@@ -41,18 +41,12 @@ export const useLoadActionTypes = ({
         featureId: GenerativeAIForSecurityConnectorFeatureId,
       });
 
-      const actionTypeKey = {
-        bedrock: '.bedrock',
-        openai: '.gen-ai',
-        gemini: '.gemini',
-      };
+      // TODO add .inference once all the providers support unified completion
+      const actionTypes = ['.bedrock', '.gen-ai', '.gemini'];
 
-      const sortedData = queryResult
-        .filter((p) =>
-          [actionTypeKey.bedrock, actionTypeKey.openai, actionTypeKey.gemini].includes(p.id)
-        )
+      return queryResult
+        .filter((p) => actionTypes.includes(p.id))
         .sort((a, b) => a.name.localeCompare(b.name));
-      return sortedData;
     },
     {
       retry: false,

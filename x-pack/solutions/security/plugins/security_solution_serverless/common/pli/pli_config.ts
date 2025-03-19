@@ -8,18 +8,31 @@
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { SecurityProductLine, SecurityProductTier } from '../config';
+import { ProductLine } from '../product';
 
 type PliProductFeatures = Readonly<
   Record<SecurityProductLine, Readonly<Record<SecurityProductTier, Readonly<ProductFeatureKeys>>>>
 >;
 
 export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
-  security: {
+  [ProductLine.aiSoc]: {
+    search_ai_lake: [
+      ProductFeatureKey.attackDiscovery,
+      ProductFeatureKey.assistant,
+      ProductFeatureKey.alertsSummary,
+    ],
+    essentials: [ProductFeatureKey.attackDiscovery, ProductFeatureKey.assistant],
+    complete: [ProductFeatureKey.attackDiscovery, ProductFeatureKey.assistant],
+  },
+  [ProductLine.security]: {
+    search_ai_lake: [],
     essentials: [
       ProductFeatureKey.endpointHostManagement,
       ProductFeatureKey.endpointPolicyManagement,
     ],
     complete: [
+      ProductFeatureKey.endpointHostManagement,
+      ProductFeatureKey.endpointPolicyManagement,
       ProductFeatureKey.advancedInsights,
       ProductFeatureKey.assistant,
       ProductFeatureKey.attackDiscovery,
@@ -28,26 +41,34 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.threatIntelligence,
       ProductFeatureKey.casesConnectors,
       ProductFeatureKey.externalRuleActions,
-      ProductFeatureKey.integrationAssistant,
+      ProductFeatureKey.automaticImport,
+      ProductFeatureKey.prebuiltRuleCustomization,
+      ProductFeatureKey.siemMigrations,
     ],
   },
-  endpoint: {
+  [ProductLine.endpoint]: {
+    search_ai_lake: [], // endpoint add-on not available in search_ai_lake tier
     essentials: [
       ProductFeatureKey.endpointPolicyProtections,
       ProductFeatureKey.endpointArtifactManagement,
       ProductFeatureKey.endpointExceptions,
     ],
     complete: [
+      ProductFeatureKey.endpointPolicyProtections,
+      ProductFeatureKey.endpointArtifactManagement,
+      ProductFeatureKey.endpointExceptions,
       ProductFeatureKey.endpointHostIsolationExceptions,
       ProductFeatureKey.endpointResponseActions,
       ProductFeatureKey.osqueryAutomatedResponseActions,
       ProductFeatureKey.endpointAgentTamperProtection,
       ProductFeatureKey.endpointCustomNotification,
       ProductFeatureKey.endpointProtectionUpdates,
+      ProductFeatureKey.securityWorkflowInsights,
     ],
   },
-  cloud: {
+  [ProductLine.cloud]: {
+    search_ai_lake: [], // cloud add-on not available in search_ai_lake tier
     essentials: [ProductFeatureKey.cloudSecurityPosture],
-    complete: [],
+    complete: [ProductFeatureKey.cloudSecurityPosture],
   },
 } as const;

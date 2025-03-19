@@ -12,7 +12,8 @@ import { RoleCredentials } from '../../../../shared/services';
 import { createOpenAIConnector } from './utils/create_openai_connector';
 import { createLlmProxy, LlmProxy } from './utils/create_llm_proxy';
 
-const esArchiveIndex = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
+const esArchiveIndex =
+  'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
@@ -192,7 +193,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('show edit context', async () => {
-          await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens();
+          await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens(
+            'basic_index',
+            ['baz']
+          );
         });
 
         it('save selected fields between modes', async () => {

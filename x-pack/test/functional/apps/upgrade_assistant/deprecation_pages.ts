@@ -33,11 +33,9 @@ export default function upgradeAssistantFunctionalTests({
          * on both local and CI environments.
          */
         await es.cluster.putSettings({
-          body: {
-            persistent: {
-              cluster: {
-                max_shards_per_node: 5,
-              },
+          persistent: {
+            cluster: {
+              max_shards_per_node: 5,
             },
           },
         });
@@ -50,12 +48,10 @@ export default function upgradeAssistantFunctionalTests({
     after(async () => {
       try {
         await es.cluster.putSettings({
-          body: {
-            persistent: {
-              cluster: {
-                // initial cluster setting from x-pack/test/functional/config.upgrade_assistant.js
-                max_shards_per_node: 29,
-              },
+          persistent: {
+            cluster: {
+              // initial cluster setting from x-pack/test/functional/config.upgrade_assistant.js
+              max_shards_per_node: 29,
             },
           },
         });

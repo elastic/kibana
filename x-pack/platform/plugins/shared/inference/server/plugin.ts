@@ -8,8 +8,9 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import {
-  type BoundInferenceClient,
   createClient as createInferenceClient,
+  createChatModel,
+  type BoundInferenceClient,
   type InferenceClient,
 } from './inference_client';
 import { registerRoutes } from './routes';
@@ -60,6 +61,16 @@ export class InferencePlugin
           actions: pluginsStart.actions,
           logger: this.logger.get('client'),
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
+      },
+
+      getChatModel: async (options) => {
+        return createChatModel({
+          request: options.request,
+          connectorId: options.connectorId,
+          chatModelOptions: options.chatModelOptions,
+          actions: pluginsStart.actions,
+          logger: this.logger,
+        });
       },
     };
   }

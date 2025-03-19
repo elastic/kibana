@@ -457,13 +457,7 @@
               "\nhttp service"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
@@ -479,13 +473,23 @@
               "\nnotifications service"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.NotificationsSetup",
-                "text": "NotificationsSetup"
-              }
+              "NotificationsSetup"
+            ],
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-date-picker",
+            "id": "def-public.DatePickerDependencies.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [
+              "\nKibana Security User Profile Service"
+            ],
+            "signature": [
+              "UserProfileService"
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
@@ -501,13 +505,7 @@
               "\nEUI theme"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              }
+              "ThemeServiceSetup"
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
@@ -523,13 +521,7 @@
               "\nKibana UI advanced settings"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
@@ -561,13 +553,7 @@
               "\nInternationalisation service"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-i18n-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-public.I18nStart",
-                "text": "I18nStart"
-              }
+              "I18nStart"
             ],
             "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
@@ -682,7 +668,9 @@
               "\ntimefilter service."
             ],
             "signature": [
-              "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
+              "{ readonly useTimefilter: () => ",
+              "TimefilterHook",
+              "; isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
               "Observable",
               "<boolean>; getTimeUpdate$: () => ",
               "Observable",

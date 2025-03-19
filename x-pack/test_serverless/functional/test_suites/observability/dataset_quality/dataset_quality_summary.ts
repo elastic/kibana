@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { datasetNames, getInitialTestLogs, getLogsForDataset } from './data';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const retry = getService('retry');
   const PageObjects = getPageObjects([
     'common',
     'datasetQuality',
@@ -61,12 +62,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('shows poor, degraded and good count as 0 and all dataset as healthy', async () => {
       await PageObjects.datasetQuality.refreshTable();
-      const summary = await PageObjects.datasetQuality.parseSummaryPanel(excludeKeysFromServerless);
-      expect(summary).to.eql({
-        datasetHealthPoor: '0',
-        datasetHealthDegraded: '0',
-        datasetHealthGood: '3',
-        activeDatasets: '0 of 3',
+      // Sometimes the summary flashes with wrong count, retry to stabilize. This should be fixed at the root, but for now we retry.
+      await retry.try(async () => {
+        const summary = await PageObjects.datasetQuality.parseSummaryPanel(
+          excludeKeysFromServerless
+        );
+        expect(summary).to.eql({
+          datasetHealthPoor: '0',
+          datasetHealthDegraded: '0',
+          datasetHealthGood: '3',
+          activeDatasets: '0 of 3',
+        });
       });
     });
 

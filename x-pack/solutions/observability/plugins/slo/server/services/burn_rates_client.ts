@@ -12,20 +12,20 @@ import {
   AggregationsValueCountAggregate,
   MsearchMultisearchBody,
   QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALL_VALUE,
   occurrencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
+import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { DateRange, Duration, SLODefinition } from '../domain/models';
 import { computeBurnRate, computeSLI } from '../domain/services';
 import { getDelayInSecondsFromSLO } from '../domain/services/get_delay_in_seconds_from_slo';
 import { getLookbackDateRange } from '../domain/services/get_lookback_date_range';
 import { InternalQueryError } from '../errors';
-import { computeTotalSlicesFromDateRange } from './utils/compute_total_slices_from_date_range';
+import { getSlicesFromDateRange } from './utils/get_slices_from_date_range';
 
 type WindowName = string;
 export interface BurnRatesClient {
@@ -65,8 +65,8 @@ export class DefaultBurnRatesClient implements BurnRatesClient {
     );
 
     const index = remoteName
-      ? `${remoteName}:${SLO_DESTINATION_INDEX_PATTERN}`
-      : SLO_DESTINATION_INDEX_PATTERN;
+      ? `${remoteName}:${SLI_DESTINATION_INDEX_PATTERN}`
+      : SLI_DESTINATION_INDEX_PATTERN;
 
     const result = await this.esClient.search<unknown, EsAggregations>({
       ...commonQuery(slo, instanceId, longestDateRange),
@@ -224,10 +224,8 @@ function handleWindowedResult(
         from: new Date(bucket.from_as_string!),
         to: new Date(bucket.to_as_string!),
       };
-      const totalSlices = computeTotalSlicesFromDateRange(
-        dateRange,
-        slo.objective.timesliceWindow!
-      );
+
+      const totalSlices = getSlicesFromDateRange(dateRange, slo.objective.timesliceWindow!);
 
       sliValue = computeSLI(good, total, totalSlices);
     } else {

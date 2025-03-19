@@ -9,11 +9,11 @@ import agent, { Span } from 'elastic-apm-node';
 import type { Logger } from '@kbn/logging';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
 import { streamFactory, StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
-import { transformError } from '@kbn/securitysolution-es-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assistant-common';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { AIMessageChunk } from '@langchain/core/messages';
+import { AgentFinish } from 'langchain/agents';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
@@ -65,6 +65,9 @@ export const streamGraph = async ({
 
   let didEnd = false;
   const handleStreamEnd = (finalResponse: string, isError = false) => {
+    if (didEnd) {
+      return;
+    }
     if (onLlmResponse) {
       onLlmResponse(
         finalResponse,
@@ -78,7 +81,7 @@ export const streamGraph = async ({
     streamEnd();
     didEnd = true;
     if ((streamingSpan && !streamingSpan?.outcome) || streamingSpan?.outcome === 'unknown') {
-      streamingSpan.outcome = 'success';
+      streamingSpan.outcome = isError ? 'failure' : 'success';
     }
     streamingSpan?.end();
   };
@@ -103,99 +106,89 @@ export const streamGraph = async ({
         : undefined
     );
 
-    for await (const { event, data, tags } of stream) {
-      if ((tags || []).includes(AGENT_NODE_TAG)) {
-        if (event === 'on_chat_model_stream') {
-          const msg = data.chunk as AIMessageChunk;
-          if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
-            push({ payload: msg.content as string, type: 'content' });
+    const pushStreamUpdate = async () => {
+      for await (const { event, data, tags } of stream) {
+        if ((tags || []).includes(AGENT_NODE_TAG)) {
+          if (event === 'on_chat_model_stream') {
+            const msg = data.chunk as AIMessageChunk;
+            if (!didEnd && !msg.tool_call_chunks?.length && msg.content.length) {
+              push({ payload: msg.content as string, type: 'content' });
+            }
+          }
+
+          if (
+            event === 'on_chat_model_end' &&
+            !data.output.lc_kwargs?.tool_calls?.length &&
+            !didEnd
+          ) {
+            handleStreamEnd(data.output.content);
           }
         }
-
-        if (
-          event === 'on_chat_model_end' &&
-          !data.output.lc_kwargs?.tool_calls?.length &&
-          !didEnd
-        ) {
-          handleStreamEnd(data.output.content);
-        }
       }
-    }
+    };
+
+    pushStreamUpdate().catch((err) => {
+      logger.error(`Error streaming graph: ${err}`);
+      handleStreamEnd(err.message, true);
+    });
+
     return responseWithHeaders;
   }
 
   // Stream is from openai functions agent
   let finalMessage = '';
-  let conversationId: string | undefined;
-  const stream = assistantGraph.streamEvents(inputs, {
-    callbacks: [
-      apmTracer,
-      ...(traceOptions?.tracers ?? []),
-      ...(telemetryTracer ? [telemetryTracer] : []),
-    ],
-    runName: DEFAULT_ASSISTANT_GRAPH_ID,
-    streamMode: 'values',
-    tags: traceOptions?.tags ?? [],
-    version: 'v1',
-  });
+  const stream = assistantGraph.streamEvents(
+    inputs,
+    {
+      callbacks: [
+        apmTracer,
+        ...(traceOptions?.tracers ?? []),
+        ...(telemetryTracer ? [telemetryTracer] : []),
+      ],
+      runName: DEFAULT_ASSISTANT_GRAPH_ID,
+      streamMode: 'values',
+      tags: traceOptions?.tags ?? [],
+      version: 'v1',
+    },
+    inputs?.provider === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
+  );
 
-  const processEvent = async () => {
-    try {
-      const { value, done } = await stream.next();
-      if (done) return;
+  const pushStreamUpdate = async () => {
+    for await (const { event, data, tags } of stream) {
+      if ((tags || []).includes(AGENT_NODE_TAG)) {
+        if (event === 'on_llm_stream') {
+          const chunk = data?.chunk;
+          const msg = chunk.message;
+          if (msg?.tool_call_chunks && msg?.tool_call_chunks.length > 0) {
+            /* empty */
+          } else if (!didEnd) {
+            push({ payload: msg.content, type: 'content' });
+            finalMessage += msg.content;
+          }
+        }
 
-      const event = value;
-      // only process events that are part of the agent run
-      if ((event.tags || []).includes(AGENT_NODE_TAG)) {
-        if (event.name === 'ActionsClientChatOpenAI') {
-          if (event.event === 'on_llm_stream') {
-            const chunk = event.data?.chunk;
-            const msg = chunk.message;
-            if (msg?.tool_call_chunks && msg?.tool_call_chunks.length > 0) {
-              // I don't think we hit this anymore because of our check for AGENT_NODE_TAG
-              // however, no harm to keep it in
-              /* empty */
-            } else if (!didEnd) {
-              push({ payload: msg.content, type: 'content' });
-              finalMessage += msg.content;
-            }
-          } else if (event.event === 'on_llm_end' && !didEnd) {
-            const generation = event.data.output?.generations[0][0];
-            if (
-              // no finish_reason means the stream was aborted
-              !generation?.generationInfo?.finish_reason ||
-              generation?.generationInfo?.finish_reason === 'stop'
-            ) {
-              handleStreamEnd(
-                generation?.text && generation?.text.length ? generation?.text : finalMessage
-              );
-            }
+        if (event === 'on_llm_end' && !didEnd) {
+          const generation = data.output?.generations[0][0];
+          if (
+            // if generation is null, an error occurred - do nothing and let error handling complete the stream
+            generation != null &&
+            // no finish_reason means the stream was aborted
+            (!generation?.generationInfo?.finish_reason ||
+              generation?.generationInfo?.finish_reason === 'stop')
+          ) {
+            handleStreamEnd(
+              generation?.text && generation?.text.length ? generation?.text : finalMessage
+            );
           }
         }
       }
-
-      void processEvent();
-    } catch (err) {
-      // if I throw an error here, it crashes the server. Not sure how to get around that.
-      // If I put await on this function the error works properly, but when there is not an error
-      // it waits for the entire stream to complete before resolving
-      const error = transformError(err);
-
-      if (error.message === 'AbortError') {
-        // user aborted the stream, we must end it manually here
-        return handleStreamEnd(finalMessage);
-      }
-      logger.error(`Error streaming from LangChain: ${error.message}`);
-      if (conversationId) {
-        push({ payload: `Conversation id: ${conversationId}`, type: 'content' });
-      }
-      push({ payload: error.message, type: 'content' });
-      handleStreamEnd(error.message, true);
     }
   };
 
-  // Start processing events, do not await! Return `responseWithHeaders` immediately
-  void processEvent();
+  pushStreamUpdate().catch((err) => {
+    logger.error(`Error streaming graph: ${err}`);
+    handleStreamEnd(err.message, true);
+  });
 
   return responseWithHeaders;
 };
@@ -242,7 +235,7 @@ export const invokeGraph = async ({
       };
       span.addLabels({ evaluationId: traceOptions?.evaluationId });
     }
-    const r = await assistantGraph.invoke(inputs, {
+    const result = await assistantGraph.invoke(inputs, {
       callbacks: [
         apmTracer,
         ...(traceOptions?.tracers ?? []),
@@ -251,8 +244,8 @@ export const invokeGraph = async ({
       runName: DEFAULT_ASSISTANT_GRAPH_ID,
       tags: traceOptions?.tags ?? [],
     });
-    const output = r.agentOutcome.returnValues.output;
-    const conversationId = r.conversation?.id;
+    const output = (result.agentOutcome as AgentFinish).returnValues.output;
+    const conversationId = result.conversation?.id;
     if (onLlmResponse) {
       await onLlmResponse(output, traceData);
     }

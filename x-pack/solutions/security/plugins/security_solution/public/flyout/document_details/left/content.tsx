@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEuiBackgroundColor } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
@@ -29,6 +29,7 @@ export interface PanelContentProps {
  * Displays the content of investigation and insights tabs (visualize is hidden for 8.9).
  */
 export const PanelContent: FC<PanelContentProps> = ({ selectedTabId, tabs }) => {
+  const { euiTheme } = useEuiTheme();
   const selectedTabContent = useMemo(() => {
     return tabs.find((tab) => tab.id === selectedTabId)?.content;
   }, [selectedTabId, tabs]);
@@ -36,7 +37,7 @@ export const PanelContent: FC<PanelContentProps> = ({ selectedTabId, tabs }) => 
   return (
     <FlyoutBody
       css={css`
-        background-color: ${useEuiBackgroundColor('subdued')};
+        background-color: ${euiTheme.colors.backgroundBaseSubdued};
       `}
     >
       {selectedTabContent}

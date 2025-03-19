@@ -89,13 +89,7 @@
         "description": [],
         "signature": [
           "(endpoint: string, pathParams: Record<string, any>) => { method: \"get\" | ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.DestructiveRouteMethod",
-            "text": "DestructiveRouteMethod"
-          },
+          "DestructiveRouteMethod",
           "; pathname: string; version: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/format_request.ts",
@@ -145,13 +139,7 @@
         "description": [],
         "signature": [
           "(endpoint: string) => { method: \"get\" | ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.DestructiveRouteMethod",
-            "text": "DestructiveRouteMethod"
-          },
+          "DestructiveRouteMethod",
           "; pathname: string; version: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/parse_endpoint.ts",
@@ -185,15 +173,9 @@
         "label": "registerRoutes",
         "description": [],
         "signature": [
-          "({\n  core,\n  repository,\n  logger,\n  dependencies,\n}: { core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-server",
-            "scope": "server",
-            "docId": "kibKbnCoreLifecycleServerPluginApi",
-            "section": "def-server.CoreSetup",
-            "text": "CoreSetup"
-          },
-          "<object, unknown>; repository: Record<string, ",
+          "({\n  core,\n  repository,\n  logger,\n  dependencies,\n  runDevModeChecks,\n}: { core: ",
+          "CoreSetup",
+          "<{}, unknown>; repository: Record<string, ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -217,7 +199,7 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; dependencies: TDependencies; }) => void"
+          "; dependencies: TDependencies; runDevModeChecks: boolean; }) => void"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository/src/register_routes.ts",
         "deprecated": false,
@@ -228,7 +210,7 @@
             "id": "def-server.registerRoutes.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  core,\n  repository,\n  logger,\n  dependencies,\n}",
+            "label": "{\n  core,\n  repository,\n  logger,\n  dependencies,\n  runDevModeChecks,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-server-route-repository/src/register_routes.ts",
             "deprecated": false,
@@ -242,14 +224,8 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreSetup",
-                    "text": "CoreSetup"
-                  },
-                  "<object, unknown>"
+                  "CoreSetup",
+                  "<{}, unknown>"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository/src/register_routes.ts",
                 "deprecated": false,
@@ -315,6 +291,17 @@
                 "signature": [
                   "TDependencies"
                 ],
+                "path": "src/platform/packages/shared/kbn-server-route-repository/src/register_routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/server-route-repository",
+                "id": "def-server.registerRoutes.$1.runDevModeChecks",
+                "type": "boolean",
+                "tags": [],
+                "label": "runDevModeChecks",
+                "description": [],
                 "path": "src/platform/packages/shared/kbn-server-route-repository/src/register_routes.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -442,13 +429,7 @@
                 "text": "ClientRequestParamsOf"
               },
               "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpFetchOptions",
-                "text": "HttpFetchOptions"
-              },
+              "HttpFetchOptions",
               ">) => Promise<",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -495,13 +476,7 @@
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpFetchOptions",
-                    "text": "HttpFetchOptions"
-                  },
+                  "HttpFetchOptions",
                   ">"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
@@ -529,13 +504,7 @@
                 "text": "ClientRequestParamsOf"
               },
               "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpFetchOptions",
-                "text": "HttpFetchOptions"
-              },
+              "HttpFetchOptions",
               ">) => ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -586,13 +555,7 @@
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpFetchOptions",
-                    "text": "HttpFetchOptions"
-                  },
+                  "HttpFetchOptions",
                   ">"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
@@ -703,21 +666,9 @@
         "label": "DefaultRouteCreateOptions",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouteConfigOptions",
-            "text": "RouteConfigOptions"
-          },
+          "RouteConfigOptions",
           "<\"get\" | ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.DestructiveRouteMethod",
-            "text": "DestructiveRouteMethod"
-          },
+          "DestructiveRouteMethod",
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
@@ -733,7 +684,7 @@
         "label": "EndpointOf",
         "description": [],
         "signature": [
-          "keyof TServerRouteRepository"
+          "keyof TServerRouteRepository & string"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
         "deprecated": false,
@@ -782,23 +733,11 @@
             "text": "ServerRoute"
           },
           "<any, any, any, infer TReturnType extends ServerRouteHandlerReturnType, any> ? TReturnType extends ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<infer TWrappedResponseType extends string | Record<string, any> | Error | Buffer | ",
           "Stream",
           " | { message: string | Error; attributes?: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.ResponseErrorAttributes",
-            "text": "ResponseErrorAttributes"
-          },
+          "ResponseErrorAttributes",
           " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
@@ -844,13 +783,7 @@
         "description": [],
         "signature": [
           "{ endpoint: TEndpoint; handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>; security?: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouteSecurity",
-            "text": "RouteSecurity"
-          },
+          "RouteSecurity",
           " | undefined; } & (TRouteParamsRT extends ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
@@ -934,7 +867,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "Zod.ZodAny"
+              "KbnPassThroughAny"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository/src/validation_objects.ts",
             "deprecated": false,
@@ -948,7 +881,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "Zod.ZodAny"
+              "KbnPassThroughAny"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository/src/validation_objects.ts",
             "deprecated": false,
@@ -962,7 +895,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              "Zod.ZodAny"
+              "KbnPassThroughAny"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository/src/validation_objects.ts",
             "deprecated": false,

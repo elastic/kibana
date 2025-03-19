@@ -9,10 +9,15 @@ import moment from 'moment';
 import expect from '@kbn/expect';
 import { get } from 'lodash';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
+import {
+  IValidatedEvent,
+  nanosToMillis,
+  IValidatedEventInternalDocInfo,
+} from '@kbn/event-log-plugin/server';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ES_TEST_INDEX_NAME, ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
+
 import { Spaces } from '../../../scenarios';
 import {
   getUrlPrefix,
@@ -299,7 +304,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           });
 
           function validateInstanceEvent(
-            event: IValidatedEvent,
+            event: IValidatedEventInternalDocInfo,
             subMessage: string,
             shouldHaveEventEnd: boolean,
             flapping: boolean,
@@ -2025,6 +2030,100 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           expect(get(executeEvents[5], RECOVERED_PATH)).to.be(0);
           expect(get(executeEvents[5], ACTION_PATH)).to.be(0);
           expect(get(executeEvents[5], DELAYED_PATH)).to.be(1);
+        });
+
+        it('should update event log document fields', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
+          // Create a rule that will generate events
+          const response = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                rule_type_id: 'test.patternFiring',
+                schedule: { interval: '1s' },
+                throttle: null,
+                params: {
+                  pattern: {
+                    instance: [true, false],
+                  },
+                },
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+              })
+            );
+
+          expect(response.status).to.eql(200);
+          const alertId = response.body.id;
+          objectRemover.add(space.id, alertId, 'rule', 'alerting');
+
+          // Get the events and find one to update
+          const events = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([['execute', { gte: 1 }]]),
+            });
+          });
+
+          expect(events.length).to.be.greaterThan(0);
+          const eventToUpdate = events[0];
+
+          // Prepare the update
+          const fieldsToUpdate = {
+            event: { kind: 'test_update' },
+          };
+
+          // Call the update API
+          const updateResponse = await supertest
+            .post(`${getUrlPrefix(space.id)}/_test/event_log/update_documents`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              _id: eventToUpdate?._id,
+              _index: eventToUpdate?._index,
+              _seq_no: eventToUpdate?._seq_no,
+              _primary_term: eventToUpdate?._primary_term,
+              fieldsToUpdate,
+            })
+            .expect(200);
+
+          expect(updateResponse.body.ok).to.be(true);
+
+          // Verify the update by getting the event again
+          await retry.try(async () => {
+            const newResponse = await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([['execute', { gte: 1 }]]),
+            });
+
+            const updatedEvent = newResponse.find((event) => event?._id === eventToUpdate?._id);
+            expect(updatedEvent).to.be.ok();
+            expect(updatedEvent?.event?.kind).to.be('test_update');
+
+            return response;
+          });
         });
       });
     }

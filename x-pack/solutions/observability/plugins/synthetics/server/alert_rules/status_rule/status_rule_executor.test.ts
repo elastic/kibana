@@ -12,11 +12,12 @@ import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
-import * as monitorUtils from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
 import { SyntheticsServerSetup } from '../../types';
 import { AlertStatusMetaData } from '../../../common/runtime_types/alert_rules/common';
+import { SyntheticsEsClient } from '../../lib';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 
 describe('StatusRuleExecutor', () => {
   // @ts-ignore
@@ -65,8 +66,11 @@ describe('StatusRuleExecutor', () => {
 
   const mockStart = coreMock.createStart();
   const uiSettingsClient = mockStart.uiSettings.asScopedToClient(soClient);
+  const esClient = new SyntheticsEsClient(soClient, mockEsClient, {
+    heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+  });
 
-  const statusRule = new StatusRuleExecutor(serverMock, monitorClient, {
+  const statusRule = new StatusRuleExecutor(esClient, serverMock, monitorClient, {
     params: {},
     services: {
       uiSettingsClient,
@@ -77,10 +81,11 @@ describe('StatusRuleExecutor', () => {
       name: 'test',
     },
   } as any);
+  const configRepo = statusRule.monitorConfigRepository;
 
   describe('DefaultRule', () => {
     it('should only query enabled monitors', async () => {
-      const spy = jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([]);
+      const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
       const { downConfigs, staleDownConfigs } = await statusRule.getDownChecks({});
 
@@ -89,12 +94,11 @@ describe('StatusRuleExecutor', () => {
 
       expect(spy).toHaveBeenCalledWith({
         filter: 'synthetics-monitor.attributes.alert.status.enabled: true',
-        soClient,
       });
     });
 
     it('marks deleted configs as expected', async () => {
-      jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue(testMonitors);
+      jest.spyOn(configRepo, 'getAll').mockResolvedValue(testMonitors);
 
       const { downConfigs } = await statusRule.getDownChecks({});
 
@@ -170,7 +174,7 @@ describe('StatusRuleExecutor', () => {
     });
 
     it('does not mark deleted config when monitor does not contain location label', async () => {
-      jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([
+      jest.spyOn(configRepo, 'getAll').mockResolvedValue([
         {
           ...testMonitors[0],
           attributes: {

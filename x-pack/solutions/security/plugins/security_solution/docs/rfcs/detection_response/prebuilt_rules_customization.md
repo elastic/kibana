@@ -381,7 +381,7 @@ The endpoints should be updated to include a custom response header, using the [
 
 **Alert (rule objects) mapping**
 
-No changes will be needed for the [mapping of rule saved objects](https://github.com/elastic/kibana/blob/main/x-pack/plugins/alerting/common/saved_objects/rules/mappings.ts) (of type `alert`), since the new fields introduced will be part of the `params` field, which is a `flattened` field.
+No changes will be needed for the [mapping of rule saved objects](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/alerting/common/saved_objects/rules/mappings.ts) (of type `alert`), since the new fields introduced will be part of the `params` field, which is a `flattened` field.
 
 **Security Rules (prebuilt rule assets) mapping**
 
@@ -391,9 +391,9 @@ No changes will be needed either for the `security-rule` [mapping](https://githu
 
 ### Context
 
-Historically, migrations to Elasticsearch saved objects were carried out by a procedure in which the changes in the SO were described in a migration operation that would be carried out **during an upgrade to a specific Kibana version**. See `x-pack/plugins/alerting/server/saved_objects/migrations/index.ts` for a list of migrations of SO that take place when a user updates Kibana to a specific version.
+Historically, migrations to Elasticsearch saved objects were carried out by a procedure in which the changes in the SO were described in a migration operation that would be carried out **during an upgrade to a specific Kibana version**. See `x-pack/platform/plugins/shared/alerting/server/saved_objects/migrations/index.ts` for a list of migrations of SO that take place when a user updates Kibana to a specific version.
 
-However, this mechanism is no longer supported by the Alerting Framework team - which maintained it -, and the new migration mechanism introduced to replace that, the [Model Version API](https://github.com/elastic/kibana/blob/main/packages/core/saved-objects/core-saved-objects-server/docs/model_versions.md), which is Serverless-compatible, doesn't support migrating encrypted saved objects.
+However, this mechanism is no longer supported by the Alerting Framework team - which maintained it -, and the new migration mechanism introduced to replace that, the [Model Version API](https://github.com/elastic/kibana/blob/main/src/core/packages/saved-objects/server/docs/model_versions.md), which is Serverless-compatible, doesn't support migrating encrypted saved objects.
 
 Since our alerting rules are encrypted saved objects, we have to find an alternative strategy to migrate them. Therefore, we will perform the migration of the saved objects directly in the Detection API's endpoints that interact with them. This means that, instead of all of a user's saved object being migrated in a single operation during a Kibana update, the SO will be migrated when the pertinent endpoints are called. In the next section, we describe which those endpoints are.
 
@@ -403,9 +403,9 @@ Since the migration of rules will be performed as the user calls the pertinent e
 
 All endpoints belonging to Detection Rules Management that create and update -including upgrade of prebuilt rules to new version- use three CRUD methods under the hood:
 
-- [`createRules`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/create_rules.ts)
-- [`patchRules`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/patch_rules.ts)
-- [`updateRules`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/update_rules.ts)
+- [`createRules`](https://github.com/elastic/kibana/blob/8.0/x-pack/plugins/security_solution/server/lib/detection_engine/rules/create_rules.ts)
+- [`patchRules`](https://github.com/elastic/kibana/blob/8.0/x-pack/plugins/security_solution/server/lib/detection_engine/rules/patch_rules.ts)
+- [`updateRules`](https://github.com/elastic/kibana/blob/8.0/x-pack/plugins/security_solution/server/lib/detection_engine/rules/update_rules.ts)
 
 This "overuse" of these 3 methods for a variety of user actions makes their logic tightly coupled and creates a considerable amount of complexity to CRUD functions that should remain logically simple.
 
@@ -464,7 +464,7 @@ The **normalization on read** will be carried out by a new `normalizeRuleSourceS
 
 Inside this method, we will use `normalizeRuleSourceSchemaOnRuleRead` to calculate the normalized values of `rule_source` and `immutable`.
 
-_Source: [x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts)_
+_Source: [rule_converters.ts](https://github.com/elastic/kibana/blob/8.0/x-pack/plugins/security_solution/server/lib/detection_engine/schemas/rule_converters.ts)_
 
 ```ts
 export const internalRuleToAPIResponse = (rule) => {
@@ -817,7 +817,7 @@ That means that updating a rule's actions should not be considered a customizati
 Secondly, in order to migrate the `is_customized` value for rule edits, we can follow two approaches:
 
 1. Calculate it in the `paramsModifier` callback that is passed to the `rulesClient.bulkEdit` method. This will need to modify the parameters of the callback to take as parameter the whole rule and the operations on the attributes, in order to have access to the values of the rule's field before and after of the edit.
-2. Calculate it as part of the `validateMutatedRuleTypeParams` method in `x-pack/plugins/alerting/server/lib/validate_mutated_rule_type_params.ts` where we have access to the original params and the modified params.
+2. Calculate it as part of the `validateMutatedRuleTypeParams` method in `x-pack/platform/plugins/shared/alerting/server/lib/validate_mutated_rule_type_params.ts` where we have access to the original params and the modified params.
 
 ----
 
@@ -948,7 +948,7 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
 
 - [**Perform Rule Installation** - `POST /prebuilt_rules/installation/_install` (Internal)](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/perform_rule_installation/perform_rule_installation_route.ts)
 
-To install a new prebuilt rule, this endpoint uses the [`createPrebuiltRules` method](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/rule_objects/create_prebuilt_rules.ts), which in turn calls the [`createRules` method](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/create_rules.ts).
+To install a new prebuilt rule, this endpoint uses the [`createPrebuiltRules` method](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/rule_objects/create_prebuilt_rules.ts), which in turn calls the [`createRules` method](https://github.com/elastic/kibana/blob/8.0/x-pack/plugins/security_solution/server/lib/detection_engine/rules/create_rules.ts).
 
 This endpoint also suffers from the issue of tightly coupled logic explained above: using th `createRules` method for creating, importing and upgrading -in some cases- rules. We need to create a new CRUD method specifically for installing prebuilt rules, that extracts that responsibility out of the `createRules` method.
 

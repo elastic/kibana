@@ -19,6 +19,7 @@ import {
 import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   isMlRule,
@@ -77,7 +78,6 @@ import {
 } from '../../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { RulePreview } from '../../components/rule_preview';
-import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { VALIDATION_WARNING_CODE_FIELD_NAME_MAP } from '../../../rule_creation/constants/validation_warning_codes';
 import { extractValidationMessages } from '../../../rule_creation/logic/extract_validation_messages';
@@ -206,7 +206,6 @@ const CreateRulePageComponent: React.FC = () => {
   const collapseFn = useRef<() => void | undefined>();
   const [prevRuleType, setPrevRuleType] = useState<string>();
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
-  const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
 
   const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
 
@@ -218,20 +217,6 @@ const CreateRulePageComponent: React.FC = () => {
   );
 
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
-
-  const isPreviewDisabled = getIsRulePreviewDisabled({
-    ruleType,
-    isQueryBarValid,
-    isThreatQueryBarValid,
-    index: memoizedIndex,
-    dataViewId: defineStepData.dataViewId,
-    dataSourceType: defineStepData.dataSourceType,
-    threatIndex: defineStepData.threatIndex,
-    threatMapping: defineStepData.threatMapping,
-    machineLearningJobId: defineStepData.machineLearningJobId,
-    queryBar: defineStepData.queryBar,
-    newTermsFields: defineStepData.newTermsFields,
-  });
 
   useEffect(() => {
     if (prevRuleType !== ruleType) {
@@ -375,6 +360,11 @@ const CreateRulePageComponent: React.FC = () => {
 
     return { valid, warnings };
   }, [validateStep]);
+
+  const verifyRuleDefinitionForPreview = useCallback(
+    () => defineStepForm.validate(),
+    [defineStepForm]
+  );
 
   const editStep = useCallback(
     async (step: RuleStep) => {
@@ -536,13 +526,11 @@ const CreateRulePageComponent: React.FC = () => {
           <StepDefineRule
             isLoading={isCreateRuleLoading || loading}
             indicesConfig={indicesConfig}
-            threatIndicesConfig={threatIndicesConfig}
             form={defineStepForm}
             indexPattern={indexPattern}
             isIndexPatternLoading={isIndexPatternLoading}
             isQueryBarValid={isQueryBarValid}
             setIsQueryBarValid={setIsQueryBarValid}
-            setIsThreatQueryBarValid={setIsThreatQueryBarValid}
             index={memoizedIndex}
             threatIndex={defineStepData.threatIndex}
             alertSuppressionFields={defineStepData[ALERT_SUPPRESSION_FIELDS_FIELD_NAME]}
@@ -550,7 +538,6 @@ const CreateRulePageComponent: React.FC = () => {
             shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
             queryBarTitle={defineStepData.queryBar.title}
             queryBarSavedId={defineStepData.queryBar.saved_id}
-            thresholdFields={defineStepData.threshold.field}
           />
           <NextStep
             dataTestSubj="define-continue"
@@ -574,7 +561,6 @@ const CreateRulePageComponent: React.FC = () => {
       isQueryBarValid,
       loading,
       memoDefineStepReadOnly,
-      threatIndicesConfig,
     ]
   );
   const memoDefineStepExtraAction = useMemo(
@@ -732,6 +718,7 @@ const CreateRulePageComponent: React.FC = () => {
           }}
         >
           <StepRuleActions
+            ruleTypeId={ruleTypeMappings[ruleType]}
             isLoading={isCreateRuleLoading || loading || isStartingJobs}
             actionMessageParams={actionMessageParams}
             summaryActionMessageParams={actionMessageParams}
@@ -786,6 +773,7 @@ const CreateRulePageComponent: React.FC = () => {
       isCreateRuleLoading,
       isStartingJobs,
       loading,
+      ruleType,
       submitRuleDisabled,
       submitRuleEnabled,
     ]
@@ -919,7 +907,7 @@ const CreateRulePageComponent: React.FC = () => {
                   onToggleCollapsed={onToggleCollapsedMemo}
                 >
                   <RulePreview
-                    isDisabled={isPreviewDisabled && activeStep === RuleStep.defineRule}
+                    verifyRuleDefinition={verifyRuleDefinitionForPreview}
                     defineRuleData={defineStepData}
                     aboutRuleData={aboutStepData}
                     scheduleRuleData={scheduleStepData}

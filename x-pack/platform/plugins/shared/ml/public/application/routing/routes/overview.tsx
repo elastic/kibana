@@ -19,6 +19,7 @@ import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import type { MlRoute, PageProps } from '../router';
 import { createPath, PageLoader } from '../router';
 import { useRouteResolver } from '../use_resolver';
+import { initSavedObjects } from '../resolvers';
 
 const OverviewPage = React.lazy(() => import('../../overview/overview_page'));
 
@@ -48,6 +49,7 @@ const PageWrapper: FC<PageProps> = () => {
   const { context } = useRouteResolver('full', ['canGetMlInfo'], {
     getMlNodeCount,
     loadMlServerInfo,
+    initSavedObjects,
   });
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });

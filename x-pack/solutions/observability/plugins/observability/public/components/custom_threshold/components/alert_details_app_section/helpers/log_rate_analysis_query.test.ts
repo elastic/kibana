@@ -128,6 +128,12 @@ describe('buildEsQuery', () => {
   ];
 
   test.each(testData)('should generate correct es query for $title', ({ alert }) => {
-    expect(getLogRateAnalysisEQQuery(alert)).toMatchSnapshot();
+    expect(
+      getLogRateAnalysisEQQuery(alert, {
+        allowLeadingWildcards: true,
+        queryStringOptions: {},
+        ignoreFilterIfFieldNotInIndex: false,
+      })
+    ).toMatchSnapshot();
   });
 });

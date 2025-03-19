@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { Config } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { SecuritySolutionEndpointRegistryHelpers } from '../../common/services/security_solution';
@@ -55,6 +56,7 @@ export const generateConfig = async ({
 
   return {
     ...baseConfig.getAll(),
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     pageObjects,
     testFiles,
     dockerServers: createEndpointDockerConfig(),

@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
-
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { useEuiTheme } from '@elastic/eui';
 import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
-
-import { useMonitorFilters } from '../../hooks/use_monitor_filters';
-import { useRefreshedRange } from '../../../../hooks';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import React from 'react';
 import { ClientPluginsStart } from '../../../../../../plugin';
-import * as labels from '../labels';
+import { useRefreshedRange } from '../../../../hooks';
+import { useMonitorFilters } from '../../hooks/use_monitor_filters';
 import { useMonitorQueryFilters } from '../../hooks/use_monitor_query_filters';
+import * as labels from '../labels';
 
 export const MonitorTestRunsCount = () => {
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const { from, to } = useRefreshedRange(30, 'days');
   const filters = useMonitorFilters({});
@@ -42,7 +40,7 @@ export const MonitorTestRunsCount = () => {
           dataType: 'synthetics',
           selectedMetricField: 'monitor_total_runs',
           name: labels.TEST_RUNS_LABEL,
-          color: theme.eui.euiColorVis1,
+          color: euiTheme.colors.vis.euiColorVis0,
         },
       ]}
     />

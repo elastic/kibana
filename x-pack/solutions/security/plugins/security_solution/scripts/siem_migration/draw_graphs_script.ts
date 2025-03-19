@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { InferenceClient } from '@kbn/inference-plugin/server';
 import type {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
@@ -17,6 +16,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/task/agent';
 import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/rules/task/retrievers';
+import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/rules/task/util/esql_knowledge_base';
+import type { SiemMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
 
 interface Drawable {
   drawMermaidPng: () => Promise<Blob>;
@@ -26,8 +27,7 @@ const mockLlm = new FakeLLM({
   response: JSON.stringify({}, null, 2),
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
-const inferenceClient = {} as InferenceClient;
-const connectorId = 'draw_graphs';
+const esqlKnowledgeBase = {} as EsqlKnowledgeBase;
 const ruleMigrationsRetriever = {} as RuleMigrationsRetriever;
 
 const createLlmInstance = () => {
@@ -36,12 +36,13 @@ const createLlmInstance = () => {
 
 async function getAgentGraph(logger: Logger): Promise<Drawable> {
   const model = createLlmInstance();
+  const telemetryClient = {} as SiemMigrationTelemetryClient;
   const graph = getRuleMigrationAgent({
     model,
-    inferenceClient,
+    esqlKnowledgeBase,
     ruleMigrationsRetriever,
-    connectorId,
     logger,
+    telemetryClient,
   });
   return graph.getGraphAsync({ xray: true });
 }

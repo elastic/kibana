@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EntityType } from '../../../../common/entity_analytics/types';
 import {
   renderMutation,
   renderQuery,
@@ -71,7 +72,7 @@ describe('useAssetCriticality', () => {
       mockFetchAssetCriticalityPrivileges.mockResolvedValue({ has_all_required: true });
       mockDeleteAssetCriticality.mockResolvedValue({});
       mockCreateAssetCriticality.mockResolvedValue({});
-      const entity: Entity = { name: 'test_entity_name', type: 'host' };
+      const entity: Entity = { name: 'test_entity_name', type: EntityType.host };
 
       const { mutation } = await renderWrappedHook(() => useAssetCriticalityData({ entity }));
 
@@ -90,7 +91,7 @@ describe('useAssetCriticality', () => {
       mockFetchAssetCriticalityPrivileges.mockResolvedValue({ has_all_required: true });
       mockDeleteAssetCriticality.mockResolvedValue({});
       mockCreateAssetCriticality.mockResolvedValue({});
-      const entity: Entity = { name: 'test_entity_name', type: 'host' };
+      const entity: Entity = { name: 'test_entity_name', type: EntityType.host };
 
       const { mutation } = await renderWrappedHook(() => useAssetCriticalityData({ entity }));
 

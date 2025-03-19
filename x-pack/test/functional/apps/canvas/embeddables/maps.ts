@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('by-value', () => {
       it('creates new map embeddable', async () => {
         const originalEmbeddableCount = await canvas.getEmbeddableCount();
-        await canvas.createNewVis('maps');
+        await canvas.addNewPanel('Maps');
         await maps.clickSaveAndReturnButton();
         const embeddableCount = await canvas.getEmbeddableCount();
         expect(embeddableCount).to.eql(originalEmbeddableCount + 1);

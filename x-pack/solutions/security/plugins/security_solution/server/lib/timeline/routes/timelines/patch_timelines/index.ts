@@ -28,7 +28,7 @@ export const patchTimelinesRoute = (router: SecuritySolutionPluginRouter) => {
       path: TIMELINE_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: ['timeline_write'],
         },
       },
       access: 'public',

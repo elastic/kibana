@@ -1,0 +1,239 @@
+{
+  "id": "@kbn/object-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/object-utils",
+        "id": "def-common.calculateObjectDiff",
+        "type": "Function",
+        "tags": [],
+        "label": "calculateObjectDiff",
+        "description": [
+          "\nCompares two JSON objects and calculates the added and removed properties, including nested properties."
+        ],
+        "signature": [
+          "(oldObj: TBase, newObj: TCompare | undefined) => ObjectDiffResult<TBase, TCompare>"
+        ],
+        "path": "src/platform/packages/shared/kbn-object-utils/src/calculate_object_diff.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/object-utils",
+            "id": "def-common.calculateObjectDiff.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "oldObj",
+            "description": [
+              "- The base object."
+            ],
+            "signature": [
+              "TBase"
+            ],
+            "path": "src/platform/packages/shared/kbn-object-utils/src/calculate_object_diff.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/object-utils",
+            "id": "def-common.calculateObjectDiff.$2",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "newObj",
+            "description": [
+              "- The comparison object."
+            ],
+            "signature": [
+              "TCompare | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-object-utils/src/calculate_object_diff.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "An object containing added and removed properties."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/object-utils",
+        "id": "def-common.flattenObject",
+        "type": "Function",
+        "tags": [],
+        "label": "flattenObject",
+        "description": [
+          "\nReturns a flattened version of the input object also accounting for nested properties."
+        ],
+        "signature": [
+          "(obj: TObj, parentKey: string) => Record<PropertyKey, GetValuesTypes<TObj>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-object-utils/src/flatten_object.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/object-utils",
+            "id": "def-common.flattenObject.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "obj",
+            "description": [
+              "- The input object."
+            ],
+            "signature": [
+              "TObj"
+            ],
+            "path": "src/platform/packages/shared/kbn-object-utils/src/flatten_object.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/object-utils",
+            "id": "def-common.flattenObject.$2",
+            "type": "string",
+            "tags": [],
+            "label": "parentKey",
+            "description": [
+              "- The initial key used for recursive flattening."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-object-utils/src/flatten_object.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An object containing all the flattened properties."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/object-utils",
+        "id": "def-common.flattenObjectNestedLast",
+        "type": "Function",
+        "tags": [],
+        "label": "flattenObjectNestedLast",
+        "description": [
+          "\nReturns a flattened version of the input object, giving higher priority to nested fields and flattening them after the other properties."
+        ],
+        "signature": [
+          "(obj: TObj) => { [x: string]: GetValuesTypes<TObj> | GetValuesTypes<GetValuesTypes<TObj>>; [x: number]: GetValuesTypes<TObj> | GetValuesTypes<GetValuesTypes<TObj>>; [x: symbol]: GetValuesTypes<TObj> | GetValuesTypes<GetValuesTypes<TObj>>; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-object-utils/src/flatten_object.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/object-utils",
+            "id": "def-common.flattenObjectNestedLast.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "obj",
+            "description": [
+              "- The input object."
+            ],
+            "signature": [
+              "TObj"
+            ],
+            "path": "src/platform/packages/shared/kbn-object-utils/src/flatten_object.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An object containing all the flattened properties."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/object-utils",
+        "id": "def-common.unflattenObject",
+        "type": "Function",
+        "tags": [],
+        "label": "unflattenObject",
+        "description": [],
+        "signature": [
+          "(source: T, target: Record<string, any>) => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.UnionToIntersection",
+            "text": "UnionToIntersection"
+          },
+          "<Exclude<",
+          "ValuesType",
+          "<{ [TKey in keyof T as string]: string extends TKey ? Record<TKey, T[TKey]> : {} extends Pick<T, TKey> ? ",
+          "DeepPartial",
+          "<DedotKey<T, TKey, Exclude<T[TKey], undefined>>> : DedotKey<T, TKey, T[TKey]>; }>, undefined>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-object-utils/src/unflatten_object.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/object-utils",
+            "id": "def-common.unflattenObject.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-object-utils/src/unflatten_object.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/object-utils",
+            "id": "def-common.unflattenObject.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "target",
+            "description": [],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "src/platform/packages/shared/kbn-object-utils/src/unflatten_object.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

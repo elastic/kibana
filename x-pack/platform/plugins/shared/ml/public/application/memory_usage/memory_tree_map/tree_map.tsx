@@ -7,25 +7,18 @@
 
 import type { FC } from 'react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import {
-  Chart,
-  Settings,
-  Partition,
-  PartitionLayout,
-  DARK_THEME,
-  LIGHT_THEME,
-} from '@elastic/charts';
+import { Chart, Settings, Partition, PartitionLayout } from '@elastic/charts';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useIsDarkTheme } from '@kbn/ml-kibana-theme';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import type { MemoryUsageInfo } from '../../../../common/types/trained_models';
 import type { JobType, MlSavedObjectType } from '../../../../common/types/saved_objects';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { LoadingWrapper } from '../../jobs/new_job/pages/components/charts/loading_wrapper';
-import { useFieldFormatter, useMlKibana } from '../../contexts/kibana';
+import { useFieldFormatter } from '../../contexts/kibana';
 
 import { useRefresh } from '../../routing/use_refresh';
 import { getMemoryItemColor } from '../memory_item_colors';
@@ -61,12 +54,7 @@ const TYPE_LABELS_INVERTED = Object.entries(TYPE_LABELS).reduce<Record<MlSavedOb
 );
 
 export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
-  const {
-    services: { theme: themeService },
-  } = useMlKibana();
-  const isDarkTheme = useIsDarkTheme(themeService);
-
-  const baseTheme = useMemo(() => (isDarkTheme ? DARK_THEME : LIGHT_THEME), [isDarkTheme]);
+  const baseTheme = useElasticChartsTheme();
 
   const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
 
@@ -148,7 +136,6 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
     },
     [loadJobMemorySize, refresh]
   );
-
   return (
     <div
       style={{ height: chartHeight }}

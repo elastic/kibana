@@ -25,6 +25,11 @@ paths:
                     type: boolean
                     nullable: true
                 required: [name, index_mapping_outdated]
+              examples:
+                success:
+                  value:
+                    index_mapping_outdated: false
+                    name: '.alerts-security.alerts-default'
         401:
           description: Unsuccessful authentication response
           content:

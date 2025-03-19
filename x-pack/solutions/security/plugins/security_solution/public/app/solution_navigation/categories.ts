@@ -39,6 +39,10 @@ export const CATEGORIES: Array<SeparatorLinkCategory<SolutionPageName>> = [
   },
   {
     type: LinkCategoryType.separator,
+    linkIds: [SecurityPageName.assetInventory],
+  },
+  {
+    type: LinkCategoryType.separator,
     linkIds: [SecurityPageName.assets],
   },
   {
@@ -66,6 +70,10 @@ export const FOOTER_CATEGORIES: Array<LinkCategory<SolutionPageName>> = [
       defaultMessage: 'Management',
     }),
     iconType: 'gear',
-    linkIds: [ExternalPageName.management, ExternalPageName.integrationsSecurity],
+    linkIds: [
+      ExternalPageName.management,
+      ExternalPageName.managementMonitoring,
+      ExternalPageName.integrationsSecurity,
+    ],
   },
 ];

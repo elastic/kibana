@@ -49,14 +49,19 @@ export const KnowledgeBaseEntryErrorSchema = z
   .strict();
 
 /**
+ * Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc
+ */
+export type KnowledgeBaseResource = z.infer<typeof KnowledgeBaseResource>;
+export const KnowledgeBaseResource = z.enum(['security_labs', 'user']);
+export type KnowledgeBaseResourceEnum = typeof KnowledgeBaseResource.enum;
+export const KnowledgeBaseResourceEnum = KnowledgeBaseResource.enum;
+
+/**
  * Metadata about a Knowledge Base Entry
  */
 export type Metadata = z.infer<typeof Metadata>;
 export const Metadata = z.object({
-  /**
-   * Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
-   */
-  kbResource: z.string(),
+  kbResource: KnowledgeBaseResource,
   /**
    * Source document name or filepath
    */
@@ -97,6 +102,10 @@ export const BaseDefaultableFields = z.object({
    */
   namespace: z.string().optional(),
   /**
+   * Whether this Knowledge Base Entry is global, defaults to false
+   */
+  global: z.boolean().optional(),
+  /**
    * Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
    */
   users: z.array(User).optional(),
@@ -136,6 +145,11 @@ export const ResponseFields = z.object({
   updatedBy: z.string(),
 });
 
+export type DeleteResponseFields = z.infer<typeof DeleteResponseFields>;
+export const DeleteResponseFields = z.object({
+  id: NonEmptyString,
+});
+
 export type SharedResponseProps = z.infer<typeof SharedResponseProps>;
 export const SharedResponseProps = BaseResponseProps.merge(ResponseFields);
 
@@ -148,10 +162,7 @@ export const DocumentEntryRequiredFields = z.object({
    * Entry type
    */
   type: z.literal('document'),
-  /**
-   * Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
-   */
-  kbResource: z.string(),
+  kbResource: KnowledgeBaseResource,
   /**
    * Source document name or filepath
    */
@@ -248,5 +259,14 @@ export const KnowledgeBaseEntryUpdateProps = z.discriminatedUnion('type', [
   IndexEntryUpdateFields,
 ]);
 
+export type KnowledgeBaseEntryUpdateRouteProps = z.infer<typeof KnowledgeBaseEntryUpdateRouteProps>;
+export const KnowledgeBaseEntryUpdateRouteProps = z.discriminatedUnion('type', [
+  DocumentEntryCreateFields,
+  IndexEntryCreateFields,
+]);
+
 export type KnowledgeBaseEntryResponse = z.infer<typeof KnowledgeBaseEntryResponse>;
 export const KnowledgeBaseEntryResponse = z.discriminatedUnion('type', [DocumentEntry, IndexEntry]);
+
+export type KnowledgeBaseEntryDeleteResponse = z.infer<typeof KnowledgeBaseEntryDeleteResponse>;
+export const KnowledgeBaseEntryDeleteResponse = DeleteResponseFields;

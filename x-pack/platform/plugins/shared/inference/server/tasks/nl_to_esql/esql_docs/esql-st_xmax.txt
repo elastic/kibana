@@ -1,0 +1,27 @@
+# ST_XMAX
+
+The ST_XMAX function extracts the maximum value of the x coordinates from the supplied geometry.
+
+## Syntax
+
+`ST_XMAX(point)`
+
+### Parameters
+
+#### point
+
+This is an expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. The function returns `null` if the point is `null`.
+
+## Examples
+
+Here's an example of how to use the ST_XMAX function:
+
+```esql
+FROM airport_city_boundaries
+| WHERE abbrev == "CPH"
+| EVAL envelope = ST_ENVELOPE(city_boundary)
+| EVAL xmin = ST_XMIN(envelope), xmax = ST_XMAX(envelope), ymin = ST_YMIN(envelope), ymax = ST_YMAX(envelope)
+| KEEP abbrev, airport, xmin, xmax, ymin, ymax
+```
+
+In this example, the ST_XMAX function is used to extract the maximum x coordinate from the envelope of the 'city_boundary' field.

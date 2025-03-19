@@ -10,26 +10,14 @@
         "label": "DeprecationsService",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-deprecations-browser-internal",
-            "scope": "public",
-            "docId": "kibKbnCoreDeprecationsBrowserInternalPluginApi",
-            "section": "def-public.DeprecationsService",
-            "text": "DeprecationsService"
-          },
+          "DeprecationsService",
           " implements ",
           "CoreService",
           "<void, ",
-          {
-            "pluginId": "@kbn/core-deprecations-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
-            "section": "def-public.DeprecationsServiceStart",
-            "text": "DeprecationsServiceStart"
-          },
+          "DeprecationsServiceStart",
           ">"
         ],
-        "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
+        "path": "src/core/packages/deprecations/browser-internal/src/deprecations_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +31,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
+            "path": "src/core/packages/deprecations/browser-internal/src/deprecations_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -58,23 +46,11 @@
             "description": [],
             "signature": [
               "({ http }: { http: ",
-              {
-                "pluginId": "@kbn/core-http-browser-internal",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserInternalPluginApi",
-                "section": "def-public.InternalHttpStart",
-                "text": "InternalHttpStart"
-              },
+              "InternalHttpStart",
               "; }) => ",
-              {
-                "pluginId": "@kbn/core-deprecations-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
-                "section": "def-public.DeprecationsServiceStart",
-                "text": "DeprecationsServiceStart"
-              }
+              "DeprecationsServiceStart"
             ],
-            "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
+            "path": "src/core/packages/deprecations/browser-internal/src/deprecations_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -85,7 +61,7 @@
                 "tags": [],
                 "label": "{ http }",
                 "description": [],
-                "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
+                "path": "src/core/packages/deprecations/browser-internal/src/deprecations_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -98,18 +74,12 @@
                     "description": [],
                     "signature": [
                       "Omit<",
-                      {
-                        "pluginId": "@kbn/core-http-browser",
-                        "scope": "public",
-                        "docId": "kibKbnCoreHttpBrowserPluginApi",
-                        "section": "def-public.HttpSetup",
-                        "text": "HttpSetup"
-                      },
+                      "HttpSetup",
                       ", \"staticAssets\"> & { staticAssets: ",
                       "InternalStaticAssets",
                       "; }"
                     ],
-                    "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
+                    "path": "src/core/packages/deprecations/browser-internal/src/deprecations_service.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -128,7 +98,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
+            "path": "src/core/packages/deprecations/browser-internal/src/deprecations_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

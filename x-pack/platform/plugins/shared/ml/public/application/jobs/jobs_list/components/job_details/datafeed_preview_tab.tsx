@@ -52,7 +52,9 @@ export const DatafeedPreviewPane: FC<Props> = ({ job }) => {
   }
 
   return loading ? (
-    <EuiLoadingSpinner size="xl" />
+    <div className="job-loading-spinner" data-test-subj="mlJobDetails loading">
+      <EuiLoadingSpinner size="l" />
+    </div>
   ) : (
     <>
       {previewJson === null ? (

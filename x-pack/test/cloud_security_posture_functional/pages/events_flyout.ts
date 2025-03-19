@@ -6,17 +6,25 @@
  */
 
 import { waitForPluginInitialized } from '../../cloud_security_posture_api/utils';
-import type { FtrProviderContext } from '../ftr_provider_context';
+import type { SecurityTelemetryFtrProviderContext } from '../config';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: SecurityTelemetryFtrProviderContext) {
   const retry = getService('retry');
   const logger = getService('log');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const pageObjects = getPageObjects(['common', 'header', 'networkEvents', 'expandedFlyout']);
+  const ebtUIHelper = getService('kibana_ebt_ui');
+  const pageObjects = getPageObjects([
+    'common',
+    'header',
+    'networkEvents',
+    'expandedFlyoutGraph',
+    'timeline',
+  ]);
   const networkEventsPage = pageObjects.networkEvents;
-  const expandedFlyout = pageObjects.expandedFlyout;
+  const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
+  const timelinePage = pageObjects.timeline;
 
   describe('Security Network Page - Graph visualization', function () {
     this.tags(['cloud_security_posture_graph_viz']);
@@ -37,8 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
 
       await networkEventsPage.waitForListToHaveEvents();
-
-      await networkEventsPage.flyout.expandVisualizations();
+      await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
     });
 
     after(async () => {
@@ -48,51 +55,102 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('expanded flyout - filter by node', async () => {
+      await networkEventsPage.flyout.expandVisualizations();
       await networkEventsPage.flyout.assertGraphPreviewVisible();
       await networkEventsPage.flyout.assertGraphNodesNumber(3);
 
-      await expandedFlyout.expandGraph();
-      await expandedFlyout.waitGraphIsLoaded();
-      await expandedFlyout.assertGraphNodesNumber(3);
+      await expandedFlyoutGraph.expandGraph();
+      await expandedFlyoutGraph.waitGraphIsLoaded();
+      await expandedFlyoutGraph.assertGraphNodesNumber(3);
+      await expandedFlyoutGraph.toggleSearchBar();
 
       // Show actions by entity
-      await expandedFlyout.showActionsByEntity('admin@example.com');
-      await expandedFlyout.expectFilterTextEquals(0, 'actor.entity.id: admin@example.com');
-      await expandedFlyout.expectFilterPreviewEquals(0, 'actor.entity.id: admin@example.com');
+      await expandedFlyoutGraph.showActionsByEntity('admin@example.com');
+      await expandedFlyoutGraph.expectFilterTextEquals(0, 'actor.entity.id: admin@example.com');
+      await expandedFlyoutGraph.expectFilterPreviewEquals(0, 'actor.entity.id: admin@example.com');
 
       // Show actions on entity
-      await expandedFlyout.showActionsOnEntity('admin@example.com');
-      await expandedFlyout.expectFilterTextEquals(
+      await expandedFlyoutGraph.showActionsOnEntity('admin@example.com');
+      await expandedFlyoutGraph.expectFilterTextEquals(
         0,
         'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com'
       );
-      await expandedFlyout.expectFilterPreviewEquals(
+      await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
         'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com'
       );
 
       // Explore related entities
-      await expandedFlyout.exploreRelatedEntities('admin@example.com');
-      await expandedFlyout.expectFilterTextEquals(
+      await expandedFlyoutGraph.exploreRelatedEntities('admin@example.com');
+      await expandedFlyoutGraph.expectFilterTextEquals(
         0,
         'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
       );
-      await expandedFlyout.expectFilterPreviewEquals(
+      await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
         'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
+      );
+
+      // Show events with the same action
+      await expandedFlyoutGraph.showEventsOfSameAction(
+        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)'
+      );
+      await expandedFlyoutGraph.expectFilterTextEquals(
+        0,
+        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
+      );
+      await expandedFlyoutGraph.expectFilterPreviewEquals(
+        0,
+        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
+      );
+
+      // Hide events with the same action
+      await expandedFlyoutGraph.hideEventsOfSameAction(
+        'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)'
+      );
+      await expandedFlyoutGraph.expectFilterTextEquals(
+        0,
+        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
+      );
+      await expandedFlyoutGraph.expectFilterPreviewEquals(
+        0,
+        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
+      );
+
+      // Hide actions on entity
+      await expandedFlyoutGraph.hideActionsOnEntity('admin@example.com');
+      await expandedFlyoutGraph.expectFilterTextEquals(
+        0,
+        'actor.entity.id: admin@example.com OR related.entity: admin@example.com'
+      );
+      await expandedFlyoutGraph.expectFilterPreviewEquals(
+        0,
+        'actor.entity.id: admin@example.com OR related.entity: admin@example.com'
       );
 
       // Clear filters
-      await expandedFlyout.clearAllFilters();
+      await expandedFlyoutGraph.clearAllFilters();
 
       // Add custom filter
-      await expandedFlyout.addFilter({
+      await expandedFlyoutGraph.addFilter({
         field: 'actor.entity.id',
         operation: 'is',
         value: 'admin2@example.com',
       });
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await expandedFlyout.assertGraphNodesNumber(5);
+      await expandedFlyoutGraph.assertGraphNodesNumber(5);
+
+      // Open timeline
+      await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
+      await timelinePage.ensureTimelineIsOpen();
+      await timelinePage.waitForEvents();
+      await timelinePage.closeTimeline();
+
+      // Test query bar
+      await expandedFlyoutGraph.setKqlQuery('cannotFindThis');
+      await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
+      await timelinePage.ensureTimelineIsOpen();
+      await timelinePage.waitForEvents();
     });
   });
 }

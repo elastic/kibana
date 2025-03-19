@@ -21,6 +21,7 @@ import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { hasTimestampFields } from '../utils/utils';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine';
 
+const actualHasTimestampFields = jest.requireActual('../utils/utils').hasTimestampFields;
 jest.mock('../utils/utils', () => ({
   ...jest.requireActual('../utils/utils'),
   getExceptions: () => [],
@@ -74,7 +75,6 @@ describe('Custom Query Alerts', () => {
         scheduleNotificationResponseActionsService: () => null,
         experimentalFeatures: allowedExperimentalValues,
         logger,
-        version: '1.0.0',
         id: QUERY_RULE_TYPE_ID,
         name: 'Custom Query Rule',
       })
@@ -114,7 +114,8 @@ describe('Custom Query Alerts', () => {
     expect(eventsTelemetry.queueTelemetryEvents).not.toHaveBeenCalled();
   });
 
-  it('sends an alert when events are found', async () => {
+  it('short-circuits and writes a warning if no indices are found', async () => {
+    (hasTimestampFields as jest.Mock).mockImplementationOnce(actualHasTimestampFields); // default behavior will produce a 'no indices found' result from this helper
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
         eventsTelemetry,
@@ -122,7 +123,6 @@ describe('Custom Query Alerts', () => {
         scheduleNotificationResponseActionsService: () => null,
         experimentalFeatures: allowedExperimentalValues,
         logger,
-        version: '1.0.0',
         id: QUERY_RULE_TYPE_ID,
         name: 'Custom Query Rule',
       })
@@ -156,6 +156,76 @@ describe('Custom Query Alerts', () => {
 
     await executor({ params });
 
+    expect((await ruleDataClient.getWriter()).bulk).not.toHaveBeenCalled();
+    expect(eventsTelemetry.sendAsync).not.toHaveBeenCalled();
+    expect(mockedStatusLogger.logStatusChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        newStatus: RuleExecutionStatusEnum['partial failure'],
+        message:
+          'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["auditbeat-*","filebeat-*","packetbeat-*","winlogbeat-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.',
+      })
+    );
+  });
+
+  it('sends an alert when events are found', async () => {
+    const queryAlertType = securityRuleTypeWrapper(
+      createQueryAlertType({
+        eventsTelemetry,
+        licensing,
+        scheduleNotificationResponseActionsService: () => null,
+        experimentalFeatures: allowedExperimentalValues,
+        logger,
+        id: QUERY_RULE_TYPE_ID,
+        name: 'Custom Query Rule',
+      })
+    );
+
+    alerting.registerType(queryAlertType);
+
+    const params = getQueryRuleParams();
+
+    // mock field caps so as not to short-circuit on "no indices found"
+    services.scopedClusterClient.asInternalUser.fieldCaps.mockResolvedValueOnce({
+      // @ts-expect-error our fieldCaps mock only seems to use the last value of the overloaded FieldCapsApi
+      body: {
+        indices: params.index!,
+        fields: {
+          _id: {
+            _id: {
+              type: '_id',
+              metadata_field: true,
+              searchable: true,
+              aggregatable: false,
+            },
+          },
+        },
+      },
+    });
+
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        hits: {
+          hits: [sampleDocNoSortId()],
+          sequences: [],
+          events: [],
+          total: {
+            relation: 'eq',
+            value: 1,
+          },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          skipped: 0,
+          successful: 1,
+          total: 1,
+        },
+      })
+    );
+
+    await executor({ params });
+
     expect((await ruleDataClient.getWriter()).bulk).toHaveBeenCalled();
     expect(eventsTelemetry.sendAsync).toHaveBeenCalled();
   });
@@ -171,7 +241,6 @@ describe('Custom Query Alerts', () => {
         scheduleNotificationResponseActionsService: () => null,
         experimentalFeatures: allowedExperimentalValues,
         logger,
-        version: '1.0.0',
         id: QUERY_RULE_TYPE_ID,
         name: 'Custom Query Rule',
       })

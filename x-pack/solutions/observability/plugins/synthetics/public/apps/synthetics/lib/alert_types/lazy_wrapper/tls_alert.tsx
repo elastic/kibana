@@ -10,17 +10,17 @@ import { Provider as ReduxProvider } from 'react-redux';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import { TLSRuleComponent } from '../../../components/alerts/tls_rule_ui';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { TLSParams } from '../../../../../../common/runtime_types/alerts/tls';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import { store } from '../../../state';
 
 interface Props {
   coreStart: CoreStart;
   plugins: ClientPluginsStart;
-  ruleParams: RuleTypeParamsExpressionProps<TLSParams>['ruleParams'];
-  setRuleParams: RuleTypeParamsExpressionProps<TLSParams>['setRuleParams'];
+  ruleParams: RuleTypeParamsExpressionProps<TLSRuleParams>['ruleParams'];
+  setRuleParams: RuleTypeParamsExpressionProps<TLSRuleParams>['setRuleParams'];
 }
 
 // eslint-disable-next-line import/no-default-export

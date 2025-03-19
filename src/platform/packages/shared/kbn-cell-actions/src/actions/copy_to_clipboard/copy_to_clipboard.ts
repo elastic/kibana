@@ -24,7 +24,7 @@ import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '../translations';
 
 const ICON = 'copyClipboard';
 const COPY_TO_CLIPBOARD = i18n.translate('cellActions.actions.copyToClipboard.displayName', {
-  defaultMessage: 'Copy to Clipboard',
+  defaultMessage: 'Copy to clipboard',
 });
 const COPY_TO_CLIPBOARD_SUCCESS = i18n.translate(
   'cellActions.actions.copyToClipboard.successMessage',

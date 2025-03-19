@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiIcon } from '@elastic/eui';
-import styled, { createGlobalStyle, css } from 'styled-components';
+import React, { memo } from 'react';
+import type { ComponentProps, FC } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiIcon, useEuiFontSize } from '@elastic/eui';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 
 export const SecuritySolutionAppWrapper = styled.div`
   display: flex;
@@ -22,7 +26,7 @@ SecuritySolutionAppWrapper.displayName = 'SecuritySolutionAppWrapper';
  * components, that position themselves just below the kibana header, are displayed correctly
  * when shown above content that is set to `full screen`.
  */
-export const FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET = () => css`
+export const FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET = `
   .euiOverlayMask[data-relative-to-header='below'] {
     top: 0 !important;
   }
@@ -34,12 +38,10 @@ export const FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET = () => css`
 `;
 
 /*
-  SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
+  SIDE EFFECT: the following `appGlobalStyles` overrides default styling in angular code that was not theme-friendly
   and `EuiPopover`, `EuiToolTip` global styles
 */
-export const AppGlobalStyle = createGlobalStyle<{
-  theme: { eui: { euiColorPrimary: string; euiColorLightShade: string; euiSizeS: string } };
-}>`
+export const appGlobalStyles = ({ euiTheme }: UseEuiTheme): string => `
   /*
     overrides the default styling of EuiDataGrid expand popover footer to
     make it a column of actions instead of the default actions row
@@ -69,8 +71,8 @@ export const AppGlobalStyle = createGlobalStyle<{
     }
 
     .euiText + .euiPopoverFooter {
-      border-top: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
-      margin-top: ${({ theme }) => theme.eui.euiSizeS};
+      border-top: 1px solid ${euiTheme.colors.lightShade};
+      margin-top: ${euiTheme.size.s};
     }
   }
 
@@ -107,20 +109,24 @@ export const AppGlobalStyle = createGlobalStyle<{
   }
 `;
 
-export const DescriptionListStyled = styled(EuiDescriptionList)`
-  ${({ theme }) => `
-    word-break: break-word;
-    dt {
-      font-size: ${theme.eui.euiFontSizeXS} !important;
-    }
-    dd {
-      width: fit-content;
-    }
-    dd > div {
-      width: fit-content;
-    }
-  `}
-`;
+export const DescriptionListStyled: FC<ComponentProps<typeof EuiDescriptionList>> = memo(
+  ({ css: cssProp, ...props }) => {
+    const baseStyles = css`
+      word-break: break-word;
+      dt {
+        font-size: ${useEuiFontSize('xs').fontSize} !important;
+      }
+      dd {
+        width: fit-content;
+      }
+      dd > div {
+        width: fit-content;
+      }
+    `;
+
+    return <EuiDescriptionList css={[baseStyles, cssProp]} {...props} />;
+  }
+);
 
 DescriptionListStyled.displayName = 'DescriptionListStyled';
 
@@ -153,7 +159,7 @@ export const OverviewWrapper = styled(EuiFlexGroup)`
 
   .euiButtonIcon {
     position: absolute;
-    right: ${(props) => props.theme.eui.euiSizeM};
+    right: ${({ theme }) => theme.euiTheme.size.m};
     top: 6px;
     z-index: 2;
   }

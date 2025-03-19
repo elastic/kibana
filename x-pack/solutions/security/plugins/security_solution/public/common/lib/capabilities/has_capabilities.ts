@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { get, isArray } from 'lodash';
+import get from 'lodash/get';
+import isArray from 'lodash/isArray';
 import type { Capabilities } from '@kbn/core/public';
 
 /**

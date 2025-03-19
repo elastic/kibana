@@ -25,7 +25,7 @@
           "HeatmapVisParams",
           ">"
         ],
-        "path": "src/plugins/vis_types/heatmap/public/vis_type/index.ts",
+        "path": "src/platform/plugins/private/vis_types/heatmap/public/vis_type/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,7 +39,7 @@
             "signature": [
               "HeatmapTypeProps"
             ],
-            "path": "src/plugins/vis_types/heatmap/public/vis_type/index.ts",
+            "path": "src/platform/plugins/private/vis_types/heatmap/public/vis_type/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -78,7 +78,7 @@
         "signature": [
           "\"visualization:visualize:legacyHeatmapChartsLibrary\""
         ],
-        "path": "src/plugins/vis_types/heatmap/common/index.ts",
+        "path": "src/platform/plugins/private/vis_types/heatmap/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

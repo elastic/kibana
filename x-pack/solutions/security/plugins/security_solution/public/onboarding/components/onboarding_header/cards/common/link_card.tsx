@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiCard, EuiImage, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiCard, EuiImage, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import classNames from 'classnames';
 import { trackOnboardingLinkClick } from '../../../lib/telemetry';
 import { useCardStyles } from './link_card.styles';
@@ -50,11 +50,7 @@ export const LinkCard: React.FC<LinkCardProps> = React.memo(
             size={64}
           />
         }
-        title={
-          <EuiTitle size="xxs" className="headerCardTitle">
-            <h3>{title}</h3>
-          </EuiTitle>
-        }
+        title={<span className="headerCardTitle">{title}</span>}
         description={<EuiText size="xs">{description}</EuiText>}
       >
         <EuiSpacer size="s" />

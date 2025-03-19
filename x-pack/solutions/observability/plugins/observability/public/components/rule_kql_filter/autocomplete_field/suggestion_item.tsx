@@ -23,7 +23,7 @@ export function SuggestionItem(props: Props) {
   const { isSelected, onClick, onMouseEnter, onKeyDown, suggestion } = props;
   const { euiTheme } = useEuiTheme();
 
-  const suggestionItemContainerCss = `
+  const suggestionItemContainerCss = css`
     display: flex;
     flex-direction: row;
     font-size: ${euiTheme.font.scale.s};
@@ -32,7 +32,7 @@ export function SuggestionItem(props: Props) {
     background-color: ${isSelected ? euiTheme.colors.lightestShade : 'transparent'};
   `;
 
-  const suggestionItemFieldCss = `
+  const suggestionItemFieldCss = css`
     align-items: center;
     cursor: pointer;
     display: flex;
@@ -41,7 +41,7 @@ export function SuggestionItem(props: Props) {
     padding: ${euiTheme.size.xs};
   `;
 
-  const suggestionItemIconFieldCss = `
+  const suggestionItemIconFieldCss = css`
     background-color: ${transparentize(0.9, getEuiIconColor(euiTheme, suggestion.type))};
     color: ${getEuiIconColor(euiTheme, suggestion.type)};
     flex: 0 0 auto;
@@ -49,12 +49,12 @@ export function SuggestionItem(props: Props) {
     width: ${euiTheme.size.xl};
   `;
 
-  const suggestionItemTextFieldCss = `
+  const suggestionItemTextFieldCss = css`
     flex: 2 0 0;
     font-family: ${euiTheme.font.familyCode};
   `;
 
-  const suggestionItemDescriptionFieldCss = `
+  const suggestionItemDescriptionFieldCss = css`
     flex: 3 0 0;
     p {
       display: inline;
@@ -71,28 +71,11 @@ export function SuggestionItem(props: Props) {
       onMouseEnter={onMouseEnter}
       onKeyDown={onKeyDown}
     >
-      <div
-        css={css`
-          ${suggestionItemFieldCss}
-          ${suggestionItemIconFieldCss}
-        `}
-      >
+      <div css={[suggestionItemFieldCss, suggestionItemIconFieldCss]}>
         <EuiIcon type={getEuiIconType(suggestion.type)} />
       </div>
-      <div
-        css={css`
-          ${suggestionItemFieldCss}
-          ${suggestionItemTextFieldCss}
-        `}
-      >
-        {suggestion.text}
-      </div>
-      <div
-        css={css`
-          ${suggestionItemFieldCss}
-          ${suggestionItemDescriptionFieldCss}
-        `}
-      >
+      <div css={[suggestionItemFieldCss, suggestionItemTextFieldCss]}>{suggestion.text}</div>
+      <div css={[suggestionItemFieldCss, suggestionItemDescriptionFieldCss]}>
         {suggestion.description}
       </div>
     </div>

@@ -113,7 +113,7 @@ Object {
         "params": Object {
           "colorStops": Array [
             Object {
-              "color": "#98a2b3",
+              "color": "#aaa",
               "stop": 0,
             },
             Object {
@@ -144,7 +144,7 @@ Object {
           "steps": 3,
           "stops": Array [
             Object {
-              "color": "#98a2b3",
+              "color": "#aaa",
               "stop": 20,
             },
             Object {

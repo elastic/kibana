@@ -47,7 +47,7 @@ export const getBadgeColorForMonitorStatus = (status: MonitorStatus): IconColor 
 export const getTextColorForMonitorStatus = (
   status: MonitorStatus
 ): keyof EuiThemeComputed['colors'] => {
-  return status === 'skipped' ? 'disabledText' : 'text';
+  return status === 'skipped' ? 'textDisabled' : 'textParagraph';
 };
 
 export const COMPLETE_LABEL = i18n.translate('xpack.synthetics.monitorStatus.complete', {

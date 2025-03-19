@@ -7,7 +7,15 @@
 
 export interface Usage {
   slo: {
-    total: number;
+    total: number; // deprecated
+    definitions: {
+      total: number;
+      total_with_ccs: number;
+      total_with_groups: number;
+    };
+    instances: {
+      total: number;
+    };
     by_status: {
       enabled: number;
       disabled: number;

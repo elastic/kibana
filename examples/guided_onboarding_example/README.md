@@ -1,6 +1,6 @@
 # guidedOnboardingExample
 
-This plugin contains code examples for the Guided Onboarding plugin. More information can be found in `KIBANA_FOLDER/src/plugins/guided_onboarding/README.md`
+This plugin contains code examples for the Guided Onboarding plugin. More information can be found in `KIBANA_FOLDER/src/platform/plugins/shared/guided_onboarding/README.md`
 
 ---
 

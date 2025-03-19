@@ -15,8 +15,8 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useStoreEntityTypes } from '../../../hooks/use_enabled_entity_types';
 import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { EntitiesList } from '../entities_list';
 import { useEntityStoreStatus } from '../hooks/use_entity_store';
 import { EntityAnalyticsRiskScores } from '../../entity_analytics_risk_score';
@@ -27,6 +27,7 @@ import { EnablementPanel } from './dashboard_enablement_panel';
 const EntityStoreDashboardPanelsComponent = () => {
   const riskEngineStatus = useRiskEngineStatus();
   const storeStatusQuery = useEntityStoreStatus({});
+  const entityTypes = useStoreEntityTypes();
 
   const callouts = (storeStatusQuery.data?.engines ?? [])
     .filter((engine) => engine.status === 'error')
@@ -73,12 +74,11 @@ const EntityStoreDashboardPanelsComponent = () => {
 
       {riskEngineStatus.data?.risk_engine_status !== RiskEngineStatusEnum.NOT_INSTALLED && (
         <>
-          <EuiFlexItem>
-            <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.user} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EntityAnalyticsRiskScores riskEntity={RiskScoreEntity.host} />
-          </EuiFlexItem>
+          {entityTypes.map((entityType) => (
+            <EuiFlexItem key={entityType}>
+              <EntityAnalyticsRiskScores riskEntity={entityType} />
+            </EuiFlexItem>
+          ))}
         </>
       )}
       {storeStatusQuery.data?.status !== 'not_installed' &&

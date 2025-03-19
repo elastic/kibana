@@ -6,18 +6,19 @@
  */
 
 import { isEqual } from 'lodash';
-import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import {
   ALERT_EVALUATION_VALUES,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_REASON,
   ALERT_GROUP,
+  ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
+import { getEcsGroups } from '@kbn/alerting-rule-utils';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { getEsQueryConfig } from '../../../utils/get_es_query_config';
 import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
@@ -42,6 +43,7 @@ import {
   flattenAdditionalContext,
   getFormattedGroupBy,
   getContextForRecoveredAlerts,
+  getGroupByObject,
 } from './utils';
 
 import { formatAlertResult, getLabel } from './lib/format_alert_result';
@@ -50,14 +52,14 @@ import { MissingGroupsRecord } from './lib/check_missing_group';
 
 export interface CustomThresholdLocators {
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
-  logsExplorerLocator?: LocatorPublic<LogsExplorerLocatorParams>;
+  logsLocator?: LocatorPublic<DiscoverAppLocatorParams>;
 }
 
 export const createCustomThresholdExecutor = ({
   basePath,
   logger,
   config,
-  locators: { logsExplorerLocator },
+  locators: { logsLocator },
 }: {
   basePath: IBasePath;
   logger: Logger;
@@ -126,6 +128,7 @@ export const createCustomThresholdExecutor = ({
     const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
     const dataView = initialSearchSource.getField('index')!;
     const { id: dataViewId, timeFieldName } = dataView;
+    const runtimeMappings = dataView.getRuntimeMappings();
     const dataViewIndexPattern = dataView.getIndexPattern();
     const dataViewName = dataView.getName();
     if (!dataViewIndexPattern) {
@@ -147,6 +150,7 @@ export const createCustomThresholdExecutor = ({
       logger,
       { end: dateEnd, start: dateStart },
       esQueryConfig,
+      runtimeMappings,
       state.lastRunTimestamp,
       previousMissingGroups
     );
@@ -159,6 +163,7 @@ export const createCustomThresholdExecutor = ({
     }
 
     const groupByKeysObjectMapping = getFormattedGroupBy(params.groupBy, resultGroupSet);
+    const groupingObject = getGroupByObject(params.groupBy, resultGroupSet);
     const groupArray = [...resultGroupSet];
     const nextMissingGroups = new Set<MissingGroupsRecord>();
     const hasGroups = !isEqual(groupArray, [UNGROUPED_FACTORY_KEY]);
@@ -269,6 +274,7 @@ export const createCustomThresholdExecutor = ({
           context: {
             alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, uuid),
             group: groupByKeysObjectMapping[group],
+            grouping: groupingObject[group],
             reason,
             timestamp,
             value: alertResults.map((result) => {
@@ -281,7 +287,7 @@ export const createCustomThresholdExecutor = ({
             viewInAppUrl: getViewInAppUrl({
               dataViewId: params.searchConfiguration?.index?.title ?? dataViewId,
               groups,
-              logsExplorerLocator,
+              logsLocator,
               metrics: alertResults.length === 1 ? alertResults[0][group].metrics : [],
               searchConfiguration: params.searchConfiguration,
               startedAt: indexedStartedAt,
@@ -296,6 +302,22 @@ export const createCustomThresholdExecutor = ({
     alertsClient.setAlertLimitReached(hasReachedLimit);
     const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
 
+    let groupingObjectForRecovered: Record<string, object> = {};
+
+    // extracing group by fields from kibana.alert.rule.params,
+    // since all recovered alert documents will have same group by fields,
+    // we are only checking first recovered alert document
+    if (recoveredAlerts.length > 0) {
+      const alertHit = recoveredAlerts[0].hit;
+      const ruleParamsOfRecoveredAlert = alertHit?.[ALERT_RULE_PARAMETERS] as EvaluatedRuleParams;
+      const groupByFields = ruleParamsOfRecoveredAlert?.groupBy;
+
+      groupingObjectForRecovered = getGroupByObject(
+        groupByFields,
+        new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.alert.getId()))
+      );
+    }
+
     const groupByKeysObjectForRecovered = getFormattedGroupBy(
       params.groupBy,
       new Set<string>(recoveredAlerts.map((recoveredAlert) => recoveredAlert.alert.getId()))
@@ -306,22 +328,24 @@ export const createCustomThresholdExecutor = ({
       const alertUuid = recoveredAlert.alert.getUuid();
       const indexedStartedAt = recoveredAlert.alert.getStart() ?? startedAt.toISOString();
       const group = groupByKeysObjectForRecovered[recoveredAlertId];
-
+      const grouping = groupingObjectForRecovered[recoveredAlertId];
       const alertHits = recoveredAlert.hit;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
 
       const context = {
         alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
         group,
+        grouping,
         timestamp: startedAt.toISOString(),
         viewInAppUrl: getViewInAppUrl({
           dataViewId,
           groups: group,
-          logsExplorerLocator,
+          logsLocator,
           metrics: params.criteria[0]?.metrics,
           searchConfiguration: params.searchConfiguration,
           startedAt: indexedStartedAt,
         }),
+        reason: alertHits?.[ALERT_REASON],
         ...additionalContext,
       };
 

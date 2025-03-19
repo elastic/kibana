@@ -6,7 +6,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { isEmpty, noop } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
@@ -53,7 +53,7 @@ export interface TimelineArgs {
   inspect: InspectResponse;
 
   /**
-   * `loadPage` loads the next page/batch of records.
+   * `loadNextBatch` loads the next page/batch of records.
    * This is different from the data grid pages. Data grid pagination is only
    * client side and changing data grid pages does not impact this function.
    *
@@ -61,7 +61,7 @@ export interface TimelineArgs {
    * irrespective of where user is in Data grid pagination.
    *
    */
-  loadPage: LoadPage;
+  loadNextBatch: LoadPage;
   pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
   refetch: inputsModel.Refetch;
   totalCount: number;
@@ -72,7 +72,7 @@ type OnNextResponseHandler = (response: TimelineArgs) => Promise<void> | void;
 
 type TimelineEventsSearchHandler = (onNextResponse?: OnNextResponseHandler) => void;
 
-type LoadPage = (newActivePage: number) => void;
+type LoadPage = () => void;
 
 type TimelineRequest<T extends KueryFilterQueryKind> = T extends 'kuery'
   ? TimelineEventsAllOptionsInput
@@ -163,11 +163,10 @@ export const useTimelineEventsHandler = ({
   const [{ pageName }] = useRouteSpy();
   const dispatch = useDispatch();
   const { data } = useKibana().services;
-  const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState<DataLoadingState>(DataLoadingState.loaded);
-  const [activePage, setActivePage] = useState(
+  const [activeBatch, setActiveBatch] = useState(
     id === TimelineId.active ? activeTimeline.getActivePage() : 0
   );
   const [timelineRequest, setTimelineRequest] = useState<TimelineRequest<typeof language> | null>(
@@ -184,7 +183,7 @@ export const useTimelineEventsHandler = ({
   }, [dispatch, id]);
 
   /**
-   * `wrappedLoadPage` loads the next page/batch of records.
+   * `loadBatchHandler` loads the next batch of records.
    * This is different from the data grid pages. Data grid pagination is only
    * client side and changing data grid pages does not impact this function.
    *
@@ -192,17 +191,22 @@ export const useTimelineEventsHandler = ({
    * irrespective of where user is in Data grid pagination.
    *
    */
-  const wrappedLoadPage = useCallback(
-    (newActivePage: number) => {
+  const loadBatchHandler = useCallback(
+    (newActiveBatch: number) => {
       clearSignalsState();
 
       if (id === TimelineId.active) {
-        activeTimeline.setActivePage(newActivePage);
+        activeTimeline.setActivePage(newActiveBatch);
       }
-      setActivePage(newActivePage);
+
+      setActiveBatch(newActiveBatch);
     },
     [clearSignalsState, id]
   );
+
+  const loadNextBatch = useCallback(() => {
+    loadBatchHandler(activeBatch + 1);
+  }, [activeBatch, loadBatchHandler]);
 
   useEffect(() => {
     return () => {
@@ -210,29 +214,32 @@ export const useTimelineEventsHandler = ({
     };
   }, []);
 
-  const refetchGrid = useCallback(() => {
-    if (refetch.current != null) {
-      refetch.current();
-    }
-    wrappedLoadPage(0);
-  }, [wrappedLoadPage]);
+  useEffect(() => {
+    // when batch size changes, refetch DataGrid
+    setActiveBatch(0);
+  }, [limit]);
 
-  const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
-    id,
-    inspect: {
-      dsl: [],
-      response: [],
-    },
-    refetch: refetchGrid,
-    totalCount: -1,
-    pageInfo: {
-      activePage: 0,
-      querySize: 0,
-    },
-    events: [],
-    loadPage: wrappedLoadPage,
-    refreshedAt: 0,
-  });
+  const defaultTimelineResponse = useMemo(
+    () => ({
+      id,
+      inspect: {
+        dsl: [],
+        response: [],
+      },
+      refetch: () => {},
+      totalCount: -1,
+      pageInfo: {
+        activePage: 0,
+        querySize: 0,
+      },
+      events: [],
+      loadNextBatch,
+      refreshedAt: 0,
+    }),
+    [id, loadNextBatch]
+  );
+
+  const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>(defaultTimelineResponse);
 
   const timelineSearch = useCallback(
     async (
@@ -246,7 +253,8 @@ export const useTimelineEventsHandler = ({
       const asyncSearch = async () => {
         prevTimelineRequest.current = request;
         abortCtrl.current = new AbortController();
-        if (activePage === 0) {
+
+        if (activeBatch === 0) {
           setLoading(DataLoadingState.loading);
         } else {
           setLoading(DataLoadingState.loadingMore);
@@ -317,7 +325,6 @@ export const useTimelineEventsHandler = ({
         } else {
           prevTimelineRequest.current = activeTimeline.getRequest();
         }
-        refetch.current = asyncSearch;
 
         setTimelineResponse((prevResp) => {
           const resp =
@@ -325,11 +332,7 @@ export const useTimelineEventsHandler = ({
               ? activeTimeline.getEqlResponse()
               : activeTimeline.getResponse();
           if (resp != null) {
-            return {
-              ...resp,
-              refetch: refetchGrid,
-              loadPage: wrappedLoadPage,
-            };
+            return resp;
           }
           return prevResp;
         });
@@ -343,105 +346,136 @@ export const useTimelineEventsHandler = ({
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
       await asyncSearch();
-      refetch.current = asyncSearch;
     },
-    [
-      pageName,
-      skip,
-      id,
-      activePage,
-      startTracking,
-      data.search,
-      dataViewId,
-      refetchGrid,
-      wrappedLoadPage,
-    ]
+    [pageName, skip, id, activeBatch, startTracking, data.search, dataViewId]
   );
+
+  const refetchGrid = useCallback(() => {
+    /*
+     *
+     * Trigger search with a new request object to fetch the latest data.
+     *
+     */
+    const newTimelineRequest: typeof timelineRequest = {
+      ...timelineRequest,
+      factoryQueryType: TimelineEventsQueries.all,
+      language,
+      sort,
+      fieldRequested: timelineRequest?.fieldRequested ?? fields,
+      fields: timelineRequest?.fieldRequested ?? fields,
+      pagination: {
+        activePage: 0,
+        querySize: limit,
+      },
+    };
+
+    setTimelineRequest(newTimelineRequest);
+
+    timelineSearch(newTimelineRequest);
+    setActiveBatch(0);
+  }, [timelineRequest, timelineSearch, limit, language, sort, fields]);
 
   useEffect(() => {
     if (indexNames.length === 0) {
       return;
     }
 
-    setTimelineRequest((prevRequest) => {
-      const prevEqlRequest = prevRequest as TimelineEqlRequestOptionsInput;
-      const prevSearchParameters = {
-        defaultIndex: prevRequest?.defaultIndex ?? [],
-        filterQuery: prevRequest?.filterQuery ?? '',
-        querySize: prevRequest?.pagination?.querySize ?? 0,
-        sort: prevRequest?.sort ?? initSortDefault,
-        timerange: prevRequest?.timerange ?? {},
-        runtimeMappings: (prevRequest?.runtimeMappings ?? {}) as unknown as RunTimeMappings,
-        ...deStructureEqlOptions(prevEqlRequest),
-      };
+    // Only set timeline request when an actual query exists
+    if (filterQuery || eqlOptions?.query) {
+      setTimelineRequest((prevRequest) => {
+        const prevEqlRequest = prevRequest as TimelineEqlRequestOptionsInput;
+        const prevSearchParameters = {
+          defaultIndex: prevRequest?.defaultIndex ?? [],
+          filterQuery: prevRequest?.filterQuery ?? '',
+          sort: prevRequest?.sort ?? initSortDefault,
+          timerange: prevRequest?.timerange ?? {},
+          runtimeMappings: (prevRequest?.runtimeMappings ?? {}) as unknown as RunTimeMappings,
+          ...deStructureEqlOptions(prevEqlRequest),
+        };
 
-      const timerange =
-        startDate && endDate
-          ? { timerange: { interval: '12h', from: startDate, to: endDate } }
-          : {};
-      const currentSearchParameters = {
-        defaultIndex: indexNames,
-        filterQuery: createFilter(filterQuery),
-        querySize: limit,
-        sort,
-        runtimeMappings,
-        ...timerange,
-        ...deStructureEqlOptions(eqlOptions),
-      };
+        const timerange =
+          startDate && endDate
+            ? { timerange: { interval: '12h', from: startDate, to: endDate } }
+            : {};
+        const currentSearchParameters = {
+          defaultIndex: indexNames,
+          filterQuery: createFilter(filterQuery),
+          sort,
+          runtimeMappings: runtimeMappings ?? {},
+          ...timerange,
+          ...deStructureEqlOptions(eqlOptions),
+        };
 
-      const newActivePage = deepEqual(prevSearchParameters, currentSearchParameters)
-        ? activePage
-        : 0;
+        const areSearchParamsSame = deepEqual(prevSearchParameters, currentSearchParameters);
 
-      /*
-       * optimization to avoid unnecessary network request when a field
-       * has already been fetched
-       *
-       */
+        const newActiveBatch = !areSearchParamsSame ? 0 : activeBatch;
 
-      let finalFieldRequest = fields;
+        /*
+         * optimization to avoid unnecessary network request when a field
+         * has already been fetched
+         *
+         */
 
-      const newFieldsRequested = fields.filter(
-        (field) => !prevRequest?.fieldRequested?.includes(field)
-      );
-      if (newFieldsRequested.length > 0) {
-        finalFieldRequest = [...(prevRequest?.fieldRequested ?? []), ...newFieldsRequested];
-      } else {
-        finalFieldRequest = prevRequest?.fieldRequested ?? [];
-      }
+        let finalFieldRequest = fields;
 
-      const currentRequest = {
-        defaultIndex: indexNames,
-        factoryQueryType: TimelineEventsQueries.all,
-        fieldRequested: finalFieldRequest,
-        fields: finalFieldRequest,
-        filterQuery: createFilter(filterQuery),
-        pagination: {
-          activePage: newActivePage,
-          querySize: limit,
-        },
-        language,
-        runtimeMappings,
-        sort,
-        ...timerange,
-        ...(eqlOptions ? eqlOptions : {}),
-      } as const;
-
-      if (activePage !== newActivePage) {
-        setActivePage(newActivePage);
-        if (id === TimelineId.active) {
-          activeTimeline.setActivePage(newActivePage);
+        const newFieldsRequested = fields.filter(
+          (field) => !prevRequest?.fieldRequested?.includes(field)
+        );
+        if (newFieldsRequested.length > 0) {
+          finalFieldRequest = [...(prevRequest?.fieldRequested ?? []), ...newFieldsRequested];
+        } else {
+          finalFieldRequest = prevRequest?.fieldRequested ?? [];
         }
-      }
-      if (!deepEqual(prevRequest, currentRequest)) {
-        return currentRequest;
-      }
-      return prevRequest;
-    });
+
+        let newPagination = {
+          /*
+           *
+           * fetches data cumulatively for the batches upto the activeBatch
+           * This is needed because, we want to get incremental data as well for the old batches
+           * For example, newly requested fields
+           *
+           * */
+          activePage: newActiveBatch,
+          querySize: limit,
+        };
+
+        if (newFieldsRequested.length > 0) {
+          newPagination = {
+            activePage: 0,
+            querySize: (newActiveBatch + 1) * limit,
+          };
+        }
+
+        const currentRequest = {
+          defaultIndex: indexNames,
+          factoryQueryType: TimelineEventsQueries.all,
+          fieldRequested: finalFieldRequest,
+          fields: finalFieldRequest,
+          filterQuery: createFilter(filterQuery),
+          pagination: newPagination,
+          language,
+          runtimeMappings,
+          sort,
+          ...timerange,
+          ...(eqlOptions ? eqlOptions : {}),
+        } as const;
+
+        if (activeBatch !== newActiveBatch) {
+          setActiveBatch(newActiveBatch);
+          if (id === TimelineId.active) {
+            activeTimeline.setActivePage(newActiveBatch);
+          }
+        }
+        if (!deepEqual(prevRequest, currentRequest)) {
+          return currentRequest;
+        }
+        return prevRequest;
+      });
+    }
   }, [
     dispatch,
     indexNames,
-    activePage,
+    activeBatch,
     endDate,
     eqlOptions,
     filterQuery,
@@ -453,6 +487,16 @@ export const useTimelineEventsHandler = ({
     fields,
     runtimeMappings,
   ]);
+
+  /*
+    cleanup timeline events response when the filters were removed completely
+    to avoid displaying previous query results
+  */
+  useEffect(() => {
+    if (isEmpty(filterQuery)) {
+      setTimelineResponse(defaultTimelineResponse);
+    }
+  }, [defaultTimelineResponse, filterQuery]);
 
   const timelineSearchHandler = useCallback(
     async (onNextHandler?: OnNextResponseHandler) => {
@@ -467,33 +511,18 @@ export const useTimelineEventsHandler = ({
     [id, timelineRequest, timelineSearch, timerangeKind]
   );
 
-  /*
-    cleanup timeline events response when the filters were removed completely
-    to avoid displaying previous query results
-  */
-  useEffect(() => {
-    if (isEmpty(filterQuery)) {
-      setTimelineResponse({
-        id,
-        inspect: {
-          dsl: [],
-          response: [],
-        },
-        refetch: refetchGrid,
-        totalCount: -1,
-        pageInfo: {
-          activePage: 0,
-          querySize: 0,
-        },
-        events: [],
-        loadPage: wrappedLoadPage,
-        refreshedAt: 0,
-      });
-    }
-  }, [filterQuery, id, refetchGrid, wrappedLoadPage]);
+  const finalTimelineLineResponse = useMemo(() => {
+    return {
+      ...timelineResponse,
+      loadNextBatch,
+      refetch: refetchGrid,
+    };
+  }, [timelineResponse, loadNextBatch, refetchGrid]);
 
-  return [loading, timelineResponse, timelineSearchHandler];
+  return [loading, finalTimelineLineResponse, timelineSearchHandler];
 };
+
+const defaultEvents: TimelineItem[][] = [];
 
 export const useTimelineEvents = ({
   dataViewId,
@@ -511,7 +540,7 @@ export const useTimelineEvents = ({
   skip = false,
   timerangeKind,
 }: UseTimelineEventsProps): [DataLoadingState, TimelineArgs] => {
-  const [eventsPerPage, setEventsPerPage] = useState<TimelineItem[][]>([[]]);
+  const [eventsPerPage, setEventsPerPage] = useState<TimelineItem[][]>(defaultEvents);
   const [dataLoadingState, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
     dataViewId,
     endDate,
@@ -536,19 +565,38 @@ export const useTimelineEvents = ({
      * the combined list of events can be supplied to DataGrid.
      *
      * */
+
+    if (dataLoadingState !== DataLoadingState.loaded) return;
+
+    const { activePage, querySize } = timelineResponse.pageInfo;
+
     setEventsPerPage((prev) => {
-      const result = [...prev];
-      result[timelineResponse.pageInfo.activePage] = timelineResponse.events;
+      let result = structuredClone(prev);
+      const newEventsLength = timelineResponse.events.length;
+      const oldEventsLength = result.length;
+
+      if (querySize === limit && activePage > 0) {
+        result[activePage] = timelineResponse.events;
+      } else if (oldEventsLength === 0 && newEventsLength === 0) {
+        // don't change array reference if no actual changes take place
+        result = prev;
+      } else {
+        result = [timelineResponse.events];
+      }
       return result;
     });
-  }, [timelineResponse.events, timelineResponse.pageInfo.activePage]);
+  }, [timelineResponse.events, timelineResponse.pageInfo, dataLoadingState, limit]);
 
   useEffect(() => {
     if (!timelineSearchHandler) return;
     timelineSearchHandler();
   }, [timelineSearchHandler]);
 
-  const combinedEvents = useMemo(() => eventsPerPage.flat(), [eventsPerPage]);
+  const combinedEvents = useMemo(
+    // exclude undefined values / empty slots
+    () => eventsPerPage.filter(Boolean).flat(),
+    [eventsPerPage]
+  );
 
   const combinedResponse = useMemo(
     () => ({

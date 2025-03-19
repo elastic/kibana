@@ -37,15 +37,13 @@ export const riskEngineStatusRoute = (
         const [_, { taskManager }] = await getStartServices();
 
         try {
-          const { riskEngineStatus, legacyRiskEngineStatus, taskStatus } =
-            await riskEngineClient.getStatus({
-              namespace: spaceId,
-              taskManager,
-            });
+          const { riskEngineStatus, taskStatus } = await riskEngineClient.getStatus({
+            namespace: spaceId,
+            taskManager,
+          });
 
           const body: RiskEngineStatusResponse = {
             risk_engine_status: riskEngineStatus,
-            legacy_risk_engine_status: legacyRiskEngineStatus,
             risk_engine_task_status: taskStatus,
           };
 

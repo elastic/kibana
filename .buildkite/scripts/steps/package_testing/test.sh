@@ -5,8 +5,9 @@ set -euo pipefail
 source "$(dirname "$0")/../../common/util.sh"
 .buildkite/scripts/bootstrap.sh
 
-# temporary adding this to get screenshots
-is_test_execution_step
+# temporary enable this to get screenshots on package testing failures
+#
+#is_test_execution_step
 
 echo "--- Package Testing for $TEST_PACKAGE"
 
@@ -24,7 +25,7 @@ elif [[ "$TEST_PACKAGE" == "docker" ]]; then
 fi
 cd ..
 
-export VAGRANT_CWD=$PWD/test/package
+export VAGRANT_CWD=$PWD/src/platform/test/package
 vagrant up "$TEST_PACKAGE" --no-provision
 
 node scripts/es snapshot \
@@ -55,5 +56,6 @@ export TEST_ES_URL="http://elastic:changeme@192.168.56.1:9200"
 
 cd x-pack
 
-echo "--- FTR - Reporting"
-node scripts/functional_test_runner.js --config test/functional/apps/visualize/config.ts --include-tag=smoke --quiet
+# Re-enable after finding suitable suites, --include-tag=smoke does not currently have any matches
+# echo "--- FTR - Reporting"
+# node scripts/functional_test_runner.js --config src/platform/test/functional/apps/visualize/config.ts --include-tag=smoke --quiet

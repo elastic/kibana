@@ -24,15 +24,15 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import * as example1 from './examples/1_using_existing_format';
 import * as example2 from './examples/2_creating_custom_formatter';
 // @ts-ignore
-import example1SampleCode from '!!raw-loader!./examples/1_using_existing_format';
+import example1SampleCode from './examples/1_using_existing_format?raw';
 // @ts-ignore
-import example2SampleCodePart1 from '!!raw-loader!../common/example_currency_format';
+import example2SampleCodePart1 from '../common/example_currency_format?raw';
 // @ts-ignore
-import example2SampleCodePart2 from '!!raw-loader!./examples/2_creating_custom_formatter';
+import example2SampleCodePart2 from './examples/2_creating_custom_formatter?raw';
 // @ts-ignore
-import example2SampleCodePart3 from '!!raw-loader!../server/examples/2_creating_custom_formatter';
+import example2SampleCodePart3 from '../server/examples/2_creating_custom_formatter?raw';
 // @ts-ignore
-import example3SampleCode from '!!raw-loader!./examples/3_creating_custom_format_editor';
+import example3SampleCode from './examples/3_creating_custom_format_editor?raw';
 
 export interface Deps {
   fieldFormats: FieldFormatsStart;

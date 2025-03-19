@@ -28,6 +28,7 @@ import {
 } from '@elastic/eui';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis/window_parameters';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
+import { CASES_TOAST_MESSAGES_TITLES } from '../../../cases/constants';
 import { useCasesModal } from '../../../hooks/use_cases_modal';
 import { useDataSource } from '../../../hooks/use_data_source';
 import type { LogRateAnalysisEmbeddableState } from '../../../embeddables/log_rate_analysis/types';
@@ -60,9 +61,12 @@ export const LogRateAnalysisAttachmentsMenu = ({
   const timeRange = useTimeRangeUpdates();
   const absoluteTimeRange = useTimeRangeUpdates(true);
 
-  const openCasesModalCallback = useCasesModal(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE);
+  const openCasesModalCallback = useCasesModal(
+    EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
+    CASES_TOAST_MESSAGES_TITLES.LOG_RATE_ANALYSIS
+  );
 
-  const canEditDashboards = capabilities.dashboard.createNew;
+  const canEditDashboards = capabilities.dashboard_v2.createNew;
 
   const { create: canCreateCase, update: canUpdateCase } = cases?.helpers?.canUseCases() ?? {
     create: false,
@@ -120,6 +124,7 @@ export const LogRateAnalysisAttachmentsMenu = ({
                   name: i18n.translate('xpack.aiops.logRateAnalysis.addToDashboardTitle', {
                     defaultMessage: 'Add to dashboard',
                   }),
+                  icon: 'dashboardApp',
                   panel: 'attachToDashboardPanel',
                   'data-test-subj': 'aiopsLogRateAnalysisAttachToDashboardButton',
                 },
@@ -131,6 +136,7 @@ export const LogRateAnalysisAttachmentsMenu = ({
                   name: i18n.translate('xpack.aiops.logRateAnalysis.attachToCaseLabel', {
                     defaultMessage: 'Add to case',
                   }),
+                  icon: 'casesApp',
                   'data-test-subj': 'aiopsLogRateAnalysisAttachToCaseButton',
                   disabled: !isCasesAttachmentEnabled,
                   ...(!isCasesAttachmentEnabled
@@ -217,8 +223,11 @@ export const LogRateAnalysisAttachmentsMenu = ({
                 aria-label={i18n.translate('xpack.aiops.logRateAnalysis.attachmentsMenuAriaLabel', {
                   defaultMessage: 'Attachments',
                 })}
-                iconType="boxesHorizontal"
                 color="text"
+                display="base"
+                size="s"
+                isSelected={isActionMenuOpen}
+                iconType="boxesHorizontal"
                 onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
               />
             }

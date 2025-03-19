@@ -12,6 +12,7 @@ import type {
   LabelNodeDataModel,
   EdgeDataModel,
   NodeShape,
+  Color as NodeColor,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import type { Node, NodeProps as xyNodeProps, Edge, EdgeProps as xyEdgeProps } from '@xyflow/react';
 
@@ -50,6 +51,7 @@ export interface LabelNodeViewModel
     LabelNodeDataModel,
     BaseNodeDataViewModel {
   expandButtonClick?: ExpandButtonClickCallback;
+  nodeClick?: NodeClickCallback;
 }
 
 export type NodeViewModel = EntityNodeViewModel | GroupNodeViewModel | LabelNodeViewModel;
@@ -62,7 +64,9 @@ export type EdgeProps = xyEdgeProps<
   Edge<
     EdgeViewModel & {
       sourceShape: NodeShape;
+      sourceColor: NodeColor;
       targetShape: NodeShape;
+      targetColor: NodeColor;
     }
   >
 >;

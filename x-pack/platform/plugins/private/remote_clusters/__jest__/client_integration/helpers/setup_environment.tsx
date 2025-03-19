@@ -34,6 +34,7 @@ export const WithAppDependencies =
         context={{
           isCloudEnabled: !!isCloudEnabled,
           cloudBaseUrl: 'test.com',
+          cloudDeploymentUrl: 'deployment.com',
           executionContext: executionContextServiceMock.createStartContract(),
           canUseAPIKeyTrustModel: true,
           ...overrides,

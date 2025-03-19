@@ -1,0 +1,809 @@
+{
+  "id": "@kbn/security-ai-prompts",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/security-ai-prompts",
+        "id": "def-server.getPrompt",
+        "type": "Function",
+        "tags": [],
+        "label": "getPrompt",
+        "description": [
+          "\nGet prompt by promptId\nprovide either model + provider or connector to avoid additional calls to get connector"
+        ],
+        "signature": [
+          "({ actionsClient, connector, connectorId, localPrompts, model: providedModel, promptGroupId, promptId, provider: providedProvider, savedObjectsClient, }: ",
+          {
+            "pluginId": "@kbn/security-ai-prompts",
+            "scope": "server",
+            "docId": "kibKbnSecurityAiPromptsPluginApi",
+            "section": "def-server.GetPromptArgs",
+            "text": "GetPromptArgs"
+          },
+          ") => Promise<string>"
+        ],
+        "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.getPrompt.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  actionsClient,\n  connector,\n  connectorId,\n  localPrompts,\n  model: providedModel,\n  promptGroupId,\n  promptId,\n  provider: providedProvider,\n  savedObjectsClient,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-ai-prompts",
+                "scope": "server",
+                "docId": "kibKbnSecurityAiPromptsPluginApi",
+                "section": "def-server.GetPromptArgs",
+                "text": "GetPromptArgs"
+              }
+            ],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-ai-prompts",
+        "id": "def-server.getPromptsByGroupId",
+        "type": "Function",
+        "tags": [],
+        "label": "getPromptsByGroupId",
+        "description": [
+          "\nGet prompts by feature (promptGroupId)\nprovide either model + provider or connector to avoid additional calls to get connector"
+        ],
+        "signature": [
+          "({ actionsClient, connector, connectorId, localPrompts, model: providedModel, promptGroupId, promptIds, provider: providedProvider, savedObjectsClient, }: ",
+          {
+            "pluginId": "@kbn/security-ai-prompts",
+            "scope": "server",
+            "docId": "kibKbnSecurityAiPromptsPluginApi",
+            "section": "def-server.GetPromptsByGroupIdArgs",
+            "text": "GetPromptsByGroupIdArgs"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/security-ai-prompts",
+            "scope": "server",
+            "docId": "kibKbnSecurityAiPromptsPluginApi",
+            "section": "def-server.PromptArray",
+            "text": "PromptArray"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.getPromptsByGroupId.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  actionsClient,\n  connector,\n  connectorId,\n  localPrompts,\n  model: providedModel,\n  promptGroupId,\n  promptIds,\n  provider: providedProvider,\n  savedObjectsClient,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-ai-prompts",
+                "scope": "server",
+                "docId": "kibKbnSecurityAiPromptsPluginApi",
+                "section": "def-server.GetPromptsByGroupIdArgs",
+                "text": "GetPromptsByGroupIdArgs"
+              }
+            ],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-ai-prompts",
+        "id": "def-server.resolveProviderAndModel",
+        "type": "Function",
+        "tags": [],
+        "label": "resolveProviderAndModel",
+        "description": [],
+        "signature": [
+          "({ providedProvider, providedModel, connectorId, actionsClient, providedConnector, }: { providedProvider?: string | undefined; providedModel?: string | undefined; connectorId: string; actionsClient: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.PublicMethodsOf",
+            "text": "PublicMethodsOf"
+          },
+          "<",
+          {
+            "pluginId": "actions",
+            "scope": "server",
+            "docId": "kibActionsPluginApi",
+            "section": "def-server.ActionsClient",
+            "text": "ActionsClient"
+          },
+          ">; providedConnector?: ",
+          "Connector",
+          " | undefined; }) => Promise<{ provider?: string | undefined; model?: string | undefined; }>"
+        ],
+        "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.resolveProviderAndModel.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  providedProvider,\n  providedModel,\n  connectorId,\n  actionsClient,\n  providedConnector,\n}",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-ai-prompts",
+                "id": "def-server.resolveProviderAndModel.$1.providedProvider",
+                "type": "string",
+                "tags": [],
+                "label": "providedProvider",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/security-ai-prompts",
+                "id": "def-server.resolveProviderAndModel.$1.providedModel",
+                "type": "string",
+                "tags": [],
+                "label": "providedModel",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/security-ai-prompts",
+                "id": "def-server.resolveProviderAndModel.$1.connectorId",
+                "type": "string",
+                "tags": [],
+                "label": "connectorId",
+                "description": [],
+                "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/security-ai-prompts",
+                "id": "def-server.resolveProviderAndModel.$1.actionsClient",
+                "type": "Object",
+                "tags": [],
+                "label": "actionsClient",
+                "description": [],
+                "signature": [
+                  "{ execute: (connectorExecuteParams: ",
+                  "ConnectorExecuteParams",
+                  ") => Promise<",
+                  {
+                    "pluginId": "actions",
+                    "scope": "common",
+                    "docId": "kibActionsPluginApi",
+                    "section": "def-common.ActionTypeExecutorResult",
+                    "text": "ActionTypeExecutorResult"
+                  },
+                  "<unknown>>; create: ({ action, options, }: Omit<",
+                  "ConnectorCreateParams",
+                  ", \"context\">) => Promise<",
+                  "Connector",
+                  ">; update: ({ id, action, }: Pick<",
+                  "ConnectorUpdateParams",
+                  ", \"id\" | \"action\">) => Promise<",
+                  "Connector",
+                  ">; get: ({ id, throwIfSystemAction, }: { id: string; throwIfSystemAction?: boolean | undefined; }) => Promise<",
+                  "Connector",
+                  ">; getAll: ({ includeSystemActions }?: { includeSystemActions?: boolean | undefined; }) => Promise<",
+                  {
+                    "pluginId": "actions",
+                    "scope": "server",
+                    "docId": "kibActionsPluginApi",
+                    "section": "def-server.ConnectorWithExtraFindData",
+                    "text": "ConnectorWithExtraFindData"
+                  },
+                  "[]>; getAllSystemConnectors: () => Promise<",
+                  {
+                    "pluginId": "actions",
+                    "scope": "server",
+                    "docId": "kibActionsPluginApi",
+                    "section": "def-server.ConnectorWithExtraFindData",
+                    "text": "ConnectorWithExtraFindData"
+                  },
+                  "[]>; getBulk: ({ ids, throwIfSystemAction, }: { ids: string[]; throwIfSystemAction?: boolean | undefined; }) => Promise<",
+                  "Connector",
+                  "[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
+                  "ActionsConfigurationUtilities",
+                  ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; bulkEnqueueExecution: (options: ",
+                  "ExecuteOptions",
+                  "[]) => Promise<",
+                  "ExecutionResponse",
+                  ">; listTypes: ({ featureId, includeSystemActionTypes, }?: ",
+                  "ListTypesParams",
+                  ") => Promise<",
+                  "ConnectorType",
+                  "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; isPreconfigured: (connectorId: string) => boolean; isSystemAction: (connectorId: string) => boolean; getGlobalExecutionLogWithAuth: ({ dateStart, dateEnd, filter, page, perPage, sort, namespaces, }: ",
+                  {
+                    "pluginId": "actions",
+                    "scope": "common",
+                    "docId": "kibActionsPluginApi",
+                    "section": "def-common.GetGlobalExecutionLogParams",
+                    "text": "GetGlobalExecutionLogParams"
+                  },
+                  ") => Promise<",
+                  {
+                    "pluginId": "actions",
+                    "scope": "common",
+                    "docId": "kibActionsPluginApi",
+                    "section": "def-common.IExecutionLogResult",
+                    "text": "IExecutionLogResult"
+                  },
+                  ">; getGlobalExecutionKpiWithAuth: ({ dateStart, dateEnd, filter, namespaces, }: ",
+                  {
+                    "pluginId": "actions",
+                    "scope": "common",
+                    "docId": "kibActionsPluginApi",
+                    "section": "def-common.GetGlobalExecutionKPIParams",
+                    "text": "GetGlobalExecutionKPIParams"
+                  },
+                  ") => Promise<{ success: number; unknown: number; failure: number; warning: number; }>; }"
+                ],
+                "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/security-ai-prompts",
+                "id": "def-server.resolveProviderAndModel.$1.providedConnector",
+                "type": "Object",
+                "tags": [],
+                "label": "providedConnector",
+                "description": [],
+                "signature": [
+                  "Connector",
+                  " | undefined"
+                ],
+                "path": "x-pack/solutions/security/packages/security-ai-prompts/src/get_prompt.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/security-ai-prompts",
+        "id": "def-server.GetPromptArgs",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetPromptArgs",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.GetPromptArgs.actionsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "actionsClient",
+            "description": [],
+            "signature": [
+              "{ execute: (connectorExecuteParams: ",
+              "ConnectorExecuteParams",
+              ") => Promise<",
+              {
+                "pluginId": "actions",
+                "scope": "common",
+                "docId": "kibActionsPluginApi",
+                "section": "def-common.ActionTypeExecutorResult",
+                "text": "ActionTypeExecutorResult"
+              },
+              "<unknown>>; create: ({ action, options, }: Omit<",
+              "ConnectorCreateParams",
+              ", \"context\">) => Promise<",
+              "Connector",
+              ">; update: ({ id, action, }: Pick<",
+              "ConnectorUpdateParams",
+              ", \"id\" | \"action\">) => Promise<",
+              "Connector",
+              ">; get: ({ id, throwIfSystemAction, }: { id: string; throwIfSystemAction?: boolean | undefined; }) => Promise<",
+              "Connector",
+              ">; getAll: ({ includeSystemActions }?: { includeSystemActions?: boolean | undefined; }) => Promise<",
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.ConnectorWithExtraFindData",
+                "text": "ConnectorWithExtraFindData"
+              },
+              "[]>; getAllSystemConnectors: () => Promise<",
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.ConnectorWithExtraFindData",
+                "text": "ConnectorWithExtraFindData"
+              },
+              "[]>; getBulk: ({ ids, throwIfSystemAction, }: { ids: string[]; throwIfSystemAction?: boolean | undefined; }) => Promise<",
+              "Connector",
+              "[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
+              "ActionsConfigurationUtilities",
+              ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; bulkEnqueueExecution: (options: ",
+              "ExecuteOptions",
+              "[]) => Promise<",
+              "ExecutionResponse",
+              ">; listTypes: ({ featureId, includeSystemActionTypes, }?: ",
+              "ListTypesParams",
+              ") => Promise<",
+              "ConnectorType",
+              "[]>; isActionTypeEnabled: (actionTypeId: string, options?: { notifyUsage: boolean; }) => boolean; isPreconfigured: (connectorId: string) => boolean; isSystemAction: (connectorId: string) => boolean; getGlobalExecutionLogWithAuth: ({ dateStart, dateEnd, filter, page, perPage, sort, namespaces, }: ",
+              {
+                "pluginId": "actions",
+                "scope": "common",
+                "docId": "kibActionsPluginApi",
+                "section": "def-common.GetGlobalExecutionLogParams",
+                "text": "GetGlobalExecutionLogParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "actions",
+                "scope": "common",
+                "docId": "kibActionsPluginApi",
+                "section": "def-common.IExecutionLogResult",
+                "text": "IExecutionLogResult"
+              },
+              ">; getGlobalExecutionKpiWithAuth: ({ dateStart, dateEnd, filter, namespaces, }: ",
+              {
+                "pluginId": "actions",
+                "scope": "common",
+                "docId": "kibActionsPluginApi",
+                "section": "def-common.GetGlobalExecutionKPIParams",
+                "text": "GetGlobalExecutionKPIParams"
+              },
+              ") => Promise<{ success: number; unknown: number; failure: number; warning: number; }>; }"
+            ],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.GetPromptArgs.connector",
+            "type": "Object",
+            "tags": [],
+            "label": "connector",
+            "description": [],
+            "signature": [
+              "Connector",
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.GetPromptArgs.connectorId",
+            "type": "string",
+            "tags": [],
+            "label": "connectorId",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.GetPromptArgs.localPrompts",
+            "type": "Array",
+            "tags": [],
+            "label": "localPrompts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/security-ai-prompts",
+                "scope": "server",
+                "docId": "kibKbnSecurityAiPromptsPluginApi",
+                "section": "def-server.Prompt",
+                "text": "Prompt"
+              },
+              "[]"
+            ],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.GetPromptArgs.model",
+            "type": "string",
+            "tags": [],
+            "label": "model",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.GetPromptArgs.promptId",
+            "type": "string",
+            "tags": [],
+            "label": "promptId",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.GetPromptArgs.promptGroupId",
+            "type": "string",
+            "tags": [],
+            "label": "promptGroupId",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.GetPromptArgs.provider",
+            "type": "string",
+            "tags": [],
+            "label": "provider",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.GetPromptArgs.savedObjectsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectsClient",
+            "description": [],
+            "signature": [
+              "SavedObjectsClientContract"
+            ],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-ai-prompts",
+        "id": "def-server.GetPromptsByGroupIdArgs",
+        "type": "Interface",
+        "tags": [],
+        "label": "GetPromptsByGroupIdArgs",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/security-ai-prompts",
+            "scope": "server",
+            "docId": "kibKbnSecurityAiPromptsPluginApi",
+            "section": "def-server.GetPromptsByGroupIdArgs",
+            "text": "GetPromptsByGroupIdArgs"
+          },
+          " extends Omit<",
+          {
+            "pluginId": "@kbn/security-ai-prompts",
+            "scope": "server",
+            "docId": "kibKbnSecurityAiPromptsPluginApi",
+            "section": "def-server.GetPromptArgs",
+            "text": "GetPromptArgs"
+          },
+          ", \"promptId\">"
+        ],
+        "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.GetPromptsByGroupIdArgs.promptGroupId",
+            "type": "string",
+            "tags": [],
+            "label": "promptGroupId",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.GetPromptsByGroupIdArgs.promptIds",
+            "type": "Array",
+            "tags": [],
+            "label": "promptIds",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-ai-prompts",
+        "id": "def-server.Prompt",
+        "type": "Interface",
+        "tags": [],
+        "label": "Prompt",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.Prompt.promptId",
+            "type": "string",
+            "tags": [],
+            "label": "promptId",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.Prompt.promptGroupId",
+            "type": "string",
+            "tags": [],
+            "label": "promptGroupId",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.Prompt.prompt",
+            "type": "Object",
+            "tags": [],
+            "label": "prompt",
+            "description": [],
+            "signature": [
+              "{ default: string; }"
+            ],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.Prompt.provider",
+            "type": "string",
+            "tags": [],
+            "label": "provider",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.Prompt.model",
+            "type": "string",
+            "tags": [],
+            "label": "model",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.Prompt.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/security-ai-prompts",
+        "id": "def-server.PromptArray",
+        "type": "Type",
+        "tags": [],
+        "label": "PromptArray",
+        "description": [],
+        "signature": [
+          "{ promptId: string; prompt: string; }[]"
+        ],
+        "path": "x-pack/solutions/security/packages/security-ai-prompts/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/security-ai-prompts",
+        "id": "def-server.promptType",
+        "type": "Object",
+        "tags": [],
+        "label": "promptType",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/security-ai-prompts/src/saved_object_mappings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.promptType.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/saved_object_mappings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.promptType.hidden",
+            "type": "boolean",
+            "tags": [],
+            "label": "hidden",
+            "description": [],
+            "signature": [
+              "false"
+            ],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/saved_object_mappings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.promptType.management",
+            "type": "Object",
+            "tags": [],
+            "label": "management",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/saved_object_mappings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-ai-prompts",
+                "id": "def-server.promptType.management.importableAndExportable",
+                "type": "boolean",
+                "tags": [],
+                "label": "importableAndExportable",
+                "description": [],
+                "signature": [
+                  "true"
+                ],
+                "path": "x-pack/solutions/security/packages/security-ai-prompts/src/saved_object_mappings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/security-ai-prompts",
+                "id": "def-server.promptType.management.visibleInManagement",
+                "type": "boolean",
+                "tags": [],
+                "label": "visibleInManagement",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/solutions/security/packages/security-ai-prompts/src/saved_object_mappings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.promptType.namespaceType",
+            "type": "string",
+            "tags": [],
+            "label": "namespaceType",
+            "description": [],
+            "signature": [
+              "\"agnostic\""
+            ],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/saved_object_mappings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-ai-prompts",
+            "id": "def-server.promptType.mappings",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [],
+            "signature": [
+              "SavedObjectsTypeMappingDefinition"
+            ],
+            "path": "x-pack/solutions/security/packages/security-ai-prompts/src/saved_object_mappings.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

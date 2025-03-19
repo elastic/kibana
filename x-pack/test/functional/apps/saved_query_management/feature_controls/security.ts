@@ -5,12 +5,55 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getSavedQuerySecurityUtils } from '../utils/saved_query_security';
 
-type AppName = 'discover' | 'dashboard' | 'maps' | 'visualize';
+const featureConfigs = [
+  {
+    feature: 'discover',
+    app: 'discover',
+    hasImplicitSaveQueryManagement: true,
+  },
+  {
+    feature: 'dashboard',
+    app: 'dashboard',
+    hasImplicitSaveQueryManagement: true,
+  },
+  {
+    feature: 'maps',
+    app: 'maps',
+    hasImplicitSaveQueryManagement: true,
+  },
+  {
+    feature: 'visualize',
+    app: 'visualize',
+    hasImplicitSaveQueryManagement: true,
+  },
+  {
+    feature: 'discover_v2',
+    app: 'discover',
+    hasImplicitSaveQueryManagement: false,
+  },
+  {
+    feature: 'dashboard_v2',
+    app: 'dashboard',
+    hasImplicitSaveQueryManagement: false,
+  },
+  {
+    feature: 'maps_v2',
+    app: 'maps',
+    hasImplicitSaveQueryManagement: false,
+  },
+  {
+    feature: 'visualize_v2',
+    app: 'visualize',
+    hasImplicitSaveQueryManagement: false,
+  },
+] as const;
 
-const apps: AppName[] = ['discover', 'dashboard', 'maps', 'visualize'];
+type FeatureName = (typeof featureConfigs)[number]['feature'];
+type FeatureApp = (typeof featureConfigs)[number]['app'];
 
 export default function (ctx: FtrProviderContext) {
   const { getPageObjects, getService } = ctx;
@@ -18,23 +61,25 @@ export default function (ctx: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const securityService = getService('security');
   const globalNav = getService('globalNav');
-  const { common, discover, security, dashboard, maps, visualize } = getPageObjects([
+  const { common, discover, security, dashboard, maps, visualize, spaceSelector } = getPageObjects([
     'common',
     'discover',
     'security',
     'dashboard',
     'maps',
     'visualize',
+    'spaceSelector',
   ]);
   const kibanaServer = getService('kibanaServer');
 
   async function login(
-    appName: AppName,
-    appPrivilege: 'read' | 'all',
-    globalPrivilege: 'none' | 'all'
+    featureName: FeatureName,
+    featurePrivilege: 'read' | 'all',
+    globalPrivilege: 'none' | 'read' | 'all',
+    expectSpaceSelector = false
   ) {
-    const name = `global_saved_query_${appName}`;
-    const password = `password_${name}_${appPrivilege}_${globalPrivilege}`;
+    const name = `global_saved_query_${featureName}`;
+    const password = `password_${name}_${featurePrivilege}_${globalPrivilege}`;
 
     await securityService.role.create(name, {
       elasticsearch: {
@@ -43,7 +88,7 @@ export default function (ctx: FtrProviderContext) {
       kibana: [
         {
           feature: {
-            [appName]: [appPrivilege],
+            [featureName]: [featurePrivilege],
             savedQueryManagement: [globalPrivilege],
           },
           spaces: ['*'],
@@ -57,19 +102,17 @@ export default function (ctx: FtrProviderContext) {
       full_name: 'test user',
     });
 
-    await security.login(`${name}-user`, password, {
-      expectSpaceSelector: false,
-    });
+    await security.login(`${name}-user`, password, { expectSpaceSelector });
   }
 
-  async function logout(appName: AppName) {
-    const name = `global_saved_query_${appName}`;
+  async function logout(featureName: FeatureName) {
+    const name = `global_saved_query_${featureName}`;
     await security.forceLogout();
     await securityService.role.delete(name);
     await securityService.user.delete(`${name}-user`);
   }
 
-  async function navigateToApp(appName: AppName) {
+  async function navigateToApp(appName: FeatureApp) {
     switch (appName) {
       case 'discover':
         await common.navigateToApp('discover');
@@ -91,100 +134,185 @@ export default function (ctx: FtrProviderContext) {
     }
   }
 
-  describe('Security: App vs Global privilege', () => {
-    apps.forEach((appName) => {
-      before(async () => {
-        await kibanaServer.savedObjects.cleanStandardList();
-
-        await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
-        );
-
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-
-        // ensure we're logged out, so we can log in as the appropriate users
-        await security.forceLogout();
-      });
-
-      after(async () => {
-        // logout, so the other tests don't accidentally run as the custom users we're testing below
-        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-        await security.forceLogout();
-
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
-        );
-
-        await kibanaServer.savedObjects.cleanStandardList();
-      });
-
-      describe(`${appName} read-only privileges with enabled savedQueryManagement.saveQuery privilege`, () => {
+  describe('Security', () => {
+    describe('App vs Global privilege', () => {
+      featureConfigs.forEach(({ feature, app, hasImplicitSaveQueryManagement }) => {
         before(async () => {
-          await login(appName, 'read', 'all');
-          await navigateToApp(appName);
-          await common.waitForTopNavToBeVisible();
+          await kibanaServer.savedObjects.cleanStandardList();
+
+          await kibanaServer.importExport.load(
+            'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
+          );
+
+          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+
+          // ensure we're logged out, so we can log in as the appropriate users
+          await security.forceLogout();
         });
 
         after(async () => {
-          await logout(appName);
+          // logout, so the other tests don't accidentally run as the custom users we're testing below
+          // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+          await security.forceLogout();
+
+          await kibanaServer.importExport.unload(
+            'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
+          );
+
+          await kibanaServer.savedObjects.cleanStandardList();
         });
 
-        it('shows read-only badge', async () => {
-          await globalNav.badgeExistsOrFail('Read only');
+        describe(`${feature} read-only privileges with savedQueryManagement.saveQuery all privilege`, () => {
+          before(async () => {
+            await login(feature, 'read', 'all');
+            await navigateToApp(app);
+            await common.waitForTopNavToBeVisible();
+          });
+
+          after(async () => {
+            await logout(feature);
+          });
+
+          it('shows read-only badge', async () => {
+            await globalNav.badgeExistsOrFail('Read only');
+          });
+
+          savedQuerySecurityUtils.shouldAllowSavingQueries();
         });
 
-        savedQuerySecurityUtils.shouldAllowSavingQueries();
+        describe(`${feature} read-only privileges with savedQueryManagement.saveQuery read privilege`, () => {
+          before(async () => {
+            await login(feature, 'read', 'read');
+            await navigateToApp(app);
+            await common.waitForTopNavToBeVisible();
+          });
+
+          after(async () => {
+            await logout(feature);
+          });
+
+          it('shows read-only badge', async () => {
+            await globalNav.badgeExistsOrFail('Read only');
+          });
+
+          savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();
+        });
+
+        describe(`${feature} read-only privileges with disabled savedQueryManagement.saveQuery privilege`, () => {
+          before(async () => {
+            await login(feature, 'read', 'none');
+            await navigateToApp(app);
+          });
+
+          after(async () => {
+            await logout(feature);
+          });
+
+          it('shows read-only badge', async () => {
+            await globalNav.badgeExistsOrFail('Read only');
+          });
+
+          if (hasImplicitSaveQueryManagement) {
+            savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();
+          } else {
+            savedQuerySecurityUtils.shouldDisallowAccessToSavedQueries();
+          }
+        });
+
+        describe(`${feature} all privileges with savedQueryManagement.saveQuery all privilege`, () => {
+          before(async () => {
+            await login(feature, 'all', 'all');
+            await navigateToApp(app);
+          });
+
+          after(async () => {
+            await logout(feature);
+          });
+
+          it("doesn't show read-only badge", async () => {
+            await globalNav.badgeMissingOrFail();
+          });
+
+          savedQuerySecurityUtils.shouldAllowSavingQueries();
+        });
+
+        describe(`${feature} all privileges with savedQueryManagement.saveQuery read privilege`, () => {
+          before(async () => {
+            await login(feature, 'all', 'read');
+            await navigateToApp(app);
+          });
+
+          after(async () => {
+            await logout(feature);
+          });
+
+          it("doesn't show read-only badge", async () => {
+            await globalNav.badgeMissingOrFail();
+          });
+
+          if (hasImplicitSaveQueryManagement) {
+            savedQuerySecurityUtils.shouldAllowSavingQueries();
+          } else {
+            savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();
+          }
+        });
+
+        describe(`${feature} all privileges with disabled savedQueryManagement.saveQuery privilege`, () => {
+          before(async () => {
+            await login(feature, 'all', 'none');
+            await navigateToApp(app);
+          });
+
+          after(async () => {
+            await logout(feature);
+          });
+
+          it("doesn't show read-only badge", async () => {
+            await globalNav.badgeMissingOrFail();
+          });
+
+          if (hasImplicitSaveQueryManagement) {
+            savedQuerySecurityUtils.shouldAllowSavingQueries();
+          } else {
+            savedQuerySecurityUtils.shouldDisallowAccessToSavedQueries();
+          }
+        });
       });
+    });
 
-      describe(`${appName} read-only privileges with disabled savedQueryManagement.saveQuery privilege`, () => {
-        before(async () => {
-          await login(appName, 'read', 'none');
-          await navigateToApp(appName);
+    describe('Spaces feature visibility', () => {
+      featureConfigs.forEach(({ feature }) => {
+        describe(`space with ${feature} disabled`, () => {
+          const spaceId = `${feature}_space`;
+          let disabledFeatureId: string;
+
+          before(async () => {
+            await kibanaServer.spaces.create({
+              id: spaceId,
+              name: spaceId,
+              disabledFeatures: [feature],
+            });
+            const disabledFeature = (await kibanaServer.spaces.get(spaceId)) as {
+              disabledFeatures: string[];
+            };
+            [disabledFeatureId] = disabledFeature.disabledFeatures;
+            await common.navigateToApp('home');
+          });
+
+          after(async () => {
+            await kibanaServer.spaces.delete(spaceId);
+          });
+
+          it('should not disable saved query management feature visibility', async () => {
+            await spaceSelector.openSpacesNav();
+            await spaceSelector.clickManageSpaces();
+            await spaceSelector.clickSpaceEditButton(spaceId);
+            await spaceSelector.toggleFeatureCategoryVisibility('kibana');
+            await spaceSelector.toggleFeatureCategoryVisibility('management');
+            expect(await spaceSelector.getFeatureCheckboxState(disabledFeatureId)).to.be(false);
+            expect(await spaceSelector.getFeatureCheckboxState('savedQueryManagement')).to.be(true);
+          });
         });
-
-        after(async () => {
-          await logout(appName);
-        });
-
-        it('shows read-only badge', async () => {
-          await globalNav.badgeExistsOrFail('Read only');
-        });
-
-        savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();
-      });
-
-      describe(`${appName} all privileges with enabled savedQueryManagement.saveQuery privilege`, () => {
-        before(async () => {
-          await login(appName, 'all', 'all');
-          await navigateToApp(appName);
-        });
-
-        after(async () => {
-          await logout(appName);
-        });
-
-        it("doesn't show read-only badge", async () => {
-          await globalNav.badgeMissingOrFail();
-        });
-
-        savedQuerySecurityUtils.shouldAllowSavingQueries();
-      });
-
-      describe(`${appName} all privileges with disabled savedQueryManagement.saveQuery privilege`, () => {
-        before(async () => {
-          await login(appName, 'all', 'none');
-          await navigateToApp(appName);
-        });
-
-        after(async () => {
-          await logout(appName);
-        });
-
-        it("doesn't show read-only badge", async () => {
-          await globalNav.badgeMissingOrFail();
-        });
-
-        savedQuerySecurityUtils.shouldAllowSavingQueries();
       });
     });
   });

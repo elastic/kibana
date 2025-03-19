@@ -28,7 +28,7 @@ import {
   ReqStatus,
   selectFetchNotesByDocumentIdsError,
   selectFetchNotesByDocumentIdsStatus,
-  selectSortedNotesByDocumentId,
+  makeSelectNotesByDocumentId,
 } from '../../../../notes/store/notes.slice';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -56,12 +56,12 @@ export const NotesDetails = memo(() => {
   const { addError: addErrorToast } = useAppToasts();
   const dispatch = useDispatch();
   const { eventId, dataFormattedForFieldBrowser } = useDocumentDetailsContext();
-  const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+  const { notesPrivileges } = useUserPrivileges();
   const { basicAlertData: basicData } = useInvestigationGuide({
     dataFormattedForFieldBrowser,
   });
 
-  const canCreateNotes = kibanaSecuritySolutionsPrivileges.crud;
+  const canCreateNotes = notesPrivileges.crud;
 
   // will drive the value we send to the AddNote component
   // if true (timeline is saved and the user kept the checkbox checked) we'll send the timelineId to the AddNote component
@@ -95,13 +95,8 @@ export const NotesDetails = memo(() => {
       );
     }
   }, [dispatch, eventId, timelineSavedObjectId, timeline.pinnedEventIds]);
-
-  const notes: Note[] = useSelector((state: State) =>
-    selectSortedNotesByDocumentId(state, {
-      documentId: eventId,
-      sort: { field: 'created', direction: 'asc' },
-    })
-  );
+  const selectNotesByDocumentId = useMemo(() => makeSelectNotesByDocumentId(), []);
+  const notes: Note[] = useSelector((state: State) => selectNotesByDocumentId(state, eventId));
   const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdsStatus(state));
   const fetchError = useSelector((state: State) => selectFetchNotesByDocumentIdsError(state));
 

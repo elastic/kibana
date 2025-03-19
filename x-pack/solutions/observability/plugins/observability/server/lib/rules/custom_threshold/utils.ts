@@ -6,8 +6,6 @@
  */
 
 import { isError } from 'lodash';
-import { buildEsQuery as kbnBuildEsQuery } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
@@ -44,26 +42,6 @@ export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
     validate: (value) =>
       arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
   });
-
-export const validateKQLStringFilter = (value: string) => {
-  if (value === '') {
-    // Allow clearing the filter.
-    return;
-  }
-
-  try {
-    kbnBuildEsQuery(undefined, [{ query: value, language: 'kuery' }], [], {
-      allowLeadingWildcards: true,
-      queryStringOptions: {},
-      ignoreFilterIfFieldNotInIndex: false,
-    });
-  } catch (e) {
-    return i18n.translate('xpack.observability.customThreshold.rule.schema.invalidFilterQuery', {
-      defaultMessage: 'filterQuery must be a valid KQL filter (error: {errorMessage})',
-      values: { errorMessage: e?.message },
-    });
-  }
-};
 
 export const createScopedLogger = (
   logger: Logger,
@@ -233,6 +211,26 @@ export const flattenObject = (obj: AdditionalContext, prefix: string = ''): Addi
 
     return acc;
   }, {});
+
+export const getGroupByObject = (
+  groupBy: string | string[] | undefined,
+  resultGroupSet: Set<string>
+): Record<string, object> => {
+  const groupByKeysObjectMapping: Record<string, object> = {};
+  if (groupBy) {
+    resultGroupSet.forEach((groupSet) => {
+      const groupSetKeys = groupSet.split(',');
+      groupByKeysObjectMapping[groupSet] = unflattenObject(
+        Array.isArray(groupBy)
+          ? groupBy.reduce((result, group, index) => {
+              return { ...result, [group]: groupSetKeys[index]?.trim() };
+            }, {})
+          : { [groupBy]: groupSet }
+      );
+    });
+  }
+  return groupByKeysObjectMapping;
+};
 
 export const getFormattedGroupBy = (
   groupBy: string | string[] | undefined,

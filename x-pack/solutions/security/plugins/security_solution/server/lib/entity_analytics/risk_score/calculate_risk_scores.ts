@@ -16,6 +16,9 @@ import {
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { getRiskEngineEntityTypes } from '../../../../common/entity_analytics/risk_engine/utils';
+import type { EntityType } from '../../../../common/search_strategy';
+import type { ExperimentalFeatures } from '../../../../common';
 import type {
   AssetCriticalityRecord,
   RiskScoresPreviewResponse,
@@ -26,7 +29,6 @@ import type {
   RiskScoreWeights,
 } from '../../../../common/api/entity_analytics/common';
 import {
-  type IdentifierType,
   getRiskLevel,
   RiskCategories,
   RiskWeightTypes,
@@ -110,7 +112,7 @@ const buildIdentifierTypeAggregation = ({
   scriptedMetricPainless,
 }: {
   afterKeys: AfterKeys;
-  identifierType: IdentifierType;
+  identifierType: EntityType;
   pageSize: number;
   weights?: RiskScoreWeights;
   alertSampleSizePerShard: number;
@@ -200,7 +202,7 @@ const processScores = async ({
 };
 
 export const getGlobalWeightForIdentifierType = (
-  identifierType: IdentifierType,
+  identifierType: EntityType,
   weights?: RiskScoreWeights
 ): number | undefined =>
   weights?.find((weight) => weight.type === RiskWeightTypes.global)?.[identifierType];
@@ -220,11 +222,13 @@ export const calculateRiskScores = async ({
   weights,
   alertSampleSizePerShard = 10_000,
   excludeAlertStatuses = [],
+  experimentalFeatures,
   excludeAlertTags = [],
 }: {
   assetCriticalityService: AssetCriticalityService;
   esClient: ElasticsearchClient;
   logger: Logger;
+  experimentalFeatures: ExperimentalFeatures;
 } & CalculateScoresParams): Promise<RiskScoresPreviewResponse> =>
   withSecuritySpan('calculateRiskScores', async () => {
     const now = new Date().toISOString();
@@ -243,7 +247,10 @@ export const calculateRiskScores = async ({
         bool: { must_not: { terms: { [ALERT_WORKFLOW_TAGS]: excludeAlertTags } } },
       });
     }
-    const identifierTypes: IdentifierType[] = identifierType ? [identifierType] : ['host', 'user'];
+    const identifierTypes: EntityType[] = identifierType
+      ? [identifierType]
+      : getRiskEngineEntityTypes(experimentalFeatures);
+
     const request = {
       size: 0,
       _source: false,
@@ -297,16 +304,19 @@ export const calculateRiskScores = async ({
         scores: {
           host: [],
           user: [],
+          service: [],
         },
       };
     }
 
     const userBuckets = response.aggregations.user?.buckets ?? [];
     const hostBuckets = response.aggregations.host?.buckets ?? [];
+    const serviceBuckets = response.aggregations.service?.buckets ?? [];
 
     const afterKeys = {
       host: response.aggregations.host?.after_key,
       user: response.aggregations.user?.after_key,
+      service: experimentalFeatures ? response.aggregations.service?.after_key : undefined,
     };
 
     const hostScores = await processScores({
@@ -323,6 +333,13 @@ export const calculateRiskScores = async ({
       logger,
       now,
     });
+    const serviceScores = await processScores({
+      assetCriticalityService,
+      buckets: serviceBuckets,
+      identifierField: 'service.name',
+      logger,
+      now,
+    });
 
     return {
       ...(debug ? { request, response } : {}),
@@ -330,6 +347,7 @@ export const calculateRiskScores = async ({
       scores: {
         host: hostScores,
         user: userScores,
+        service: serviceScores,
       },
     };
   });

@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 import {
   BOOTSTRAP_PREBUILT_RULES_KEY,
   useBootstrapPrebuiltRulesMutation,
-} from '../api/hooks/use_bootstrap_prebuilt_rules';
+} from '../api/hooks/prebuilt_rules/use_bootstrap_prebuilt_rules';
 
 /**
  * Install or upgrade the security packages (endpoint and prebuilt rules)

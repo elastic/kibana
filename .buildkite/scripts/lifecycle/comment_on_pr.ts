@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { addComment } from '#pipeline-utils';
+import parseArgs from 'minimist';
+import { upsertComment, addComment } from '#pipeline-utils';
 
 const ALLOWED_ENV_VARS = [
   'BUILDKITE_BRANCH',
@@ -31,20 +32,16 @@ const ALLOWED_ENV_VARS = [
   'GITHUB_PR_TRIGGER_USER',
   'GITHUB_PR_USER',
 ];
-const DEFAULT_MESSAGE_TEMPLATE =
-  '🚀 Buildkite job started for PR #${GITHUB_PR_NUMBER}: ${BUILDKITE_BUILD_URL}';
 
-export function commentOnPR() {
-  const messageTemplate =
-    process.argv.slice(2)?.join(' ') ||
-    process.env.JOB_START_COMMENT_TEMPLATE ||
-    DEFAULT_MESSAGE_TEMPLATE;
-  if (messageTemplate === DEFAULT_MESSAGE_TEMPLATE) {
-    console.log('No message template provided, using default message');
-  } else {
-    console.log(`Using message template: ${messageTemplate}`);
-  }
-
+export function commentOnPR({
+  messageTemplate,
+  context,
+  clearPrevious,
+}: {
+  messageTemplate: string;
+  context?: string;
+  clearPrevious: boolean;
+}) {
   const message = messageTemplate.replace(/\${([^}]+)}/g, (_, envVar) => {
     if (ALLOWED_ENV_VARS.includes(envVar)) {
       return process.env[envVar] || '';
@@ -53,11 +50,39 @@ export function commentOnPR() {
     }
   });
 
-  return addComment(message);
+  if (context) {
+    return upsertComment({ commentBody: message, commentContext: context, clearPrevious });
+  } else {
+    return addComment(message);
+  }
 }
 
 if (require.main === module) {
-  commentOnPR().catch((error) => {
+  const args = parseArgs<{
+    context?: string;
+    message: string;
+    'clear-previous'?: boolean | string;
+  }>(process.argv.slice(2), {
+    string: ['message', 'context'],
+    boolean: ['clear-previous'],
+  });
+
+  if (!args.message) {
+    throw new Error(
+      `No message template provided for ${process.argv[1]}, use --message to provide one.`
+    );
+  } else {
+    console.log(`Using message template: ${args.message}`);
+  }
+
+  commentOnPR({
+    messageTemplate: args.message,
+    context: args.context,
+    clearPrevious:
+      typeof args['clear-previous'] === 'string'
+        ? !!args['clear-previous'].match(/(1|true)/i)
+        : !!args['clear-previous'],
+  }).catch((error) => {
     console.error(error);
     process.exit(1);
   });

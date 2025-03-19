@@ -48,7 +48,7 @@ const mockCreateStoreWithQueryFilters = () => {
   return createMockStore(myState);
 };
 
-export const wrapper = ({ children }: { children: React.ReactElement }) => (
+export const wrapper = ({ children }: React.PropsWithChildren) => (
   <TestProviders store={mockCreateStoreWithQueryFilters()}>{children}</TestProviders>
 );
 

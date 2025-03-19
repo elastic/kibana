@@ -14,5 +14,5 @@ echo "--- Observability onboarding Cypress Tests"
 
 cd "$XPACK_DIR"
 
-node plugins/observability_solution/observability_onboarding/scripts/test/e2e.js \
+node solutions/observability/plugins/observability_onboarding/scripts/test/e2e.js \
   --kibana-install-dir "$KIBANA_BUILD_LOCATION" \

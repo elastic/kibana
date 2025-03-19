@@ -15,7 +15,7 @@
           "NoDataCardComponentProps",
           ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/card/no_data/impl/src/no_data_card.tsx",
+        "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/no_data_card.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,7 +29,7 @@
             "signature": [
               "NoDataCardComponentProps"
             ],
-            "path": "packages/shared-ux/card/no_data/impl/src/no_data_card.tsx",
+            "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/no_data_card.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -52,7 +52,7 @@
           "NoDataCardKibanaDependencies",
           ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/card/no_data/impl/src/services.tsx",
+        "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -68,7 +68,7 @@
               "NoDataCardKibanaDependencies",
               ">"
             ],
-            "path": "packages/shared-ux/card/no_data/impl/src/services.tsx",
+            "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -91,7 +91,7 @@
           "NoDataCardServices",
           ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/card/no_data/impl/src/services.tsx",
+        "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -107,7 +107,7 @@
               "NoDataCardServices",
               ">"
             ],
-            "path": "packages/shared-ux/card/no_data/impl/src/services.tsx",
+            "path": "src/platform/packages/shared/shared-ux/card/no_data/impl/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -134,7 +134,7 @@
           "EuiCardProps",
           ", \"className\" | \"title\" | \"href\">> & { button?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLElement> | undefined; description?: React.ReactNode; category?: string | undefined; canAccessFleet?: boolean | undefined; }"
         ],
-        "path": "packages/shared-ux/card/no_data/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/card/no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -153,7 +153,7 @@
           " & ",
           "RedirectAppLinksKibanaDependencies"
         ],
-        "path": "packages/shared-ux/card/no_data/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/card/no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -172,7 +172,7 @@
           "EuiCardProps",
           ", \"className\" | \"title\" | \"href\">> & { button?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLElement> | undefined; description?: React.ReactNode; category?: string | undefined; canAccessFleet?: boolean | undefined; }"
         ],
-        "path": "packages/shared-ux/card/no_data/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/card/no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -191,7 +191,7 @@
           " & ",
           "RedirectAppLinksServices"
         ],
-        "path": "packages/shared-ux/card/no_data/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/card/no_data/types/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

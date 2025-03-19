@@ -11,6 +11,7 @@ import { LLM } from '@langchain/core/language_models/llms';
 import { get } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import { DEFAULT_TIMEOUT, getDefaultArguments } from './constants';
 
 import { getMessageContentAndRole } from './helpers';
@@ -28,6 +29,7 @@ interface ActionsClientLlmParams {
   timeout?: number;
   traceId?: string;
   traceOptions?: TraceOptions;
+  telemetryMetadata?: TelemetryMetadata;
 }
 
 export class ActionsClientLlm extends LLM {
@@ -36,6 +38,7 @@ export class ActionsClientLlm extends LLM {
   #logger: Logger;
   #traceId: string;
   #timeout?: number;
+  telemetryMetadata?: TelemetryMetadata;
 
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
   // Not using getter as `this._llmType()` is called in the constructor via `super({})`
@@ -54,6 +57,7 @@ export class ActionsClientLlm extends LLM {
     temperature,
     timeout,
     traceOptions,
+    telemetryMetadata,
   }: ActionsClientLlmParams) {
     super({
       callbacks: [...(traceOptions?.tracers ?? [])],
@@ -67,6 +71,7 @@ export class ActionsClientLlm extends LLM {
     this.#timeout = timeout;
     this.model = model;
     this.temperature = temperature;
+    this.telemetryMetadata = telemetryMetadata;
   }
 
   _llmType() {
@@ -89,24 +94,37 @@ export class ActionsClientLlm extends LLM {
           assistantMessage
         )} `
     );
+
     // create a new connector request body with the assistant message:
     const requestBody = {
       actionId: this.#connectorId,
-      params: {
-        // hard code to non-streaming subaction as this class only supports non-streaming
-        subAction: 'invokeAI',
-        subActionParams: {
-          model: this.model,
-          messages: [assistantMessage], // the assistant message
-          ...getDefaultArguments(this.llmType, this.temperature),
-          // This timeout is large because LangChain prompts can be complicated and take a long time
-          timeout: this.#timeout ?? DEFAULT_TIMEOUT,
-        },
-      },
+      params:
+        this.llmType === 'inference'
+          ? {
+              subAction: 'unified_completion',
+              subActionParams: {
+                body: {
+                  model: this.model,
+                  messages: [assistantMessage], // the assistant message
+                },
+                telemetryMetadata: this.telemetryMetadata,
+              },
+            }
+          : {
+              // hard code to non-streaming subaction as this class only supports non-streaming
+              subAction: 'invokeAI',
+              subActionParams: {
+                model: this.model,
+                messages: [assistantMessage], // the assistant message
+                ...getDefaultArguments(this.llmType, this.temperature),
+                // This timeout is large because LangChain prompts can be complicated and take a long time
+                timeout: this.#timeout ?? DEFAULT_TIMEOUT,
+                telemetryMetadata: this.telemetryMetadata,
+              },
+            },
     };
 
     const actionResult = await this.#actionsClient.execute(requestBody);
-
     if (actionResult.status === 'error') {
       const error = new Error(
         `${LLM_TYPE}: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
@@ -115,6 +133,18 @@ export class ActionsClientLlm extends LLM {
         error.name = actionResult?.serviceMessage;
       }
       throw error;
+    }
+
+    if (this.llmType === 'inference') {
+      const content = get('data.choices[0].message.content', actionResult);
+
+      if (typeof content !== 'string') {
+        throw new Error(
+          `${LLM_TYPE}: inference content should be a string, but it had an unexpected type: ${typeof content}`
+        );
+      }
+
+      return content; // per the contact of _call, return a string
     }
 
     const content = get('data.message', actionResult);

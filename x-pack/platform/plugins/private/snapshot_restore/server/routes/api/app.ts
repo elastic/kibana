@@ -30,7 +30,16 @@ export function registerAppRoutes({
   lib: { handleEsError },
 }: RouteDependencies) {
   router.get(
-    { path: addBasePath('privileges'), validate: false },
+    {
+      path: addBasePath('privileges'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 
@@ -51,9 +60,7 @@ export function registerAppRoutes({
         // Get cluster privileges
         const { has_all_requested: hasAllPrivileges, cluster } =
           await clusterClient.asCurrentUser.security.hasPrivileges({
-            body: {
-              cluster: [...APP_REQUIRED_CLUSTER_PRIVILEGES, ...APP_SLM_CLUSTER_PRIVILEGES],
-            },
+            cluster: [...APP_REQUIRED_CLUSTER_PRIVILEGES, ...APP_SLM_CLUSTER_PRIVILEGES],
           });
 
         // Find missing cluster privileges and set overall app privileges

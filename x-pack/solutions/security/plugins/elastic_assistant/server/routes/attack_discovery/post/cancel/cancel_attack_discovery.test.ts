@@ -51,7 +51,7 @@ describe('cancelAttackDiscoveryRoute', () => {
       ...mockCurrentAd,
       status: 'canceled',
     });
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     context.elasticAssistant.getAttackDiscoveryDataClient.mockResolvedValue(mockDataClient);
 
     cancelAttackDiscoveryRoute(server.router);
@@ -70,7 +70,7 @@ describe('cancelAttackDiscoveryRoute', () => {
   });
 
   it('should handle missing authenticated user', async () => {
-    context.elasticAssistant.getCurrentUser.mockReturnValue(null);
+    context.elasticAssistant.getCurrentUser.mockResolvedValueOnce(null);
     const response = await server.inject(
       getCancelAttackDiscoveryRequest('connector-id'),
       requestContextMock.convertContext(context)

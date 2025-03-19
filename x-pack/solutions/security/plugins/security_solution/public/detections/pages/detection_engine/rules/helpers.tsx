@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import dateMath from '@kbn/datemath';
-import moment from 'moment';
 import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
@@ -22,6 +20,7 @@ import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { requiredOptional } from '@kbn/zod-helpers';
+import { toSimpleRuleSchedule } from '../../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import {
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
@@ -44,9 +43,12 @@ import type {
   ActionsStepRule,
 } from './types';
 import { DataSourceType, AlertSuppressionDurationType } from './types';
-import { severityOptions } from '../../../../detection_engine/rule_creation_ui/components/step_about_rule/data';
+import { SeverityLevel } from '../../../../detection_engine/rule_creation_ui/components/step_about_rule/data';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import type { RuleAction, RuleResponse } from '../../../../../common/api/detection_engine';
+import { normalizeMachineLearningJobId } from '../../../../common/utils/normalize_machine_learning_job_id';
+import { convertDateMathToDuration } from '../../../../common/utils/date_math';
+import { DEFAULT_HISTORY_WINDOW_SIZE } from '../../../../common/constants';
 
 export interface GetStepsData {
   aboutRuleData: AboutStepRule;
@@ -97,9 +99,7 @@ export const getActionsStepsData = (
 
 export const getMachineLearningJobId = (rule: RuleResponse): string[] | undefined => {
   if (rule.type === 'machine_learning') {
-    return typeof rule.machine_learning_job_id === 'string'
-      ? [rule.machine_learning_job_id]
-      : rule.machine_learning_job_id;
+    return normalizeMachineLearningJobId(rule.machine_learning_job_id);
   }
   return undefined;
 };
@@ -160,8 +160,8 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
   newTermsFields: ('new_terms_fields' in rule && rule.new_terms_fields) || [],
   historyWindowSize:
     'history_window_start' in rule && rule.history_window_start
-      ? convertHistoryStartToSize(rule.history_window_start)
-      : '7d',
+      ? convertDateMathToDuration(rule.history_window_start)
+      : DEFAULT_HISTORY_WINDOW_SIZE,
   shouldLoadQueryDynamically: Boolean(rule.type === 'saved_query' && rule.saved_id),
   [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]:
     ('alert_suppression' in rule &&
@@ -189,52 +189,22 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
   ),
 });
 
-export const convertHistoryStartToSize = (relativeTime: string) => {
-  if (relativeTime.startsWith('now-')) {
-    return relativeTime.substring(4);
-  } else {
-    return relativeTime;
-  }
-};
-
 export const getScheduleStepsData = (rule: RuleResponse): ScheduleStepRule => {
-  const { interval, from } = rule;
-  const fromHumanizedValue = getHumanizedDuration(from, interval);
+  const simpleRuleSchedule = toSimpleRuleSchedule(rule);
+
+  if (simpleRuleSchedule) {
+    return {
+      interval: simpleRuleSchedule.interval,
+      from: simpleRuleSchedule.lookback,
+    };
+  }
 
   return {
-    interval,
-    from: fromHumanizedValue,
+    interval: rule.interval,
+    // Fallback to zero look-back since UI isn't able to handle negative
+    // look-back
+    from: '0s',
   };
-};
-
-/**
- * Converts seconds to duration string, like "1h", "30m" or "15s"
- */
-export const secondsToDurationString = (seconds: number): string => {
-  if (seconds === 0) {
-    return `0s`;
-  }
-
-  if (seconds % 3600 === 0) {
-    return `${seconds / 3600}h`;
-  } else if (seconds % 60 === 0) {
-    return `${seconds / 60}m`;
-  } else {
-    return `${seconds}s`;
-  }
-};
-
-export const getHumanizedDuration = (from: string, interval: string): string => {
-  const fromValue = dateMath.parse(from) ?? moment();
-  const intervalValue = dateMath.parse(`now-${interval}`) ?? moment();
-
-  const fromDuration = moment.duration(intervalValue.diff(fromValue));
-
-  // Basing calculations off floored seconds count as moment durations weren't precise
-  const intervalDuration = Math.floor(fromDuration.asSeconds());
-  // For consistency of display value
-
-  return secondsToDurationString(intervalDuration);
 };
 
 export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): AboutStepRule => {
@@ -302,11 +272,14 @@ const severitySortMapping = {
 };
 
 export const fillEmptySeverityMappings = (mappings: SeverityMapping): SeverityMapping => {
-  const missingMappings: SeverityMapping = severityOptions.flatMap((so) =>
-    mappings.find((mapping) => mapping.severity === so.value) == null
-      ? [{ field: '', value: '', operator: 'equals', severity: so.value }]
-      : []
-  );
+  const missingMappings: SeverityMapping = Object.values(SeverityLevel).flatMap((severityLevel) => {
+    const isSeverityLevelInMappings = mappings.some(
+      (mapping) => mapping.severity === severityLevel
+    );
+    return isSeverityLevelInMappings
+      ? []
+      : [{ field: '', value: '', operator: 'equals', severity: severityLevel }];
+  });
   return [...mappings, ...missingMappings].sort(
     (a, b) => severitySortMapping[a.severity] - severitySortMapping[b.severity]
   );

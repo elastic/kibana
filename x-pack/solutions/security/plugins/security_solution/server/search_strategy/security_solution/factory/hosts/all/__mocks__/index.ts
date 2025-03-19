@@ -31,7 +31,6 @@ export const mockOptions: HostsRequestOptions = {
   pagination: { activePage: 0, cursorStart: 0, fakePossibleCount: 50, querySize: 10 },
   timerange: { interval: '12h', from: '2020-09-03T09:15:21.415Z', to: '2020-09-04T09:15:21.415Z' },
   sort: { direction: Direction.desc, field: HostsFields.lastSeen },
-  isNewRiskScoreModuleInstalled: false,
 };
 
 export const mockSearchStrategyResponse: IEsSearchResponse<unknown> = {
@@ -483,52 +482,50 @@ export const formattedSearchStrategyResponse = {
           ],
           ignore_unavailable: true,
           track_total_hits: false,
-          body: {
-            aggregations: {
-              host_count: { cardinality: { field: 'host.name' } },
-              host_data: {
-                terms: { size: 10, field: 'host.name', order: { lastSeen: 'desc' } },
-                aggs: {
-                  lastSeen: { max: { field: '@timestamp' } },
-                  os: {
-                    top_hits: {
-                      size: 1,
-                      sort: [{ '@timestamp': { order: 'desc' } }],
-                      _source: false,
-                    },
+          aggregations: {
+            host_count: { cardinality: { field: 'host.name' } },
+            host_data: {
+              terms: { size: 10, field: 'host.name', order: { lastSeen: 'desc' } },
+              aggs: {
+                lastSeen: { max: { field: '@timestamp' } },
+                os: {
+                  top_hits: {
+                    size: 1,
+                    sort: [{ '@timestamp': { order: 'desc' } }],
+                    _source: false,
                   },
                 },
               },
             },
-            query: {
-              bool: {
-                filter: [
-                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: '2020-09-03T09:15:21.415Z',
-                        lte: '2020-09-04T09:15:21.415Z',
-                        format: 'strict_date_optional_time',
-                      },
+          },
+          query: {
+            bool: {
+              filter: [
+                { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: '2020-09-03T09:15:21.415Z',
+                      lte: '2020-09-04T09:15:21.415Z',
+                      format: 'strict_date_optional_time',
                     },
                   },
-                ],
-              },
+                },
+              ],
             },
-            _source: false,
-            fields: [
-              'host.id',
-              'host.name',
-              'host.os.name',
-              'host.os.version',
-              {
-                field: '@timestamp',
-                format: 'strict_date_optional_time',
-              },
-            ],
-            size: 0,
           },
+          _source: false,
+          fields: [
+            'host.id',
+            'host.name',
+            'host.os.name',
+            'host.os.version',
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
+          size: 0,
         },
         null,
         2
@@ -649,52 +646,50 @@ export const mockBuckets: HostAggEsItem = {
 export const expectedDsl = {
   allow_no_indices: true,
   track_total_hits: false,
-  body: {
-    aggregations: {
-      host_count: { cardinality: { field: 'host.name' } },
-      host_data: {
-        aggs: {
-          lastSeen: { max: { field: '@timestamp' } },
-          os: {
-            top_hits: {
-              _source: false,
-              size: 1,
-              sort: [{ '@timestamp': { order: 'desc' } }],
+  aggregations: {
+    host_count: { cardinality: { field: 'host.name' } },
+    host_data: {
+      aggs: {
+        lastSeen: { max: { field: '@timestamp' } },
+        os: {
+          top_hits: {
+            _source: false,
+            size: 1,
+            sort: [{ '@timestamp': { order: 'desc' } }],
+          },
+        },
+      },
+      terms: { field: 'host.name', order: { lastSeen: 'desc' }, size: 10 },
+    },
+  },
+  query: {
+    bool: {
+      filter: [
+        { bool: { filter: [{ match_all: {} }], must: [], must_not: [], should: [] } },
+        {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: '2020-09-03T09:15:21.415Z',
+              lte: '2020-09-04T09:15:21.415Z',
             },
           },
         },
-        terms: { field: 'host.name', order: { lastSeen: 'desc' }, size: 10 },
-      },
+      ],
     },
-    query: {
-      bool: {
-        filter: [
-          { bool: { filter: [{ match_all: {} }], must: [], must_not: [], should: [] } },
-          {
-            range: {
-              '@timestamp': {
-                format: 'strict_date_optional_time',
-                gte: '2020-09-03T09:15:21.415Z',
-                lte: '2020-09-04T09:15:21.415Z',
-              },
-            },
-          },
-        ],
-      },
-    },
-    _source: false,
-    fields: [
-      'host.id',
-      'host.name',
-      'host.os.name',
-      'host.os.version',
-      {
-        field: '@timestamp',
-        format: 'strict_date_optional_time',
-      },
-    ],
-    size: 0,
   },
+  _source: false,
+  fields: [
+    'host.id',
+    'host.name',
+    'host.os.name',
+    'host.os.version',
+    {
+      field: '@timestamp',
+      format: 'strict_date_optional_time',
+    },
+  ],
+  size: 0,
   ignore_unavailable: true,
   index: [
     'apm-*-transaction*',

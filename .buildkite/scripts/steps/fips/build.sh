@@ -22,7 +22,6 @@ node scripts/build \
     --docker-tag-qualifier="$BUILDKITE_COMMIT" \
     --docker-push \
     --skip-docker-ubi \
-    --skip-docker-ubuntu \
     --skip-docker-wolfi \
     --skip-docker-cloud \
     --skip-docker-serverless \

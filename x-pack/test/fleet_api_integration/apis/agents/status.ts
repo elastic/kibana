@@ -48,22 +48,18 @@ export default function ({ getService }: FtrProviderContext) {
         id: 'agent1',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
-        body: {
-          doc: {
-            policy_revision_idx: 1,
-            last_checkin: new Date().toISOString(),
-          },
+        doc: {
+          policy_revision_idx: 1,
+          last_checkin: new Date().toISOString(),
         },
       });
       await es.update({
         id: 'agent2',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
-        body: {
-          doc: {
-            policy_revision_idx: 1,
-            last_checkin: new Date(Date.now() - 1000 * 60 * 3).toISOString(), // 2m online
-          },
+        doc: {
+          policy_revision_idx: 1,
+          last_checkin: new Date(Date.now() - 1000 * 60 * 3).toISOString(), // 2m online
         },
       });
       // 1 agents offline
@@ -71,11 +67,9 @@ export default function ({ getService }: FtrProviderContext) {
         id: 'agent3',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
-        body: {
-          doc: {
-            policy_revision_idx: 1,
-            last_checkin: new Date(Date.now() - 1000 * 60 * 6).toISOString(), // 6m offline
-          },
+        doc: {
+          policy_revision_idx: 1,
+          last_checkin: new Date(Date.now() - 1000 * 60 * 6).toISOString(), // 6m offline
         },
       });
       // 1 agents inactive
@@ -83,12 +77,10 @@ export default function ({ getService }: FtrProviderContext) {
         id: 'agent4',
         refresh: 'wait_for',
         index: AGENTS_INDEX,
-        body: {
-          doc: {
-            policy_id: 'policy-inactivity-timeout',
-            policy_revision_idx: 1,
-            last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
-          },
+        doc: {
+          policy_id: 'policy-inactivity-timeout',
+          policy_revision_idx: 1,
+          last_checkin: new Date(Date.now() - 1000 * 60).toISOString(), // policy timeout 1 min
         },
       });
       // 1 agents inactive through enrolled_at as no last_checkin
@@ -206,6 +198,40 @@ export default function ({ getService }: FtrProviderContext) {
           enrolled_at: new Date().toISOString(),
         },
       });
+      // 1 uninstalled agent
+      await es.create({
+        id: 'agent12',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        document: {
+          active: true,
+          access_api_key_id: 'api-key-4',
+          policy_id: 'policy-inactivity-timeout',
+          type: 'PERMANENT',
+          policy_revision_idx: 1,
+          local_metadata: { host: { hostname: 'host6' } },
+          user_provided_metadata: {},
+          enrolled_at: new Date().toISOString(),
+          audit_unenrolled_reason: 'uninstall',
+        },
+      });
+      // 1 orphaned agent
+      await es.create({
+        id: 'agent13',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        document: {
+          active: true,
+          access_api_key_id: 'api-key-4',
+          policy_id: 'policy-inactivity-timeout',
+          type: 'PERMANENT',
+          policy_revision_idx: 1,
+          local_metadata: { host: { hostname: 'host6' } },
+          user_provided_metadata: {},
+          enrolled_at: new Date().toISOString(),
+          audit_unenrolled_reason: 'orphaned',
+        },
+      });
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
@@ -218,13 +244,15 @@ export default function ({ getService }: FtrProviderContext) {
           events: 0,
           other: 0,
           online: 2,
-          active: 8,
-          all: 11,
+          active: 10,
+          all: 13,
           error: 2,
           offline: 1,
           updating: 3,
           inactive: 2,
           unenrolled: 1,
+          orphaned: 1,
+          uninstalled: 1,
         },
       });
     });
@@ -292,13 +320,15 @@ export default function ({ getService }: FtrProviderContext) {
           events: 0,
           other: 0,
           online: 3,
-          active: 10,
-          all: 11,
+          active: 12,
+          all: 13,
           error: 2,
           offline: 1,
           updating: 4,
           inactive: 0,
           unenrolled: 1,
+          orphaned: 1,
+          uninstalled: 1,
         },
       });
     });

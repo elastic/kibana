@@ -41,7 +41,7 @@ export class AgentManager extends Manager {
   public async setup() {
     this.log.info(chalk.bold('Setting up Agent'));
 
-    const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
+    const artifact = `docker.elastic.co/elastic-agent/elastic-agent:${await getLatestVersion()}`;
     this.log.indent(4, () => this.log.info(`Image: ${artifact}`));
     const containerName = generateRandomString(12);
     const fleetServerUrl =

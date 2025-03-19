@@ -217,23 +217,37 @@ export default function createSentinelOneTests({ getService }: FtrProviderContex
         });
 
         for (const s1SubAction of s1SubActions) {
-          it(`should allow execute of ${s1SubAction}`, async () => {
+          const isAllowedSubAction = s1SubAction === SUB_ACTION.GET_AGENTS;
+          it(`should ${
+            isAllowedSubAction ? 'allow' : 'deny'
+          } execute of ${s1SubAction}`, async () => {
             const {
               // eslint-disable-next-line @typescript-eslint/naming-convention
-              body: { status, message, connector_id },
+              body: { status, message, connector_id, statusCode, error },
             } = await executeSubAction({
               supertest: supertestWithoutAuth,
               subAction: s1SubAction,
               subActionParams: {},
               username: user.username,
               password: user.password,
+              ...(isAllowedSubAction
+                ? {}
+                : { expectedHttpCode: 403, errorLogger: logErrorDetails.ignoreCodes([403]) }),
             });
 
-            expect({ status, message, connector_id }).to.eql({
-              status: 'error',
-              message: 'an error occurred while running the action',
-              connector_id: connectorId,
-            });
+            if (isAllowedSubAction) {
+              expect({ status, message, connector_id }).to.eql({
+                status: 'error',
+                message: 'an error occurred while running the action',
+                connector_id: connectorId,
+              });
+            } else {
+              expect({ statusCode, message, error }).to.eql({
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to execute a ".sentinelone" action',
+              });
+            }
           });
         }
       });

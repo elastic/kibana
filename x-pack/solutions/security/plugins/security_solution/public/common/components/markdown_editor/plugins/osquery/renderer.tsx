@@ -7,9 +7,9 @@
 
 // receives the configuration from the parser and renders
 import React, { useCallback, useContext, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import { reduce } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useUpsellingMessage } from '../../../../hooks/use_upselling';
@@ -17,12 +17,6 @@ import { BasicAlertDataContext } from '../../../../../flyout/document_details/le
 import { expandDottedObject } from '../../../../../../common/utils/expand_dotted';
 import OsqueryLogo from './osquery_icon/osquery.svg';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
-
-const StyledEuiButton = styled(EuiButton)`
-  > span > img {
-    margin-block-end: 0;
-  }
-`;
 
 export const OsqueryRenderer = ({
   configuration,
@@ -58,16 +52,21 @@ export const OsqueryRenderer = ({
   return (
     <>
       <EuiToolTip content={interactionsUpsellingMessage}>
-        <StyledEuiButton
+        <EuiButton
           iconType={OsqueryLogo}
           onClick={handleOpen}
           disabled={!!interactionsUpsellingMessage}
+          css={css`
+            > span > img {
+              margin-block-end: 0;
+            }
+          `}
         >
           {configuration.label ??
             i18n.translate('xpack.securitySolution.markdown.osquery.runOsqueryButtonLabel', {
               defaultMessage: 'Run Osquery',
             })}
-        </StyledEuiButton>
+        </EuiButton>
       </EuiToolTip>
       {showFlyout && (
         <OsqueryFlyout

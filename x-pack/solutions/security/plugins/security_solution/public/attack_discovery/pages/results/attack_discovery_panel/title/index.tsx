@@ -6,7 +6,6 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonTitle, EuiTitle, useEuiTheme } from '@elastic/eui';
-import { AssistantAvatar } from '@kbn/elastic-assistant';
 import {
   replaceAnonymizedValuesWithOriginalValues,
   type Replacements,
@@ -14,6 +13,7 @@ import {
 import { css } from '@emotion/react';
 
 import React, { useMemo } from 'react';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 
 const AVATAR_SIZE = 24; // px
 
@@ -55,11 +55,11 @@ const TitleComponent: React.FC<Props> = ({
         data-test-subj="assistantAvatar"
         grow={false}
       >
-        <AssistantAvatar
+        <AssistantIcon
           css={css`
             transform: translate(5px, 5px);
           `}
-          size="xxs"
+          size="s"
         />
       </EuiFlexItem>
 

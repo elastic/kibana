@@ -1,0 +1,42 @@
+# @kbn-doc-linker partial
+
+
+required:
+  - windowSize
+  - windowUnit
+  - environment
+  - anomalySeverityType
+properties:
+  serviceName:
+    type: string
+    description: Filter the rule to apply to a specific service name.
+  transactionType:
+    type: string
+    description: Filter the rule to apply to a specific transaction type.
+  windowSize:
+    type: number
+    example: 6
+    description: >
+      The size of the time window (in `windowUnit` units), which determines how far back to search for documents.
+      Generally it should be a value higher than the rule check interval to avoid gaps in detection.
+  windowUnit:
+    type: string
+    description: >
+      The type of units for the time window.
+      For example: minutes, hours, or days.
+    enum:
+      - "m"
+      - "h"
+      - "d"
+  environment:
+    type: string
+    description: Filter the rule to apply to a specific environment.
+  anomalySeverityType:
+    type: string
+    description: >
+      The severity of anomalies that will generate alerts: critical, major, minor, or warning.
+    enum:
+      - critical
+      - major
+      - minor
+      - warning

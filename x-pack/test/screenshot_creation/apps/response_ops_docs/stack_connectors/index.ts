@@ -26,13 +26,11 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
       await es.indices.create({
         index: testIndex,
-        body: {
-          mappings: {
-            properties: {
-              date_updated: {
-                type: 'date',
-                format: 'epoch_millis',
-              },
+        mappings: {
+          properties: {
+            date_updated: {
+              type: 'date',
+              format: 'epoch_millis',
             },
           },
         },

@@ -24,7 +24,7 @@ export function Config() {
 
   return (
     <EuiPanel
-      color="subdued"
+      color="plain"
       paddingSize="l"
       hasShadow={false}
       borderRadius="none"

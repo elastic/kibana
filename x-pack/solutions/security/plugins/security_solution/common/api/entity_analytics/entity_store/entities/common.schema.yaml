@@ -9,7 +9,6 @@ components:
     UserEntity:
       type: object
       required:
-        - "@timestamp"
         - user
         - entity
       properties:
@@ -66,10 +65,15 @@ components:
               $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
           required:
             - criticality
+        event:
+          type: object
+          properties:
+            ingested:
+              type: string
+              format: date-time
     HostEntity:
       type: object
       required:
-        - "@timestamp"
         - host
         - entity
       properties:
@@ -130,8 +134,55 @@ components:
               $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
           required:
             - criticality
-
+        event:
+          type: object
+          properties:
+            ingested:
+              type: string
+              format: date-time
+    ServiceEntity:
+      type: object
+      required:
+        - service
+        - entity
+      properties:
+        "@timestamp":
+          type: string
+          format: date-time
+        entity:
+          type: object
+          required:
+            - name
+            - source
+          properties:
+            name:
+              type: string
+            source:
+              type: string
+        service:
+          type: object
+          properties:
+            name:
+              type: string
+            risk:
+              $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+          required:
+            - name
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
+        event:
+          type: object
+          properties:
+            ingested:
+              type: string
+              format: date-time
     Entity:
       oneOf:
         - $ref: '#/components/schemas/UserEntity'
         - $ref: '#/components/schemas/HostEntity'
+        - $ref: '#/components/schemas/ServiceEntity'

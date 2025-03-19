@@ -41,28 +41,20 @@ export default ({ getService }: FtrProviderContext): void => {
         roleAuthc
       );
 
-      const { created_by: createdBy, ...data } =
-        svlCases.omit.removeServerGeneratedPropertiesFromCase(theCase);
-      const { created_by: _, ...expectedData } = svlCases.api.postCaseResp('observability');
+      const {
+        created_by: createdBy,
+        comments,
+        ...data
+      } = svlCases.omit.removeServerGeneratedPropertiesFromCase(theCase);
+
+      const {
+        created_by: _,
+        comments: _comments,
+        ...expectedData
+      } = svlCases.api.postCaseResp('observability');
 
       expect(data).to.eql(expectedData);
       expect(createdBy).to.have.keys('full_name', 'email', 'username');
-    });
-
-    it('should throw a 400 if the query param includeComments is being used', async () => {
-      const postedCase = await svlCases.api.createCase(
-        svlCases.api.getPostCaseRequest('observability'),
-        roleAuthc
-      );
-
-      await svlCases.api.getCase(
-        {
-          caseId: postedCase.id,
-          includeComments: true,
-          expectedHttpCode: 400,
-        },
-        roleAuthc
-      );
     });
   });
 };

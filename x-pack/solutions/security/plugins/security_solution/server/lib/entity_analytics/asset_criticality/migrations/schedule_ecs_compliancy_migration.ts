@@ -6,7 +6,7 @@
  */
 
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
-import { AssetCriticalityEcsMigrationClient } from '../asset_criticality_migration_client';
+import { AssetCriticalityMigrationClient } from '../asset_criticality_migration_client';
 
 const TASK_TYPE = 'security-solution-ea-asset-criticality-ecs-migration';
 const TASK_ID = `${TASK_TYPE}-task-id`;
@@ -37,17 +37,11 @@ export const scheduleAssetCriticalityEcsCompliancyMigration = async ({
   const taskManagerStart = depsStart.taskManager;
   const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-  const migrationClient = new AssetCriticalityEcsMigrationClient({
+  const migrationClient = new AssetCriticalityMigrationClient({
     esClient,
     logger,
     auditLogger,
   });
-
-  const shouldMigrateMappings = await migrationClient.isEcsMappingsMigrationRequired();
-  if (shouldMigrateMappings) {
-    logger.debug('Migrating Asset Criticality mappings');
-    await migrationClient.migrateEcsMappings();
-  }
 
   const shouldMigrateData = await migrationClient.isEcsDataMigrationRequired();
   if (shouldMigrateData && taskManagerStart) {
@@ -83,7 +77,7 @@ export const createMigrationTask =
         abortController = new AbortController();
         const [coreStart] = await getStartServices();
         const esClient = coreStart.elasticsearch.client.asInternalUser;
-        const migrationClient = new AssetCriticalityEcsMigrationClient({
+        const migrationClient = new AssetCriticalityMigrationClient({
           esClient,
           logger,
           auditLogger,

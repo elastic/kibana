@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION = '1';
-
 export const ELASTIC_AI_ASSISTANT_URL = '/api/security_ai_assistant';
 export const ELASTIC_AI_ASSISTANT_INTERNAL_URL = '/internal/elastic_assistant';
 
@@ -43,20 +41,22 @@ export const ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND =
 
 // TODO: Update existing 'status' endpoint to take resource as query param as to not conflict with 'entries'
 export const ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL =
-  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/knowledge_base/{resource?}` as const;
+  `${ELASTIC_AI_ASSISTANT_URL}/knowledge_base/{resource?}` as const;
 export const ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL =
-  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/knowledge_base/entries` as const;
+  `${ELASTIC_AI_ASSISTANT_URL}/knowledge_base/entries` as const;
+export const ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID =
+  `${ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL}/{id}` as const;
 export const ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND =
   `${ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL}/_find` as const;
 export const ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION =
   `${ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL}/_bulk_action` as const;
+
 export const ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL =
   `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/knowledge_base/_indices` as const;
-
 export const ELASTIC_AI_ASSISTANT_EVALUATE_URL =
   `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/evaluate` as const;
 
 // Defend insights
-export const DEFEND_INSIGHTS_TOOL_ID = 'defend-insights';
+export const DEFEND_INSIGHTS_ID = 'defend-insights';
 export const DEFEND_INSIGHTS = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/defend_insights`;
 export const DEFEND_INSIGHTS_BY_ID = `${DEFEND_INSIGHTS}/{id}`;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { buildAgentStatusRuntimeField } from '@kbn/fleet-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
@@ -80,24 +80,22 @@ const getUnitedMetadataSortMethod = (
 
 export function getESQueryHostMetadataByID(agentID: string): estypes.SearchRequest {
   return {
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  { term: { 'agent.id': agentID } },
-                  { term: { 'HostDetails.agent.id': agentID } },
-                ],
-              },
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                { term: { 'agent.id': agentID } },
+                { term: { 'HostDetails.agent.id': agentID } },
+              ],
             },
-          ],
-        },
+          },
+        ],
       },
-      sort: MetadataSortMethod,
-      size: 1,
     },
+    sort: MetadataSortMethod,
+    size: 1,
     index: metadataCurrentIndexPattern,
   };
 }
@@ -106,50 +104,46 @@ export function getESQueryHostMetadataByFleetAgentIds(
   fleetAgentIds: string[]
 ): estypes.SearchRequest {
   return {
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [{ terms: { 'elastic.agent.id': fleetAgentIds } }],
-              },
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [{ terms: { 'elastic.agent.id': fleetAgentIds } }],
             },
-          ],
-        },
+          },
+        ],
       },
-      sort: MetadataSortMethod,
     },
+    sort: MetadataSortMethod,
     index: metadataCurrentIndexPattern,
   };
 }
 
-export function getESQueryHostMetadataByIDs(agentIDs: string[]) {
+export function getESQueryHostMetadataByIDs(agentIDs: string[]): estypes.SearchRequest {
   return {
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  { terms: { 'agent.id': agentIDs } },
-                  { terms: { 'HostDetails.agent.id': agentIDs } },
-                ],
-              },
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                { terms: { 'agent.id': agentIDs } },
+                { terms: { 'HostDetails.agent.id': agentIDs } },
+              ],
             },
-          ],
-        },
+          },
+        ],
       },
-      sort: MetadataSortMethod,
     },
+    sort: MetadataSortMethod,
     index: metadataCurrentIndexPattern,
   };
 }
 
 const lastCheckinRuntimeField = {
   last_checkin: {
-    type: 'date',
+    type: 'date' as const,
     script: {
       lang: 'painless',
       source:
@@ -158,14 +152,10 @@ const lastCheckinRuntimeField = {
   },
 };
 
-interface BuildUnitedIndexQueryResponse {
-  body: {
-    query: Record<string, unknown>;
-    track_total_hits: boolean;
-    sort: estypes.SortCombinations[];
-    runtime_mappings: Record<string, unknown>;
-    fields?: string[];
-  };
+interface BuildUnitedIndexQueryResponse extends estypes.SearchRequest {
+  track_total_hits: boolean;
+  sort: estypes.SortCombinations[];
+  fields?: string[];
   from: number;
   size: number;
   index: string;
@@ -217,7 +207,7 @@ export async function buildUnitedIndexQuery(
     },
   };
 
-  let query: BuildUnitedIndexQueryResponse['body']['query'] = idFilter;
+  let query: BuildUnitedIndexQueryResponse['query'] = idFilter;
 
   if (statusesKuery || kuery) {
     const kqlQuery = toElasticsearchQuery(fromKueryExpression(kuery ?? ''));
@@ -241,13 +231,11 @@ export async function buildUnitedIndexQuery(
 
   const fields = Object.keys(runtimeMappings);
   return {
-    body: {
-      query,
-      track_total_hits: true,
-      sort: getUnitedMetadataSortMethod(sortField as EndpointSortableField, sortDirection),
-      fields,
-      runtime_mappings: runtimeMappings,
-    },
+    query,
+    track_total_hits: true,
+    sort: getUnitedMetadataSortMethod(sortField as EndpointSortableField, sortDirection),
+    fields,
+    runtime_mappings: runtimeMappings,
     from: page * pageSize,
     size: pageSize,
     index: METADATA_UNITED_INDEX,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../mock';
 import { buildMockJobsSummary, getJobsSummaryResponseMock } from '../../ml_popover/api.mock';
 import { useInstalledSecurityJobs } from './use_installed_security_jobs';

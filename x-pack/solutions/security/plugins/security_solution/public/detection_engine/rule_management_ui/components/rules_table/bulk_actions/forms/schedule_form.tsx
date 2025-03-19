@@ -9,11 +9,11 @@ import { EuiCallOut } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
-import { ScheduleItem } from '../../../../../rule_creation/components/schedule_item_form';
 import type { FormSchema } from '../../../../../../shared_imports';
 import { UseField, useForm } from '../../../../../../shared_imports';
 import { bulkSetSchedule as i18n } from '../translations';
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';
+import { ScheduleItemField } from '../../../../../rule_creation/components/schedule_item_field';
 
 export interface ScheduleFormData {
   interval: string;
@@ -79,22 +79,22 @@ export const ScheduleForm = ({ rulesCount, onClose, onConfirm }: ScheduleFormCom
     >
       <UseField
         path="interval"
-        component={ScheduleItem}
+        component={ScheduleItemField}
         componentProps={{
           idAria: 'bulkEditRulesScheduleIntervalSelector',
           dataTestSubj: 'bulkEditRulesScheduleIntervalSelector',
           fullWidth: true,
-          minimumValue: 1,
+          minValue: 1,
         }}
       />
       <UseField
         path="lookback"
-        component={ScheduleItem}
+        component={ScheduleItemField}
         componentProps={{
           idAria: 'bulkEditRulesScheduleLookbackSelector',
           dataTestSubj: 'bulkEditRulesScheduleLookbackSelector',
           fullWidth: true,
-          minimumValue: 1,
+          minValue: 1,
         }}
       />
     </BulkEditFormWrapper>

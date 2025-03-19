@@ -31,7 +31,6 @@
     "@kbn/datemath",
     "@kbn/server-route-repository",
     "@kbn/zod",
-    "@kbn/zod-helpers",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/licensing-plugin",
     "@kbn/core-saved-objects-server",
@@ -39,5 +38,6 @@
     "@kbn/apm-utils",
     "@kbn/features-plugin",
     "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/zod-helpers",
   ]
 }

@@ -1,0 +1,30 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@kbn/ambient-ui-types"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/core-http-browser",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/core",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-notifications-browser-mocks"
+  ]
+}

@@ -12,13 +12,7 @@
         "description": [],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ") => () => ",
           {
             "pluginId": "expressions",
@@ -37,7 +31,7 @@
           },
           ">"
         ],
-        "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
+        "path": "src/platform/plugins/shared/expression_metric/public/expression_renderers/metric_renderer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,15 +43,9 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
-            "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
+            "path": "src/platform/plugins/shared/expression_metric/public/expression_renderers/metric_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -75,13 +63,7 @@
         "description": [],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ") => () => ",
           {
             "pluginId": "expressions",
@@ -100,7 +82,7 @@
           },
           ">"
         ],
-        "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
+        "path": "src/platform/plugins/shared/expression_metric/public/expression_renderers/metric_renderer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -112,15 +94,9 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
-            "path": "src/plugins/expression_metric/public/expression_renderers/metric_renderer.tsx",
+            "path": "src/platform/plugins/shared/expression_metric/public/expression_renderers/metric_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -144,7 +120,7 @@
       "signature": [
         "void"
       ],
-      "path": "src/plugins/expression_metric/public/plugin.ts",
+      "path": "src/platform/plugins/shared/expression_metric/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -168,7 +144,7 @@
       "signature": [
         "void"
       ],
-      "path": "src/plugins/expression_metric/server/plugin.ts",
+      "path": "src/platform/plugins/shared/expression_metric/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -220,7 +196,7 @@
           },
           "; metricFormat: string; }; }; }"
         ],
-        "path": "src/plugins/expression_metric/common/expression_functions/metric_function.ts",
+        "path": "src/platform/plugins/shared/expression_metric/common/expression_functions/metric_function.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -236,7 +212,7 @@
         "tags": [],
         "label": "Arguments",
         "description": [],
-        "path": "src/plugins/expression_metric/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/expression_metric/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -247,7 +223,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "src/plugins/expression_metric/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/expression_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -267,7 +243,7 @@
                 "text": "ExpressionTypeStyle"
               }
             ],
-            "path": "src/plugins/expression_metric/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/expression_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -278,7 +254,7 @@
             "tags": [],
             "label": "metricFormat",
             "description": [],
-            "path": "src/plugins/expression_metric/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/expression_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -298,7 +274,7 @@
                 "text": "ExpressionTypeStyle"
               }
             ],
-            "path": "src/plugins/expression_metric/common/types/expression_functions.ts",
+            "path": "src/platform/plugins/shared/expression_metric/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -312,7 +288,7 @@
         "tags": [],
         "label": "MetricRendererConfig",
         "description": [],
-        "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
+        "path": "src/platform/plugins/shared/expression_metric/common/types/expression_renderers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -325,7 +301,7 @@
             "description": [
               "The text to display under the metric"
             ],
-            "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -347,7 +323,7 @@
                 "text": "ExpressionTypeStyle"
               }
             ],
-            "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -363,7 +339,7 @@
             "signature": [
               "string | number | null"
             ],
-            "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -385,7 +361,7 @@
                 "text": "ExpressionTypeStyle"
               }
             ],
-            "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -398,7 +374,7 @@
             "description": [
               "NumeralJS format string"
             ],
-            "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -412,7 +388,7 @@
         "tags": [],
         "label": "NodeDimensions",
         "description": [],
-        "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
+        "path": "src/platform/plugins/shared/expression_metric/common/types/expression_renderers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -423,7 +399,7 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -434,7 +410,7 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "path": "src/plugins/expression_metric/common/types/expression_renderers.ts",
+            "path": "src/platform/plugins/shared/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -454,7 +430,7 @@
         "signature": [
           "\"CSS\""
         ],
-        "path": "src/plugins/expression_metric/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_metric/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -525,7 +501,7 @@
           },
           ">>"
         ],
-        "path": "src/plugins/expression_metric/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/expression_metric/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -542,7 +518,7 @@
         "signature": [
           "\"`font-family`\""
         ],
-        "path": "src/plugins/expression_metric/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_metric/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -557,7 +533,7 @@
         "signature": [
           "\"`font-weight`\""
         ],
-        "path": "src/plugins/expression_metric/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_metric/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -579,7 +555,7 @@
           },
           "[]"
         ],
-        "path": "src/plugins/expression_metric/common/expression_functions/index.ts",
+        "path": "src/platform/plugins/shared/expression_metric/common/expression_functions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -594,7 +570,7 @@
         "signature": [
           "string | number | null"
         ],
-        "path": "src/plugins/expression_metric/common/types/expression_functions.ts",
+        "path": "src/platform/plugins/shared/expression_metric/common/types/expression_functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -609,7 +585,7 @@
         "signature": [
           "\"Numeral pattern\""
         ],
-        "path": "src/plugins/expression_metric/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_metric/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -624,7 +600,7 @@
         "signature": [
           "\"expressionMetric\""
         ],
-        "path": "src/plugins/expression_metric/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_metric/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -639,7 +615,7 @@
         "signature": [
           "\"expressionMetric\""
         ],
-        "path": "src/plugins/expression_metric/common/constants.ts",
+        "path": "src/platform/plugins/shared/expression_metric/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

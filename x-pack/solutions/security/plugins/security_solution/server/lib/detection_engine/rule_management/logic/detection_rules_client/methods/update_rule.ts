@@ -27,7 +27,6 @@ interface UpdateRuleArguments {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   ruleUpdate: RuleUpdateProps;
   mlAuthz: MlAuthz;
-  isRuleCustomizationEnabled: boolean;
 }
 
 export const updateRule = async ({
@@ -36,7 +35,6 @@ export const updateRule = async ({
   prebuiltRuleAssetClient,
   ruleUpdate,
   mlAuthz,
-  isRuleCustomizationEnabled,
 }: UpdateRuleArguments): Promise<RuleResponse> => {
   const { rule_id: ruleId, id } = ruleUpdate;
 
@@ -59,7 +57,6 @@ export const updateRule = async ({
     prebuiltRuleAssetClient,
     existingRule,
     ruleUpdate,
-    isRuleCustomizationEnabled,
   });
 
   const updatedRule = await rulesClient.update({

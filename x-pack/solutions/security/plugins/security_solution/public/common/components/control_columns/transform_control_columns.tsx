@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
+import type { FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
 import type { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
 import type { ComponentType } from 'react';
 import React from 'react';

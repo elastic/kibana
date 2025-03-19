@@ -12,26 +12,26 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { AttachmentType, APP_ID as CASE_APP_ID } from '@kbn/cases-plugin/common';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
-import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { useMlKibana } from '../../application/contexts/kibana';
 
-export function AlertActions(props: AlertActionsProps) {
+export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => {
   const { alert, refresh } = props;
-  const { cases, triggersActionsUi } = useMlKibana().services;
+  const { cases } = useMlKibana().services;
   const casesPrivileges = cases?.helpers.canUseCases([CASE_APP_ID]);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  const ruleId = alert[ALERT_RULE_UUID]?.[0] ?? null;
-  const alertId = alert[ALERT_UUID]?.[0] ?? '';
+  const ruleId = (alert[ALERT_RULE_UUID]?.[0] as string) ?? null;
+  const alertId = (alert[ALERT_UUID]?.[0] as string) ?? '';
 
   const ecsData = useMemo<Ecs>(
     () => ({
@@ -50,7 +50,7 @@ export function AlertActions(props: AlertActionsProps) {
             type: AttachmentType.alert,
             rule: {
               id: ruleId,
-              name: alert[ALERT_RULE_NAME]![0],
+              name: alert[ALERT_RULE_NAME]![0] as string,
             },
             owner: PLUGIN_ID,
           },
@@ -83,19 +83,21 @@ export function AlertActions(props: AlertActionsProps) {
     closeActionsPopover();
   };
 
-  const DefaultAlertActions = useMemo(
-    () =>
-      triggersActionsUi?.getAlertsTableDefaultAlertActions({
-        key: 'defaultRowActions',
-        onActionExecuted: closeActionsPopover,
-        isAlertDetailsEnabled: false,
-        resolveRulePagePath: (alertRuleId) =>
+  const defaultAlertActions = useMemo(
+    () => (
+      <DefaultAlertActions
+        key="defaultRowActions"
+        onActionExecuted={closeActionsPopover}
+        isAlertDetailsEnabled={false}
+        resolveRulePagePath={(alertRuleId) =>
           alertRuleId
             ? `/app/management/insightsAndAlerting/triggersActions/rule/${alertRuleId}`
-            : null,
-        ...props,
-      }),
-    [props, triggersActionsUi]
+            : null
+        }
+        {...props}
+      />
+    ),
+    [props]
   );
 
   const actionsMenuItems = [
@@ -125,8 +127,8 @@ export function AlertActions(props: AlertActionsProps) {
       : []),
   ];
 
-  if (DefaultAlertActions) {
-    actionsMenuItems.push(DefaultAlertActions);
+  if (defaultAlertActions) {
+    actionsMenuItems.push(defaultAlertActions);
   }
 
   const actionsToolTip =
@@ -167,4 +169,4 @@ export function AlertActions(props: AlertActionsProps) {
       </EuiPopover>
     </>
   );
-}
+};

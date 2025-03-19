@@ -142,7 +142,7 @@ describe('useGetUpdatedTags hook', () => {
       // add first
       rerender({ exception: { tags }, filters: getFiltersInOrder() });
       tags = result.current.getTagsUpdatedBy('first', ['first:brie']);
-      expect(tags).toStrictEqual(['first:brie', 'special_second', 'third:spaghetti']);
+      expect(tags).toStrictEqual(['special_second', 'third:spaghetti', 'first:brie']);
     });
 
     it('should update category order on any change if filter is changed (although it should not)', () => {
@@ -155,11 +155,9 @@ describe('useGetUpdatedTags hook', () => {
       expect(tags).toStrictEqual([
         'first:mozzarella',
         'first:roquefort',
-
-        'second:shiraz',
-
         'third:tagliatelle',
         'third:penne',
+        'second:shiraz',
       ]);
 
       const newFilterOrder = {
@@ -172,12 +170,10 @@ describe('useGetUpdatedTags hook', () => {
       tags = result.current.getTagsUpdatedBy('third', ['third:spaghetti']);
 
       expect(tags).toStrictEqual([
-        'third:spaghetti',
-
         'first:mozzarella',
         'first:roquefort',
-
         'second:shiraz',
+        'third:spaghetti',
       ]);
     });
 

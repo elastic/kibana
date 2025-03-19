@@ -31,7 +31,6 @@ if is_pr_with_label "ci:build-cloud-image"; then
   --docker-push \
   --skip-docker-ubi \
   --skip-docker-fips \
-  --skip-docker-ubuntu \
   --skip-docker-wolfi \
   --skip-docker-serverless \
   --skip-docker-contexts

@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
+import { EntityType } from '../../../../common/search_strategy';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import { mockRiskScoreState } from '../../../flyout/shared/mocks';
 import { FlyoutRiskSummary } from './risk_summary';
@@ -17,7 +18,7 @@ export default {
   title: 'Components/FlyoutRiskSummary',
 };
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -27,6 +28,8 @@ export const Default: Story<void> = () => {
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
             queryId={'testQuery'}
             recalculatingScore={false}
+            isLinkEnabled
+            entityType={EntityType.user}
           />
         </div>
       </TestProvider>
@@ -34,7 +37,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const PreviewMode: Story<void> = () => {
+export const LinkEnabledInPreviewMode: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -43,7 +46,29 @@ export const PreviewMode: Story<void> = () => {
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
             queryId={'testQuery'}
             recalculatingScore={false}
+            openDetailsPanel={() => {}}
+            isLinkEnabled
             isPreviewMode
+            entityType={EntityType.user}
+          />
+        </div>
+      </TestProvider>
+    </StorybookProviders>
+  );
+};
+
+export const LinkDisabled: StoryFn = () => {
+  return (
+    <StorybookProviders>
+      <TestProvider>
+        <div style={{ maxWidth: '300px' }}>
+          <FlyoutRiskSummary
+            riskScoreData={{ ...mockRiskScoreState, data: [] }}
+            queryId={'testQuery'}
+            recalculatingScore={false}
+            openDetailsPanel={() => {}}
+            isLinkEnabled={false}
+            entityType={EntityType.user}
           />
         </div>
       </TestProvider>

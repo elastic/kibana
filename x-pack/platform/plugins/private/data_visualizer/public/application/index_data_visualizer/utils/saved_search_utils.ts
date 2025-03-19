@@ -6,12 +6,12 @@
  */
 
 // TODO Consolidate with duplicate component `CorrelationsProgressControls` in
-// `x-pack/plugins/observability_solution/apm/public/components/app/correlations/progress_controls.tsx`
+// `x-pack/solutions/observability/plugins/apm/public/components/app/correlations/progress_controls.tsx`
 import { cloneDeep } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { Query, Filter, AggregateQuery } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getEsQueryConfig, SearchSource } from '@kbn/data-plugin/common';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiSuperSelect } from '@elastic/eui';
+import { EuiButtonIcon, EuiSuperSelect, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import type { Filter, Query } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-plugin/common';
@@ -21,28 +21,31 @@ import { getSourcererScopeName, removeIgnoredAlertFilters } from './helpers';
 import * as i18n from './translations';
 import type { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
 
-const TopNContainer = styled.div`
-  min-width: 600px;
-`;
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
 
-const CloseButton = styled(EuiButtonIcon)`
-  position: absolute;
-  right: 4px;
-  top: 4px;
-`;
+  return {
+    topNContainer: css`
+      min-width: 600px;
+    `,
+    closeButton: css`
+      position: absolute;
+      right: 4px;
+      top: 4px;
+    `,
+    viewSelect: css`
+      width: 170px;
+    `,
+    topNContent: css`
+      margin-top: 4px;
+      margin-right: ${euiTheme.size.xs};
 
-const ViewSelect = styled(EuiSuperSelect<string>)`
-  width: 170px;
-`;
-
-const TopNContent = styled.div`
-  margin-top: 4px;
-  margin-right: ${({ theme }) => theme.eui.euiSizeXS};
-
-  .euiPanel {
-    border: none;
-  }
-`;
+      .euiPanel {
+        border: none;
+      }
+    `,
+  };
+};
 
 export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   filterQuery?: string;
@@ -78,6 +81,7 @@ const TopNComponent: React.FC<Props> = ({
   toggleTopN,
   applyGlobalQueriesAndFilters,
 }) => {
+  const styles = useStyles();
   const [view, setView] = useState<TimelineEventsType>(defaultView);
   const onViewSelected = useCallback(
     (value: string) => setView(value as TimelineEventsType),
@@ -91,7 +95,8 @@ const TopNComponent: React.FC<Props> = ({
 
   const headerChildren = useMemo(
     () => (
-      <ViewSelect
+      <EuiSuperSelect<string>
+        css={styles.viewSelect}
         data-test-subj="view-select"
         disabled={options.length === 1}
         onChange={onViewSelected}
@@ -99,7 +104,7 @@ const TopNComponent: React.FC<Props> = ({
         valueOfSelected={view}
       />
     ),
-    [onViewSelected, options, view]
+    [onViewSelected, options, styles.viewSelect, view]
   );
 
   // alert workflow statuses (e.g. open | closed) and other alert-specific
@@ -110,8 +115,8 @@ const TopNComponent: React.FC<Props> = ({
   );
 
   return (
-    <TopNContainer data-test-subj="topN-container">
-      <TopNContent>
+    <div css={styles.topNContainer} data-test-subj="topN-container">
+      <div css={styles.topNContent}>
         {view === 'raw' || view === 'all' ? (
           <EventsByDataset
             filterQuery={filterQuery}
@@ -142,15 +147,16 @@ const TopNComponent: React.FC<Props> = ({
             hideQueryToggle
           />
         )}
-      </TopNContent>
+      </div>
 
-      <CloseButton
+      <EuiButtonIcon
+        css={styles.closeButton}
         aria-label={i18n.CLOSE}
         data-test-subj="close"
         iconType="cross"
         onClick={toggleTopN}
       />
-    </TopNContainer>
+    </div>
   );
 };
 

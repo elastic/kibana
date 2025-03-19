@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
 import * as fastGlob from 'fast-glob';
 import yargs from 'yargs';
@@ -37,9 +37,13 @@ function runEvaluations() {
             kibana: argv.kibana,
           });
 
+          log.info(`Elasticsearch URL: ${serviceUrls.esUrl}`);
+
           const kibanaClient = new KibanaClient(log, serviceUrls.kibanaUrl, argv.spaceId);
           const esClient = new Client({
             node: serviceUrls.esUrl,
+            Connection: HttpConnection,
+            requestTimeout: 30_000,
           });
 
           await kibanaClient.createSpaceIfNeeded();
@@ -100,7 +104,7 @@ function runEvaluations() {
             evaluationConnectorId: evaluationConnector.id!,
             persist: argv.persist,
             suite: mocha.suite,
-            scopes: ['all'],
+            scopes: ['observability'],
           });
 
           const header: string[][] = [

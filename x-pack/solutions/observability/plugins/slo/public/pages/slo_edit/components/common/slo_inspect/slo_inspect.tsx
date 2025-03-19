@@ -26,10 +26,8 @@ import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useFetchSloInspect } from '../../../../../hooks/use_fetch_slo_inspect';
-import { usePluginContext } from '../../../../../hooks/use_plugin_context';
 import { transformCreateSLOFormToCreateSLOInput } from '../../../helpers/process_slo_form_values';
 import { CreateSLOForm } from '../../../types';
 import { CodeBlockAccordion } from './code_block_accordion';
@@ -41,18 +39,7 @@ interface Props {
   disabled: boolean;
 }
 
-export function SLOInspectWrapper({ slo, disabled }: Props) {
-  const {
-    services: { uiSettings },
-  } = useKibana();
-
-  const { isDev } = usePluginContext();
-  const isInspectorEnabled = uiSettings?.get<boolean>(enableInspectEsQueries);
-
-  return isDev || isInspectorEnabled ? <SLOInspect slo={slo} disabled={disabled} /> : null;
-}
-
-function SLOInspect({ slo, disabled }: Props) {
+export function SLOInspect({ slo, disabled }: Props) {
   const { share, http } = useKibana().services;
   const { trigger, getValues } = useFormContext<CreateSLOForm>();
 

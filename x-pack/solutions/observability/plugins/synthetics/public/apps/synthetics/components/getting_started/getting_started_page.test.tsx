@@ -23,7 +23,7 @@ describe('GettingStartedPage', () => {
       deleteLoading: false,
       onSubmit: jest.fn(),
       onDelete: jest.fn(),
-      formData: undefined,
+      createLoading: false,
     });
     jest.spyOn(permissionsHooks, 'useCanManagePrivateLocation').mockReturnValue(true);
   });
@@ -81,9 +81,11 @@ describe('GettingStartedPage', () => {
           locationsLoaded: true,
           loading: false,
         },
+        privateLocations: {
+          isCreatePrivateLocationFlyoutVisible: true,
+        },
         agentPolicies: {
           data: [],
-          isAddingNewPrivateLocation: true,
         },
       },
     });
@@ -108,7 +110,9 @@ describe('GettingStartedPage', () => {
         },
         agentPolicies: {
           data: [{}],
-          isAddingNewPrivateLocation: true,
+        },
+        privateLocations: {
+          isCreatePrivateLocationFlyoutVisible: true,
         },
       },
     });
@@ -145,7 +149,9 @@ describe('GettingStartedPage', () => {
           },
           agentPolicies: {
             data: [{}],
-            isAddingNewPrivateLocation: true,
+          },
+          privateLocations: {
+            isCreatePrivateLocationFlyoutVisible: true,
           },
         },
       }

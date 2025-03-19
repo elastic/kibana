@@ -44,19 +44,22 @@ export const useGetMigrationTranslationStats = (migrationId: string) => {
  *
  * @returns A translation stats cache invalidation callback
  */
-export const useInvalidateGetMigrationTranslationStats = (migrationId: string) => {
+export const useInvalidateGetMigrationTranslationStats = () => {
   const queryClient = useQueryClient();
 
-  const SPECIFIC_MIGRATION_TRANSLATION_PATH = replaceParams(
-    SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH,
-    {
-      migration_id: migrationId,
-    }
-  );
+  return useCallback(
+    (migrationId: string) => {
+      const SPECIFIC_MIGRATION_TRANSLATION_PATH = replaceParams(
+        SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH,
+        {
+          migration_id: migrationId,
+        }
+      );
 
-  return useCallback(() => {
-    queryClient.invalidateQueries(['GET', SPECIFIC_MIGRATION_TRANSLATION_PATH], {
-      refetchType: 'active',
-    });
-  }, [SPECIFIC_MIGRATION_TRANSLATION_PATH, queryClient]);
+      queryClient.invalidateQueries(['GET', SPECIFIC_MIGRATION_TRANSLATION_PATH], {
+        refetchType: 'active',
+      });
+    },
+    [queryClient]
+  );
 };

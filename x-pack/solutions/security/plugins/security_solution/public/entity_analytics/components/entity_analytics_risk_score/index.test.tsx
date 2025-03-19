@@ -9,13 +9,15 @@ import { render, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { EntityAnalyticsRiskScores } from '.';
-import { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
+import { EntityType, EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import type { SeverityCount } from '../severity/types';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { useRiskScore } from '../../api/hooks/use_risk_score';
 import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { RiskSeverity } from '../../../../common/search_strategy';
+import { capitalize } from 'lodash/fp';
 
 const mockedTelemetry = createTelemetryServiceMock();
 const mockedUseKibana = mockUseKibana();
@@ -54,7 +56,7 @@ const defaultProps = {
   data: undefined,
   inspect: null,
   refetch: () => {},
-  isModuleEnabled: true,
+  hasEngineBeenInstalled: true,
   isAuthorized: true,
   loading: false,
 };
@@ -73,7 +75,7 @@ jest.mock('../../../common/hooks/use_navigate_to_alerts_page_with_filters', () =
 const mockOpenRightPanel = jest.fn();
 jest.mock('@kbn/expandable-flyout');
 
-describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
+describe.each([EntityType.host, EntityType.user, EntityType.service])(
   'EntityAnalyticsRiskScores entityType: %s',
   (riskEntity) => {
     beforeEach(() => {
@@ -89,14 +91,14 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
     });
 
     it('renders enable button when module is disable', () => {
-      mockUseRiskScore.mockReturnValue({ ...defaultProps, isModuleEnabled: false });
+      mockUseRiskScore.mockReturnValue({ ...defaultProps, hasEngineBeenInstalled: false });
       const { getByTestId } = render(
         <TestProviders>
           <EntityAnalyticsRiskScores riskEntity={riskEntity} />
         </TestProviders>
       );
 
-      expect(getByTestId(`enable_${riskEntity}_risk_score`)).toBeInTheDocument();
+      expect(getByTestId(`enable_risk_score`)).toBeInTheDocument();
     });
 
     it("doesn't render enable button when module is enable", () => {
@@ -106,7 +108,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
         </TestProviders>
       );
 
-      expect(queryByTestId(`enable_${riskEntity}_risk_score`)).not.toBeInTheDocument();
+      expect(queryByTestId(`enable_risk_score`)).not.toBeInTheDocument();
     });
 
     it('queries when toggleStatus is true', () => {
@@ -222,64 +224,68 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       await waitFor(() => {
         expect(mockOpenAlertsPageWithFilters.mock.calls[0][0]).toEqual([
           {
-            title: riskEntity === RiskScoreEntity.host ? 'Host' : 'User',
-            fieldName: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+            title: capitalize(riskEntity),
+            fieldName: EntityTypeToIdentifierField[riskEntity],
             selectedOptions: [name],
           },
         ]);
       });
     });
 
-    it('opens the expandable flyout when entity name is clicked', async () => {
-      mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
-      mockUseRiskScoreKpi.mockReturnValue({
-        severityCount: mockSeverityCount,
-        loading: false,
-      });
-      const name = 'testName';
-      const data = [
-        {
-          '@timestamp': '1234567899',
-          [riskEntity]: {
-            name,
-            risk: {
-              rule_risks: [],
-              calculated_level: RiskSeverity.High,
-              calculated_score_norm: 75,
-              multipliers: [],
-            },
-          },
-          alertsCount: 0,
-        },
-      ];
-      mockUseRiskScore.mockReturnValue({ ...defaultProps, data });
-
-      const { getByTestId, queryByTestId } = render(
-        <TestProviders>
-          <EntityAnalyticsRiskScores riskEntity={riskEntity} />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        expect(queryByTestId('loadingPanelRiskScore')).not.toBeInTheDocument();
-      });
-
-      const detailsButton = getByTestId(
-        riskEntity === RiskScoreEntity.host ? `host-details-button` : `users-link-anchor`
-      );
-
-      fireEvent.click(detailsButton);
-
-      await waitFor(() => {
-        expect(mockOpenRightPanel).toHaveBeenCalledWith({
-          id: `${riskEntity}-panel`,
-          params: {
-            [riskEntity === RiskScoreEntity.host ? `hostName` : `userName`]: 'testName',
-            contextID: 'entity-risk-score-table',
-            scopeId: 'entity-risk-score-table',
-          },
+    // Skip service entity test while it doesn't has a flyout
+    (riskEntity === EntityType.service ? it.skip : it)(
+      'opens the expandable flyout when entity name is clicked',
+      async () => {
+        mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+        mockUseRiskScoreKpi.mockReturnValue({
+          severityCount: mockSeverityCount,
+          loading: false,
         });
-      });
-    });
+        const name = 'testName';
+        const data = [
+          {
+            '@timestamp': '1234567899',
+            [riskEntity]: {
+              name,
+              risk: {
+                rule_risks: [],
+                calculated_level: RiskSeverity.High,
+                calculated_score_norm: 75,
+                multipliers: [],
+              },
+            },
+            alertsCount: 0,
+          },
+        ];
+        mockUseRiskScore.mockReturnValue({ ...defaultProps, data });
+
+        const { getByTestId, queryByTestId } = render(
+          <TestProviders>
+            <EntityAnalyticsRiskScores riskEntity={riskEntity} />
+          </TestProviders>
+        );
+
+        await waitFor(() => {
+          expect(queryByTestId('loadingPanelRiskScore')).not.toBeInTheDocument();
+        });
+
+        const detailsButton = getByTestId(
+          riskEntity === EntityType.host ? `host-details-button` : `users-link-anchor`
+        );
+
+        fireEvent.click(detailsButton);
+
+        await waitFor(() => {
+          expect(mockOpenRightPanel).toHaveBeenCalledWith({
+            id: `${riskEntity}-panel`,
+            params: {
+              [riskEntity === EntityType.host ? `hostName` : `userName`]: 'testName',
+              contextID: 'entity-risk-score-table',
+              scopeId: 'entity-risk-score-table',
+            },
+          });
+        });
+      }
+    );
   }
 );

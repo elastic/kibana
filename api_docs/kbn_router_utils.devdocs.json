@@ -32,7 +32,7 @@
           "({ href, onClick }: GetRouterLinkPropsDeps) => ",
           "RouterLinkProps"
         ],
-        "path": "packages/kbn-router-utils/src/get_router_link_props/index.ts",
+        "path": "src/platform/packages/shared/kbn-router-utils/src/get_router_link_props/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -46,7 +46,7 @@
             "signature": [
               "GetRouterLinkPropsDeps"
             ],
-            "path": "packages/kbn-router-utils/src/get_router_link_props/index.ts",
+            "path": "src/platform/packages/shared/kbn-router-utils/src/get_router_link_props/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

@@ -28,11 +28,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover request counts', function describeIndexTests() {
     before(async function () {
       await PageObjects.svlCommonPage.loginAsAdmin();
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
+      );
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
@@ -43,7 +49,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
     });
@@ -127,11 +135,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should send no more than 2 requests (documents + chart) when toggling the chart visibility', async () => {
-        await expectSearches(type, 2, async () => {
+      it(`should send no requests (documents + chart) when toggling the chart visibility`, async () => {
+        await expectSearches(type, 0, async () => {
+          // hide chart
+          await PageObjects.discover.toggleChartVisibility();
+          // show chart
           await PageObjects.discover.toggleChartVisibility();
         });
-        await expectSearches(type, 2, async () => {
+      });
+      it(`should send a request for chart data when toggling the chart visibility after a time range change`, async () => {
+        // hide chart
+        await PageObjects.discover.toggleChartVisibility();
+        await PageObjects.timePicker.setAbsoluteRange(
+          'Sep 21, 2015 @ 06:31:44.000',
+          'Sep 24, 2015 @ 00:00:00.000'
+        );
+        await waitForLoadingToFinish();
+        await expectSearches(type, 1, async () => {
+          // show chart, we expect a request for the chart data, since the time range changed
           await PageObjects.discover.toggleChartVisibility();
         });
       });

@@ -6,24 +6,22 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import type {
-  AggregationsAggregate,
-  SearchResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import pRetry from 'p-retry';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { ToolingLog } from '@kbn/tooling-log';
+import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 import {
   APM_ALERTS_INDEX,
   ApmAlertFields,
 } from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
 
+const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
+
 async function getAlertByRuleId({ es, ruleId }: { es: Client; ruleId: string }) {
   const response = (await es.search({
     index: APM_ALERTS_INDEX,
-    body: {
-      query: {
-        term: {
-          'kibana.alert.rule.uuid': ruleId,
-        },
+    query: {
+      term: {
+        'kibana.alert.rule.uuid': ruleId,
       },
     },
   })) as SearchResponse<ApmAlertFields, Record<string, AggregationsAggregate>>;
@@ -40,16 +38,17 @@ export async function waitForAlertsForRule({
   ruleId: string;
   minimumAlertCount?: number;
 }) {
-  return pRetry(
-    async () => {
+  return await retryForSuccess(new debugLog({ context: 'waitForAlertsForRule' }), {
+    timeout: 20_000,
+    methodName: 'waitForAlertsForRule',
+    block: async () => {
       const alerts = await getAlertByRuleId({ es, ruleId });
       const actualAlertCount = alerts.length;
-      if (actualAlertCount < minimumAlertCount) {
+      if (actualAlertCount < minimumAlertCount)
         throw new Error(`Expected ${minimumAlertCount} but got ${actualAlertCount} alerts`);
-      }
 
       return alerts;
     },
-    { retries: 5 }
-  );
+    retryCount: 5,
+  });
 }

@@ -39,6 +39,7 @@ export async function mountManagementSection(
     i18n,
     overlays,
     theme,
+    userProfile,
     savedObjects,
     uiSettings,
     settings,
@@ -57,6 +58,7 @@ export async function mountManagementSection(
     savedObjectsManagement,
     savedSearch,
     contentManagement,
+    fieldsMetadata,
   } = plugins;
   const { docTitle } = chrome;
 
@@ -79,6 +81,7 @@ export async function mountManagementSection(
     notifications,
     overlays,
     theme,
+    userProfile,
     savedObjects,
     storage: localStorage,
     uiSettings,
@@ -93,6 +96,7 @@ export async function mountManagementSection(
     savedObjectsManagement,
     savedSearch,
     contentManagement,
+    fieldsMetadata,
   };
 
   const enabledFeatures: TransformEnabledFeatures = {

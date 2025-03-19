@@ -12,6 +12,7 @@ export type {
   ESQLAstItem,
   ESQLAstCommand,
   ESQLAstMetricsCommand,
+  ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
   ESQLCommandMode,
@@ -30,6 +31,21 @@ export type {
   ESQLAstNode,
 } from './src/types';
 
+export {
+  isColumn,
+  isDoubleLiteral,
+  isFunctionExpression,
+  isBinaryExpression,
+  isWhereExpression,
+  isFieldExpression,
+  isSource,
+  isIdentifier,
+  isIntegerLiteral,
+  isLiteral,
+  isParamLiteral,
+  isProperNode,
+} from './src/ast/helpers';
+
 export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/builder';
 
 export {
@@ -44,7 +60,7 @@ export {
   ESQLErrorListener,
 } from './src/parser';
 
-export { Walker, type WalkerOptions, walk } from './src/walker';
+export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './src/walker';
 export * as synth from './src/synth';
 
 export {

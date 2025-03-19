@@ -14,6 +14,7 @@ import {
   MessageRole,
   ConversationSummary,
   UUID,
+  ContentReferences,
 } from '@kbn/elastic-assistant-common';
 import { getConversation } from './get_conversation';
 import { getUpdateScript } from './helpers';
@@ -32,6 +33,9 @@ export interface UpdateConversationSchema {
     trace_data?: {
       transaction_id?: string;
       trace_id?: string;
+    };
+    metadata?: {
+      content_references?: ContentReferences;
     };
   }>;
   api_config?: {
@@ -66,6 +70,7 @@ export const updateConversation = async ({
 }: UpdateConversationParams): Promise<ConversationResponse | null> => {
   const updatedAt = new Date().toISOString();
   const params = transformToUpdateScheme(updatedAt, conversationUpdateProps);
+
   try {
     const response = await esClient.updateByQuery({
       conflicts: 'proceed',
@@ -114,7 +119,7 @@ export const transformToUpdateScheme = (
   return {
     id,
     updated_at: updatedAt,
-    title,
+    ...(title ? { title } : {}),
     ...(apiConfig
       ? {
           api_config: {
@@ -126,27 +131,46 @@ export const transformToUpdateScheme = (
           },
         }
       : {}),
-    exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
-    replacements: replacements
-      ? Object.keys(replacements).map((key) => ({
-          uuid: key,
-          value: replacements[key],
-        }))
-      : undefined,
-    messages: messages?.map((message) => ({
-      '@timestamp': message.timestamp,
-      content: message.content,
-      is_error: message.isError,
-      reader: message.reader,
-      role: message.role,
-      ...(message.traceData
-        ? {
-            trace_data: {
-              trace_id: message.traceData.traceId,
-              transaction_id: message.traceData.transactionId,
-            },
-          }
-        : {}),
-    })),
+    ...(excludeFromLastConversationStorage != null
+      ? {
+          exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
+        }
+      : {}),
+    ...(replacements
+      ? {
+          replacements: Object.keys(replacements).map((key) => ({
+            uuid: key,
+            value: replacements[key],
+          })),
+        }
+      : {}),
+    ...(messages
+      ? {
+          messages: messages.map((message) => ({
+            '@timestamp': message.timestamp,
+            content: message.content,
+            is_error: message.isError,
+            reader: message.reader,
+            role: message.role,
+            ...(message.metadata
+              ? {
+                  metadata: {
+                    ...(message.metadata.contentReferences
+                      ? { content_references: message.metadata.contentReferences }
+                      : {}),
+                  },
+                }
+              : {}),
+            ...(message.traceData
+              ? {
+                  trace_data: {
+                    trace_id: message.traceData.traceId,
+                    transaction_id: message.traceData.transactionId,
+                  },
+                }
+              : {}),
+          })),
+        }
+      : {}),
   };
 };

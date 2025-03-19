@@ -12,10 +12,8 @@ import type {
   GenerationInterval,
   AttackDiscoveryStats,
 } from '@kbn/elastic-assistant-common';
-import {
-  AttackDiscoveryPostResponse,
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
-} from '@kbn/elastic-assistant-common';
+import { AttackDiscoveryPostResponse, API_VERSIONS } from '@kbn/elastic-assistant-common';
+import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 
@@ -25,13 +23,20 @@ import { getErrorToastText } from '../helpers';
 import { CONNECTOR_ERROR, ERROR_GENERATING_ATTACK_DISCOVERIES } from '../translations';
 import { getGenAiConfig, getRequestBody } from './helpers';
 
+interface FetchAttackDiscoveriesOptions {
+  end?: string;
+  filter?: Record<string, unknown>;
+  size?: number;
+  start?: string;
+}
+
 export interface UseAttackDiscovery {
   alertsContextCount: number | null;
   approximateFutureTime: Date | null;
   attackDiscoveries: AttackDiscoveries;
   didInitialFetch: boolean;
   failureReason: string | null;
-  fetchAttackDiscoveries: () => Promise<void>;
+  fetchAttackDiscoveries: (options?: FetchAttackDiscoveriesOptions) => Promise<void>;
   generationIntervals: GenerationInterval[] | undefined;
   isLoading: boolean;
   isLoadingPost: boolean;
@@ -151,37 +156,59 @@ export const useAttackDiscovery = ({
   }, [connectorId, pollData]);
 
   /** The callback when users click the Generate button */
-  const fetchAttackDiscoveries = useCallback(async () => {
-    try {
-      if (requestBody.apiConfig.connectorId === '' || requestBody.apiConfig.actionTypeId === '') {
-        throw new Error(CONNECTOR_ERROR);
-      }
-      setLoadingConnectorId?.(connectorId ?? null);
-      // sets isLoading to true
-      setPollStatus('running');
-      setIsLoadingPost(true);
-      setApproximateFutureTime(null);
-      // call the internal API to generate attack discoveries:
-      const rawResponse = await http.fetch('/internal/elastic_assistant/attack_discovery', {
-        body: JSON.stringify(requestBody),
-        method: 'POST',
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
-      });
-      setIsLoadingPost(false);
-      const parsedResponse = AttackDiscoveryPostResponse.safeParse(rawResponse);
+  const fetchAttackDiscoveries = useCallback(
+    async (options: FetchAttackDiscoveriesOptions | undefined) => {
+      try {
+        if (options?.size != null) {
+          setAlertsContextCount(options.size);
+        }
 
-      if (!parsedResponse.success) {
-        throw new Error('Failed to parse the response');
+        const end = options?.end;
+        const filter = !isEmpty(options?.filter) ? options?.filter : undefined;
+        const start = options?.start;
+
+        const bodyWithOverrides = {
+          ...requestBody,
+          end,
+          filter,
+          size,
+          start,
+        };
+
+        if (
+          bodyWithOverrides.apiConfig.connectorId === '' ||
+          bodyWithOverrides.apiConfig.actionTypeId === ''
+        ) {
+          throw new Error(CONNECTOR_ERROR);
+        }
+        setLoadingConnectorId?.(connectorId ?? null);
+        // sets isLoading to true
+        setPollStatus('running');
+        setIsLoadingPost(true);
+        setApproximateFutureTime(null);
+
+        // call the internal API to generate attack discoveries:
+        const rawResponse = await http.post('/internal/elastic_assistant/attack_discovery', {
+          body: JSON.stringify(bodyWithOverrides),
+          version: API_VERSIONS.internal.v1,
+        });
+        setIsLoadingPost(false);
+        const parsedResponse = AttackDiscoveryPostResponse.safeParse(rawResponse);
+
+        if (!parsedResponse.success) {
+          throw new Error('Failed to parse the response');
+        }
+      } catch (error) {
+        setIsLoadingPost(false);
+        setIsLoading(false);
+        toasts?.addDanger(error, {
+          title: ERROR_GENERATING_ATTACK_DISCOVERIES,
+          text: getErrorToastText(error),
+        });
       }
-    } catch (error) {
-      setIsLoadingPost(false);
-      setIsLoading(false);
-      toasts?.addDanger(error, {
-        title: ERROR_GENERATING_ATTACK_DISCOVERIES,
-        text: getErrorToastText(error),
-      });
-    }
-  }, [connectorId, http, requestBody, setLoadingConnectorId, setPollStatus, toasts]);
+    },
+    [connectorId, http, requestBody, setLoadingConnectorId, setPollStatus, size, toasts]
+  );
 
   return {
     alertsContextCount,

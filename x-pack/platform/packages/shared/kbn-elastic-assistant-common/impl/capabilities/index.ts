@@ -20,5 +20,6 @@ export type AssistantFeatureKey = keyof AssistantFeatures;
  */
 export const defaultAssistantFeatures = Object.freeze({
   assistantModelEvaluation: false,
-  defendInsights: false,
+  defendInsights: true,
+  assistantAttackDiscoverySchedulingEnabled: false,
 });

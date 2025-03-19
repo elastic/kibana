@@ -31,7 +31,7 @@
           },
           "[]"
         ],
-        "path": "src/plugins/custom_integrations/public/services/find.ts",
+        "path": "src/platform/plugins/shared/custom_integrations/public/services/find.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -52,7 +52,7 @@
               },
               "[]"
             ],
-            "path": "src/plugins/custom_integrations/public/services/find.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/public/services/find.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -67,7 +67,7 @@
             "signature": [
               "FindParams"
             ],
-            "path": "src/plugins/custom_integrations/public/services/find.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/public/services/find.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -88,7 +88,7 @@
           "Props",
           ") => React.JSX.Element | null>"
         ],
-        "path": "src/plugins/custom_integrations/public/components/index.tsx",
+        "path": "src/platform/plugins/shared/custom_integrations/public/components/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -122,7 +122,7 @@
         "signature": [
           "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<R>>"
         ],
-        "path": "src/plugins/custom_integrations/public/components/index.tsx",
+        "path": "src/platform/plugins/shared/custom_integrations/public/components/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -138,7 +138,7 @@
             "signature": [
               "React.ComponentType<P>"
             ],
-            "path": "src/plugins/custom_integrations/public/components/index.tsx",
+            "path": "src/platform/plugins/shared/custom_integrations/public/components/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -155,7 +155,7 @@
             "signature": [
               "React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
             ],
-            "path": "src/plugins/custom_integrations/public/components/index.tsx",
+            "path": "src/platform/plugins/shared/custom_integrations/public/components/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -176,7 +176,7 @@
       "tags": [],
       "label": "CustomIntegrationsSetup",
       "description": [],
-      "path": "src/plugins/custom_integrations/public/types.ts",
+      "path": "src/platform/plugins/shared/custom_integrations/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -198,7 +198,7 @@
             },
             "[]>"
           ],
-          "path": "src/plugins/custom_integrations/public/types.ts",
+          "path": "src/platform/plugins/shared/custom_integrations/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -222,7 +222,7 @@
             },
             "[]>"
           ],
-          "path": "src/plugins/custom_integrations/public/types.ts",
+          "path": "src/platform/plugins/shared/custom_integrations/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -239,7 +239,7 @@
       "tags": [],
       "label": "CustomIntegrationsStart",
       "description": [],
-      "path": "src/plugins/custom_integrations/public/types.ts",
+      "path": "src/platform/plugins/shared/custom_integrations/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -253,7 +253,7 @@
           "signature": [
             "React.FunctionComponent<{ children?: React.ReactNode; }>"
           ],
-          "path": "src/plugins/custom_integrations/public/types.ts",
+          "path": "src/platform/plugins/shared/custom_integrations/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -298,7 +298,7 @@
           "signature": [
             "{ [x: string]: React.FC<{}>; }"
           ],
-          "path": "src/plugins/custom_integrations/public/types.ts",
+          "path": "src/platform/plugins/shared/custom_integrations/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -320,7 +320,7 @@
         "description": [
           "\nA definition of a dataintegration, which can be registered with Kibana."
         ],
-        "path": "src/plugins/custom_integrations/common/index.ts",
+        "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -331,7 +331,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -342,7 +342,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -353,7 +353,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -367,7 +367,7 @@
             "signature": [
               "\"ui_link\""
             ],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -378,7 +378,7 @@
             "tags": [],
             "label": "uiInternalPath",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -392,7 +392,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -403,7 +403,7 @@
             "tags": [],
             "label": "isBeta",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -424,7 +424,7 @@
               },
               "[]"
             ],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -438,7 +438,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -452,7 +452,7 @@
             "signature": [
               "\"search\" | \"other\" | \"beats\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
             ],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -466,7 +466,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -488,7 +488,7 @@
         "signature": [
           "string"
         ],
-        "path": "src/plugins/custom_integrations/common/index.ts",
+        "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -502,7 +502,7 @@
       "tags": [],
       "label": "CustomIntegrationsPluginSetup",
       "description": [],
-      "path": "src/plugins/custom_integrations/server/types.ts",
+      "path": "src/platform/plugins/shared/custom_integrations/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -524,7 +524,7 @@
             },
             ", \"type\">) => void"
           ],
-          "path": "src/plugins/custom_integrations/server/types.ts",
+          "path": "src/platform/plugins/shared/custom_integrations/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -546,7 +546,7 @@
                 },
                 ", \"type\">"
               ],
-              "path": "src/plugins/custom_integrations/server/types.ts",
+              "path": "src/platform/plugins/shared/custom_integrations/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -572,7 +572,7 @@
             },
             "[]"
           ],
-          "path": "src/plugins/custom_integrations/server/types.ts",
+          "path": "src/platform/plugins/shared/custom_integrations/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -589,7 +589,7 @@
       "tags": [],
       "label": "CustomIntegrationsPluginStart",
       "description": [],
-      "path": "src/plugins/custom_integrations/server/types.ts",
+      "path": "src/platform/plugins/shared/custom_integrations/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -610,7 +610,7 @@
         "description": [
           "\nA definition of a dataintegration, which can be registered with Kibana."
         ],
-        "path": "src/plugins/custom_integrations/common/index.ts",
+        "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -621,7 +621,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -632,7 +632,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -643,7 +643,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -657,7 +657,7 @@
             "signature": [
               "\"ui_link\""
             ],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -668,7 +668,7 @@
             "tags": [],
             "label": "uiInternalPath",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -682,7 +682,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -693,7 +693,7 @@
             "tags": [],
             "label": "isBeta",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -714,7 +714,7 @@
               },
               "[]"
             ],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -728,7 +728,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -742,7 +742,7 @@
             "signature": [
               "\"search\" | \"other\" | \"beats\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
             ],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -756,7 +756,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -772,7 +772,7 @@
         "description": [
           "\nAn icon representing an Integration."
         ],
-        "path": "src/plugins/custom_integrations/common/index.ts",
+        "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -783,7 +783,7 @@
             "tags": [],
             "label": "src",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -797,7 +797,7 @@
             "signature": [
               "\"svg\" | \"eui\""
             ],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -813,7 +813,7 @@
         "description": [
           "\nAn object containing the id of an `IntegrationCategory` and the count of all Integrations in that category."
         ],
-        "path": "src/plugins/custom_integrations/common/index.ts",
+        "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -824,7 +824,7 @@
             "tags": [],
             "label": "count",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -835,7 +835,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -857,7 +857,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "src/plugins/custom_integrations/common/index.ts",
+        "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -874,7 +874,7 @@
         "signature": [
           "string"
         ],
-        "path": "src/plugins/custom_integrations/common/index.ts",
+        "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -889,7 +889,7 @@
         "signature": [
           "\"customIntegrations\""
         ],
-        "path": "src/plugins/custom_integrations/common/index.ts",
+        "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -904,7 +904,7 @@
         "signature": [
           "\"customIntegrations\""
         ],
-        "path": "src/plugins/custom_integrations/common/index.ts",
+        "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -916,7 +916,7 @@
         "tags": [],
         "label": "ROUTES_APPEND_CUSTOM_INTEGRATIONS",
         "description": [],
-        "path": "src/plugins/custom_integrations/common/index.ts",
+        "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -928,7 +928,7 @@
         "tags": [],
         "label": "ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS",
         "description": [],
-        "path": "src/plugins/custom_integrations/common/index.ts",
+        "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -945,7 +945,7 @@
         "signature": [
           "(\"search\" | \"other\" | \"beats\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\")[]"
         ],
-        "path": "src/plugins/custom_integrations/common/index.ts",
+        "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -962,7 +962,7 @@
         "signature": [
           "\"search\" | \"other\" | \"beats\" | \"language_clients\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
         ],
-        "path": "src/plugins/custom_integrations/common/index.ts",
+        "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -976,7 +976,7 @@
         "tags": [],
         "label": "FEATURED_INTEGRATIONS_BY_CATEGORY",
         "description": [],
-        "path": "src/plugins/custom_integrations/common/index.ts",
+        "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -990,7 +990,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1004,7 +1004,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1020,7 +1020,7 @@
         "description": [
           "\nA map of category names and their corresponding titles."
         ],
-        "path": "src/plugins/custom_integrations/common/index.ts",
+        "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1031,7 +1031,7 @@
             "tags": [],
             "label": "advanced_analytics_ueba",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1042,7 +1042,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1053,7 +1053,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1066,7 +1066,7 @@
             "tags": [],
             "label": "analytics_engine",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1077,7 +1077,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1088,7 +1088,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1101,7 +1101,7 @@
             "tags": [],
             "label": "application_observability",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1112,7 +1112,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1123,7 +1123,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1136,7 +1136,7 @@
             "tags": [],
             "label": "auditd",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1147,7 +1147,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1158,7 +1158,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1171,7 +1171,7 @@
             "tags": [],
             "label": "authentication",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1182,7 +1182,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1193,7 +1193,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1206,7 +1206,7 @@
             "tags": [],
             "label": "aws",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1217,7 +1217,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1231,7 +1231,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1244,7 +1244,7 @@
             "tags": [],
             "label": "azure",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1255,7 +1255,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1269,7 +1269,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1282,7 +1282,7 @@
             "tags": [],
             "label": "big_data",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1293,7 +1293,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1304,7 +1304,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1317,7 +1317,7 @@
             "tags": [],
             "label": "cdn_security",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1328,7 +1328,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1339,7 +1339,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1352,7 +1352,7 @@
             "tags": [],
             "label": "cloud",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1363,7 +1363,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1377,7 +1377,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1390,7 +1390,7 @@
             "tags": [],
             "label": "config_management",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1401,7 +1401,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1415,7 +1415,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1428,7 +1428,7 @@
             "tags": [],
             "label": "connector",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1439,7 +1439,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1450,7 +1450,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1463,7 +1463,7 @@
             "tags": [],
             "label": "connector_client",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1474,7 +1474,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1485,7 +1485,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1498,7 +1498,7 @@
             "tags": [],
             "label": "containers",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1509,7 +1509,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1523,7 +1523,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1536,7 +1536,7 @@
             "tags": [],
             "label": "crawler",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1547,7 +1547,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1558,7 +1558,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1571,7 +1571,7 @@
             "tags": [],
             "label": "credential_management",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1582,7 +1582,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1593,7 +1593,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1606,7 +1606,7 @@
             "tags": [],
             "label": "crm",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1617,7 +1617,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1631,7 +1631,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1644,7 +1644,7 @@
             "tags": [],
             "label": "custom",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1655,7 +1655,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1669,7 +1669,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1682,7 +1682,7 @@
             "tags": [],
             "label": "custom_logs",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1693,7 +1693,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1704,7 +1704,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1717,7 +1717,7 @@
             "tags": [],
             "label": "database_security",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1728,7 +1728,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1739,7 +1739,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1752,7 +1752,7 @@
             "tags": [],
             "label": "datastore",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1763,7 +1763,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1777,7 +1777,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1790,7 +1790,7 @@
             "tags": [],
             "label": "dns_security",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1801,7 +1801,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1812,7 +1812,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1825,7 +1825,7 @@
             "tags": [],
             "label": "edr_xdr",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1836,7 +1836,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1847,7 +1847,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1860,7 +1860,7 @@
             "tags": [],
             "label": "cloudsecurity_cdr",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1871,7 +1871,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1882,7 +1882,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1895,7 +1895,7 @@
             "tags": [],
             "label": "elasticsearch_sdk",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1906,7 +1906,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1920,7 +1920,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1933,7 +1933,7 @@
             "tags": [],
             "label": "elastic_stack",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1944,7 +1944,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1958,7 +1958,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1971,7 +1971,7 @@
             "tags": [],
             "label": "email_security",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1982,7 +1982,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1993,7 +1993,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2006,7 +2006,7 @@
             "tags": [],
             "label": "firewall_security",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2017,7 +2017,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2028,7 +2028,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2041,7 +2041,7 @@
             "tags": [],
             "label": "google_cloud",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2052,7 +2052,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2066,7 +2066,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2079,7 +2079,7 @@
             "tags": [],
             "label": "iam",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2090,7 +2090,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2101,7 +2101,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2114,7 +2114,7 @@
             "tags": [],
             "label": "ids_ips",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2125,7 +2125,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2136,7 +2136,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2149,7 +2149,7 @@
             "tags": [],
             "label": "infrastructure",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2160,7 +2160,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2174,7 +2174,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2187,7 +2187,7 @@
             "tags": [],
             "label": "java_observability",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2198,7 +2198,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2209,7 +2209,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2222,7 +2222,7 @@
             "tags": [],
             "label": "kubernetes",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2233,7 +2233,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2244,7 +2244,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2257,7 +2257,7 @@
             "tags": [],
             "label": "language_client",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2268,7 +2268,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2279,7 +2279,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2292,7 +2292,7 @@
             "tags": [],
             "label": "languages",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2303,7 +2303,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2317,7 +2317,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2330,7 +2330,7 @@
             "tags": [],
             "label": "load_balancer",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2341,7 +2341,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2352,7 +2352,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2365,7 +2365,7 @@
             "tags": [],
             "label": "message_queue",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2376,7 +2376,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2387,7 +2387,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2400,7 +2400,7 @@
             "tags": [],
             "label": "monitoring",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2411,7 +2411,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2422,7 +2422,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2435,7 +2435,7 @@
             "tags": [],
             "label": "native_search",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2446,7 +2446,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2457,7 +2457,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2470,7 +2470,7 @@
             "tags": [],
             "label": "network",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2481,7 +2481,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2495,7 +2495,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2508,7 +2508,7 @@
             "tags": [],
             "label": "network_security",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2519,7 +2519,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2530,7 +2530,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2543,7 +2543,7 @@
             "tags": [],
             "label": "notification",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2554,7 +2554,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2565,7 +2565,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2578,7 +2578,7 @@
             "tags": [],
             "label": "observability",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2589,7 +2589,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2603,7 +2603,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2616,7 +2616,7 @@
             "tags": [],
             "label": "os_system",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2627,7 +2627,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2641,7 +2641,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2654,7 +2654,7 @@
             "tags": [],
             "label": "process_manager",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2665,7 +2665,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2676,7 +2676,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2689,7 +2689,7 @@
             "tags": [],
             "label": "productivity",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2700,7 +2700,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2714,7 +2714,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2727,7 +2727,7 @@
             "tags": [],
             "label": "productivity_security",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2738,7 +2738,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2749,7 +2749,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2762,7 +2762,7 @@
             "tags": [],
             "label": "proxy_security",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2773,7 +2773,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2784,7 +2784,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2797,7 +2797,7 @@
             "tags": [],
             "label": "sdk_search",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2808,7 +2808,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2819,7 +2819,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2832,7 +2832,7 @@
             "tags": [],
             "label": "search",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2843,7 +2843,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2857,7 +2857,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2870,7 +2870,7 @@
             "tags": [],
             "label": "security",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2881,7 +2881,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2895,7 +2895,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2908,7 +2908,7 @@
             "tags": [],
             "label": "stream_processing",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2919,7 +2919,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2930,7 +2930,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2943,7 +2943,7 @@
             "tags": [],
             "label": "support",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2954,7 +2954,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -2968,7 +2968,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2981,7 +2981,7 @@
             "tags": [],
             "label": "threat_intel",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2992,7 +2992,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3003,7 +3003,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3016,7 +3016,7 @@
             "tags": [],
             "label": "ticketing",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3027,7 +3027,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3041,7 +3041,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3054,7 +3054,7 @@
             "tags": [],
             "label": "version_control",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3065,7 +3065,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3079,7 +3079,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3092,7 +3092,7 @@
             "tags": [],
             "label": "virtualization",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3103,7 +3103,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3114,7 +3114,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3127,7 +3127,7 @@
             "tags": [],
             "label": "vpn_security",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3138,7 +3138,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3149,7 +3149,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3162,7 +3162,7 @@
             "tags": [],
             "label": "vulnerability_management",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3173,7 +3173,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3184,7 +3184,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3197,7 +3197,7 @@
             "tags": [],
             "label": "web",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3208,7 +3208,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3219,7 +3219,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3232,7 +3232,7 @@
             "tags": [],
             "label": "web_application_firewall",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3243,7 +3243,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3254,7 +3254,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3267,7 +3267,7 @@
             "tags": [],
             "label": "websphere",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3278,7 +3278,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3289,7 +3289,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3302,7 +3302,7 @@
             "tags": [],
             "label": "workplace_search_content_source",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3313,7 +3313,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3324,7 +3324,7 @@
                 "tags": [],
                 "label": "parent_id",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3339,7 +3339,7 @@
             "description": [
               "// Kibana added"
             ],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3350,7 +3350,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3364,7 +3364,7 @@
                 "signature": [
                   "undefined"
                 ],
-                "path": "src/plugins/custom_integrations/common/index.ts",
+                "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3382,7 +3382,7 @@
         "description": [
           "\nA map of shipper names and their corresponding titles."
         ],
-        "path": "src/plugins/custom_integrations/common/index.ts",
+        "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3393,7 +3393,7 @@
             "tags": [],
             "label": "beats",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3404,7 +3404,7 @@
             "tags": [],
             "label": "search",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3415,7 +3415,7 @@
             "tags": [],
             "label": "language_clients",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3426,7 +3426,7 @@
             "tags": [],
             "label": "other",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3437,7 +3437,7 @@
             "tags": [],
             "label": "sample_data",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3448,7 +3448,7 @@
             "tags": [],
             "label": "tests",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3459,7 +3459,7 @@
             "tags": [],
             "label": "tutorial",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3470,7 +3470,7 @@
             "tags": [],
             "label": "placeholders",
             "description": [],
-            "path": "src/plugins/custom_integrations/common/index.ts",
+            "path": "src/platform/plugins/shared/custom_integrations/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }

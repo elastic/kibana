@@ -14,7 +14,7 @@
         "tags": [],
         "label": "capabilitiesServiceMock",
         "description": [],
-        "path": "packages/core/capabilities/core-capabilities-browser-mocks/src/capabilities_service.mock.ts",
+        "path": "src/core/packages/capabilities/browser-mocks/src/capabilities_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +38,7 @@
               "CapabilitiesService",
               ">>"
             ],
-            "path": "packages/core/capabilities/core-capabilities-browser-mocks/src/capabilities_service.mock.ts",
+            "path": "src/core/packages/capabilities/browser-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -56,7 +56,7 @@
               "CapabilitiesStart",
               ">"
             ],
-            "path": "packages/core/capabilities/core-capabilities-browser-mocks/src/capabilities_service.mock.ts",
+            "path": "src/core/packages/capabilities/browser-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

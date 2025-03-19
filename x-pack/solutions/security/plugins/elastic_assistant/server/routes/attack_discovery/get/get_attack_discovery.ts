@@ -9,7 +9,7 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import {
   AttackDiscoveryGetResponse,
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  API_VERSIONS,
   AttackDiscoveryGetRequestParams,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -32,7 +32,7 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             params: buildRouteValidationWithZod(AttackDiscoveryGetRequestParams),
@@ -51,7 +51,7 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
         try {
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
 
-          const authenticatedUser = assistantContext.getCurrentUser();
+          const authenticatedUser = await assistantContext.getCurrentUser();
           const connectorId = decodeURIComponent(request.params.connectorId);
           if (authenticatedUser == null) {
             return resp.error({

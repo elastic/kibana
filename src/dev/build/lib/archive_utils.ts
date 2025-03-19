@@ -12,7 +12,7 @@ import yauzl from 'yauzl';
 import yazl from 'yazl';
 
 // The utilities in this file are largely copied with minor modifications from
-// `x-pack/plugins/fleet/server/services/epm/extract.ts`. We can't import them directly
+// `x-pack/platform/plugins/shared/fleet/server/services/epm/extract.ts`. We can't import them directly
 // in the bundled package task due to tsconfig limitation, so they're copied here instead.
 
 export interface ZipEntry {
@@ -63,7 +63,7 @@ export async function createZipFile(entries: ZipEntry[], destination: string): P
   });
 }
 
-// Copied over some utilities from x-pack/plugins/fleet/server/services/epm/archive/extract.ts since we can't
+// Copied over some utilities from x-pack/platform/plugins/shared/fleet/server/services/epm/archive/extract.ts since we can't
 // import them directly due to `tsconfig` limitations in the `kibana/src/` directory.
 function yauzlFromBuffer(buffer: Buffer, opts: yauzl.Options): Promise<yauzl.ZipFile> {
   return new Promise((resolve, reject) =>

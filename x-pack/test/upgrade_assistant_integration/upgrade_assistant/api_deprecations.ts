@@ -42,13 +42,13 @@ export default function ({ getService }: FtrProviderContext) {
       // await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.emptyKibanaIndex();
     });
-    it('returns does not return api deprecations if the routes are not called', async () => {
+    it('does not return api deprecations if deprecated routes are not called', async () => {
       const { deprecations } = (await supertest.get(`/api/deprecations/`).expect(200)).body;
       const apiDeprecations = getApiDeprecations(deprecations);
       expect(apiDeprecations.length).to.equal(0);
     });
 
-    it('returns deprecated APIs when the api is called', async () => {
+    it('returns deprecated APIs when a deprecated api is called', async () => {
       await supertest
         .get(`/internal/routing_example/d/internal_versioned_route?apiVersion=1`)
         .expect(200);
@@ -157,9 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { hits } = await es.search<{ 'usage-counter': UsageCountersSavedObject }>({
         index: '.kibana_usage_counters',
-        body: {
-          query: { bool: { should } },
-        },
+        query: { bool: { should } },
       });
 
       expect(hits.hits.length).to.equal(4);
@@ -185,9 +183,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { hits } = await es.search<{ 'usage-counter': UsageCountersSavedObject }>({
           index: '.kibana_usage_counters',
-          body: {
-            query: { bool: { should } },
-          },
+          query: { bool: { should } },
         });
 
         expect(hits.hits.length).to.equal(5);
@@ -205,6 +201,25 @@ export default function ({ getService }: FtrProviderContext) {
           ].sort()
         );
       });
+    });
+    it('GET /api/upgrade_assistant/status does not return { readyForUpgrade: false } if there are only critical API deprecations', async () => {
+      /** Throw in another critical deprecation... */
+      await supertest.get(`/api/routing_example/d/removed_route`).expect(200);
+      // sleep a little until the usage counter is synced into ES
+      await setTimeoutAsync(3000);
+      await retry.tryForTime(
+        15 * 1000,
+        async () => {
+          const { deprecations } = (await supertest.get(`/api/deprecations/`).expect(200)).body;
+          const apiDeprecations = getApiDeprecations(deprecations);
+          // confirm there is at least one CRITICAL deprecated API usage present
+          expect(apiDeprecations.some(({ level }) => level === 'critical')).to.be(true);
+        },
+        undefined,
+        2000
+      );
+      const { body } = await supertest.get(`/api/upgrade_assistant/status`).expect(200);
+      expect(body.readyForUpgrade).to.be(true);
     });
   });
 }

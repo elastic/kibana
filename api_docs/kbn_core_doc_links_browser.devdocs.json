@@ -11,7 +11,7 @@
         "tags": [],
         "label": "DocLinksStart",
         "description": [],
-        "path": "packages/core/doc-links/core-doc-links-browser/src/types.ts",
+        "path": "src/core/packages/doc-links/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -22,7 +22,7 @@
             "tags": [],
             "label": "DOC_LINK_VERSION",
             "description": [],
-            "path": "packages/core/doc-links/core-doc-links-browser/src/types.ts",
+            "path": "src/core/packages/doc-links/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -33,7 +33,7 @@
             "tags": [],
             "label": "ELASTIC_WEBSITE_URL",
             "description": [],
-            "path": "packages/core/doc-links/core-doc-links-browser/src/types.ts",
+            "path": "src/core/packages/doc-links/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -53,7 +53,7 @@
                 "text": "DocLinks"
               }
             ],
-            "path": "packages/core/doc-links/core-doc-links-browser/src/types.ts",
+            "path": "src/core/packages/doc-links/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

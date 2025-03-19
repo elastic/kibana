@@ -121,7 +121,7 @@ describe('risk weight schema', () => {
 
         expect(decoded.success).toBeFalsy();
         expect(stringifyZodError(decoded.error)).toEqual(
-          'type: Invalid literal value, expected "global_identifier", host: Required, type: Invalid literal value, expected "global_identifier"'
+          'type: Invalid literal value, expected "global_identifier", host: Required, type: Invalid literal value, expected "global_identifier", type: Invalid literal value, expected "global_identifier", service: Required'
         );
       });
 

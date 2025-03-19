@@ -16,11 +16,15 @@ import {
   DATASET_QUALITY_TEST_PASSWORD,
   DatasetQualityUsername,
 } from '@kbn/dataset-quality-plugin/server/test_helpers/create_dataset_quality_users/authentication';
-import { FtrConfigProviderContext, defineDockerServersConfig } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import {
+  fleetPackageRegistryDockerImage,
+  FtrConfigProviderContext,
+  defineDockerServersConfig,
+} from '@kbn/test';
 import path from 'path';
 import supertest from 'supertest';
 import { UrlObject, format } from 'url';
-import { dockerImage } from '../../fleet_api_integration/config.base';
 import { DatasetQualityFtrConfigName } from '../configs';
 import { createDatasetQualityApiClient } from './dataset_quality_api_supertest';
 import {
@@ -28,7 +32,6 @@ import {
   InheritedFtrProviderContext,
   InheritedServices,
 } from './ftr_provider_context';
-import { PackageService } from './package_service';
 import { RegistryProvider } from './registry';
 
 export interface DatasetQualityFtrConfig {
@@ -81,7 +84,6 @@ export interface CreateTest {
       context: InheritedFtrProviderContext
     ) => SyntheticsSynthtraceEsClient;
     datasetQualityApiClient: (context: InheritedFtrProviderContext) => DatasetQualityApiClient;
-    packageService: ({ getService }: FtrProviderContext) => ReturnType<typeof PackageService>;
   };
   junit: { reportName: string };
   esTestCluster: any;
@@ -116,12 +118,13 @@ export function createTestConfig(
     const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     return {
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles: [require.resolve('../tests')],
       servers,
       dockerServers: defineDockerServersConfig({
         registry: {
           enabled: !!dockerRegistryPort,
-          image: dockerImage,
+          image: fleetPackageRegistryDockerImage,
           portInContainer: 8080,
           port: dockerRegistryPort,
           args: dockerArgs,
@@ -132,7 +135,6 @@ export function createTestConfig(
       servicesRequiredForTestAnalysis: ['datasetQualityFtrConfig', 'registry'],
       services: {
         ...services,
-        packageService: PackageService,
         datasetQualityFtrConfig: () => config,
         registry: RegistryProvider,
         logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>

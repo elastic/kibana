@@ -18,13 +18,7 @@
             "text": "ConsoleUIPlugin"
           },
           " implements ",
-          {
-            "pluginId": "@kbn/core-plugins-browser",
-            "scope": "public",
-            "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "console",
@@ -49,7 +43,7 @@
             "section": "def-public.AppSetupUIPluginDependencies",
             "text": "AppSetupUIPluginDependencies"
           },
-          ", object>"
+          ", never>"
         ],
         "path": "src/platform/plugins/shared/console/public/plugin.ts",
         "deprecated": false,
@@ -77,13 +71,7 @@
                 "label": "ctx",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<object>"
                 ],
                 "path": "src/platform/plugins/shared/console/public/plugin.ts",
@@ -103,14 +91,8 @@
             "description": [],
             "signature": [
               "({ notifications, getStartServices, http }: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
-              "<object, unknown>, { devTools, home, share, usageCollection }: ",
+              "CoreSetup",
+              "<{}, unknown>, { devTools, home, share, usageCollection }: ",
               {
                 "pluginId": "console",
                 "scope": "public",
@@ -139,14 +121,8 @@
                 "label": "{ notifications, getStartServices, http }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
-                  "<object, unknown>"
+                  "CoreSetup",
+                  "<{}, unknown>"
                 ],
                 "path": "src/platform/plugins/shared/console/public/plugin.ts",
                 "deprecated": false,
@@ -186,13 +162,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", deps: ",
               {
                 "pluginId": "console",
@@ -222,13 +192,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/platform/plugins/shared/console/public/plugin.ts",
                 "deprecated": false,

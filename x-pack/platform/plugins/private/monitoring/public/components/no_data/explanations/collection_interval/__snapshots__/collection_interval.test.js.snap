@@ -1,0 +1,170 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExplainCollectionInterval collection interval setting updates should show a success message while updated = true 1`] = `
+Array [
+  <h2
+    class="euiTitle emotion-euiTitle-l"
+  >
+    Success! Wait a moment please.
+  </h2>,
+  <hr
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+  />,
+  <div
+    class="euiText emotion-euiText-m"
+  >
+    <p>
+      As soon as monitoring data appears in your cluster the page will automatically refresh with your monitoring dashboard. This only takes only a few seconds.
+    </p>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+  />,
+  <span
+    aria-label="Loading"
+    class="euiLoadingSpinner emotion-euiLoadingSpinner-l"
+    role="progressbar"
+  />,
+]
+`;
+
+exports[`ExplainCollectionInterval collection interval setting updates should show a waiting indicator while updating = true 1`] = `
+Array [
+  <h2
+    class="euiTitle emotion-euiTitle-l"
+  >
+    Monitoring is currently off
+  </h2>,
+  <span
+    class="emotion-euiTextColor-subdued"
+  >
+    <div
+      class="euiText emotion-euiText-m"
+    >
+      <p>
+        Monitoring provides insight to your hardware performance and load.
+      </p>
+    </div>
+  </span>,
+  <hr
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+  />,
+  <div
+    class="euiText emotion-euiText-m"
+  >
+    <p>
+      We checked the cluster settings and found that 
+      <code>
+        xpack.monitoring.collection.interval
+      </code>
+       is set to 
+      <code>
+        -1
+      </code>
+      .
+    </p>
+    <p>
+      The collection interval setting needs to be a positive integer (10s is recommended) in order for the collection agents to be active.
+    </p>
+    <p>
+      Would you like us to change it and enable monitoring?
+    </p>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+  />,
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-fill-disabled"
+        data-test-subj="enableCollectionInterval"
+        disabled=""
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          <span
+            aria-label="Loading"
+            class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+            role="progressbar"
+            style="border-color: #1750ba currentcolor currentcolor currentcolor;"
+          />
+          Turn on monitoring
+        </span>
+      </button>
+    </div>
+  </div>,
+]
+`;
+
+exports[`ExplainCollectionInterval should explain about xpack.monitoring.collection.interval setting 1`] = `
+Array [
+  <h2
+    class="euiTitle emotion-euiTitle-l"
+  >
+    Monitoring is currently off
+  </h2>,
+  <span
+    class="emotion-euiTextColor-subdued"
+  >
+    <div
+      class="euiText emotion-euiText-m"
+    >
+      <p>
+        Monitoring provides insight to your hardware performance and load.
+      </p>
+    </div>
+  </span>,
+  <hr
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+  />,
+  <div
+    class="euiText emotion-euiText-m"
+  >
+    <p>
+      We checked the cluster settings and found that 
+      <code>
+        xpack.monitoring.collection.interval
+      </code>
+       is set to 
+      <code>
+        -1
+      </code>
+      .
+    </p>
+    <p>
+      The collection interval setting needs to be a positive integer (10s is recommended) in order for the collection agents to be active.
+    </p>
+    <p>
+      Would you like us to change it and enable monitoring?
+    </p>
+  </div>,
+  <div
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+  />,
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-fill-primary"
+        data-test-subj="enableCollectionInterval"
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          Turn on monitoring
+        </span>
+      </button>
+    </div>
+  </div>,
+]
+`;

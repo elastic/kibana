@@ -20,7 +20,7 @@ import { getGenAiConfig } from '../helpers';
 
 export interface ConnectorSetupProps {
   conversation?: Conversation;
-  onConversationUpdate?: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
+  onConversationUpdate?: ({ cId }: { cId: string }) => Promise<void>;
   updateConversationsOnSaveConnector?: boolean;
 }
 
@@ -35,9 +35,9 @@ export const ConnectorSetup = ({
   );
   const { setApiConfig } = useConversation();
   // Access all conversations so we can add connector to all on initial setup
-  const { actionTypeRegistry, http } = useAssistantContext();
+  const { actionTypeRegistry, http, inferenceEnabled } = useAssistantContext();
 
-  const { refetch: refetchConnectors } = useLoadConnectors({ http });
+  const { refetch: refetchConnectors } = useLoadConnectors({ http, inferenceEnabled });
 
   const { data: actionTypes } = useLoadActionTypes({ http });
 
@@ -63,7 +63,6 @@ export const ConnectorSetup = ({
         if (updatedConversation) {
           onConversationUpdate?.({
             cId: updatedConversation.id,
-            cTitle: updatedConversation.title,
           });
 
           refetchConnectors?.();

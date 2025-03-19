@@ -6,24 +6,24 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
-import { RuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
-import { getEsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base_caller';
+import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
+import type { EsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base';
 import type { GraphNode } from '../../types';
 import { ESQL_SYNTAX_TRANSLATION_PROMPT } from './prompts';
+import {
+  getElasticRiskScoreFromOriginalRule,
+  getElasticSeverityFromOriginalRule,
+} from './severity';
 
 interface GetTranslateRuleNodeParams {
-  inferenceClient: InferenceClient;
-  connectorId: string;
+  esqlKnowledgeBase: EsqlKnowledgeBase;
   logger: Logger;
 }
 
 export const getTranslateRuleNode = ({
-  inferenceClient,
-  connectorId,
+  esqlKnowledgeBase,
   logger,
 }: GetTranslateRuleNodeParams): GraphNode => {
-  const esqlKnowledgeBaseCaller = getEsqlKnowledgeBase({ inferenceClient, connectorId, logger });
   return async (state) => {
     const indexPatterns =
       state.integration?.data_streams?.map((dataStream) => dataStream.index_pattern).join(',') ||
@@ -40,32 +40,20 @@ export const getTranslateRuleNode = ({
       splunk_rule: JSON.stringify(splunkRule, null, 2),
       indexPatterns,
     });
-    const response = await esqlKnowledgeBaseCaller(prompt);
+    const response = await esqlKnowledgeBase.translate(prompt);
 
-    const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';
+    const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1].trim() ?? '';
     const translationSummary = response.match(/## Translation Summary[\s\S]*$/)?.[0] ?? '';
-
-    const translationResult = getTranslationResult(esqlQuery);
-
     return {
       response,
-      comments: [translationSummary],
-      translation_result: translationResult,
+      comments: [generateAssistantComment(cleanMarkdown(translationSummary))],
       elastic_rule: {
-        title: state.original_rule.title,
-        integration_id: integrationId,
-        description: state.original_rule.description,
-        severity: 'low',
+        integration_ids: [integrationId],
         query: esqlQuery,
         query_language: 'esql',
+        risk_score: getElasticRiskScoreFromOriginalRule(state.original_rule),
+        severity: getElasticSeverityFromOriginalRule(state.original_rule),
       },
     };
   };
-};
-
-const getTranslationResult = (esqlQuery: string): RuleTranslationResult => {
-  if (esqlQuery.match(/\[(macro):[\s\S]*\]/)) {
-    return RuleTranslationResult.PARTIAL;
-  }
-  return RuleTranslationResult.FULL;
 };

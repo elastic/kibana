@@ -17,23 +17,14 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 
-import { euiThemeVars } from '@kbn/ui-theme';
+import { useAnonymizationUpdater } from '../../../assistant/settings/use_settings_updater/use_anonymization_updater';
 import { Stats } from '../../../data_anonymization_editor/stats';
 import { ContextEditor } from '../../../data_anonymization_editor/context_editor';
 import * as i18n from '../anonymization_settings/translations';
-import {
-  useAnonymizationListUpdate,
-  UseAnonymizationListUpdateProps,
-} from '../anonymization_settings/use_anonymization_list_update';
-import {
-  DEFAULT_ANONYMIZATION_FIELDS,
-  DEFAULT_CONVERSATIONS,
-  DEFAULT_PROMPTS,
-  useSettingsUpdater,
-} from '../../../assistant/settings/use_settings_updater/use_settings_updater';
 import { useFetchAnonymizationFields } from '../../../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 import { AssistantSettingsBottomBar } from '../../../assistant/settings/assistant_settings_bottom_bar';
 import { useAssistantContext } from '../../../assistant_context';
@@ -52,75 +43,40 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
   modalMode = false,
   onClose,
 }) => {
-  const { toasts } = useAssistantContext();
-  const { data: anonymizationFields } = useFetchAnonymizationFields();
-  const [hasPendingChanges, setHasPendingChanges] = useState(false);
+  const { euiTheme } = useEuiTheme();
+  const { http, toasts } = useAssistantContext();
+  const { data: anonymizationFields, refetch } = useFetchAnonymizationFields();
 
   const {
-    anonymizationFieldsBulkActions,
-    setAnonymizationFieldsBulkActions,
-    setUpdatedAnonymizationData,
-    resetSettings,
-    saveSettings,
+    hasPendingChanges,
+    onListUpdated,
+    resetAnonymizationSettings,
+    saveAnonymizationSettings,
     updatedAnonymizationData,
-  } = useSettingsUpdater(
-    DEFAULT_CONVERSATIONS, // Anonymization settings do not require conversations
-    DEFAULT_PROMPTS, // Anonymization settings do not require prompts
-    false, // Anonymization settings do not require conversations
-    false, // Anonymization settings do not require prompts
-    anonymizationFields ?? DEFAULT_ANONYMIZATION_FIELDS
-  );
+  } = useAnonymizationUpdater({
+    anonymizationFields,
+    http,
+    toasts,
+  });
 
   const onCancelClick = useCallback(() => {
     onClose?.();
-    resetSettings();
-    setHasPendingChanges(false);
-  }, [onClose, resetSettings]);
+    resetAnonymizationSettings();
+  }, [onClose, resetAnonymizationSettings]);
 
-  const handleSave = useCallback(
-    async (param?: { callback?: () => void }) => {
-      await saveSettings();
-      toasts?.addSuccess({
-        iconType: 'check',
-        title: SETTINGS_UPDATED_TOAST_TITLE,
-      });
-      setHasPendingChanges(false);
-      param?.callback?.();
-    },
-    [saveSettings, toasts]
-  );
+  const handleSave = useCallback(async () => {
+    await saveAnonymizationSettings();
+    toasts?.addSuccess({
+      iconType: 'check',
+      title: SETTINGS_UPDATED_TOAST_TITLE,
+    });
+    await refetch();
+  }, [refetch, saveAnonymizationSettings, toasts]);
 
   const onSaveButtonClicked = useCallback(() => {
     handleSave();
     onClose?.();
   }, [handleSave, onClose]);
-
-  const handleAnonymizationFieldsBulkActions = useCallback<
-    UseAnonymizationListUpdateProps['setAnonymizationFieldsBulkActions']
-  >(
-    (value) => {
-      setHasPendingChanges(true);
-      setAnonymizationFieldsBulkActions(value);
-    },
-    [setAnonymizationFieldsBulkActions]
-  );
-
-  const handleUpdatedAnonymizationData = useCallback<
-    UseAnonymizationListUpdateProps['setUpdatedAnonymizationData']
-  >(
-    (value) => {
-      setHasPendingChanges(true);
-      setUpdatedAnonymizationData(value);
-    },
-    [setUpdatedAnonymizationData]
-  );
-
-  const onListUpdated = useAnonymizationListUpdate({
-    anonymizationFields: updatedAnonymizationData,
-    anonymizationFieldsBulkActions,
-    setAnonymizationFieldsBulkActions: handleAnonymizationFieldsBulkActions,
-    setUpdatedAnonymizationData: handleUpdatedAnonymizationData,
-  });
 
   if (modalMode) {
     return (
@@ -138,7 +94,7 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
               isDataAnonymizable={true}
               anonymizationFields={updatedAnonymizationData.data}
               titleSize="m"
-              gap={euiThemeVars.euiSizeS}
+              gap={euiTheme.size.s}
             />
           </EuiFlexGroup>
 
@@ -173,7 +129,7 @@ const AnonymizationSettingsManagementComponent: React.FC<Props> = ({
             isDataAnonymizable={true}
             anonymizationFields={updatedAnonymizationData.data}
             titleSize="m"
-            gap={euiThemeVars.euiSizeS}
+            gap={euiTheme.size.s}
           />
         </EuiFlexGroup>
 

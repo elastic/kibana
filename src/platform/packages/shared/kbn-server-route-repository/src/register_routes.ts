@@ -26,6 +26,7 @@ import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { isZod } from '@kbn/zod';
 import { merge, omit } from 'lodash';
 import { Observable, isObservable } from 'rxjs';
+import { assertAllParsableSchemas } from '@kbn/zod-helpers';
 import { makeZodValidationObject } from './make_zod_validation_object';
 import { validateAndDecodeParams } from './validate_and_decode_params';
 import { noParamsValidationObject, passThroughValidationObject } from './validation_objects';
@@ -42,11 +43,13 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
   repository,
   logger,
   dependencies,
+  runDevModeChecks,
 }: {
   core: CoreSetup;
   repository: Record<string, ServerRoute<string, RouteParamsRT | undefined, any, any, any>>;
   logger: Logger;
   dependencies: TDependencies;
+  runDevModeChecks: boolean;
 }) {
   const routes = Object.values(repository);
 
@@ -60,6 +63,25 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
     const options: DefaultRouteCreateOptions = 'options' in route ? route.options : {};
 
     const { method, pathname, version } = parseEndpoint(endpoint);
+
+    if (runDevModeChecks && isZod(params)) {
+      const dangerousSchemas = assertAllParsableSchemas(params);
+      if (dangerousSchemas.size > 0) {
+        for (const { key, schema } of dangerousSchemas) {
+          const typeName = schema._def.typeName;
+
+          if (typeName === 'ZodEffects') {
+            logger.warn(
+              `Warning for ${endpoint}: schema ${typeName} at ${key} has transforming effects and could lead to unexpected behaviour`
+            );
+          } else {
+            logger.warn(
+              `Warning for ${endpoint}: schema ${typeName} at ${key} is not inspectable and could lead to runtime exceptions, convert it to a supported schema`
+            );
+          }
+        }
+      }
+    }
 
     const wrappedHandler = async (
       context: RequestHandlerContext,
@@ -96,6 +118,12 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         }
 
         if (isKibanaResponse(result)) {
+          if (result.status >= 500) {
+            logger.error(() => `HTTP ${result.status}: ${JSON.stringify(result.payload)}`);
+          } else if (result.status >= 400) {
+            logger.debug(() => `HTTP ${result.status}: ${JSON.stringify(result.payload)}`);
+          }
+
           return result;
         } else if (isObservable(result)) {
           const controller = new AbortController();
@@ -113,8 +141,6 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
           return response.ok({ body });
         }
       } catch (error) {
-        logger.error(error);
-
         const opts = {
           statusCode: 500,
           body: {
@@ -132,6 +158,12 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         if (isBoom(error)) {
           opts.statusCode = error.output.statusCode;
           opts.body.attributes.data = error?.data;
+        }
+
+        if (opts.statusCode >= 500) {
+          logger.error(() => error);
+        } else {
+          logger.debug(() => error);
         }
 
         return response.custom(opts);
@@ -169,7 +201,8 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       router.versioned[method]({
         path: pathname,
         access,
-        // @ts-expect-error we are essentially calling multiple methods at the same type so TS gets confused
+        summary: options.summary,
+        description: options.description,
         options: omit(options, 'access', 'description', 'summary', 'deprecated', 'discontinued'),
         security,
       }).addVersion(

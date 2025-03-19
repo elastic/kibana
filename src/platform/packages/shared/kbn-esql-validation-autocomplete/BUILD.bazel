@@ -21,7 +21,8 @@ SRCS = glob(
 )
 
 SHARED_DEPS = [
-  "//packages/kbn-i18n",
+  "//src/platform/packages/shared/kbn-i18n",
+  "//src/platform/packages/shared/kbn-esql-types",
   "@npm//fastest-levenshtein",
 ]
 

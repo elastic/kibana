@@ -12,6 +12,7 @@ export type {
   FunctionCallingMode,
   ChatCompleteStreamResponse,
   ChatCompleteResponse,
+  ChatCompleteRetryConfiguration,
 } from './api';
 export type {
   BoundChatCompleteAPI,
@@ -29,6 +30,9 @@ export {
 } from './events';
 export {
   MessageRole,
+  type MessageContent,
+  type MessageContentImage,
+  type MessageContentText,
   type Message,
   type AssistantMessage,
   type UserMessage,
@@ -47,6 +51,7 @@ export {
   type UnvalidatedToolCall,
   type ToolChoice,
 } from './tools';
+export type { ChatCompleteMetadata, ConnectorTelemetryMetadata } from './metadata';
 export {
   isChatCompletionChunkEvent,
   isChatCompletionEvent,

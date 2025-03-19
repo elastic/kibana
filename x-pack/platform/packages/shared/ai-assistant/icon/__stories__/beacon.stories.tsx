@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 
 import { AssistantBeacon as Component } from '../beacon';
 
@@ -19,7 +19,12 @@ export default {
       options: ['original', 's', 'm', 'l', 'xl', 'xxl'],
       defaultValue: 'xxl',
     },
+    backgroundColor: {
+      control: 'select',
+      options: ['body', 'emptyShade', 'lightShade', 'darkShade'],
+      defaultValue: 'body',
+    },
   },
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
-export const Beacon: ComponentStory<typeof Component> = (args) => <Component {...args} />;
+export const Beacon: StoryFn<typeof Component> = (args) => <Component {...args} />;

@@ -19,8 +19,8 @@ const _getEditPath = (name: string, encode = true): string => {
   return `${BASE_PATH}${EDIT_PATH}/${encode ? encodeURIComponent(name) : name}`;
 };
 
-const _getCreatePath = (): string => {
-  return `${BASE_PATH}${CREATE_PATH}`;
+const _getCreatePath = (name?: string): string => {
+  return `${BASE_PATH}${CREATE_PATH}${name ? `?name=${encodeURIComponent(name)}` : ''}`;
 };
 
 const _getClonePath = (name: string, encode = true): string => {
@@ -55,7 +55,9 @@ export const getListPath = ({
 } = {}): string => _getListPath(inspectedPipelineName);
 export const getEditPath = ({ pipelineName }: { pipelineName: string }): string =>
   _getEditPath(pipelineName, true);
-export const getCreatePath = (): string => _getCreatePath();
+
+export const getCreatePath = ({ pipelineName }: { pipelineName?: string } = {}): string =>
+  _getCreatePath(pipelineName);
 export const getClonePath = ({ clonedPipelineName }: { clonedPipelineName: string }): string =>
   _getClonePath(clonedPipelineName, true);
 export const getCreateFromCsvPath = (): string => _getCreateFromCsvPath();

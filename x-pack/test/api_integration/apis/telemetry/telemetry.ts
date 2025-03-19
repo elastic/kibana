@@ -27,11 +27,12 @@ import type {
   CacheDetails,
 } from '@kbn/telemetry-collection-manager-plugin/server/types';
 import { assertTelemetryPayload } from '@kbn/telemetry-tools';
+import type { TelemetrySchemaObject } from '@kbn/telemetry-tools/src/schema_ftr_validations/schema_to_config_schema';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import type { SecurityService } from '@kbn/ftr-common-functional-ui-services';
+import type { SecurityService } from '@kbn/ftr-common-functional-services';
 import basicClusterFixture from './fixtures/basiccluster.json';
 import multiClusterFixture from './fixtures/multicluster.json';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -167,7 +168,7 @@ export default function ({ getService }: FtrProviderContext) {
           monitoringRootTelemetrySchema.properties.monitoringTelemetry.properties.stats.items
         );
 
-        const plugins = [
+        const schemas = [
           ossPluginsTelemetrySchema,
           ossPackagesTelemetrySchema,
           ossPlatformTelemetrySchema,
@@ -176,7 +177,8 @@ export default function ({ getService }: FtrProviderContext) {
           xpackObservabilityTelemetrySchema,
           xpackSearchTelemetrySchema,
           xpackSecurityTelemetrySchema,
-        ].reduce((acc, schema) => deepmerge(acc, schema));
+        ] as TelemetrySchemaObject[];
+        const plugins = schemas.reduce((acc, schema) => deepmerge(acc, schema));
 
         try {
           assertTelemetryPayload({ root, plugins }, localXPack);

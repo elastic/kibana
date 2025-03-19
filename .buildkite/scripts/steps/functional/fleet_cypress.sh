@@ -9,7 +9,7 @@ export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 echo "--- Fleet Cypress tests (Chrome)"
 
-cd x-pack/plugins/fleet
+cd x-pack/platform/plugins/shared/fleet
 
 set +e
 yarn cypress:run:reporter; status=$?; yarn cypress_space_awareness:run:reporter; space_status=$?; yarn junit:merge || :; [ "$status" -ne 0 ] && exit $status || [ "$space_status" -ne 0 ] && exit $space_status || exit 0

@@ -71,3 +71,32 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "a2cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb56f",
+    "index": ".entities.v1.latest.security_service_default",
+    "source": {
+      "@timestamp": "2024-09-11T11:24:15.591Z",
+      "event": {
+        "ingested": "2024-09-11T11:26:49.641707Z"
+      },
+      "service": {
+        "name": "test-service-name",
+        "id": "test-service-id",
+        "type": "system",
+        "ephemeral_id": "test-ephemeral-id",
+        "version": "7.15.0",
+        "state": "running",
+        "environment": "production"
+      },
+      "entity": {
+        "name": "ali-ubuntu-server",
+        "id": "ali-ubuntu-server",
+        "type": "service",
+        "source": ".ds-logs-endpoint.events.process-default-2024.10.23-000001"
+      }
+    }
+  }
+}

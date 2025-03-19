@@ -31,7 +31,7 @@ describe('Get Insights Route Handler', () => {
 
     registerGetInsightsRoute(router, mockEndpointContext);
 
-    callRoute = async (params, authz = { canReadSecuritySolution: true }) => {
+    callRoute = async (params, authz = { canReadWorkflowInsights: true }) => {
       const mockContext = {
         core: {
           security: {
@@ -96,7 +96,7 @@ describe('Get Insights Route Handler', () => {
 
   describe('with invalid privileges', () => {
     it('should return forbidden if user lacks read privileges', async () => {
-      await callRoute({}, { canReadSecuritySolution: false });
+      await callRoute({}, { canReadWorkflowInsights: false });
 
       expect(mockResponse.forbidden).toHaveBeenCalled();
     });

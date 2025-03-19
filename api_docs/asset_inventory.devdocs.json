@@ -31,7 +31,42 @@
       "path": "x-pack/solutions/security/plugins/asset_inventory/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "assetInventory",
+          "id": "def-public.AssetInventoryPluginStart.getAssetInventoryPage",
+          "type": "Function",
+          "tags": [],
+          "label": "getAssetInventoryPage",
+          "description": [],
+          "signature": [
+            "(assetInventoryStartDeps: ",
+            "AppPluginStartDependencies",
+            ") => JSX.Element"
+          ],
+          "path": "x-pack/solutions/security/plugins/asset_inventory/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "assetInventory",
+              "id": "def-public.AssetInventoryPluginStart.getAssetInventoryPage.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "assetInventoryStartDeps",
+              "description": [],
+              "signature": [
+                "AppPluginStartDependencies"
+              ],
+              "path": "x-pack/solutions/security/plugins/asset_inventory/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }

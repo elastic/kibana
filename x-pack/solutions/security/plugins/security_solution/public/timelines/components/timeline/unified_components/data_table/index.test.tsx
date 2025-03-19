@@ -10,14 +10,16 @@ import React from 'react';
 import { TimelineDataTable } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
 import { DataLoadingState } from '@kbn/unified-data-table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import type { ComponentProps } from 'react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
-import { timelineActions } from '../../../../store';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import * as timelineActions from '../../../../store/actions';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 jest.mock('../../../../../sourcerer/containers');
 
@@ -31,9 +33,11 @@ jest.mock('react-router-dom', () => ({
 
 const onFieldEditedMock = jest.fn();
 const refetchMock = jest.fn();
-const onChangePageMock = jest.fn();
+const onFetchMoreRecordsMock = jest.fn();
 
 const openFlyoutMock = jest.fn();
+
+const updateSampleSizeSpy = jest.spyOn(timelineActions, 'updateSampleSize');
 
 jest.mock('@kbn/expandable-flyout');
 
@@ -52,6 +56,11 @@ type TestComponentProps = Partial<ComponentProps<typeof TimelineDataTable>> & {
 // that is why we are setting it to 10s
 const SPECIAL_TEST_TIMEOUT = 50000;
 
+const mockDataView = new DataView({
+  spec: mockSourcererScope.sourcererDataView,
+  fieldFormats: fieldFormatsMock,
+});
+
 const TestComponent = (props: TestComponentProps) => {
   const { store = createMockStore(), ...restProps } = props;
   useSourcererDataView();
@@ -60,6 +69,7 @@ const TestComponent = (props: TestComponentProps) => {
       <TimelineDataTable
         columns={initialEnrichedColumns}
         columnIds={initialEnrichedColumnsIds}
+        dataView={mockDataView}
         activeTab={TimelineTabs.query}
         timelineId={TimelineId.test}
         itemsPerPage={50}
@@ -72,7 +82,7 @@ const TestComponent = (props: TestComponentProps) => {
         refetch={refetchMock}
         dataLoadingState={DataLoadingState.loaded}
         totalCount={mockTimelineData.length}
-        onFetchMoreRecords={onChangePageMock}
+        onFetchMoreRecords={onFetchMoreRecordsMock}
         updatedAt={Date.now()}
         onSetColumns={jest.fn()}
         onFilter={jest.fn()}
@@ -97,6 +107,7 @@ describe('unified data table', () => {
     });
   });
   afterEach(() => {
+    updateSampleSizeSpy.mockClear();
     jest.clearAllMocks();
   });
 
@@ -199,7 +210,7 @@ describe('unified data table', () => {
   });
 
   it(
-    'should refetch on sample size change',
+    'should update sample size correctly',
     async () => {
       render(<TestComponent />);
 
@@ -217,8 +228,11 @@ describe('unified data table', () => {
         target: { value: '10' },
       });
 
+      updateSampleSizeSpy.mockClear();
+
       await waitFor(() => {
-        expect(refetchMock).toHaveBeenCalledTimes(1);
+        expect(updateSampleSizeSpy).toHaveBeenCalledTimes(1);
+        expect(updateSampleSizeSpy).toHaveBeenCalledWith({ id: TimelineId.test, sampleSize: 10 });
       });
     },
     SPECIAL_TEST_TIMEOUT
@@ -257,12 +271,12 @@ describe('unified data table', () => {
       });
       expect(
         screen.getAllByTestId('unifiedDataTableRowHeightSettings_lineCountNumber')[0]
-      ).toHaveValue(String(rowHeight.initial));
+      ).toHaveValue(rowHeight.initial);
 
       fireEvent.change(
         screen.getAllByTestId('unifiedDataTableRowHeightSettings_lineCountNumber')[0],
         {
-          target: { value: String(rowHeight.new) },
+          target: { value: rowHeight.new },
         }
       );
 
@@ -315,7 +329,7 @@ describe('unified data table', () => {
         expect(screen.getByTestId('dscGridSampleSizeFetchMoreLink')).toBeVisible();
         fireEvent.click(screen.getByTestId('dscGridSampleSizeFetchMoreLink'));
         await waitFor(() => {
-          expect(onChangePageMock).toHaveBeenNthCalledWith(1, 1);
+          expect(onFetchMoreRecordsMock).toHaveBeenCalledTimes(1);
         });
       },
       SPECIAL_TEST_TIMEOUT

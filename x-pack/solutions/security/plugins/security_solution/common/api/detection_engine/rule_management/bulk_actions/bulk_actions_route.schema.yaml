@@ -75,6 +75,7 @@ components:
       type: string
       enum:
         - IMMUTABLE
+        - PREBUILT_CUSTOMIZATION_LICENSE
         - MACHINE_LEARNING_AUTH
         - MACHINE_LEARNING_INDEX_PATTERN
         - ESQL_INDEX_PATTERN
@@ -313,7 +314,7 @@ components:
         - delete_investigation_fields
         - set_investigation_fields
 
-    # Per rulesClient.bulkEdit rules actions operation contract (x-pack/plugins/alerting/server/rules_client/rules_client.ts) normalized rule action object is expected (NormalizedAlertAction) as value for the edit operation
+    # Per rulesClient.bulkEdit rules actions operation contract (x-pack/platform/plugins/shared/alerting/server/rules_client/rules_client.ts) normalized rule action object is expected (NormalizedAlertAction) as value for the edit operation
     NormalizedRuleAction:
       type: object
       properties:

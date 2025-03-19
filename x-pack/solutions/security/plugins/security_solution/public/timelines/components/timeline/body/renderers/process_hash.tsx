@@ -20,12 +20,12 @@ const HashFlexGroup = styled(EuiFlexGroup)`
 interface Props {
   contextId: string;
   eventId: string;
-  isDraggable?: boolean;
   processHashSha256: string | null | undefined;
+  scopeId: string;
 }
 
 export const ProcessHash = React.memo<Props>(
-  ({ contextId, eventId, isDraggable, processHashSha256 }) => {
+  ({ contextId, eventId, processHashSha256, scopeId }) => {
     if (isNillEmptyOrNotFinite(processHashSha256)) {
       return null;
     }
@@ -34,11 +34,11 @@ export const ProcessHash = React.memo<Props>(
       <HashFlexGroup alignItems="center" direction="column" gutterSize="none">
         <TokensFlexItem grow={false} component="div">
           <DraggableBadge
+            scopeId={scopeId}
             contextId={contextId}
             eventId={eventId}
             field="process.hash.sha256"
             iconType="number"
-            isDraggable={isDraggable}
             value={processHashSha256}
             fieldType="keyword"
             isAggregatable={true}

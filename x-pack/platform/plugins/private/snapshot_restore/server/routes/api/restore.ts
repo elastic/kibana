@@ -6,7 +6,6 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { SnapshotRestore, SnapshotRestoreShardEs } from '../../../common/types';
 import { serializeRestoreSettings } from '../../../common/lib';
@@ -22,7 +21,16 @@ export function registerRestoreRoutes({
 }: RouteDependencies) {
   // GET all snapshot restores
   router.get(
-    { path: addBasePath('restores'), validate: false },
+    {
+      path: addBasePath('restores'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = (await ctx.core).elasticsearch;
 
@@ -96,6 +104,12 @@ export function registerRestoreRoutes({
   router.post(
     {
       path: addBasePath('restore/{repository}/{snapshot}'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: { body: restoreSettingsSchema, params: restoreParamsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -105,10 +119,10 @@ export function registerRestoreRoutes({
 
       try {
         const response = await clusterClient.asCurrentUser.snapshot.restore({
+          // TODO: Bring {@link RestoreSettingsEs} in line with {@link RestoreRequest}
+          ...serializeRestoreSettings(restoreSettings),
           repository,
           snapshot,
-          // TODO: Bring {@link RestoreSettingsEs} in line with {@link RestoreRequest['body']}
-          body: serializeRestoreSettings(restoreSettings) as estypes.SnapshotRestoreRequest['body'],
         });
 
         return res.ok({ body: response });

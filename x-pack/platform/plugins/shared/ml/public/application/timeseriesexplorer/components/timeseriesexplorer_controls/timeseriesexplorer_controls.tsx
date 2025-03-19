@@ -14,6 +14,7 @@ import {
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiPopover,
   htmlIdGenerator,
 } from '@elastic/eui';
@@ -25,6 +26,9 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
+import type { MlJobState } from '@elastic/elasticsearch/lib/api/types';
+import { CASES_TOAST_MESSAGES_TITLES } from '../../../../cases/constants';
+import type { CombinedJobWithStats } from '../../../../../server/shared';
 import type { JobId } from '../../../../../common/types/anomaly_detection_jobs/job';
 import { useMlKibana } from '../../../contexts/kibana';
 import { useCasesModal } from '../../../contexts/kibana/use_cases_modal';
@@ -32,12 +36,13 @@ import { getDefaultSingleMetricViewerPanelTitle } from '../../../../embeddables/
 import type { MlEntity } from '../../../../embeddables';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../../../../embeddables/constants';
 import type { SingleMetricViewerEmbeddableState } from '../../../../embeddables/types';
+import { ForecastingModal } from '../forecasting_modal/forecasting_modal';
+import type { Entity } from '../entity_control/entity_control';
 
 interface Props {
   forecastId?: string;
   selectedDetectorIndex: number;
   selectedEntities?: MlEntity;
-  selectedJobId: JobId;
   showAnnotationsCheckbox: boolean;
   showAnnotations: boolean;
   showForecastCheckbox: boolean;
@@ -47,6 +52,17 @@ interface Props {
   onShowModelBoundsChange: () => void;
   onShowAnnotationsChange: () => void;
   onShowForecastChange: () => void;
+  fullRefresh: boolean;
+  loading: boolean;
+  hasResults: boolean;
+  selectedJob: CombinedJobWithStats;
+  selectedJobId: string;
+  jobs: CombinedJobWithStats[];
+  setForecastId: (forecastId: string) => void;
+  entities: Entity[];
+  jobState: MlJobState;
+  earliestRecordTimestamp: number;
+  latestRecordTimestamp: number;
 }
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -74,6 +90,16 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
   onShowAnnotationsChange,
   onShowModelBoundsChange,
   onShowForecastChange,
+  fullRefresh,
+  loading,
+  hasResults,
+  setForecastId,
+  selectedJob,
+  entities,
+  jobs,
+  jobState,
+  earliestRecordTimestamp,
+  latestRecordTimestamp,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [createInDashboard, setCreateInDashboard] = useState<boolean>(false);
@@ -88,7 +114,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
 
   const globalTimeRange = useTimeRangeUpdates(true);
 
-  const canEditDashboards = capabilities.dashboard?.createNew ?? false;
+  const canEditDashboards = capabilities.dashboard_v2?.createNew ?? false;
 
   const closePopoverOnAction = useCallback(
     (actionCallback: Function) => {
@@ -100,7 +126,13 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
     [setIsMenuOpen]
   );
 
-  const openCasesModalCallback = useCasesModal(ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE);
+  const openCasesModalCallback = useCasesModal(
+    ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
+    CASES_TOAST_MESSAGES_TITLES.SINGLE_METRIC_VIEWER
+  );
+
+  const showControls =
+    (fullRefresh === false || loading === false) && hasResults === true && jobs.length > 0;
 
   const menuPanels: EuiContextMenuPanelDescriptor[] = [
     {
@@ -113,6 +145,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
               defaultMessage="Add to dashboard"
             />
           ),
+          icon: 'dashboardApp',
           onClick: closePopoverOnAction(() => {
             setCreateInDashboard(true);
           }),
@@ -131,6 +164,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
           defaultMessage="Add to case"
         />
       ),
+      icon: 'casesApp',
       onClick: closePopoverOnAction(() => {
         openCasesModalCallback({
           forecastId,
@@ -175,72 +209,101 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
 
   return (
     <>
-      <EuiFlexGroup style={{ float: 'right' }} alignItems="center">
-        {showModelBoundsCheckbox && (
-          <EuiFlexItem grow={false}>
-            <EuiCheckbox
-              id="toggleModelBoundsCheckbox"
-              label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
-                defaultMessage: 'show model bounds',
-              })}
-              checked={showModelBounds}
-              onChange={onShowModelBoundsChange}
-            />
+      <EuiFlexGroup
+        style={{ float: 'right' }}
+        alignItems="center"
+        justifyContent="flexEnd"
+        gutterSize="s"
+      >
+        {showModelBoundsCheckbox && showControls && (
+          <EuiFlexItem grow={false} css={{ minWidth: '170px' }}>
+            <EuiFormRow hasEmptyLabelSpace>
+              <EuiCheckbox
+                id="toggleModelBoundsCheckbox"
+                label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
+                  defaultMessage: 'show model bounds',
+                })}
+                checked={showModelBounds}
+                onChange={onShowModelBoundsChange}
+              />
+            </EuiFormRow>
           </EuiFlexItem>
         )}
 
-        {showAnnotationsCheckbox && (
+        {showAnnotationsCheckbox && showControls && (
           <EuiFlexItem grow={false}>
-            <EuiCheckbox
-              id="toggleAnnotationsCheckbox"
-              label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
-                defaultMessage: 'annotations',
-              })}
-              checked={showAnnotations}
-              onChange={onShowAnnotationsChange}
-            />
+            <EuiFormRow hasEmptyLabelSpace>
+              <EuiCheckbox
+                id="toggleAnnotationsCheckbox"
+                label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
+                  defaultMessage: 'annotations',
+                })}
+                checked={showAnnotations}
+                onChange={onShowAnnotationsChange}
+              />
+            </EuiFormRow>
           </EuiFlexItem>
         )}
 
-        {showForecastCheckbox && (
-          <EuiFlexItem grow={false}>
-            <EuiCheckbox
-              id="toggleShowForecastCheckbox"
-              label={
-                <span data-test-subj={'mlForecastCheckbox'}>
-                  {i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
-                    defaultMessage: 'show forecast',
-                  })}
-                </span>
-              }
-              checked={showForecast}
-              onChange={onShowForecastChange}
-            />
+        {showForecastCheckbox && showControls && (
+          <EuiFlexItem grow={false} css={{ minWidth: '120px' }}>
+            <EuiFormRow hasEmptyLabelSpace>
+              <EuiCheckbox
+                id="toggleShowForecastCheckbox"
+                label={
+                  <span data-test-subj={'mlForecastCheckbox'}>
+                    {i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
+                      defaultMessage: 'show forecast',
+                    })}
+                  </span>
+                }
+                checked={showForecast}
+                onChange={onShowForecastChange}
+              />
+            </EuiFormRow>
           </EuiFlexItem>
         )}
 
-        {canEditDashboards ? (
-          <EuiFlexItem grow={false} css={{ marginLeft: 'auto !important', alignSelf: 'baseline' }}>
-            <EuiPopover
-              button={
-                <EuiButtonIcon
-                  size="s"
-                  aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
-                    defaultMessage: 'Actions',
-                  })}
-                  color="text"
-                  iconType="boxesHorizontal"
-                  onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
-                  data-test-subj="mlAnomalyTimelinePanelMenu"
-                />
-              }
-              isOpen={isMenuOpen}
-              closePopover={setIsMenuOpen.bind(null, false)}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-            >
-              <EuiContextMenu initialPanelId={0} panels={menuPanels} />
-            </EuiPopover>
+        <EuiFormRow hasEmptyLabelSpace>
+          <ForecastingModal
+            job={selectedJob}
+            jobState={jobState}
+            detectorIndex={selectedDetectorIndex}
+            entities={entities}
+            earliestRecordTimestamp={earliestRecordTimestamp}
+            latestRecordTimestamp={latestRecordTimestamp}
+            setForecastId={setForecastId}
+            className="forecast-controls"
+            selectedForecastId={forecastId}
+          />
+        </EuiFormRow>
+
+        {canEditDashboards && showControls ? (
+          <EuiFlexItem grow={false}>
+            <EuiFormRow hasEmptyLabelSpace>
+              <EuiPopover
+                button={
+                  <EuiButtonIcon
+                    aria-label={i18n.translate('xpack.ml.explorer.swimlaneActions', {
+                      defaultMessage: 'Actions',
+                    })}
+                    color="text"
+                    display="base"
+                    isSelected={isMenuOpen}
+                    iconType="boxesHorizontal"
+                    onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
+                    data-test-subj="mlAnomalyTimelinePanelMenu"
+                    size="m"
+                  />
+                }
+                isOpen={isMenuOpen}
+                closePopover={setIsMenuOpen.bind(null, false)}
+                panelPaddingSize="none"
+                anchorPosition="downLeft"
+              >
+                <EuiContextMenu initialPanelId={0} panels={menuPanels} />
+              </EuiPopover>
+            </EuiFormRow>
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>

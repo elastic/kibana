@@ -5,7 +5,7 @@ set -euo pipefail
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Build API Docs"
-node --max-old-space-size=12000 scripts/build_api_docs
+node --max-old-space-size=24000 scripts/build_api_docs
 
 if [[ "${PUBLISH_API_DOCS_CHANGES:-}" == "true" ]]; then
   echo "--- Store API Docs changes in Buildkite"

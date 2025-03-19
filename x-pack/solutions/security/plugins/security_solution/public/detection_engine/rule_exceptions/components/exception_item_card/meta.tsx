@@ -7,6 +7,7 @@
 
 import React, { memo, useMemo, useState } from 'react';
 import type { EuiContextMenuPanelProps } from '@elastic/eui';
+import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiContextMenuItem,
@@ -17,20 +18,15 @@ import {
   EuiText,
   EuiButtonEmpty,
   EuiPopover,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import styled from 'styled-components';
 
 import { LinkToRuleDetails, LinkToListDetails } from '../../../../exceptions/components';
 import * as i18n from './translations';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import type { ExceptionListRuleReferencesSchema } from '../../../../../common/api/detection_engine/rule_exceptions';
-
-const StyledFlexItem = styled(EuiFlexItem)`
-  border-right: 1px solid #d3dae6;
-  padding: 4px 12px 4px 0;
-`;
 
 export interface ExceptionItemCardMetaInfoProps {
   item: ExceptionListItemSchema;
@@ -48,6 +44,21 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
     const onCloseRulesPopover = () => setIsRulesPopoverOpen(false);
     const onClosListsPopover = () => setIsListsPopoverOpen(false);
 
+    const { euiTheme } = useEuiTheme();
+    const metaInfoItemStyles = css`
+      border-right: ${euiTheme.border.thin};
+      padding: ${euiTheme.size.xs} ${euiTheme.size.m} ${euiTheme.size.xs} 0;
+    `;
+    const referenceLinksContainerStyles = css`
+      div {
+        color: ${euiTheme.colors.textPrimary};
+        padding: ${euiTheme.size.s};
+
+        &:not(:last-child) {
+          border-bottom: ${euiTheme.border.thin};
+        }
+      }
+    `;
     const isExpired = useMemo(
       () => (item.expire_time ? new Date(item.expire_time) <= new Date() : false),
       [item]
@@ -73,7 +84,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
       if (listAndReferences == null) return <></>;
 
       return (
-        <StyledFlexItem grow={false}>
+        <EuiFlexItem css={metaInfoItemStyles} grow={false}>
           <EuiPopover
             button={
               <EuiButtonEmpty
@@ -90,11 +101,18 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             data-test-subj={`${dataTestSubj}-rulesPopover`}
             id={'rulesPopover'}
           >
-            <EuiContextMenuPanel size="s" items={itemActions} />
+            <EuiContextMenuPanel size="s" css={referenceLinksContainerStyles} items={itemActions} />
           </EuiPopover>
-        </StyledFlexItem>
+        </EuiFlexItem>
       );
-    }, [listAndReferences, dataTestSubj, isRulesPopoverOpen, itemActions]);
+    }, [
+      listAndReferences,
+      metaInfoItemStyles,
+      dataTestSubj,
+      isRulesPopoverOpen,
+      referenceLinksContainerStyles,
+      itemActions,
+    ]);
 
     const listsAffected = useMemo((): JSX.Element => {
       if (listAndReferences == null) return <></>;
@@ -120,6 +138,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             >
               <EuiContextMenuPanel
                 size="s"
+                css={referenceLinksContainerStyles}
                 items={[
                   <EuiContextMenuItem
                     data-test-subj={`${dataTestSubj}-listsAffected-${listAndReferences.id}`}
@@ -142,7 +161,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
       } else {
         return <></>;
       }
-    }, [listAndReferences, dataTestSubj, isListsPopoverOpen]);
+    }, [listAndReferences, dataTestSubj, isListsPopoverOpen, referenceLinksContainerStyles]);
 
     return (
       <EuiFlexGroup
@@ -151,7 +170,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
         gutterSize="s"
         data-test-subj={dataTestSubj}
       >
-        <StyledFlexItem grow={false}>
+        <EuiFlexItem css={metaInfoItemStyles} grow={false}>
           <MetaInfoDetails
             fieldName="created_by"
             label={i18n.EXCEPTION_ITEM_CREATED_LABEL}
@@ -159,8 +178,8 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             value2={item.created_by}
             dataTestSubj={`${dataTestSubj}-createdBy`}
           />
-        </StyledFlexItem>
-        <StyledFlexItem grow={false}>
+        </EuiFlexItem>
+        <EuiFlexItem css={metaInfoItemStyles} grow={false}>
           <MetaInfoDetails
             fieldName="updated_by"
             label={i18n.EXCEPTION_ITEM_UPDATED_LABEL}
@@ -168,10 +187,10 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             value2={item.updated_by}
             dataTestSubj={`${dataTestSubj}-updatedBy`}
           />
-        </StyledFlexItem>
+        </EuiFlexItem>
         {item.expire_time != null && (
           <>
-            <StyledFlexItem grow={false}>
+            <EuiFlexItem css={metaInfoItemStyles} grow={false}>
               <MetaInfoDetails
                 fieldName="expire_time"
                 label={
@@ -180,7 +199,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
                 value1={<FormattedDate fieldName="expire_time" value={item.expire_time} />}
                 dataTestSubj={`${dataTestSubj}-expireTime`}
               />
-            </StyledFlexItem>
+            </EuiFlexItem>
           </>
         )}
         {listAndReferences != null && (

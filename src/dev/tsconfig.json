@@ -10,6 +10,7 @@
   ],
   "exclude": [
     "target/**/*",
+    "packages/**/*"
   ],
   "kbn_references": [
     "@kbn/core",

@@ -9,6 +9,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
 
 import { EuiPanel } from '@elastic/eui';
+import { EMPTY_SEVERITY_COUNT, EntityType } from '../../../common/search_strategy';
 import { useRiskScoreKpi } from '../api/hooks/use_risk_score_kpi';
 import { useRiskScore } from '../api/hooks/use_risk_score';
 import { UserRiskScoreQueryId } from '../common/utils';
@@ -20,13 +21,10 @@ import type { State } from '../../common/store';
 import { UserRiskScoreTable } from './user_risk_score_table';
 import { usersSelectors } from '../../explore/users/store';
 import { useQueryToggle } from '../../common/containers/query_toggle';
-import { EMPTY_SEVERITY_COUNT, RiskScoreEntity } from '../../../common/search_strategy';
-import { RiskScoresNoDataDetected } from './risk_score_onboarding/risk_score_no_data_detected';
-import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
-import { RiskScoreUpdatePanel } from './risk_score_update_panel';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 import { RiskEnginePrivilegesCallOut } from './risk_engine_privileges_callout';
 import { useUpsellingComponent } from '../../common/hooks/use_upselling';
+import { RiskScoresNoDataDetected } from './risk_score_no_data_detected';
 
 const UserRiskScoreTableManage = manageQuery(UserRiskScoreTable);
 
@@ -39,7 +37,6 @@ export const UserRiskScoreQueryTabBody = ({
   startDate: from,
   type,
 }: UsersComponentsQueryProps) => {
-  const { data: riskScoreEngineStatus } = useRiskEngineStatus();
   const getUserRiskScoreSelector = useMemo(() => usersSelectors.userRiskScoreSelector(), []);
   const { activePage, limit, sort } = useDeepEqualSelector((state: State) =>
     getUserRiskScoreSelector(state)
@@ -67,36 +64,25 @@ export const UserRiskScoreQueryTabBody = ({
 
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
-  const privileges = useMissingRiskEnginePrivileges();
+  const privileges = useMissingRiskEnginePrivileges({ readonly: true });
 
-  const {
-    data,
-    inspect,
-    isDeprecated,
-    isInspected,
-    isModuleEnabled,
-    loading,
-    refetch,
-    totalCount,
-  } = useRiskScore({
-    filterQuery,
-    pagination,
-    riskEntity: RiskScoreEntity.user,
-    skip: querySkip,
-    sort,
-    timerange,
-  });
+  const { data, inspect, isInspected, hasEngineBeenInstalled, loading, refetch, totalCount } =
+    useRiskScore({
+      filterQuery,
+      pagination,
+      riskEntity: EntityType.user,
+      skip: querySkip,
+      sort,
+      timerange,
+    });
 
   const { severityCount, loading: isKpiLoading } = useRiskScoreKpi({
     filterQuery,
-    riskEntity: RiskScoreEntity.user,
+    riskEntity: EntityType.user,
     skip: querySkip,
   });
 
-  const status = {
-    isDisabled: !isModuleEnabled && !loading,
-    isDeprecated: isDeprecated && !loading,
-  };
+  const isDisabled = !hasEngineBeenInstalled && !loading;
 
   const RiskScoreUpsell = useUpsellingComponent('entity_analytics_panel');
   if (RiskScoreUpsell) {
@@ -111,26 +97,25 @@ export const UserRiskScoreQueryTabBody = ({
     );
   }
 
-  if (status.isDisabled || status.isDeprecated) {
+  if (isDisabled) {
     return (
       <EuiPanel hasBorder>
-        <EnableRiskScore
-          {...status}
-          entityType={RiskScoreEntity.host}
-          refetch={refetch}
-          timerange={timerange}
-        />
+        <EnableRiskScore isDisabled={isDisabled} entityType={EntityType.host} />
       </EuiPanel>
     );
   }
 
-  if (isModuleEnabled && userSeveritySelectionRedux.length === 0 && data && data.length === 0) {
-    return <RiskScoresNoDataDetected entityType={RiskScoreEntity.user} refetch={refetch} />;
+  if (
+    hasEngineBeenInstalled &&
+    userSeveritySelectionRedux.length === 0 &&
+    data &&
+    data.length === 0
+  ) {
+    return <RiskScoresNoDataDetected entityType={EntityType.user} />;
   }
 
   return (
     <>
-      {riskScoreEngineStatus?.isUpdateAvailable && <RiskScoreUpdatePanel />}
       <UserRiskScoreTableManage
         deleteQuery={deleteQuery}
         data={data ?? []}

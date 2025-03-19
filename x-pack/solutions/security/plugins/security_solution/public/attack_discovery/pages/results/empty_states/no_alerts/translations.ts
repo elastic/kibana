@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const ATTACK_DISCOVERY_ONLY = i18n.translate(
   'xpack.securitySolution.attackDiscovery.pages.noAlerts.attackDiscoveryOnlyLabel',
   {
-    defaultMessage: 'Attack Discovery only analyzes alerts from the past 24 hours.',
+    defaultMessage: 'There were no matching alerts in the configured time range.',
   }
 );
 

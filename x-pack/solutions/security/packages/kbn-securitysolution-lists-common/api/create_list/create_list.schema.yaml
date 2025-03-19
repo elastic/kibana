@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Create list API endpoint
+  title: Create value list API endpoint
   version: '2023-10-31'
 paths:
   /api/lists:
@@ -8,10 +8,10 @@ paths:
       x-labels: [serverless, ess]
       operationId: CreateList
       x-codegen-enabled: true
-      summary: Create a list
-      description: Create a new list.
+      summary: Create a value list
+      description: Create a new value list.
       requestBody:
-        description: List's properties
+        description: Value list's properties
         required: true
         content:
           application/json:
@@ -27,9 +27,9 @@ paths:
                 type:
                   $ref: '../model/list_common.schema.yaml#/components/schemas/ListType'
                 serializer:
-                  type: string
+                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListSerializer'
                 deserializer:
-                  type: string
+                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListDeserializer'
                 meta:
                   $ref: '../model/list_common.schema.yaml#/components/schemas/ListMetadata'
                 version:
@@ -40,6 +40,34 @@ paths:
                 - name
                 - description
                 - type
+            examples:
+              ip:
+                value:
+                  id: ip_list
+                  name: Simple list with ips
+                  description: This list describes bad internet ips
+                  type: ip
+              ip_range:
+                value:
+                  id: ip_range_list
+                  name: Simple list with ip ranges
+                  description: This list has ip ranges
+                  type: ip_range
+              keyword:
+                value:
+                  id: keyword_list
+                  name: Simple list with a keyword
+                  description: This list describes bad host names
+                  type: keyword
+              keyword_custom_format:
+                value:
+                  id: keyword_custom_format_list
+                  name: Simple list with a keyword using a custom format
+                  description: This parses the first found ipv4 only
+                  serializer: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
+                  deserializer: '{{value}}'
+                  type: keyword
+
       responses:
         200:
           description: Successful response
@@ -47,6 +75,69 @@ paths:
             application/json:
               schema:
                 $ref: '../model/list_schemas.schema.yaml#/components/schemas/List'
+              examples:
+                ip:
+                  value:
+                    id: ip_list
+                    type: ip
+                    name: Simple list with ips
+                    description: This list describes bad internet ips
+                    immutable: false
+                    '@timestamp': 2025-01-08T04:47:34.273Z
+                    version: 1
+                    _version: WzAsMV0=
+                    tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                    created_at: 2025-01-08T04:47:34.273Z
+                    created_by: elastic
+                    updated_at: 2025-01-08T04:47:34.273Z
+                    updated_by: elastic
+                ip_range:
+                  value:
+                    id: ip_range_list
+                    type: ip_range
+                    name: Simple list with ip ranges
+                    description: This list has ip ranges
+                    immutable: false
+                    '@timestamp': 2025-01-09T18:23:52.241Z
+                    version: 1
+                    _version: WzAsMV0=
+                    tie_breaker_id: 74aebdaf-601f-4940-b351-155728ff7003
+                    created_at: 2025-01-09T18:23:52.241Z
+                    created_by: elastic
+                    updated_at: 2025-01-09T18:23:52.241Z
+                    updated_by: elastic
+                keyword:
+                  value:
+                    id: keyword_list
+                    type: keyword
+                    name: Simple list with a keyword
+                    description: This list describes bad host names
+                    immutable: false
+                    '@timestamp': 2025-01-09T18:24:55.786Z
+                    version: 1
+                    _version: WzEsMV0=
+                    tie_breaker_id: f7e7dbaa-daf7-4c9a-a3dc-56643923ef68
+                    created_at: 2025-01-09T18:24:55.786Z
+                    created_by: elastic
+                    updated_at: 2025-01-09T18:24:55.786Z
+                    updated_by: elastic
+                keyword_custom_format:
+                  value:
+                    id: keyword_custom_format_list
+                    type: keyword
+                    name: Simple list with a keyword using a custom format
+                    description: This parses the first found ipv4 only
+                    serializer: '(?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))'
+                    deserializer: '{{value}}'
+                    immutable: false
+                    '@timestamp': 2025-01-09T18:25:39.604Z
+                    version: 1
+                    _version: WzIsMV0=
+                    tie_breaker_id: 8247ae63-b780-47b8-9a89-948b643e9ec2
+                    created_at: 2025-01-09T18:25:39.604Z
+                    created_by: elastic
+                    updated_at: 2025-01-09T18:25:39.604Z
+                    updated_by: elastic
         400:
           description: Invalid input data response
           content:
@@ -55,27 +146,54 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    message: To create a list, the data stream must exist first. Data stream \".lists-default\" does not exist
+                    status_code: 400
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [POST /api/lists] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]'
         409:
           description: List already exists response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                alreadyExists:
+                  value:
+                    message: 'list id: "keyword_custom_format_list" already exists'
+                    status_code: 409
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500

@@ -26,6 +26,7 @@ import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../../../../screens/breadcrumbs
 import {
   installPrebuiltRuleAssets,
   createAndInstallMockedPrebuiltRules,
+  preventPrebuiltRulesPackageInstallation,
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { createSavedQuery, deleteSavedQueries } from '../../../../tasks/api_calls/saved_queries';
 import { fetchMachineLearningModules } from '../../../../tasks/api_calls/machine_learning';
@@ -65,6 +66,7 @@ import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
   deleteAlertsAndRules,
   deleteDataView,
+  deletePrebuiltRulesAssets,
   postDataView,
 } from '../../../../tasks/api_calls/common';
 import { enableRules, waitForRulesToFinishExecution } from '../../../../tasks/api_calls/rules';
@@ -72,7 +74,7 @@ import { enableRules, waitForRulesToFinishExecution } from '../../../../tasks/ap
 const PREVIEW_TABS = {
   OVERVIEW: 'Overview',
   JSON_VIEW: 'JSON view',
-  UPDATES: 'Updates', // Currently open by default on upgrade
+  UPDATES: 'Elastic update overview', // Currently open by default on upgrade
 };
 
 describe(
@@ -374,8 +376,11 @@ describe(
     };
 
     beforeEach(() => {
+      preventPrebuiltRulesPackageInstallation();
+
       login();
       resetRulesTableState();
+      deletePrebuiltRulesAssets();
       deleteAlertsAndRules();
 
       visitRulesManagementTable();
@@ -1164,17 +1169,12 @@ describe(
           openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
           assertSelectedPreviewTab(PREVIEW_TABS.UPDATES); // Should be open by default
 
-          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Current rule').should('be.visible');
-          cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('Elastic update').should('be.visible');
-
-          cy.get(PER_FIELD_DIFF_WRAPPER).should('have.length', 2);
-
-          /* Version should be the first field in the order */
-          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('Version').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('1').should('be.visible');
-          cy.get(PER_FIELD_DIFF_WRAPPER).first().contains('2').should('be.visible');
-
+          cy.get(PER_FIELD_DIFF_WRAPPER).should('have.length', 1);
           cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Name').should('be.visible');
+
+          // expand Name field section
+          cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Name').click();
+
           cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Outdated rule 1').should('be.visible');
           cy.get(PER_FIELD_DIFF_WRAPPER).last().contains('Updated rule 1').should('be.visible');
         });

@@ -11,21 +11,23 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiResizableContainer,
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { useConfirmValidationErrorsModal } from '../../../../common/hooks/use_confirm_validation_errors_modal';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { isEsqlRule } from '../../../../../common/detection_engine/utils';
 import { RulePreview } from '../../components/rule_preview';
-import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
 import type {
   RuleResponse,
   RuleUpdateProps,
@@ -60,11 +62,7 @@ import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
 import { ruleStepsOrder } from '../../../../detections/pages/detection_engine/rules/utils';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
-import {
-  APP_UI_ID,
-  DEFAULT_INDEX_KEY,
-  DEFAULT_THREAT_INDEX_KEY,
-} from '../../../../../common/constants';
+import { APP_UI_ID, DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
@@ -73,8 +71,10 @@ import { VALIDATION_WARNING_CODE_FIELD_NAME_MAP } from '../../../rule_creation/c
 import { useRuleForms, useRuleIndexPattern } from '../form';
 import { useEsqlIndex, useEsqlQueryForAboutStep } from '../../hooks';
 import { CustomHeaderPageMemo } from '..';
-import { useIsPrebuiltRulesCustomizationEnabled } from '../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
+import { usePrebuiltRulesCustomizationStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { ALERT_SUPPRESSION_FIELDS_FIELD_NAME } from '../../../rule_creation/components/alert_suppression_edit';
+import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
+import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
@@ -91,20 +91,23 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     useListsConfig();
   const { application, triggersActionsUi } = useKibana().services;
   const { navigateToApp } = application;
-  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
+
+  const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
+  const canEditRule = isRulesCustomizationEnabled || !rule.immutable;
+
+  const prebuiltCustomizationUpsellingMessage = usePrebuiltRuleCustomizationUpsellingMessage(
+    'prebuilt_rule_customization_description'
+  );
 
   const { detailName: ruleId } = useParams<{ detailName: string }>();
 
   const [activeStep, setActiveStep] = useState<RuleStep>(
-    !isPrebuiltRulesCustomizationEnabled && rule.immutable
-      ? RuleStep.ruleActions
-      : RuleStep.defineRule
+    canEditRule ? RuleStep.defineRule : RuleStep.ruleActions
   );
   const { mutateAsync: updateRule, isLoading } = useUpdateRule();
   const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
   const collapseFn = useRef<() => void | undefined>();
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
-  const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
 
   const backOptions = useMemo(
     () => ({
@@ -117,7 +120,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   );
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
-  const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
   const { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData } = getStepsData({
     rule,
@@ -150,20 +152,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     () => (isEsqlRule(defineStepData.ruleType) ? esqlIndex : defineStepData.index),
     [defineStepData.index, esqlIndex, defineStepData.ruleType]
   );
-
-  const isPreviewDisabled = getIsRulePreviewDisabled({
-    ruleType: defineStepData.ruleType,
-    isQueryBarValid,
-    isThreatQueryBarValid,
-    index: memoizedIndex,
-    dataViewId: defineStepData.dataViewId,
-    dataSourceType: defineStepData.dataSourceType,
-    threatIndex: defineStepData.threatIndex,
-    threatMapping: defineStepData.threatMapping,
-    machineLearningJobId: defineStepData.machineLearningJobId,
-    queryBar: defineStepData.queryBar,
-    newTermsFields: defineStepData.newTermsFields,
-  });
 
   const loading = userInfoLoading || listsConfigLoading;
   const { isSavedQueryLoading, savedQuery } = useGetSavedQuery({
@@ -209,13 +197,19 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     dataViewId: defineStepData.dataViewId,
   });
 
+  const customizationDisabledTooltip =
+    !canEditRule && !isRulesCustomizationEnabled
+      ? prebuiltCustomizationUpsellingMessage
+      : undefined;
+
   const tabs = useMemo(
     () => [
       {
         'data-test-subj': 'edit-rule-define-tab',
         id: RuleStep.defineRule,
         name: ruleI18n.DEFINITION,
-        disabled: !isPrebuiltRulesCustomizationEnabled && rule?.immutable,
+        disabled: !canEditRule,
+        tooltip: customizationDisabledTooltip,
         content: (
           <div
             style={{
@@ -229,7 +223,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                   isLoading={loading || isLoading || isSavedQueryLoading}
                   isUpdateView
                   indicesConfig={indicesConfig}
-                  threatIndicesConfig={threatIndicesConfig}
                   defaultSavedQuery={savedQuery}
                   form={defineStepForm}
                   key="defineStep"
@@ -237,7 +230,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                   isIndexPatternLoading={isIndexPatternLoading}
                   isQueryBarValid={isQueryBarValid}
                   setIsQueryBarValid={setIsQueryBarValid}
-                  setIsThreatQueryBarValid={setIsThreatQueryBarValid}
                   index={memoizedIndex}
                   threatIndex={defineStepData.threatIndex}
                   alertSuppressionFields={defineStepData[ALERT_SUPPRESSION_FIELDS_FIELD_NAME]}
@@ -245,7 +237,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                   shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
                   queryBarTitle={defineStepData.queryBar.title}
                   queryBarSavedId={defineStepData.queryBar.saved_id}
-                  thresholdFields={defineStepData.threshold.field}
                 />
               )}
               <EuiSpacer />
@@ -257,7 +248,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-about-tab',
         id: RuleStep.aboutRule,
         name: ruleI18n.ABOUT,
-        disabled: !isPrebuiltRulesCustomizationEnabled && rule?.immutable,
+        disabled: !canEditRule,
+        tooltip: customizationDisabledTooltip,
         content: (
           <div
             style={{
@@ -290,7 +282,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-schedule-tab',
         id: RuleStep.scheduleRule,
         name: ruleI18n.SCHEDULE,
-        disabled: !isPrebuiltRulesCustomizationEnabled && rule?.immutable,
+        disabled: !canEditRule,
+        tooltip: customizationDisabledTooltip,
         content: (
           <div
             style={{
@@ -327,6 +320,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
               {actionsStepData != null && (
                 <StepRuleActions
                   ruleId={rule?.id}
+                  ruleTypeId={ruleTypeMappings[rule?.type]}
                   isLoading={isLoading}
                   isUpdateView
                   actionMessageParams={actionMessageParams}
@@ -342,26 +336,26 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       },
     ],
     [
-      isPrebuiltRulesCustomizationEnabled,
-      rule?.immutable,
-      rule.rule_source,
-      rule?.id,
+      canEditRule,
+      customizationDisabledTooltip,
       activeStep,
       loading,
       isSavedQueryLoading,
       isLoading,
       indicesConfig,
-      threatIndicesConfig,
       savedQuery,
       defineStepForm,
       indexPattern,
       isIndexPatternLoading,
       isQueryBarValid,
-      defineStepData,
       memoizedIndex,
+      defineStepData,
       aboutStepData,
       aboutStepForm,
       esqlQueryForAboutStep,
+      rule.rule_source,
+      rule?.id,
+      rule?.type,
       scheduleStepData,
       scheduleStepForm,
       actionsStepData,
@@ -413,10 +407,9 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   const onSubmit = useCallback(async () => {
     const actionsStepFormValid = await actionsStepForm.validate();
-    if (!isPrebuiltRulesCustomizationEnabled && rule.immutable) {
+    if (!canEditRule) {
       // Since users cannot edit Define, About and Schedule tabs of the rule, we skip validation of those to avoid
       // user confusion of seeing that those tabs have error and not being able to see or do anything about that.
-      // We will need to remove this condition once rule customization work is done.
       if (actionsStepFormValid) {
         await saveChanges();
       }
@@ -458,8 +451,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     await saveChanges();
   }, [
     actionsStepForm,
-    isPrebuiltRulesCustomizationEnabled,
-    rule.immutable,
+    canEditRule,
     defineStepForm,
     aboutStepForm,
     scheduleStepForm,
@@ -474,15 +466,16 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   const renderTabs = () => {
     return tabs.map((tab, index) => (
-      <EuiTab
-        key={index}
-        onClick={() => onTabClick(tab)}
-        isSelected={tab.id === activeStep}
-        disabled={tab.disabled}
-        data-test-subj={tab['data-test-subj']}
-      >
-        {tab.name}
-      </EuiTab>
+      <EuiToolTip key={index} position="top" content={tab.tooltip}>
+        <EuiTab
+          onClick={() => onTabClick(tab)}
+          isSelected={tab.id === activeStep}
+          disabled={tab.disabled}
+          data-test-subj={tab['data-test-subj']}
+        >
+          {tab.name}
+        </EuiTab>
+      </EuiToolTip>
     ));
   };
 
@@ -495,6 +488,21 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       });
     },
     [navigateToApp, ruleId]
+  );
+
+  const upgradeCallout = useRuleUpdateCallout({
+    rule,
+    message: ruleI18n.HAS_RULE_UPDATE_EDITING_CALLOUT_MESSAGE,
+    actionButton: (
+      <EuiLink onClick={goToDetailsRule} data-test-subj="ruleEditingUpdateRuleCalloutButton">
+        {ruleI18n.HAS_RULE_UPDATE_EDITING_CALLOUT_BUTTON}
+      </EuiLink>
+    ),
+  });
+
+  const verifyRuleDefinitionForPreview = useCallback(
+    () => defineStepForm.validate(),
+    [defineStepForm]
   );
 
   if (
@@ -538,6 +546,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                         setIsRulePreviewVisible={setIsRulePreviewVisible}
                         togglePanel={togglePanel}
                       />
+                      {isRulesCustomizationEnabled && upgradeCallout}
                       {invalidSteps.length > 0 && (
                         <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="warning">
                           <FormattedMessage
@@ -608,7 +617,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                   onToggleCollapsed={() => setIsRulePreviewVisible((isVisible) => !isVisible)}
                 >
                   <RulePreview
-                    isDisabled={isPreviewDisabled}
+                    verifyRuleDefinition={verifyRuleDefinitionForPreview}
                     defineRuleData={defineStepData}
                     aboutRuleData={aboutStepData}
                     scheduleRuleData={scheduleStepData}

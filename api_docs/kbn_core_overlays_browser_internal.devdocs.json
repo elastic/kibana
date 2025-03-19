@@ -12,23 +12,11 @@
         "label": "InternalOverlayBannersStart",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-overlays-browser-internal",
-            "scope": "public",
-            "docId": "kibKbnCoreOverlaysBrowserInternalPluginApi",
-            "section": "def-public.InternalOverlayBannersStart",
-            "text": "InternalOverlayBannersStart"
-          },
+          "InternalOverlayBannersStart",
           " extends ",
-          {
-            "pluginId": "@kbn/core-overlays-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-            "section": "def-public.OverlayBannersStart",
-            "text": "OverlayBannersStart"
-          }
+          "OverlayBannersStart"
         ],
-        "path": "packages/core/overlays/core-overlays-browser-internal/src/banners/banners_service.tsx",
+        "path": "src/core/packages/overlays/browser-internal/src/banners/banners_service.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

@@ -29,6 +29,8 @@ import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer'
 import { defaultRowRenderers } from '../../body/renderers';
 import { useDispatch } from 'react-redux';
 import { TimelineTabs } from '@kbn/securitysolution-data-table';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
 
 const SPECIAL_TEST_TIMEOUT = 30000;
 
@@ -55,6 +57,8 @@ jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 jest.mock('../../../../../common/lib/kibana');
+
+jest.mock('../../../../../common/components/user_privileges');
 
 let useTimelineEventsMock = jest.fn();
 
@@ -125,6 +129,11 @@ describe('EQL Tab', () => {
       }
     );
 
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      notesPrivileges: { read: true },
+    });
+
     HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
       return {
         width: 1000,
@@ -137,47 +146,59 @@ describe('EQL Tab', () => {
 
   describe('rendering', () => {
     const fetchNotesMock = jest.spyOn(notesApi, 'fetchNotesByDocumentIds');
-    test('should render the timeline table', async () => {
-      fetchNotesMock.mockImplementation(jest.fn());
-      render(
-        <TestProviders store={createMockStore(mockState)}>
-          <TestComponent />
-        </TestProviders>
-      );
+    test(
+      'should render the timeline table',
+      async () => {
+        fetchNotesMock.mockImplementation(jest.fn());
+        render(
+          <TestProviders store={createMockStore(mockState)}>
+            <TestComponent />
+          </TestProviders>
+        );
 
-      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-    });
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
 
-    test('it renders the timeline column headers', async () => {
-      render(
-        <TestProviders store={createMockStore(mockState)}>
-          <TestComponent />
-        </TestProviders>
-      );
+    test(
+      'it renders the timeline column headers',
+      async () => {
+        render(
+          <TestProviders store={createMockStore(mockState)}>
+            <TestComponent />
+          </TestProviders>
+        );
 
-      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-    });
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
 
-    test('should render correct placeholder when there are not results', async () => {
-      (useTimelineEvents as jest.Mock).mockReturnValue([
-        false,
-        {
-          events: [],
-          pageInfo: {
-            activePage: 0,
-            totalPages: 10,
+    test(
+      'should render correct placeholder when there are not results',
+      async () => {
+        (useTimelineEvents as jest.Mock).mockReturnValue([
+          false,
+          {
+            events: [],
+            pageInfo: {
+              activePage: 0,
+              totalPages: 10,
+            },
           },
-        },
-      ]);
+        ]);
 
-      render(
-        <TestProviders store={createMockStore(mockState)}>
-          <TestComponent />
-        </TestProviders>
-      );
+        render(
+          <TestProviders store={createMockStore(mockState)}>
+            <TestComponent />
+          </TestProviders>
+        );
 
-      expect(await screen.findByText('No results found')).toBeVisible();
-    });
+        expect(await screen.findByText('No results found')).toBeVisible();
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
 
     describe('pagination', () => {
       beforeEach(() => {

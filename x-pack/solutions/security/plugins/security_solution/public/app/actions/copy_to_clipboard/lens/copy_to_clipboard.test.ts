@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { CellValueContext, EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
-import { ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import { createCopyToClipboardLensAction } from './copy_to_clipboard';
 import { KibanaServices } from '../../../../common/lib/kibana';
@@ -40,13 +39,6 @@ const getMockLensApi = (
     saveToLibrary: jest.fn(async () => 'saved-id'),
   });
 
-const getMockEmbeddable = (type: string): IEmbeddable =>
-  ({
-    type,
-    getFilters: jest.fn(),
-    getQuery: jest.fn(),
-  } as unknown as IEmbeddable);
-
 const lensEmbeddable = getMockLensApi();
 
 const columnMeta = {
@@ -71,7 +63,7 @@ describe('createCopyToClipboardLensAction', () => {
   });
 
   it('should return display name', () => {
-    expect(copyToClipboardAction.getDisplayName(context)).toEqual('Copy to Clipboard');
+    expect(copyToClipboardAction.getDisplayName(context)).toEqual('Copy to clipboard');
   });
 
   it('should return icon type', () => {
@@ -83,7 +75,10 @@ describe('createCopyToClipboardLensAction', () => {
       expect(
         await copyToClipboardAction.isCompatible({
           ...context,
-          embeddable: new ErrorEmbeddable('some error', {} as EmbeddableInput),
+          embeddable: {
+            ...getMockLensApi(),
+            blockingError$: new BehaviorSubject(new Error('some error')),
+          },
         })
       ).toEqual(false);
     });
@@ -92,7 +87,9 @@ describe('createCopyToClipboardLensAction', () => {
       expect(
         await copyToClipboardAction.isCompatible({
           ...context,
-          embeddable: getMockEmbeddable('not_lens') as unknown as IEmbeddable,
+          embeddable: {
+            type: 'not_lens',
+          },
         })
       ).toEqual(false);
     });

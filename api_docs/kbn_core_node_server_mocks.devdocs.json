@@ -22,7 +22,7 @@
         "tags": [],
         "label": "nodeServiceMock",
         "description": [],
-        "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",
+        "path": "src/core/packages/node/server-mocks/src/node_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,7 +36,7 @@
             "signature": [
               "() => jest.Mocked<NodeServiceContract>"
             ],
-            "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",
+            "path": "src/core/packages/node/server-mocks/src/node_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -54,7 +54,7 @@
               "InternalNodeServicePreboot",
               ">"
             ],
-            "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",
+            "path": "src/core/packages/node/server-mocks/src/node_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -69,16 +69,10 @@
             "description": [],
             "signature": [
               "({ ui, backgroundTasks, migrator, }?: { ui: boolean; backgroundTasks: boolean; migrator: boolean; }) => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-node-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreNodeServerInternalPluginApi",
-                "section": "def-server.InternalNodeServiceStart",
-                "text": "InternalNodeServiceStart"
-              },
+              "InternalNodeServiceStart",
               ">"
             ],
-            "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",
+            "path": "src/core/packages/node/server-mocks/src/node_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -93,7 +87,7 @@
                 "signature": [
                   "{ ui: boolean; backgroundTasks: boolean; migrator: boolean; }"
                 ],
-                "path": "packages/core/node/core-node-server-mocks/src/node_service.mock.ts",
+                "path": "src/core/packages/node/server-mocks/src/node_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

@@ -7,8 +7,9 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
+import { ASSET_CRITICALITY_MAPPINGS_VERSIONS } from './constants';
 
-interface AssetCriticalityEcsMigrationClientOpts {
+interface AssetCriticalityMigrationClientOpts {
   logger: Logger;
   auditLogger: AuditLogger | undefined;
   esClient: ElasticsearchClient;
@@ -40,20 +41,20 @@ if (ctx._source.id_field == 'user.name') {
   ctx._source.host = host;
 }`;
 
-export class AssetCriticalityEcsMigrationClient {
+export class AssetCriticalityMigrationClient {
   private readonly assetCriticalityDataClient: AssetCriticalityDataClient;
-  constructor(private readonly options: AssetCriticalityEcsMigrationClientOpts) {
+  constructor(private readonly options: AssetCriticalityMigrationClientOpts) {
     this.assetCriticalityDataClient = new AssetCriticalityDataClient({
       ...options,
       namespace: '*', // The migration is applied to all spaces
     });
   }
 
-  public isEcsMappingsMigrationRequired = async () => {
+  public isMappingsMigrationRequired = async () => {
     const indicesMappings = await this.assetCriticalityDataClient.getIndexMappings();
 
     return Object.values(indicesMappings).some(
-      ({ mappings }) => mappings?.properties?.asset === undefined
+      ({ mappings }) => mappings._meta?.version !== ASSET_CRITICALITY_MAPPINGS_VERSIONS
     );
   };
 
@@ -66,7 +67,7 @@ export class AssetCriticalityEcsMigrationClient {
     return resp.hits.hits.length > 0;
   };
 
-  public migrateEcsMappings = () => {
+  public migrateMappings = () => {
     return this.assetCriticalityDataClient.createOrUpdateIndex();
   };
 
@@ -78,12 +79,40 @@ export class AssetCriticalityEcsMigrationClient {
         ignore_unavailable: true,
         allow_no_indices: true,
         scroll_size: 10000,
-        body: {
-          query: ECS_MAPPINGS_MIGRATION_QUERY,
-          script: {
-            source: PAINLESS_SCRIPT,
-            lang: 'painless',
+        query: ECS_MAPPINGS_MIGRATION_QUERY,
+        script: {
+          source: PAINLESS_SCRIPT,
+          lang: 'painless',
+        },
+      },
+      {
+        requestTimeout: '5m',
+        retryOnTimeout: true,
+        maxRetries: 2,
+        signal: abortSignal,
+      }
+    );
+  };
+
+  public copyTimestampToEventIngestedForAssetCriticality = (abortSignal?: AbortSignal) => {
+    return this.options.esClient.updateByQuery(
+      {
+        index: this.assetCriticalityDataClient.getIndex(),
+        conflicts: 'proceed',
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        query: {
+          bool: {
+            must_not: {
+              exists: {
+                field: 'event.ingested',
+              },
+            },
           },
+        },
+        script: {
+          source: 'ctx._source.event.ingested = ctx._source.@timestamp',
+          lang: 'painless',
         },
       },
       {

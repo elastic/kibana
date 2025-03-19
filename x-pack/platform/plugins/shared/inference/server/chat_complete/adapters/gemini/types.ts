@@ -25,7 +25,7 @@ export type GenerateContentResponseChunk = GenerateContentResponse & {
  * We need to use the connector's format, not directly Gemini's...
  * In practice, 'parts' get mapped to 'content'
  *
- * See x-pack/plugins/stack_connectors/server/connector_types/gemini/gemini.ts
+ * See x-pack/platform/plugins/shared/stack_connectors/server/connector_types/gemini/gemini.ts
  */
 export interface GeminiMessage {
   role: 'assistant' | 'user';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { flattenObject, getFormattedGroupBy, validateKQLStringFilter } from './utils';
+import { flattenObject, getFormattedGroupBy, getGroupByObject } from './utils';
 
 describe('FlattenObject', () => {
   it('flattens multi level item', () => {
@@ -57,29 +57,6 @@ describe('FlattenObject', () => {
   });
 });
 
-describe('validateKQLStringFilter', () => {
-  const data = [
-    // input, output
-    ['', undefined],
-    ['host.name:host-0', undefined],
-  ];
-  const dataWithError = [
-    // input, output
-    [
-      ':*',
-      'filterQuery must be a valid KQL filter (error: Expected "(", NOT, end of input, field name, value, whitespace but ":" found.',
-    ],
-  ];
-
-  test.each(data)('validateKQLStringFilter(%s): %o', (input: any, output: any) => {
-    expect(validateKQLStringFilter(input)).toEqual(output);
-  });
-
-  test.each(dataWithError)('validateKQLStringFilter(%s): %o', (input: any, output: any) => {
-    expect(validateKQLStringFilter(input)).toContain(output);
-  });
-});
-
 describe('getFormattedGroupBy', () => {
   it('should format groupBy correctly for empty input', () => {
     expect(getFormattedGroupBy(undefined, new Set<string>())).toEqual({});
@@ -121,6 +98,31 @@ describe('getFormattedGroupBy', () => {
         { field: 'tags', value: 'group-0' },
         { field: 'container.name', value: 'container-name' },
       ],
+    });
+  });
+});
+
+describe('getGroupByObject', () => {
+  it('should return empty object for undefined groupBy', () => {
+    expect(getFormattedGroupBy(undefined, new Set<string>())).toEqual({});
+  });
+
+  it('should return an object containing groups for one groupBy field', () => {
+    expect(getGroupByObject('host.name', new Set(['host-0', 'host-1']))).toEqual({
+      'host-0': { host: { name: 'host-0' } },
+      'host-1': { host: { name: 'host-1' } },
+    });
+  });
+
+  it('should return an object containing groups for multiple groupBy fields', () => {
+    expect(
+      getGroupByObject(
+        ['host.name', 'container.id'],
+        new Set(['host-0,container-0', 'host-1,container-1'])
+      )
+    ).toEqual({
+      'host-0,container-0': { container: { id: 'container-0' }, host: { name: 'host-0' } },
+      'host-1,container-1': { container: { id: 'container-1' }, host: { name: 'host-1' } },
     });
   });
 });

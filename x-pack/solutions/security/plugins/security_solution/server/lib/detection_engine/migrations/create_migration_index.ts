@@ -34,13 +34,16 @@ export const createMigrationIndex = async ({
 
   const response = await esClient.indices.create({
     index: destinationIndexName,
-    body: {
-      settings: {
-        index: {
-          lifecycle: {
-            indexing_complete: true,
-          },
+    settings: {
+      index: {
+        lifecycle: {
+          indexing_complete: true,
         },
+      },
+    },
+    mappings: {
+      _meta: {
+        version,
       },
     },
   });

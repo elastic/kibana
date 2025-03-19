@@ -31,15 +31,7 @@ import type {
   TooltipProps,
   TooltipValue,
 } from '@elastic/charts';
-import {
-  Chart,
-  Heatmap,
-  Position,
-  ScaleType,
-  Settings,
-  Tooltip,
-  LEGACY_LIGHT_THEME,
-} from '@elastic/charts';
+import { Chart, Heatmap, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -51,7 +43,6 @@ import {
   ML_SEVERITY_COLORS,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
-import { useIsDarkTheme } from '@kbn/ml-kibana-theme';
 import type { TimeBuckets as TimeBucketsClass } from '@kbn/ml-time-buckets';
 import { SwimLanePagination } from './swimlane_pagination';
 import type {
@@ -66,7 +57,6 @@ import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { SWIM_LANE_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './constants';
-import { useMlKibana } from '../contexts/kibana';
 
 declare global {
   interface Window {
@@ -202,14 +192,14 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   yAxisWidth,
   onRenderComplete,
 }) => {
+  const {
+    theme: { useChartsBaseTheme },
+  } = chartsService;
+
   const [chartWidth, setChartWidth] = useState<number>(0);
 
-  const {
-    services: { theme: themeService },
-  } = useMlKibana();
-
-  const isDarkTheme = useIsDarkTheme(themeService);
-  const { euiTheme } = useEuiTheme();
+  const { colorMode, euiTheme } = useEuiTheme();
+  const isDarkTheme = colorMode === 'DARK';
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
@@ -223,6 +213,8 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     }, RESIZE_THROTTLE_TIME_MS),
     [chartWidth]
   );
+
+  const baseTheme = useChartsBaseTheme();
 
   const swimLanePoints = useMemo(() => {
     const showFilterContext = filterActive === true && swimlaneType === SWIMLANE_TYPE.OVERALL;
@@ -464,8 +456,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                       <Tooltip {...tooltipOptions} />
                       <Settings
                         theme={themeOverrides}
-                        // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-                        baseTheme={LEGACY_LIGHT_THEME}
+                        baseTheme={baseTheme}
                         onElementClick={onElementClick}
                         onPointerUpdate={handleCursorUpdate}
                         showLegend={showLegend}

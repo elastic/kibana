@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useReducer } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import type { DataViewBase } from '@kbn/es-query';
-import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ListItemComponent } from './list_item';
 import { AndOrBadge } from '../and_or_badge';
 import { LogicButtons } from './logic_buttons';
 import type { ThreatMapEntries } from './types';
-import type { State } from './reducer';
-import { reducer } from './reducer';
-import { getDefaultEmptyEntry, getNewItem, filterItems } from './helpers';
+import { createAndNewEntryItem, createOrNewEntryItem } from './helpers';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
@@ -32,135 +29,81 @@ const MyButtonsContainer = styled(EuiFlexItem)`
   margin: 16px 0;
 `;
 
-const initialState: State = {
-  andLogicIncluded: false,
-  entries: [],
-  entriesToDelete: [],
-};
-
-interface OnChangeProps {
-  entryItems: ThreatMapping;
-  entriesToDelete: ThreatMapEntries[];
-}
-
 interface ThreatMatchComponentProps {
-  listItems: ThreatMapEntries[];
+  mappingEntries: ThreatMapEntries[];
   indexPatterns: DataViewBase;
   threatIndexPatterns: DataViewBase;
-  onChange: (arg: OnChangeProps) => void;
+  'id-aria'?: string;
+  'data-test-subj'?: string;
+  onMappingEntriesChange: (newValue: ThreatMapEntries[]) => void;
 }
 
 export const ThreatMatchComponent = ({
-  listItems,
+  mappingEntries,
   indexPatterns,
   threatIndexPatterns,
-  onChange,
+  'id-aria': idAria,
+  'data-test-subj': dataTestSubj,
+  onMappingEntriesChange,
 }: ThreatMatchComponentProps) => {
-  const [{ entries, entriesToDelete, andLogicIncluded }, dispatch] = useReducer(reducer(), {
-    ...initialState,
-  });
-
-  const setUpdateEntries = useCallback(
-    (items: ThreatMapEntries[]): void => {
-      dispatch({
-        type: 'setEntries',
-        entries: items,
-      });
-    },
-    [dispatch]
-  );
-
-  const setDefaultEntries = useCallback(
-    (item: ThreatMapEntries): void => {
-      dispatch({
-        type: 'setDefault',
-        initialState,
-        lastEntry: item,
-      });
-    },
-    [dispatch]
-  );
-
   const handleEntryItemChange = useCallback(
     (item: ThreatMapEntries, index: number): void => {
-      const updatedEntries = [
-        ...entries.slice(0, index),
-        {
-          ...item,
-        },
-        ...entries.slice(index + 1),
-      ];
+      const updatedEntries = mappingEntries.slice();
 
-      setUpdateEntries(updatedEntries);
+      updatedEntries.splice(index, 1, item);
+
+      onMappingEntriesChange(updatedEntries);
     },
-    [setUpdateEntries, entries]
+    [mappingEntries, onMappingEntriesChange]
   );
 
   const handleDeleteEntryItem = useCallback(
-    (item: ThreatMapEntries, itemIndex: number): void => {
+    (item: ThreatMapEntries, index: number): void => {
       if (item.entries.length === 0) {
-        const updatedEntries = [...entries.slice(0, itemIndex), ...entries.slice(itemIndex + 1)];
-        // if it's the only item left, don't delete it just add a default entry to it
-        if (updatedEntries.length === 0) {
-          setDefaultEntries(item);
-        } else {
-          setUpdateEntries([...entries.slice(0, itemIndex), ...entries.slice(itemIndex + 1)]);
-        }
+        const updatedEntries = mappingEntries.slice();
+
+        updatedEntries.splice(index, 1);
+
+        onMappingEntriesChange(updatedEntries);
       } else {
-        handleEntryItemChange(item, itemIndex);
+        handleEntryItemChange(item, index);
       }
     },
-    [handleEntryItemChange, setUpdateEntries, entries, setDefaultEntries]
+    [mappingEntries, onMappingEntriesChange, handleEntryItemChange]
   );
 
-  const handleAddNewEntryItemEntry = useCallback((): void => {
-    const lastEntry = entries[entries.length - 1];
-    const { entries: innerEntries } = lastEntry;
-
-    const updatedEntry: ThreatMapEntries = {
-      ...lastEntry,
-      entries: [...innerEntries, getDefaultEmptyEntry()],
-    };
-
-    setUpdateEntries([...entries.slice(0, entries.length - 1), { ...updatedEntry }]);
-  }, [setUpdateEntries, entries]);
-
-  const handleAddNewEntryItem = useCallback((): void => {
+  const handleOrClick = useCallback((): void => {
     // There is a case where there are numerous list items, all with
     // empty `entries` array.
-    const newItem = getNewItem();
-    setUpdateEntries([...entries, { ...newItem }]);
-  }, [setUpdateEntries, entries]);
 
-  const handleAddClick = useCallback((): void => {
-    handleAddNewEntryItemEntry();
-  }, [handleAddNewEntryItemEntry]);
+    onMappingEntriesChange([...mappingEntries, createOrNewEntryItem()]);
+  }, [mappingEntries, onMappingEntriesChange]);
 
-  // Bubble up changes to parent
-  useEffect(() => {
-    onChange({ entryItems: filterItems(entries), entriesToDelete });
-  }, [onChange, entriesToDelete, entries]);
+  const handleAndClick = useCallback((): void => {
+    const lastEntry = mappingEntries.at(-1);
 
-  // Defaults to never be sans entry, instead
-  // always falls back to an empty entry if user deletes all
-  useEffect(() => {
-    if (
-      entries.length === 0 ||
-      (entries.length === 1 && entries[0].entries != null && entries[0].entries.length === 0)
-    ) {
-      handleAddNewEntryItem();
+    if (!lastEntry) {
+      onMappingEntriesChange([createOrNewEntryItem()]);
+      return;
     }
-  }, [entries, handleAddNewEntryItem]);
 
-  useEffect(() => {
-    if (listItems.length > 0) {
-      setUpdateEntries(listItems);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const { entries: innerEntries } = lastEntry;
+    const updatedEntry: ThreatMapEntries = {
+      ...lastEntry,
+      entries: [...innerEntries, createAndNewEntryItem()],
+    };
+
+    onMappingEntriesChange([...mappingEntries.slice(0, -1), updatedEntry]);
+  }, [mappingEntries, onMappingEntriesChange]);
+
+  const andLogicIncluded = useMemo(
+    () => mappingEntries.some(({ entries }) => entries.length > 1),
+    [mappingEntries]
+  );
+
   return (
-    <EuiFlexGroup gutterSize="s" direction="column">
-      {entries.map((entryListItem, index) => {
+    <EuiFlexGroup gutterSize="s" direction="column" id-aria={idAria} data-test-subj={dataTestSubj}>
+      {mappingEntries.map((entryListItem, index) => {
         const key = (entryListItem as typeof entryListItem & { id?: string }).id ?? `${index}`;
         return (
           <EuiFlexItem grow={1} key={key}>
@@ -190,7 +133,7 @@ export const ThreatMatchComponent = ({
                   threatIndexPatterns={threatIndexPatterns}
                   listItemIndex={index}
                   andLogicIncluded={andLogicIncluded}
-                  isOnlyItem={entries.length === 1}
+                  isOnlyItem={mappingEntries.length === 1}
                   onDeleteEntryItem={handleDeleteEntryItem}
                   onChangeEntryItem={handleEntryItemChange}
                 />
@@ -200,7 +143,7 @@ export const ThreatMatchComponent = ({
         );
       })}
 
-      <MyButtonsContainer data-test-subj={'andOrOperatorButtons'}>
+      <MyButtonsContainer data-test-subj="andOrOperatorButtons">
         <EuiFlexGroup gutterSize="s">
           {andLogicIncluded && (
             <MyInvisibleAndBadge grow={false}>
@@ -211,8 +154,8 @@ export const ThreatMatchComponent = ({
             <LogicButtons
               isOrDisabled={false}
               isAndDisabled={false}
-              onOrClicked={handleAddNewEntryItem}
-              onAndClicked={handleAddClick}
+              onOrClicked={handleOrClick}
+              onAndClicked={handleAndClick}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -8,14 +8,18 @@
  */
 
 import type {
+  BinaryExpressionRenameOperator,
+  BinaryExpressionWhereOperator,
   ESQLAstNode,
   ESQLBinaryExpression,
   ESQLColumn,
   ESQLFunction,
+  ESQLIdentifier,
   ESQLIntegerLiteral,
   ESQLLiteral,
   ESQLParamLiteral,
   ESQLProperNode,
+  ESQLSource,
 } from '../types';
 import { BinaryExpressionGroup } from './constants';
 
@@ -40,6 +44,21 @@ export const isFunctionExpression = (node: unknown): node is ESQLFunction =>
 export const isBinaryExpression = (node: unknown): node is ESQLBinaryExpression =>
   isFunctionExpression(node) && node.subtype === 'binary-expression';
 
+export const isWhereExpression = (
+  node: unknown
+): node is ESQLBinaryExpression<BinaryExpressionWhereOperator> =>
+  isBinaryExpression(node) && node.name === 'where';
+
+export const isAsExpression = (
+  node: unknown
+): node is ESQLBinaryExpression<BinaryExpressionRenameOperator> =>
+  isBinaryExpression(node) && node.name === 'as';
+
+export const isFieldExpression = (
+  node: unknown
+): node is ESQLBinaryExpression<BinaryExpressionWhereOperator> =>
+  isBinaryExpression(node) && node.name === '=';
+
 export const isLiteral = (node: unknown): node is ESQLLiteral =>
   isProperNode(node) && node.type === 'literal';
 
@@ -54,6 +73,12 @@ export const isParamLiteral = (node: unknown): node is ESQLParamLiteral =>
 
 export const isColumn = (node: unknown): node is ESQLColumn =>
   isProperNode(node) && node.type === 'column';
+
+export const isSource = (node: unknown): node is ESQLSource =>
+  isProperNode(node) && node.type === 'source';
+
+export const isIdentifier = (node: unknown): node is ESQLIdentifier =>
+  isProperNode(node) && node.type === 'identifier';
 
 /**
  * Returns the group of a binary expression:

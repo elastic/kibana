@@ -34,6 +34,7 @@ import type { PatternAnalysisEmbeddableState } from '../../embeddables/pattern_a
 import type { RandomSamplerOption, RandomSamplerProbability } from './sampling_menu/random_sampler';
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
@@ -66,11 +67,14 @@ export const AttachmentsMenu = ({
     update: false,
   };
 
-  const openCasesModalCallback = useCasesModal(EMBEDDABLE_PATTERN_ANALYSIS_TYPE);
+  const openCasesModalCallback = useCasesModal(
+    EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
+    CASES_TOAST_MESSAGES_TITLES.PATTERN_ANALYSIS
+  );
 
   const timeRange = useTimeRangeUpdates();
 
-  const canEditDashboards = capabilities.dashboard.createNew;
+  const canEditDashboards = capabilities.dashboard_v2.createNew;
 
   const onSave: SaveModalDashboardProps['onSave'] = useCallback(
     ({ dashboardId, newTitle, newDescription }) => {
@@ -123,6 +127,7 @@ export const AttachmentsMenu = ({
                     defaultMessage: 'Add to dashboard',
                   }),
                   panel: 'attachToDashboardPanel',
+                  icon: 'dashboardApp',
                   'data-test-subj': 'aiopsLogPatternAnalysisAttachToDashboardButton',
                 },
               ]
@@ -133,6 +138,7 @@ export const AttachmentsMenu = ({
                   name: i18n.translate('xpack.aiops.logCategorization.attachToCaseLabel', {
                     defaultMessage: 'Add to case',
                   }),
+                  icon: 'casesApp',
                   'data-test-subj': 'aiopsLogPatternAnalysisAttachToCaseButton',
                   onClick: () => {
                     setIsActionMenuOpen(false);
@@ -218,8 +224,11 @@ export const AttachmentsMenu = ({
                     defaultMessage: 'Attachments',
                   }
                 )}
-                iconType="boxesHorizontal"
+                size="m"
                 color="text"
+                display="base"
+                isSelected={isActionMenuOpen}
+                iconType="boxesHorizontal"
                 onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
               />
             }

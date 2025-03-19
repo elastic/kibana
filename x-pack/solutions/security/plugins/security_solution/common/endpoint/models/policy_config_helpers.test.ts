@@ -333,6 +333,7 @@ describe('Policy Config helpers', () => {
 // the logic for disabling protections is also modified due to type check.
 export const eventsOnlyPolicy = (): PolicyConfig => ({
   global_manifest_version: 'latest',
+  global_telemetry_enabled: false,
   meta: {
     license: '',
     cloud: false,

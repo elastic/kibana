@@ -22,9 +22,12 @@ import {
 } from './data/__mocks__/mocks';
 import { mockCreateClient as mockTaskCreateClient, mockStopAll } from './task/__mocks__/mocks';
 import { waitFor } from '@testing-library/dom';
+import type { SiemRuleMigrationsClientDependencies } from './types';
 
 jest.mock('./data/rule_migrations_data_service');
 jest.mock('./task/rule_migrations_task_service');
+
+const dependencies = {} as SiemRuleMigrationsClientDependencies;
 
 describe('SiemRuleMigrationsService', () => {
   let ruleMigrationsService: SiemRuleMigrationsService;
@@ -74,6 +77,7 @@ describe('SiemRuleMigrationsService', () => {
         spaceId: 'default',
         currentUser,
         request: httpServerMock.createKibanaRequest(),
+        dependencies,
       };
     });
 
@@ -95,7 +99,8 @@ describe('SiemRuleMigrationsService', () => {
         expect(mockDataCreateClient).toHaveBeenCalledWith({
           spaceId: createClientParams.spaceId,
           currentUser: createClientParams.currentUser,
-          esClient: esClusterClient.asInternalUser,
+          esScopedClient: esClusterClient.asScoped(),
+          dependencies,
         });
       });
 
@@ -104,6 +109,7 @@ describe('SiemRuleMigrationsService', () => {
         expect(mockTaskCreateClient).toHaveBeenCalledWith({
           currentUser: createClientParams.currentUser,
           dataClient: mockDataCreateClient(),
+          dependencies,
         });
       });
 

@@ -30,19 +30,7 @@ const actionsClient = actionsClientMock.create();
 jest.mock('../lib/build_response', () => ({
   buildResponse: jest.fn().mockImplementation((x) => x),
 }));
-jest.mock('../lib/executor', () => ({
-  executeAction: jest.fn().mockImplementation(async ({ connectorId }) => {
-    if (connectorId === 'mock-connector-id') {
-      return {
-        connector_id: 'mock-connector-id',
-        data: mockActionResponse,
-        status: 'ok',
-      };
-    } else {
-      throw new Error('simulated error');
-    }
-  }),
-}));
+
 const mockStream = jest.fn().mockImplementation(() => new PassThrough());
 const mockLangChainExecute = langChainExecute as jest.Mock;
 const mockAppendAssistantMessageToConversation = appendAssistantMessageToConversation as jest.Mock;

@@ -36,7 +36,7 @@ export const ENABLEMENT_INITIALIZING_RISK_ENGINE = i18n.translate(
 export const ENABLEMENT_INITIALIZING_ENTITY_STORE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityStore.enablement.initializing.store',
   {
-    defaultMessage: 'Initializing entity store',
+    defaultMessage: 'Configuring Entity Store',
   }
 );
 
@@ -51,7 +51,7 @@ export const ENABLEMENT_DESCRIPTION_RISK_ENGINE_ONLY = i18n.translate(
 export const ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityStore.enablement.description.store',
   {
-    defaultMessage: 'Store host and user entities observed in events.',
+    defaultMessage: 'Store data for entities observed in events.',
   }
 );
 
@@ -59,7 +59,7 @@ export const ENABLEMENT_DESCRIPTION_BOTH = i18n.translate(
   'xpack.securitySolution.entityAnalytics.entityStore.enablement.description.both',
   {
     defaultMessage:
-      'Your entity store is currently empty. Add information about your entities directly from your logs, or import them using a text file.',
+      'Add information about your entities directly from your logs, or import them using a text file.',
   }
 );
 

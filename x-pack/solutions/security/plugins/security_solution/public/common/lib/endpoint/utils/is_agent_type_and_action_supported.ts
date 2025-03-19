@@ -27,11 +27,13 @@ export const isAgentTypeAndActionSupported = (
   const isSentinelOneGetFileEnabled = features.responseActionsSentinelOneGetFileEnabled;
   const isCrowdstrikeHostIsolationEnabled =
     features.responseActionsCrowdstrikeManualHostIsolationEnabled;
+  const isMicrosoftDefenderEndpointEnabled = features.responseActionsMSDefenderEndpointEnabled;
 
   const isAgentTypeSupported =
     agentType === 'endpoint' ||
     (agentType === 'sentinel_one' && isSentinelOneV1Enabled) ||
-    (agentType === 'crowdstrike' && isCrowdstrikeHostIsolationEnabled);
+    (agentType === 'crowdstrike' && isCrowdstrikeHostIsolationEnabled) ||
+    (agentType === 'microsoft_defender_endpoint' && isMicrosoftDefenderEndpointEnabled);
 
   let isActionNameSupported: boolean =
     !actionName || isActionSupportedByAgentType(agentType, actionName, actionType);

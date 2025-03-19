@@ -7,18 +7,11 @@
 
 import React from 'react';
 import { upperFirst } from 'lodash/fp';
-import { euiLightVars } from '@kbn/ui-theme';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 
+import { useEuiTheme } from '@elastic/eui';
 import { HealthTruncateText } from '../health_truncate_text';
-
-const { euiColorVis0, euiColorVis5, euiColorVis7, euiColorVis9 } = euiLightVars;
-const severityToColorMap: Record<Severity, string> = {
-  low: euiColorVis0,
-  medium: euiColorVis5,
-  high: euiColorVis7,
-  critical: euiColorVis9,
-};
+import { useRiskSeverityColors } from '../../utils/risk_color_palette';
 
 interface Props {
   value: Severity;
@@ -29,8 +22,10 @@ const SeverityBadgeComponent: React.FC<Props> = ({
   value,
   'data-test-subj': dataTestSubj = 'severity',
 }) => {
+  const { euiTheme } = useEuiTheme();
   const displayValue = upperFirst(value);
-  const color = severityToColorMap[value] ?? 'subdued';
+  const severityToColorMap = useRiskSeverityColors();
+  const color = severityToColorMap[value] ?? euiTheme.colors.textSubdued;
 
   return (
     <HealthTruncateText

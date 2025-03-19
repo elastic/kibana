@@ -26,6 +26,12 @@ export const registerPrivilegesRoute = ({ router, config }: RouteDependencies) =
   router.get(
     {
       path: `${API_BASE_PATH}/privileges/{permissions_type}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: schema.object({
           permissions_type: schema.oneOf([
@@ -54,7 +60,7 @@ export const registerPrivilegesRoute = ({ router, config }: RouteDependencies) =
       const requiredPrivileges = requiredPrivilegesMap[permissionsType];
       const { has_all_requested: hasAllPrivileges, cluster } =
         await clusterClient.asCurrentUser.security.hasPrivileges({
-          body: { cluster: requiredPrivileges },
+          cluster: requiredPrivileges,
         });
 
       if (!hasAllPrivileges) {

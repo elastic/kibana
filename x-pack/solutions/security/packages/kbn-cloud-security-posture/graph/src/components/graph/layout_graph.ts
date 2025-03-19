@@ -75,8 +75,9 @@ export const layoutGraph = (
 
     // We are shifting the dagre node position (anchor=center center) to the top left
     // so it matches the React Flow node anchor point (top left).
-    const x = dagreNode.x - (dagreNode.width ?? 0) / 2;
-    const y = dagreNode.y - (dagreNode.height ?? 0) / 2;
+    // We also need to round the position to avoid subpixel rendering
+    const x = Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2);
+    const y = Math.round(dagreNode.y - (dagreNode.height ?? 0) / 2);
 
     if (node.data.shape === 'group') {
       return {

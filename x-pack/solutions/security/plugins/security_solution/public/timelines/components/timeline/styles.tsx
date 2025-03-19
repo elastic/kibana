@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
 import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
@@ -94,43 +93,11 @@ export const EventsTh = styled.div.attrs<{ role: string }>(
   }
 
   /* don't display Draggable placeholder */
+
   [data-rbd-placeholder-context-id] {
     display: none !important;
   }
 `;
-
-export const EventsThContent = styled.div.attrs(({ className = '' }) => ({
-  className: `siemEventsTable__thContent ${className}`,
-}))<{ textAlign?: string; width?: number }>`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  line-height: ${({ theme }) => theme.eui.euiLineHeight};
-  min-width: 0;
-  padding: ${({ theme }) => theme.eui.euiSizeXS};
-  text-align: ${({ textAlign }) => textAlign};
-  width: ${({ width }) =>
-    width != null
-      ? `${width}px`
-      : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
-
-  > button.euiButtonIcon,
-  > .euiToolTipAnchor > button.euiButtonIcon {
-    margin-left: ${({ theme }) => `-${theme.eui.euiSizeXS}`};
-  }
-`;
-
-const TIMELINE_EVENT_DETAILS_OFFSET = 40;
-
-interface WidthProp {
-  width: number;
-}
-
-export const EventsTrSupplementContainer = styled.div.attrs<WidthProp>(({ width }) => ({
-  role: 'dialog',
-  style: {
-    width: `${width - TIMELINE_EVENT_DETAILS_OFFSET}px`,
-  },
-}))<WidthProp>``;
 
 export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__trSupplement ${className}` as string,
@@ -139,6 +106,7 @@ export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
   padding-left: ${({ theme }) => theme.eui.euiSizeM};
+
   .euiAccordion + div {
     background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
     padding: 0 ${({ theme }) => theme.eui.euiSizeS};
@@ -162,14 +130,6 @@ export const EventsTdContent = styled.div.attrs(({ className }) => ({
   button.euiButtonIcon {
     margin-left: ${({ theme }) => `-${theme.eui.euiSizeXS}`};
   }
-`;
-
-/**
- * EVENTS LOADING
- */
-export const EventsLoading = styled(EuiLoadingSpinner)`
-  margin: 0 2px;
-  vertical-align: middle;
 `;
 
 export const HideShowContainer = styled.div.attrs<{ $isVisible: boolean }>(

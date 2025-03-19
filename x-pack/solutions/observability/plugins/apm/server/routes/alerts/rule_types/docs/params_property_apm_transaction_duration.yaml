@@ -1,0 +1,60 @@
+# @kbn-doc-linker partial
+
+required:
+  - windowSize
+  - windowUnit
+  - threshold
+  - environment
+  - aggregationType
+properties:
+  serviceName:
+    type: string
+    description: Filter the rule to apply to a specific service.
+  transactionType:
+    type: string
+    description: Filter the rule to apply to a specific transaction type.
+  transactionName:
+    type: string
+    description: Filter the rule to apply to a specific transaction name.
+  windowSize:
+    type: number
+    description: >
+      The size of the time window (in `windowUnit` units), which determines how far back to search for documents.
+      Generally it should be a value higher than the rule check interval to avoid gaps in detection.
+    example: 6
+  windowUnit:
+    type: string
+    description: >
+      The type of units for the time window.
+      For example: minutes, hours, or days.
+    enum:
+      - "m"
+      - "h"
+      - "d"
+  environment:
+    type: string
+    description: Filter the rule to apply to a specific environment.
+  threshold:
+    type: number
+    description: The latency threshold value.
+  groupBy:
+    type: array
+    default: ["service.name", "service.environment", "transaction.type"]
+    uniqueItems: true
+    items:
+      type: string
+      enum:
+        - "service.name"
+        - "service.environment"
+        - "transaction.type"
+        - "transaction.name"
+    description: >
+      Perform a composite aggregation against the selected fields.
+      When any of these groups match the selected rule conditions, an alert is triggered per group.
+  aggregationType:
+    type: string
+    enum:
+      - avg
+      - 95th
+      - 99th
+    description: The type of aggregation to perform.

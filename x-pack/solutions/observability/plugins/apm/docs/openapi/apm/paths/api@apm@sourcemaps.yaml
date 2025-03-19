@@ -1,0 +1,119 @@
+get:
+  summary: Get source maps
+  description: >
+    Get an array of Fleet artifacts, including source map uploads.
+    You must have `read` or `all` Kibana privileges for the APM and User Experience feature.
+  operationId: getSourceMaps
+  tags:
+    - APM sourcemaps
+  parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - name: page
+      in: query
+      description: Page number
+      schema:
+        type: number
+    - name: perPage
+      in: query
+      description: Number of records per page
+      schema:
+        type: number
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/source_maps_response.yaml'
+          examples:
+            getSourceMapsResponse1:
+              $ref: '../components/examples/source_maps_get_200_response1.yaml'
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '500':
+      description: Internal Server Error response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/500_response.yaml'
+    '501':
+      description: Not Implemented response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/501_response.yaml'
+  x-codeSamples:
+    - $ref: "../components/examples/source_maps_get_curl_request1.yaml"
+post:
+  summary: Upload a source map
+  description: >
+    Upload a source map for a specific service and version.
+    You must have `all` Kibana privileges for the APM and User Experience feature.
+
+    The maximum payload size is `1mb`.
+    If you attempt to upload a source map that exceeds the maximum payload size, you will get a 413 error.
+    Before uploading source maps that exceed this default, change the maximum payload size allowed by Kibana with the `server.maxPayload` variable.
+  operationId: uploadSourceMap
+  tags:
+    - APM sourcemaps
+  parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          $ref: '../components/schemas/upload_source_map_object.yaml'
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/upload_source_maps_response.yaml'
+          examples:
+            uploadSourceMapResponse1:
+              $ref: '../components/examples/source_maps_upload_200_response1.yaml'
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Forbidden response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
+    '500':
+      description: Internal Server Error response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/500_response.yaml'
+    '501':
+      description: Not Implemented response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/501_response.yaml'
+  x-codeSamples:
+    - $ref: "../components/examples/source_maps_upload_curl_request1.yaml"

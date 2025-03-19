@@ -42,13 +42,6 @@ export const REQUIRED_FIELDS_GENERAL_WARNING_TITLE = i18n.translate(
   }
 );
 
-export const OPTIONAL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.optionalText',
-  {
-    defaultMessage: 'Optional',
-  }
-);
-
 export const REMOVE_REQUIRED_FIELD_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.requiredFields.removeRequiredFieldButtonAriaLabel',
   {

@@ -6,14 +6,20 @@
  */
 
 import type { EuiButtonProps } from '@elastic/eui';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { SettingsModal } from './settings_modal';
 import { StatusBell } from './status_bell';
 import * as i18n from './translations';
 
@@ -26,6 +32,7 @@ interface Props {
   onGenerate: () => void;
   onCancel: () => void;
   onConnectorIdSelected: (connectorId: string) => void;
+  openFlyout: () => void;
   setLocalStorageAttackDiscoveryMaxAlerts: React.Dispatch<React.SetStateAction<string | undefined>>;
   stats: AttackDiscoveryStats | null;
 }
@@ -39,6 +46,7 @@ const HeaderComponent: React.FC<Props> = ({
   onGenerate,
   onConnectorIdSelected,
   onCancel,
+  openFlyout,
   setLocalStorageAttackDiscoveryMaxAlerts,
   stats,
 }) => {
@@ -78,23 +86,20 @@ const HeaderComponent: React.FC<Props> = ({
     <EuiFlexGroup
       alignItems="center"
       css={css`
-        gap: ${euiTheme.size.m};
         margin-top: ${euiTheme.size.m};
       `}
       data-test-subj="header"
       gutterSize="none"
     >
-      <EuiFlexItem grow={false}>
-        <SettingsModal
-          connectorId={connectorId}
-          isLoading={isLoading}
-          localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
-          setLocalStorageAttackDiscoveryMaxAlerts={setLocalStorageAttackDiscoveryMaxAlerts}
-        />
-      </EuiFlexItem>
       <StatusBell stats={stats} />
       {connectorsAreConfigured && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          css={css`
+            margin-left: ${euiTheme.size.s};
+            margin-right: ${euiTheme.size.s};
+          `}
+          grow={false}
+        >
           <ConnectorSelectorInline
             onConnectorSelected={noop}
             onConnectorIdSelected={onConnectorIdSelected}
@@ -103,6 +108,23 @@ const HeaderComponent: React.FC<Props> = ({
           />
         </EuiFlexItem>
       )}
+
+      <EuiFlexItem
+        css={css`
+          margin-right: ${euiTheme.size.m};
+        `}
+        grow={false}
+      >
+        <EuiToolTip content={i18n.SETTINGS} data-test-subj="openAlertSelectionToolTip">
+          <EuiButtonIcon
+            aria-label={i18n.SETTINGS}
+            color="text"
+            data-test-subj="openAlertSelection"
+            iconType="gear"
+            onClick={openFlyout}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
         <EuiToolTip

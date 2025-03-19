@@ -231,13 +231,7 @@
         "description": [],
         "signature": [
           "({ core, children, }: React.PropsWithChildren<{ core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           "; }>) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/context.tsx",
@@ -253,13 +247,7 @@
             "description": [],
             "signature": [
               "React.PropsWithChildren<{ core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               "; }>"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/context.tsx",
@@ -1041,13 +1029,7 @@
         "description": [],
         "signature": [
           "(param: { url?: string | undefined; appId?: string | undefined; restoreScroll?: boolean | undefined; } & ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-public.NavigateToAppOptions",
-            "text": "NavigateToAppOptions"
-          },
+          "NavigateToAppOptions",
           ") => void"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/navigation.ts",
@@ -1064,13 +1046,7 @@
             "description": [],
             "signature": [
               "{ url?: string | undefined; appId?: string | undefined; restoreScroll?: boolean | undefined; } & ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.NavigateToAppOptions",
-                "text": "NavigateToAppOptions"
-              }
+              "NavigateToAppOptions"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/navigation.ts",
             "deprecated": false,

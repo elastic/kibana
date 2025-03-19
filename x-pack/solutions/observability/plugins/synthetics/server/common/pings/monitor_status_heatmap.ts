@@ -23,62 +23,60 @@ export async function queryMonitorHeatmap({
   intervalInMinutes: number;
 }) {
   return syntheticsEsClient.search({
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              exists: {
-                field: 'summary',
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            exists: {
+              field: 'summary',
+            },
+          },
+          {
+            range: {
+              '@timestamp': {
+                gte: from,
+                lte: to,
               },
             },
-            {
-              range: {
-                '@timestamp': {
-                  gte: from,
-                  lte: to,
-                },
-              },
+          },
+          {
+            term: {
+              'monitor.id': monitorId,
             },
-            {
-              term: {
-                'monitor.id': monitorId,
-              },
+          },
+          {
+            term: {
+              'observer.geo.name': location,
             },
-            {
-              term: {
-                'observer.geo.name': location,
-              },
-            },
-          ],
+          },
+        ],
+      },
+    },
+    sort: [
+      {
+        '@timestamp': {
+          order: 'desc',
         },
       },
-      sort: [
-        {
-          '@timestamp': {
-            order: 'desc',
-          },
+    ],
+    _source: false,
+    fields: ['@timestamp', 'config_id', 'summary.*', 'error.*', 'observer.geo.name'],
+    aggs: {
+      heatmap: {
+        date_histogram: {
+          field: '@timestamp',
+          fixed_interval: `${intervalInMinutes}m`,
         },
-      ],
-      _source: false,
-      fields: ['@timestamp', 'config_id', 'summary.*', 'error.*', 'observer.geo.name'],
-      aggs: {
-        heatmap: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: `${intervalInMinutes}m`,
-          },
-          aggs: {
-            up: {
-              sum: {
-                field: 'summary.up',
-              },
+        aggs: {
+          up: {
+            sum: {
+              field: 'summary.up',
             },
-            down: {
-              sum: {
-                field: 'summary.down',
-              },
+          },
+          down: {
+            sum: {
+              field: 'summary.down',
             },
           },
         },

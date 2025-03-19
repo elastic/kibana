@@ -25,6 +25,8 @@ export const RULE_NUMBER_FILTER = 'options-filter-popover-button-rule-number-mul
 export const RULE_NUMBER_FILTER_SEARCH_FIELD = 'rule-number-search-input';
 export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
 export const TAKE_ACTION_BUTTON = 'csp:take_action';
+export const CLOSE_FLYOUT_BUTTON = 'euiFlyoutCloseButton';
+export const CLOSE_TOAST_BUTTON = 'toastCloseButton';
 
 export function RulePagePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -131,6 +133,29 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
       const rulesFlyoutEnableSwitchButton = await testSubjects.find(RULES_FLYOUT_SWITCH_BUTTON);
       return await rulesFlyoutEnableSwitchButton.getAttribute('aria-checked');
     },
+    closeToasts: async () => {
+      const toasts = await testSubjects.findAll(CLOSE_TOAST_BUTTON);
+      for (const toast of toasts) {
+        await toast.click();
+      }
+    },
+    togglEnableRulesRowSwitchButton: async (index: number, filterType: 'enable' | 'disable') => {
+      const enableRulesRowSwitches = await testSubjects.findAll(RULES_ROWS_ENABLE_SWITCH_BUTTON);
+      const checked = await enableRulesRowSwitches[index].getAttribute('aria-checked');
+
+      if (filterType === 'enable' && checked) {
+        return;
+      }
+      if (filterType === 'disable' && !checked) {
+        return;
+      }
+      await enableRulesRowSwitches[index].click();
+    },
+
+    clickCloseFlyoutButton: async () => {
+      const closeFlyoutButton = await testSubjects.find(CLOSE_FLYOUT_BUTTON);
+      await closeFlyoutButton.click();
+    },
 
     clickTakeActionButton: async () => {
       const takeActionButton = await testSubjects.find(TAKE_ACTION_BUTTON);
@@ -162,10 +187,17 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     },
 
     clickIntegrationsEvaluatedButton: async () => {
-      const integrationsEvaluatedButton = await testSubjects.find(
-        'rules-counters-integrations-evaluated-button'
-      );
-      await integrationsEvaluatedButton.click();
+      await retry.try(async () => {
+        const integrationsEvaluatedButton = await testSubjects.find(
+          'rules-counters-integrations-evaluated-button'
+        );
+        // Check that href exists and is not empty
+        const href = await integrationsEvaluatedButton.getAttribute('href');
+        if (!href) {
+          throw new Error('Integration link is not ready yet - href is empty');
+        }
+        await integrationsEvaluatedButton.click();
+      });
     },
 
     getFailedFindingsCounter: async () => {

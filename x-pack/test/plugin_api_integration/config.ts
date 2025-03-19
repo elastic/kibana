@@ -7,12 +7,14 @@
 
 import path from 'path';
 import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const integrationConfig = await readConfigFile(require.resolve('../api_integration/config'));
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [
       require.resolve('./test_suites/platform'),
       require.resolve('./test_suites/task_manager'),
@@ -36,7 +38,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.task_manager.monitored_aggregated_stats_refresh_rate=5000',
         `--xpack.stack_connectors.enableExperimental=${JSON.stringify([
           'crowdstrikeConnectorOn',
-          'inferenceConnectorOn',
+          'microsoftDefenderEndpointOn',
         ])}`,
         ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
       ],

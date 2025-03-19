@@ -186,6 +186,10 @@ export default function ({ getService }: FtrProviderContext) {
         'event.duration',
         'kibana.server_uuid',
         'kibana.version',
+        '_id',
+        '_index',
+        '_seq_no',
+        '_primary_term',
       ]);
 
       expect(propertiesToCheck).to.be.eql(event);

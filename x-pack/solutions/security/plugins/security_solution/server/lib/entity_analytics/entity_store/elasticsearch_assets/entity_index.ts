@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import {
   EngineComponentResourceEnum,
   type EngineComponentStatus,
@@ -13,6 +14,8 @@ import {
 } from '../../../../../common/api/entity_analytics';
 import { getEntitiesIndexName } from '../utils';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
+
+import type { EntityEngineInstallationDescriptor } from '../installation/types';
 
 interface Options {
   entityType: EntityType;
@@ -57,4 +60,52 @@ export const getEntityIndexStatus = async ({
   );
 
   return { id: index, installed: exists, resource: EngineComponentResourceEnum.index };
+};
+
+export type MappingProperties = NonNullable<MappingTypeMapping['properties']>;
+
+export const generateIndexMappings = (
+  description: Pick<EntityEngineInstallationDescriptor, 'fields' | 'identityField'>
+): MappingTypeMapping => {
+  const identityFieldMappings: MappingProperties = {
+    [description.identityField]: {
+      type: 'keyword',
+      fields: {
+        text: {
+          type: 'match_only_text',
+        },
+      },
+    },
+  };
+
+  const otherFieldMappings = description.fields
+    .filter(({ mapping }) => mapping)
+    .reduce((acc, { destination, mapping }) => {
+      acc[destination] = mapping;
+      return acc;
+    }, {} as MappingProperties);
+
+  return {
+    properties: { ...BASE_ENTITY_INDEX_MAPPING, ...identityFieldMappings, ...otherFieldMappings },
+  };
+};
+
+export const BASE_ENTITY_INDEX_MAPPING: MappingProperties = {
+  '@timestamp': {
+    type: 'date',
+  },
+  'asset.criticality': {
+    type: 'keyword',
+  },
+  'entity.name': {
+    type: 'keyword',
+    fields: {
+      text: {
+        type: 'match_only_text',
+      },
+    },
+  },
+  'entity.source': {
+    type: 'keyword',
+  },
 };

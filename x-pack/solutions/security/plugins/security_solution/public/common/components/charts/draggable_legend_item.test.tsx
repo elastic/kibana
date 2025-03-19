@@ -8,6 +8,7 @@
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import '../../mock/react_beautiful_dnd';
 import { TestProviders } from '../../mock';
@@ -31,6 +32,7 @@ describe('DraggableLegendItem', () => {
     dataProviderId: 'draggable-legend-item-3207fda7-d008-402a-86a0-8ad632081bad-event_dataset-flow',
     field: 'event.dataset',
     value: 'flow',
+    scopeId: 'test',
   };
 
   let wrapper: ReactWrapper;
@@ -56,11 +58,11 @@ describe('DraggableLegendItem', () => {
   });
 
   it('renders a custom legend item via the `render` prop when provided', () => {
-    const render = (fieldValuePair?: { field: string; value: string | number }) => (
+    const renderContent = (fieldValuePair?: { field: string; value: string | number }) => (
       <div data-test-subj="custom">{`${fieldValuePair?.field} - ${fieldValuePair?.value}`}</div>
     );
 
-    const customLegendItem = { ...legendItem, render };
+    const customLegendItem = { ...legendItem, render: renderContent };
 
     wrapper = mount(
       <TestProviders>
@@ -107,5 +109,18 @@ describe('DraggableLegendItem', () => {
       </TestProviders>
     );
     expect(wrapper.find('[data-test-subj="value-wrapper-empty"]').first().exists()).toBeFalsy();
+  });
+
+  describe('when actions are inline', () => {
+    it('renders the legend item content', () => {
+      const { getByTestId, queryByTestId } = render(
+        <TestProviders>
+          <DraggableLegendItem legendItem={legendItem} isInlineActions />
+        </TestProviders>
+      );
+
+      expect(queryByTestId(`legend-item-${legendItem.dataProviderId}`)).not.toBeInTheDocument();
+      expect(getByTestId('legendItemInlineActions')).toBeInTheDocument();
+    });
   });
 });

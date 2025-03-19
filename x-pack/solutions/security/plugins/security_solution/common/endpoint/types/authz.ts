@@ -93,6 +93,13 @@ export interface EndpointAuthz {
   canReadEndpointExceptions: boolean;
   /** if the user has read permissions for endpoint exceptions */
   canWriteEndpointExceptions: boolean;
+  /** If user is allowed to manage global artifacts. Introduced support for spaces feature */
+  canManageGlobalArtifacts: boolean;
+
+  /** if the user has write permissions for workflow insights */
+  canWriteWorkflowInsights: boolean;
+  /** if the user has read permissions for workflow insights */
+  canReadWorkflowInsights: boolean;
 }
 
 export type EndpointAuthzKeyList = Array<keyof EndpointAuthz>;

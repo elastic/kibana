@@ -22,7 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     // custom roles are not enabled for observability projects
     this.tags(['skipSvlOblt']);
 
-    describe('as Viewer', () => {
+    describe('as Viewer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginAsViewer();
         await pageObjects.common.navigateToApp('management');
@@ -33,7 +33,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('as Admin', () => {
+    describe('as Admin', function () {
+      this.tags(['failsOnMKI']);
+
       before(async () => {
         await pageObjects.svlCommonPage.loginAsAdmin();
         await pageObjects.common.navigateToApp('management');

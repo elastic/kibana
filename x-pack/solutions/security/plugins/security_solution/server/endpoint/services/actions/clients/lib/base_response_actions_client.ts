@@ -503,6 +503,8 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         : {}),
     };
 
+    this.log.debug(() => `creating action request document:\n${stringify(doc)}`);
+
     try {
       const logsEndpointActionsResult = await this.options.esClient.index<LogsEndpointAction>(
         {
@@ -526,6 +528,9 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       return doc;
     } catch (err) {
       this.sendActionCreationErrorTelemetry(actionRequest.command, err);
+      this.log.debug(
+        () => `attempt to index document into ${ENDPOINT_ACTIONS_INDEX} failed:\n${stringify(err)}`
+      );
 
       if (!(err instanceof ResponseActionsClientError)) {
         throw new ResponseActionsClientError(
@@ -654,7 +659,13 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     }
   }
 
-  protected fetchAllPendingActions(): AsyncIterable<ResponseActionsClientPendingAction[]> {
+  protected fetchAllPendingActions<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(): AsyncIterable<
+    Array<ResponseActionsClientPendingAction<TParameters, TOutputContent, TMeta>>
+  > {
     const esClient = this.options.esClient;
     const query: QueryDslQueryContainer = {
       bool: {
@@ -861,10 +872,10 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     actionId: string,
     fileId: string
   ): Promise<GetFileDownloadMethodResponse> {
-    throw new ResponseActionsClientError(`Method getFileDownload() not implemented`, 501);
+    throw new ResponseActionsNotSupportedError('getFileDownload');
   }
 
   public async getFileInfo(actionId: string, fileId: string): Promise<UploadedFileInfo> {
-    throw new ResponseActionsClientError(`Method getFileInfo() not implemented`, 501);
+    throw new ResponseActionsNotSupportedError('getFileInfo');
   }
 }

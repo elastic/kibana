@@ -132,7 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('dashboard panel - save to library', async () => {
-      await dashboardPanelActions.legacySaveToLibrary('', title);
+      await dashboardPanelActions.saveToLibrary('', title);
       await a11y.testAppSnapshot();
       await testSubjects.click('saveCancelButton');
     });

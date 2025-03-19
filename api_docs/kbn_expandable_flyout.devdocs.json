@@ -128,8 +128,8 @@
             "pluginId": "@kbn/expandable-flyout",
             "scope": "public",
             "docId": "kibKbnExpandableFlyoutPluginApi",
-            "section": "def-public.FlyoutPanelProps",
-            "text": "FlyoutPanelProps"
+            "section": "def-public.FlyoutPanelHistory",
+            "text": "FlyoutPanelHistory"
           },
           "[]"
         ],
@@ -654,6 +654,55 @@
       },
       {
         "parentPluginId": "@kbn/expandable-flyout",
+        "id": "def-public.FlyoutPanelHistory",
+        "type": "Interface",
+        "tags": [],
+        "label": "FlyoutPanelHistory",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-public.FlyoutPanelHistory.lastOpen",
+            "type": "number",
+            "tags": [],
+            "label": "lastOpen",
+            "description": [
+              "\nTime at which the flyout was last opened"
+            ],
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-public.FlyoutPanelHistory.panel",
+            "type": "Object",
+            "tags": [],
+            "label": "panel",
+            "description": [
+              "\nPanel that was opened"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/expandable-flyout",
+                "scope": "public",
+                "docId": "kibKbnExpandableFlyoutPluginApi",
+                "section": "def-public.FlyoutPanelProps",
+                "text": "FlyoutPanelProps"
+              }
+            ],
+            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/expandable-flyout",
         "id": "def-public.FlyoutPanelProps",
         "type": "Interface",
         "tags": [],
@@ -710,22 +759,6 @@
                 "text": "PanelPath"
               },
               " | undefined"
-            ],
-            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-public.FlyoutPanelProps.state",
-            "type": "Object",
-            "tags": [],
-            "label": "state",
-            "description": [
-              "\nTracks visual state such as whether the panel is collapsed"
-            ],
-            "signature": [
-              "Record<string, unknown> | undefined"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
             "deprecated": false,
@@ -820,14 +853,16 @@
             "type": "Array",
             "tags": [],
             "label": "history",
-            "description": [],
+            "description": [
+              "\nHistory of the right panels that were opened"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/expandable-flyout",
                 "scope": "public",
                 "docId": "kibKbnExpandableFlyoutPluginApi",
-                "section": "def-public.FlyoutPanelProps",
-                "text": "FlyoutPanelProps"
+                "section": "def-public.FlyoutPanelHistory",
+                "text": "FlyoutPanelHistory"
               },
               "[]"
             ],

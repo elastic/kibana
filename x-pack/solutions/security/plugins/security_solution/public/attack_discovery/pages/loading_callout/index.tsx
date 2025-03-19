@@ -23,14 +23,18 @@ interface Props {
   alertsContextCount: number | null;
   approximateFutureTime: Date | null;
   connectorIntervals: GenerationInterval[];
+  end?: string | null;
   localStorageAttackDiscoveryMaxAlerts: string | undefined;
+  start?: string | null;
 }
 
 const LoadingCalloutComponent: React.FC<Props> = ({
   alertsContextCount,
-  localStorageAttackDiscoveryMaxAlerts,
   approximateFutureTime,
   connectorIntervals,
+  end,
+  localStorageAttackDiscoveryMaxAlerts,
+  start,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { theme } = useKibana().services;
@@ -50,12 +54,14 @@ const LoadingCalloutComponent: React.FC<Props> = ({
         >
           <LoadingMessages
             alertsContextCount={alertsContextCount}
+            end={end}
             localStorageAttackDiscoveryMaxAlerts={localStorageAttackDiscoveryMaxAlerts}
+            start={start}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [alertsContextCount, euiTheme.size.m, localStorageAttackDiscoveryMaxAlerts]
+    [alertsContextCount, end, euiTheme.size.m, localStorageAttackDiscoveryMaxAlerts, start]
   );
 
   const isDarkMode = theme.getTheme().darkMode === true;

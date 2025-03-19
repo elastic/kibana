@@ -21,7 +21,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+        "path": "x-pack/platform/packages/private/kbn-random-sampling/src/ui/slider_control/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,7 +41,7 @@
                 "text": "ControlSliderProps"
               }
             ],
-            "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+            "path": "x-pack/platform/packages/private/kbn-random-sampling/src/ui/slider_control/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -68,7 +68,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "x-pack/packages/kbn-random-sampling/src/ui/icon/sampling_icon.tsx",
+        "path": "x-pack/platform/packages/private/kbn-random-sampling/src/ui/icon/sampling_icon.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -88,7 +88,7 @@
                 "text": "RandomSamplingIconProps"
               }
             ],
-            "path": "x-pack/packages/kbn-random-sampling/src/ui/icon/sampling_icon.tsx",
+            "path": "x-pack/platform/packages/private/kbn-random-sampling/src/ui/icon/sampling_icon.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -106,7 +106,7 @@
         "tags": [],
         "label": "ControlSliderProps",
         "description": [],
-        "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+        "path": "x-pack/platform/packages/private/kbn-random-sampling/src/ui/slider_control/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -120,9 +120,9 @@
               "Allowed values to show on the Control Slider"
             ],
             "signature": [
-              "number[]"
+              "{ label: string; value: number; accessibleLabel?: string | undefined; }[]"
             ],
-            "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+            "path": "x-pack/platform/packages/private/kbn-random-sampling/src/ui/slider_control/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -138,7 +138,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+            "path": "x-pack/platform/packages/private/kbn-random-sampling/src/ui/slider_control/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -154,7 +154,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+            "path": "x-pack/platform/packages/private/kbn-random-sampling/src/ui/slider_control/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -170,7 +170,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+            "path": "x-pack/platform/packages/private/kbn-random-sampling/src/ui/slider_control/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -186,7 +186,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+            "path": "x-pack/platform/packages/private/kbn-random-sampling/src/ui/slider_control/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -202,7 +202,7 @@
             "signature": [
               "(newValue: number) => void"
             ],
-            "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+            "path": "x-pack/platform/packages/private/kbn-random-sampling/src/ui/slider_control/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -216,7 +216,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "x-pack/packages/kbn-random-sampling/src/ui/slider_control/index.tsx",
+                "path": "x-pack/platform/packages/private/kbn-random-sampling/src/ui/slider_control/index.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -240,7 +240,7 @@
         "signature": [
           "React.SVGProps<SVGSVGElement> & CustomProps"
         ],
-        "path": "x-pack/packages/kbn-random-sampling/src/ui/icon/sampling_icon.tsx",
+        "path": "x-pack/platform/packages/private/kbn-random-sampling/src/ui/icon/sampling_icon.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -22,47 +22,53 @@ import {
   EuiBadgeProps,
   EuiBadge,
   EuiCode,
+  EuiThemeComputed,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { ApplicationStart } from '@kbn/core/public';
 import { Index, IndexDetailsTab } from '@kbn/index-management-shared-types';
 import { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
 import { Phase } from '../../../common/types';
 import { getPolicyEditPath } from '../../application/services/navigation';
-
-const phaseToBadgeMapping: Record<Phase, { color: EuiBadgeProps['color']; label: string }> = {
-  hot: {
-    color: euiThemeVars.euiColorVis9,
-    label: 'Hot',
-  },
-  warm: {
-    color: euiThemeVars.euiColorVis5,
-    label: 'Warm',
-  },
-  cold: {
-    color: euiThemeVars.euiColorVis1,
-    label: 'Cold',
-  },
-  frozen: {
-    color: euiThemeVars.euiColorVis4,
-    label: 'Frozen',
-  },
-  delete: {
-    color: 'default',
-    label: 'Delete',
-  },
-};
-
 interface Props {
   index: Index;
   getUrlForApp: ApplicationStart['getUrlForApp'];
+  euiTheme: EuiThemeComputed;
 }
 
-export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlForApp }) => {
+export const IndexLifecycleSummary: FunctionComponent<Props> = ({
+  index,
+  getUrlForApp,
+  euiTheme,
+}) => {
   const { ilm: ilmData } = index;
   // only ILM managed indices render the ILM tab
   const ilm = ilmData as IlmExplainLifecycleLifecycleExplainManaged;
+  const isBorealis = euiTheme.themeName === 'EUI_THEME_BOREALIS';
+
+  // Changing the mappings for the phases in Borealis as a mid-term solution. See https://github.com/elastic/kibana/issues/203664#issuecomment-2536593361.
+  const phaseToBadgeMapping: Record<Phase, { color: EuiBadgeProps['color']; label: string }> = {
+    hot: {
+      color: isBorealis ? euiTheme.colors.vis.euiColorVis6 : euiTheme.colors.vis.euiColorVis9,
+      label: 'Hot',
+    },
+    warm: {
+      color: isBorealis ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.vis.euiColorVis5,
+      label: 'Warm',
+    },
+    cold: {
+      color: isBorealis ? euiTheme.colors.vis.euiColorVis2 : euiTheme.colors.vis.euiColorVis1,
+      label: 'Cold',
+    },
+    frozen: {
+      color: euiTheme.colors.vis.euiColorVis4,
+      label: 'Frozen',
+    },
+    delete: {
+      color: 'default',
+      label: 'Delete',
+    },
+  };
 
   // if ilm.phase is an unexpected value, then display a default badge
   const phaseBadgeConfig = phaseToBadgeMapping[ilm.phase as Phase] ?? {

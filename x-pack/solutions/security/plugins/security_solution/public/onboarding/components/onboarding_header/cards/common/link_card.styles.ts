@@ -22,19 +22,20 @@ export const useCardStyles = () => {
       .headerCardLink,
       .headerCardLink * {
         text-decoration: underline;
-        text-decoration-color: ${euiTheme.colors.primaryText};
+        text-decoration-color: ${euiTheme.colors.textPrimary};
       }
     }
 
     .headerCardTitle {
       font-weight: ${euiTheme.font.weight.semiBold};
+      font-size: 1rem;
     }
 
     ${isDarkMode
       ? `
-          background-color: ${euiTheme.colors.lightestShade};
+          background-color: ${euiTheme.colors.backgroundBasePlain};
           box-shadow: none;
-          border: 1px solid ${euiTheme.colors.mediumShade};
+          border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
         `
       : ''}
   `;

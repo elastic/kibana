@@ -16,7 +16,7 @@ import {
 import { ApmTransactionDurationTransformGenerator } from './apm_transaction_duration';
 
 const SPACE_ID = 'custom-space';
-const generator = new ApmTransactionDurationTransformGenerator(SPACE_ID, dataViewsService);
+const generator = new ApmTransactionDurationTransformGenerator(SPACE_ID, dataViewsService, false);
 
 describe('APM Transaction Duration Transform Generator', () => {
   it('returns the expected transform params with every specified indicator params', async () => {

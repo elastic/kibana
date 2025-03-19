@@ -6,26 +6,26 @@
  */
 
 import React, { memo } from 'react';
-import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import {
   NodeShapeContainer,
-  NodeLabel,
   NodeShapeOnHoverSvg,
   NodeShapeSvg,
   NodeIcon,
   NodeButton,
   HandleStyleOverride,
+  useNodeFillColor,
 } from './styles';
 import type { EntityNodeViewModel, NodeProps } from '../types';
 import { HexagonHoverShape, HexagonShape } from './shapes/hexagon_shape';
 import { NodeExpandButton } from './node_expand_button';
+import { Label } from './label';
 
 const NODE_WIDTH = 87;
 const NODE_HEIGHT = 96;
 
-// eslint-disable-next-line react/display-name
-export const HexagonNode: React.FC<NodeProps> = memo((props: NodeProps) => {
+export const HexagonNode = memo<NodeProps>((props: NodeProps) => {
   const { id, color, icon, label, interactive, expandButtonClick, nodeClick } =
     props.data as EntityNodeViewModel;
   const { euiTheme } = useEuiTheme();
@@ -51,7 +51,7 @@ export const HexagonNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           xmlns="http://www.w3.org/2000/svg"
         >
           <HexagonShape
-            fill={useEuiBackgroundColor(color ?? 'primary')}
+            fill={useNodeFillColor(color)}
             stroke={euiTheme.colors[color ?? 'primary']}
           />
           {icon && <NodeIcon x="11" y="15" icon={icon} color={color} />}
@@ -60,6 +60,7 @@ export const HexagonNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           <>
             <NodeButton onClick={(e) => nodeClick?.(e, props)} />
             <NodeExpandButton
+              color={color}
               onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
               x={`${NODE_WIDTH - NodeExpandButton.ExpandButtonSize / 2 + 2}px`}
               y={`${(NODE_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2 - 2}px`}
@@ -81,7 +82,9 @@ export const HexagonNode: React.FC<NodeProps> = memo((props: NodeProps) => {
           style={HandleStyleOverride}
         />
       </NodeShapeContainer>
-      <NodeLabel>{label ? label : id}</NodeLabel>
+      <Label text={label ? label : id} />
     </>
   );
 });
+
+HexagonNode.displayName = 'HexagonNode';

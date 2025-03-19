@@ -10,18 +10,16 @@ import {
 } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import moment from 'moment';
+import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 import { FINAL_SUMMARY_FILTER } from '../../../common/constants/client_defaults';
 import { formatFilterString } from '../common';
 import { SyntheticsServerSetup } from '../../types';
 import { getSyntheticsCerts } from '../../queries/get_certs';
-import { TLSParams } from '../../../common/runtime_types/alerts/tls';
 import { savedObjectsAdapter } from '../../saved_objects';
 import { DYNAMIC_SETTINGS_DEFAULTS, SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
-import {
-  getAllMonitors,
-  processMonitors,
-} from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import {
   CertResult,
   ConfigKey,
@@ -35,16 +33,17 @@ import { SyntheticsEsClient } from '../../lib';
 
 export class TLSRuleExecutor {
   previousStartedAt: Date | null;
-  params: TLSParams;
+  params: TLSRuleParams;
   esClient: SyntheticsEsClient;
   soClient: SavedObjectsClientContract;
   server: SyntheticsServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
+  monitorConfigRepository: MonitorConfigRepository;
 
   constructor(
     previousStartedAt: Date | null,
-    p: TLSParams,
+    p: TLSRuleParams,
     soClient: SavedObjectsClientContract,
     scopedClient: ElasticsearchClient,
     server: SyntheticsServerSetup,
@@ -58,12 +57,15 @@ export class TLSRuleExecutor {
     });
     this.server = server;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
+    this.monitorConfigRepository = new MonitorConfigRepository(
+      soClient,
+      server.encryptedSavedObjects.getClient()
+    );
   }
 
   async getMonitors() {
     const HTTP_OR_TCP = `${monitorAttributes}.${ConfigKey.MONITOR_TYPE}: http or ${monitorAttributes}.${ConfigKey.MONITOR_TYPE}: tcp`;
-    this.monitors = await getAllMonitors({
-      soClient: this.soClient,
+    this.monitors = await this.monitorConfigRepository.getAll({
       filter: `${monitorAttributes}.${AlertConfigKey.TLS_ENABLED}: true and (${HTTP_OR_TCP})`,
     });
 
@@ -171,50 +173,48 @@ export class TLSRuleExecutor {
     const configIds = certs.map((cert) => cert.configId);
     const certIds = certs.map((cert) => cert.sha256);
     const { body } = await this.esClient.search({
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-1d',
-                    lt: 'now',
-                  },
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: 'now-1d',
+                  lt: 'now',
                 },
               },
-              {
-                terms: {
-                  config_id: configIds,
-                },
+            },
+            {
+              terms: {
+                config_id: configIds,
               },
-              FINAL_SUMMARY_FILTER,
-            ],
-            must_not: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      'tls.server.hash.sha256': certIds,
-                    },
+            },
+            FINAL_SUMMARY_FILTER,
+          ],
+          must_not: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    'tls.server.hash.sha256': certIds,
                   },
-                ],
-              },
+                },
+              ],
             },
           },
         },
-        collapse: {
-          field: 'config_id',
-        },
-        _source: ['@timestamp', 'monitor', 'url', 'config_id', 'tls'],
-        sort: [
-          {
-            '@timestamp': {
-              order: 'desc',
-            },
-          },
-        ],
       },
+      collapse: {
+        field: 'config_id',
+      },
+      _source: ['@timestamp', 'monitor', 'url', 'config_id', 'tls'],
+      sort: [
+        {
+          '@timestamp': {
+            order: 'desc',
+          },
+        },
+      ],
     });
 
     return body.hits.hits.map((hit) => hit._source as TLSLatestPing);

@@ -10,6 +10,11 @@ import React from 'react';
 import { Graph, type GraphProps } from './graph';
 import { TestProviders } from '../mock/test_providers';
 
+// Turn off the optimization that hides elements that are not visible in the viewport
+jest.mock('./constants', () => ({
+  ONLY_RENDER_VISIBLE_ELEMENTS: false,
+}));
+
 const renderGraphPreview = (props: GraphProps) =>
   render(
     <TestProviders>

@@ -514,13 +514,7 @@
         "description": [],
         "signature": [
           "<D = any, E = any>(httpClient: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           ", { path, method, body, query, version, asSystemRequest }: ",
           {
             "pluginId": "esUiShared",
@@ -551,13 +545,7 @@
             "label": "httpClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "src/platform/plugins/shared/es_ui_shared/public/request/send_request.ts",
             "deprecated": false,
@@ -616,13 +604,7 @@
         "description": [],
         "signature": [
           "<D = any, E = Error>(httpClient: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           ", { path, method, query, body, pollIntervalMs, initialData, deserializer, version, }: ",
           {
             "pluginId": "esUiShared",
@@ -653,13 +635,7 @@
             "label": "httpClient",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
             "path": "src/platform/plugins/shared/es_ui_shared/public/request/use_request.ts",
             "deprecated": false,
@@ -868,6 +844,20 @@
             "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esUiShared",
+            "id": "def-public.Error.statusCode",
+            "type": "number",
+            "tags": [],
+            "label": "statusCode",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1057,13 +1047,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpFetchQuery",
-                "text": "HttpFetchQuery"
-              },
+              "HttpFetchQuery",
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/es_ui_shared/public/request/send_request.ts",
@@ -1567,13 +1551,7 @@
         ],
         "signature": [
           "({ error, response, handleCustomError, }: EsErrorHandlerParams) => ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any>"
         ],
         "path": "src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/errors/handle_es_error.ts",

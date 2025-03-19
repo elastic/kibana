@@ -18,7 +18,7 @@
       "expressions",
       "dataViews",
       "uiActions",
-      "contentManagement"
+      "contentManagement",
     ],
     "requiredBundles": [
       "kibanaReact",

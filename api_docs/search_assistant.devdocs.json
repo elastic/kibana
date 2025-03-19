@@ -14,7 +14,7 @@
       "tags": [],
       "label": "SearchAssistantPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/search_assistant/public/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_assistant/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,7 +28,7 @@
       "tags": [],
       "label": "SearchAssistantPluginStart",
       "description": [],
-      "path": "x-pack/plugins/search_assistant/public/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_assistant/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -50,7 +50,7 @@
       "tags": [],
       "label": "SearchAssistantPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/search_assistant/server/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_assistant/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -64,7 +64,7 @@
       "tags": [],
       "label": "SearchAssistantPluginStart",
       "description": [],
-      "path": "x-pack/plugins/search_assistant/server/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_assistant/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -88,7 +88,7 @@
         "signature": [
           "\"searchAssistant\""
         ],
-        "path": "x-pack/plugins/search_assistant/common/index.ts",
+        "path": "x-pack/solutions/search/plugins/search_assistant/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -103,7 +103,7 @@
         "signature": [
           "\"searchAssistant\""
         ],
-        "path": "x-pack/plugins/search_assistant/common/index.ts",
+        "path": "x-pack/solutions/search/plugins/search_assistant/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

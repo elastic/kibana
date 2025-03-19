@@ -13,7 +13,6 @@ import {
   getStepsData,
   getAboutStepsData,
   getActionsStepsData,
-  getHumanizedDuration,
   getModifiedAboutDetailsData,
   getPrePackagedTimelineInstallationStatus,
   determineDetailsValue,
@@ -149,7 +148,11 @@ describe('rule helpers', () => {
         references: ['www.test.co'],
         riskScore: { value: 21, mapping: [], isMappingChecked: false },
         ruleNameOverride: 'message',
-        severity: { value: 'low', mapping: fillEmptySeverityMappings([]), isMappingChecked: false },
+        severity: {
+          value: 'low',
+          mapping: fillEmptySeverityMappings([]),
+          isMappingChecked: false,
+        },
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         timestampOverride: 'event.ingested',
@@ -325,50 +328,6 @@ describe('rule helpers', () => {
 
         expect(result).toEqual(expected);
       });
-    });
-  });
-
-  describe('getHumanizedDuration', () => {
-    test('returns from as seconds if from duration is specified in seconds', () => {
-      const result = getHumanizedDuration('now-62s', '1m');
-
-      expect(result).toEqual('2s');
-    });
-
-    test('returns from as seconds if from duration is specified in seconds greater than 60', () => {
-      const result = getHumanizedDuration('now-122s', '1m');
-
-      expect(result).toEqual('62s');
-    });
-
-    test('returns from as minutes if from duration is specified in minutes', () => {
-      const result = getHumanizedDuration('now-660s', '5m');
-
-      expect(result).toEqual('6m');
-    });
-
-    test('returns from as minutes if from duration is specified in minutes greater than 60', () => {
-      const result = getHumanizedDuration('now-6600s', '5m');
-
-      expect(result).toEqual('105m');
-    });
-
-    test('returns from as hours if from duration is specified in hours', () => {
-      const result = getHumanizedDuration('now-7500s', '5m');
-
-      expect(result).toEqual('2h');
-    });
-
-    test('returns from as if from is not parsable as dateMath', () => {
-      const result = getHumanizedDuration('randomstring', '5m');
-
-      expect(result).toEqual('NaNs');
-    });
-
-    test('returns from as 5m if interval is not parsable as dateMath', () => {
-      const result = getHumanizedDuration('now-300s', 'randomstring');
-
-      expect(result).toEqual('5m');
     });
   });
 

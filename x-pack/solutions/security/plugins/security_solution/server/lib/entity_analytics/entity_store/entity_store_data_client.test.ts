@@ -12,26 +12,88 @@ import {
 } from '@kbn/core/server/mocks';
 import { EntityStoreDataClient } from './entity_store_data_client';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
-import type { EntityType } from '../../../../common/api/entity_analytics/entity_store/common.gen';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { AppClient } from '../../..';
 import type { EntityStoreConfig } from './types';
 import { mockGlobalState } from '../../../../public/common/mock';
 import type { EntityDefinition } from '@kbn/entities-schema';
-import { getUnitedEntityDefinition } from './united_entity_definitions';
+import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
+import { EntityType } from '../../../../common/search_strategy';
+import type { InitEntityEngineResponse } from '../../../../common/api/entity_analytics';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { defaultOptions } from './constants';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 
-const unitedDefinition = getUnitedEntityDefinition({
-  entityType: 'host',
-  namespace: 'test',
-  fieldHistoryLength: 10,
-  indexPatterns: [],
-  syncDelay: '1m',
-  frequency: '1m',
+const definition: EntityDefinition = convertToEntityManagerDefinition(
+  {
+    id: 'host_engine',
+    entityType: 'host',
+    pipeline: [],
+    version: '0.0.1',
+    fields: [],
+    identityField: 'host.name',
+    indexMappings: {},
+    indexPatterns: [],
+    settings: {
+      timeout: '180s',
+      docsPerSecond: undefined,
+      syncDelay: '1m',
+      frequency: '1m',
+      timestampField: '@timestamp',
+      lookbackPeriod: '24h',
+    },
+    dynamic: false,
+  },
+  { namespace: 'test', filter: '' }
+);
+
+const stubSecurityDataView = createStubDataView({
+  spec: {
+    id: 'security',
+    title: 'security',
+  },
 });
-const definition: EntityDefinition = unitedDefinition.entityManagerDefinition;
+
+const dataviewService = {
+  ...dataViewPluginMocks.createStartContract(),
+  get: () => Promise.resolve(stubSecurityDataView),
+  clearInstanceCache: () => Promise.resolve(),
+};
+
+const mockGetEntityDefinition = jest.fn().mockResolvedValue([]);
+const mockUpdateEntityDefinition = jest.fn().mockResolvedValue(undefined);
+jest.mock('@kbn/entityManager-plugin/server/lib/entity_client', () => {
+  return {
+    EntityClient: jest.fn().mockImplementation(() => ({
+      updateEntityDefinition: mockUpdateEntityDefinition,
+      getEntityDefinitions: mockGetEntityDefinition,
+    })),
+  };
+});
+
+const mockListDescriptor = jest.fn().mockResolvedValue({ engines: [] });
+const mockUpdateStatus = jest.fn().mockResolvedValue({});
+jest.mock('./saved_object/engine_descriptor', () => {
+  return {
+    EngineDescriptorClient: jest.fn().mockImplementation(() => ({
+      list: mockListDescriptor,
+      updateStatus: mockUpdateStatus,
+    })),
+  };
+});
+
+const mockCheckPrivileges = jest.fn().mockReturnValue({
+  hasAllRequested: true,
+  privileges: {
+    elasticsearch: { cluster: [], index: [] },
+    kibana: [],
+  },
+});
 
 describe('EntityStoreDataClient', () => {
-  const mockSavedObjectClient = savedObjectsClientMock.create();
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
   const esClientMock = clusterClientMock.asCurrentUser;
   const loggerMock = loggingSystemMock.createLogger();
@@ -39,12 +101,22 @@ describe('EntityStoreDataClient', () => {
     clusterClient: clusterClientMock,
     logger: loggerMock,
     namespace: 'default',
-    soClient: mockSavedObjectClient,
+    soClient: savedObjectsClientMock.create(),
     kibanaVersion: '9.0.0',
-    dataViewsService: {} as DataViewsService,
-    appClient: {} as AppClient,
+    dataViewsService: dataviewService as unknown as DataViewsService,
+    appClient: {
+      getSourcererDataViewId: jest.fn().mockReturnValue('security-solution'),
+      getAlertsIndex: jest.fn().mockReturnValue('alerts'),
+    } as unknown as AppClient,
     config: {} as EntityStoreConfig,
     experimentalFeatures: mockGlobalState.app.enableExperimental,
+    taskManager: {} as TaskManagerStartContract,
+    security: {
+      authz: {
+        checkPrivilegesDynamicallyWithRequest: () => mockCheckPrivileges,
+      },
+    } as unknown as SecurityPluginStart,
+    request: {} as KibanaRequest,
   });
 
   const defaultSearchParams = {
@@ -72,14 +144,14 @@ describe('EntityStoreDataClient', () => {
 
   describe('search entities', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
+      jest.clearAllMocks();
       esClientMock.search.mockResolvedValue(emptySearchResponse);
     });
 
     it('searches in the entities store indices', async () => {
       await dataClient.searchEntities({
         ...defaultSearchParams,
-        entityTypes: ['host', 'user'],
+        entityTypes: [EntityType.host, EntityType.user],
       });
 
       expect(esClientMock.search).toHaveBeenCalledWith(
@@ -260,7 +332,7 @@ describe('EntityStoreDataClient', () => {
           installed: true,
         },
         {
-          id: 'security_host_test',
+          id: 'indexTemplates_id',
           installed: true,
           resource: 'index_template',
         },
@@ -325,6 +397,106 @@ describe('EntityStoreDataClient', () => {
           ],
         },
       ]);
+    });
+  });
+
+  describe('enable entities', () => {
+    let spyInit: jest.SpyInstance;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      spyInit = jest
+        .spyOn(dataClient, 'init')
+        .mockImplementation(() => Promise.resolve({} as InitEntityEngineResponse));
+    });
+
+    it('only enable engine for the given entityType', async () => {
+      await dataClient.enable({
+        ...defaultOptions,
+        entityTypes: [EntityType.host],
+      });
+
+      expect(spyInit).toHaveBeenCalledWith(EntityType.host, expect.anything(), expect.anything());
+    });
+  });
+
+  describe('applyDataViewIndices', () => {
+    beforeEach(() => {
+      mockUpdateEntityDefinition.mockClear();
+      jest.clearAllMocks();
+    });
+
+    it('applies data view indices to the entity store', async () => {
+      mockListDescriptor.mockResolvedValueOnce({ engines: [{}] });
+      mockGetEntityDefinition.mockResolvedValueOnce({
+        definitions: [definition],
+      });
+
+      const response = await dataClient.applyDataViewIndices();
+
+      expect(mockUpdateEntityDefinition).toHaveBeenCalled();
+      expect(response.errors.length).toBe(0);
+      expect(response.successes.length).toBe(1);
+    });
+
+    it('returns empty successes and errors if no engines found', async () => {
+      mockListDescriptor.mockResolvedValueOnce({ engines: [] });
+
+      const response = await dataClient.applyDataViewIndices();
+
+      expect(response.successes.length).toBe(0);
+      expect(response.errors.length).toBe(0);
+    });
+
+    it('throws an error if the user does not have required privileges', async () => {
+      mockCheckPrivileges.mockReturnValueOnce({
+        hasAllRequested: false,
+        privileges: {
+          elasticsearch: { cluster: [], index: [] },
+          kibana: [],
+        },
+      });
+
+      mockListDescriptor.mockResolvedValueOnce({ engines: [{}] });
+
+      await expect(dataClient.applyDataViewIndices()).rejects.toThrow(
+        /The current user does not have the required indices privileges.*/
+      );
+    });
+
+    it('skips update if index patterns are the same', async () => {
+      mockListDescriptor.mockResolvedValueOnce({ engines: [{}] });
+      mockGetEntityDefinition.mockResolvedValueOnce({
+        definitions: [
+          {
+            indexPatterns: [
+              stubSecurityDataView.getIndexPattern(),
+              '.asset-criticality.asset-criticality-default',
+              'risk-score.risk-score-latest-default',
+            ],
+          },
+        ],
+      });
+
+      const response = await dataClient.applyDataViewIndices();
+
+      expect(mockUpdateEntityDefinition).not.toHaveBeenCalled();
+      expect(response.successes.length).toBe(1);
+      expect(response.errors.length).toBe(0);
+    });
+
+    it('handles errors during update', async () => {
+      const testErrorMessages = 'Update failed';
+      mockUpdateEntityDefinition.mockRejectedValueOnce(new Error(testErrorMessages));
+      mockListDescriptor.mockResolvedValueOnce({ engines: [{}] });
+      mockGetEntityDefinition.mockResolvedValueOnce({
+        definitions: [definition],
+      });
+
+      const response = await dataClient.applyDataViewIndices();
+
+      expect(response.errors.length).toBeGreaterThan(0);
+      expect(response.errors[0].message).toBe(testErrorMessages);
     });
   });
 });

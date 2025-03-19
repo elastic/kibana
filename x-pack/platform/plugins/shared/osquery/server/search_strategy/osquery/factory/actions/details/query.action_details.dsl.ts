@@ -29,11 +29,9 @@ export const buildActionDetailsQuery = ({
     allow_no_indices: true,
     index: componentTemplateExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
-    body: {
-      query: { bool: { filter: filterQuery } },
-      size: 1,
-      fields: ['*'],
-    },
+    query: { bool: { filter: filterQuery } },
+    size: 1,
+    fields: ['*'],
   };
 
   return dslQuery;

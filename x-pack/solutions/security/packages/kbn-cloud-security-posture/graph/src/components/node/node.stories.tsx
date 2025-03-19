@@ -9,8 +9,9 @@ import React from 'react';
 import { ThemeProvider } from '@emotion/react';
 import { pick } from 'lodash';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { NodeViewModel } from '../types';
+import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode, LabelNode } from '.';
 
 import '@xyflow/react/dist/style.css';
@@ -29,6 +30,7 @@ export default {
     },
     expandButtonClick: { action: 'expandButtonClick' },
   },
+  decorators: [GlobalStylesStorybookDecorator],
 };
 
 const nodeTypes = {
@@ -40,7 +42,7 @@ const nodeTypes = {
   label: LabelNode,
 };
 
-const Template: Story<NodeViewModel> = (args: NodeViewModel) => (
+const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
   <ThemeProvider theme={{ darkMode: false }}>
     <ReactFlow
       fitView

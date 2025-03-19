@@ -24,6 +24,8 @@ jest.doMock('./steps', () => {
 export const downloadToDiskMock = jest.fn();
 export const openZipArchiveMock = jest.fn();
 export const loadMappingFileMock = jest.fn();
+export const loadManifestFileMock = jest.fn();
+export const ensureDefaultElserDeployedMock = jest.fn();
 
 jest.doMock('./utils', () => {
   const actual = jest.requireActual('./utils');
@@ -32,5 +34,7 @@ jest.doMock('./utils', () => {
     downloadToDisk: downloadToDiskMock,
     openZipArchive: openZipArchiveMock,
     loadMappingFile: loadMappingFileMock,
+    loadManifestFile: loadManifestFileMock,
+    ensureDefaultElserDeployed: ensureDefaultElserDeployedMock,
   };
 });

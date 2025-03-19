@@ -66,6 +66,7 @@ import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { getTimeBoundsFromSelection } from './hooks/use_selected_cells';
 import { SwimLaneWrapper } from './alerts';
 import { Y_AXIS_LABEL_WIDTH } from './constants';
+import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
 import type { ExplorerState } from './explorer_data';
 import { useJobSelection } from './hooks/use_job_selection';
 
@@ -114,7 +115,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    const canEditDashboards = capabilities.dashboard?.createNew ?? false;
+    const canEditDashboards = capabilities.dashboard_v2?.createNew ?? false;
 
     const timeBuckets = useTimeBuckets(uiSettings);
 
@@ -187,7 +188,10 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
       [severityUpdate, swimLaneSeverity]
     );
 
-    const openCasesModalCallback = useCasesModal(ANOMALY_SWIMLANE_EMBEDDABLE_TYPE);
+    const openCasesModalCallback = useCasesModal(
+      ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+      CASES_TOAST_MESSAGES_TITLES.ANOMALY_TIMELINE
+    );
 
     const openCasesModal = useCallback(
       (swimLaneType: SwimlaneType) => {
@@ -235,6 +239,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             />
           ),
           panel: 'addToDashboardPanel',
+          icon: 'dashboardApp',
           'data-test-subj': 'mlAnomalyTimelinePanelAddToDashboardButton',
         });
 
@@ -280,6 +285,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               defaultMessage="Add to case"
             />
           ),
+          icon: 'casesApp',
           'data-test-subj': 'mlAnomalyTimelinePanelAttachToCaseButton',
         });
 
@@ -428,6 +434,8 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
                         defaultMessage: 'Actions',
                       })}
                       color="text"
+                      display="base"
+                      isSelected={isMenuOpen}
                       iconType="boxesHorizontal"
                       onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
                       data-test-subj="mlAnomalyTimelinePanelMenu"

@@ -25,7 +25,7 @@
           },
           "<M>"
         ],
-        "path": "src/plugins/files/common/files_client.ts",
+        "path": "src/platform/plugins/shared/files/common/files_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,7 +49,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/files/common/files_client.ts",
+            "path": "src/platform/plugins/shared/files/common/files_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -67,7 +67,7 @@
             "signature": [
               "(args: { token: string; fileName?: string | undefined; }) => any"
             ],
-            "path": "src/plugins/files/common/files_client.ts",
+            "path": "src/platform/plugins/shared/files/common/files_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -78,7 +78,7 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "path": "src/plugins/files/common/files_client.ts",
+                "path": "src/platform/plugins/shared/files/common/files_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -89,7 +89,7 @@
                     "tags": [],
                     "label": "token",
                     "description": [],
-                    "path": "src/plugins/files/common/files_client.ts",
+                    "path": "src/platform/plugins/shared/files/common/files_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -103,7 +103,7 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "src/plugins/files/common/files_client.ts",
+                    "path": "src/platform/plugins/shared/files/common/files_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -124,7 +124,7 @@
         "description": [
           "\nA factory for creating a {@link ScopedFilesClient}"
         ],
-        "path": "src/plugins/files/common/files_client.ts",
+        "path": "src/platform/plugins/shared/files/common/files_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -142,7 +142,7 @@
               "FilesClient",
               "<M>"
             ],
-            "path": "src/plugins/files/common/files_client.ts",
+            "path": "src/platform/plugins/shared/files/common/files_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -162,7 +162,7 @@
               "ScopedFilesClient",
               "<M>"
             ],
-            "path": "src/plugins/files/common/files_client.ts",
+            "path": "src/platform/plugins/shared/files/common/files_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -178,7 +178,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/files/common/files_client.ts",
+                "path": "src/platform/plugins/shared/files/common/files_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -282,7 +282,7 @@
           },
           "; }"
         ],
-        "path": "src/plugins/files/common/files_client.ts",
+        "path": "src/platform/plugins/shared/files/common/files_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -515,7 +515,7 @@
           },
           "; }"
         ],
-        "path": "src/plugins/files/common/files_client.ts",
+        "path": "src/platform/plugins/shared/files/common/files_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -531,7 +531,7 @@
       "description": [
         "\nPublic setup-phase contract"
       ],
-      "path": "src/plugins/files/public/plugin.ts",
+      "path": "src/platform/plugins/shared/files/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -549,53 +549,53 @@
           "signature": [
             "FilesClientFactory"
           ],
-          "path": "src/plugins/files/public/plugin.ts",
+          "path": "src/platform/plugins/shared/files/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": true,
           "references": [
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/public/application.tsx"
+              "path": "x-pack/platform/plugins/shared/cases/public/application.tsx"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/public/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/cases/public/plugin.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/public/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/cases/public/plugin.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/public/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/cases/public/plugin.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/public/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/cases/public/plugin.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/public/plugin.ts"
+              "path": "x-pack/platform/plugins/shared/cases/public/plugin.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/public/plugin.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/public/plugin.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/public/plugin.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/public/plugin.test.ts"
             },
             {
               "plugin": "imageEmbeddable",
-              "path": "src/plugins/image_embeddable/public/components/image_editor/open_image_editor.tsx"
+              "path": "src/platform/plugins/private/image_embeddable/public/components/image_editor/open_image_editor.tsx"
             },
             {
               "plugin": "imageEmbeddable",
-              "path": "src/plugins/image_embeddable/public/image_embeddable/get_image_embeddable_factory.tsx"
+              "path": "src/platform/plugins/private/image_embeddable/public/image_embeddable/get_image_embeddable_factory.tsx"
             },
             {
               "plugin": "filesManagement",
-              "path": "src/plugins/files_management/public/mount_management_section.tsx"
+              "path": "src/platform/plugins/private/files_management/public/mount_management_section.tsx"
             }
           ]
         },
@@ -619,7 +619,7 @@
             },
             ") => void"
           ],
-          "path": "src/plugins/files/public/plugin.ts",
+          "path": "src/platform/plugins/shared/files/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -641,7 +641,7 @@
                   "text": "FileKindBrowser"
                 }
               ],
-              "path": "src/plugins/files/public/plugin.ts",
+              "path": "src/platform/plugins/shared/files/public/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -687,7 +687,7 @@
         },
         "[]; }"
       ],
-      "path": "src/plugins/files/public/plugin.ts",
+      "path": "src/platform/plugins/shared/files/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -726,7 +726,7 @@
             "text": "FileClient"
           }
         ],
-        "path": "src/plugins/files/server/file_client/create_es_file_client.ts",
+        "path": "src/platform/plugins/shared/files/server/file_client/create_es_file_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -748,7 +748,7 @@
                 "text": "CreateEsFileClientArgs"
               }
             ],
-            "path": "src/plugins/files/server/file_client/create_es_file_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/create_es_file_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -769,7 +769,7 @@
         "signature": [
           "(algorithm?: \"sha256\" | \"md5\" | \"sha1\" | \"sha512\") => FileHashTransform"
         ],
-        "path": "src/plugins/files/server/file_client/stream_transforms/file_hash_transform/file_hash_transform.ts",
+        "path": "src/platform/plugins/shared/files/server/file_client/stream_transforms/file_hash_transform/file_hash_transform.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -783,7 +783,7 @@
             "signature": [
               "\"sha256\" | \"md5\" | \"sha1\" | \"sha512\""
             ],
-            "path": "src/plugins/files/server/file_client/stream_transforms/file_hash_transform/file_hash_transform.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/stream_transforms/file_hash_transform/file_hash_transform.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -803,7 +803,7 @@
         "description": [
           "\nArguments to create an ES file client."
         ],
-        "path": "src/plugins/files/server/file_client/create_es_file_client.ts",
+        "path": "src/platform/plugins/shared/files/server/file_client/create_es_file_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -816,7 +816,7 @@
             "description": [
               "\nThe name of the ES index that will store file metadata."
             ],
-            "path": "src/plugins/files/server/file_client/create_es_file_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/create_es_file_client.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -829,7 +829,7 @@
             "description": [
               "\nThe name of the ES index that will store file contents."
             ],
-            "path": "src/plugins/files/server/file_client/create_es_file_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/create_es_file_client.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -845,15 +845,11 @@
             "signature": [
               "{ create: { <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
-              "<TDocument> | ",
-              "CreateRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "WriteResponseBase",
               ">; <TDocument = unknown>(this: That, params: ",
-              "CreateRequest",
-              "<TDocument> | ",
               "CreateRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -863,23 +859,17 @@
               "WriteResponseBase",
               ", unknown>>; <TDocument = unknown>(this: That, params: ",
               "CreateRequest",
-              "<TDocument> | ",
-              "CreateRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
               ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
               "UpdateRequest",
-              "<TDocument, TPartialDocument> | ",
-              "UpdateRequest",
               "<TDocument, TPartialDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "UpdateResponse",
               "<TDocumentR>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
-              "UpdateRequest",
-              "<TDocument, TPartialDocument> | ",
               "UpdateRequest",
               "<TDocument, TPartialDocument>, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -889,23 +879,17 @@
               "UpdateResponse",
               "<TDocumentR>, unknown>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
               "UpdateRequest",
-              "<TDocument, TPartialDocument> | ",
-              "UpdateRequest",
               "<TDocument, TPartialDocument>, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "UpdateResponse",
               "<TDocumentR>>; }; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
-              " | ",
-              "GetRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "GetResponse",
               "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-              "GetRequest",
-              " | ",
               "GetRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -915,23 +899,17 @@
               "GetResponse",
               "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
               "GetRequest",
-              " | ",
-              "GetRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "GetResponse",
               "<TDocument>>; }; delete: { (this: That, params: ",
               "DeleteRequest",
-              " | ",
-              "DeleteRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "WriteResponseBase",
               ">; (this: That, params: ",
-              "DeleteRequest",
-              " | ",
               "DeleteRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -940,8 +918,6 @@
               "<",
               "WriteResponseBase",
               ", unknown>>; (this: That, params: ",
-              "DeleteRequest",
-              " | ",
               "DeleteRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -953,8 +929,6 @@
               "AggregationsAggregate",
               ">>(this: That, params?: ",
               "SearchRequest",
-              " | ",
-              "SearchRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
@@ -962,8 +936,6 @@
               "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
               "SearchRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -974,8 +946,6 @@
               "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params?: ",
-              "SearchRequest",
-              " | ",
               "SearchRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
@@ -993,15 +963,11 @@
               "default",
               "; bulk: { <TDocument = unknown, TPartialDocument = unknown>(this: That, params: ",
               "BulkRequest",
-              "<TDocument, TPartialDocument> | ",
-              "BulkRequest",
               "<TDocument, TPartialDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "BulkResponse",
               ">; <TDocument = unknown, TPartialDocument = unknown>(this: That, params: ",
-              "BulkRequest",
-              "<TDocument, TPartialDocument> | ",
               "BulkRequest",
               "<TDocument, TPartialDocument>, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1011,23 +977,17 @@
               "BulkResponse",
               ", unknown>>; <TDocument = unknown, TPartialDocument = unknown>(this: That, params: ",
               "BulkRequest",
-              "<TDocument, TPartialDocument> | ",
-              "BulkRequest",
               "<TDocument, TPartialDocument>, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "BulkResponse",
               ">; }; capabilities: { (this: That, params?: ",
               "TODO",
-              " | ",
-              "TODO",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "TODO",
               ">; (this: That, params?: ",
-              "TODO",
-              " | ",
               "TODO",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1036,8 +996,6 @@
               "<",
               "TODO",
               ", unknown>>; (this: That, params?: ",
-              "TODO",
-              " | ",
               "TODO",
               " | undefined, options?: ",
               "TransportRequestOptions",
@@ -1049,15 +1007,11 @@
               "default",
               "; clearScroll: { (this: That, params?: ",
               "ClearScrollRequest",
-              " | ",
-              "ClearScrollRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "ClearScrollResponse",
               ">; (this: That, params?: ",
-              "ClearScrollRequest",
-              " | ",
               "ClearScrollRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1067,23 +1021,17 @@
               "ClearScrollResponse",
               ", unknown>>; (this: That, params?: ",
               "ClearScrollRequest",
-              " | ",
-              "ClearScrollRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ClearScrollResponse",
               ">; }; closePointInTime: { (this: That, params: ",
               "ClosePointInTimeRequest",
-              " | ",
-              "ClosePointInTimeRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "ClosePointInTimeResponse",
               ">; (this: That, params: ",
-              "ClosePointInTimeRequest",
-              " | ",
               "ClosePointInTimeRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1092,8 +1040,6 @@
               "<",
               "ClosePointInTimeResponse",
               ", unknown>>; (this: That, params: ",
-              "ClosePointInTimeRequest",
-              " | ",
               "ClosePointInTimeRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1105,15 +1051,11 @@
               "default",
               "; count: { (this: That, params?: ",
               "CountRequest",
-              " | ",
-              "CountRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "CountResponse",
               ">; (this: That, params?: ",
-              "CountRequest",
-              " | ",
               "CountRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1123,8 +1065,6 @@
               "CountResponse",
               ", unknown>>; (this: That, params?: ",
               "CountRequest",
-              " | ",
-              "CountRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
@@ -1133,15 +1073,11 @@
               "default",
               "; deleteByQuery: { (this: That, params: ",
               "DeleteByQueryRequest",
-              " | ",
-              "DeleteByQueryRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "DeleteByQueryResponse",
               ">; (this: That, params: ",
-              "DeleteByQueryRequest",
-              " | ",
               "DeleteByQueryRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1150,8 +1086,6 @@
               "<",
               "DeleteByQueryResponse",
               ", unknown>>; (this: That, params: ",
-              "DeleteByQueryRequest",
-              " | ",
               "DeleteByQueryRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1159,15 +1093,11 @@
               "DeleteByQueryResponse",
               ">; }; deleteByQueryRethrottle: { (this: That, params: ",
               "DeleteByQueryRethrottleRequest",
-              " | ",
-              "DeleteByQueryRethrottleRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "TasksTaskListResponseBase",
               ">; (this: That, params: ",
-              "DeleteByQueryRethrottleRequest",
-              " | ",
               "DeleteByQueryRethrottleRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1176,8 +1106,6 @@
               "<",
               "TasksTaskListResponseBase",
               ", unknown>>; (this: That, params: ",
-              "DeleteByQueryRethrottleRequest",
-              " | ",
               "DeleteByQueryRethrottleRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1185,15 +1113,11 @@
               "TasksTaskListResponseBase",
               ">; }; deleteScript: { (this: That, params: ",
               "DeleteScriptRequest",
-              " | ",
-              "DeleteScriptRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "AcknowledgedResponseBase",
               ">; (this: That, params: ",
-              "DeleteScriptRequest",
-              " | ",
               "DeleteScriptRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1202,8 +1126,6 @@
               "<",
               "AcknowledgedResponseBase",
               ", unknown>>; (this: That, params: ",
-              "DeleteScriptRequest",
-              " | ",
               "DeleteScriptRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1217,33 +1139,23 @@
               "default",
               "; exists: { (this: That, params: ",
               "ExistsRequest",
-              " | ",
-              "ExistsRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<boolean>; (this: That, params: ",
-              "ExistsRequest",
-              " | ",
               "ExistsRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
               " | undefined): Promise<",
               "TransportResult",
               "<boolean, unknown>>; (this: That, params: ",
-              "ExistsRequest",
-              " | ",
               "ExistsRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; existsSource: { (this: That, params: ",
               "ExistsSourceRequest",
-              " | ",
-              "ExistsSourceRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<boolean>; (this: That, params: ",
-              "ExistsSourceRequest",
-              " | ",
               "ExistsSourceRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1251,21 +1163,15 @@
               "TransportResult",
               "<boolean, unknown>>; (this: That, params: ",
               "ExistsSourceRequest",
-              " | ",
-              "ExistsSourceRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; explain: { <TDocument = unknown>(this: That, params: ",
-              "ExplainRequest",
-              " | ",
               "ExplainRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "ExplainResponse",
               "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-              "ExplainRequest",
-              " | ",
               "ExplainRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1275,8 +1181,6 @@
               "ExplainResponse",
               "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
               "ExplainRequest",
-              " | ",
-              "ExplainRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
@@ -1285,15 +1189,11 @@
               "default",
               "; fieldCaps: { (this: That, params?: ",
               "FieldCapsRequest",
-              " | ",
-              "FieldCapsRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "FieldCapsResponse",
               ">; (this: That, params?: ",
-              "FieldCapsRequest",
-              " | ",
               "FieldCapsRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1302,8 +1202,6 @@
               "<",
               "FieldCapsResponse",
               ", unknown>>; (this: That, params?: ",
-              "FieldCapsRequest",
-              " | ",
               "FieldCapsRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
@@ -1313,15 +1211,11 @@
               "default",
               "; getScript: { (this: That, params: ",
               "GetScriptRequest",
-              " | ",
-              "GetScriptRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "GetScriptResponse",
               ">; (this: That, params: ",
-              "GetScriptRequest",
-              " | ",
               "GetScriptRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1331,23 +1225,17 @@
               "GetScriptResponse",
               ", unknown>>; (this: That, params: ",
               "GetScriptRequest",
-              " | ",
-              "GetScriptRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "GetScriptResponse",
               ">; }; getScriptContext: { (this: That, params?: ",
               "GetScriptContextRequest",
-              " | ",
-              "GetScriptContextRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "GetScriptContextResponse",
               ">; (this: That, params?: ",
-              "GetScriptContextRequest",
-              " | ",
               "GetScriptContextRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1356,8 +1244,6 @@
               "<",
               "GetScriptContextResponse",
               ", unknown>>; (this: That, params?: ",
-              "GetScriptContextRequest",
-              " | ",
               "GetScriptContextRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
@@ -1365,15 +1251,11 @@
               "GetScriptContextResponse",
               ">; }; getScriptLanguages: { (this: That, params?: ",
               "GetScriptLanguagesRequest",
-              " | ",
-              "GetScriptLanguagesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "GetScriptLanguagesResponse",
               ">; (this: That, params?: ",
-              "GetScriptLanguagesRequest",
-              " | ",
               "GetScriptLanguagesRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1382,8 +1264,6 @@
               "<",
               "GetScriptLanguagesResponse",
               ", unknown>>; (this: That, params?: ",
-              "GetScriptLanguagesRequest",
-              " | ",
               "GetScriptLanguagesRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
@@ -1391,13 +1271,9 @@
               "GetScriptLanguagesResponse",
               ">; }; getSource: { <TDocument = unknown>(this: That, params: ",
               "GetSourceRequest",
-              " | ",
-              "GetSourceRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<TDocument>; <TDocument = unknown>(this: That, params: ",
-              "GetSourceRequest",
-              " | ",
               "GetSourceRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1405,23 +1281,17 @@
               "TransportResult",
               "<TDocument, unknown>>; <TDocument = unknown>(this: That, params: ",
               "GetSourceRequest",
-              " | ",
-              "GetSourceRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<TDocument>; }; graph: ",
               "default",
               "; healthReport: { (this: That, params?: ",
               "HealthReportRequest",
-              " | ",
-              "HealthReportRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "HealthReportResponse",
               ">; (this: That, params?: ",
-              "HealthReportRequest",
-              " | ",
               "HealthReportRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1430,8 +1300,6 @@
               "<",
               "HealthReportResponse",
               ", unknown>>; (this: That, params?: ",
-              "HealthReportRequest",
-              " | ",
               "HealthReportRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
@@ -1441,15 +1309,11 @@
               "default",
               "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
-              "<TDocument> | ",
-              "IndexRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "WriteResponseBase",
               ">; <TDocument = unknown>(this: That, params: ",
-              "IndexRequest",
-              "<TDocument> | ",
               "IndexRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1458,8 +1322,6 @@
               "<",
               "WriteResponseBase",
               ", unknown>>; <TDocument = unknown>(this: That, params: ",
-              "IndexRequest",
-              "<TDocument> | ",
               "IndexRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptions",
@@ -1471,15 +1333,11 @@
               "default",
               "; info: { (this: That, params?: ",
               "InfoRequest",
-              " | ",
-              "InfoRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "InfoResponse",
               ">; (this: That, params?: ",
-              "InfoRequest",
-              " | ",
               "InfoRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1489,8 +1347,6 @@
               "InfoResponse",
               ", unknown>>; (this: That, params?: ",
               "InfoRequest",
-              " | ",
-              "InfoRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
@@ -1499,15 +1355,11 @@
               "default",
               "; knnSearch: { <TDocument = unknown>(this: That, params: ",
               "KnnSearchRequest",
-              " | ",
-              "KnnSearchRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "KnnSearchResponse",
               "<TDocument>>; <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              " | ",
               "KnnSearchRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1516,8 +1368,6 @@
               "<",
               "KnnSearchResponse",
               "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params: ",
-              "KnnSearchRequest",
-              " | ",
               "KnnSearchRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1529,15 +1379,11 @@
               "default",
               "; mget: { <TDocument = unknown>(this: That, params?: ",
               "MgetRequest",
-              " | ",
-              "MgetRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "MgetResponse",
               "<TDocument>>; <TDocument = unknown>(this: That, params?: ",
-              "MgetRequest",
-              " | ",
               "MgetRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1546,8 +1392,6 @@
               "<",
               "MgetResponse",
               "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params?: ",
-              "MgetRequest",
-              " | ",
               "MgetRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
@@ -1563,8 +1407,6 @@
               "AggregationsAggregate",
               ">>(this: That, params: ",
               "MsearchRequest",
-              " | ",
-              "MsearchRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
@@ -1572,8 +1414,6 @@
               "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params: ",
-              "MsearchRequest",
-              " | ",
               "MsearchRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1584,8 +1424,6 @@
               "<TDocument, TAggregations>, unknown>>; <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params: ",
-              "MsearchRequest",
-              " | ",
               "MsearchRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1595,8 +1433,6 @@
               "AggregationsAggregate",
               ">>(this: That, params: ",
               "MsearchTemplateRequest",
-              " | ",
-              "MsearchTemplateRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
@@ -1604,8 +1440,6 @@
               "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params: ",
-              "MsearchTemplateRequest",
-              " | ",
               "MsearchTemplateRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1617,23 +1451,17 @@
               "AggregationsAggregate",
               ">>(this: That, params: ",
               "MsearchTemplateRequest",
-              " | ",
-              "MsearchTemplateRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "MsearchTemplateResponse",
               "<TDocument, TAggregations>>; }; mtermvectors: { (this: That, params?: ",
               "MtermvectorsRequest",
-              " | ",
-              "MtermvectorsRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "MtermvectorsResponse",
               ">; (this: That, params?: ",
-              "MtermvectorsRequest",
-              " | ",
               "MtermvectorsRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1642,8 +1470,6 @@
               "<",
               "MtermvectorsResponse",
               ", unknown>>; (this: That, params?: ",
-              "MtermvectorsRequest",
-              " | ",
               "MtermvectorsRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
@@ -1653,15 +1479,11 @@
               "default",
               "; openPointInTime: { (this: That, params: ",
               "OpenPointInTimeRequest",
-              " | ",
-              "OpenPointInTimeRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "OpenPointInTimeResponse",
               ">; (this: That, params: ",
-              "OpenPointInTimeRequest",
-              " | ",
               "OpenPointInTimeRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1670,8 +1492,6 @@
               "<",
               "OpenPointInTimeResponse",
               ", unknown>>; (this: That, params: ",
-              "OpenPointInTimeRequest",
-              " | ",
               "OpenPointInTimeRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1679,13 +1499,9 @@
               "OpenPointInTimeResponse",
               ">; }; ping: { (this: That, params?: ",
               "PingRequest",
-              " | ",
-              "PingRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<boolean>; (this: That, params?: ",
-              "PingRequest",
-              " | ",
               "PingRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1693,23 +1509,17 @@
               "TransportResult",
               "<boolean, unknown>>; (this: That, params?: ",
               "PingRequest",
-              " | ",
-              "PingRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; profiling: ",
               "default",
               "; putScript: { (this: That, params: ",
               "PutScriptRequest",
-              " | ",
-              "PutScriptRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "AcknowledgedResponseBase",
               ">; (this: That, params: ",
-              "PutScriptRequest",
-              " | ",
               "PutScriptRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1718,8 +1528,6 @@
               "<",
               "AcknowledgedResponseBase",
               ", unknown>>; (this: That, params: ",
-              "PutScriptRequest",
-              " | ",
               "PutScriptRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1729,15 +1537,11 @@
               "default",
               "; rankEval: { (this: That, params: ",
               "RankEvalRequest",
-              " | ",
-              "RankEvalRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "RankEvalResponse",
               ">; (this: That, params: ",
-              "RankEvalRequest",
-              " | ",
               "RankEvalRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1746,8 +1550,6 @@
               "<",
               "RankEvalResponse",
               ", unknown>>; (this: That, params: ",
-              "RankEvalRequest",
-              " | ",
               "RankEvalRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1755,15 +1557,11 @@
               "RankEvalResponse",
               ">; }; reindex: { (this: That, params: ",
               "ReindexRequest",
-              " | ",
-              "ReindexRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "ReindexResponse",
               ">; (this: That, params: ",
-              "ReindexRequest",
-              " | ",
               "ReindexRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1772,8 +1570,6 @@
               "<",
               "ReindexResponse",
               ", unknown>>; (this: That, params: ",
-              "ReindexRequest",
-              " | ",
               "ReindexRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1781,15 +1577,11 @@
               "ReindexResponse",
               ">; }; reindexRethrottle: { (this: That, params: ",
               "ReindexRethrottleRequest",
-              " | ",
-              "ReindexRethrottleRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "ReindexRethrottleResponse",
               ">; (this: That, params: ",
-              "ReindexRethrottleRequest",
-              " | ",
               "ReindexRethrottleRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1799,23 +1591,17 @@
               "ReindexRethrottleResponse",
               ", unknown>>; (this: That, params: ",
               "ReindexRethrottleRequest",
-              " | ",
-              "ReindexRethrottleRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "ReindexRethrottleResponse",
               ">; }; renderSearchTemplate: { (this: That, params?: ",
               "RenderSearchTemplateRequest",
-              " | ",
-              "RenderSearchTemplateRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "RenderSearchTemplateResponse",
               ">; (this: That, params?: ",
-              "RenderSearchTemplateRequest",
-              " | ",
               "RenderSearchTemplateRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1825,8 +1611,6 @@
               "RenderSearchTemplateResponse",
               ", unknown>>; (this: That, params?: ",
               "RenderSearchTemplateRequest",
-              " | ",
-              "RenderSearchTemplateRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
@@ -1835,15 +1619,11 @@
               "default",
               "; scriptsPainlessExecute: { <TResult = unknown>(this: That, params?: ",
               "ScriptsPainlessExecuteRequest",
-              " | ",
-              "ScriptsPainlessExecuteRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "ScriptsPainlessExecuteResponse",
               "<TResult>>; <TResult = unknown>(this: That, params?: ",
-              "ScriptsPainlessExecuteRequest",
-              " | ",
               "ScriptsPainlessExecuteRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1853,8 +1633,6 @@
               "ScriptsPainlessExecuteResponse",
               "<TResult>, unknown>>; <TResult = unknown>(this: That, params?: ",
               "ScriptsPainlessExecuteRequest",
-              " | ",
-              "ScriptsPainlessExecuteRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
@@ -1863,8 +1641,6 @@
               "AggregationsAggregate",
               ">>(this: That, params: ",
               "ScrollRequest",
-              " | ",
-              "ScrollRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
@@ -1872,8 +1648,6 @@
               "<TDocument, TAggregations>>; <TDocument = unknown, TAggregations = Record<string, ",
               "AggregationsAggregate",
               ">>(this: That, params: ",
-              "ScrollRequest",
-              " | ",
               "ScrollRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1885,8 +1659,6 @@
               "AggregationsAggregate",
               ">>(this: That, params: ",
               "ScrollRequest",
-              " | ",
-              "ScrollRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
@@ -1895,13 +1667,9 @@
               "default",
               "; searchMvt: { (this: That, params: ",
               "SearchMvtRequest",
-              " | ",
-              "SearchMvtRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<ArrayBuffer>; (this: That, params: ",
-              "SearchMvtRequest",
-              " | ",
               "SearchMvtRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1909,21 +1677,15 @@
               "TransportResult",
               "<ArrayBuffer, unknown>>; (this: That, params: ",
               "SearchMvtRequest",
-              " | ",
-              "SearchMvtRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<ArrayBuffer>; }; searchShards: { (this: That, params?: ",
-              "SearchShardsRequest",
-              " | ",
               "SearchShardsRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "SearchShardsResponse",
               ">; (this: That, params?: ",
-              "SearchShardsRequest",
-              " | ",
               "SearchShardsRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1933,23 +1695,17 @@
               "SearchShardsResponse",
               ", unknown>>; (this: That, params?: ",
               "SearchShardsRequest",
-              " | ",
-              "SearchShardsRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchShardsResponse",
               ">; }; searchTemplate: { <TDocument = unknown>(this: That, params?: ",
               "SearchTemplateRequest",
-              " | ",
-              "SearchTemplateRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "SearchTemplateResponse",
               "<TDocument>>; <TDocument = unknown>(this: That, params?: ",
-              "SearchTemplateRequest",
-              " | ",
               "SearchTemplateRequest",
               " | undefined, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -1958,8 +1714,6 @@
               "<",
               "SearchTemplateResponse",
               "<TDocument>, unknown>>; <TDocument = unknown>(this: That, params?: ",
-              "SearchTemplateRequest",
-              " | ",
               "SearchTemplateRequest",
               " | undefined, options?: ",
               "TransportRequestOptions",
@@ -1987,15 +1741,11 @@
               "default",
               "; termsEnum: { (this: That, params: ",
               "TermsEnumRequest",
-              " | ",
-              "TermsEnumRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "TermsEnumResponse",
               ">; (this: That, params: ",
-              "TermsEnumRequest",
-              " | ",
               "TermsEnumRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -2005,23 +1755,17 @@
               "TermsEnumResponse",
               ", unknown>>; (this: That, params: ",
               "TermsEnumRequest",
-              " | ",
-              "TermsEnumRequest",
               ", options?: ",
               "TransportRequestOptions",
               " | undefined): Promise<",
               "TermsEnumResponse",
               ">; }; termvectors: { <TDocument = unknown>(this: That, params: ",
               "TermvectorsRequest",
-              "<TDocument> | ",
-              "TermvectorsRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "TermvectorsResponse",
               ">; <TDocument = unknown>(this: That, params: ",
-              "TermvectorsRequest",
-              "<TDocument> | ",
               "TermvectorsRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptionsWithMeta",
@@ -2030,8 +1774,6 @@
               "<",
               "TermvectorsResponse",
               ", unknown>>; <TDocument = unknown>(this: That, params: ",
-              "TermvectorsRequest",
-              "<TDocument> | ",
               "TermvectorsRequest",
               "<TDocument>, options?: ",
               "TransportRequestOptions",
@@ -2043,15 +1785,11 @@
               "default",
               "; updateByQuery: { (this: That, params: ",
               "UpdateByQueryRequest",
-              " | ",
-              "UpdateByQueryRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "UpdateByQueryResponse",
               ">; (this: That, params: ",
-              "UpdateByQueryRequest",
-              " | ",
               "UpdateByQueryRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -2060,8 +1798,6 @@
               "<",
               "UpdateByQueryResponse",
               ", unknown>>; (this: That, params: ",
-              "UpdateByQueryRequest",
-              " | ",
               "UpdateByQueryRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -2069,15 +1805,11 @@
               "UpdateByQueryResponse",
               ">; }; updateByQueryRethrottle: { (this: That, params: ",
               "UpdateByQueryRethrottleRequest",
-              " | ",
-              "UpdateByQueryRethrottleRequest",
               ", options?: ",
               "TransportRequestOptionsWithOutMeta",
               " | undefined): Promise<",
               "UpdateByQueryRethrottleResponse",
               ">; (this: That, params: ",
-              "UpdateByQueryRethrottleRequest",
-              " | ",
               "UpdateByQueryRethrottleRequest",
               ", options?: ",
               "TransportRequestOptionsWithMeta",
@@ -2086,8 +1818,6 @@
               "<",
               "UpdateByQueryRethrottleResponse",
               ", unknown>>; (this: That, params: ",
-              "UpdateByQueryRethrottleRequest",
-              " | ",
               "UpdateByQueryRethrottleRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -2099,7 +1829,7 @@
               "default",
               "; }"
             ],
-            "path": "src/plugins/files/server/file_client/create_es_file_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/create_es_file_client.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2115,7 +1845,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/files/server/file_client/create_es_file_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/create_es_file_client.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2131,7 +1861,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/files/server/file_client/create_es_file_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/create_es_file_client.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2153,7 +1883,7 @@
                 "text": "Logger"
               }
             ],
-            "path": "src/plugins/files/server/file_client/create_es_file_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/create_es_file_client.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2179,7 +1909,7 @@
           },
           "<Meta>"
         ],
-        "path": "src/plugins/files/server/file_service/file_action_types.ts",
+        "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2192,7 +1922,7 @@
             "description": [
               "\nFile name"
             ],
-            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2205,7 +1935,7 @@
             "description": [
               "\nFile kind, must correspond to a registered {@link FileKind}."
             ],
-            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2221,7 +1951,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2237,7 +1967,7 @@
             "signature": [
               "Meta | undefined"
             ],
-            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2253,7 +1983,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2269,7 +1999,7 @@
             "signature": [
               "{ name?: string | undefined; id?: string | undefined; } | undefined"
             ],
-            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2285,7 +2015,7 @@
         "description": [
           "\nArguments for a creating a file share"
         ],
-        "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
+        "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2301,7 +2031,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2319,7 +2049,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2342,7 +2072,7 @@
               },
               "<unknown>"
             ],
-            "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2356,7 +2086,7 @@
         "tags": [],
         "label": "DeleteArg",
         "description": [],
-        "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+        "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2371,7 +2101,7 @@
             "description": [
               "\nUnique ID of file metadata to delete\n"
             ],
-            "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2387,7 +2117,7 @@
         "description": [
           "\nArguments to delete a file."
         ],
-        "path": "src/plugins/files/server/file_service/file_action_types.ts",
+        "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2400,7 +2130,7 @@
             "description": [
               "\nFile ID."
             ],
-            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2416,7 +2146,7 @@
         "description": [
           "\nDelete file shares for file arguments."
         ],
-        "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
+        "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2429,7 +2159,7 @@
             "description": [
               "\nThe file id to delete the shares for."
             ],
-            "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2445,7 +2175,7 @@
         "description": [
           "\nWraps the {@link FileMetadataClient} and {@link BlobStorageClient} client\nto provide basic file CRUD functionality.\n\nFor now this is just a shallow type of the implementation for export purposes."
         ],
-        "path": "src/plugins/files/server/file_client/types.ts",
+        "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2458,7 +2188,7 @@
             "description": [
               "See {@link FileMetadata.FileKind}."
             ],
-            "path": "src/plugins/files/server/file_client/types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2484,7 +2214,7 @@
               },
               "<M>>"
             ],
-            "path": "src/plugins/files/server/file_client/types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2501,7 +2231,7 @@
                   "CreateArgs",
                   "<M>"
                 ],
-                "path": "src/plugins/files/server/file_client/types.ts",
+                "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2537,7 +2267,7 @@
               },
               "<M>>"
             ],
-            "path": "src/plugins/files/server/file_client/types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2559,7 +2289,7 @@
                     "text": "GetArg"
                   }
                 ],
-                "path": "src/plugins/files/server/file_client/types.ts",
+                "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2587,7 +2317,7 @@
               },
               "<M>) => Promise<void>"
             ],
-            "path": "src/plugins/files/server/file_client/types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2603,7 +2333,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/files/server/file_client/types.ts",
+                "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2627,7 +2357,7 @@
                   },
                   "<M>"
                 ],
-                "path": "src/plugins/files/server/file_client/types.ts",
+                "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2655,7 +2385,7 @@
               },
               ") => Promise<void>"
             ],
-            "path": "src/plugins/files/server/file_client/types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2677,7 +2407,7 @@
                     "text": "DeleteArgs"
                   }
                 ],
-                "path": "src/plugins/files/server/file_client/types.ts",
+                "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2713,7 +2443,7 @@
               },
               "<unknown>[]; total: number; }>"
             ],
-            "path": "src/plugins/files/server/file_client/types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2736,7 +2466,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "src/plugins/files/server/file_client/types.ts",
+                "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2768,7 +2498,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/files/server/file_client/types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2784,7 +2514,7 @@
                 "signature": [
                   "ShareArgs"
                 ],
-                "path": "src/plugins/files/server/file_client/types.ts",
+                "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2806,7 +2536,7 @@
             "signature": [
               "(args: IdArg) => Promise<void>"
             ],
-            "path": "src/plugins/files/server/file_client/types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2823,7 +2553,7 @@
                 "signature": [
                   "IdArg"
                 ],
-                "path": "src/plugins/files/server/file_share_service/types.ts",
+                "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2859,7 +2589,7 @@
               },
               "[]; }>"
             ],
-            "path": "src/plugins/files/server/file_client/types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -2882,7 +2612,7 @@
                     "text": "ListArgs"
                   }
                 ],
-                "path": "src/plugins/files/server/file_share_service/types.ts",
+                "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2910,7 +2640,7 @@
           },
           "<M>"
         ],
-        "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+        "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2923,7 +2653,7 @@
             "description": [
               "\nUnique ID of a file, used to locate a file."
             ],
-            "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2955,7 +2685,7 @@
               },
               " & { FileKind: string; Meta?: M | undefined; }"
             ],
-            "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2971,7 +2701,7 @@
         "description": [
           "\nAn abstraction of storage implementation of file object's (i.e., metadata)"
         ],
-        "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+        "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3003,7 +2733,7 @@
               },
               "<unknown>>"
             ],
-            "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3026,7 +2756,7 @@
                   },
                   "<unknown>"
                 ],
-                "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3062,7 +2792,7 @@
               },
               "<unknown>>"
             ],
-            "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3084,7 +2814,7 @@
                     "text": "GetArg"
                   }
                 ],
-                "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3122,7 +2852,7 @@
               },
               "<unknown> | null)[]>; }"
             ],
-            "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3133,7 +2863,7 @@
                 "tags": [],
                 "label": "arg",
                 "description": [],
-                "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -3147,7 +2877,7 @@
                     "signature": [
                       "string[]"
                     ],
-                    "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                    "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -3161,7 +2891,7 @@
                     "signature": [
                       "true | undefined"
                     ],
-                    "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                    "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -3198,7 +2928,7 @@
               },
               "<unknown> | null)[]>; }"
             ],
-            "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3213,7 +2943,7 @@
                   "BulkGetArg",
                   " | { ids: string[]; throwIfNotFound: false; }"
                 ],
-                "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3249,7 +2979,7 @@
               },
               "<unknown>>"
             ],
-            "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3272,7 +3002,7 @@
                   },
                   "<unknown>"
                 ],
-                "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3300,7 +3030,7 @@
               },
               ") => Promise<void>"
             ],
-            "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3322,7 +3052,7 @@
                     "text": "DeleteArg"
                   }
                 ],
-                "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3358,7 +3088,7 @@
               },
               "<unknown>[]; }>"
             ],
-            "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3381,7 +3111,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -3417,7 +3147,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3439,7 +3169,7 @@
                     "text": "GetUsageMetricsArgs"
                   }
                 ],
-                "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+                "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3459,7 +3189,7 @@
         "description": [
           "\nA simple interface for getting an instance of {@link FileServiceStart}"
         ],
-        "path": "src/plugins/files/server/file_service/file_service_factory.ts",
+        "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3474,13 +3204,7 @@
             ],
             "signature": [
               "(req: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
               {
                 "pluginId": "files",
@@ -3490,7 +3214,7 @@
                 "text": "FileServiceStart"
               }
             ],
-            "path": "src/plugins/files/server/file_service/file_service_factory.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3504,16 +3228,10 @@
                   "- the Kibana request to scope the service to"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "src/plugins/files/server/file_service/file_service_factory.ts",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3542,7 +3260,7 @@
                 "text": "FileServiceStart"
               }
             ],
-            "path": "src/plugins/files/server/file_service/file_service_factory.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3560,7 +3278,7 @@
         "description": [
           "\nPublic file service interface."
         ],
-        "path": "src/plugins/files/server/file_service/file_service.ts",
+        "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3592,7 +3310,7 @@
               },
               "<M>>"
             ],
-            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3615,7 +3333,7 @@
                   },
                   "<M>"
                 ],
-                "path": "src/plugins/files/server/file_service/file_service.ts",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3643,7 +3361,7 @@
               },
               ") => Promise<void>"
             ],
-            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3665,7 +3383,7 @@
                     "text": "UpdateFileArgs"
                   }
                 ],
-                "path": "src/plugins/files/server/file_service/file_service.ts",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3693,7 +3411,7 @@
               },
               ") => Promise<void>"
             ],
-            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3715,7 +3433,7 @@
                     "text": "DeleteFileArgs"
                   }
                 ],
-                "path": "src/plugins/files/server/file_service/file_service.ts",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3737,7 +3455,7 @@
               "BulkDeleteFilesArgs",
               ") => Promise<PromiseSettledResult<void>[]>"
             ],
-            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3753,7 +3471,7 @@
                 "signature": [
                   "BulkDeleteFilesArgs"
                 ],
-                "path": "src/plugins/files/server/file_service/file_service.ts",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3789,7 +3507,7 @@
               },
               "<M>>"
             ],
-            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3811,7 +3529,7 @@
                     "text": "GetByIdArgs"
                   }
                 ],
-                "path": "src/plugins/files/server/file_service/file_service.ts",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3889,7 +3607,7 @@
               },
               "<unknown> | null; })[]>; }"
             ],
-            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3907,7 +3625,7 @@
                   "BulkGetByIdArgs",
                   ", \"ids\"> & { throwIfNotFound?: true | undefined; }"
                 ],
-                "path": "src/plugins/files/server/file_service/file_service.ts",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3983,7 +3701,7 @@
               },
               "<unknown> | null; })[]>; }"
             ],
-            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3999,7 +3717,7 @@
                   "BulkGetByIdArgs",
                   ", \"ids\"> & { throwIfNotFound?: true | undefined; format: \"map\"; }"
                 ],
-                "path": "src/plugins/files/server/file_service/file_service.ts",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4075,7 +3793,7 @@
               },
               "<unknown> | null; })[]>; }"
             ],
-            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4091,7 +3809,7 @@
                   "BulkGetByIdArgs",
                   ", \"ids\"> & { throwIfNotFound: false; }"
                 ],
-                "path": "src/plugins/files/server/file_service/file_service.ts",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4167,7 +3885,7 @@
               },
               "<unknown> | null; })[]>; }"
             ],
-            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4183,7 +3901,7 @@
                   "BulkGetByIdArgs",
                   ", \"ids\"> & { throwIfNotFound: false; format: \"map\"; }"
                 ],
-                "path": "src/plugins/files/server/file_service/file_service.ts",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4259,7 +3977,7 @@
               },
               "<unknown> | null; })[]>; }"
             ],
-            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4273,7 +3991,7 @@
                 "signature": [
                   "BulkGetByIdArgs"
                 ],
-                "path": "src/plugins/files/server/file_service/file_service.ts",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4309,7 +4027,7 @@
               },
               "<M>[]; total: number; }>"
             ],
-            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4331,7 +4049,7 @@
                     "text": "FindFileArgs"
                   }
                 ],
-                "path": "src/plugins/files/server/file_service/file_service.ts",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4359,7 +4077,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -4376,7 +4094,7 @@
                 "signature": [
                   "IdArg"
                 ],
-                "path": "src/plugins/files/server/file_share_service/types.ts",
+                "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4410,7 +4128,7 @@
               },
               "[]; }>"
             ],
-            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -4433,7 +4151,7 @@
                     "text": "ListArgs"
                   }
                 ],
-                "path": "src/plugins/files/server/file_share_service/types.ts",
+                "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4467,7 +4185,7 @@
               },
               " & { id: string; }>"
             ],
-            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -4490,7 +4208,7 @@
                     "text": "UpdateArgs"
                   }
                 ],
-                "path": "src/plugins/files/server/file_share_service/types.ts",
+                "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4508,7 +4226,7 @@
             "signature": [
               "(args: IdArg) => Promise<void>"
             ],
-            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -4525,7 +4243,7 @@
                 "signature": [
                   "IdArg"
                 ],
-                "path": "src/plugins/files/server/file_share_service/types.ts",
+                "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -4551,7 +4269,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -4577,7 +4295,7 @@
               },
               "<M>>"
             ],
-            "path": "src/plugins/files/server/file_service/file_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4593,7 +4311,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/files/server/file_service/file_service.ts",
+                "path": "src/platform/plugins/shared/files/server/file_service/file_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4613,7 +4331,7 @@
         "description": [
           "\nWe only expose functionality here that do not require you to have a {@link File}\ninstance loaded."
         ],
-        "path": "src/plugins/files/server/file_share_service/types.ts",
+        "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4637,7 +4355,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/files/server/file_share_service/types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4653,7 +4371,7 @@
                 "signature": [
                   "IdArg"
                 ],
-                "path": "src/plugins/files/server/file_share_service/types.ts",
+                "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4689,7 +4407,7 @@
               },
               "[]; }>"
             ],
-            "path": "src/plugins/files/server/file_share_service/types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4711,7 +4429,7 @@
                     "text": "ListArgs"
                   }
                 ],
-                "path": "src/plugins/files/server/file_share_service/types.ts",
+                "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4747,7 +4465,7 @@
               },
               " & { id: string; }>"
             ],
-            "path": "src/plugins/files/server/file_share_service/types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4769,7 +4487,7 @@
                     "text": "UpdateArgs"
                   }
                 ],
-                "path": "src/plugins/files/server/file_share_service/types.ts",
+                "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4789,7 +4507,7 @@
             "signature": [
               "(args: IdArg) => Promise<void>"
             ],
-            "path": "src/plugins/files/server/file_share_service/types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -4805,7 +4523,7 @@
                 "signature": [
                   "IdArg"
                 ],
-                "path": "src/plugins/files/server/file_share_service/types.ts",
+                "path": "src/platform/plugins/shared/files/server/file_share_service/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -4840,7 +4558,7 @@
             "text": "Pagination"
           }
         ],
-        "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+        "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4856,7 +4574,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4891,7 +4609,7 @@
             "text": "Pagination"
           }
         ],
-        "path": "src/plugins/files/server/file_service/file_action_types.ts",
+        "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4907,7 +4625,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4923,7 +4641,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4939,7 +4657,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4955,7 +4673,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4971,7 +4689,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4987,7 +4705,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5003,7 +4721,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5019,7 +4737,7 @@
             "signature": [
               "Record<string, string | string[]> | undefined"
             ],
-            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5035,7 +4753,7 @@
         "description": [
           "\nGet a file"
         ],
-        "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+        "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5048,7 +4766,7 @@
             "description": [
               "\nUnique ID of file metadata"
             ],
-            "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5064,7 +4782,7 @@
         "description": [
           "\nArguments to get a file by ID."
         ],
-        "path": "src/plugins/files/server/file_service/file_action_types.ts",
+        "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5077,7 +4795,7 @@
             "description": [
               "\nFile ID."
             ],
-            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5093,7 +4811,7 @@
         "description": [
           "\nArgs to get usage metrics"
         ],
-        "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+        "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5109,7 +4827,7 @@
             "signature": [
               "{ capacity: number; }"
             ],
-            "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5142,7 +4860,7 @@
             "text": "Pagination"
           }
         ],
-        "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
+        "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5158,7 +4876,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5184,7 +4902,7 @@
           },
           "<M>"
         ],
-        "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+        "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5197,7 +4915,7 @@
             "description": [
               "\nA unique file ID."
             ],
-            "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5221,7 +4939,7 @@
               },
               " | undefined; FileKind?: string | undefined; Meta?: M | undefined; }"
             ],
-            "path": "src/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
+            "path": "src/platform/plugins/shared/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5237,7 +4955,7 @@
         "description": [
           "\nUpdate file share arguments."
         ],
-        "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
+        "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5250,7 +4968,7 @@
             "description": [
               "\nThe file share ID."
             ],
-            "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5266,7 +4984,7 @@
             "signature": [
               "{ name?: string | undefined; }"
             ],
-            "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
+            "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5282,7 +5000,7 @@
         "description": [
           "\nArguments to update a file"
         ],
-        "path": "src/plugins/files/server/file_service/file_action_types.ts",
+        "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5295,7 +5013,7 @@
             "description": [
               "\nFile ID."
             ],
-            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5311,7 +5029,7 @@
             "signature": [
               "{ meta: unknown; name: string; alt: string | undefined; }"
             ],
-            "path": "src/plugins/files/server/file_service/file_action_types.ts",
+            "path": "src/platform/plugins/shared/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5333,7 +5051,7 @@
         "signature": [
           "IdArg"
         ],
-        "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
+        "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5350,7 +5068,7 @@
         "signature": [
           "IdArg"
         ],
-        "path": "src/plugins/files/server/file_share_service/internal_file_share_service.ts",
+        "path": "src/platform/plugins/shared/files/server/file_share_service/internal_file_share_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5366,7 +5084,7 @@
       "description": [
         "\nFiles plugin setup contract"
       ],
-      "path": "src/plugins/files/server/types.ts",
+      "path": "src/platform/plugins/shared/files/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -5392,53 +5110,53 @@
             },
             ") => void"
           ],
-          "path": "src/plugins/files/server/types.ts",
+          "path": "src/platform/plugins/shared/files/server/types.ts",
           "deprecated": false,
           "trackAdoption": true,
           "references": [
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/files/index.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/files/index.test.ts"
             }
           ],
           "children": [
@@ -5460,7 +5178,7 @@
                   "text": "FileKind"
                 }
               ],
-              "path": "src/plugins/files/server/types.ts",
+              "path": "src/platform/plugins/shared/files/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -5481,7 +5199,7 @@
       "description": [
         "\nFiles plugin start contract"
       ],
-      "path": "src/plugins/files/server/types.ts",
+      "path": "src/platform/plugins/shared/files/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -5505,17 +5223,17 @@
               "text": "FileServiceFactory"
             }
           ],
-          "path": "src/plugins/files/server/types.ts",
+          "path": "src/platform/plugins/shared/files/server/types.ts",
           "deprecated": false,
           "trackAdoption": true,
           "references": [
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/client/factory.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/client/factory.ts"
             },
             {
               "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/plugin.test.ts"
+              "path": "x-pack/platform/plugins/shared/cases/server/plugin.test.ts"
             }
           ]
         }
@@ -5537,7 +5255,7 @@
         "description": [
           "\nDefines all the settings for supported blob stores.\n\nKey names map to unique blob store implementations and so must not be changed\nwithout a migration"
         ],
-        "path": "src/plugins/files/common/types.ts",
+        "path": "src/platform/plugins/shared/files/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5553,7 +5271,7 @@
             "signature": [
               "{ index: string; } | undefined"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5579,7 +5297,7 @@
           },
           "<Meta>"
         ],
-        "path": "src/plugins/files/common/types.ts",
+        "path": "src/platform/plugins/shared/files/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5592,7 +5310,7 @@
             "description": [
               "\nThe file ID"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5615,7 +5333,7 @@
               },
               "<Meta>"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -5647,7 +5365,7 @@
               },
               "<Meta>>"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5671,7 +5389,7 @@
                   },
                   "<Meta>>"
                 ],
-                "path": "src/plugins/files/common/types.ts",
+                "path": "src/platform/plugins/shared/files/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5705,7 +5423,7 @@
               },
               "<Meta>>"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5721,7 +5439,7 @@
                 "signature": [
                   "Readable"
                 ],
-                "path": "src/plugins/files/common/types.ts",
+                "path": "src/platform/plugins/shared/files/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5739,7 +5457,7 @@
                   "Observable",
                   "<unknown> | undefined"
                 ],
-                "path": "src/plugins/files/common/types.ts",
+                "path": "src/platform/plugins/shared/files/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5758,7 +5476,7 @@
                   "UploadOptions",
                   ", \"transforms\">> | undefined"
                 ],
-                "path": "src/plugins/files/common/types.ts",
+                "path": "src/platform/plugins/shared/files/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5780,7 +5498,7 @@
               "Readable",
               ">"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5800,7 +5518,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5836,7 +5554,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5859,7 +5577,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "src/plugins/files/common/types.ts",
+                "path": "src/platform/plugins/shared/files/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -5887,7 +5605,7 @@
               },
               "[]>"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5913,7 +5631,7 @@
               },
               ") => Promise<void>"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -5935,7 +5653,7 @@
                     "text": "FileUnshareOptions"
                   }
                 ],
-                "path": "src/plugins/files/common/types.ts",
+                "path": "src/platform/plugins/shared/files/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -5963,7 +5681,7 @@
               },
               "<Meta>"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -5991,7 +5709,7 @@
           },
           "<Meta>"
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6004,7 +5722,7 @@
             "description": [
               "\nUnique file ID."
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6017,7 +5735,7 @@
             "description": [
               "\nISO string of when this file was created"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6030,7 +5748,7 @@
             "description": [
               "\nISO string of when the file was updated"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6045,7 +5763,7 @@
             "description": [
               "\nFile name.\n"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6061,7 +5779,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6077,7 +5795,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6095,7 +5813,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6111,7 +5829,7 @@
             "signature": [
               "Meta | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6127,7 +5845,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6142,7 +5860,7 @@
             "description": [
               "\nA unique kind that governs various aspects of the file. A consumer of the\nfiles service must register a file kind and link their files to a specific\nkind.\n"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6158,7 +5876,7 @@
             "signature": [
               "\"AWAITING_UPLOAD\" | \"UPLOADING\" | \"READY\" | \"UPLOAD_ERROR\" | \"DELETED\""
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6174,7 +5892,7 @@
             "signature": [
               "{ name?: string | undefined; id?: string | undefined; } | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6190,7 +5908,7 @@
             "signature": [
               "{ [hashName: string]: string | undefined; md5?: string | undefined; sha1?: string | undefined; sha256?: string | undefined; sha384?: string | undefined; sha512?: string | undefined; ssdeep?: string | undefined; tlsh?: string | undefined; } | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6221,7 +5939,7 @@
             "text": "FileKindBase"
           }
         ],
-        "path": "src/plugins/files/common/types.ts",
+        "path": "src/platform/plugins/shared/files/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6247,7 +5965,7 @@
               },
               "<unknown>) => number) | undefined"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6270,7 +5988,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6288,7 +6006,7 @@
             "signature": [
               "{ create?: HttpEndpointDefinition | undefined; update?: HttpEndpointDefinition | undefined; delete?: HttpEndpointDefinition | undefined; getById?: HttpEndpointDefinition | undefined; list?: HttpEndpointDefinition | undefined; download?: HttpEndpointDefinition | undefined; share?: HttpEndpointDefinition | undefined; }"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6304,7 +6022,7 @@
             "signature": [
               "(\"sha256\" | \"md5\" | \"sha1\" | \"sha512\")[] | undefined"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6335,7 +6053,7 @@
             "text": "FileKindBase"
           }
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6353,7 +6071,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6369,7 +6087,7 @@
             "signature": [
               "{ list?: { enabled: boolean; } | undefined; delete?: { enabled: boolean; reason?: string | undefined; } | undefined; } | undefined"
             ],
-            "path": "packages/shared-ux/file/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6385,7 +6103,7 @@
         "description": [
           "\nAttributes of a file that represent a serialised version of the file."
         ],
-        "path": "packages/shared-ux/file/types/sharing.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6398,7 +6116,7 @@
             "description": [
               "\nUnique ID share instance"
             ],
-            "path": "packages/shared-ux/file/types/sharing.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6411,7 +6129,7 @@
             "description": [
               "\nISO timestamp the share was created"
             ],
-            "path": "packages/shared-ux/file/types/sharing.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6424,7 +6142,7 @@
             "description": [
               "\nUnix timestamp (in milliseconds) of when this share expires"
             ],
-            "path": "packages/shared-ux/file/types/sharing.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6440,7 +6158,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/file/types/sharing.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6453,7 +6171,7 @@
             "description": [
               "\nThe ID of the file this share is linked to"
             ],
-            "path": "packages/shared-ux/file/types/sharing.ts",
+            "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6469,7 +6187,7 @@
         "description": [
           "\nArguments to pass to share a file"
         ],
-        "path": "src/plugins/files/common/types.ts",
+        "path": "src/platform/plugins/shared/files/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6485,7 +6203,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6503,7 +6221,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6519,7 +6237,7 @@
         "description": [
           "\nA collection of generally useful metrics about files."
         ],
-        "path": "src/plugins/files/common/types.ts",
+        "path": "src/platform/plugins/shared/files/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6535,7 +6253,7 @@
             "signature": [
               "{ esFixedSizeIndex: { capacity: number; used: number; available: number; }; }"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6551,7 +6269,7 @@
             "signature": [
               "{ AWAITING_UPLOAD: number; UPLOADING: number; READY: number; UPLOAD_ERROR: number; DELETED: number; }"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6567,7 +6285,7 @@
             "signature": [
               "{ [x: string]: number; }"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6583,7 +6301,7 @@
         "description": [
           "\nArguments for unsharing a file"
         ],
-        "path": "src/plugins/files/common/types.ts",
+        "path": "src/platform/plugins/shared/files/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6596,7 +6314,7 @@
             "description": [
               "\nSpecify the share instance to remove"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6612,7 +6330,7 @@
         "description": [
           "\nValues for paginating through results."
         ],
-        "path": "src/plugins/files/common/types.ts",
+        "path": "src/platform/plugins/shared/files/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -6628,7 +6346,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -6644,7 +6362,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/files/common/types.ts",
+            "path": "src/platform/plugins/shared/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6682,7 +6400,7 @@
           },
           " | undefined; }"
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6699,7 +6417,7 @@
         "signature": [
           "\"esFixedSizeIndex\""
         ],
-        "path": "src/plugins/files/common/constants.ts",
+        "path": "src/platform/plugins/shared/files/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6716,7 +6434,7 @@
         "signature": [
           "\"file\""
         ],
-        "path": "src/plugins/files/common/constants.ts",
+        "path": "src/platform/plugins/shared/files/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6733,7 +6451,7 @@
         "signature": [
           "\"none\" | \"br\" | \"gzip\" | \"deflate\""
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6766,7 +6484,7 @@
           },
           " & { FileKind: string; Meta?: Meta | undefined; }"
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6781,13 +6499,7 @@
           "\nAn {@link SavedObject} containing a file object (i.e., metadata only)."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObject",
-            "text": "SavedObject"
-          },
+          "SavedObject",
           "<",
           {
             "pluginId": "@kbn/shared-ux-file-types",
@@ -6798,7 +6510,7 @@
           },
           "<Meta>>"
         ],
-        "path": "src/plugins/files/common/types.ts",
+        "path": "src/platform/plugins/shared/files/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6815,7 +6527,7 @@
         "signature": [
           "{ created: string; token: string; name?: string | undefined; valid_until: number; }"
         ],
-        "path": "packages/shared-ux/file/types/sharing.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6841,7 +6553,7 @@
           },
           " & { token: string; }"
         ],
-        "path": "packages/shared-ux/file/types/sharing.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/sharing.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6856,7 +6568,7 @@
         "signature": [
           "\"AWAITING_UPLOAD\" | \"UPLOADING\" | \"READY\" | \"UPLOAD_ERROR\" | \"DELETED\""
         ],
-        "path": "packages/shared-ux/file/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6873,7 +6585,7 @@
         "signature": [
           "\"files\""
         ],
-        "path": "src/plugins/files/common/constants.ts",
+        "path": "src/platform/plugins/shared/files/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6890,7 +6602,7 @@
         "signature": [
           "\"files\""
         ],
-        "path": "src/plugins/files/common/constants.ts",
+        "path": "src/platform/plugins/shared/files/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6907,7 +6619,7 @@
         "signature": [
           "{ meta: Meta | undefined; name: string; alt: string | undefined; }"
         ],
-        "path": "src/plugins/files/common/types.ts",
+        "path": "src/platform/plugins/shared/files/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -6924,7 +6636,7 @@
         "signature": [
           "{ name?: string | undefined; }"
         ],
-        "path": "src/plugins/files/common/types.ts",
+        "path": "src/platform/plugins/shared/files/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

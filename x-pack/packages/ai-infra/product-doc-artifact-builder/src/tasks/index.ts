@@ -8,7 +8,6 @@
 export { extractDocumentation } from './extract_documentation';
 export { indexDocuments } from './index_documents';
 export { createTargetIndex } from './create_index';
-export { installElser } from './install_elser';
 export { createChunkFiles } from './create_chunk_files';
 export { checkConnectivity } from './check_connectivity';
 export { createArtifact } from './create_artifact';

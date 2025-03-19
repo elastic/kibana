@@ -7,10 +7,11 @@
 
 import objectHash from 'object-hash';
 import type { Moment } from 'moment';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-
+import type { estypes } from '@elastic/elasticsearch';
+import { robustGet } from '../../utils/source_fields_merging/utils/robust_field_access';
 import type { CompleteRule, EsqlRuleParams } from '../../../rule_schema';
 import type { SignalSource } from '../../types';
+
 /**
  * Generates id for ES|QL alert.
  * Id is generated as hash of event properties and rule/space config identifiers.
@@ -23,6 +24,7 @@ export const generateAlertId = ({
   tuple,
   isRuleAggregating,
   index,
+  expandedFields,
 }: {
   isRuleAggregating: boolean;
   event: estypes.SearchHit<SignalSource>;
@@ -34,15 +36,49 @@ export const generateAlertId = ({
     maxSignals: number;
   };
   index: number;
+  expandedFields?: string[];
 }) => {
   const ruleRunId = tuple.from.toISOString() + tuple.to.toISOString();
 
-  return !isRuleAggregating && event._id
-    ? objectHash([event._id, event._version, event._index, `${spaceId}:${completeRule.alertId}`])
-    : objectHash([
-        ruleRunId,
-        completeRule.ruleParams.query,
-        `${spaceId}:${completeRule.alertId}`,
-        index,
-      ]);
+  if (!isRuleAggregating && event._id) {
+    const idFields = [
+      event._id,
+      event._version,
+      event._index,
+      `${spaceId}:${completeRule.alertId}`,
+      ...retrieveExpandedValues({
+        event,
+        fields: expandedFields,
+      }),
+    ];
+    return objectHash(idFields);
+  } else {
+    return objectHash([
+      ruleRunId,
+      completeRule.ruleParams.query,
+      `${spaceId}:${completeRule.alertId}`,
+      index,
+    ]);
+  }
+};
+
+/**
+ * returns array of values from source event for requested list of fields
+ * undefined values are dropped
+ */
+const retrieveExpandedValues = ({
+  event,
+  fields,
+}: {
+  event: estypes.SearchHit<SignalSource>;
+  fields?: string[];
+}) => {
+  if (!fields || !event._source) {
+    return [];
+  }
+
+  const values = fields.map((field) =>
+    event._source ? robustGet({ key: field, document: event._source }) : undefined
+  );
+  return fields.length === 0 ? [event] : values.filter(Boolean);
 };

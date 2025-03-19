@@ -25,10 +25,9 @@ export const AddPrebuiltRulesHeaderButtons = () => {
   const {
     state: {
       selectedRules,
-      loadingRules,
       isRefetching,
       isUpgradingSecurityPackages,
-      isInstallingAllRules,
+      isAnyRuleInstalling,
       hasRulesToInstall,
     },
     actions: { installAllRules, installSelectedRules },
@@ -39,8 +38,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
   const numberOfSelectedRules = selectedRules.length ?? 0;
   const shouldDisplayInstallSelectedRulesButton = numberOfSelectedRules > 0;
 
-  const isRuleInstalling = loadingRules.length > 0 || isInstallingAllRules;
-  const isRequestInProgress = isRuleInstalling || isRefetching || isUpgradingSecurityPackages;
+  const isRequestInProgress = isAnyRuleInstalling || isRefetching || isUpgradingSecurityPackages;
 
   const [isOverflowPopoverOpen, setOverflowPopover] = useBoolean(false);
 
@@ -81,7 +79,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
               data-test-subj="installSelectedRulesButton"
             >
               {i18n.INSTALL_SELECTED_RULES(numberOfSelectedRules)}
-              {isRuleInstalling && <EuiLoadingSpinner size="s" />}
+              {isAnyRuleInstalling && <EuiLoadingSpinner size="s" />}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -116,7 +114,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
           aria-label={i18n.INSTALL_ALL_ARIA_LABEL}
         >
           {i18n.INSTALL_ALL}
-          {isRuleInstalling && <EuiLoadingSpinner size="s" />}
+          {isAnyRuleInstalling && <EuiLoadingSpinner size="s" />}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

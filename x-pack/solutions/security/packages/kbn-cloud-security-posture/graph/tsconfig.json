@@ -3,13 +3,8 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx", "**/mock/*.json", ".storybook/**/*.ts", ".storybook/**/*.tsx"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/cloud-security-posture-common",
     "@kbn/data-views-plugin",
@@ -20,5 +15,9 @@
     "@kbn/es-query",
     "@kbn/data-service",
     "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/storybook",
+    "@kbn/data-plugin",
+    "@kbn/core-application-browser-mocks"
   ]
 }

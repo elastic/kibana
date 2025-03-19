@@ -7,12 +7,10 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { RuleMigrationTaskCreateClientParams } from './types';
-import { RuleMigrationsTaskClient } from './rule_migrations_task_client';
-
-export type MigrationRunning = Map<string, { user: string; abortController: AbortController }>;
+import { RuleMigrationsTaskClient, type MigrationsRunning } from './rule_migrations_task_client';
 
 export class RuleMigrationsTaskService {
-  private migrationsRunning: MigrationRunning;
+  private migrationsRunning: MigrationsRunning;
 
   constructor(private logger: Logger) {
     this.migrationsRunning = new Map();
@@ -21,12 +19,14 @@ export class RuleMigrationsTaskService {
   public createClient({
     currentUser,
     dataClient,
+    dependencies,
   }: RuleMigrationTaskCreateClientParams): RuleMigrationsTaskClient {
     return new RuleMigrationsTaskClient(
       this.migrationsRunning,
       this.logger,
       dataClient,
-      currentUser
+      currentUser,
+      dependencies
     );
   }
 

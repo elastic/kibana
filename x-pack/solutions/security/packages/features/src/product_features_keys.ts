@@ -8,6 +8,8 @@
 export enum ProductFeatureSecurityKey {
   /** Enables Advanced Insights (Entity Risk, GenAI) */
   advancedInsights = 'advanced_insights',
+  /** Enables Alerts Summary page for AI SOC */
+  alertsSummary = 'alerts_summary',
   /**
    * Enables Investigation guide in Timeline
    */
@@ -85,9 +87,17 @@ export enum ProductFeatureSecurityKey {
   cloudSecurityPosture = 'cloud_security_posture',
 
   /**
-   * enables the integration assistant
+   * enables the automatic import
    */
-  integrationAssistant = 'integration_assistant',
+  automaticImport = 'automatic_import',
+
+  /** Enables Endpoint Workflow Insights */
+  securityWorkflowInsights = 'security_workflow_insights',
+
+  /**
+   * Enables customization of prebuilt Elastic rules
+   */
+  prebuiltRuleCustomization = 'prebuilt_rule_customization',
 }
 
 export enum ProductFeatureCasesKey {
@@ -111,19 +121,45 @@ export enum ProductFeatureAttackDiscoveryKey {
   attackDiscovery = 'attack_discovery',
 }
 
+export enum ProductFeatureTimelineFeatureKey {
+  /**
+   * Enables Timeline
+   */
+  timeline = 'timeline',
+}
+
+export enum ProductFeatureNotesFeatureKey {
+  /**
+   * Enables Notes
+   */
+  notes = 'notes',
+}
+export enum ProductFeatureSiemMigrationsKey {
+  /**
+   * Enables the SIEM Migrations main feature
+   */
+  siemMigrations = 'siem_migrations',
+}
+
 // Merges the two enums.
 export const ProductFeatureKey = {
   ...ProductFeatureSecurityKey,
   ...ProductFeatureCasesKey,
   ...ProductFeatureAssistantKey,
   ...ProductFeatureAttackDiscoveryKey,
+  ...ProductFeatureSiemMigrationsKey,
+  ...ProductFeatureTimelineFeatureKey,
+  ...ProductFeatureNotesFeatureKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
 export type ProductFeatureKeyType =
   | ProductFeatureSecurityKey
   | ProductFeatureCasesKey
   | ProductFeatureAssistantKey
-  | ProductFeatureAttackDiscoveryKey;
+  | ProductFeatureAttackDiscoveryKey
+  | ProductFeatureSiemMigrationsKey
+  | ProductFeatureTimelineFeatureKey
+  | ProductFeatureNotesFeatureKey;
 
 export const ALL_PRODUCT_FEATURE_KEYS = Object.freeze(Object.values(ProductFeatureKey));
 
@@ -135,8 +171,10 @@ export enum SecuritySubFeatureId {
   hostIsolationExceptionsBasic = 'hostIsolationExceptionsBasicSubFeature',
   blocklist = 'blocklistSubFeature',
   eventFilters = 'eventFiltersSubFeature',
+  globalArtifactManagement = 'globalArtifactManagementSubFeature',
   policyManagement = 'policyManagementSubFeature',
   responseActionsHistory = 'responseActionsHistorySubFeature',
+  workflowInsights = 'workflowInsightsSubFeature',
   hostIsolation = 'hostIsolationSubFeature',
   processOperations = 'processOperationsSubFeature',
   fileOperations = 'fileOperationsSubFeature',
@@ -150,6 +188,7 @@ export enum CasesSubFeatureId {
   casesSettings = 'casesSettingsSubFeature',
   createComment = 'createCommentSubFeature',
   reopenCase = 'reopenCaseSubFeature',
+  assignUsers = 'assignUsersSubFeature',
 }
 
 /** Sub-features IDs for Security Assistant */

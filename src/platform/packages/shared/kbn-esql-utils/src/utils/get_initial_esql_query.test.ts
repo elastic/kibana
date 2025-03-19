@@ -101,4 +101,79 @@ describe('getInitialESQLQuery', () => {
       'FROM logs* | WHERE @custom_timestamp >= ?_tstart AND @custom_timestamp <= ?_tend | LIMIT 10'
     );
   });
+
+  it('should append a where clause correctly if there is no @timestamp in the index fields and a query is given', () => {
+    const fields = [
+      {
+        name: '@custom_timestamp',
+        displayName: '@custom_timestamp',
+        type: 'date',
+        scripted: false,
+        filterable: true,
+        aggregatable: true,
+        sortable: true,
+      },
+      {
+        name: 'message',
+        displayName: 'message',
+        type: 'string',
+        scripted: false,
+        filterable: false,
+      },
+    ] as DataView['fields'];
+    const dataView = getDataView('logs*', fields, '@custom_timestamp');
+    expect(getInitialESQLQuery(dataView, { language: 'kuery', query: 'error' })).toBe(
+      'FROM logs* | WHERE @custom_timestamp >= ?_tstart AND @custom_timestamp <= ?_tend AND KQL("""error""") | LIMIT 10'
+    );
+  });
+
+  it('should append a where clause correctly if there is @timestamp in the index fields and a query is given', () => {
+    const fields = [
+      {
+        name: '@timestamp',
+        displayName: '@timestamp',
+        type: 'date',
+        scripted: false,
+        filterable: true,
+        aggregatable: true,
+        sortable: true,
+      },
+      {
+        name: 'message',
+        displayName: 'message',
+        type: 'string',
+        scripted: false,
+        filterable: false,
+      },
+    ] as DataView['fields'];
+    const dataView = getDataView('logs*', fields, 'timestamp');
+    expect(getInitialESQLQuery(dataView, { language: 'lucene', query: 'error' })).toBe(
+      'FROM logs* | WHERE QSTR("""error""") | LIMIT 10'
+    );
+  });
+
+  it('should not append a where clause correctly if there is @timestamp in the index fields and no kql or lucene query is given', () => {
+    const fields = [
+      {
+        name: '@timestamp',
+        displayName: '@timestamp',
+        type: 'date',
+        scripted: false,
+        filterable: true,
+        aggregatable: true,
+        sortable: true,
+      },
+      {
+        name: 'message',
+        displayName: 'message',
+        type: 'string',
+        scripted: false,
+        filterable: false,
+      },
+    ] as DataView['fields'];
+    const dataView = getDataView('logs*', fields, 'timestamp');
+    expect(getInitialESQLQuery(dataView, { language: 'unknown', query: 'error' })).toBe(
+      'FROM logs* | LIMIT 10'
+    );
+  });
 });

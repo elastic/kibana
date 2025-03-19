@@ -6,7 +6,7 @@
  */
 
 import { generateAlertId } from './generate_alert_id';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SignalSource } from '../../types';
 import type { CompleteRule, EsqlRuleParams } from '../../../rule_schema';
 import moment from 'moment';
@@ -16,6 +16,9 @@ const mockEvent: estypes.SearchHit<SignalSource> = {
   _id: 'test_id',
   _version: 2,
   _index: 'test_index',
+  _source: {
+    'agent.name': 'test-0',
+  },
 };
 
 const mockRule = {
@@ -141,6 +144,22 @@ describe('generateAlertId', () => {
     it('creates id not dependant on rule query', () => {
       modifiedIdParams.completeRule.ruleParams.query = 'from packetbeat*';
       expect(id).toBe(generateAlertId(modifiedIdParams));
+    });
+
+    it('creates id dependant on expandedFields fields in source event', () => {
+      modifiedIdParams.expandedFields = ['agent.name'];
+      expect(id).not.toBe(generateAlertId(modifiedIdParams));
+    });
+
+    it('creates id not dependant on expandedFields fields, if they are not in event source', () => {
+      modifiedIdParams.expandedFields = ['agent.type'];
+      expect(id).toBe(generateAlertId(modifiedIdParams));
+    });
+
+    // when expanded fields empty, it means expanded field was dropped from ES|QL response, so we need to hash the whole event source object to properly deduplicate alerts
+    it('creates id not dependant on empty expandedFields fields', () => {
+      modifiedIdParams.expandedFields = [];
+      expect(id).not.toBe(generateAlertId(modifiedIdParams));
     });
   });
 });

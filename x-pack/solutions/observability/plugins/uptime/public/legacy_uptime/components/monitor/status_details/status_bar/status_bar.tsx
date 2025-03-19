@@ -133,7 +133,9 @@ export const MonitorStatusBar: React.FC = () => {
         <MonitorRedirects monitorStatus={monitorStatus} />
         <EuiDescriptionListTitle>{ENABLE_STATUS_ALERT}</EuiDescriptionListTitle>
         {selectedMonitor && (
-          <EnableMonitorAlert monitorId={monitorId} selectedMonitor={selectedMonitor} />
+          <dd>
+            <EnableMonitorAlert monitorId={monitorId} selectedMonitor={selectedMonitor} />
+          </dd>
         )}
       </EuiDescriptionList>
     </>

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { InferSearchResponseOf } from '@kbn/es-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { entitiesAliasPattern, ENTITY_LATEST } from '@kbn/entities-schema';
@@ -97,14 +98,13 @@ export function createEntitiesESClient({
     ): Promise<{ responses: Array<InferSearchResponseOf<TDocument, TSearchRequest>> }> {
       const searches = allSearches
         .map((params) => {
+          const { index, ...body } = params;
           const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] = [
             {
-              index: [params.index],
+              index: [index],
               ignore_unavailable: true,
             },
-            {
-              ...params.body,
-            },
+            body,
           ];
 
           return searchParams;

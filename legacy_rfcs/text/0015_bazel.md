@@ -76,7 +76,7 @@ A Bazel [macro](https://docs.bazel.build/versions/master/skylark/macros.html) wi
 
 A Bazel [macro](https://docs.bazel.build/versions/master/skylark/macros.html) will be created to centralize the usage of Webpack. The macro will, at minimum, accept a configuration file and supply a base `webpack.config.js` file. Currently, all plugins share the same Webpack configuration. Allowing a plugin to provide additional configuration will allow plugins the ability to add loaders without affecting the performance of others.
 
-While running Kibana from source in development, the proxy server will ensure that client-side code for plugins is compiled and available. This is currently handled by the [basePathProxy](https://github.com/elastic/kibana/blob/main/src/core/server/http/base_path_proxy_server.ts), where server restarts and optimizer builds are observed and cause the proxy to pause requests. With Bazel, we will utilize [iBazel](https://github.com/bazelbuild/bazel-watche) to watch for file changes and re-build the plugin targets when necessary. The watcher will emit [events](https://github.com/bazelbuild/bazel-watcher#remote-events) that we will use to block requests and provide feedback to the logs.
+While running Kibana from source in development, the proxy server will ensure that client-side code for plugins is compiled and available. This is currently handled by the [basePathProxy](https://github.com/elastic/kibana/blob/main/packages/kbn-cli-dev-mode/src/base_path_proxy/http1.ts), where server restarts and optimizer builds are observed and cause the proxy to pause requests. With Bazel, we will utilize [iBazel](https://github.com/bazelbuild/bazel-watche) to watch for file changes and re-build the plugin targets when necessary. The watcher will emit [events](https://github.com/bazelbuild/bazel-watcher#remote-events) that we will use to block requests and provide feedback to the logs.
 
 While there are a few proofs of concepts for a Webpack 5 Bazel rule, none currently exist which are deemed production-ready. In the meantime, we can use the Webpack CLI directly. One of the main advantages being explored in these rules will be the support for using the Bazel worker to provide incremental builds similar to what `@kbn/optimizer` is doing today.
 
@@ -85,7 +85,7 @@ We are aware there are quite a few alternatives to Webpack, but our plan is to c
 
 ### Unit Testing
 
-A Bazel macro will be created to centralize the usage of Jest unit testing. The macro will, at minimum, accept a Jest configuration file, add the [Jest preset](https://github.com/elastic/kibana/blob/main/packages/kbn-test/jest-preset.js) and its dependencies as sources, then use the Jest CLI to execute tests. 
+A Bazel macro will be created to centralize the usage of Jest unit testing. The macro will, at minimum, accept a Jest configuration file, add the [Jest preset](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-test/jest-preset.js) and its dependencies as sources, then use the Jest CLI to execute tests. 
 
 Developers currently use `yarn test:jest` to efficiently run tests in a given directory without remembering the command or path. This command will continue to work as it does today, but will begin running tests through Bazel for packages or plugins which have been migrated.
 
@@ -191,9 +191,9 @@ A `BUILD.bazel` file will be added to the root of each package defining a `build
 
 The `@kbn/pm` package was updated in https://github.com/elastic/kibana/pull/89961 to run the new packages build target, invoked by calling `bazel build //packages:build`, before executing the existing legacy package builds.
 
-The build targets will no longer reside within the package themselves and instead will be within the `bazel/bin` directory. To account for this, any defined dependency will need to be updated to reference the new directory (example: `link:bazel/bin/packages/kbn-datemath`). While also in this transition period, the build will need to copy over the packages from `bazel/bin` into the `node_modules` of the build target.
+The build targets will no longer reside within the package themselves and instead will be within the `bazel/bin` directory. To account for this, any defined dependency will need to be updated to reference the new directory (example: `link:bazel/bin/src/platform/packages/shared/kbn-datemath`). While also in this transition period, the build will need to copy over the packages from `bazel/bin` into the `node_modules` of the build target.
 
-Example package BUILD.bazel for `packages/kbn-datemath`:
+Example package BUILD.bazel for `src/platform/packages/shared/kbn-datemath`:
 
 ```python
 load("@build_bazel_rules_nodejs//:index.bzl", "pkg_npm")

@@ -33,7 +33,7 @@
           "NoDataCardServices",
           ", PropArguments, ServiceArguments>"
         ],
-        "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+        "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,7 +44,7 @@
             "tags": [],
             "label": "propArguments",
             "description": [],
-            "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -55,7 +55,7 @@
                 "tags": [],
                 "label": "category",
                 "description": [],
-                "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -66,18 +66,18 @@
                     "tags": [],
                     "label": "control",
                     "description": [],
-                    "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                        "id": "def-public.StorybookMock.propArguments.category.control.type",
+                        "id": "def-public.StorybookMock.propArguments.category.control.control",
                         "type": "string",
                         "tags": [],
-                        "label": "type",
+                        "label": "control",
                         "description": [],
-                        "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                        "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -90,7 +90,7 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -103,7 +103,7 @@
                 "tags": [],
                 "label": "title",
                 "description": [],
-                "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -114,18 +114,18 @@
                     "tags": [],
                     "label": "control",
                     "description": [],
-                    "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                        "id": "def-public.StorybookMock.propArguments.title.control.type",
+                        "id": "def-public.StorybookMock.propArguments.title.control.control",
                         "type": "string",
                         "tags": [],
-                        "label": "type",
+                        "label": "control",
                         "description": [],
-                        "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                        "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -138,7 +138,7 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -151,7 +151,7 @@
                 "tags": [],
                 "label": "description",
                 "description": [],
-                "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -162,18 +162,18 @@
                     "tags": [],
                     "label": "control",
                     "description": [],
-                    "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                        "id": "def-public.StorybookMock.propArguments.description.control.type",
+                        "id": "def-public.StorybookMock.propArguments.description.control.control",
                         "type": "string",
                         "tags": [],
-                        "label": "type",
+                        "label": "control",
                         "description": [],
-                        "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                        "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -186,7 +186,7 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -199,7 +199,7 @@
                 "tags": [],
                 "label": "button",
                 "description": [],
-                "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -210,18 +210,18 @@
                     "tags": [],
                     "label": "control",
                     "description": [],
-                    "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
-                        "id": "def-public.StorybookMock.propArguments.button.control.type",
+                        "id": "def-public.StorybookMock.propArguments.button.control.control",
                         "type": "string",
                         "tags": [],
-                        "label": "type",
+                        "label": "control",
                         "description": [],
-                        "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                        "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -234,7 +234,7 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -249,7 +249,7 @@
             "tags": [],
             "label": "serviceArguments",
             "description": [],
-            "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -260,20 +260,33 @@
                 "tags": [],
                 "label": "canAccessFleet",
                 "description": [],
-                "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
                     "id": "def-public.StorybookMock.serviceArguments.canAccessFleet.control",
-                    "type": "string",
+                    "type": "Object",
                     "tags": [],
                     "label": "control",
                     "description": [],
-                    "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                     "deprecated": false,
-                    "trackAdoption": false
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
+                        "id": "def-public.StorybookMock.serviceArguments.canAccessFleet.control.control",
+                        "type": "string",
+                        "tags": [],
+                        "label": "control",
+                        "description": [],
+                        "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-card-no-data-mocks",
@@ -282,7 +295,7 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -307,7 +320,7 @@
               },
               "[]"
             ],
-            "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -330,7 +343,7 @@
               " | undefined) => ",
               "NoDataCardComponentProps"
             ],
-            "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -351,7 +364,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -378,7 +391,7 @@
               ") => ",
               "NoDataCardServices"
             ],
-            "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -398,7 +411,7 @@
                     "text": "Params"
                   }
                 ],
-                "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -426,7 +439,7 @@
           ">) => ",
           "NoDataCardKibanaDependencies"
         ],
-        "path": "packages/shared-ux/card/no_data/mocks/src/jest.ts",
+        "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/jest.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -442,7 +455,7 @@
               "NoDataCardServices",
               ">"
             ],
-            "path": "packages/shared-ux/card/no_data/mocks/src/jest.ts",
+            "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/jest.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -466,7 +479,7 @@
           ">) => ",
           "NoDataCardServices"
         ],
-        "path": "packages/shared-ux/card/no_data/mocks/src/jest.ts",
+        "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/jest.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -482,7 +495,7 @@
               "NoDataCardServices",
               ">"
             ],
-            "path": "packages/shared-ux/card/no_data/mocks/src/jest.ts",
+            "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/jest.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -507,7 +520,7 @@
         "signature": [
           "{ title: any; description: any; category: any; button: any; canAccessFleet: any; }"
         ],
-        "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
+        "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

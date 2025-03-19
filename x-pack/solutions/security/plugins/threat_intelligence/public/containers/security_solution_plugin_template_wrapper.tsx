@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
 import { useKibana } from '../hooks/use_kibana';
 
@@ -15,17 +15,18 @@ import { useKibana } from '../hooks/use_kibana';
  *
  * The `template` prop can be used to alter the page layout for a given plugin route / all routes within a plugin - depending on the nesting.
  */
-export const SecuritySolutionPluginTemplateWrapper: FC<KibanaPageTemplateProps> = ({
-  children,
-  ...rest
-}) => {
-  const {
-    services: {
-      securityLayout: { getPluginWrapper },
-    },
-  } = useKibana();
+export const SecuritySolutionPluginTemplateWrapper: FC<KibanaPageTemplateProps> = React.memo(
+  ({ children, ...rest }) => {
+    const {
+      services: {
+        securityLayout: { getPluginWrapper },
+      },
+    } = useKibana();
 
-  const Wrapper = getPluginWrapper();
+    const Wrapper = useMemo(() => getPluginWrapper(), [getPluginWrapper]);
 
-  return <Wrapper {...rest}>{children}</Wrapper>;
-};
+    return <Wrapper {...rest}>{children}</Wrapper>;
+  }
+);
+
+SecuritySolutionPluginTemplateWrapper.displayName = 'SecuritySolutionPluginTemplateWrapper';

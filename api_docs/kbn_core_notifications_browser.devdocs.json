@@ -14,23 +14,11 @@
           "\nOptions available for {@link IToasts} error APIs."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-public.ErrorToastOptions",
-            "text": "ErrorToastOptions"
-          },
+          "ErrorToastOptions",
           " extends ",
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-public.ToastOptions",
-            "text": "ToastOptions"
-          }
+          "ToastOptions"
         ],
-        "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+        "path": "src/core/packages/notifications/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +31,7 @@
             "description": [
               "\nThe title of the toast and the dialog when expanding the message."
             ],
-            "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+            "path": "src/core/packages/notifications/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -59,7 +47,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+            "path": "src/core/packages/notifications/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -75,7 +63,7 @@
         "description": [
           "\nMethods for adding and removing global toast messages. See {@link ToastsApi}."
         ],
-        "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+        "path": "src/core/packages/notifications/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -90,16 +78,10 @@
               "() => ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
+              "Toast",
               "[]>"
             ],
-            "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+            "path": "src/core/packages/notifications/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -114,23 +96,11 @@
             "description": [],
             "signature": [
               "(toastOrTitle: ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
+              "ToastInput",
               ") => ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              }
+              "Toast"
             ],
-            "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+            "path": "src/core/packages/notifications/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -142,15 +112,9 @@
                 "label": "toastOrTitle",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  }
+                  "ToastInput"
                 ],
-                "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+                "path": "src/core/packages/notifications/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -167,16 +131,10 @@
             "description": [],
             "signature": [
               "(toastOrId: string | ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              },
+              "Toast",
               ") => void"
             ],
-            "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+            "path": "src/core/packages/notifications/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -189,15 +147,9 @@
                 "description": [],
                 "signature": [
                   "string | ",
-                  {
-                    "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  }
+                  "Toast"
                 ],
-                "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+                "path": "src/core/packages/notifications/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -214,23 +166,11 @@
             "description": [],
             "signature": [
               "(toastOrTitle: ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
+              "ToastInput",
               ", options?: any) => ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              }
+              "Toast"
             ],
-            "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+            "path": "src/core/packages/notifications/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -242,15 +182,9 @@
                 "label": "toastOrTitle",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  }
+                  "ToastInput"
                 ],
-                "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+                "path": "src/core/packages/notifications/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -265,7 +199,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+                "path": "src/core/packages/notifications/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -282,23 +216,11 @@
             "description": [],
             "signature": [
               "(toastOrTitle: ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
+              "ToastInput",
               ", options?: any) => ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              }
+              "Toast"
             ],
-            "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+            "path": "src/core/packages/notifications/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -310,15 +232,9 @@
                 "label": "toastOrTitle",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  }
+                  "ToastInput"
                 ],
-                "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+                "path": "src/core/packages/notifications/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -333,7 +249,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+                "path": "src/core/packages/notifications/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -350,23 +266,11 @@
             "description": [],
             "signature": [
               "(toastOrTitle: ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
+              "ToastInput",
               ", options?: any) => ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              }
+              "Toast"
             ],
-            "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+            "path": "src/core/packages/notifications/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -378,15 +282,9 @@
                 "label": "toastOrTitle",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  }
+                  "ToastInput"
                 ],
-                "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+                "path": "src/core/packages/notifications/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -401,7 +299,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+                "path": "src/core/packages/notifications/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -418,23 +316,11 @@
             "description": [],
             "signature": [
               "(toastOrTitle: ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.ToastInput",
-                "text": "ToastInput"
-              },
+              "ToastInput",
               ", options?: any) => ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              }
+              "Toast"
             ],
-            "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+            "path": "src/core/packages/notifications/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -446,15 +332,9 @@
                 "label": "toastOrTitle",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-public.ToastInput",
-                    "text": "ToastInput"
-                  }
+                  "ToastInput"
                 ],
-                "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+                "path": "src/core/packages/notifications/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -469,7 +349,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+                "path": "src/core/packages/notifications/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -486,23 +366,11 @@
             "description": [],
             "signature": [
               "(error: Error, options: ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.ErrorToastOptions",
-                "text": "ErrorToastOptions"
-              },
+              "ErrorToastOptions",
               ") => ",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.Toast",
-                "text": "Toast"
-              }
+              "Toast"
             ],
-            "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+            "path": "src/core/packages/notifications/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -516,7 +384,7 @@
                 "signature": [
                   "Error"
                 ],
-                "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+                "path": "src/core/packages/notifications/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -529,15 +397,9 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-notifications-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                    "section": "def-public.ErrorToastOptions",
-                    "text": "ErrorToastOptions"
-                  }
+                  "ErrorToastOptions"
                 ],
-                "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+                "path": "src/core/packages/notifications/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -555,7 +417,7 @@
         "tags": [],
         "label": "NotificationsSetup",
         "description": [],
-        "path": "packages/core/notifications/core-notifications-browser/src/contracts.ts",
+        "path": "src/core/packages/notifications/browser/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -569,15 +431,9 @@
               "{@link ToastsSetup}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.IToasts",
-                "text": "IToasts"
-              }
+              "IToasts"
             ],
-            "path": "packages/core/notifications/core-notifications-browser/src/contracts.ts",
+            "path": "src/core/packages/notifications/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -591,7 +447,7 @@
         "tags": [],
         "label": "NotificationsStart",
         "description": [],
-        "path": "packages/core/notifications/core-notifications-browser/src/contracts.ts",
+        "path": "src/core/packages/notifications/browser/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -605,15 +461,9 @@
               "{@link ToastsStart}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.IToasts",
-                "text": "IToasts"
-              }
+              "IToasts"
             ],
-            "path": "packages/core/notifications/core-notifications-browser/src/contracts.ts",
+            "path": "src/core/packages/notifications/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -627,7 +477,7 @@
             "signature": [
               "(options: { title: string; error: Error; }) => void"
             ],
-            "path": "packages/core/notifications/core-notifications-browser/src/contracts.ts",
+            "path": "src/core/packages/notifications/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -638,7 +488,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "packages/core/notifications/core-notifications-browser/src/contracts.ts",
+                "path": "src/core/packages/notifications/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -649,7 +499,7 @@
                     "tags": [],
                     "label": "title",
                     "description": [],
-                    "path": "packages/core/notifications/core-notifications-browser/src/contracts.ts",
+                    "path": "src/core/packages/notifications/browser/src/contracts.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -663,7 +513,7 @@
                     "signature": [
                       "Error"
                     ],
-                    "path": "packages/core/notifications/core-notifications-browser/src/contracts.ts",
+                    "path": "src/core/packages/notifications/browser/src/contracts.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -684,7 +534,7 @@
         "description": [
           "\nOptions available for {@link IToasts} APIs."
         ],
-        "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+        "path": "src/core/packages/notifications/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -700,7 +550,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+            "path": "src/core/packages/notifications/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -721,24 +571,12 @@
           "Pick<",
           "Toast",
           ", \"prefix\" | \"onError\" | \"defaultValue\" | \"security\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"css\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"autoFocus\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"nonce\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"content\" | \"datatype\" | \"inlist\" | \"property\" | \"rel\" | \"resource\" | \"rev\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-braillelabel\" | \"aria-brailleroledescription\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colindextext\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-description\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowindextext\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"children\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onResize\" | \"onResizeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerLeave\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"iconType\" | \"onClose\" | \"toastLifeTimeMs\"> & { title?: string | ",
-          {
-            "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-public.MountPoint",
-            "text": "MountPoint"
-          },
+          "MountPoint",
           "<HTMLElement> | undefined; text?: string | ",
-          {
-            "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-public.MountPoint",
-            "text": "MountPoint"
-          },
+          "MountPoint",
           "<HTMLElement> | undefined; } & { id: string; }"
         ],
-        "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+        "path": "src/core/packages/notifications/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -754,15 +592,9 @@
         ],
         "signature": [
           "string | ",
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-public.ToastInputFields",
-            "text": "ToastInputFields"
-          }
+          "ToastInputFields"
         ],
-        "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+        "path": "src/core/packages/notifications/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -780,24 +612,12 @@
           "Pick<",
           "Toast",
           ", \"prefix\" | \"onError\" | \"defaultValue\" | \"security\" | \"className\" | \"aria-label\" | \"data-test-subj\" | \"css\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"autoFocus\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"nonce\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"content\" | \"datatype\" | \"inlist\" | \"property\" | \"rel\" | \"resource\" | \"rev\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-braillelabel\" | \"aria-brailleroledescription\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colindextext\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-description\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowindextext\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"children\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChange\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onResize\" | \"onResizeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerLeave\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"iconType\" | \"onClose\" | \"toastLifeTimeMs\"> & { title?: string | ",
-          {
-            "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-public.MountPoint",
-            "text": "MountPoint"
-          },
+          "MountPoint",
           "<HTMLElement> | undefined; text?: string | ",
-          {
-            "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-public.MountPoint",
-            "text": "MountPoint"
-          },
+          "MountPoint",
           "<HTMLElement> | undefined; }"
         ],
-        "path": "packages/core/notifications/core-notifications-browser/src/types.ts",
+        "path": "src/core/packages/notifications/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -812,15 +632,9 @@
           "\n{@link IToasts}"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-public.IToasts",
-            "text": "IToasts"
-          }
+          "IToasts"
         ],
-        "path": "packages/core/notifications/core-notifications-browser/src/contracts.ts",
+        "path": "src/core/packages/notifications/browser/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -835,15 +649,9 @@
           "\n{@link IToasts}"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-public.IToasts",
-            "text": "IToasts"
-          }
+          "IToasts"
         ],
-        "path": "packages/core/notifications/core-notifications-browser/src/contracts.ts",
+        "path": "src/core/packages/notifications/browser/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

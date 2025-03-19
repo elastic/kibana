@@ -58,6 +58,7 @@ import type {
   ESQLIdentifier,
   ESQLBinaryExpression,
   BinaryExpressionOperator,
+  ESQLCommand,
 } from '../types';
 import { parseIdentifier, getPosition } from './helpers';
 import { Builder, type AstNodeParserFields } from '../builder';
@@ -84,8 +85,22 @@ const createParserFields = (ctx: ParserRuleContext): AstNodeParserFields => ({
   incomplete: Boolean(ctx.exception),
 });
 
-export const createCommand = (name: string, ctx: ParserRuleContext) =>
-  Builder.command({ name, args: [] }, createParserFields(ctx));
+export const createCommand = <
+  Name extends string,
+  Cmd extends ESQLCommand<Name> = ESQLCommand<Name>
+>(
+  name: Name,
+  ctx: ParserRuleContext,
+  partial?: Partial<Cmd>
+): Cmd => {
+  const command = Builder.command({ name, args: [] }, createParserFields(ctx)) as Cmd;
+
+  if (partial) {
+    Object.assign(command, partial);
+  }
+
+  return command;
+};
 
 export const createInlineCast = (ctx: InlineCastContext, value: ESQLInlineCast['value']) =>
   Builder.expression.inlineCast(
@@ -127,11 +142,11 @@ export function createLiteralString(ctx: StringContext): ESQLLiteral {
 
   if (!isTripleQuoted) {
     valueUnquoted = valueUnquoted
-      .replace(/\\\\/g, '\\')
       .replace(/\\"/g, '"')
       .replace(/\\r/g, '\r')
       .replace(/\\n/g, '\n')
-      .replace(/\\t/g, '\t');
+      .replace(/\\t/g, '\t')
+      .replace(/\\\\/g, '\\');
   }
 
   return Builder.expression.literal.string(

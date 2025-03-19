@@ -1,0 +1,131 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoginForm login selector properly switches to login form -> login help and back: Login Help 1`] = `
+<ReactMarkdown
+  transformLinkUri={[Function]}
+>
+  <p
+    key="p-1-1-0"
+  >
+    <strong
+      key="strong-1-1-0"
+    >
+      some help
+    </strong>
+  </p>
+</ReactMarkdown>
+`;
+
+exports[`LoginForm login selector properly switches to login help: Login Help 1`] = `
+<ReactMarkdown
+  transformLinkUri={[Function]}
+>
+  <p
+    key="p-1-1-0"
+  >
+    <strong
+      key="strong-1-1-0"
+    >
+      some help
+    </strong>
+  </p>
+</ReactMarkdown>
+`;
+
+exports[`LoginForm properly switches to login help: Login Help 1`] = `
+<ReactMarkdown
+  transformLinkUri={[Function]}
+>
+  <p
+    key="p-1-1-0"
+  >
+    <strong
+      key="strong-1-1-0"
+    >
+      some help
+    </strong>
+  </p>
+</ReactMarkdown>
+`;
+
+exports[`LoginForm renders as expected 1`] = `
+<Fragment>
+  <EuiPanel
+    color="transparent"
+    data-test-subj="loginForm"
+  >
+    <form
+      onSubmit={[Function]}
+    >
+      <EuiFormRow
+        isInvalid={false}
+        label={
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="Username"
+            id="xpack.security.login.basicLoginForm.usernameFormRowLabel"
+          />
+        }
+      >
+        <EuiFieldText
+          aria-required={true}
+          autoComplete="off"
+          data-test-subj="loginUsername"
+          disabled={false}
+          id="username"
+          inputRef={[Function]}
+          isInvalid={false}
+          name="username"
+          onChange={[Function]}
+          value=""
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        isInvalid={false}
+        label={
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="Password"
+            id="xpack.security.login.basicLoginForm.passwordFormRowLabel"
+          />
+        }
+      >
+        <EuiFieldPassword
+          aria-required={true}
+          autoComplete="off"
+          data-test-subj="loginPassword"
+          disabled={false}
+          id="password"
+          isInvalid={false}
+          name="password"
+          onChange={[Function]}
+          type="dual"
+          value=""
+        />
+      </EuiFormRow>
+      <EuiSpacer />
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+      >
+        <EuiFlexItem>
+          <EuiButton
+            color="primary"
+            data-test-subj="loginSubmit"
+            fill={true}
+            fullWidth={true}
+            isDisabled={false}
+            isLoading={false}
+            onClick={[Function]}
+            type="submit"
+          >
+            <MemoizedFormattedMessage
+              defaultMessage="Log in"
+              id="xpack.security.login.basicLoginForm.logInButtonLabel"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </form>
+  </EuiPanel>
+</Fragment>
+`;

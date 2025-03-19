@@ -6,11 +6,14 @@
  */
 
 import expect from '@kbn/expect';
+import type { DarkModeValue as ColorMode } from '@kbn/user-profile-components';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
-  const PageObjects = getPageObjects(['common', 'header']);
+  const browser = getService('browser');
+  const PageObjects = getPageObjects(['common', 'header', 'userProfiles', 'settings']);
+  const testSubjects = getService('testSubjects');
 
   describe('Cloud Links integration', function () {
     before(async () => {
@@ -31,12 +34,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Guided onboarding', () => {
-      it('The button "Setup guides" is loaded', async () => {
-        expect(await find.byCssSelector('[data-test-subj="guideButtonRedirect"]')).to.not.be(null);
-        const cloudLink = await find.byLinkText('Setup guides');
-        expect(cloudLink).to.not.be(null);
-      });
-
       it('The help link "Setup guides" is added', async () => {
         await PageObjects.common.clickAndValidate(
           'helpMenuButton',
@@ -146,10 +143,120 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(cloudLink).to.not.be(null);
       });
 
-      it('Shows the theme darkMode toggle', async () => {
-        await PageObjects.common.clickAndValidate('userMenuButton', 'darkModeToggle');
-        const darkModeSwitch = await find.byCssSelector('[data-test-subj="darkModeToggleSwitch"]');
-        expect(darkModeSwitch).to.not.be(null);
+      it('Shows the appearance button', async () => {
+        await PageObjects.common.clickAndValidate('userMenuButton', 'appearanceSelector');
+      });
+    });
+
+    describe('Appearance selector modal', () => {
+      const openAppearanceSelectorModal = async () => {
+        // Check if the user menu is open
+        await find.byCssSelector('[data-test-subj="userMenu"]', 1000).catch(async () => {
+          await testSubjects.click('userMenuButton');
+        });
+        await testSubjects.click('appearanceSelector');
+        const appearanceModal = await find.byCssSelector(
+          '[data-test-subj="appearanceModal"]',
+          1000
+        );
+        expect(appearanceModal).to.not.be(null);
+      };
+
+      const refreshPage = async () => {
+        await browser.refresh();
+        await testSubjects.exists('globalLoadingIndicator-hidden');
+      };
+
+      const changeColorMode = async (colorMode: ColorMode) => {
+        await openAppearanceSelectorModal();
+        await testSubjects.click(`colorModeKeyPadItem${colorMode}`);
+        await testSubjects.click('appearanceModalSaveButton');
+        await testSubjects.missingOrFail('appearanceModal');
+      };
+
+      after(async () => {
+        await changeColorMode('space_default');
+
+        await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
+          basePath: '',
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
+        });
+
+        // Reset the space default dark mode to "disabled"
+        await PageObjects.settings.setAdvancedSettingsSelect('theme:darkMode', 'disabled');
+        {
+          const advancedSetting = await PageObjects.settings.getAdvancedSettings('theme:darkMode');
+          expect(advancedSetting).to.be('disabled');
+        }
+
+        await refreshPage();
+      });
+
+      it('has 4 color mode options to chose from', async () => {
+        await openAppearanceSelectorModal();
+        const colorModes: ColorMode[] = ['light', 'dark', 'system', 'space_default'];
+        for (const colorMode of colorModes) {
+          const themeModeButton = await testSubjects.find(`colorModeKeyPadItem${colorMode}`, 1000);
+          expect(themeModeButton).to.not.be(null);
+        }
+        await testSubjects.click('appearanceModalDiscardButton');
+      });
+
+      it('can change the color mode to dark', async () => {
+        await changeColorMode('dark');
+        await refreshPage();
+        const colorModeTag = await PageObjects.userProfiles.getThemeTag();
+        expect(colorModeTag).to.be('borealisdark');
+      });
+
+      it('can change the color mode to light', async () => {
+        await changeColorMode('light');
+        await refreshPage();
+        const colorModeTag = await PageObjects.userProfiles.getThemeTag();
+        expect(colorModeTag).to.be('borealislight');
+      });
+
+      it('can change the color mode to space_default', async () => {
+        // Let's make sure we are in light mode before changing to space_default
+        await changeColorMode('light');
+
+        {
+          await refreshPage();
+          const colorModeTag = await PageObjects.userProfiles.getThemeTag();
+          expect(colorModeTag).to.be('borealislight');
+        }
+
+        // Change the space default dark mode to "enabled"
+        await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
+          basePath: '',
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+          shouldUseHashForSubUrl: false,
+        });
+
+        await PageObjects.settings.setAdvancedSettingsSelect('theme:darkMode', 'enabled');
+        {
+          const advancedSetting = await PageObjects.settings.getAdvancedSettings('theme:darkMode');
+          expect(advancedSetting).to.be('enabled');
+        }
+
+        // Make sure we are still in light mode as per the User profile
+        // even after setting the space default to "dark"
+        {
+          await refreshPage();
+          const colorModeTag = await PageObjects.userProfiles.getThemeTag();
+          expect(colorModeTag).to.be('borealislight');
+        }
+
+        await changeColorMode('space_default');
+
+        {
+          await refreshPage();
+          const colorModeTag = await PageObjects.userProfiles.getThemeTag();
+          expect(colorModeTag).to.be('borealisdark'); // We are now in dark mode
+        }
       });
     });
   });

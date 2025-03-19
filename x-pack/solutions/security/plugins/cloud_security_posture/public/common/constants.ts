@@ -23,7 +23,6 @@ import {
 import eksLogo from '../assets/icons/cis_eks_logo.svg';
 import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 
-export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 
 export const LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY = 'cloudPosture:dataTable:pageSize';
@@ -171,11 +170,14 @@ export const DEFAULT_GROUPING_TABLE_HEIGHT = 512;
 
 export const FINDINGS_GROUPING_OPTIONS = {
   NONE: 'none',
+  RESOURCE_ID: 'resource.id',
   RESOURCE_NAME: 'resource.name',
   RULE_NAME: 'rule.name',
   RULE_SECTION: 'rule.section',
   CLOUD_ACCOUNT_NAME: 'cloud.account.name',
+  CLOUD_ACCOUNT_ID: 'cloud.account.id',
   ORCHESTRATOR_CLUSTER_NAME: 'orchestrator.cluster.name',
+  ORCHESTRATOR_CLUSTER_ID: 'orchestrator.cluster.id',
 };
 
 export const VULNERABILITY_FIELDS = {
@@ -223,6 +225,6 @@ the fields from the runtime mappings if they are removed from the Data Table.
 */
 export const CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {};
 export const CDR_MISCONFIGURATION_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {
-  [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME]: ['orchestrator.cluster.name'],
-  [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME]: ['cloud.account.name'],
+  [FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID]: ['orchestrator.cluster.id'],
+  [FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID]: ['cloud.account.id'],
 };

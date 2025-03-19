@@ -13,7 +13,7 @@ import {
   SearchResponse,
   AggregationsMultiBucketAggregateBase,
   AggregationsStringRareTermsBucketKeys,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { EsHitRecord } from '@kbn/discover-utils/types';
 import {
@@ -21,7 +21,7 @@ import {
   CDR_VULNERABILITIES_INDEX_PATTERN,
   CDR_3RD_PARTY_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
-import { FindingsBaseEsQuery, showErrorToast } from '@kbn/cloud-security-posture';
+import { BaseEsQuery, showErrorToast } from '@kbn/cloud-security-posture';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
 import {
@@ -38,7 +38,7 @@ type LatestFindingsResponse = IKibanaSearchResponse<
 interface FindingsAggs {
   count: AggregationsMultiBucketAggregateBase<AggregationsStringRareTermsBucketKeys>;
 }
-interface VulnerabilitiesQuery extends FindingsBaseEsQuery {
+interface VulnerabilitiesQuery extends BaseEsQuery {
   sort: string[][];
   enabled: boolean;
   pageSize: number;
@@ -118,7 +118,7 @@ export const useLatestVulnerabilities = (options: VulnerabilitiesQuery) => {
         rawResponse: { hits },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: getVulnerabilitiesQuery(options, pageParam),
+          params: getVulnerabilitiesQuery(options, pageParam) as LatestFindingsRequest['params'],
         })
       );
 

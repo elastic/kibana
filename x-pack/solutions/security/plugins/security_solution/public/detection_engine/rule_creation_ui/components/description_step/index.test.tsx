@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { shallow, mount } from 'enzyme';
+import { render } from '@testing-library/react';
 
 import {
   StepRuleDescription,
@@ -271,7 +272,7 @@ describe('description_step', () => {
         mockLicenseService
       );
 
-      expect(result.length).toEqual(14);
+      expect(result.length).toEqual(15);
     });
   });
 
@@ -412,6 +413,8 @@ describe('description_step', () => {
     });
 
     describe('threshold', () => {
+      const thresholdLabel = 'Threshold';
+
       test('returns threshold description when threshold exist and field is empty', () => {
         const mockThreshold = {
           threshold: {
@@ -421,13 +424,13 @@ describe('description_step', () => {
         };
         const result: ListItems[] = getDescriptionItem(
           'threshold',
-          'Threshold label',
+          thresholdLabel,
           mockThreshold,
           mockFilterManager,
           mockLicenseService
         );
 
-        expect(result[0].title).toEqual('Threshold label');
+        expect(result[0].title).toEqual(thresholdLabel);
         expect(React.isValidElement(result[0].description)).toBeTruthy();
         expect(mount(result[0].description as React.ReactElement).html()).toContain(
           'All results >= 100'
@@ -443,13 +446,13 @@ describe('description_step', () => {
         };
         const result: ListItems[] = getDescriptionItem(
           'threshold',
-          'Threshold label',
+          thresholdLabel,
           mockThreshold,
           mockFilterManager,
           mockLicenseService
         );
 
-        expect(result[0].title).toEqual('Threshold label');
+        expect(result[0].title).toEqual(thresholdLabel);
         expect(React.isValidElement(result[0].description)).toBeTruthy();
         expect(mount(result[0].description as React.ReactElement).html()).toEqual(
           'Results aggregated by user.name >= 100'
@@ -469,13 +472,13 @@ describe('description_step', () => {
         };
         const result: ListItems[] = getDescriptionItem(
           'threshold',
-          'Threshold label',
+          thresholdLabel,
           mockThreshold,
           mockFilterManager,
           mockLicenseService
         );
 
-        expect(result[0].title).toEqual('Threshold label');
+        expect(result[0].title).toEqual(thresholdLabel);
         expect(React.isValidElement(result[0].description)).toBeTruthy();
         expect(mount(result[0].description as React.ReactElement).html()).toEqual(
           'Results aggregated by user.name >= 100'
@@ -495,13 +498,13 @@ describe('description_step', () => {
         };
         const result: ListItems[] = getDescriptionItem(
           'threshold',
-          'Threshold label',
+          thresholdLabel,
           mockThreshold,
           mockFilterManager,
           mockLicenseService
         );
 
-        expect(result[0].title).toEqual('Threshold label');
+        expect(result[0].title).toEqual(thresholdLabel);
         expect(React.isValidElement(result[0].description)).toBeTruthy();
         expect(mount(result[0].description as React.ReactElement).html()).toContain(
           'Results aggregated by user.name >= 100 when unique values count of host.test_value >= 10'
@@ -834,6 +837,55 @@ describe('description_step', () => {
 
           expect(result.length).toEqual(0);
         });
+      });
+    });
+
+    describe('threatIndex', () => {
+      test('returns no data when there are no index patterns selected', () => {
+        const result: ListItems[] = getDescriptionItem(
+          'threatIndex',
+          'Threat index patterns',
+          {
+            threatIndex: [],
+          },
+          mockFilterManager,
+          mockLicenseService
+        );
+
+        expect(result).toHaveLength(0);
+      });
+
+      test('returns the correct title', () => {
+        const result: ListItems[] = getDescriptionItem(
+          'threatIndex',
+          'Threat index patterns',
+          {
+            threatIndex: ['test-*'],
+          },
+          mockFilterManager,
+          mockLicenseService
+        );
+
+        expect(result).toHaveLength(1);
+        expect(result[0].title).toBe('Indicator index patterns');
+      });
+
+      test('returns the correct description', () => {
+        const result: ListItems[] = getDescriptionItem(
+          'threatIndex',
+          'Threat index patterns',
+          {
+            threatIndex: ['test1-*', 'test2-*'],
+          },
+          mockFilterManager,
+          mockLicenseService
+        );
+
+        expect(result).toHaveLength(1);
+
+        const { container } = render(result[0].description);
+
+        expect(container).toHaveTextContent('test1-*test2-*');
       });
     });
   });

@@ -24,17 +24,17 @@ export const createQueue = (
   logger.debug(`createQueue > index name: ${indexName}`);
   return async.cargoQueue(
     (docs: object[], callback) => {
-      const body: object[] = [];
+      const operations: object[] = [];
       docs.forEach((doc) => {
-        body.push({
+        operations.push({
           create: {
             _index: indexName,
           },
         });
-        body.push(omit(doc, 'namespace'));
+        operations.push(omit(doc, 'namespace'));
       });
       esClient
-        .bulk({ body, refresh: true })
+        .bulk({ operations, refresh: true })
         .then((resp) => {
           if (resp.errors) {
             logger.error(

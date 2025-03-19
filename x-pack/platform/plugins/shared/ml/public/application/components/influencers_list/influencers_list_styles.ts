@@ -9,12 +9,12 @@ import { css } from '@emotion/react';
 
 import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 
-import { mlColors } from '../../styles';
+import { ML_SEVERITY_COLORS } from '@kbn/ml-anomaly-utils';
 
 export const useInfluencersListStyles = () => {
   const { euiTheme } = useEuiTheme();
   const euiFontSizeXS = useEuiFontSize('xs').fontSize;
-  const euiFontSizeS = useEuiFontSize('s').fontSize;
+  const euiFontSizeM = useEuiFontSize('m').fontSize;
 
   return {
     influencersList: css({
@@ -23,7 +23,7 @@ export const useInfluencersListStyles = () => {
     fieldLabel: css({
       fontSize: euiFontSizeXS,
       textAlign: 'left',
-      maxHeight: euiFontSizeS,
+      maxHeight: euiFontSizeM,
       maxWidth: 'calc(100% - 102px)',
     }),
     progress: css({
@@ -50,12 +50,12 @@ export const useInfluencersListStyles = () => {
         width: `${barScore}%`,
         backgroundColor:
           severity === 'critical'
-            ? mlColors.critical
+            ? ML_SEVERITY_COLORS.CRITICAL
             : severity === 'major'
-            ? mlColors.major
+            ? ML_SEVERITY_COLORS.MAJOR
             : severity === 'minor'
-            ? mlColors.minor
-            : mlColors.warning,
+            ? ML_SEVERITY_COLORS.MINOR
+            : ML_SEVERITY_COLORS.WARNING,
       }),
     scoreLabel: (severity: string) =>
       css({
@@ -67,12 +67,12 @@ export const useInfluencersListStyles = () => {
         display: 'inline',
         borderColor:
           severity === 'critical'
-            ? mlColors.critical
+            ? ML_SEVERITY_COLORS.CRITICAL
             : severity === 'major'
-            ? mlColors.major
+            ? ML_SEVERITY_COLORS.MAJOR
             : severity === 'minor'
-            ? mlColors.minor
-            : mlColors.warning,
+            ? ML_SEVERITY_COLORS.MINOR
+            : ML_SEVERITY_COLORS.WARNING,
       }),
     totalScoreLabel: css({
       width: euiTheme.size.xl,

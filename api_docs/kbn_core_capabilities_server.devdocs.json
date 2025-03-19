@@ -21,7 +21,7 @@
         "description": [
           "\nAPIs to manage the {@link Capabilities} that will be used by the application.\n\nPlugins relying on capabilities to toggle some of their features should register them during the setup phase\nusing the `registerProvider` method.\n\nPlugins having the responsibility to restrict capabilities depending on a given context should register\ntheir capabilities switcher using the `registerSwitcher` method.\n\nRefers to the methods documentation for complete description and examples.\n"
         ],
-        "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+        "path": "src/core/packages/capabilities/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,16 +36,10 @@
             ],
             "signature": [
               "(provider: ",
-              {
-                "pluginId": "@kbn/core-capabilities-server",
-                "scope": "server",
-                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                "section": "def-server.CapabilitiesProvider",
-                "text": "CapabilitiesProvider"
-              },
+              "CapabilitiesProvider",
               ") => void"
             ],
-            "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+            "path": "src/core/packages/capabilities/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -57,15 +51,9 @@
                 "label": "provider",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-capabilities-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                    "section": "def-server.CapabilitiesProvider",
-                    "text": "CapabilitiesProvider"
-                  }
+                  "CapabilitiesProvider"
                 ],
-                "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+                "path": "src/core/packages/capabilities/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -84,24 +72,12 @@
             ],
             "signature": [
               "(switcher: ",
-              {
-                "pluginId": "@kbn/core-capabilities-server",
-                "scope": "server",
-                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                "section": "def-server.CapabilitiesSwitcher",
-                "text": "CapabilitiesSwitcher"
-              },
+              "CapabilitiesSwitcher",
               ", options: ",
-              {
-                "pluginId": "@kbn/core-capabilities-server",
-                "scope": "server",
-                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                "section": "def-server.CapabilitiesSwitcherOptions",
-                "text": "CapabilitiesSwitcherOptions"
-              },
+              "CapabilitiesSwitcherOptions",
               ") => void"
             ],
-            "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+            "path": "src/core/packages/capabilities/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -113,15 +89,9 @@
                 "label": "switcher",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-capabilities-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                    "section": "def-server.CapabilitiesSwitcher",
-                    "text": "CapabilitiesSwitcher"
-                  }
+                  "CapabilitiesSwitcher"
                 ],
-                "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+                "path": "src/core/packages/capabilities/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -134,15 +104,9 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-capabilities-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                    "section": "def-server.CapabilitiesSwitcherOptions",
-                    "text": "CapabilitiesSwitcherOptions"
-                  }
+                  "CapabilitiesSwitcherOptions"
                 ],
-                "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+                "path": "src/core/packages/capabilities/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -162,7 +126,7 @@
         "description": [
           "\nAPIs to access the application {@link Capabilities}.\n"
         ],
-        "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+        "path": "src/core/packages/capabilities/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -177,32 +141,14 @@
             ],
             "signature": [
               "(request: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>, options: ",
-              {
-                "pluginId": "@kbn/core-capabilities-server",
-                "scope": "server",
-                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                "section": "def-server.ResolveCapabilitiesOptions",
-                "text": "ResolveCapabilitiesOptions"
-              },
+              "ResolveCapabilitiesOptions",
               ") => Promise<",
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              },
+              "Capabilities",
               ">"
             ],
-            "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+            "path": "src/core/packages/capabilities/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -216,16 +162,10 @@
                   "The request to resolve capabilities for"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreHttpServerPluginApi",
-                    "section": "def-server.KibanaRequest",
-                    "text": "KibanaRequest"
-                  },
+                  "KibanaRequest",
                   "<unknown, unknown, unknown, any>"
                 ],
-                "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+                "path": "src/core/packages/capabilities/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -238,15 +178,9 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-capabilities-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-                    "section": "def-server.ResolveCapabilitiesOptions",
-                    "text": "ResolveCapabilitiesOptions"
-                  }
+                  "ResolveCapabilitiesOptions"
                 ],
-                "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+                "path": "src/core/packages/capabilities/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -266,7 +200,7 @@
         "description": [
           "\nOptions for the {@link CapabilitiesSetup.registerSwitcher} API.\n"
         ],
-        "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+        "path": "src/core/packages/capabilities/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -282,7 +216,7 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+            "path": "src/core/packages/capabilities/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -298,7 +232,7 @@
         "description": [
           "\nOptions for {@link CapabilitiesStart.resolveCapabilities}.\n"
         ],
-        "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+        "path": "src/core/packages/capabilities/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -314,7 +248,7 @@
             "signature": [
               "string | string[]"
             ],
-            "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+            "path": "src/core/packages/capabilities/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -330,7 +264,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+            "path": "src/core/packages/capabilities/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -351,16 +285,10 @@
         ],
         "signature": [
           "() => Partial<",
-          {
-            "pluginId": "@kbn/core-capabilities-common",
-            "scope": "common",
-            "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-            "section": "def-common.Capabilities",
-            "text": "Capabilities"
-          },
+          "Capabilities",
           ">"
         ],
-        "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
+        "path": "src/core/packages/capabilities/server/src/capabilities.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -378,21 +306,9 @@
         ],
         "signature": [
           "(request: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any>, uiCapabilities: ",
-          {
-            "pluginId": "@kbn/core-capabilities-common",
-            "scope": "common",
-            "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-            "section": "def-common.Capabilities",
-            "text": "Capabilities"
-          },
+          "Capabilities",
           ", useDefaultCapabilities: boolean) => ",
           {
             "pluginId": "@kbn/utility-types",
@@ -402,16 +318,10 @@
             "text": "MaybePromise"
           },
           "<Partial<",
-          {
-            "pluginId": "@kbn/core-capabilities-common",
-            "scope": "common",
-            "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-            "section": "def-common.Capabilities",
-            "text": "Capabilities"
-          },
+          "Capabilities",
           ">>"
         ],
-        "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
+        "path": "src/core/packages/capabilities/server/src/capabilities.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -424,36 +334,24 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
-            "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
+            "path": "src/core/packages/capabilities/server/src/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-capabilities-server",
             "id": "def-server.CapabilitiesSwitcher.$2",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "uiCapabilities",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              }
+              "{ [key: string]: Record<string, boolean | Record<string, boolean>>; navLinks: Record<string, boolean>; management: { [sectionId: string]: Record<string, boolean>; }; catalogue: Record<string, boolean>; } & { discover?: {} | undefined; dashboard?: {} | undefined; maps?: {} | undefined; visualize?: {} | undefined; }"
             ],
-            "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
+            "path": "src/core/packages/capabilities/server/src/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -464,7 +362,7 @@
             "tags": [],
             "label": "useDefaultCapabilities",
             "description": [],
-            "path": "packages/core/capabilities/core-capabilities-server/src/capabilities.ts",
+            "path": "src/core/packages/capabilities/server/src/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
           }

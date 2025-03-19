@@ -22,6 +22,7 @@ import type {
   HttpStart,
   IUiSettingsClient,
   ThemeServiceStart,
+  UserProfileService,
 } from '@kbn/core/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -90,6 +91,10 @@ export interface AiopsAppContextValue {
    * Usage collection.
    */
   usageCollection?: UsageCollectionSetup;
+  /**
+   * User profile service.
+   */
+  userProfile: UserProfileService;
   /**
    * Used to create deep links to other plugins.
    */

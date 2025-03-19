@@ -14,14 +14,6 @@ describe('<EditPolicy /> request flyout', () => {
   let testBed: RequestFlyoutTestBed;
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   beforeEach(async () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
@@ -34,12 +26,8 @@ describe('<EditPolicy /> request flyout', () => {
   });
 
   test('renders a json in flyout for a default policy', async () => {
-    const { actions, component } = testBed;
+    const { actions } = testBed;
     await actions.openRequestFlyout();
-    await act(async () => {
-      jest.advanceTimersByTime(0); // allow the flyout to open and form validation to run
-    });
-    component.update();
 
     const json = actions.getRequestJson();
     const expected = `PUT _ilm/policy/my_policy\n${JSON.stringify(

@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -15,7 +14,6 @@ import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_ref
 import type { Refetch } from '../../../common/types';
 import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
-import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { useManagedUser } from '../shared/hooks/use_managed_user';
@@ -25,23 +23,21 @@ import { getCriteriaFromUsersType } from '../../../common/components/ml/criteria
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomalyTableProvider } from '../../../common/components/ml/anomaly/anomaly_table_provider';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UserPanelContent } from './content';
 import { UserPanelHeader } from './header';
-import { UserDetailsPanelKey } from '../user_details_left';
 import { useObservedUser } from './hooks/use_observed_user';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { UserPreviewPanelFooter } from '../user_preview/footer';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
-import { EntityEventTypes } from '../../../common/lib/telemetry';
+import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
+import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   userName: string;
-  isDraggable?: boolean;
   isPreviewMode?: boolean;
 }
 
@@ -50,7 +46,6 @@ export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
   params: UserPanelProps;
 }
 
-export const UserPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-panel';
 export const UserPreviewPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-preview-panel';
 export const USER_PANEL_RISK_SCORE_QUERY_ID = 'userPanelRiskScoreQuery';
 const FIRST_RECORD_PAGINATION = {
@@ -58,21 +53,14 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const UserPanel = ({
-  contextID,
-  scopeId,
-  userName,
-  isDraggable,
-  isPreviewMode,
-}: UserPanelProps) => {
-  const { telemetry } = useKibana().services;
+export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserPanelProps) => {
   const userNameFilterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
   );
 
   const riskScoreState = useRiskScore({
-    riskEntity: RiskScoreEntity.user,
+    riskEntity: EntityType.user,
     filterQuery: userNameFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
@@ -96,7 +84,7 @@ export const UserPanel = ({
   }, [refetch, refetchRiskInputsTab]);
 
   const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    RiskScoreEntity.user,
+    EntityType.user,
     userName,
     { onSuccess: refetchRiskScore }
   );
@@ -104,7 +92,7 @@ export const UserPanel = ({
   const { hasMisconfigurationFindings } = useHasMisconfigurations('user.name', userName);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: 'user.name',
+    field: EntityIdentifierFields.userName,
     value: userName,
     to,
     from,
@@ -120,47 +108,25 @@ export const UserPanel = ({
     setQuery,
   });
 
-  const { openLeftPanel } = useExpandableFlyoutApi();
-  const openPanelTab = useCallback(
-    (tab?: EntityDetailsLeftPanelTab) => {
-      telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {
-        entity: 'user',
-      });
+  const { openDetailsPanel, isLinkEnabled } = useNavigateToUserDetails({
+    userName,
+    email,
+    scopeId,
+    contextID,
+    isRiskScoreExist,
+    hasMisconfigurationFindings,
+    hasNonClosedAlerts,
+    isPreviewMode,
+  });
 
-      openLeftPanel({
-        id: UserDetailsPanelKey,
-        params: {
-          isRiskScoreExist: !!userRiskData?.user?.risk,
-          scopeId,
-          user: {
-            name: userName,
-            email,
-          },
-          path: tab ? { tab } : undefined,
-          hasMisconfigurationFindings,
-          hasNonClosedAlerts,
-        },
-      });
-    },
-    [
-      telemetry,
-      openLeftPanel,
-      userRiskData?.user?.risk,
-      scopeId,
-      userName,
-      email,
-      hasMisconfigurationFindings,
-      hasNonClosedAlerts,
-    ]
-  );
   const openPanelFirstTab = useCallback(
     () =>
-      openPanelTab(
-        isRiskScoreExist
+      openDetailsPanel({
+        tab: isRiskScoreExist
           ? EntityDetailsLeftPanelTab.RISK_INPUTS
-          : EntityDetailsLeftPanelTab.CSP_INSIGHTS
-      ),
-    [isRiskScoreExist, openPanelTab]
+          : EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+      }),
+    [isRiskScoreExist, openDetailsPanel]
   );
 
   const hasUserDetailsData =
@@ -212,17 +178,12 @@ export const UserPanel = ({
               onAssetCriticalityChange={calculateEntityRiskScore}
               contextID={contextID}
               scopeId={scopeId}
-              isDraggable={!!isDraggable}
-              openDetailsPanel={!isPreviewMode ? openPanelTab : undefined}
+              openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
+              isLinkEnabled={isLinkEnabled}
             />
             {isPreviewMode && (
-              <UserPreviewPanelFooter
-                userName={userName}
-                contextID={contextID}
-                scopeId={scopeId}
-                isDraggable={!!isDraggable}
-              />
+              <UserPreviewPanelFooter userName={userName} contextID={contextID} scopeId={scopeId} />
             )}
           </>
         );

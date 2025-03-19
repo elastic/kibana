@@ -18,13 +18,7 @@
             "text": "InspectorPublicPlugin"
           },
           " implements ",
-          {
-            "pluginId": "@kbn/core-plugins-browser",
-            "scope": "public",
-            "docId": "kibKbnCorePluginsBrowserPluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "inspector",
@@ -41,9 +35,9 @@
             "section": "def-public.Start",
             "text": "Start"
           },
-          ", object, object>"
+          ", never, never>"
         ],
-        "path": "src/plugins/inspector/public/plugin.tsx",
+        "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,7 +52,7 @@
               "InspectorViewRegistry",
               " | undefined"
             ],
-            "path": "src/plugins/inspector/public/plugin.tsx",
+            "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -72,7 +66,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/inspector/public/plugin.tsx",
+            "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -84,16 +78,10 @@
                 "label": "_initializerContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-plugins-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCorePluginsBrowserPluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<object>"
                 ],
-                "path": "src/plugins/inspector/public/plugin.tsx",
+                "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -110,14 +98,8 @@
             "description": [],
             "signature": [
               "(_core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
-              "<object, unknown>) => { registerView: (view: ",
+              "CoreSetup",
+              "<{}, unknown>) => { registerView: (view: ",
               {
                 "pluginId": "inspector",
                 "scope": "public",
@@ -129,7 +111,7 @@
               "InspectorViewRegistry",
               "; }; }"
             ],
-            "path": "src/plugins/inspector/public/plugin.tsx",
+            "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -141,16 +123,10 @@
                 "label": "_core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
-                  "<object, unknown>"
+                  "CoreSetup",
+                  "<{}, unknown>"
                 ],
-                "path": "src/plugins/inspector/public/plugin.tsx",
+                "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -167,13 +143,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", startDeps: ",
               "InspectorPluginStartDeps",
               ") => { isAvailable: (adapters?: ",
@@ -201,16 +171,10 @@
                 "text": "InspectorOptions"
               },
               " | undefined) => ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              },
+              "OverlayRef",
               "; }"
             ],
-            "path": "src/plugins/inspector/public/plugin.tsx",
+            "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -222,15 +186,9 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
-                "path": "src/plugins/inspector/public/plugin.tsx",
+                "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -245,7 +203,7 @@
                 "signature": [
                   "InspectorPluginStartDeps"
                 ],
-                "path": "src/plugins/inspector/public/plugin.tsx",
+                "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -263,7 +221,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/inspector/public/plugin.tsx",
+            "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -294,7 +252,7 @@
           " extends ",
           "events"
         ],
-        "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+        "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -308,7 +266,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -337,7 +295,7 @@
                 "text": "RequestResponder"
               }
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -353,7 +311,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -370,7 +328,7 @@
                 "signature": [
                   "RequestParams"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -387,7 +345,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -407,7 +365,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -423,7 +381,7 @@
             "signature": [
               "(id: string) => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -437,7 +395,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -463,7 +421,7 @@
               },
               "[]"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -481,7 +439,7 @@
         "description": [
           "\nAn API to specify information about a specific request that will be logged.\nCreate a new instance to log a request using {@link RequestAdapter#start}."
         ],
-        "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+        "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -495,7 +453,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -515,7 +473,7 @@
                     "text": "Request"
                   }
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -530,7 +488,7 @@
                 "signature": [
                   "() => void"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -555,7 +513,7 @@
                 "text": "RequestResponder"
               }
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -569,7 +527,7 @@
                 "signature": [
                   "object"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -602,7 +560,7 @@
                 "text": "RequestResponder"
               }
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -622,7 +580,7 @@
                     "text": "RequestStatistics"
                   }
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -650,7 +608,7 @@
               "Response",
               ") => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -670,7 +628,7 @@
                     "text": "RequestStatus"
                   }
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -685,7 +643,7 @@
                 "signature": [
                   "Response"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -705,7 +663,7 @@
               "Response",
               ") => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -719,7 +677,7 @@
                 "signature": [
                   "Response"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -739,7 +697,7 @@
               "Response",
               ") => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -753,7 +711,7 @@
                 "signature": [
                   "Response"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -783,7 +741,7 @@
             "text": "HasInspectorAdapters"
           }
         ],
-        "path": "src/plugins/inspector/public/adapters/has_inspector_adapters.ts",
+        "path": "src/platform/plugins/shared/inspector/public/adapters/has_inspector_adapters.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -797,7 +755,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/plugins/inspector/public/adapters/has_inspector_adapters.ts",
+            "path": "src/platform/plugins/shared/inspector/public/adapters/has_inspector_adapters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -817,7 +775,7 @@
         "description": [
           "\nThe interface that the adapters used to open an inspector have to fullfill."
         ],
-        "path": "src/plugins/inspector/common/adapters/types.ts",
+        "path": "src/platform/plugins/shared/inspector/common/adapters/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -838,7 +796,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/inspector/common/adapters/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -852,7 +810,7 @@
             "signature": [
               "[key: string]:  any"
             ],
-            "path": "src/plugins/inspector/common/adapters/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -866,7 +824,7 @@
         "tags": [],
         "label": "HasInspectorAdapters",
         "description": [],
-        "path": "src/plugins/inspector/public/adapters/has_inspector_adapters.ts",
+        "path": "src/platform/plugins/shared/inspector/public/adapters/has_inspector_adapters.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -888,7 +846,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/inspector/public/adapters/has_inspector_adapters.ts",
+            "path": "src/platform/plugins/shared/inspector/public/adapters/has_inspector_adapters.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -909,7 +867,7 @@
         "description": [
           "\nOptions that can be specified when opening the inspector."
         ],
-        "path": "src/plugins/inspector/public/types.ts",
+        "path": "src/platform/plugins/shared/inspector/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -923,7 +881,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/inspector/public/types.ts",
+            "path": "src/platform/plugins/shared/inspector/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -937,7 +895,21 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/plugins/inspector/public/types.ts",
+            "path": "src/platform/plugins/shared/inspector/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.InspectorOptions.flyoutType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "flyoutType",
+            "description": [],
+            "signature": [
+              "\"push\" | \"overlay\" | undefined"
+            ],
+            "path": "src/platform/plugins/shared/inspector/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -955,7 +927,7 @@
         "description": [
           "\nAn object describing an inspector view."
         ],
-        "path": "src/plugins/inspector/public/types.ts",
+        "path": "src/platform/plugins/shared/inspector/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1001,7 +973,7 @@
               },
               ">>"
             ],
-            "path": "src/plugins/inspector/public/types.ts",
+            "path": "src/platform/plugins/shared/inspector/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1015,7 +987,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/inspector/public/types.ts",
+            "path": "src/platform/plugins/shared/inspector/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1029,7 +1001,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/inspector/public/types.ts",
+            "path": "src/platform/plugins/shared/inspector/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1051,7 +1023,7 @@
               },
               ") => boolean) | undefined"
             ],
-            "path": "src/plugins/inspector/public/types.ts",
+            "path": "src/platform/plugins/shared/inspector/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1071,7 +1043,7 @@
                     "text": "Adapters"
                   }
                 ],
-                "path": "src/plugins/inspector/public/types.ts",
+                "path": "src/platform/plugins/shared/inspector/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1086,7 +1058,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "src/plugins/inspector/public/types.ts",
+            "path": "src/platform/plugins/shared/inspector/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1112,7 +1084,7 @@
           },
           "<TAdapters>"
         ],
-        "path": "src/plugins/inspector/public/types.ts",
+        "path": "src/platform/plugins/shared/inspector/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1128,7 +1100,7 @@
             "signature": [
               "TAdapters"
             ],
-            "path": "src/plugins/inspector/public/types.ts",
+            "path": "src/platform/plugins/shared/inspector/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1141,7 +1113,7 @@
             "description": [
               "\nThe title that the inspector is currently using e.g. a visualization name."
             ],
-            "path": "src/plugins/inspector/public/types.ts",
+            "path": "src/platform/plugins/shared/inspector/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1157,7 +1129,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/plugins/inspector/public/types.ts",
+            "path": "src/platform/plugins/shared/inspector/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1182,7 +1154,7 @@
           " extends ",
           "RequestParams"
         ],
-        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1193,7 +1165,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1204,7 +1176,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1218,7 +1190,7 @@
             "signature": [
               "object | undefined"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1233,7 +1205,7 @@
               "Response",
               " | undefined"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1244,7 +1216,7 @@
             "tags": [],
             "label": "startTime",
             "description": [],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1265,7 +1237,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1285,7 +1257,7 @@
                 "text": "RequestStatus"
               }
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1299,7 +1271,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1313,7 +1285,7 @@
         "tags": [],
         "label": "RequestStatistic",
         "description": [],
-        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1324,7 +1296,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1338,7 +1310,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1352,7 +1324,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1366,7 +1338,7 @@
         "tags": [],
         "label": "RequestStatistics",
         "description": [],
-        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1387,7 +1359,7 @@
                 "text": "RequestStatistic"
               }
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1405,7 +1377,7 @@
         "description": [
           "\nThe status a request can have."
         ],
-        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1420,15 +1392,9 @@
         "label": "InspectorSession",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-public.OverlayRef",
-            "text": "OverlayRef"
-          }
+          "OverlayRef"
         ],
-        "path": "src/plugins/inspector/public/types.ts",
+        "path": "src/platform/plugins/shared/inspector/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1442,7 +1408,7 @@
       "tags": [],
       "label": "Setup",
       "description": [],
-      "path": "src/plugins/inspector/public/plugin.tsx",
+      "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1464,7 +1430,7 @@
             },
             ") => void"
           ],
-          "path": "src/plugins/inspector/public/plugin.tsx",
+          "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [],
@@ -1485,7 +1451,7 @@
                   "text": "InspectorViewDescription"
                 }
               ],
-              "path": "src/plugins/inspector/public/view_registry.ts",
+              "path": "src/platform/plugins/shared/inspector/public/view_registry.ts",
               "deprecated": false,
               "trackAdoption": false
             }
@@ -1503,7 +1469,7 @@
             "InspectorViewRegistry",
             "; }"
           ],
-          "path": "src/plugins/inspector/public/plugin.tsx",
+          "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1518,7 +1484,7 @@
       "tags": [],
       "label": "Start",
       "description": [],
-      "path": "src/plugins/inspector/public/plugin.tsx",
+      "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1542,7 +1508,7 @@
             },
             " | undefined) => boolean"
           ],
-          "path": "src/plugins/inspector/public/plugin.tsx",
+          "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1565,7 +1531,7 @@
                 },
                 " | undefined"
               ],
-              "path": "src/plugins/inspector/public/plugin.tsx",
+              "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -1605,15 +1571,9 @@
               "text": "InspectorOptions"
             },
             " | undefined) => ",
-            {
-              "pluginId": "@kbn/core-mount-utils-browser",
-              "scope": "public",
-              "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-              "section": "def-public.OverlayRef",
-              "text": "OverlayRef"
-            }
+            "OverlayRef"
           ],
-          "path": "src/plugins/inspector/public/plugin.tsx",
+          "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1635,7 +1595,7 @@
                   "text": "Adapters"
                 }
               ],
-              "path": "src/plugins/inspector/public/plugin.tsx",
+              "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1659,7 +1619,7 @@
                 },
                 " | undefined"
               ],
-              "path": "src/plugins/inspector/public/plugin.tsx",
+              "path": "src/platform/plugins/shared/inspector/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -1706,7 +1666,7 @@
           " extends ",
           "events"
         ],
-        "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+        "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1720,7 +1680,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1749,7 +1709,7 @@
                 "text": "RequestResponder"
               }
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1765,7 +1725,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1782,7 +1742,7 @@
                 "signature": [
                   "RequestParams"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1799,7 +1759,7 @@
                 "signature": [
                   "number"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1819,7 +1779,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1835,7 +1795,7 @@
             "signature": [
               "(id: string) => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1849,7 +1809,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1875,7 +1835,7 @@
               },
               "[]"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1893,7 +1853,7 @@
         "description": [
           "\nAn API to specify information about a specific request that will be logged.\nCreate a new instance to log a request using {@link RequestAdapter#start}."
         ],
-        "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+        "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1907,7 +1867,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1927,7 +1887,7 @@
                     "text": "Request"
                   }
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1942,7 +1902,7 @@
                 "signature": [
                   "() => void"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1967,7 +1927,7 @@
                 "text": "RequestResponder"
               }
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1981,7 +1941,7 @@
                 "signature": [
                   "object"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2014,7 +1974,7 @@
                 "text": "RequestResponder"
               }
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2034,7 +1994,7 @@
                     "text": "RequestStatistics"
                   }
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2062,7 +2022,7 @@
               "Response",
               ") => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2082,7 +2042,7 @@
                     "text": "RequestStatus"
                   }
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2097,7 +2057,7 @@
                 "signature": [
                   "Response"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2117,7 +2077,7 @@
               "Response",
               ") => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2131,7 +2091,7 @@
                 "signature": [
                   "Response"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2151,7 +2111,7 @@
               "Response",
               ") => void"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2165,7 +2125,7 @@
                 "signature": [
                   "Response"
                 ],
-                "path": "src/plugins/inspector/common/adapters/request/request_responder.ts",
+                "path": "src/platform/plugins/shared/inspector/common/adapters/request/request_responder.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2188,7 +2148,7 @@
         "description": [
           "\nThe interface that the adapters used to open an inspector have to fullfill."
         ],
-        "path": "src/plugins/inspector/common/adapters/types.ts",
+        "path": "src/platform/plugins/shared/inspector/common/adapters/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2209,7 +2169,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/inspector/common/adapters/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2223,7 +2183,7 @@
             "signature": [
               "[key: string]:  any"
             ],
-            "path": "src/plugins/inspector/common/adapters/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2248,7 +2208,7 @@
           " extends ",
           "RequestParams"
         ],
-        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2259,7 +2219,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2270,7 +2230,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2284,7 +2244,7 @@
             "signature": [
               "object | undefined"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2299,7 +2259,7 @@
               "Response",
               " | undefined"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2310,7 +2270,7 @@
             "tags": [],
             "label": "startTime",
             "description": [],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2331,7 +2291,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2351,7 +2311,7 @@
                 "text": "RequestStatus"
               }
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2365,7 +2325,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2379,7 +2339,7 @@
         "tags": [],
         "label": "RequestStatistic",
         "description": [],
-        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2390,7 +2350,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2404,7 +2364,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2418,7 +2378,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2432,7 +2392,7 @@
         "tags": [],
         "label": "RequestStatistics",
         "description": [],
-        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2453,7 +2413,7 @@
                 "text": "RequestStatistic"
               }
             ],
-            "path": "src/plugins/inspector/common/adapters/request/types.ts",
+            "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2471,7 +2431,7 @@
         "description": [
           "\nThe status a request can have."
         ],
-        "path": "src/plugins/inspector/common/adapters/request/types.ts",
+        "path": "src/platform/plugins/shared/inspector/common/adapters/request/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

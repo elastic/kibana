@@ -38,13 +38,14 @@ jest.mock('../utils/create_or_update_index', () => ({
 jest.spyOn(transforms, 'createTransform').mockResolvedValue(Promise.resolve());
 jest.spyOn(transforms, 'scheduleTransformNow').mockResolvedValue(Promise.resolve());
 
+let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+const totalFieldsLimit = 1000;
+
 describe('RiskScoreDataClient', () => {
   let riskScoreDataClient: RiskScoreDataClient;
   let riskScoreDataClientWithNameSpace: RiskScoreDataClient;
   let mockSavedObjectClient: ReturnType<typeof savedObjectsClientMock.create>;
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-  const totalFieldsLimit = 1000;
 
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
@@ -84,244 +85,6 @@ describe('RiskScoreDataClient', () => {
 
   describe('init success', () => {
     it('should initialize risk engine resources in the appropriate space', async () => {
-      const assertComponentTemplate = (namespace: string) => {
-        expect(createOrUpdateComponentTemplate).toHaveBeenCalledWith(
-          expect.objectContaining({
-            logger,
-            esClient,
-            template: expect.objectContaining({
-              name: `.risk-score-mappings-${namespace}`,
-              _meta: {
-                managed: true,
-              },
-            }),
-            totalFieldsLimit: 1000,
-          })
-        );
-      };
-
-      const assertIndexTemplate = (namespace: string) => {
-        expect(createOrUpdateIndexTemplate).toHaveBeenCalledWith({
-          logger,
-          esClient,
-          template: {
-            name: `.risk-score.risk-score-${namespace}-index-template`,
-            body: {
-              data_stream: { hidden: true },
-              index_patterns: [`risk-score.risk-score-${namespace}`],
-              composed_of: [`.risk-score-mappings-${namespace}`],
-              template: {
-                lifecycle: {},
-                settings: {
-                  'index.mapping.total_fields.limit': totalFieldsLimit,
-                },
-                mappings: {
-                  dynamic: false,
-                  _meta: {
-                    kibana: {
-                      version: '8.9.0',
-                    },
-                    managed: true,
-                    namespace,
-                  },
-                },
-              },
-              _meta: {
-                kibana: {
-                  version: '8.9.0',
-                },
-                managed: true,
-                namespace,
-              },
-            },
-          },
-        });
-      };
-
-      const assertDataStream = (namespace: string) => {
-        expect(createDataStream).toHaveBeenCalledWith({
-          logger,
-          esClient,
-          totalFieldsLimit,
-          indexPatterns: {
-            template: `.risk-score.risk-score-${namespace}-index-template`,
-            alias: `risk-score.risk-score-${namespace}`,
-          },
-        });
-      };
-
-      const assertIndex = (namespace: string) => {
-        expect(createOrUpdateIndex).toHaveBeenCalledWith({
-          logger,
-          esClient,
-          options: {
-            index: `risk-score.risk-score-latest-${namespace}`,
-            mappings: {
-              dynamic: false,
-              properties: {
-                '@timestamp': {
-                  ignore_malformed: false,
-                  type: 'date',
-                },
-                host: {
-                  properties: {
-                    name: {
-                      type: 'keyword',
-                    },
-                    risk: {
-                      properties: {
-                        calculated_level: {
-                          type: 'keyword',
-                        },
-                        calculated_score: {
-                          type: 'float',
-                        },
-                        calculated_score_norm: {
-                          type: 'float',
-                        },
-                        category_1_count: {
-                          type: 'long',
-                        },
-                        category_1_score: {
-                          type: 'float',
-                        },
-                        id_field: {
-                          type: 'keyword',
-                        },
-                        id_value: {
-                          type: 'keyword',
-                        },
-                        inputs: {
-                          properties: {
-                            category: {
-                              type: 'keyword',
-                            },
-                            description: {
-                              type: 'keyword',
-                            },
-                            id: {
-                              type: 'keyword',
-                            },
-                            index: {
-                              type: 'keyword',
-                            },
-                            risk_score: {
-                              type: 'float',
-                            },
-                            timestamp: {
-                              type: 'date',
-                            },
-                          },
-                          type: 'object',
-                        },
-                        notes: {
-                          type: 'keyword',
-                        },
-                      },
-                      type: 'object',
-                    },
-                  },
-                },
-                user: {
-                  properties: {
-                    name: {
-                      type: 'keyword',
-                    },
-                    risk: {
-                      properties: {
-                        calculated_level: {
-                          type: 'keyword',
-                        },
-                        calculated_score: {
-                          type: 'float',
-                        },
-                        calculated_score_norm: {
-                          type: 'float',
-                        },
-                        category_1_count: {
-                          type: 'long',
-                        },
-                        category_1_score: {
-                          type: 'float',
-                        },
-                        id_field: {
-                          type: 'keyword',
-                        },
-                        id_value: {
-                          type: 'keyword',
-                        },
-                        inputs: {
-                          properties: {
-                            category: {
-                              type: 'keyword',
-                            },
-                            description: {
-                              type: 'keyword',
-                            },
-                            id: {
-                              type: 'keyword',
-                            },
-                            index: {
-                              type: 'keyword',
-                            },
-                            risk_score: {
-                              type: 'float',
-                            },
-                            timestamp: {
-                              type: 'date',
-                            },
-                          },
-                          type: 'object',
-                        },
-                        notes: {
-                          type: 'keyword',
-                        },
-                      },
-                      type: 'object',
-                    },
-                  },
-                },
-              },
-            },
-          },
-        });
-      };
-
-      const assertTransform = (namespace: string) => {
-        expect(transforms.createTransform).toHaveBeenCalledWith({
-          logger,
-          esClient,
-          transform: {
-            dest: {
-              index: `risk-score.risk-score-latest-${namespace}`,
-            },
-            frequency: '1h',
-            latest: {
-              sort: '@timestamp',
-              unique_key: ['host.name', 'user.name'],
-            },
-            source: {
-              index: [`risk-score.risk-score-${namespace}`],
-            },
-            sync: {
-              time: {
-                delay: '0s',
-                field: '@timestamp',
-              },
-            },
-            transform_id: `risk_score_latest_transform_${namespace}`,
-            settings: {
-              unattended: true,
-            },
-            _meta: {
-              version: 2,
-              managed: true,
-              managed_by: 'security-entity-analytics',
-            },
-          },
-        });
-      };
-
       // Default namespace
       esClient.cluster.existsComponentTemplate.mockResolvedValue(false);
       await riskScoreDataClient.init();
@@ -340,139 +103,9 @@ describe('RiskScoreDataClient', () => {
       assertIndex('space-1');
       assertTransform('space-1');
 
-      expect((createOrUpdateComponentTemplate as jest.Mock).mock.lastCall[0].template.template)
-        .toMatchInlineSnapshot(`
-          Object {
-            "mappings": Object {
-              "dynamic": "strict",
-              "properties": Object {
-                "@timestamp": Object {
-                  "ignore_malformed": false,
-                  "type": "date",
-                },
-                "host": Object {
-                  "properties": Object {
-                    "name": Object {
-                      "type": "keyword",
-                    },
-                    "risk": Object {
-                      "properties": Object {
-                        "calculated_level": Object {
-                          "type": "keyword",
-                        },
-                        "calculated_score": Object {
-                          "type": "float",
-                        },
-                        "calculated_score_norm": Object {
-                          "type": "float",
-                        },
-                        "category_1_count": Object {
-                          "type": "long",
-                        },
-                        "category_1_score": Object {
-                          "type": "float",
-                        },
-                        "id_field": Object {
-                          "type": "keyword",
-                        },
-                        "id_value": Object {
-                          "type": "keyword",
-                        },
-                        "inputs": Object {
-                          "properties": Object {
-                            "category": Object {
-                              "type": "keyword",
-                            },
-                            "description": Object {
-                              "type": "keyword",
-                            },
-                            "id": Object {
-                              "type": "keyword",
-                            },
-                            "index": Object {
-                              "type": "keyword",
-                            },
-                            "risk_score": Object {
-                              "type": "float",
-                            },
-                            "timestamp": Object {
-                              "type": "date",
-                            },
-                          },
-                          "type": "object",
-                        },
-                        "notes": Object {
-                          "type": "keyword",
-                        },
-                      },
-                      "type": "object",
-                    },
-                  },
-                },
-                "user": Object {
-                  "properties": Object {
-                    "name": Object {
-                      "type": "keyword",
-                    },
-                    "risk": Object {
-                      "properties": Object {
-                        "calculated_level": Object {
-                          "type": "keyword",
-                        },
-                        "calculated_score": Object {
-                          "type": "float",
-                        },
-                        "calculated_score_norm": Object {
-                          "type": "float",
-                        },
-                        "category_1_count": Object {
-                          "type": "long",
-                        },
-                        "category_1_score": Object {
-                          "type": "float",
-                        },
-                        "id_field": Object {
-                          "type": "keyword",
-                        },
-                        "id_value": Object {
-                          "type": "keyword",
-                        },
-                        "inputs": Object {
-                          "properties": Object {
-                            "category": Object {
-                              "type": "keyword",
-                            },
-                            "description": Object {
-                              "type": "keyword",
-                            },
-                            "id": Object {
-                              "type": "keyword",
-                            },
-                            "index": Object {
-                              "type": "keyword",
-                            },
-                            "risk_score": Object {
-                              "type": "float",
-                            },
-                            "timestamp": Object {
-                              "type": "date",
-                            },
-                          },
-                          "type": "object",
-                        },
-                        "notes": Object {
-                          "type": "keyword",
-                        },
-                      },
-                      "type": "object",
-                    },
-                  },
-                },
-              },
-            },
-            "settings": Object {},
-          }
-        `);
+      expect(
+        (createOrUpdateComponentTemplate as jest.Mock).mock.lastCall[0].template.template
+      ).toMatchSnapshot();
     });
   });
 
@@ -527,3 +160,298 @@ describe('RiskScoreDataClient', () => {
     });
   });
 });
+
+const assertComponentTemplate = (namespace: string) => {
+  expect(createOrUpdateComponentTemplate).toHaveBeenCalledWith(
+    expect.objectContaining({
+      logger,
+      esClient,
+      template: expect.objectContaining({
+        name: `.risk-score-mappings-${namespace}`,
+        _meta: {
+          managed: true,
+        },
+      }),
+      totalFieldsLimit: 1000,
+    })
+  );
+};
+
+const assertIndexTemplate = (namespace: string) => {
+  expect(createOrUpdateIndexTemplate).toHaveBeenCalledWith({
+    logger,
+    esClient,
+    template: expect.objectContaining({
+      name: `.risk-score.risk-score-${namespace}-index-template`,
+      data_stream: { hidden: true },
+      index_patterns: [`risk-score.risk-score-${namespace}`],
+      composed_of: [`.risk-score-mappings-${namespace}`],
+    }),
+  });
+};
+
+const assertDataStream = (namespace: string) => {
+  expect(createDataStream).toHaveBeenCalledWith({
+    logger,
+    esClient,
+    totalFieldsLimit,
+    indexPatterns: {
+      template: `.risk-score.risk-score-${namespace}-index-template`,
+      alias: `risk-score.risk-score-${namespace}`,
+    },
+  });
+};
+
+const assertIndex = (namespace: string) => {
+  expect(createOrUpdateIndex).toHaveBeenCalledWith({
+    logger,
+    esClient,
+    options: {
+      index: `risk-score.risk-score-latest-${namespace}`,
+      mappings: {
+        dynamic: false,
+        properties: {
+          '@timestamp': {
+            ignore_malformed: false,
+            type: 'date',
+          },
+          event: {
+            properties: {
+              ingested: {
+                type: 'date',
+              },
+            },
+          },
+          host: {
+            properties: {
+              name: {
+                type: 'keyword',
+              },
+              risk: {
+                properties: {
+                  calculated_level: {
+                    type: 'keyword',
+                  },
+                  calculated_score: {
+                    type: 'float',
+                  },
+                  calculated_score_norm: {
+                    type: 'float',
+                  },
+                  category_1_count: {
+                    type: 'long',
+                  },
+                  category_1_score: {
+                    type: 'float',
+                  },
+                  id_field: {
+                    type: 'keyword',
+                  },
+                  id_value: {
+                    type: 'keyword',
+                  },
+                  notes: {
+                    type: 'keyword',
+                  },
+                  inputs: {
+                    properties: {
+                      id: {
+                        type: 'keyword',
+                      },
+                      index: {
+                        type: 'keyword',
+                      },
+                      category: {
+                        type: 'keyword',
+                      },
+                      description: {
+                        type: 'keyword',
+                      },
+                      risk_score: {
+                        type: 'float',
+                      },
+                      timestamp: {
+                        type: 'date',
+                      },
+                    },
+                    type: 'object',
+                  },
+                },
+                type: 'object',
+              },
+            },
+          },
+          service: {
+            properties: {
+              name: {
+                type: 'keyword',
+              },
+              risk: {
+                properties: {
+                  calculated_level: {
+                    type: 'keyword',
+                  },
+                  calculated_score: {
+                    type: 'float',
+                  },
+                  calculated_score_norm: {
+                    type: 'float',
+                  },
+                  category_1_count: {
+                    type: 'long',
+                  },
+                  category_1_score: {
+                    type: 'float',
+                  },
+                  id_field: {
+                    type: 'keyword',
+                  },
+                  id_value: {
+                    type: 'keyword',
+                  },
+                  inputs: {
+                    properties: {
+                      category: {
+                        type: 'keyword',
+                      },
+                      description: {
+                        type: 'keyword',
+                      },
+                      id: {
+                        type: 'keyword',
+                      },
+                      index: {
+                        type: 'keyword',
+                      },
+                      risk_score: {
+                        type: 'float',
+                      },
+                      timestamp: {
+                        type: 'date',
+                      },
+                    },
+                    type: 'object',
+                  },
+                  notes: {
+                    type: 'keyword',
+                  },
+                },
+                type: 'object',
+              },
+            },
+          },
+          user: {
+            properties: {
+              name: {
+                type: 'keyword',
+              },
+              risk: {
+                properties: {
+                  calculated_level: {
+                    type: 'keyword',
+                  },
+                  calculated_score: {
+                    type: 'float',
+                  },
+                  calculated_score_norm: {
+                    type: 'float',
+                  },
+                  category_1_count: {
+                    type: 'long',
+                  },
+                  category_1_score: {
+                    type: 'float',
+                  },
+                  id_field: {
+                    type: 'keyword',
+                  },
+                  id_value: {
+                    type: 'keyword',
+                  },
+                  notes: {
+                    type: 'keyword',
+                  },
+                  inputs: {
+                    properties: {
+                      id: {
+                        type: 'keyword',
+                      },
+                      index: {
+                        type: 'keyword',
+                      },
+                      category: {
+                        type: 'keyword',
+                      },
+                      description: {
+                        type: 'keyword',
+                      },
+                      risk_score: {
+                        type: 'float',
+                      },
+                      timestamp: {
+                        type: 'date',
+                      },
+                    },
+                    type: 'object',
+                  },
+                },
+                type: 'object',
+              },
+            },
+          },
+        },
+      },
+      settings: {
+        'index.default_pipeline': `entity_analytics_create_eventIngest_from_timestamp-pipeline-${namespace}`,
+      },
+    },
+  });
+};
+
+const assertTransform = (namespace: string) => {
+  expect(transforms.createTransform).toHaveBeenCalledWith({
+    logger,
+    esClient,
+    transform: {
+      dest: {
+        index: `risk-score.risk-score-latest-${namespace}`,
+      },
+      frequency: '1h',
+      latest: {
+        sort: '@timestamp',
+        unique_key: ['host.name', 'user.name', 'service.name'],
+      },
+      source: {
+        index: [`risk-score.risk-score-${namespace}`],
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-24h',
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+      sync: {
+        time: {
+          delay: '0s',
+          field: '@timestamp',
+        },
+      },
+      transform_id: `risk_score_latest_transform_${namespace}`,
+      settings: {
+        unattended: true,
+      },
+      _meta: {
+        version: 3,
+        managed: true,
+        managed_by: 'security-entity-analytics',
+      },
+    },
+  });
+};

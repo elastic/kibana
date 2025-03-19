@@ -6,34 +6,19 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { StoryFn } from '@storybook/react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { IndicatorsFieldSelector } from './field_selector';
-
-const mockIndexPattern: DataView = {
-  fields: [
-    {
-      name: '@timestamp',
-      type: 'date',
-    } as DataViewField,
-    {
-      name: 'threat.feed.name',
-      type: 'string',
-    } as DataViewField,
-  ],
-} as DataView;
 
 export default {
   component: IndicatorsFieldSelector,
   title: 'IndicatorsFieldSelector',
 };
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <IndicatorsFieldSelector
-      indexPattern={mockIndexPattern}
       valueChange={({ label }: EuiComboBoxOptionOption<string>) =>
         window.alert(`${label} selected`)
       }
@@ -41,10 +26,9 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const WithDefaultValue: Story<void> = () => {
+export const WithDefaultValue: StoryFn = () => {
   return (
     <IndicatorsFieldSelector
-      indexPattern={mockIndexPattern}
       valueChange={({ label }: EuiComboBoxOptionOption<string>) =>
         window.alert(`${label} selected`)
       }
@@ -53,6 +37,6 @@ export const WithDefaultValue: Story<void> = () => {
   );
 };
 
-export const NoData: Story<void> = () => {
-  return <IndicatorsFieldSelector indexPattern={{ fields: [] } as any} valueChange={() => {}} />;
+export const NoData: StoryFn = () => {
+  return <IndicatorsFieldSelector valueChange={() => {}} />;
 };

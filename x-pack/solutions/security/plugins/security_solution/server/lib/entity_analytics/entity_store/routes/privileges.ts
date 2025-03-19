@@ -25,8 +25,10 @@ export const entityStoreInternalPrivilegesRoute = (
     .get({
       access: 'internal',
       path: ENTITY_STORE_INTERNAL_PRIVILEGES_URL,
-      options: {
-        tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(
