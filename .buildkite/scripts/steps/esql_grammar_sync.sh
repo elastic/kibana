@@ -12,6 +12,8 @@ synchronize_lexer_grammar () {
   cp "$source_file" "$destination_file"
   cp -r "$source_lib_dir" "$destination_lib_dir"
 
+  ls -l "$destination_lib_dir"
+
   # Insert the license header
   temp_file=$(mktemp)
   printf "// DO NOT MODIFY THIS FILE BY HAND. IT IS MANAGED BY A CI JOB.\n\n%s" "$(cat $destination_file)" > "$temp_file"
