@@ -54,7 +54,7 @@ export interface UMServerRoute<T> {
  * provided by Kibana core.
  */
 export type UMRouteDefinition<T> = UMServerRoute<T> &
-  RouteConfig<ObjectType, ObjectType, ObjectType, RouteMethod>;
+  Omit<RouteConfig<ObjectType, ObjectType, ObjectType, RouteMethod>, 'security'>;
 
 /**
  * This type represents an Uptime route definition that corresponds to the contract
