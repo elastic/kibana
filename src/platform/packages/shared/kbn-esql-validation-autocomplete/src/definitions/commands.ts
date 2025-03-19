@@ -28,19 +28,24 @@ import {
 import { ENRICH_MODES } from './settings';
 
 import { type CommandDefinition } from './types';
-import { suggest as suggestForSort } from '../autocomplete/commands/sort';
-import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
+import { checkAggExistence, checkFunctionContent } from './commands_helpers';
+
+import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
 import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
-import { suggest as suggestForStats } from '../autocomplete/commands/stats';
-import { suggest as suggestForWhere } from '../autocomplete/commands/where';
-import { suggest as suggestForJoin } from '../autocomplete/commands/join';
+import { suggest as suggestForEnrich } from '../autocomplete/commands/enrich';
+import { suggest as suggestForEval } from '../autocomplete/commands/eval';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
+import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
+import { suggest as suggestForJoin } from '../autocomplete/commands/join';
+import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
+import { suggest as suggestForLimit } from '../autocomplete/commands/limit';
+import { suggest as suggestForMvExpand } from '../autocomplete/commands/mv_expand';
+import { suggest as suggestForRename } from '../autocomplete/commands/rename';
 import { suggest as suggestForRow } from '../autocomplete/commands/row';
 import { suggest as suggestForShow } from '../autocomplete/commands/show';
-import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
-import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
-import { suggest as suggestForEnrich } from '../autocomplete/commands/enrich';
-import { checkAggExistence, checkFunctionContent } from './commands_helpers';
+import { suggest as suggestForSort } from '../autocomplete/commands/sort';
+import { suggest as suggestForStats } from '../autocomplete/commands/stats';
+import { suggest as suggestForWhere } from '../autocomplete/commands/where';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -203,6 +208,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         { name: 'expression', type: 'function', optional: true },
       ],
     },
+    suggest: () => [],
   },
   {
     name: 'stats',
@@ -239,6 +245,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     modes: [],
     // Reusing the same validation logic as stats command
     validate: statsValidator,
+    suggest: () => [],
   },
 
   {
@@ -259,6 +266,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
     options: [],
     modes: [],
+    suggest: suggestForEval,
   },
   {
     name: 'rename',
@@ -272,6 +280,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
     options: [asOption],
     modes: [],
+    suggest: suggestForRename,
   },
   {
     name: 'limit',
@@ -286,6 +295,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
     options: [],
     modes: [],
+    suggest: suggestForLimit,
   },
   {
     name: 'keep',
@@ -438,6 +448,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       multipleParams: false,
       params: [{ name: 'column', type: 'column', innerTypes: ['any'] }],
     },
+    suggest: suggestForMvExpand,
   },
   {
     name: 'enrich',
@@ -469,6 +480,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [],
       multipleParams: false,
     },
+    suggest: () => [],
   },
   {
     name: 'join',

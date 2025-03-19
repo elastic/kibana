@@ -609,7 +609,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"unprivileged\" | \"indexed\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\" | \"waiting_for_results\""
+              "\"indexed\" | \"indexing\" | \"unprivileged\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\" | \"waiting_for_results\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/status.ts",
             "deprecated": false,
@@ -1364,7 +1364,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"empty\" | \"not-empty\" | \"unprivileged\""
+              "\"empty\" | \"unprivileged\" | \"not-empty\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/status.ts",
             "deprecated": false,
@@ -1928,7 +1928,7 @@
         "label": "CspStatusCode",
         "description": [],
         "signature": [
-          "\"unprivileged\" | \"indexed\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\" | \"waiting_for_results\""
+          "\"indexed\" | \"indexing\" | \"unprivileged\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\" | \"waiting_for_results\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/status.ts",
         "deprecated": false,
@@ -1973,7 +1973,7 @@
         "label": "IndexStatus",
         "description": [],
         "signature": [
-          "\"empty\" | \"not-empty\" | \"unprivileged\""
+          "\"empty\" | \"unprivileged\" | \"not-empty\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/status.ts",
         "deprecated": false,

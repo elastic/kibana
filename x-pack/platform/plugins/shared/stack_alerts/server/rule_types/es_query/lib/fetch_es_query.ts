@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,
@@ -13,9 +13,9 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/common';
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
-import { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
+import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import { getComparatorScript } from '../../../../common';
-import { OnlyEsQueryRuleParams } from '../types';
+import type { OnlyEsQueryRuleParams } from '../types';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
 import { getParsedQuery, checkForShardFailures } from '../util';
 

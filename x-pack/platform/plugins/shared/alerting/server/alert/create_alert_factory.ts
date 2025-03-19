@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
-import { AlertInstanceContext, AlertInstanceState } from '../types';
-import { Alert, PublicAlert } from './alert';
+import type { AlertInstanceContext, AlertInstanceState } from '../types';
+import type { PublicAlert } from './alert';
+import { Alert } from './alert';
 import { processAlerts } from '../lib';
-import { DISABLE_FLAPPING_SETTINGS } from '../../common/rules_settings';
 
 export interface AlertFactory<
   State extends AlertInstanceState,
@@ -142,23 +142,17 @@ export function createAlertFactory<
             return [];
           }
 
-          const { currentRecoveredAlerts } = processAlerts<
-            State,
-            Context,
-            ActionGroupIds,
-            ActionGroupIds
-          >({
-            alerts,
-            existingAlerts: originalAlerts,
-            previouslyRecoveredAlerts: {},
-            hasReachedAlertLimit,
-            alertLimit: maxAlerts,
-            autoRecoverAlerts,
-            // flappingSettings.enabled is false, as we only want to use this function to get the recovered alerts
-            flappingSettings: DISABLE_FLAPPING_SETTINGS,
-          });
-          return Object.keys(currentRecoveredAlerts ?? {}).map(
-            (alertId: string) => currentRecoveredAlerts[alertId]
+          const { recoveredAlerts } = processAlerts<State, Context, ActionGroupIds, ActionGroupIds>(
+            {
+              alerts,
+              existingAlerts: originalAlerts,
+              hasReachedAlertLimit,
+              alertLimit: maxAlerts,
+              autoRecoverAlerts,
+            }
+          );
+          return Object.keys(recoveredAlerts ?? {}).map(
+            (alertId: string) => recoveredAlerts[alertId]
           );
         },
       };
