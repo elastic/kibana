@@ -98,7 +98,7 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
           <div className="eui-fullHeight">
             <UnifiedTabs
               initialItems={initialItems}
-              maxItemsCount={20}
+              maxItemsCount={25}
               services={services}
               onChanged={() => {}}
               createItem={getNewTabDefaultProps}

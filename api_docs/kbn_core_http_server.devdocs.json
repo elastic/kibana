@@ -5598,7 +5598,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unsnooze/unsnooze_rule_route.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unsnooze/internal/unsnooze_rule_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -7030,14 +7030,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unsnooze/unsnooze_rule_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unsnooze/unsnooze_rule_route.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/update_api_key/update_rule_api_key_route.test.ts"
               },
               {
@@ -7079,6 +7071,14 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/snooze/internal/snooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unsnooze/internal/unsnooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unsnooze/internal/unsnooze_rule_route.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -8090,6 +8090,10 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unsnooze/external/unsnooze_rule_route.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.ts"
               },
               {
@@ -8327,6 +8331,22 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unsnooze/external/unsnooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unsnooze/external/unsnooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unsnooze/external/unsnooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/unsnooze/external/unsnooze_rule_route.test.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -10915,10 +10935,6 @@
               },
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/status/server-internal/src/routes/status_preboot.ts"
-              },
-              {
-                "plugin": "@kbn/core",
                 "path": "src/core/packages/i18n/server-internal/src/routes/translations.ts"
               },
               {
@@ -10927,19 +10943,7 @@
               },
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/capabilities/server-internal/src/routes/resolve_capabilities.ts"
-              },
-              {
-                "plugin": "@kbn/core",
                 "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/apps/server-internal/src/core_app.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/apps/server-internal/src/core_app.ts"
               },
               {
                 "plugin": "usageCollection",
@@ -10964,10 +10968,6 @@
               {
                 "plugin": "monitoringCollection",
                 "path": "x-pack/platform/plugins/private/monitoring_collection/server/routes/api/v1/prometheus/get_metrics.ts"
-              },
-              {
-                "plugin": "files",
-                "path": "src/platform/plugins/shared/files/server/routes/public_facing/download.ts"
               },
               {
                 "plugin": "banners",

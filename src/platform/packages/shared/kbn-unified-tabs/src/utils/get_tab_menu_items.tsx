@@ -34,6 +34,7 @@ const getTabMenuItem = ({
 
 export interface GetTabMenuItemsFnProps {
   tabsState: TabsState;
+  maxItemsCount: number | undefined;
   onDuplicate: (item: TabItem) => void;
   onCloseOtherTabs: (item: TabItem) => void;
   onCloseTabsToTheRight: (item: TabItem) => void;
@@ -41,6 +42,7 @@ export interface GetTabMenuItemsFnProps {
 
 export const getTabMenuItemsFn = ({
   tabsState,
+  maxItemsCount,
   onDuplicate,
   onCloseOtherTabs,
   onCloseTabsToTheRight,
@@ -68,19 +70,25 @@ export const getTabMenuItemsFn = ({
           onClick: onCloseTabsToTheRight,
         });
 
-    const items: TabMenuItem[] = [
-      getTabMenuItem({
-        item,
-        name: 'duplicate',
-        label: i18n.translate('unifiedTabs.tabMenu.duplicateMenuItem', {
-          defaultMessage: 'Duplicate',
-        }),
-        onClick: onDuplicate,
-      }),
-    ];
+    const items: TabMenuItem[] = [];
+
+    if (!maxItemsCount || tabsState.items.length < maxItemsCount) {
+      items.push(
+        getTabMenuItem({
+          item,
+          name: 'duplicate',
+          label: i18n.translate('unifiedTabs.tabMenu.duplicateMenuItem', {
+            defaultMessage: 'Duplicate',
+          }),
+          onClick: onDuplicate,
+        })
+      );
+    }
 
     if (closeOtherTabsItem || closeTabsToTheRightItem) {
-      items.push(DividerMenuItem);
+      if (items.length > 0) {
+        items.push(DividerMenuItem);
+      }
 
       if (closeOtherTabsItem) {
         items.push(closeOtherTabsItem);
