@@ -98,11 +98,6 @@ export {
 
 export { useLoadConnectors } from './impl/connectorland/use_load_connectors';
 
-export {
-  ELASTIC_AI_ASSISTANT_TITLE,
-  WELCOME_CONVERSATION_TITLE,
-} from './impl/assistant/use_conversation/translations';
-
 export type {
   /** for rendering results in a code block */
   CodeBlockDetails,
@@ -149,10 +144,8 @@ export { useFetchCurrentUserConversations } from './impl/assistant/api/conversat
 export * from './impl/assistant/api/conversations/bulk_update_actions_conversations';
 export { getConversationById } from './impl/assistant/api/conversations/conversations';
 
-export { mergeBaseWithPersistedConversations } from './impl/assistant/helpers';
-
 export { UpgradeButtons } from './impl/upgrade/upgrade_buttons';
-export { getUserConversations, getPrompts, bulkUpdatePrompts } from './impl/assistant/api';
+export { getUserConversationsExist, getPrompts, bulkUpdatePrompts } from './impl/assistant/api';
 
 export {
   /** A range slider component, typically used to configure the number of alerts sent as context */

@@ -13,6 +13,7 @@ import { isLiteralItem, isColumnItem, isInlineCastItem } from '../shared/helpers
 import { getMessageFromId } from '../validation/errors';
 import type { CommandOptionsDefinition } from './types';
 
+/** @deprecated — options are going away */
 export const byOption: CommandOptionsDefinition = {
   name: 'by',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.byDoc', {
@@ -25,6 +26,7 @@ export const byOption: CommandOptionsDefinition = {
   optional: true,
 };
 
+/** @deprecated — options are going away */
 export const metadataOption: CommandOptionsDefinition = {
   name: 'metadata',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.metadataDoc', {
@@ -70,6 +72,7 @@ export const metadataOption: CommandOptionsDefinition = {
   },
 };
 
+/** @deprecated — options are going away */
 export const asOption: CommandOptionsDefinition = {
   name: 'as',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.asDoc', {
@@ -85,6 +88,7 @@ export const asOption: CommandOptionsDefinition = {
   optional: false,
 };
 
+/** @deprecated — options are going away */
 export const onOption: CommandOptionsDefinition = {
   name: 'on',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.onDoc', {
@@ -97,6 +101,7 @@ export const onOption: CommandOptionsDefinition = {
   optional: true,
 };
 
+/** @deprecated — options are going away */
 export const withOption: CommandOptionsDefinition = {
   name: 'with',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.withDoc', {
@@ -109,6 +114,7 @@ export const withOption: CommandOptionsDefinition = {
   optional: true,
 };
 
+/** @deprecated — options are going away */
 export const appendSeparatorOption: CommandOptionsDefinition = {
   name: 'append_separator',
   description: i18n.translate(

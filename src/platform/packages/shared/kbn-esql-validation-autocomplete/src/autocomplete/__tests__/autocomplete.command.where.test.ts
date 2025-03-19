@@ -6,9 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { ESQLVariableType } from '@kbn/esql-types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
-import { ESQLVariableType } from '../../shared/types';
 import { pipeCompleteItem } from '../complete_items';
 import { getDateLiterals } from '../factories';
 import { log10ParameterTypes, powParameterTypes } from './constants';
@@ -400,7 +399,7 @@ describe('WHERE <expression>', () => {
         const suggestions = await suggest('FROM a | WHERE agent.name == /', {
           callbacks: {
             canSuggestVariables: () => true,
-            getVariablesByType: () => [],
+            getVariables: () => [],
             getColumnsFor: () => Promise.resolve([{ name: 'agent.name', type: 'keyword' }]),
           },
         });
@@ -412,7 +411,7 @@ describe('WHERE <expression>', () => {
           detail: 'Click to create',
           command: { id: 'esql.control.values.create', title: 'Click to create' },
           sortText: '11',
-          rangeToReplace: { start: 31, end: 31 },
+          rangeToReplace: { start: 30, end: 30 },
         });
       });
 
@@ -422,7 +421,7 @@ describe('WHERE <expression>', () => {
         const suggestions = await suggest('FROM a | WHERE agent.name == /', {
           callbacks: {
             canSuggestVariables: () => true,
-            getVariablesByType: () => [
+            getVariables: () => [
               {
                 key: 'value',
                 value: 'java',
@@ -440,7 +439,7 @@ describe('WHERE <expression>', () => {
           detail: 'Named parameter',
           command: undefined,
           sortText: '11A',
-          rangeToReplace: { start: 31, end: 31 },
+          rangeToReplace: { start: 30, end: 30 },
         });
       });
     });

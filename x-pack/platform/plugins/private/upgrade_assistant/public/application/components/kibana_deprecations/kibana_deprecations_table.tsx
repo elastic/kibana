@@ -257,8 +257,11 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       search={searchConfig}
       sorting={sorting}
       pagination={PAGINATION_CONFIG}
-      rowProps={() => ({
+      rowProps={(deprecation) => ({
         'data-test-subj': 'row',
+        onClick: () => {
+          toggleFlyout(deprecation);
+        },
       })}
       cellProps={(deprecation, field) => ({
         'data-test-subj': `${((field?.name as string) || 'table').toLowerCase()}Cell`,

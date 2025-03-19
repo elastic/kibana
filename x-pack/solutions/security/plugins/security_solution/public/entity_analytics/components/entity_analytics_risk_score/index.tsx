@@ -176,7 +176,7 @@ const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
 
   const refreshPage = useRefetchQueries();
 
-  const privileges = useMissingRiskEnginePrivileges(['read']);
+  const privileges = useMissingRiskEnginePrivileges({ readonly: true });
 
   if (!isAuthorized) {
     return null;

@@ -9,28 +9,24 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
-import { createMaintenanceWindow, createObjectRemover } from './utils';
+import { createMaintenanceWindow } from './utils';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
+  const supertest = getService('supertest');
   const pageObjects = getPageObjects(['common', 'maintenanceWindows', 'header']);
   const retry = getService('retry');
   const toasts = getService('toasts');
 
-  let objectRemover: ObjectRemover;
+  const objectRemover = new ObjectRemover(supertest);
   const browser = getService('browser');
 
-  // Failing: See https://github.com/elastic/kibana/issues/205269
-  describe.skip('Maintenance windows table', function () {
-    before(async () => {
-      objectRemover = await createObjectRemover({ getService });
-    });
-
+  describe('Maintenance windows table', function () {
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('maintenanceWindows');
     });
 
-    after(async () => {
+    afterEach(async () => {
       await objectRemover.removeAll();
     });
 
@@ -293,6 +289,35 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.isEnabled('pagination-button-0');
       const listedOnSecondPageMWs = await testSubjects.findAll('list-item');
       expect(listedOnSecondPageMWs.length).to.be(2);
+    });
+
+    it('should delete a maintenance window', async () => {
+      const name = generateUniqueKey();
+      await createMaintenanceWindow({
+        name,
+        getService,
+      });
+
+      await browser.refresh();
+      await pageObjects.maintenanceWindows.searchMaintenanceWindows(name);
+
+      const listBefore = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
+      expect(listBefore.length).to.eql(1);
+
+      await testSubjects.click('table-actions-popover');
+      await testSubjects.click('table-actions-delete');
+
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await retry.try(async () => {
+        const toastTitle = await toasts.getTitleAndDismiss();
+        expect(toastTitle).to.eql('Deleted maintenance window');
+      });
+
+      await pageObjects.maintenanceWindows.searchMaintenanceWindows(name);
+
+      const listAfter = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
+      expect(listAfter.length).to.eql(0);
     });
   });
 };

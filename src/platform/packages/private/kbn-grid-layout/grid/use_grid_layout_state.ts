@@ -41,8 +41,8 @@ export const useGridLayoutState = ({
   gridLayoutStateManager: GridLayoutStateManager;
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
 } => {
-  const rowRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const panelRefs = useRef<Array<{ [id: string]: HTMLDivElement | null }>>([]);
+  const rowRefs = useRef<{ [rowId: string]: HTMLDivElement | null }>({});
+  const panelRefs = useRef<{ [rowId: string]: { [panelId: string]: HTMLDivElement | null } }>({});
   const { euiTheme } = useEuiTheme();
 
   const expandedPanelId$ = useMemo(
@@ -83,8 +83,8 @@ export const useGridLayoutState = ({
 
   const gridLayoutStateManager = useMemo(() => {
     const resolvedLayout = cloneDeep(layout);
-    resolvedLayout.forEach((row, rowIndex) => {
-      resolvedLayout[rowIndex] = resolveGridRow(row);
+    Object.values(resolvedLayout).forEach((row) => {
+      resolvedLayout[row.id] = resolveGridRow(row);
     });
 
     const gridLayout$ = new BehaviorSubject<GridLayoutData>(resolvedLayout);
@@ -92,14 +92,10 @@ export const useGridLayoutState = ({
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
     const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
-    const panelIds$ = new BehaviorSubject<string[][]>(
-      layout.map(({ panels }) => Object.keys(panels))
-    );
 
     return {
       rowRefs,
       panelRefs,
-      panelIds$,
       proposedGridLayout$,
       gridLayout$,
       activePanel$,

@@ -39,6 +39,7 @@ import { FilesManagementPageObject } from './files_management';
 import { AnnotationEditorPageObject } from './annotation_library_editor_page';
 import { SolutionNavigationProvider } from './solution_navigation';
 import { EmbeddedConsoleProvider } from './embedded_console';
+import { SpaceSettingsPageObject } from './space_settings';
 
 export const pageObjects = {
   annotationEditor: AnnotationEditorPageObject,
@@ -73,6 +74,7 @@ export const pageObjects = {
   unifiedSearch: UnifiedSearchPageObject,
   unifiedFieldList: UnifiedFieldListPageObject,
   filesManagement: FilesManagementPageObject,
+  spaceSettings: SpaceSettingsPageObject,
 };
 
 export { SolutionNavigationProvider } from './solution_navigation';

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { ILicenseState, verifyApiAccess } from '../../lib';
+import type { IRouter } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { ILicenseState } from '../../lib';
+import { verifyApiAccess } from '../../lib';
 import { BASE_ACTION_API_PATH } from '../../../common';
-import { ActionsRequestHandlerContext } from '../../types';
+import type { ActionsRequestHandlerContext } from '../../types';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 export const getAllActionRoute = (

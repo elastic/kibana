@@ -21,8 +21,10 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./ephemeral'));
     loadTestFile(require.resolve('./muted_alerts'));
     loadTestFile(require.resolve('./event_log_alerts'));
+    loadTestFile(require.resolve('./snooze_internal'));
     loadTestFile(require.resolve('./snooze'));
     loadTestFile(require.resolve('./unsnooze'));
+    loadTestFile(require.resolve('./unsnooze_internal'));
     loadTestFile(require.resolve('./bulk_edit'));
     loadTestFile(require.resolve('./bulk_disable'));
     loadTestFile(require.resolve('./capped_action_type'));

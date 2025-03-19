@@ -24,6 +24,7 @@
     border-radius: $euiBorderRadius;
     background: $euiColorEmptyShade;
     height: 100%;
+    overflow: hidden;
     @include euiScrollBar;
     &>* {
       flex: 1 1 100%;

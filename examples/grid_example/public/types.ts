@@ -26,7 +26,7 @@ export interface DashboardGridData {
 
 interface DashboardPanelState {
   type: string;
-  gridData: DashboardGridData & { row?: number };
+  gridData: DashboardGridData & { row?: string };
   explicitInput: Partial<any> & { id: string };
   version?: string;
 }
@@ -35,7 +35,9 @@ export interface MockedDashboardPanelMap {
   [key: string]: DashboardPanelState;
 }
 
-export type MockedDashboardRowMap = Array<{ title: string; collapsed: boolean }>;
+export interface MockedDashboardRowMap {
+  [id: string]: { id: string; order: number; title: string; collapsed: boolean };
+}
 
 export interface MockSerializedDashboardState {
   panels: MockedDashboardPanelMap;

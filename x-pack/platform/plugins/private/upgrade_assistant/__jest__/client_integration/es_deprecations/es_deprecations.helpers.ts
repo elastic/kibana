@@ -48,6 +48,16 @@ const createActions = (testBed: TestBed) => {
 
       component.update();
     },
+    clickReindexColumnAt: async (
+      columnType: 'isCritical' | 'message' | 'type' | 'index' | 'correctiveAction',
+      index: number
+    ) => {
+      await act(async () => {
+        find(`reindexTableCell-${columnType}`).at(index).simulate('click');
+      });
+
+      component.update();
+    },
   };
 
   const clickFilterByIndex = async (index: number) => {
@@ -159,6 +169,12 @@ const createActions = (testBed: TestBed) => {
         find('startReindexingButton').simulate('click');
       });
 
+      component.update();
+    },
+    closeFlyout: async () => {
+      await act(async () => {
+        find('closeReindexButton').simulate('click');
+      });
       component.update();
     },
   };

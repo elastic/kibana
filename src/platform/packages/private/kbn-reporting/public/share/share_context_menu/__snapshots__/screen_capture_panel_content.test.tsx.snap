@@ -93,6 +93,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
       <button
         aria-controls="advanced-options"
         aria-expanded="false"
+        aria-hidden="true"
         aria-labelledby="generated-id"
         class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
         tabindex="-1"
@@ -275,6 +276,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
       <button
         aria-controls="advanced-options"
         aria-expanded="false"
+        aria-hidden="true"
         aria-labelledby="generated-id"
         class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
         tabindex="-1"
@@ -404,6 +406,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
       <button
         aria-controls="advanced-options"
         aria-expanded="false"
+        aria-hidden="true"
         aria-labelledby="generated-id"
         class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
         tabindex="-1"

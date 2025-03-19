@@ -61,6 +61,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/connectors',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           delete_existing_connector: schema.maybe(schema.boolean()),
@@ -110,6 +116,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/cancel_syncs',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -126,6 +138,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.put(
     {
       path: '/internal/enterprise_search/connectors/{syncJobId}/cancel_sync',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           syncJobId: schema.string(),
@@ -160,6 +178,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/configuration',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.recordOf(
           schema.string(),
@@ -184,6 +208,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/scheduling',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           access_control: schema.object({ enabled: schema.boolean(), interval: schema.string() }),
@@ -209,6 +239,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/start_sync',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           nextSyncConfig: schema.maybe(schema.string()),
@@ -233,6 +269,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/start_incremental_sync',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -249,6 +291,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/start_access_control_sync',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -283,6 +331,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/sync_jobs',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -310,6 +364,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.put(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/pipeline',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           extract_binary_content: schema.boolean(),
@@ -333,6 +393,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.put(
     {
       path: '/internal/enterprise_search/connectors/default_pipeline',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           extract_binary_content: schema.boolean(),
@@ -352,6 +418,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/connectors/default_pipeline',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {},
     },
     elasticsearchErrorHandler(log, async (context, _, response) => {
@@ -364,6 +436,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.put(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/service_type',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({ serviceType: schema.string() }),
         params: schema.object({
@@ -385,6 +463,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.put(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/status',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({ status: schema.string() }),
         params: schema.object({
@@ -406,6 +490,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.put(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/name_and_description',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           description: schema.nullable(schema.string()),
@@ -434,6 +524,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.put(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/filtering/draft',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           advanced_snippet: schema.string(),
@@ -472,6 +568,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.put(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/filtering',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.maybe(
           schema.object({
@@ -505,6 +607,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.put(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/native',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           is_native: schema.boolean(),
@@ -525,6 +633,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/connectors',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         query: schema.object({
           fetchCrawlersOnly: schema.maybe(schema.boolean()),
@@ -602,6 +716,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -623,6 +743,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.delete(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -696,6 +822,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.put(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/index_name/{indexName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -737,6 +869,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/connectors/available_indices',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         query: schema.object({
           from: schema.number({ defaultValue: 0, min: 0 }),
@@ -775,6 +913,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/generate_config',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           connectorId: schema.string(),
@@ -838,6 +982,12 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/connectors/generate_connector_name',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           connectorName: schema.maybe(schema.string()),

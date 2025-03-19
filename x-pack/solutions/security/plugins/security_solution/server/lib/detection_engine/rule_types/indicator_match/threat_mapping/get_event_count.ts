@@ -14,44 +14,48 @@ import { buildEventsSearchQuery } from '../../utils/build_events_query';
 export const MAX_PER_PAGE = 9000;
 
 export const getEventList = async ({
+  sharedParams,
   services,
-  ruleExecutionLogger,
-  query,
-  language,
-  index,
   perPage,
   searchAfter,
   filters,
-  tuple,
-  primaryTimestamp,
-  secondaryTimestamp,
-  runtimeMappings,
-  exceptionFilter,
   eventListConfig,
   indexFields,
   sortOrder = 'desc',
 }: EventsOptions): Promise<estypes.SearchResponse<EventDoc>> => {
+  const {
+    inputIndex,
+    ruleExecutionLogger,
+    primaryTimestamp,
+    secondaryTimestamp,
+    runtimeMappings,
+    tuple,
+    exceptionFilter,
+    completeRule: {
+      ruleParams: { query, language },
+    },
+  } = sharedParams;
   const calculatedPerPage = perPage ?? MAX_PER_PAGE;
   if (calculatedPerPage > 10000) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
 
   ruleExecutionLogger.debug(
-    `Querying the events items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
+    `Querying the events items from the index: "${sharedParams.inputIndex}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
   );
 
   const queryFilter = getQueryFilter({
     query,
     language: language ?? 'kuery',
     filters,
-    index,
+    index: inputIndex,
     exceptionFilter,
     fields: indexFields,
   });
 
   const { searchResult } = await singleSearchAfter({
     searchAfterSortIds: searchAfter,
-    index,
+    index: inputIndex,
     from: tuple.from.toISOString(),
     to: tuple.to.toISOString(),
     services,
@@ -69,6 +73,9 @@ export const getEventList = async ({
   ruleExecutionLogger.debug(`Retrieved events items of size: ${searchResult.hits.hits.length}`);
   return searchResult;
 };
+
+// TODO: possible bug: event count does not respect large value list exceptions, but searchAfterBulkCreate does.
+// could lead to worse performance
 
 export const getEventCount = async ({
   esClient,

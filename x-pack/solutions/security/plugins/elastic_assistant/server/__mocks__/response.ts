@@ -87,7 +87,6 @@ export const getConversationResponseMock = (
   replacements: {},
   createdAt: timestamp,
   namespace: 'default',
-  isDefault: false,
   updatedAt: timestamp,
   timestamp,
   category: 'assistant',

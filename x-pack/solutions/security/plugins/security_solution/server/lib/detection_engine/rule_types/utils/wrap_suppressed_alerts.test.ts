@@ -19,6 +19,7 @@ import type { CompleteRule, ThreatRuleParams } from '../../rule_schema';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
+import { getSharedParamsMock } from '../__mocks__/shared_params';
 
 jest.mock('../factories/utils/transform_hit_to_alert', () => ({ transformHitToAlert: jest.fn() }));
 
@@ -95,28 +96,35 @@ const completeRuleMock: CompleteRule<ThreatRuleParams> = {
   },
   alertId: 'c1436b3e-e2a6-412a-92ff-ef7e86b926fe',
 };
-
-const wrappedParams = {
-  spaceId: 'default',
-  completeRule: {
-    ...completeRuleMock,
-    ruleParams: {
-      ...completeRuleMock.ruleParams,
-      alertSuppression: {
-        groupBy: ['agent.name', 'user.name'],
-      },
+const buildReasonMessage = () => 'mock';
+const sharedParams = getSharedParamsMock({
+  ruleParams: {
+    ...completeRuleMock.ruleParams,
+    alertSuppression: {
+      groupBy: ['agent.name', 'user.name'],
     },
   },
-  mergeStrategy: 'missingFields' as const,
-  indicesToQuery: ['test*'],
-  buildReasonMessage: () => 'mock',
-  alertTimestampOverride: undefined,
-  ruleExecutionLogger,
-  publicBaseUrl: 'public-url-mock',
-  primaryTimestamp: '@timestamp',
-  secondaryTimestamp: 'event.ingested',
-  intendedTimestamp: undefined,
-};
+  rewrites: {
+    spaceId: 'default',
+    completeRule: {
+      ...completeRuleMock,
+      ruleParams: {
+        ...completeRuleMock.ruleParams,
+        alertSuppression: {
+          groupBy: ['agent.name', 'user.name'],
+        },
+      },
+    },
+    mergeStrategy: 'missingFields' as const,
+    inputIndex: ['test*'],
+    alertTimestampOverride: undefined,
+    ruleExecutionLogger,
+    publicBaseUrl: 'public-url-mock',
+    primaryTimestamp: '@timestamp',
+    secondaryTimestamp: 'event.ingested',
+    intendedTimestamp: undefined,
+  },
+});
 
 describe('wrapSuppressedAlerts', () => {
   transformHitToAlertMock.mockReturnValue({ 'mock-props': true });
@@ -135,12 +143,12 @@ describe('wrapSuppressedAlerts', () => {
           _index: 'test*',
         },
       ],
-      ...wrappedParams,
+      sharedParams,
+      buildReasonMessage,
     });
 
     expect(transformHitToAlertMock).toHaveBeenCalledWith({
-      spaceId: 'default',
-      completeRule: wrappedParams.completeRule,
+      sharedParams,
       doc: {
         fields: {
           '@timestamp': [expectedTimestamp],
@@ -150,16 +158,9 @@ describe('wrapSuppressedAlerts', () => {
         _id: '1',
         _index: 'test*',
       },
-      mergeStrategy: 'missingFields',
-      ignoreFields: {},
-      ignoreFieldsRegexes: [],
       applyOverrides: true,
-      buildReasonMessage: wrappedParams.buildReasonMessage,
-      indicesToQuery: ['test*'],
-      alertTimestampOverride: undefined,
-      ruleExecutionLogger,
+      buildReasonMessage,
       alertUuid: expect.any(String),
-      publicBaseUrl: 'public-url-mock',
     });
     expect(wrappedAlerts[0]._source).toEqual(
       expect.objectContaining({
@@ -204,7 +205,8 @@ describe('wrapSuppressedAlerts', () => {
           _index: 'test*',
         },
       ],
-      ...wrappedParams,
+      sharedParams,
+      buildReasonMessage,
     });
 
     expect(wrappedAlerts[0]._source[ALERT_INSTANCE_ID]).toBe(
@@ -225,7 +227,8 @@ describe('wrapSuppressedAlerts', () => {
           _index: 'test*',
         },
       ],
-      ...wrappedParams,
+      sharedParams,
+      buildReasonMessage,
     });
 
     expect(wrappedAlerts[0]._source).toEqual(

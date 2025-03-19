@@ -23,6 +23,7 @@ const defaultReindexStatusMeta: ReindexStatusResponse['meta'] = {
   aliases: [],
   isFrozen: false,
   isReadonly: false,
+  isInDataStream: false,
 };
 
 describe('Reindex deprecation flyout', () => {
@@ -67,6 +68,35 @@ describe('Reindex deprecation flyout', () => {
     });
 
     testBed.component.update();
+  });
+
+  it('opens a flyout when clicking in any part of the row', async () => {
+    const { actions, exists } = testBed;
+
+    await actions.table.clickReindexColumnAt('isCritical', 0);
+    expect(exists('reindexDetails')).toBe(true);
+    await actions.reindexDeprecationFlyout.closeFlyout();
+    expect(exists('reindexDetails')).toBe(false);
+
+    await actions.table.clickReindexColumnAt('message', 0);
+    expect(exists('reindexDetails')).toBe(true);
+    await actions.reindexDeprecationFlyout.closeFlyout();
+    expect(exists('reindexDetails')).toBe(false);
+
+    await actions.table.clickReindexColumnAt('type', 0);
+    expect(exists('reindexDetails')).toBe(true);
+    await actions.reindexDeprecationFlyout.closeFlyout();
+    expect(exists('reindexDetails')).toBe(false);
+
+    await actions.table.clickReindexColumnAt('index', 0);
+    expect(exists('reindexDetails')).toBe(true);
+    await actions.reindexDeprecationFlyout.closeFlyout();
+    expect(exists('reindexDetails')).toBe(false);
+
+    await actions.table.clickReindexColumnAt('correctiveAction', 0);
+    expect(exists('reindexDetails')).toBe(true);
+    await actions.reindexDeprecationFlyout.closeFlyout();
+    expect(exists('reindexDetails')).toBe(false);
   });
 
   it('renders a flyout with reindexing details', async () => {

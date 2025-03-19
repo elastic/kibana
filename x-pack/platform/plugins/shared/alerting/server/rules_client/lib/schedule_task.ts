@@ -6,8 +6,8 @@
  */
 
 import { withSpan } from '@kbn/apm-utils';
-import { RulesClientContext } from '../types';
-import { ScheduleTaskOptions } from '../types';
+import type { RulesClientContext } from '../types';
+import type { ScheduleTaskOptions } from '../types';
 
 export async function scheduleTask(context: RulesClientContext, opts: ScheduleTaskOptions) {
   const { id, consumer, ruleTypeId, schedule, throwOnConflict } = opts;

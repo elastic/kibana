@@ -42,7 +42,7 @@ import * as i18n from './translations';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { initializeTimelineSettings } from '../../../store/actions';
 import { selectTimelineById, selectTimelineESQLSavedSearchId } from '../../../store/selectors';
-import { fetchNotesBySavedObjectIds, selectSortedNotesBySavedObjectId } from '../../../../notes';
+import { fetchNotesBySavedObjectIds, makeSelectNotesBySavedObjectId } from '../../../../notes';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
@@ -314,11 +314,10 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     }
   }, [fetchNotes, isTimelineSaved]);
 
+  const selectNotesBySavedObjectId = useMemo(() => makeSelectNotesBySavedObjectId(), []);
+
   const notesNewSystem = useSelector((state: State) =>
-    selectSortedNotesBySavedObjectId(state, {
-      savedObjectId: timelineSavedObjectId,
-      sort: { field: 'created', direction: 'asc' },
-    })
+    selectNotesBySavedObjectId(state, timelineSavedObjectId)
   );
   const numberOfNotesNewSystem = useMemo(
     () => notesNewSystem.length + (isEmpty(timelineDescription) ? 0 : 1),

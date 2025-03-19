@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { badRequest } from '@hapi/boom';
+import { badData, badRequest } from '@hapi/boom';
 import {
   IngestGetResponse,
   StreamUpsertRequest,
@@ -17,9 +17,14 @@ import { z } from '@kbn/zod';
 import { createServerRoute } from '../../create_server_route';
 
 const readIngestRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/_ingest',
+  endpoint: 'GET /api/streams/{name}/_ingest 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Get ingest stream settings',
+    description: 'Fetches the ingest settings of an ingest stream definition',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
@@ -53,9 +58,14 @@ const readIngestRoute = createServerRoute({
 });
 
 const upsertIngestRoute = createServerRoute({
-  endpoint: 'PUT /api/streams/{name}/_ingest',
+  endpoint: 'PUT /api/streams/{name}/_ingest 2023-10-31',
   options: {
-    access: 'internal',
+    access: 'public',
+    summary: 'Update ingest stream settings',
+    description: 'Upserts the ingest settings of an ingest stream definition',
+    availability: {
+      stability: 'experimental',
+    },
   },
   security: {
     authz: {
@@ -74,6 +84,13 @@ const upsertIngestRoute = createServerRoute({
     const { streamsClient, assetClient } = await getScopedClients({
       request,
     });
+
+    if (
+      isWiredStreamDefinition({ name: params.path.name, ...params.body }) &&
+      !(await streamsClient.isStreamsEnabled())
+    ) {
+      throw badData('Streams are not enabled for Wired streams.');
+    }
 
     const name = params.path.name;
 

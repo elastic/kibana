@@ -67,7 +67,7 @@ export const UserRiskScoreQueryTabBody = ({
 
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
-  const privileges = useMissingRiskEnginePrivileges();
+  const privileges = useMissingRiskEnginePrivileges({ readonly: true });
 
   const {
     data,

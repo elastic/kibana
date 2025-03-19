@@ -14,7 +14,7 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-const FLAGS_FILE = 'packages/kbn-test/src/jest/jest_flags.json';
+const FLAGS_FILE = 'src/platform/packages/shared/kbn-test/src/jest/jest_flags.json';
 
 function readStdin() {
   return new Promise((resolve, reject) => {

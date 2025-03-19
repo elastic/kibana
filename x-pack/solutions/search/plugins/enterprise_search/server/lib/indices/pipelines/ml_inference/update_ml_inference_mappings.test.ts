@@ -24,7 +24,11 @@ describe('updateMlInferenceMappings', () => {
       trained_model_configs: [
         {
           inference_config: {
-            text_expansion: {},
+            text_expansion: {
+              vocabulary: {
+                index: indexName,
+              },
+            },
           },
           input: {
             field_names: [],

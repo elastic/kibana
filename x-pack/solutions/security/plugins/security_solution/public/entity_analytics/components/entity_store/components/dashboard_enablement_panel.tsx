@@ -190,7 +190,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
 
   if (
     combinedRiskEngineStatus !== RiskEngineStatusEnum.NOT_INSTALLED &&
-    (entityStoreStatus === 'running' || entityStoreStatus === 'stopped')
+    entityStoreStatus !== 'not_installed'
   ) {
     return null;
   }
@@ -227,14 +227,8 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
         visible={modal.visible}
         toggle={(visible) => setModalState({ visible })}
         enableStore={enableEntityStore}
-        riskScore={{
-          canToggle: combinedRiskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED,
-          checked: combinedRiskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED,
-        }}
-        entityStore={{
-          canToggle: entityStoreStatus !== 'running',
-          checked: entityStoreStatus === 'not_installed',
-        }}
+        riskEngineStatus={combinedRiskEngineStatus}
+        entityStoreStatus={entityStoreStatus}
       />
     </>
   );

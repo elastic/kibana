@@ -95,7 +95,7 @@ pageLoadAssetSize:
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
   kubernetesSecurity: 77234
-  lens: 57135
+  lens: 76079
   licenseManagement: 41817
   licensing: 29004
   links: 8000
@@ -124,7 +124,7 @@ pageLoadAssetSize:
   osquery: 107090
   painlessLab: 179748
   presentationPanel: 11550
-  presentationUtil: 33905
+  presentationUtil: 9000
   productDocBase: 22500
   profiling: 36694
   remoteClusters: 51327

@@ -8,6 +8,8 @@
 import pMap from 'p-map';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import type { IndicesSourceMode } from '@elastic/elasticsearch/lib/api/types';
+
 import { appContextService } from '..';
 
 export async function updateDeprecatedComponentTemplates(esClient: ElasticsearchClient) {
@@ -37,27 +39,23 @@ export async function updateDeprecatedComponentTemplates(esClient: Elasticsearch
       const settings = componentTemplate.component_template.template.settings;
       await esClient.cluster.putComponentTemplate({
         name: componentTemplate.name,
-        body: {
-          template: {
-            settings: {
-              ...settings,
-              index: {
-                ...settings?.index,
-                mapping: {
-                  ...settings?.index?.mapping,
-                  // @ts-expect-error Property 'source' does not exist on type 'IndicesMappingLimitSettings'
-                  source: {
-                    // @ts-expect-error Property 'source.mode' does not exist on type 'IndicesMappingLimitSettings'
-                    ...settings?.index?.mapping?.source,
-                    mode,
-                  },
+        template: {
+          settings: {
+            ...settings,
+            index: {
+              ...settings?.index,
+              mapping: {
+                ...settings?.index?.mapping,
+                source: {
+                  ...settings?.index?.mapping?.source,
+                  mode: mode as IndicesSourceMode,
                 },
               },
             },
-            mappings: {
-              ...componentTemplate.component_template.template.mappings,
-              _source: restOfSource,
-            },
+          },
+          mappings: {
+            ...componentTemplate.component_template.template.mappings,
+            _source: restOfSource,
           },
         },
       });
