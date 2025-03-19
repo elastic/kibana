@@ -25,10 +25,10 @@ import {
   EuiToolTip,
   EuiSpacer,
   useEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import useUnmount from 'react-use/lib/useUnmount';
 import { monaco } from '@kbn/monaco';
-import classNames from 'classnames';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useDebounceWithOptions } from '../../../../../../shared_components';
@@ -126,7 +126,8 @@ export function FormulaEditor({
   const disposables = React.useRef<monaco.IDisposable[]>([]);
   const editor1 = React.useRef<monaco.editor.IStandaloneCodeEditor>();
 
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
 
   const visibleOperationsMap = useMemo(
     () => filterByVisibleOperation(operationDefinitionMap),
@@ -685,10 +686,12 @@ export function FormulaEditor({
   // in the behavior of Monaco when it's first loaded and then reloaded.
   return (
     <div
-      className={classNames({
-        lnsIndexPatternDimensionEditor: true,
-        'lnsIndexPatternDimensionEditor-isFullscreen': isFullscreen,
-      })}
+      css={[
+        sharedEditorStyles.self(euiThemeContext),
+        isFullscreen
+          ? fullscreenEditorStyles(euiThemeContext)
+          : defaultEditorStyles(euiThemeContext),
+      ]}
     >
       {!isFullscreen && (
         <EuiFormLabel
@@ -702,19 +705,22 @@ export function FormulaEditor({
           })}
         </EuiFormLabel>
       )}
-      <div
-        className="lnsIndexPatternDimensionEditor--shaded"
-        css={css`
-          border: ${!isFullscreen ? euiTheme.border.thin : 'none'};
-          border-radius: ${!isFullscreen ? euiTheme.border.radius.medium : 0};
-          height: ${isFullscreen ? '100%' : 'auto'};
-        `}
-      >
-        <div className="lnsFormula">
+        <div className="lnsFormula"
+          css={css({
+            backgroundColor: euiTheme.colors.lightestShade,
+            border: isFullscreen ? 'none' : euiTheme.border.thin,
+            borderRadius: isFullscreen ? 0 : euiTheme.border.radius.medium,
+            height: isFullscreen ? '100%' : 'auto',
+          })}
+        >
           <div className="lnsFormula__editor">
-            <div className="lnsFormula__editorHeader">
+            <div css={sharedEditorStyles.editorHeader(euiThemeContext)}>
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                <EuiFlexItem className="lnsFormula__editorHeaderGroup">
+                <EuiFlexItem
+                  css={css`
+                    display: block;
+                  `}
+                >
                   <EuiToolTip
                     content={
                       isWordWrapped
@@ -751,7 +757,12 @@ export function FormulaEditor({
                   </EuiToolTip>
                 </EuiFlexItem>
 
-                <EuiFlexItem className="lnsFormula__editorHeaderGroup" grow={false}>
+                <EuiFlexItem
+                  css={css`
+                    display: block;
+                  `}
+                  grow={false}
+                >
                   <EuiButtonEmpty
                     onClick={() => {
                       toggleFullscreen();
@@ -801,7 +812,7 @@ export function FormulaEditor({
               />
 
               {!text ? (
-                <div className="lnsFormula__editorPlaceholder">
+                <div css={sharedEditorStyles.editorPlaceholder(euiThemeContext)}>
                   <EuiText color="subdued" size="s">
                     {i18n.translate('xpack.lens.formulaPlaceholderText', {
                       defaultMessage: 'Type a formula by combining functions with math, like:',
@@ -813,9 +824,9 @@ export function FormulaEditor({
               ) : null}
             </div>
 
-            <div className="lnsFormula__editorFooter">
+            <div css={sharedEditorStyles.editorFooter(euiThemeContext)}>
               <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                <EuiFlexItem className="lnsFormula__editorFooterGroup">
+                <EuiFlexItem grow={false}>
                   {isFullscreen ? (
                     <EuiToolTip
                       content={
@@ -835,6 +846,7 @@ export function FormulaEditor({
                           defaultMessage: 'Hide function reference',
                         })}
                         className="lnsFormula__editorHelp lnsFormula__editorHelp--inline"
+                        css={sharedEditorStyles.editorHelpLink(euiThemeContext)}
                         color="text"
                         onClick={() => setIsHelpOpen(!isHelpOpen)}
                       >
@@ -864,7 +876,7 @@ export function FormulaEditor({
                 </EuiFlexItem>
 
                 {errorCount || warningCount ? (
-                  <EuiFlexItem className="lnsFormula__editorFooterGroup" grow={false}>
+                  <EuiFlexItem grow={false}>
                     <EuiPopover
                       ownFocus={false}
                       isOpen={isWarningOpen}
@@ -872,6 +884,9 @@ export function FormulaEditor({
                       button={
                         <EuiButtonEmpty
                           color={errorCount ? 'danger' : 'warning'}
+                          css={css`
+                            white-space: nowrap;
+                          `}
                           className="lnsFormula__editorError"
                           iconType="warning"
                           size="xs"
@@ -903,7 +918,10 @@ export function FormulaEditor({
                         `}
                       >
                         {warnings.map(({ message, severity }, index) => (
-                          <div key={index} className="lnsFormula__warningText">
+                          <div
+                            key={index}
+                            css={index !== 0 && sharedEditorStyles.warningText(euiThemeContext)}
+                          >
                             <EuiText
                               size="s"
                               color={
@@ -925,13 +943,8 @@ export function FormulaEditor({
           {/* fix the css here */}
           {isFullscreen && isHelpOpen ? (
             <div
-              className="lnsFormula__docs documentation__docs--inline"
-              css={css`
-                display: flex;
-                flex-direction: column;
-                // make sure docs are rendered in front of monaco
-                z-index: 1;
-              `}
+              className="documentation__docs--inline"
+              css={sharedEditorStyles.formulaDocs(euiThemeContext)}
             >
               <LanguageDocumentationPopoverContent
                 language="Formula"
@@ -941,6 +954,102 @@ export function FormulaEditor({
           ) : null}
         </div>
       </div>
-    </div>
+
   );
 }
+
+const sharedEditorStyles = {
+  self: ({ euiTheme }: UseEuiTheme) => {
+    return css`
+      .lnsFormula {
+        display: flex;
+        flex-direction: column;
+        & > * {
+          flex: 1;
+          min-height: 0;
+        }
+        & > * + * {
+          border-top: ${euiTheme.border.thin};
+        }
+      }
+      .lnsFormulaOverflow {
+        // Needs to be higher than the modal and all flyouts
+        z-index: ${euiTheme.levels.toast} + 1;
+      }
+      .lnsFormula__editorContent {
+        background-color: ${euiTheme.colors.lightestShade};
+        min-height: 0;
+        position: relative;
+      }
+    `;
+  },
+  formulaDocs: ({ euiTheme }: UseEuiTheme) => css`
+    display: flex;
+    flex-direction: column;
+    // make sure docs are rendered in front of monaco
+    z-index: 1;
+    background: ${euiTheme.colors.emptyShade};
+  `,
+  editorHeader: ({ euiTheme }: UseEuiTheme) => css`
+    padding: ${euiTheme.size.s};
+  `,
+  editorFooter: ({ euiTheme }: UseEuiTheme) => css`
+    padding: ${euiTheme.size.s};
+    // make sure docs are rendered in front of monaco
+    z-index: 1;
+    border-bottom-right-radius: ${euiTheme.border.radius.medium};
+    border-bottom-left-radius: ${euiTheme.border.radius.medium};
+  `,
+  editorPlaceholder: ({ euiTheme }: UseEuiTheme) => css`
+    position: absolute;
+    top: 0;
+    left: ${euiTheme.size.base};
+    right: 0;
+    color: ${euiTheme.colors.subduedText}
+    // Matches monaco editor
+    font-family: Menlo, Monaco, 'Courier New', monospace;
+    pointer-events: none;
+  `,
+  warningText: ({ euiTheme }: UseEuiTheme) => css`
+    margin-top: ${euiTheme.size.s};
+    border-top: ${euiTheme.border.thin};
+    padding-top: ${euiTheme.size.s};
+  `,
+  editorHelpLink: ({ euiTheme }: UseEuiTheme) => css`
+    align-items: center;
+    display: flex;
+    padding: ${euiTheme.size.xs};
+    & > * + * {
+      margin-left: ${euiTheme.size.xs};
+    }
+  `,
+};
+
+const defaultEditorStyles = ({ euiTheme }: UseEuiTheme) => {
+  return css`
+    .lnsFormula__editorContent {
+      height: 200px;
+    }
+  `;
+};
+
+const fullscreenEditorStyles = ({ euiTheme }: UseEuiTheme) => {
+  return css`
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    .lnsFormula__editor {
+      border-bottom: none;
+      display: flex;
+      flex-direction: column;
+      & > * + * {
+        border-top: ${euiTheme.border.thin};
+      }
+    }
+    .lnsFormula__editorContent {
+      flex: 1;
+    }
+  `;
+};
