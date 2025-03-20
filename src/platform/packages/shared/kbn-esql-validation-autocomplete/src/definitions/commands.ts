@@ -22,6 +22,9 @@ import {
   isAssignment,
   isColumnItem,
   isFunctionItem,
+  isInlineCastItem,
+  isLiteralItem,
+  isOptionItem,
   isSingleItem,
   noCaseCompare,
 } from '../shared/helpers';
@@ -175,7 +178,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     suggest: suggestForFrom,
     validate: (command: ESQLCommand) => {
       const metadataStatement = command.args.find(
-        (arg) => isSingleItem(arg) && arg.name === 'metadata'
+        (arg) => isOptionItem(arg) && arg.name === 'metadata'
       ) as ESQLCommandOption | undefined;
 
       if (!metadataStatement) {
@@ -457,6 +460,33 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       ],
     },
     suggest: suggestForDissect,
+    validate: (command: ESQLCommand) => {
+      const appendSeparatorClause = command.args.find(
+        (arg) => isOptionItem(arg) && arg.name === 'append_separator'
+      ) as ESQLCommandOption | undefined;
+
+      if (!appendSeparatorClause) {
+        return [];
+      }
+
+      const messages: ESQLMessage[] = [];
+      const [firstArg] = appendSeparatorClause.args;
+      if (
+        !Array.isArray(firstArg) &&
+        (!isLiteralItem(firstArg) || firstArg.literalType !== 'keyword')
+      ) {
+        const value =
+          'value' in firstArg && !isInlineCastItem(firstArg) ? firstArg.value : firstArg.name;
+        messages.push(
+          getMessageFromId({
+            messageId: 'wrongDissectOptionArgumentType',
+            values: { value: value ?? '' },
+            locations: firstArg.location,
+          })
+        );
+      }
+      return messages;
+    },
   },
   {
     name: 'grok',

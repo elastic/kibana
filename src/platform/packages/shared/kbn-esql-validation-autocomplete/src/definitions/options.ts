@@ -8,9 +8,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ESQLCommandOption, ESQLMessage } from '@kbn/esql-ast';
-import { isLiteralItem, isInlineCastItem } from '../shared/helpers';
-import { getMessageFromId } from '../validation/errors';
 import type { CommandOptionsDefinition } from './types';
 
 /** @deprecated — options are going away */
@@ -98,23 +95,4 @@ export const appendSeparatorOption: CommandOptionsDefinition = {
   },
   optional: true,
   skipCommonValidation: true, // tell the validation engine to use only the validate function here
-  validate: (option: ESQLCommandOption) => {
-    const messages: ESQLMessage[] = [];
-    const [firstArg] = option.args;
-    if (
-      !Array.isArray(firstArg) &&
-      (!isLiteralItem(firstArg) || firstArg.literalType !== 'keyword')
-    ) {
-      const value =
-        'value' in firstArg && !isInlineCastItem(firstArg) ? firstArg.value : firstArg.name;
-      messages.push(
-        getMessageFromId({
-          messageId: 'wrongDissectOptionArgumentType',
-          values: { value: value ?? '' },
-          locations: firstArg.location,
-        })
-      );
-    }
-    return messages;
-  },
 };
