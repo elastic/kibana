@@ -21,18 +21,8 @@ import {
 } from './fields';
 
 export type AttackDiscoveryAlert = DefaultAlert & {
-  [ALERT_ATTACK_DISCOVERY_TITLE]: string;
-  [ALERT_ATTACK_DISCOVERY_USERS]: Array<{
-    id?: string;
-    name?: string;
-  }>;
-  [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: string[];
   [ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT]?: number;
-  [ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN]: string;
-  [ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN]?: string;
-  [ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN]: string;
-  [ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS]?: string[];
-  [ALERT_ATTACK_DISCOVERY_REPLACEMENTS]?: Record<string, string>;
+  [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: string[];
   [ALERT_ATTACK_DISCOVERY_API_CONFIG]: {
     action_type_id: string;
     connector_id: string;
@@ -40,6 +30,16 @@ export type AttackDiscoveryAlert = DefaultAlert & {
     provider?: string;
     model?: string;
   };
+  [ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN]: string;
+  [ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN]?: string;
+  [ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS]?: string[];
+  [ALERT_ATTACK_DISCOVERY_REPLACEMENTS]?: Record<string, string>;
+  [ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN]: string;
+  [ALERT_ATTACK_DISCOVERY_TITLE]: string;
+  [ALERT_ATTACK_DISCOVERY_USERS]: Array<{
+    id?: string;
+    name?: string;
+  }>;
 };
 
 export type AttackDiscoveryExecutorOptions = RuleExecutorOptions<
