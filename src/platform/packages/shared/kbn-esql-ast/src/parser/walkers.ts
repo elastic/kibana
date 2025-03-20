@@ -303,8 +303,7 @@ function visitOperatorExpression(
       fn.args.push(arg);
     }
     return fn;
-  }
-  if (ctx instanceof ArithmeticBinaryContext) {
+  } else if (ctx instanceof ArithmeticBinaryContext) {
     const fn = createFunction(getMathOperation(ctx), ctx, undefined, 'binary-expression');
     const args = [visitOperatorExpression(ctx._left), visitOperatorExpression(ctx._right)];
     for (const arg of args) {
@@ -316,8 +315,7 @@ function visitOperatorExpression(
     const argsLocationExtends = computeLocationExtends(fn);
     fn.location = argsLocationExtends;
     return fn;
-  }
-  if (ctx instanceof OperatorExpressionDefaultContext) {
+  } else if (ctx instanceof OperatorExpressionDefaultContext) {
     return visitPrimaryExpression(ctx.primaryExpression());
   }
 }
@@ -417,14 +415,11 @@ export function visitRenameClauses(clausesCtx: RenameClauseContext[]): ESQLAstIt
 export function visitPrimaryExpression(ctx: PrimaryExpressionContext): ESQLAstItem | ESQLAstItem[] {
   if (ctx instanceof ConstantDefaultContext) {
     return getConstant(ctx.constant());
-  }
-  if (ctx instanceof DereferenceContext) {
+  } else if (ctx instanceof DereferenceContext) {
     return createColumn(ctx.qualifiedName());
-  }
-  if (ctx instanceof ParenthesizedExpressionContext) {
+  } else if (ctx instanceof ParenthesizedExpressionContext) {
     return collectBooleanExpression(ctx.booleanExpression());
-  }
-  if (ctx instanceof FunctionContext) {
+  } else if (ctx instanceof FunctionContext) {
     const functionExpressionCtx = ctx.functionExpression();
     const fn = createFunctionCall(ctx);
     const asteriskArg = functionExpressionCtx.ASTERISK()
@@ -441,8 +436,7 @@ export function visitPrimaryExpression(ctx: PrimaryExpressionContext): ESQLAstIt
       fn.args.push(...functionArgs);
     }
     return fn;
-  }
-  if (ctx instanceof InlineCastContext) {
+  } else if (ctx instanceof InlineCastContext) {
     return collectInlineCast(ctx);
   }
   return createUnknownItem(ctx);
