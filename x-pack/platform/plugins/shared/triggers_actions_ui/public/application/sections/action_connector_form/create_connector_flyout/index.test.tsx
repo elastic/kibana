@@ -134,6 +134,21 @@ describe('CreateConnectorFlyout', () => {
     });
   });
 
+  it('does not show the filters after an action type is selected', async () => {
+    appMockRenderer.render(
+      <CreateConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        onConnectorCreated={onConnectorCreated}
+        onTestConnector={onTestConnector}
+      />
+    );
+    expect(await screen.findByTestId('createConnectorsModalSearch')).toBeInTheDocument();
+
+    await userEvent.click(await screen.findByTestId(`${actionTypeModel.id}-card`));
+    await waitForElementToBeRemoved(screen.queryByTestId('createConnectorsModalSearch'));
+  });
+
   it('does not show the save and test button if the onTestConnector is not provided', async () => {
     const { queryByTestId } = appMockRenderer.render(
       <CreateConnectorFlyout
