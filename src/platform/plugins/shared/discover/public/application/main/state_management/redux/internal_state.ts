@@ -19,6 +19,7 @@ import {
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { v4 as uuid } from 'uuid';
 import { i18n } from '@kbn/i18n';
+import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import { type RuntimeStateManager } from './runtime_state';
@@ -36,7 +37,7 @@ const DEFAULT_TAB_LABEL = i18n.translate('discover.defaultTabLabel', {
 });
 const DEFAULT_TAB_REGEX = new RegExp(`^${DEFAULT_TAB_LABEL}( \\d+)?$`);
 
-const defaultTabState: Omit<TabState, 'id' | 'label'> = {
+export const defaultTabState: Omit<TabState, keyof TabItem> = {
   dataViewId: undefined,
   isDataViewLoading: false,
   dataRequestParams: {},
@@ -70,13 +71,13 @@ const initialState: DiscoverInternalState = {
   tabs: { byId: {}, allIds: [], currentId: '' },
 };
 
-export const createTab = (allTabs: TabState[]): TabState => {
+export const createTabItem = (allTabs: TabState[]): TabItem => {
   const id = uuid();
   const untitledTabCount = allTabs.filter((tab) => DEFAULT_TAB_REGEX.test(tab.label.trim())).length;
   const label =
     untitledTabCount > 0 ? `${DEFAULT_TAB_LABEL} ${untitledTabCount}` : DEFAULT_TAB_LABEL;
 
-  return { ...defaultTabState, id, label };
+  return { id, label };
 };
 
 const withCurrentTab = (state: DiscoverInternalState, fn: (tab: TabState) => void) => {
@@ -194,7 +195,10 @@ export const createInternalStateStore = (options: InternalStateThunkDependencies
   });
 
   // TEMPORARY: Create initial default tab
-  const defaultTab = createTab(selectAllTabs(store.getState()));
+  const defaultTab: TabState = {
+    ...defaultTabState,
+    ...createTabItem(selectAllTabs(store.getState())),
+  };
   store.dispatch(setTabs({ allTabs: [defaultTab], selectedTabId: defaultTab.id }));
 
   return store;

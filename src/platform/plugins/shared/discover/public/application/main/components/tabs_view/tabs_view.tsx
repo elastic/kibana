@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UnifiedTabs } from '@kbn/unified-tabs';
-import React, { useRef } from 'react';
+import { type TabItem, UnifiedTabs } from '@kbn/unified-tabs';
+import React, { useRef, useState } from 'react';
+import { pick } from 'lodash';
 import type { DiscoverSessionViewRef } from '../session_view';
 import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
 import {
-  createTab,
+  createTabItem,
   internalStateActions,
   selectAllTabs,
   selectCurrentTab,
@@ -26,12 +27,13 @@ export const TabsView = ({ sessionViewProps }: { sessionViewProps: DiscoverSessi
   const dispatch = useInternalStateDispatch();
   const currentTab = useInternalStateSelector(selectCurrentTab);
   const allTabs = useInternalStateSelector(selectAllTabs);
+  const [initialItems] = useState<TabItem[]>(() => allTabs.map((tab) => pick(tab, 'id', 'label')));
   const sessionViewRef = useRef<DiscoverSessionViewRef>(null);
 
   return (
     <UnifiedTabs
       services={services}
-      initialItems={allTabs}
+      initialItems={initialItems}
       onChanged={(updateState) =>
         dispatch(
           internalStateActions.updateTabs({
@@ -40,7 +42,7 @@ export const TabsView = ({ sessionViewProps }: { sessionViewProps: DiscoverSessi
           })
         )
       }
-      createItem={() => createTab(allTabs)}
+      createItem={() => createTabItem(allTabs)}
       renderContent={() => (
         <DiscoverSessionView key={currentTab.id} ref={sessionViewRef} {...sessionViewProps} />
       )}

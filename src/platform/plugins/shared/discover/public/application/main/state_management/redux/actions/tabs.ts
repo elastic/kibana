@@ -11,7 +11,11 @@ import type { TabbedContentState } from '@kbn/unified-tabs/src/components/tabbed
 import { differenceBy } from 'lodash';
 import type { TabState } from '../types';
 import { selectAllTabs, selectCurrentTab } from '../selectors';
-import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
+import {
+  defaultTabState,
+  internalStateSlice,
+  type InternalStateThunkActionCreator,
+} from '../internal_state';
 import { createTabRuntimeState } from '../runtime_state';
 
 export const setTabs: InternalStateThunkActionCreator<
@@ -42,30 +46,31 @@ interface UpdateTabsParams {
 export const updateTabs: InternalStateThunkActionCreator<[UpdateTabsParams], Promise<void>> =
   ({ updateState: { items, selectedItem }, stopSyncing }) =>
   async (dispatch, getState, { urlStateStorage }) => {
-    const allTabs = selectAllTabs(getState());
-    const currentTab = selectCurrentTab(getState());
-    let updatedTabs: TabState[] = items.map(
-      (item) => allTabs.find((tab) => tab.id === item.id) ?? (item as TabState)
-    );
+    const currentState = getState();
+    const currentTab = selectCurrentTab(currentState);
+    let updatedTabs = items.map<TabState>((item) => {
+      const existingTab = currentState.tabs.byId[item.id];
+      return existingTab ? { ...existingTab, ...item } : { ...defaultTabState, ...item };
+    });
 
-    if (selectedItem && selectedItem?.id !== currentTab.id) {
+    if (selectedItem?.id !== currentTab.id) {
       stopSyncing?.();
 
-      if (currentTab) {
-        const updatedTab: TabState = {
-          ...currentTab,
-          globalState: urlStateStorage.get('_g') ?? undefined,
-          appState: urlStateStorage.get('_a') ?? undefined,
-        };
+      updatedTabs = updatedTabs.map((tab) =>
+        tab.id === currentTab.id
+          ? {
+              ...tab,
+              globalState: urlStateStorage.get('_g') ?? undefined,
+              appState: urlStateStorage.get('_a') ?? undefined,
+            }
+          : tab
+      );
 
-        updatedTabs = updatedTabs.map((tab) => (tab.id === currentTab.id ? updatedTab : tab));
-      }
+      const existingTab = selectedItem ? currentState.tabs.byId[selectedItem.id] : undefined;
 
-      const selectedTab = allTabs.find((tab) => tab.id === selectedItem.id);
-
-      if (selectedTab) {
-        await urlStateStorage.set('_g', selectedTab.globalState);
-        await urlStateStorage.set('_a', selectedTab.appState);
+      if (existingTab) {
+        await urlStateStorage.set('_g', existingTab.globalState);
+        await urlStateStorage.set('_a', existingTab.appState);
       } else {
         await urlStateStorage.set('_g', {});
         await urlStateStorage.set('_a', {});
