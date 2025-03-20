@@ -526,7 +526,12 @@ describe('useEsqlMode', () => {
       query: { esql: 'from pattern1' },
     });
     await waitFor(() =>
-      expect(omit(selectCurrentTab(stateContainer.internalState.getState()), 'resetId')).toEqual({
+      expect(
+        omit(
+          selectCurrentTab(stateContainer.internalState.getState()).resetDefaultProfileState,
+          'resetId'
+        )
+      ).toEqual({
         columns: true,
         rowHeight: true,
         breakdownField: true,
