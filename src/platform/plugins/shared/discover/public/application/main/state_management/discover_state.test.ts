@@ -246,9 +246,9 @@ describe('Discover state', () => {
       } as SavedSearch;
 
       const { state } = await getState('/#?_a=(sort:!(!(timestamp,desc)))', { savedSearch });
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       expect(state.appState.getState().sort).toEqual([['timestamp', 'desc']]);
-      unsubscribe();
+      state.actions.stopSyncing();
     });
 
     test('Empty URL should use saved search sort for state', async () => {
@@ -266,9 +266,9 @@ describe('Discover state', () => {
           defaultUrlState: undefined,
         })
       );
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       expect(state.appState.getState().sort).toEqual([['bytes', 'desc']]);
-      unsubscribe();
+      state.actions.stopSyncing();
     });
   });
 
@@ -469,12 +469,12 @@ describe('Discover state', () => {
           defaultUrlState: undefined,
         })
       );
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       state.actions.fetchData();
       await waitFor(() => {
         expect(dataState.data$.documents$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
       });
-      unsubscribe();
+      state.actions.stopSyncing();
 
       expect(dataState.data$.totalHits$.value.result).toBe(0);
       expect(dataState.data$.documents$.value.result).toEqual([]);
@@ -499,7 +499,7 @@ describe('Discover state', () => {
       );
       const newSavedSearch = state.savedSearchState.getState();
       expect(newSavedSearch?.id).toBeUndefined();
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
         `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())"`
@@ -524,7 +524,7 @@ describe('Discover state', () => {
       }
     `);
       expect(searchSource.getField('index')?.id).toEqual('the-data-view-id');
-      unsubscribe();
+      state.actions.stopSyncing();
     });
 
     test('loadNewSavedSearch given an empty URL using loadSavedSearch', async () => {
@@ -540,13 +540,13 @@ describe('Discover state', () => {
       );
       const newSavedSearch = state.savedSearchState.getState();
       expect(newSavedSearch?.id).toBeUndefined();
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
         `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())"`
       );
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
-      unsubscribe();
+      state.actions.stopSyncing();
     });
 
     test('loadNewSavedSearch with URL changing interval state', async () => {
@@ -565,13 +565,13 @@ describe('Discover state', () => {
       );
       const newSavedSearch = state.savedSearchState.getState();
       expect(newSavedSearch?.id).toBeUndefined();
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
         `"/#?_a=(columns:!(bytes),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:month,sort:!())&_g=()"`
       );
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
-      unsubscribe();
+      state.actions.stopSyncing();
     });
 
     test('loadSavedSearch with no id, given URL changes state', async () => {
@@ -590,13 +590,13 @@ describe('Discover state', () => {
       );
       const newSavedSearch = state.savedSearchState.getState();
       expect(newSavedSearch?.id).toBeUndefined();
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
         `"/#?_a=(columns:!(bytes),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:month,sort:!())&_g=()"`
       );
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
-      unsubscribe();
+      state.actions.stopSyncing();
     });
 
     test('loadSavedSearch given an empty URL, no state changes', async () => {
@@ -625,14 +625,14 @@ describe('Discover state', () => {
         })
       );
       const newSavedSearch = state.savedSearchState.getState();
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       await new Promise(process.nextTick);
       expect(newSavedSearch?.id).toBe('the-saved-search-id');
       expect(getCurrentUrl()).toMatchInlineSnapshot(
         `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())"`
       );
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
-      unsubscribe();
+      state.actions.stopSyncing();
     });
 
     test('loadSavedSearch given a URL with different interval and columns modifying the state', async () => {
@@ -650,13 +650,13 @@ describe('Discover state', () => {
           defaultUrlState: undefined,
         })
       );
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
         `"/#?_a=(columns:!(message),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:month,sort:!())&_g=()"`
       );
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
-      unsubscribe();
+      state.actions.stopSyncing();
     });
 
     test('loadSavedSearch given a URL with different time range than the stored one showing as changed', async () => {
@@ -680,10 +680,10 @@ describe('Discover state', () => {
           defaultUrlState: undefined,
         })
       );
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       await new Promise(process.nextTick);
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
-      unsubscribe();
+      state.actions.stopSyncing();
     });
 
     test('loadSavedSearch given a URL with different refresh interval than the stored one showing as changed', async () => {
@@ -711,10 +711,10 @@ describe('Discover state', () => {
           defaultUrlState: undefined,
         })
       );
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       await new Promise(process.nextTick);
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
-      unsubscribe();
+      state.actions.stopSyncing();
     });
 
     test('loadSavedSearch given a URL with matching time range and refresh interval not showing as changed', async () => {
@@ -742,10 +742,10 @@ describe('Discover state', () => {
           defaultUrlState: undefined,
         })
       );
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       await new Promise(process.nextTick);
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
-      unsubscribe();
+      state.actions.stopSyncing();
     });
 
     test('loadSavedSearch ignoring hideChart in URL', async () => {
@@ -1064,7 +1064,7 @@ describe('Discover state', () => {
           defaultUrlState: undefined,
         })
       );
-      const unsubscribe = actions.initializeAndSync();
+      actions.initializeAndSync();
       await new Promise(process.nextTick);
       // test initial state
       expect(dataState.fetch).toHaveBeenCalledTimes(0);
@@ -1085,7 +1085,7 @@ describe('Discover state', () => {
       );
       // check if the changed data view is reflected in the URL
       expect(getCurrentUrl()).toContain(dataViewComplexMock.id);
-      unsubscribe();
+      state.actions.stopSyncing();
     });
 
     test('onDataViewCreated - persisted data view', async () => {
@@ -1099,7 +1099,7 @@ describe('Discover state', () => {
           defaultUrlState: undefined,
         })
       );
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       await state.actions.onDataViewCreated(dataViewComplexMock);
       await waitFor(() => {
         expect(selectCurrentTab(state.internalState.getState()).dataViewId).toBe(
@@ -1112,7 +1112,7 @@ describe('Discover state', () => {
       expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
         dataViewComplexMock.id
       );
-      unsubscribe();
+      state.actions.stopSyncing();
     });
 
     test('onDataViewCreated - ad-hoc data view', async () => {
@@ -1126,7 +1126,7 @@ describe('Discover state', () => {
           defaultUrlState: undefined,
         })
       );
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       jest
         .spyOn(discoverServiceMock.dataViews, 'get')
         .mockImplementationOnce((id) =>
@@ -1142,7 +1142,7 @@ describe('Discover state', () => {
       expect(state.savedSearchState.getState().searchSource.getField('index')!.id).toBe(
         dataViewAdHoc.id
       );
-      unsubscribe();
+      state.actions.stopSyncing();
     });
 
     test('onDataViewEdited - persisted data view', async () => {
@@ -1158,31 +1158,31 @@ describe('Discover state', () => {
       );
       const selectedDataViewId = selectCurrentTab(state.internalState.getState()).dataViewId;
       expect(selectedDataViewId).toBe(dataViewMock.id);
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       await state.actions.onDataViewEdited(dataViewMock);
       await waitFor(() => {
         expect(selectCurrentTab(state.internalState.getState()).dataViewId).toBe(
           selectedDataViewId
         );
       });
-      unsubscribe();
+      state.actions.stopSyncing();
     });
 
     test('onDataViewEdited - ad-hoc data view', async () => {
       const { state } = await getState('/', { savedSearch: savedSearchMock });
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       await state.actions.onDataViewCreated(dataViewAdHoc);
       const previousId = dataViewAdHoc.id;
       await state.actions.onDataViewEdited(dataViewAdHoc);
       await waitFor(() => {
         expect(selectCurrentTab(state.internalState.getState()).dataViewId).not.toBe(previousId);
       });
-      unsubscribe();
+      state.actions.stopSyncing();
     });
 
     test('onOpenSavedSearch - same target id', async () => {
       const { state } = await getState('/', { savedSearch: savedSearchMock });
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
@@ -1196,7 +1196,7 @@ describe('Discover state', () => {
       expect(state.savedSearchState.getState().hideChart).toBe(true);
       state.actions.onOpenSavedSearch(savedSearchMock.id!);
       expect(state.savedSearchState.getState().hideChart).toBe(undefined);
-      unsubscribe();
+      state.actions.stopSyncing();
     });
 
     test('onOpenSavedSearch - cleanup of previous filter', async () => {
@@ -1238,13 +1238,13 @@ describe('Discover state', () => {
           defaultUrlState: undefined,
         })
       );
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       await state.actions.createAndAppendAdHocDataView({ title: 'ad-hoc-test' });
       expect(state.appState.getState().dataSource).toEqual(
         createDataViewDataSource({ dataViewId: 'ad-hoc-id' })
       );
       expect(state.runtimeStateManager.adHocDataViews$.getValue()[0].id).toBe('ad-hoc-id');
-      unsubscribe();
+      state.actions.stopSyncing();
     });
 
     test('undoSavedSearchChanges - when changing data views', async () => {
@@ -1259,7 +1259,7 @@ describe('Discover state', () => {
           defaultUrlState: undefined,
         })
       );
-      const unsubscribe = state.actions.initializeAndSync();
+      state.actions.initializeAndSync();
       await new Promise(process.nextTick);
       const initialUrlState =
         '/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())';
@@ -1288,7 +1288,7 @@ describe('Discover state', () => {
       });
       expect(selectCurrentTab(state.internalState.getState()).dataViewId).toBe(dataViewMock.id!);
 
-      unsubscribe();
+      state.actions.stopSyncing();
     });
 
     test('undoSavedSearchChanges with timeRestore', async () => {

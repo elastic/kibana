@@ -144,7 +144,11 @@ export interface DiscoverStateContainer {
     /**
      * Initializing state containers and start subscribing to changes triggering e.g. data fetching
      */
-    initializeAndSync: () => () => void;
+    initializeAndSync: () => void;
+    /**
+     * Stop syncing the state containers started by initializeAndSync
+     */
+    stopSyncing: () => void;
     /**
      * Create and select a temporary/adhoc data view by a given index pattern
      * Used by the Data View Picker
@@ -412,6 +416,13 @@ export function getDiscoverStateContainer({
     fetchData();
   };
 
+  let internalStopSyncing = () => {};
+
+  const stopSyncing = () => {
+    internalStopSyncing();
+    internalStopSyncing = () => {};
+  };
+
   /**
    * state containers initializing and subscribing to changes triggering e.g. data fetching
    */
@@ -476,7 +487,7 @@ export function getDiscoverStateContainer({
       }
     );
 
-    return () => {
+    internalStopSyncing = () => {
       unsubscribeData();
       appStateUnsubscribe();
       appStateInitAndSyncUnsubscribe();
@@ -589,6 +600,7 @@ export function getDiscoverStateContainer({
     customizationContext,
     actions: {
       initializeAndSync,
+      stopSyncing,
       fetchData,
       onChangeDataView,
       createAndAppendAdHocDataView,
