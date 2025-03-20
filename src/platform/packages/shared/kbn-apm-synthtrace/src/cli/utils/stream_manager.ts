@@ -57,10 +57,14 @@ export class StreamManager {
     private readonly logger: ToolingLog,
     private readonly teardownCallback: () => Promise<void> = asyncNoop
   ) {
-    attach(this.logger, () => this.teardown());
+    attach(this.logger, () => {
+      this.logger.info('Tearing down after kill signal');
+      return this.teardown();
+    });
 
     parentPort?.on('message', (message) => {
       if (message === 'shutdown') {
+        this.logger.info('Tearing down worker after shutdown message');
         this.teardown()
           .then(() => {
             process.exit(0);
@@ -135,8 +139,6 @@ export class StreamManager {
       this.logger.error(`Force-quitting after receiving kill signal`);
       process.exit(1);
     });
-
-    this.logger.info('Tearing down after kill signal');
 
     // end all streams and listen until they've
     // completed

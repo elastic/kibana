@@ -60,6 +60,18 @@ export interface ActivePanel {
   };
 }
 
+export interface ActiveRowEvent {
+  id: string;
+  startingPosition: {
+    top: number;
+    left: number;
+  };
+  translate: {
+    top: number;
+    left: number;
+  };
+}
+
 export interface GridLayoutStateManager {
   gridLayout$: BehaviorSubject<GridLayoutData>;
   proposedGridLayout$: BehaviorSubject<GridLayoutData | undefined>; // temporary state for layout during drag and drop operations
@@ -69,9 +81,11 @@ export interface GridLayoutStateManager {
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
   activePanel$: BehaviorSubject<ActivePanel | undefined>;
+  activeRowEvent$: BehaviorSubject<ActiveRowEvent | undefined>;
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 
   rowRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
+  headerRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
   panelRefs: React.MutableRefObject<{
     [rowId: string]: { [panelId: string]: HTMLDivElement | null };
   }>;
