@@ -19,9 +19,8 @@ import {
   isIdentifier,
   walk,
 } from '@kbn/esql-ast';
-import type { ESQLAstJoinCommand, ESQLIdentifier } from '@kbn/esql-ast/src/types';
+import type { ESQLAstItem, ESQLAstJoinCommand, ESQLIdentifier } from '@kbn/esql-ast/src/types';
 import { CommandOptionsDefinition } from '../definitions/types';
-import { METADATA_FIELDS } from '../shared/constants';
 import { compareTypesWithLiterals } from '../shared/esql_types';
 import {
   areFieldAndVariableTypesCompatible,
@@ -198,6 +197,38 @@ async function validateAst(
   };
 }
 
+function validateArgs({
+  args,
+  commandName,
+  optionName,
+  references,
+}: {
+  args: ESQLAstItem[];
+  commandName: string;
+  optionName?: string;
+  references: ReferenceMaps;
+}): ESQLMessage[] {
+  const messages: ESQLMessage[] = [];
+  for (const arg of args) {
+    if (Array.isArray(arg)) {
+      continue;
+    }
+    if (isColumnItem(arg)) {
+      messages.push(...validateColumnForCommand(arg, commandName, references));
+    } else if (isFunctionItem(arg)) {
+      messages.push(
+        ...validateFunction({
+          fn: arg,
+          parentCommand: commandName,
+          parentOption: optionName,
+          references,
+        })
+      );
+    }
+  }
+  return messages;
+}
+
 function validateCommand(
   command: ESQLCommand,
   references: ReferenceMaps,
@@ -234,9 +265,8 @@ function validateCommand(
     }
     default: {
       // Now validate arguments
-      for (const commandArg of command.args) {
-        const wrappedArg = Array.isArray(commandArg) ? commandArg : [commandArg];
-        for (const arg of wrappedArg) {
+      for (const arg of command.args) {
+        if (!Array.isArray(arg)) {
           if (isFunctionItem(arg)) {
             messages.push(
               ...validateFunction({
@@ -296,48 +326,18 @@ function validateOption(
 ): ESQLMessage[] {
   // check if the arguments of the option are of the correct type
   const messages: ESQLMessage[] = [];
-  if (option.incomplete || command.incomplete) {
+  if (option.incomplete || command.incomplete || !optionDef) {
     return messages;
-  }
-  if (!optionDef) {
-    messages.push(
-      getMessageFromId({
-        messageId: 'unknownOption',
-        values: { command: command.name.toUpperCase(), option: option.name },
-        locations: option.location,
-      })
-    );
-    return messages;
-  }
-  // use dedicate validate fn if provided
-  if (optionDef.validate) {
-    const fields = METADATA_FIELDS;
-    messages.push(...optionDef.validate(option, command, new Set(fields)));
   }
   if (!optionDef.skipCommonValidation) {
-    option.args.forEach((arg) => {
-      if (!Array.isArray(arg)) {
-        if (!optionDef.signature.multipleParams) {
-          if (isColumnItem(arg)) {
-            messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
-          }
-        } else {
-          if (isColumnItem(arg)) {
-            messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
-          }
-          if (isFunctionItem(arg)) {
-            messages.push(
-              ...validateFunction({
-                fn: arg,
-                parentCommand: command.name,
-                parentOption: option.name,
-                references: referenceMaps,
-              })
-            );
-          }
-        }
-      }
-    });
+    messages.push(
+      ...validateArgs({
+        args: option.args,
+        commandName: command.name,
+        optionName: option.name,
+        references: referenceMaps,
+      })
+    );
   }
 
   return messages;

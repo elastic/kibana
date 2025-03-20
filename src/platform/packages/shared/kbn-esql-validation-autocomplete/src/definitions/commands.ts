@@ -461,12 +461,22 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
     suggest: suggestForDissect,
     validate: (command: ESQLCommand) => {
-      const appendSeparatorClause = command.args.find(
-        (arg) => isOptionItem(arg) && arg.name === 'append_separator'
-      ) as ESQLCommandOption | undefined;
+      const appendSeparatorClause = command.args.find((arg) => isOptionItem(arg)) as
+        | ESQLCommandOption
+        | undefined;
 
       if (!appendSeparatorClause) {
         return [];
+      }
+
+      if (appendSeparatorClause.name !== 'append_separator') {
+        return [
+          getMessageFromId({
+            messageId: 'unknownDissectKeyword',
+            values: { keyword: appendSeparatorClause.name },
+            locations: appendSeparatorClause.location,
+          }),
+        ];
       }
 
       const messages: ESQLMessage[] = [];
