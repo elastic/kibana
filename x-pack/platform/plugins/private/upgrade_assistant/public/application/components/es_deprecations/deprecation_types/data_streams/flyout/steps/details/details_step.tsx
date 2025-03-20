@@ -250,11 +250,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
               {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && !reindexExcluded && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    color={
-                      status === DataStreamMigrationStatus.cancelled
-                        ? 'warning'
-                        : 'primary'
-                    }
+                    color={status === DataStreamMigrationStatus.cancelled ? 'warning' : 'primary'}
                     iconType={status === DataStreamMigrationStatus.cancelled ? 'play' : undefined}
                     onClick={() => initAction('reindex')}
                     isLoading={loading}
