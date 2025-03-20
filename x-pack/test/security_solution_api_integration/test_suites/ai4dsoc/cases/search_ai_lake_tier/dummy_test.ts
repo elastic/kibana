@@ -50,7 +50,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(internalHeaders)
         .set('kbn-xsrf', 'true')
         .send(body)
-        .expect(200);
+        .expect(400);
     });
   });
 }
