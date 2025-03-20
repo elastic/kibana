@@ -168,8 +168,8 @@ describe('named parameters', () => {
   });
 
   describe('when incorrectly formatted, returns errors', () => {
-    it('two question marks "?" in a row', () => {
-      const text = 'ROW x = ??';
+    it('three question marks "?" in a row', () => {
+      const text = 'ROW x = ???';
       const { errors } = parse(text);
       expect(errors.length > 0).toBe(true);
     });
