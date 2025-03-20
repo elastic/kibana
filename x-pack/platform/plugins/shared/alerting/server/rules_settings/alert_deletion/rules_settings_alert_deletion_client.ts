@@ -82,6 +82,10 @@ export class RulesSettingsAlertDeletionClient {
           alertDeletion: {
             ...attributes.alertDeletion,
             ...newAlertDeletionProperties,
+            ...(newAlertDeletionProperties.categoryIds &&
+            newAlertDeletionProperties.categoryIds.length > 0
+              ? { categoryIds: newAlertDeletionProperties.categoryIds }
+              : { categoryIds: null }),
             updatedAt: modificationMetadata.updatedAt,
             updatedBy: modificationMetadata.updatedBy,
           },

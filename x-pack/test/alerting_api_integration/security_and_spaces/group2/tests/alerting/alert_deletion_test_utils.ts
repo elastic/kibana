@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import moment from 'moment';
 
 // active lifecycle alert
@@ -288,243 +289,278 @@ const getActiveAlert = (
   };
 };
 
-export const inactiveStackAlertsShouldBeDeleted = [
+export const inactiveStackAlertsOlderThan90 = [
   // 3 stack alerts that became inactive more than 90 days ago
   {
-    id: '4b26af93-e0b9-45d1-9002-42441a4f14ee',
+    space1: { id: '4b26af93-e0b9-45d1-9002-42441a4f14ee' },
+    default: { id: '5760aff4-da99-4403-a26b-bd21889c1e73' },
     time: moment.utc().subtract(100, 'days').toISOString(),
   },
   {
-    id: '3cc3e4f1-0a62-4dfd-b694-39f5c36ae433',
+    space1: { id: '3cc3e4f1-0a62-4dfd-b694-39f5c36ae433' },
+    default: { id: '8f375775-3dac-4da1-8e63-e03b89566d9d' },
     time: moment.utc().subtract(101, 'days').toISOString(),
   },
   {
-    id: '74b1ff35-8691-4a41-bb67-27f69bc5d737',
+    space1: { id: '74b1ff35-8691-4a41-bb67-27f69bc5d737' },
+    default: { id: 'bd72c41c-a904-4a29-a8fc-27026acb9496' },
     time: moment.utc().subtract(99, 'days').toISOString(),
   },
 ];
 
-export const inactiveStackAlertsShouldNotBeDeleted = [
+export const inactiveStackAlertsNewerThan90 = [
   // 2 stack alerts that became inactive less than 90 days ago
   {
-    id: 'd6f34698-4fca-4e17-bfc2-d2a10d84a19e',
+    space1: { id: 'd6f34698-4fca-4e17-bfc2-d2a10d84a19e' },
+    default: { id: '44b33c3f-cb45-4397-bf70-6fe487d99b5c' },
     time: moment.utc().subtract(50, 'days').toISOString(),
   },
   {
-    id: '8b7fa7a2-ae26-4b45-a612-74f1018c02e8',
+    space1: { id: '8b7fa7a2-ae26-4b45-a612-74f1018c02e8' },
+    default: { id: '448bfa8a-360b-4c6e-a71d-4d491b182ad2' },
     time: moment.utc().subtract(45, 'days').toISOString(),
   },
 ];
 
-export const activeStackAlertsShouldBeDeleted = [
+export const activeStackAlertsOlderThan90 = [
   // 4 stack alerts that have been active for more than 90 days
   {
-    id: 'e39c8793-a0a9-4e6a-92b7-dcea46bd4e80',
+    space1: { id: 'e39c8793-a0a9-4e6a-92b7-dcea46bd4e80' },
+    default: { id: 'da00d551-c318-4f58-b618-11f9781ec61e' },
     time: moment.utc().subtract(100, 'days').toISOString(),
   },
   {
-    id: '23bf06ea-f3a2-42f7-816e-2ca37eb9e11d',
+    space1: { id: '23bf06ea-f3a2-42f7-816e-2ca37eb9e11d' },
+    default: { id: '58fc1f4d-f949-4f51-b838-a72bef44656c' },
     time: moment.utc().subtract(150, 'days').toISOString(),
   },
   {
-    id: '58993d1a-0bec-4952-a2e8-7884608f8775',
+    space1: { id: '58993d1a-0bec-4952-a2e8-7884608f8775' },
+    default: { id: '3711cf80-8f8b-4575-b21d-2c9f4fd4f9ef' },
     time: moment.utc().subtract(120, 'days').toISOString(),
   },
   {
-    id: '7f6fe52f-447e-4e91-b036-a9b1bb021aba',
+    space1: { id: '7f6fe52f-447e-4e91-b036-a9b1bb021aba' },
+    default: { id: '581d0d3d-303a-4909-b631-62c97dea0473' },
     time: moment.utc().subtract(125, 'days').toISOString(),
   },
 ];
 
-export const activeStackAlertsShouldNotBeDeleted = [
+export const activeStackAlertsNewerThan90 = [
   // 1 stack alert that has been active for less than 90 days
   {
-    id: 'ea673c2e-fa32-4455-9460-97112235bcd5',
+    space1: { id: 'ea673c2e-fa32-4455-9460-97112235bcd5' },
+    default: { id: 'f10fb95f-7e4f-4d2d-a84a-96d5f9076298' },
     time: moment.utc().subtract(25, 'days').toISOString(),
   },
 ];
 
-export const inactiveO11yAlertsShouldBeDeleted = [
+export const inactiveO11yAlertsOlderThan90 = [
   // 2 o11y alerts that became inactive more than 90 days ago
   {
-    id: 'ac4a2809-2a9e-48b9-98f0-2faaff83dc52',
+    space1: { id: 'ac4a2809-2a9e-48b9-98f0-2faaff83dc52' },
+    default: { id: '034115eb-9edc-47be-b717-817346f1f108' },
     time: moment.utc().subtract(99, 'days').toISOString(),
   },
   {
-    id: '6095bbed-5995-4c16-a1bf-312de2408516',
+    space1: { id: '6095bbed-5995-4c16-a1bf-312de2408516' },
+    default: { id: '2b71e992-f67a-409d-b5f2-e9b7a312e681' },
     time: moment.utc().subtract(108, 'days').toISOString(),
   },
 ];
 
-export const inactiveO11yAlertsShouldNotBeDeleted = [
+export const inactiveO11yAlertsNewerThan90 = [
   // 3 o11y alerts that became inactive less than 90 days ago
   {
-    id: 'c3fb1fc2-7309-44c8-b723-eb118a3f9b6e',
+    space1: { id: 'c3fb1fc2-7309-44c8-b723-eb118a3f9b6e' },
+    default: { id: '48e93b15-a59e-4b5a-94f4-739d85b29e6c' },
     time: moment.utc().subtract(10, 'days').toISOString(),
   },
   {
-    id: '534ce6b6-bf83-47a7-b1be-c3846a03182e',
+    space1: { id: '534ce6b6-bf83-47a7-b1be-c3846a03182e' },
+    default: { id: 'c533d7d8-ae2d-4401-a8dd-43fe30543b13' },
     time: moment.utc().subtract(5, 'days').toISOString(),
   },
   {
-    id: '2ba40369-6477-4e78-ba18-a55c546fa65b',
+    space1: { id: '2ba40369-6477-4e78-ba18-a55c546fa65b' },
+    default: { id: 'fe1e22d2-3ba3-4c85-9ca3-3df869b80d46' },
     time: moment.utc().subtract(23, 'days').toISOString(),
   },
 ];
 
-export const activeO11yAlertsShouldBeDeleted = [
+export const activeO11yAlertsOlderThan90 = [
   // 1 o11y alert that has been active for more than 90 days
   {
-    id: 'eae0e607-1f15-4722-ad32-bbb8353a8ba5',
+    space1: { id: 'eae0e607-1f15-4722-ad32-bbb8353a8ba5' },
+    default: { id: 'cdad1860-5ffd-4d41-8518-f7f3c237b2c9' },
     time: moment.utc().subtract(98, 'days').toISOString(),
   },
 ];
 
-export const activeO11yAlertsShouldNotBeDeleted = [
+export const activeO11yAlertsNewerThan90 = [
   // 4 o11y alerts that have been active for less than 90 days
   {
-    id: '03d38d1d-f44e-4c6a-a1c8-34bbad86e29a',
+    space1: { id: '03d38d1d-f44e-4c6a-a1c8-34bbad86e29a' },
+    default: { id: 'f5d1c3fb-de14-46db-9c55-ff660d4ca81e' },
     time: moment.utc().subtract(2, 'days').toISOString(),
   },
   {
-    id: 'fa579125-65f0-467e-83bd-b5186492a417',
+    space1: { id: 'fa579125-65f0-467e-83bd-b5186492a417' },
+    default: { id: 'ec7e005a-d69f-4ca0-a480-006bcb47d1c4' },
     time: moment.utc().subtract(24, 'days').toISOString(),
   },
   {
-    id: '669b3dd8-85b8-4f6c-b68a-f0a845d19120',
+    space1: { id: '669b3dd8-85b8-4f6c-b68a-f0a845d19120' },
+    default: { id: 'ad987d9f-9714-4b73-a383-10a7c7761051' },
     time: moment.utc().subtract(7, 'days').toISOString(),
   },
   {
-    id: '5a6bfc58-d80b-497e-aa1b-e494c4ea6354',
+    space1: { id: '5a6bfc58-d80b-497e-aa1b-e494c4ea6354' },
+    default: { id: '9a6a0a3a-206a-4aa4-9ebe-ed0c52f4585e' },
     time: moment.utc().subtract(3, 'days').toISOString(),
   },
 ];
 
-export const inactiveSecurityAlertsShouldBeDeleted = [
+export const inactiveSecurityAlertsOlderThan90 = [
   // 5 security alerts that became inactive more than 90 days ago
   {
-    id: '6219593d-92d2-4436-a294-7942ecc9ec2d',
+    space1: { id: '6219593d-92d2-4436-a294-7942ecc9ec2d' },
+    default: { id: '7d694d7f-2f5e-4549-bf31-bd31512f30c2' },
     time: moment.utc().subtract(200, 'days').toISOString(),
   },
   {
-    id: '56ab31e5-624d-42b5-980b-6fe434c3e88a',
+    space1: { id: '56ab31e5-624d-42b5-980b-6fe434c3e88a' },
+    default: { id: '470fd3c3-0bc8-4900-8d9b-7d1a0bcd6fdc' },
     time: moment.utc().subtract(365, 'days').toISOString(),
   },
   {
-    id: 'ef8b165c-8147-493e-9455-11dda6eb34f9',
+    space1: { id: 'ef8b165c-8147-493e-9455-11dda6eb34f9' },
+    default: { id: '7359744c-b03e-4e58-8421-d518087f0830' },
     time: moment.utc().subtract(450, 'days').toISOString(),
   },
   {
-    id: '7da21baf-3601-493a-be1e-8ea8a51eb855',
+    space1: { id: '7da21baf-3601-493a-be1e-8ea8a51eb855' },
+    default: { id: 'c8cdcced-01fd-4e05-934b-87097b8bbbe3' },
     time: moment.utc().subtract(92, 'days').toISOString(),
   },
   {
-    id: 'c0fc97f9-d45b-451a-bcf8-1f9453670447',
+    space1: { id: 'c0fc97f9-d45b-451a-bcf8-1f9453670447' },
+    default: { id: 'a895b383-195b-4ca0-af4d-c9165983885f' },
     time: moment.utc().subtract(91, 'days').toISOString(),
   },
 ];
 
-export const inactiveSecurityAlertsShouldNotBeDeleted = [
+export const inactiveSecurityAlertsNewerThan90 = [
   // 1 security alert that became inactive less than 90 days ago
   {
-    id: '8ec8ffe7-15f1-45b7-befb-75c2b68169b5',
+    space1: { id: '8ec8ffe7-15f1-45b7-befb-75c2b68169b5' },
+    default: { id: '7f57affa-10d2-44b2-9413-dda04735e574' },
     time: moment.utc().subtract(3, 'days').toISOString(),
   },
 ];
 
-export const activeSecurityAlertsShouldBeDeleted = [
+export const activeSecurityAlertsOlderThan90 = [
   // 3 security alerts that have been active for more than 90 days
   {
-    id: 'c8c4ae1e-f4d1-45e3-b1dd-5da48089f4c4',
+    space1: { id: 'c8c4ae1e-f4d1-45e3-b1dd-5da48089f4c4' },
+    default: { id: 'e60b7216-1984-4884-b632-07232388ec8e' },
     time: moment.utc().subtract(99, 'days').toISOString(),
   },
   {
-    id: '27e98d3d-0e76-4a6d-8594-62da5cf96d31',
+    space1: { id: '27e98d3d-0e76-4a6d-8594-62da5cf96d31' },
+    default: { id: '118b6910-ee68-4391-867a-f7fc260c03f3' },
     time: moment.utc().subtract(103, 'days').toISOString(),
   },
   {
-    id: '04d1acb7-29df-4f85-9a51-9683e59dcbaa',
+    space1: { id: '04d1acb7-29df-4f85-9a51-9683e59dcbaa' },
+    default: { id: 'fb5a0046-fb69-460a-839a-3aa614f2259b' },
     time: moment.utc().subtract(102, 'days').toISOString(),
   },
 ];
 
-export const activeSecurityAlertsShouldNotBeDeleted = [
+export const activeSecurityAlertsNewerThan90 = [
   // 6 security alerts that have been active for less than 90 days
   {
-    id: 'e3576ffa-cb51-4527-9b30-e82b12e7c8a7',
+    space1: { id: 'e3576ffa-cb51-4527-9b30-e82b12e7c8a7' },
+    default: { id: 'd54b9a9e-eea2-4fee-9c1e-23d6bb002cd9' },
     time: moment.utc().subtract(25, 'days').toISOString(),
   },
   {
-    id: '879a0f8f-53eb-429c-b773-e2baf4657013',
+    space1: { id: '879a0f8f-53eb-429c-b773-e2baf4657013' },
+    default: { id: '6e6c2f6e-39e2-422b-bc19-2fb5dca0956c' },
     time: moment.utc().subtract(25, 'days').toISOString(),
   },
   {
-    id: '727589ac-27a2-489d-a790-ef2da59a1e04',
+    space1: { id: '727589ac-27a2-489d-a790-ef2da59a1e04' },
+    default: { id: '5226a3bd-5d30-41ec-8885-78e9dc63c957' },
     time: moment.utc().subtract(25, 'days').toISOString(),
   },
   {
-    id: '0fed8503-01bb-4fa0-bab3-33efef5ab9bc',
+    space1: { id: '0fed8503-01bb-4fa0-bab3-33efef5ab9bc' },
+    default: { id: '2050f633-5663-46b4-a8f0-20c4cde6b36c' },
     time: moment.utc().subtract(25, 'days').toISOString(),
   },
   {
-    id: '446dcee3-2c92-4a72-b6cd-9e6357283e3c',
+    space1: { id: '446dcee3-2c92-4a72-b6cd-9e6357283e3c' },
+    default: { id: 'ab287131-dfbb-4116-8ef7-0189fb4840f6' },
     time: moment.utc().subtract(25, 'days').toISOString(),
   },
   {
-    id: '58f52b91-4835-4da2-8596-4052efecfefa',
+    space1: { id: '58f52b91-4835-4da2-8596-4052efecfefa' },
+    default: { id: '9e5a420f-4110-4355-ad14-32776e5d820a' },
     time: moment.utc().subtract(25, 'days').toISOString(),
   },
 ];
 
-export const testAlertDocs = [
-  ...inactiveStackAlertsShouldBeDeleted.map((input) =>
-    getRecoveredAlert(input.id, 'stack', input.time, 'space1', getRandomBoolean())
+export const getTestAlertDocs = (spaceId: string = 'space1') => [
+  ...inactiveStackAlertsOlderThan90.map((input) =>
+    getRecoveredAlert(get(input, spaceId)?.id, 'stack', input.time, spaceId, getRandomBoolean())
   ),
-  ...inactiveStackAlertsShouldNotBeDeleted.map((input) =>
-    getRecoveredAlert(input.id, 'stack', input.time, 'space1', getRandomBoolean())
+  ...inactiveStackAlertsNewerThan90.map((input) =>
+    getRecoveredAlert(get(input, spaceId)?.id, 'stack', input.time, spaceId, getRandomBoolean())
   ),
-  ...activeStackAlertsShouldBeDeleted.map((input) =>
-    getActiveAlert(input.id, 'stack', input.time, 'space1')
+  ...activeStackAlertsOlderThan90.map((input) =>
+    getActiveAlert(get(input, spaceId)?.id, 'stack', input.time, spaceId)
   ),
-  ...activeStackAlertsShouldNotBeDeleted.map((input) =>
-    getActiveAlert(input.id, 'stack', input.time, 'space1')
-  ),
-
-  ...inactiveO11yAlertsShouldBeDeleted.map((input) =>
-    getRecoveredAlert(input.id, 'o11y', input.time, 'space1', getRandomBoolean())
-  ),
-  ...inactiveO11yAlertsShouldNotBeDeleted.map((input) =>
-    getRecoveredAlert(input.id, 'o11y', input.time, 'space1', getRandomBoolean())
-  ),
-  ...activeO11yAlertsShouldBeDeleted.map((input) =>
-    getActiveAlert(input.id, 'o11y', input.time, 'space1')
-  ),
-  ...activeO11yAlertsShouldNotBeDeleted.map((input) =>
-    getActiveAlert(input.id, 'o11y', input.time, 'space1')
+  ...activeStackAlertsNewerThan90.map((input) =>
+    getActiveAlert(get(input, spaceId)?.id, 'stack', input.time, spaceId)
   ),
 
-  ...inactiveSecurityAlertsShouldBeDeleted.map((input) =>
+  ...inactiveO11yAlertsOlderThan90.map((input) =>
+    getRecoveredAlert(get(input, spaceId)?.id, 'o11y', input.time, spaceId, getRandomBoolean())
+  ),
+  ...inactiveO11yAlertsNewerThan90.map((input) =>
+    getRecoveredAlert(get(input, spaceId)?.id, 'o11y', input.time, spaceId, getRandomBoolean())
+  ),
+  ...activeO11yAlertsOlderThan90.map((input) =>
+    getActiveAlert(get(input, spaceId)?.id, 'o11y', input.time, spaceId)
+  ),
+  ...activeO11yAlertsNewerThan90.map((input) =>
+    getActiveAlert(get(input, spaceId)?.id, 'o11y', input.time, spaceId)
+  ),
+
+  ...inactiveSecurityAlertsOlderThan90.map((input) =>
     getAcknowledgedOrClosedDetectionAlert(
-      input.id,
+      get(input, spaceId)?.id,
       'security',
       input.time,
-      'space1',
+      spaceId,
       getRandomBoolean()
     )
   ),
-  ...inactiveSecurityAlertsShouldNotBeDeleted.map((input) =>
+  ...inactiveSecurityAlertsNewerThan90.map((input) =>
     getAcknowledgedOrClosedDetectionAlert(
-      input.id,
+      get(input, spaceId)?.id,
       'security',
       input.time,
-      'space1',
+      spaceId,
       getRandomBoolean()
     )
   ),
-  ...activeSecurityAlertsShouldBeDeleted.map((input) =>
-    getActiveAlert(input.id, 'security', input.time, 'space1')
+  ...activeSecurityAlertsOlderThan90.map((input) =>
+    getActiveAlert(get(input, spaceId)?.id, 'security', input.time, spaceId)
   ),
-  ...activeSecurityAlertsShouldNotBeDeleted.map((input) =>
-    getActiveAlert(input.id, 'security', input.time, 'space1')
+  ...activeSecurityAlertsNewerThan90.map((input) =>
+    getActiveAlert(get(input, spaceId)?.id, 'security', input.time, spaceId)
   ),
 ];

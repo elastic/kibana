@@ -7,6 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 
+export const alertDeletionCategoryIdTypes = {
+  OBSERVABILITY: 'observability',
+  SECURITY_SOLUTION: 'securitySolution',
+  MANAGEMENT: 'management',
+} as const;
+
 export const updateQueryDelaySettingsBodySchema = schema.object({
   delay: schema.number(),
 });
@@ -39,4 +45,13 @@ export const updateAlertDeletionSettingsBodySchema = schema.object({
         'Threshold (in days) for deleting inactive alerts (recovered/closed/untracked) older than this value, applies only when deletion is enabled',
     },
   }),
+  category_ids: schema.maybe(
+    schema.arrayOf(
+      schema.oneOf([
+        schema.literal(alertDeletionCategoryIdTypes.OBSERVABILITY),
+        schema.literal(alertDeletionCategoryIdTypes.SECURITY_SOLUTION),
+        schema.literal(alertDeletionCategoryIdTypes.MANAGEMENT),
+      ])
+    )
+  ),
 });

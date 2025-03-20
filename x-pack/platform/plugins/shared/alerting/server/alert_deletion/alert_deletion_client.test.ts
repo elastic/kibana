@@ -13,7 +13,6 @@ import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { elasticsearchServiceMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import type { RulesSettingsAlertDeletionProperties } from '../types';
 import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../types';
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, SPACE_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
 import type { AuditLogger } from '@kbn/core/server';
@@ -208,64 +207,6 @@ const alertDeletionTaskInstance = {
   ownerId: null,
 };
 
-const mockCreatePointInTimeFinderAsInternalUser = (
-  response: {
-    saved_objects: Array<{
-      id: string;
-      type: string;
-      attributes: RulesSettingsAlertDeletionProperties;
-      references?: Array<{ id: string; name: string; type: string }>;
-      namespaces?: string[];
-    }>;
-  } = {
-    saved_objects: [
-      {
-        id: 'alert-deletion-settings',
-        type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
-        attributes: {
-          isActiveAlertsDeletionEnabled: false,
-          isInactiveAlertsDeletionEnabled: true,
-          activeAlertsDeletionThreshold: 1,
-          inactiveAlertsDeletionThreshold: 30,
-        },
-        references: [],
-      },
-      {
-        id: 'space-1:alert-deletion-settings',
-        type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
-        attributes: {
-          isActiveAlertsDeletionEnabled: false,
-          isInactiveAlertsDeletionEnabled: true,
-          activeAlertsDeletionThreshold: 1,
-          inactiveAlertsDeletionThreshold: 30,
-          categoryIds: ['securitySolution'],
-        },
-        references: [],
-        namespaces: ['space-1'],
-      },
-      {
-        id: 'another-space:alert-deletion-settings',
-        type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
-        attributes: {
-          isActiveAlertsDeletionEnabled: true,
-          isInactiveAlertsDeletionEnabled: true,
-          activeAlertsDeletionThreshold: 90,
-          inactiveAlertsDeletionThreshold: 30,
-        },
-        references: [],
-        namespaces: ['another-space'],
-      },
-    ],
-  }
-) => {
-  internalSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockResolvedValue({
-    close: jest.fn(),
-    find: function* asyncGenerator() {
-      yield response;
-    },
-  });
-};
-
 describe('AlertDeletionClient', () => {
   let alertDeletionClient: AlertDeletionClient;
 
@@ -284,6 +225,52 @@ describe('AlertDeletionClient', () => {
       spacesStartPromise: Promise.resolve(spacesStart),
       taskManagerSetup,
       taskManagerStartPromise: Promise.resolve(taskManagerStart),
+    });
+    internalSavedObjectsRepository.bulkGet.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'alert-deletion-settings',
+          type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+          attributes: {
+            alertDeletion: {
+              isActiveAlertsDeletionEnabled: false,
+              isInactiveAlertsDeletionEnabled: true,
+              activeAlertsDeletionThreshold: 1,
+              inactiveAlertsDeletionThreshold: 30,
+            },
+          },
+          references: [],
+        },
+        {
+          id: 'space-1:alert-deletion-settings',
+          type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+          attributes: {
+            alertDeletion: {
+              isActiveAlertsDeletionEnabled: false,
+              isInactiveAlertsDeletionEnabled: true,
+              activeAlertsDeletionThreshold: 1,
+              inactiveAlertsDeletionThreshold: 30,
+              categoryIds: ['securitySolution'],
+            },
+          },
+          references: [],
+          namespaces: ['space-1'],
+        },
+        {
+          id: 'another-space:alert-deletion-settings',
+          type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+          attributes: {
+            alertDeletion: {
+              isActiveAlertsDeletionEnabled: true,
+              isInactiveAlertsDeletionEnabled: true,
+              activeAlertsDeletionThreshold: 90,
+              inactiveAlertsDeletionThreshold: 30,
+            },
+          },
+          references: [],
+          namespaces: ['another-space'],
+        },
+      ],
     });
   });
 
@@ -478,7 +465,6 @@ describe('AlertDeletionClient', () => {
 
   describe('runTask', () => {
     test('should look up rules settings and issue queries for each space setting', async () => {
-      mockCreatePointInTimeFinderAsInternalUser();
       // search for setting 1, inactive alert > 30 days
       esClient.openPointInTime.mockResolvedValueOnce({
         id: 'pit1',
@@ -572,12 +558,27 @@ describe('AlertDeletionClient', () => {
 
       // 3 inactive alert queries, 1 active alert query
       expect(esClient.openPointInTime).toHaveBeenCalledTimes(4);
+      expect(esClient.openPointInTime).toHaveBeenNthCalledWith(1, {
+        keep_alive: '1m',
+        index: ['index1', 'index2'],
+      });
+      expect(esClient.openPointInTime).toHaveBeenNthCalledWith(2, {
+        keep_alive: '1m',
+        index: ['alert-index-1'],
+      });
+      expect(esClient.openPointInTime).toHaveBeenNthCalledWith(3, {
+        keep_alive: '1m',
+        index: ['index1', 'index2', 'alert-index-3'],
+      });
+      expect(esClient.openPointInTime).toHaveBeenNthCalledWith(4, {
+        keep_alive: '1m',
+        index: ['index1', 'index2', 'alert-index-3'],
+      });
 
       expect(esClient.search).toHaveBeenCalledTimes(4);
       expect(esClient.search).toHaveBeenNthCalledWith(
         1,
         {
-          index: ['index1', 'index2'],
           query: inactiveAlertsQuery(30, 'default'),
           size: 1000,
           sort: [{ [TIMESTAMP]: 'asc' }],
@@ -589,7 +590,6 @@ describe('AlertDeletionClient', () => {
       expect(esClient.search).toHaveBeenNthCalledWith(
         2,
         {
-          index: ['alert-index-1'],
           query: inactiveAlertsQuery(30, 'space-1'),
           size: 1000,
           sort: [{ [TIMESTAMP]: 'asc' }],
@@ -601,7 +601,6 @@ describe('AlertDeletionClient', () => {
       expect(esClient.search).toHaveBeenNthCalledWith(
         3,
         {
-          index: ['index1', 'index2', 'alert-index-3'],
           query: activeAlertsQuery(90, 'another-space'),
           size: 1000,
           sort: [{ [TIMESTAMP]: 'asc' }],
@@ -613,7 +612,6 @@ describe('AlertDeletionClient', () => {
       expect(esClient.search).toHaveBeenNthCalledWith(
         4,
         {
-          index: ['index1', 'index2', 'alert-index-3'],
           query: inactiveAlertsQuery(30, 'another-space'),
           size: 1000,
           sort: [{ [TIMESTAMP]: 'asc' }],
@@ -734,16 +732,18 @@ describe('AlertDeletionClient', () => {
     });
 
     test('should use search_after to paginate query', async () => {
-      mockCreatePointInTimeFinderAsInternalUser({
+      internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
         saved_objects: [
           {
             id: 'alert-deletion-settings',
             type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
             attributes: {
-              isActiveAlertsDeletionEnabled: false,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 1,
-              inactiveAlertsDeletionThreshold: 30,
+              alertDeletion: {
+                isActiveAlertsDeletionEnabled: false,
+                isInactiveAlertsDeletionEnabled: true,
+                activeAlertsDeletionThreshold: 1,
+                inactiveAlertsDeletionThreshold: 30,
+              },
             },
             references: [],
           },
@@ -820,12 +820,15 @@ describe('AlertDeletionClient', () => {
       expect(ruleTypeRegistry.getAllTypes).toHaveBeenCalledTimes(1);
 
       expect(esClient.openPointInTime).toHaveBeenCalledTimes(1);
+      expect(esClient.openPointInTime).toHaveBeenNthCalledWith(1, {
+        keep_alive: '1m',
+        index: ['alert-index-1'],
+      });
 
       expect(esClient.search).toHaveBeenCalledTimes(4);
       expect(esClient.search).toHaveBeenNthCalledWith(
         1,
         {
-          index: ['alert-index-1'],
           query: inactiveAlertsQuery(30, 'default'),
           size: 1000,
           sort: [{ [TIMESTAMP]: 'asc' }],
@@ -837,7 +840,6 @@ describe('AlertDeletionClient', () => {
       expect(esClient.search).toHaveBeenNthCalledWith(
         2,
         {
-          index: ['alert-index-1'],
           query: inactiveAlertsQuery(30, 'default'),
           size: 1000,
           sort: [{ [TIMESTAMP]: 'asc' }],
@@ -850,7 +852,6 @@ describe('AlertDeletionClient', () => {
       expect(esClient.search).toHaveBeenNthCalledWith(
         3,
         {
-          index: ['alert-index-1'],
           query: inactiveAlertsQuery(30, 'default'),
           size: 1000,
           sort: [{ [TIMESTAMP]: 'asc' }],
@@ -863,7 +864,6 @@ describe('AlertDeletionClient', () => {
       expect(esClient.search).toHaveBeenNthCalledWith(
         4,
         {
-          index: ['alert-index-1'],
           query: inactiveAlertsQuery(30, 'default'),
           size: 1000,
           sort: [{ [TIMESTAMP]: 'asc' }],
@@ -941,17 +941,19 @@ describe('AlertDeletionClient', () => {
 
     describe('error handling', () => {
       test('should handle invalid category IDs rule settings saved objects', async () => {
-        mockCreatePointInTimeFinderAsInternalUser({
+        internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
           saved_objects: [
             {
               id: 'alert-deletion-settings',
               type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
               attributes: {
-                isActiveAlertsDeletionEnabled: false,
-                isInactiveAlertsDeletionEnabled: true,
-                activeAlertsDeletionThreshold: 1,
-                inactiveAlertsDeletionThreshold: 30,
-                categoryIds: ['invalid-category'],
+                alertDeletion: {
+                  isActiveAlertsDeletionEnabled: false,
+                  isInactiveAlertsDeletionEnabled: true,
+                  activeAlertsDeletionThreshold: 1,
+                  inactiveAlertsDeletionThreshold: 30,
+                  categoryIds: ['invalid-category'],
+                },
               },
               references: [],
             },
@@ -984,11 +986,8 @@ describe('AlertDeletionClient', () => {
       });
 
       test('should handle errors querying for rule settings saved objects', async () => {
-        internalSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockResolvedValue({
-          close: jest.fn(),
-          find: function* asyncGenerator() {
-            throw new Error('error getting saved object');
-          },
+        internalSavedObjectsRepository.bulkGet.mockImplementationOnce(() => {
+          throw new Error('error getting saved object');
         });
 
         // @ts-ignore - accessing private function for testing
@@ -1016,17 +1015,120 @@ describe('AlertDeletionClient', () => {
         });
       });
 
-      test('should handle errors querying for alerts to delete', async () => {
-        mockCreatePointInTimeFinderAsInternalUser({
+      test('should handle bulk errors querying for rule settings saved objects', async () => {
+        internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
           saved_objects: [
             {
               id: 'alert-deletion-settings',
               type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
               attributes: {
-                isActiveAlertsDeletionEnabled: true,
-                isInactiveAlertsDeletionEnabled: true,
-                activeAlertsDeletionThreshold: 45,
-                inactiveAlertsDeletionThreshold: 100,
+                alertDeletion: {
+                  isActiveAlertsDeletionEnabled: false,
+                  isInactiveAlertsDeletionEnabled: false,
+                  activeAlertsDeletionThreshold: 45,
+                  inactiveAlertsDeletionThreshold: 100,
+                },
+              },
+              references: [],
+            },
+            {
+              id: 'space-1:alert-deletion-settings',
+              type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+              attributes: {},
+              references: [],
+              namespaces: ['space-1'],
+              error: {
+                error:
+                  'Saved object [alert-deletion-settings/space-1:alert-deletion-settings] not found',
+                statusCode: 404,
+                message:
+                  'Saved object [alert-deletion-settings/space-1:alert-deletion-settings] not found',
+              },
+            },
+            {
+              id: 'space2:alert-deletion-settings',
+              type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+              namespaces: ['space-2'],
+              // malformed SO, missing attributes
+              attributes: {},
+              references: [],
+            },
+          ],
+        });
+
+        // @ts-ignore - accessing private function for testing
+        await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController());
+
+        expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+        expect(esClient.search).not.toHaveBeenCalled();
+        expect(esClient.bulk).not.toHaveBeenCalled();
+        expect(taskManagerStart.bulkUpdateState).not.toHaveBeenCalled();
+        expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
+        expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+          '@timestamp': expect.any(String),
+          event: {
+            action: 'delete-alerts',
+            outcome: 'success',
+            start: expect.any(String),
+            end: expect.any(String),
+            duration: expect.any(String),
+          },
+          kibana: {
+            alert: { deletion: { num_deleted: 0 } },
+            space_ids: ['default'],
+          },
+          message: 'Alert deletion task deleted 0 alerts',
+        });
+        expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+          '@timestamp': expect.any(String),
+          event: {
+            action: 'delete-alerts',
+            outcome: 'failure',
+            start: expect.any(String),
+            end: expect.any(String),
+            duration: expect.any(String),
+          },
+          error: {
+            message:
+              'Saved object [alert-deletion-settings/space-1:alert-deletion-settings] not found',
+          },
+          kibana: {
+            alert: { deletion: { num_deleted: 0 } },
+            space_ids: ['default', 'space-1', 'another-space'],
+          },
+        });
+        expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
+          '@timestamp': expect.any(String),
+          event: {
+            action: 'delete-alerts',
+            outcome: 'failure',
+            start: expect.any(String),
+            end: expect.any(String),
+            duration: expect.any(String),
+          },
+          error: {
+            message: 'Undefined alert deletion rules settings',
+          },
+          kibana: {
+            alert: { deletion: { num_deleted: 0 } },
+            space_ids: ['space-2'],
+          },
+        });
+      });
+
+      test('should handle errors querying for alerts to delete', async () => {
+        internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
+          saved_objects: [
+            {
+              id: 'alert-deletion-settings',
+              type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+              attributes: {
+                alertDeletion: {
+                  isActiveAlertsDeletionEnabled: true,
+                  isInactiveAlertsDeletionEnabled: true,
+                  activeAlertsDeletionThreshold: 45,
+                  inactiveAlertsDeletionThreshold: 100,
+                },
               },
               references: [],
             },
@@ -1070,7 +1172,6 @@ describe('AlertDeletionClient', () => {
         expect(esClient.search).toHaveBeenNthCalledWith(
           1,
           {
-            index: ['index1', 'index2'],
             query: activeAlertsQuery(45, 'default'),
             size: 1000,
             sort: [{ [TIMESTAMP]: 'asc' }],
@@ -1082,7 +1183,6 @@ describe('AlertDeletionClient', () => {
         expect(esClient.search).toHaveBeenNthCalledWith(
           2,
           {
-            index: ['index1', 'index2'],
             query: inactiveAlertsQuery(100, 'default'),
             size: 1000,
             sort: [{ [TIMESTAMP]: 'asc' }],
@@ -1127,16 +1227,18 @@ describe('AlertDeletionClient', () => {
       });
 
       test('should handle errors bulk deleting alerts', async () => {
-        mockCreatePointInTimeFinderAsInternalUser({
+        internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
           saved_objects: [
             {
               id: 'alert-deletion-settings',
               type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
               attributes: {
-                isActiveAlertsDeletionEnabled: true,
-                isInactiveAlertsDeletionEnabled: false,
-                activeAlertsDeletionThreshold: 45,
-                inactiveAlertsDeletionThreshold: 100,
+                alertDeletion: {
+                  isActiveAlertsDeletionEnabled: true,
+                  isInactiveAlertsDeletionEnabled: false,
+                  activeAlertsDeletionThreshold: 45,
+                  inactiveAlertsDeletionThreshold: 100,
+                },
               },
               references: [],
             },
@@ -1181,10 +1283,14 @@ describe('AlertDeletionClient', () => {
         await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController());
 
         expect(esClient.openPointInTime).toHaveBeenCalledTimes(1);
+        expect(esClient.openPointInTime).toHaveBeenNthCalledWith(1, {
+          keep_alive: '1m',
+          index: ['index1', 'index2', 'alert-index-3'],
+        });
+
         expect(esClient.search).toHaveBeenCalledTimes(1);
         expect(esClient.search).toHaveBeenCalledWith(
           {
-            index: ['index1', 'index2', 'alert-index-3'],
             query: activeAlertsQuery(45, 'default'),
             size: 1000,
             sort: [{ [TIMESTAMP]: 'asc' }],

@@ -276,7 +276,7 @@ export const SuperuserAtSpace1: SuperuserAtSpace1 = {
 interface GlobalReadAtSpace1 extends Scenario {
   id: 'global_read at space1';
 }
-const GlobalReadAtSpace1: GlobalReadAtSpace1 = {
+export const GlobalReadAtSpace1: GlobalReadAtSpace1 = {
   id: 'global_read at space1',
   user: GlobalRead,
   space: Space1,

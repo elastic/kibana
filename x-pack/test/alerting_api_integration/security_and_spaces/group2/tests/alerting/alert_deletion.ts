@@ -7,22 +7,35 @@
 
 import expect from '@kbn/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import {
   DOCUMENT_SOURCE,
   createEsDocument,
 } from '../../../../spaces_only/tests/alerting/create_test_data';
 import { Space } from '../../../../common/types';
-import { Space1, SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
+import {
+  GlobalReadAtSpace1,
+  Space1,
+  Space1AllAtSpace1,
+  Superuser,
+  SuperuserAtSpace1,
+} from '../../../scenarios';
 import { getUrlPrefix, getEventLog, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
-  activeO11yAlertsShouldBeDeleted,
-  activeSecurityAlertsShouldBeDeleted,
-  activeStackAlertsShouldBeDeleted,
-  inactiveO11yAlertsShouldBeDeleted,
-  inactiveSecurityAlertsShouldBeDeleted,
-  inactiveStackAlertsShouldBeDeleted,
-  testAlertDocs,
+  activeO11yAlertsOlderThan90,
+  activeO11yAlertsNewerThan90,
+  activeSecurityAlertsOlderThan90,
+  activeSecurityAlertsNewerThan90,
+  activeStackAlertsOlderThan90,
+  activeStackAlertsNewerThan90,
+  inactiveO11yAlertsOlderThan90,
+  inactiveO11yAlertsNewerThan90,
+  inactiveSecurityAlertsOlderThan90,
+  inactiveSecurityAlertsNewerThan90,
+  inactiveStackAlertsOlderThan90,
+  inactiveStackAlertsNewerThan90,
+  getTestAlertDocs,
 } from './alert_deletion_test_utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -34,6 +47,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
   const objectRemover = new ObjectRemover(supertest);
 
   async function indexTestDocs() {
+    const testAlertDocs = getTestAlertDocs();
     const operations = testAlertDocs.flatMap(({ _index, _id, _source: doc }) => {
       return [{ index: { _index, _id } }, doc];
     });
@@ -53,15 +67,36 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
     });
   };
 
-  // inject active alerts, security, stack, o11y
-  // inject inactive alerts, security, stack, o11y
-  // recovered/untracked/acknowledged
-  // test preview returns the correct number
-  // test calling the deletion task with different settings
-  // only active enabled
-  // only inactive enabled
-  // both enabled
-  // specific context
+  const testExpectedAlertsAreDeleted = async (
+    expectedAlertsIds: string[],
+    deletedAlertIds: string[]
+  ) => {
+    // wait for the task to complete
+    await retry.try(async () => {
+      const results = await es.search<IValidatedEvent>({
+        index: '.kibana-event-log*',
+        query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
+      });
+      expect(results.hits.hits.length).to.eql(1);
+      expect(results.hits.hits[0]._source?.event?.outcome).to.eql('success');
+      expect(results.hits.hits[0]._source?.kibana?.alert?.deletion?.num_deleted).to.eql(
+        deletedAlertIds.length
+      );
+    });
+
+    await retry.try(async () => {
+      // query for alerts
+      const alerts = await es.search({
+        index: '.internal.alerts-*',
+        size: 100,
+        query: { match_all: {} },
+      });
+      expect(alerts.hits.hits.length).to.eql(expectedAlertsIds.length);
+      expectedAlertsIds.forEach((alertId) => {
+        expect(alerts.hits.hits.findIndex((a) => a._id === alertId)).to.be.greaterThan(-1);
+      });
+    });
+  };
 
   describe('alert deletion', () => {
     before(async () => {
@@ -139,12 +174,23 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         query: { match_all: {} },
         conflicts: 'proceed',
       });
+      await es.deleteByQuery({
+        index: '.kibana-event-log*',
+        query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
+        conflicts: 'proceed',
+      });
+    });
+
+    after(async () => {
       await objectRemover.removeAll();
     });
 
-    for (const scenario of UserAtSpaceScenarios) {
-      // const { user, space } = scenario;
-
+    // TODO - switch to all scenarios when real APIs available
+    for (const scenario of [
+      GlobalReadAtSpace1,
+      SuperuserAtSpace1,
+      Space1AllAtSpace1,
+    ] /* UserAtSpaceScenarios*/) {
       describe(scenario.id, () => {
         it('should return the correct number of alerts to delete when previewing', async () => {
           const previewDeleteAllCategoryActiveAlerts = await supertest
@@ -310,107 +356,1045 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
             });
 
           switch (scenario.id) {
-            case 'no_kibana_privileges at space1':
-            case 'space_1_all at space2':
-            case 'space_1_all_with_restricted_fixture at space1':
-            case 'space_1_all_alerts_none_actions at space1':
-              // when preview route is available, expect a forbidden error
-              // current test route does not gate on rules settings permissions
-              break;
+            // case 'no_kibana_privileges at space1':
+            // case 'space_1_all at space2':
+            // case 'space_1_all_with_restricted_fixture at space1':
+            // case 'space_1_all_alerts_none_actions at space1':
+            //   // when preview route is available, expect a forbidden error
+            //   // current test route does not gate on rules settings permissions
+            //   break;
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(previewDeleteAllCategoryActiveAlerts.status).to.eql(200);
               expect(previewDeleteAllCategoryActiveAlerts.body.numAlertsDeleted).to.eql(
-                activeStackAlertsShouldBeDeleted.length +
-                  activeO11yAlertsShouldBeDeleted.length +
-                  activeSecurityAlertsShouldBeDeleted.length
+                activeStackAlertsOlderThan90.length +
+                  activeO11yAlertsOlderThan90.length +
+                  activeSecurityAlertsOlderThan90.length
               );
 
               expect(previewDeleteAllCategoryInactiveAlerts.status).to.eql(200);
               expect(previewDeleteAllCategoryInactiveAlerts.body.numAlertsDeleted).to.eql(
-                inactiveStackAlertsShouldBeDeleted.length +
-                  inactiveO11yAlertsShouldBeDeleted.length +
-                  inactiveSecurityAlertsShouldBeDeleted.length
+                inactiveStackAlertsOlderThan90.length +
+                  inactiveO11yAlertsOlderThan90.length +
+                  inactiveSecurityAlertsOlderThan90.length
               );
 
               expect(previewDeleteAllCategoryActiveAndInactiveAlerts.status).to.eql(200);
               expect(previewDeleteAllCategoryActiveAndInactiveAlerts.body.numAlertsDeleted).to.eql(
-                activeStackAlertsShouldBeDeleted.length +
-                  activeO11yAlertsShouldBeDeleted.length +
-                  activeSecurityAlertsShouldBeDeleted.length +
-                  inactiveStackAlertsShouldBeDeleted.length +
-                  inactiveO11yAlertsShouldBeDeleted.length +
-                  inactiveSecurityAlertsShouldBeDeleted.length
+                activeStackAlertsOlderThan90.length +
+                  activeO11yAlertsOlderThan90.length +
+                  activeSecurityAlertsOlderThan90.length +
+                  inactiveStackAlertsOlderThan90.length +
+                  inactiveO11yAlertsOlderThan90.length +
+                  inactiveSecurityAlertsOlderThan90.length
               );
 
               expect(previewDeleteObservabilityActiveAlerts.status).to.eql(200);
               expect(previewDeleteObservabilityActiveAlerts.body.numAlertsDeleted).to.eql(
-                activeO11yAlertsShouldBeDeleted.length
+                activeO11yAlertsOlderThan90.length
               );
 
               expect(previewDeleteObservabilityInactiveAlerts.status).to.eql(200);
               expect(previewDeleteObservabilityInactiveAlerts.body.numAlertsDeleted).to.eql(
-                inactiveO11yAlertsShouldBeDeleted.length
+                inactiveO11yAlertsOlderThan90.length
               );
 
               expect(previewDeleteObservabilityActiveAndInactiveAlerts.status).to.eql(200);
               expect(
                 previewDeleteObservabilityActiveAndInactiveAlerts.body.numAlertsDeleted
-              ).to.eql(
-                activeO11yAlertsShouldBeDeleted.length + inactiveO11yAlertsShouldBeDeleted.length
-              );
+              ).to.eql(activeO11yAlertsOlderThan90.length + inactiveO11yAlertsOlderThan90.length);
 
               expect(previewDeleteSecurityActiveAlerts.status).to.eql(200);
               expect(previewDeleteSecurityActiveAlerts.body.numAlertsDeleted).to.eql(
-                activeSecurityAlertsShouldBeDeleted.length
+                activeSecurityAlertsOlderThan90.length
               );
 
               expect(previewDeleteSecurityInactiveAlerts.status).to.eql(200);
               expect(previewDeleteSecurityInactiveAlerts.body.numAlertsDeleted).to.eql(
-                inactiveSecurityAlertsShouldBeDeleted.length
+                inactiveSecurityAlertsOlderThan90.length
               );
 
               expect(previewDeleteSecurityActiveAndInactiveAlerts.status).to.eql(200);
               expect(previewDeleteSecurityActiveAndInactiveAlerts.body.numAlertsDeleted).to.eql(
-                activeSecurityAlertsShouldBeDeleted.length +
-                  inactiveSecurityAlertsShouldBeDeleted.length
+                activeSecurityAlertsOlderThan90.length + inactiveSecurityAlertsOlderThan90.length
               );
 
               expect(previewDeleteManagementActiveAlerts.status).to.eql(200);
               expect(previewDeleteManagementActiveAlerts.body.numAlertsDeleted).to.eql(
-                activeStackAlertsShouldBeDeleted.length
+                activeStackAlertsOlderThan90.length
               );
 
               expect(previewDeleteManagementInactiveAlerts.status).to.eql(200);
               expect(previewDeleteManagementInactiveAlerts.body.numAlertsDeleted).to.eql(
-                inactiveStackAlertsShouldBeDeleted.length
+                inactiveStackAlertsOlderThan90.length
               );
 
               expect(previewDeleteManagementActiveAndInactiveAlerts.status).to.eql(200);
               expect(previewDeleteManagementActiveAndInactiveAlerts.body.numAlertsDeleted).to.eql(
-                activeStackAlertsShouldBeDeleted.length + inactiveStackAlertsShouldBeDeleted.length
+                activeStackAlertsOlderThan90.length + inactiveStackAlertsOlderThan90.length
               );
 
               expect(previewDeleteMultiCategoryActiveAlerts.status).to.eql(200);
               expect(previewDeleteMultiCategoryActiveAlerts.body.numAlertsDeleted).to.eql(
-                activeStackAlertsShouldBeDeleted.length + activeO11yAlertsShouldBeDeleted.length
+                activeStackAlertsOlderThan90.length + activeO11yAlertsOlderThan90.length
               );
 
               expect(previewDeleteMultiCategoryInactiveAlerts.status).to.eql(200);
               expect(previewDeleteMultiCategoryInactiveAlerts.body.numAlertsDeleted).to.eql(
-                inactiveO11yAlertsShouldBeDeleted.length +
-                  inactiveSecurityAlertsShouldBeDeleted.length
+                inactiveO11yAlertsOlderThan90.length + inactiveSecurityAlertsOlderThan90.length
               );
 
               expect(previewDeleteMultiCategoryActiveAndInactiveAlerts.status).to.eql(200);
               expect(
                 previewDeleteMultiCategoryActiveAndInactiveAlerts.body.numAlertsDeleted
               ).to.eql(
-                activeStackAlertsShouldBeDeleted.length +
-                  activeSecurityAlertsShouldBeDeleted.length +
-                  inactiveStackAlertsShouldBeDeleted.length +
-                  inactiveSecurityAlertsShouldBeDeleted.length
+                activeStackAlertsOlderThan90.length +
+                  activeSecurityAlertsOlderThan90.length +
+                  inactiveStackAlertsOlderThan90.length +
+                  inactiveSecurityAlertsOlderThan90.length
+              );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should delete the correct of alerts - all category active alerts', async () => {
+          // update the alert deletion rules setting
+          await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(Superuser.username, Superuser.password)
+            .send({
+              is_active_alerts_deletion_enabled: true,
+              is_inactive_alerts_deletion_enabled: false,
+              active_alerts_deletion_threshold: 90,
+              inactive_alerts_deletion_threshold: 90,
+            })
+            .expect(200);
+
+          // schedule the task
+          const scheduleResponse = await supertest
+            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+            .set('kbn-xsrf', 'foo')
+            .send({});
+
+          switch (scenario.id) {
+            // case 'no_kibana_privileges at space1':
+            // case 'space_1_all at space2':
+            // case 'space_1_all_with_restricted_fixture at space1':
+            // case 'space_1_all_alerts_none_actions at space1':
+            // when schedule route is available, expect a forbidden error
+            // current test route does not gate on rules settings permissions
+            // break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(scheduleResponse.status).to.eql(200);
+
+              const expectedAlerts = [
+                ...inactiveStackAlertsOlderThan90,
+                ...inactiveStackAlertsNewerThan90,
+                ...activeStackAlertsNewerThan90,
+                ...inactiveO11yAlertsOlderThan90,
+                ...inactiveO11yAlertsNewerThan90,
+                ...activeO11yAlertsNewerThan90,
+                ...inactiveSecurityAlertsOlderThan90,
+                ...inactiveSecurityAlertsNewerThan90,
+                ...activeSecurityAlertsNewerThan90,
+              ];
+
+              const deletedAlerts = [
+                ...activeStackAlertsOlderThan90,
+                ...activeO11yAlertsOlderThan90,
+                ...activeSecurityAlertsOlderThan90,
+              ];
+
+              await testExpectedAlertsAreDeleted(
+                expectedAlerts.map((a) => a.space1.id),
+                deletedAlerts.map((a) => a.space1.id)
+              );
+
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should delete the correct of alerts - all category inactive alerts', async () => {
+          // update the alert deletion rules setting
+          await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(Superuser.username, Superuser.password)
+            .send({
+              is_active_alerts_deletion_enabled: false,
+              is_inactive_alerts_deletion_enabled: true,
+              active_alerts_deletion_threshold: 90,
+              inactive_alerts_deletion_threshold: 90,
+            })
+            .expect(200);
+
+          // schedule the task
+          const scheduleResponse = await supertest
+            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+            .set('kbn-xsrf', 'foo')
+            .send({});
+
+          switch (scenario.id) {
+            // case 'no_kibana_privileges at space1':
+            // case 'space_1_all at space2':
+            // case 'space_1_all_with_restricted_fixture at space1':
+            // case 'space_1_all_alerts_none_actions at space1':
+            //   // when schedule route is available, expect a forbidden error
+            //   // current test route does not gate on rules settings permissions
+            //   break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(scheduleResponse.status).to.eql(200);
+
+              const expectedAlerts = [
+                ...inactiveStackAlertsNewerThan90,
+                ...activeStackAlertsOlderThan90,
+                ...activeStackAlertsNewerThan90,
+                ...inactiveO11yAlertsNewerThan90,
+                ...activeO11yAlertsOlderThan90,
+                ...activeO11yAlertsNewerThan90,
+                ...inactiveSecurityAlertsNewerThan90,
+                ...activeSecurityAlertsOlderThan90,
+                ...activeSecurityAlertsNewerThan90,
+              ];
+
+              const deletedAlerts = [
+                ...inactiveStackAlertsOlderThan90,
+                ...inactiveO11yAlertsOlderThan90,
+                ...inactiveSecurityAlertsOlderThan90,
+              ];
+
+              await testExpectedAlertsAreDeleted(
+                expectedAlerts.map((a) => a.space1.id),
+                deletedAlerts.map((a) => a.space1.id)
+              );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should delete the correct of alerts - all category active and inactive alerts', async () => {
+          // update the alert deletion rules setting
+          await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(Superuser.username, Superuser.password)
+            .send({
+              is_active_alerts_deletion_enabled: true,
+              is_inactive_alerts_deletion_enabled: true,
+              active_alerts_deletion_threshold: 90,
+              inactive_alerts_deletion_threshold: 90,
+            })
+            .expect(200);
+
+          // schedule the task
+          const scheduleResponse = await supertest
+            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+            .set('kbn-xsrf', 'foo')
+            .send({});
+
+          switch (scenario.id) {
+            // case 'no_kibana_privileges at space1':
+            // case 'space_1_all at space2':
+            // case 'space_1_all_with_restricted_fixture at space1':
+            // case 'space_1_all_alerts_none_actions at space1':
+            //   // when schedule route is available, expect a forbidden error
+            //   // current test route does not gate on rules settings permissions
+            //   break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(scheduleResponse.status).to.eql(200);
+
+              const expectedAlerts = [
+                ...inactiveStackAlertsNewerThan90,
+                ...activeStackAlertsNewerThan90,
+                ...inactiveO11yAlertsNewerThan90,
+                ...activeO11yAlertsNewerThan90,
+                ...inactiveSecurityAlertsNewerThan90,
+                ...activeSecurityAlertsNewerThan90,
+              ];
+
+              const deletedAlerts = [
+                ...inactiveStackAlertsOlderThan90,
+                ...activeStackAlertsOlderThan90,
+                ...inactiveO11yAlertsOlderThan90,
+                ...activeO11yAlertsOlderThan90,
+                ...inactiveSecurityAlertsOlderThan90,
+                ...activeSecurityAlertsOlderThan90,
+              ];
+
+              await testExpectedAlertsAreDeleted(
+                expectedAlerts.map((a) => a.space1.id),
+                deletedAlerts.map((a) => a.space1.id)
+              );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should delete the correct of alerts - observability active alerts', async () => {
+          // update the alert deletion rules setting
+          await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(Superuser.username, Superuser.password)
+            .send({
+              is_active_alerts_deletion_enabled: true,
+              is_inactive_alerts_deletion_enabled: false,
+              active_alerts_deletion_threshold: 90,
+              inactive_alerts_deletion_threshold: 90,
+              category_ids: ['observability'],
+            })
+            .expect(200);
+
+          // schedule the task
+          const scheduleResponse = await supertest
+            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+            .set('kbn-xsrf', 'foo')
+            .send({});
+
+          switch (scenario.id) {
+            // case 'no_kibana_privileges at space1':
+            // case 'space_1_all at space2':
+            // case 'space_1_all_with_restricted_fixture at space1':
+            // case 'space_1_all_alerts_none_actions at space1':
+            //   // when schedule route is available, expect a forbidden error
+            //   // current test route does not gate on rules settings permissions
+            //   break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(scheduleResponse.status).to.eql(200);
+
+              const expectedAlerts = [
+                ...inactiveStackAlertsOlderThan90,
+                ...inactiveStackAlertsNewerThan90,
+                ...activeStackAlertsOlderThan90,
+                ...activeStackAlertsNewerThan90,
+                ...inactiveO11yAlertsOlderThan90,
+                ...inactiveO11yAlertsNewerThan90,
+                ...activeO11yAlertsNewerThan90,
+                ...inactiveSecurityAlertsOlderThan90,
+                ...inactiveSecurityAlertsNewerThan90,
+                ...activeSecurityAlertsOlderThan90,
+                ...activeSecurityAlertsNewerThan90,
+              ];
+
+              const deletedAlerts = activeO11yAlertsOlderThan90;
+
+              await testExpectedAlertsAreDeleted(
+                expectedAlerts.map((a) => a.space1.id),
+                deletedAlerts.map((a) => a.space1.id)
+              );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should delete the correct of alerts - observability inactive alerts', async () => {
+          // update the alert deletion rules setting
+          await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(Superuser.username, Superuser.password)
+            .send({
+              is_active_alerts_deletion_enabled: false,
+              is_inactive_alerts_deletion_enabled: true,
+              active_alerts_deletion_threshold: 90,
+              inactive_alerts_deletion_threshold: 90,
+              category_ids: ['observability'],
+            })
+            .expect(200);
+
+          // schedule the task
+          const scheduleResponse = await supertest
+            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+            .set('kbn-xsrf', 'foo')
+            .send({});
+
+          switch (scenario.id) {
+            // case 'no_kibana_privileges at space1':
+            // case 'space_1_all at space2':
+            // case 'space_1_all_with_restricted_fixture at space1':
+            // case 'space_1_all_alerts_none_actions at space1':
+            //   // when schedule route is available, expect a forbidden error
+            //   // current test route does not gate on rules settings permissions
+            //   break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(scheduleResponse.status).to.eql(200);
+
+              const expectedAlerts = [
+                ...inactiveStackAlertsOlderThan90,
+                ...inactiveStackAlertsNewerThan90,
+                ...activeStackAlertsOlderThan90,
+                ...activeStackAlertsNewerThan90,
+                ...inactiveO11yAlertsNewerThan90,
+                ...activeO11yAlertsOlderThan90,
+                ...activeO11yAlertsNewerThan90,
+                ...inactiveSecurityAlertsOlderThan90,
+                ...inactiveSecurityAlertsNewerThan90,
+                ...activeSecurityAlertsOlderThan90,
+                ...activeSecurityAlertsNewerThan90,
+              ];
+
+              const deletedAlerts = inactiveO11yAlertsOlderThan90;
+
+              await testExpectedAlertsAreDeleted(
+                expectedAlerts.map((a) => a.space1.id),
+                deletedAlerts.map((a) => a.space1.id)
+              );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should delete the correct of alerts - observability active and inactive alerts', async () => {
+          // update the alert deletion rules setting
+          await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(Superuser.username, Superuser.password)
+            .send({
+              is_active_alerts_deletion_enabled: true,
+              is_inactive_alerts_deletion_enabled: true,
+              active_alerts_deletion_threshold: 90,
+              inactive_alerts_deletion_threshold: 90,
+              category_ids: ['observability'],
+            })
+            .expect(200);
+
+          // schedule the task
+          const scheduleResponse = await supertest
+            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+            .set('kbn-xsrf', 'foo')
+            .send({});
+
+          switch (scenario.id) {
+            // case 'no_kibana_privileges at space1':
+            // case 'space_1_all at space2':
+            // case 'space_1_all_with_restricted_fixture at space1':
+            // case 'space_1_all_alerts_none_actions at space1':
+            //   // when schedule route is available, expect a forbidden error
+            //   // current test route does not gate on rules settings permissions
+            //   break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(scheduleResponse.status).to.eql(200);
+
+              const expectedAlerts = [
+                ...inactiveStackAlertsOlderThan90,
+                ...inactiveStackAlertsNewerThan90,
+                ...activeStackAlertsOlderThan90,
+                ...activeStackAlertsNewerThan90,
+                ...inactiveO11yAlertsNewerThan90,
+                ...activeO11yAlertsNewerThan90,
+                ...inactiveSecurityAlertsOlderThan90,
+                ...inactiveSecurityAlertsNewerThan90,
+                ...activeSecurityAlertsOlderThan90,
+                ...activeSecurityAlertsNewerThan90,
+              ];
+
+              const deletedAlerts = [
+                ...inactiveO11yAlertsOlderThan90,
+                ...activeO11yAlertsOlderThan90,
+              ];
+
+              await testExpectedAlertsAreDeleted(
+                expectedAlerts.map((a) => a.space1.id),
+                deletedAlerts.map((a) => a.space1.id)
+              );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should delete the correct of alerts - security active alerts', async () => {
+          // update the alert deletion rules setting
+          await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(Superuser.username, Superuser.password)
+            .send({
+              is_active_alerts_deletion_enabled: true,
+              is_inactive_alerts_deletion_enabled: false,
+              active_alerts_deletion_threshold: 90,
+              inactive_alerts_deletion_threshold: 90,
+              category_ids: ['securitySolution'],
+            })
+            .expect(200);
+
+          // schedule the task
+          const scheduleResponse = await supertest
+            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+            .set('kbn-xsrf', 'foo')
+            .send({});
+
+          switch (scenario.id) {
+            // case 'no_kibana_privileges at space1':
+            // case 'space_1_all at space2':
+            // case 'space_1_all_with_restricted_fixture at space1':
+            // case 'space_1_all_alerts_none_actions at space1':
+            //   // when schedule route is available, expect a forbidden error
+            //   // current test route does not gate on rules settings permissions
+            //   break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(scheduleResponse.status).to.eql(200);
+
+              const expectedAlerts = [
+                ...inactiveStackAlertsOlderThan90,
+                ...inactiveStackAlertsNewerThan90,
+                ...activeStackAlertsOlderThan90,
+                ...activeStackAlertsNewerThan90,
+                ...inactiveO11yAlertsOlderThan90,
+                ...inactiveO11yAlertsNewerThan90,
+                ...activeO11yAlertsOlderThan90,
+                ...activeO11yAlertsNewerThan90,
+                ...inactiveSecurityAlertsOlderThan90,
+                ...inactiveSecurityAlertsNewerThan90,
+                ...activeSecurityAlertsNewerThan90,
+              ];
+
+              const deletedAlerts = activeSecurityAlertsOlderThan90;
+
+              await testExpectedAlertsAreDeleted(
+                expectedAlerts.map((a) => a.space1.id),
+                deletedAlerts.map((a) => a.space1.id)
+              );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should delete the correct of alerts - security inactive alerts', async () => {
+          await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(Superuser.username, Superuser.password)
+            .send({
+              is_active_alerts_deletion_enabled: false,
+              is_inactive_alerts_deletion_enabled: true,
+              active_alerts_deletion_threshold: 90,
+              inactive_alerts_deletion_threshold: 90,
+              category_ids: ['securitySolution'],
+            })
+            .expect(200);
+
+          // schedule the task
+          const scheduleResponse = await supertest
+            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+            .set('kbn-xsrf', 'foo')
+            .send({});
+
+          switch (scenario.id) {
+            // case 'no_kibana_privileges at space1':
+            // case 'space_1_all at space2':
+            // case 'space_1_all_with_restricted_fixture at space1':
+            // case 'space_1_all_alerts_none_actions at space1':
+            //   // when schedule route is available, expect a forbidden error
+            //   // current test route does not gate on rules settings permissions
+            //   break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(scheduleResponse.status).to.eql(200);
+
+              const expectedAlerts = [
+                ...inactiveStackAlertsOlderThan90,
+                ...inactiveStackAlertsNewerThan90,
+                ...activeStackAlertsOlderThan90,
+                ...activeStackAlertsNewerThan90,
+                ...inactiveO11yAlertsOlderThan90,
+                ...inactiveO11yAlertsNewerThan90,
+                ...activeO11yAlertsOlderThan90,
+                ...activeO11yAlertsNewerThan90,
+                ...inactiveSecurityAlertsNewerThan90,
+                ...activeSecurityAlertsOlderThan90,
+                ...activeSecurityAlertsNewerThan90,
+              ];
+
+              const deletedAlerts = inactiveSecurityAlertsOlderThan90;
+
+              await testExpectedAlertsAreDeleted(
+                expectedAlerts.map((a) => a.space1.id),
+                deletedAlerts.map((a) => a.space1.id)
+              );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should delete the correct of alerts - security active and inactive alerts', async () => {
+          // update the alert deletion rules setting
+          await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(Superuser.username, Superuser.password)
+            .send({
+              is_active_alerts_deletion_enabled: true,
+              is_inactive_alerts_deletion_enabled: true,
+              active_alerts_deletion_threshold: 90,
+              inactive_alerts_deletion_threshold: 90,
+              category_ids: ['securitySolution'],
+            })
+            .expect(200);
+
+          // schedule the task
+          const scheduleResponse = await supertest
+            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+            .set('kbn-xsrf', 'foo')
+            .send({});
+
+          switch (scenario.id) {
+            // case 'no_kibana_privileges at space1':
+            // case 'space_1_all at space2':
+            // case 'space_1_all_with_restricted_fixture at space1':
+            // case 'space_1_all_alerts_none_actions at space1':
+            //   // when schedule route is available, expect a forbidden error
+            //   // current test route does not gate on rules settings permissions
+            //   break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(scheduleResponse.status).to.eql(200);
+
+              const expectedAlerts = [
+                ...inactiveStackAlertsOlderThan90,
+                ...inactiveStackAlertsNewerThan90,
+                ...activeStackAlertsOlderThan90,
+                ...activeStackAlertsNewerThan90,
+                ...inactiveO11yAlertsOlderThan90,
+                ...inactiveO11yAlertsNewerThan90,
+                ...activeO11yAlertsOlderThan90,
+                ...activeO11yAlertsNewerThan90,
+                ...inactiveSecurityAlertsNewerThan90,
+                ...activeSecurityAlertsNewerThan90,
+              ];
+
+              const deletedAlerts = [
+                ...inactiveSecurityAlertsOlderThan90,
+                ...activeSecurityAlertsOlderThan90,
+              ];
+
+              await testExpectedAlertsAreDeleted(
+                expectedAlerts.map((a) => a.space1.id),
+                deletedAlerts.map((a) => a.space1.id)
+              );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should delete the correct of alerts - management active alerts', async () => {
+          await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(Superuser.username, Superuser.password)
+            .send({
+              is_active_alerts_deletion_enabled: true,
+              is_inactive_alerts_deletion_enabled: false,
+              active_alerts_deletion_threshold: 90,
+              inactive_alerts_deletion_threshold: 90,
+              category_ids: ['management'],
+            })
+            .expect(200);
+
+          // schedule the task
+          const scheduleResponse = await supertest
+            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+            .set('kbn-xsrf', 'foo')
+            .send({});
+
+          switch (scenario.id) {
+            // case 'no_kibana_privileges at space1':
+            // case 'space_1_all at space2':
+            // case 'space_1_all_with_restricted_fixture at space1':
+            // case 'space_1_all_alerts_none_actions at space1':
+            //   // when schedule route is available, expect a forbidden error
+            //   // current test route does not gate on rules settings permissions
+            //   break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(scheduleResponse.status).to.eql(200);
+
+              const expectedAlerts = [
+                ...inactiveStackAlertsOlderThan90,
+                ...inactiveStackAlertsNewerThan90,
+                ...activeStackAlertsNewerThan90,
+                ...inactiveO11yAlertsOlderThan90,
+                ...inactiveO11yAlertsNewerThan90,
+                ...activeO11yAlertsOlderThan90,
+                ...activeO11yAlertsNewerThan90,
+                ...inactiveSecurityAlertsOlderThan90,
+                ...inactiveSecurityAlertsNewerThan90,
+                ...activeSecurityAlertsOlderThan90,
+                ...activeSecurityAlertsNewerThan90,
+              ];
+
+              const deletedAlerts = activeStackAlertsOlderThan90;
+
+              await testExpectedAlertsAreDeleted(
+                expectedAlerts.map((a) => a.space1.id),
+                deletedAlerts.map((a) => a.space1.id)
+              );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should delete the correct of alerts - management inactive alerts', async () => {
+          // update the alert deletion rules setting
+          await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(Superuser.username, Superuser.password)
+            .send({
+              is_active_alerts_deletion_enabled: false,
+              is_inactive_alerts_deletion_enabled: true,
+              active_alerts_deletion_threshold: 90,
+              inactive_alerts_deletion_threshold: 90,
+              category_ids: ['management'],
+            })
+            .expect(200);
+
+          // schedule the task
+          const scheduleResponse = await supertest
+            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+            .set('kbn-xsrf', 'foo')
+            .send({});
+
+          switch (scenario.id) {
+            // case 'no_kibana_privileges at space1':
+            // case 'space_1_all at space2':
+            // case 'space_1_all_with_restricted_fixture at space1':
+            // case 'space_1_all_alerts_none_actions at space1':
+            //   // when schedule route is available, expect a forbidden error
+            //   // current test route does not gate on rules settings permissions
+            //   break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(scheduleResponse.status).to.eql(200);
+
+              const expectedAlerts = [
+                ...inactiveStackAlertsNewerThan90,
+                ...activeStackAlertsOlderThan90,
+                ...activeStackAlertsNewerThan90,
+                ...inactiveO11yAlertsOlderThan90,
+                ...inactiveO11yAlertsNewerThan90,
+                ...activeO11yAlertsOlderThan90,
+                ...activeO11yAlertsNewerThan90,
+                ...inactiveSecurityAlertsOlderThan90,
+                ...inactiveSecurityAlertsNewerThan90,
+                ...activeSecurityAlertsOlderThan90,
+                ...activeSecurityAlertsNewerThan90,
+              ];
+
+              const deletedAlerts = inactiveStackAlertsOlderThan90;
+
+              await testExpectedAlertsAreDeleted(
+                expectedAlerts.map((a) => a.space1.id),
+                deletedAlerts.map((a) => a.space1.id)
+              );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should delete the correct of alerts - management active and inactive alerts', async () => {
+          // update the alert deletion rules setting
+          await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(Superuser.username, Superuser.password)
+            .send({
+              is_active_alerts_deletion_enabled: true,
+              is_inactive_alerts_deletion_enabled: true,
+              active_alerts_deletion_threshold: 90,
+              inactive_alerts_deletion_threshold: 90,
+              category_ids: ['management'],
+            })
+            .expect(200);
+
+          // schedule the task
+          const scheduleResponse = await supertest
+            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+            .set('kbn-xsrf', 'foo')
+            .send({});
+
+          switch (scenario.id) {
+            // case 'no_kibana_privileges at space1':
+            // case 'space_1_all at space2':
+            // case 'space_1_all_with_restricted_fixture at space1':
+            // case 'space_1_all_alerts_none_actions at space1':
+            //   // when schedule route is available, expect a forbidden error
+            //   // current test route does not gate on rules settings permissions
+            //   break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(scheduleResponse.status).to.eql(200);
+
+              const expectedAlerts = [
+                ...inactiveStackAlertsNewerThan90,
+                ...activeStackAlertsNewerThan90,
+                ...inactiveO11yAlertsOlderThan90,
+                ...inactiveO11yAlertsNewerThan90,
+                ...activeO11yAlertsOlderThan90,
+                ...activeO11yAlertsNewerThan90,
+                ...inactiveSecurityAlertsOlderThan90,
+                ...inactiveSecurityAlertsNewerThan90,
+                ...activeSecurityAlertsOlderThan90,
+                ...activeSecurityAlertsNewerThan90,
+              ];
+
+              const deletedAlerts = [
+                ...inactiveStackAlertsOlderThan90,
+                ...activeStackAlertsOlderThan90,
+              ];
+
+              await testExpectedAlertsAreDeleted(
+                expectedAlerts.map((a) => a.space1.id),
+                deletedAlerts.map((a) => a.space1.id)
+              );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should delete the correct of alerts - multi-category active alerts', async () => {
+          await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(Superuser.username, Superuser.password)
+            .send({
+              is_active_alerts_deletion_enabled: true,
+              is_inactive_alerts_deletion_enabled: false,
+              active_alerts_deletion_threshold: 90,
+              inactive_alerts_deletion_threshold: 90,
+              category_ids: ['observability', 'management'],
+            })
+            .expect(200);
+
+          // schedule the task
+          const scheduleResponse = await supertest
+            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+            .set('kbn-xsrf', 'foo')
+            .send({});
+
+          switch (scenario.id) {
+            // case 'no_kibana_privileges at space1':
+            // case 'space_1_all at space2':
+            // case 'space_1_all_with_restricted_fixture at space1':
+            // case 'space_1_all_alerts_none_actions at space1':
+            //   // when schedule route is available, expect a forbidden error
+            //   // current test route does not gate on rules settings permissions
+            //   break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(scheduleResponse.status).to.eql(200);
+
+              const expectedAlerts = [
+                ...inactiveStackAlertsOlderThan90,
+                ...inactiveStackAlertsNewerThan90,
+                ...activeStackAlertsNewerThan90,
+                ...inactiveO11yAlertsOlderThan90,
+                ...inactiveO11yAlertsNewerThan90,
+                ...activeO11yAlertsNewerThan90,
+                ...inactiveSecurityAlertsOlderThan90,
+                ...inactiveSecurityAlertsNewerThan90,
+                ...activeSecurityAlertsOlderThan90,
+                ...activeSecurityAlertsNewerThan90,
+              ];
+
+              const deletedAlerts = [
+                ...activeStackAlertsOlderThan90,
+                ...activeO11yAlertsOlderThan90,
+              ];
+
+              await testExpectedAlertsAreDeleted(
+                expectedAlerts.map((a) => a.space1.id),
+                deletedAlerts.map((a) => a.space1.id)
+              );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should delete the correct of alerts - multi-category inactive alerts', async () => {
+          await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(Superuser.username, Superuser.password)
+            .send({
+              is_active_alerts_deletion_enabled: false,
+              is_inactive_alerts_deletion_enabled: true,
+              active_alerts_deletion_threshold: 90,
+              inactive_alerts_deletion_threshold: 90,
+              category_ids: ['observability', 'securitySolution'],
+            })
+            .expect(200);
+
+          // schedule the task
+          const scheduleResponse = await supertest
+            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+            .set('kbn-xsrf', 'foo')
+            .send({});
+
+          switch (scenario.id) {
+            // case 'no_kibana_privileges at space1':
+            // case 'space_1_all at space2':
+            // case 'space_1_all_with_restricted_fixture at space1':
+            // case 'space_1_all_alerts_none_actions at space1':
+            //   // when schedule route is available, expect a forbidden error
+            //   // current test route does not gate on rules settings permissions
+            //   break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(scheduleResponse.status).to.eql(200);
+
+              const expectedAlerts = [
+                ...inactiveStackAlertsOlderThan90,
+                ...inactiveStackAlertsNewerThan90,
+                ...activeStackAlertsOlderThan90,
+                ...activeStackAlertsNewerThan90,
+                ...inactiveO11yAlertsNewerThan90,
+                ...activeO11yAlertsOlderThan90,
+                ...activeO11yAlertsNewerThan90,
+                ...inactiveSecurityAlertsNewerThan90,
+                ...activeSecurityAlertsOlderThan90,
+                ...activeSecurityAlertsNewerThan90,
+              ];
+
+              const deletedAlerts = [
+                ...inactiveO11yAlertsOlderThan90,
+                ...inactiveSecurityAlertsOlderThan90,
+              ];
+
+              await testExpectedAlertsAreDeleted(
+                expectedAlerts.map((a) => a.space1.id),
+                deletedAlerts.map((a) => a.space1.id)
+              );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should delete the correct of alerts - multi-category active and inactive alerts', async () => {
+          // update the alert deletion rules setting
+          await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(Superuser.username, Superuser.password)
+            .send({
+              is_active_alerts_deletion_enabled: true,
+              is_inactive_alerts_deletion_enabled: true,
+              active_alerts_deletion_threshold: 90,
+              inactive_alerts_deletion_threshold: 90,
+              category_ids: ['management', 'securitySolution'],
+            })
+            .expect(200);
+
+          // schedule the task
+          const scheduleResponse = await supertest
+            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+            .set('kbn-xsrf', 'foo')
+            .send({});
+
+          switch (scenario.id) {
+            // case 'no_kibana_privileges at space1':
+            // case 'space_1_all at space2':
+            // case 'space_1_all_with_restricted_fixture at space1':
+            // case 'space_1_all_alerts_none_actions at space1':
+            //   // when schedule route is available, expect a forbidden error
+            //   // current test route does not gate on rules settings permissions
+            //   break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(scheduleResponse.status).to.eql(200);
+
+              const expectedAlerts = [
+                ...inactiveStackAlertsNewerThan90,
+                ...activeStackAlertsNewerThan90,
+                ...inactiveO11yAlertsOlderThan90,
+                ...inactiveO11yAlertsNewerThan90,
+                ...activeO11yAlertsOlderThan90,
+                ...activeO11yAlertsNewerThan90,
+                ...inactiveSecurityAlertsNewerThan90,
+                ...activeSecurityAlertsNewerThan90,
+              ];
+
+              const deletedAlerts = [
+                ...inactiveStackAlertsOlderThan90,
+                ...activeStackAlertsOlderThan90,
+                ...inactiveSecurityAlertsOlderThan90,
+                ...activeSecurityAlertsOlderThan90,
+              ];
+
+              await testExpectedAlertsAreDeleted(
+                expectedAlerts.map((a) => a.space1.id),
+                deletedAlerts.map((a) => a.space1.id)
               );
               break;
             default:
@@ -419,5 +1403,131 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
       });
     }
+
+    describe('multi-space', () => {
+      it('should delete alerts from multiple spaces when specified', async () => {
+        // index docs into the default space
+        const testAlertDocs = getTestAlertDocs('default');
+        const operations = testAlertDocs.flatMap(({ _index, _id, _source: doc }) => {
+          return [{ index: { _index, _id } }, doc];
+        });
+        await es.bulk({ refresh: 'wait_for', operations });
+
+        // set alert deletion settings in space 1
+        await supertestWithoutAuth
+          .post(`${getUrlPrefix(Space1.id)}/internal/alerting/rules/settings/_alert_deletion`)
+          .set('kbn-xsrf', 'foo')
+          .auth(Superuser.username, Superuser.password)
+          .send({
+            is_active_alerts_deletion_enabled: false,
+            is_inactive_alerts_deletion_enabled: true,
+            active_alerts_deletion_threshold: 90,
+            inactive_alerts_deletion_threshold: 90,
+          })
+          .expect(200);
+
+        // set alert deletion settings in default space
+        await supertestWithoutAuth
+          .post(`${getUrlPrefix('default')}/internal/alerting/rules/settings/_alert_deletion`)
+          .set('kbn-xsrf', 'foo')
+          .auth(Superuser.username, Superuser.password)
+          .send({
+            is_active_alerts_deletion_enabled: false,
+            is_inactive_alerts_deletion_enabled: true,
+            active_alerts_deletion_threshold: 90,
+            inactive_alerts_deletion_threshold: 90,
+            category_ids: ['observability'],
+          })
+          .expect(200);
+
+        // schedule the task
+        await supertest
+          .post(`${getUrlPrefix(Space1.id)}/api/alerts_fixture/schedule_alert_deletion`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            spaceIds: [Space1.id, 'default'],
+          })
+          .expect(200);
+
+        const expectedAlertsSpace1 = [
+          ...inactiveStackAlertsNewerThan90,
+          ...activeStackAlertsOlderThan90,
+          ...activeStackAlertsNewerThan90,
+          ...inactiveO11yAlertsNewerThan90,
+          ...activeO11yAlertsOlderThan90,
+          ...activeO11yAlertsNewerThan90,
+          ...inactiveSecurityAlertsNewerThan90,
+          ...activeSecurityAlertsOlderThan90,
+          ...activeSecurityAlertsNewerThan90,
+        ];
+
+        const deletedAlertsSpace1 = [
+          ...inactiveStackAlertsOlderThan90,
+          ...inactiveO11yAlertsOlderThan90,
+          ...inactiveSecurityAlertsOlderThan90,
+        ];
+
+        const expectedAlertsDefault = [
+          ...inactiveStackAlertsOlderThan90,
+          ...inactiveStackAlertsNewerThan90,
+          ...activeStackAlertsOlderThan90,
+          ...activeStackAlertsNewerThan90,
+          ...inactiveO11yAlertsNewerThan90,
+          ...activeO11yAlertsOlderThan90,
+          ...activeO11yAlertsNewerThan90,
+          ...inactiveSecurityAlertsOlderThan90,
+          ...inactiveSecurityAlertsNewerThan90,
+          ...activeSecurityAlertsOlderThan90,
+          ...activeSecurityAlertsNewerThan90,
+        ];
+
+        const deletedAlertsDefault = inactiveO11yAlertsOlderThan90;
+
+        const expectedAlertIds = [
+          ...expectedAlertsDefault.map((a) => a.default.id),
+          ...expectedAlertsSpace1.map((a) => a.space1.id),
+        ];
+
+        // wait for the task to complete
+        await retry.try(async () => {
+          const results = await es.search<IValidatedEvent>({
+            index: '.kibana-event-log*',
+            query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
+          });
+          expect(results.hits.hits.length).to.eql(2);
+          expect(results.hits.hits[0]._source?.event?.outcome).to.eql('success');
+          expect(results.hits.hits[1]._source?.event?.outcome).to.eql('success');
+
+          const defaultSpaceEventLog = results.hits.hits.find(
+            (hit) => hit._source?.kibana?.space_ids?.[0] === 'default'
+          );
+          expect(defaultSpaceEventLog).not.to.be(undefined);
+          expect(defaultSpaceEventLog?._source?.kibana?.alert?.deletion?.num_deleted).to.eql(
+            deletedAlertsDefault.length
+          );
+
+          const space1SpaceEventLog = results.hits.hits.find(
+            (hit) => hit._source?.kibana?.space_ids?.[0] === 'space1'
+          );
+          expect(space1SpaceEventLog).not.to.be(undefined);
+          expect(space1SpaceEventLog?._source?.kibana?.alert?.deletion?.num_deleted).to.eql(
+            deletedAlertsSpace1.length
+          );
+        });
+
+        await retry.try(async () => {
+          // query for alerts
+          const alerts = await es.search({
+            index: '.internal.alerts-*',
+            size: 100,
+            query: { match_all: {} },
+          });
+          expect(alerts.hits.hits.length).to.eql(expectedAlertIds.length);
+          expectedAlertIds.forEach((alertId) => {
+            expect(alerts.hits.hits.findIndex((a) => a._id === alertId)).to.be.greaterThan(-1);
+          });
+        });
+      });
+    });
   });
 }

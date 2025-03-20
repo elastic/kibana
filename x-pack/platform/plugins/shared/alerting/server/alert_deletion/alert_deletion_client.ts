@@ -30,8 +30,16 @@ import type {
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { GetAlertIndicesAlias } from '../lib';
 import { AlertAuditAction, alertAuditSystemEvent, spaceIdToNamespace } from '../lib';
-import type { RuleTypeRegistry, RulesSettingsAlertDeletionProperties } from '../types';
-import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../types';
+import type {
+  RuleTypeRegistry,
+  RulesSettings,
+  RulesSettingsAlertDeletion,
+  RulesSettingsAlertDeletionProperties,
+} from '../types';
+import {
+  RULES_SETTINGS_ALERT_DELETION_SAVED_OBJECT_ID,
+  RULES_SETTINGS_SAVED_OBJECT_TYPE,
+} from '../types';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 
 export const ALERT_DELETION_TASK_TYPE = 'alert-deletion';
@@ -141,6 +149,7 @@ export class AlertDeletionClient {
         throw new Error(`Invalid category id - ${categoryIds}`);
       }
     }
+
     const ruleTypes =
       categoryIds && categoryIds.length > 0
         ? this.ruleTypeRegistry.getAllTypesForCategories(categoryIds)
@@ -193,48 +202,48 @@ export class AlertDeletionClient {
 
       // Query for rules settings in the specified spaces; create a point in time finder for efficient
       // pagination in case there are a lot of spaces
-      const alertDeletionSettingsFinder =
-        await internalSavedObjectsRepository.createPointInTimeFinder<RulesSettingsAlertDeletionProperties>(
-          {
-            type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
-            namespaces,
-            filter: `rules-settings.attributes.alertDeletion: *`,
-            perPage: 100,
-          }
-        );
+      const results = await internalSavedObjectsRepository.bulkGet<RulesSettings>(
+        namespaces.map((namespace?: string) => ({
+          id: RULES_SETTINGS_ALERT_DELETION_SAVED_OBJECT_ID,
+          type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+          ...(namespace ? { namespaces: [namespace] } : {}),
+        }))
+      );
 
-      try {
-        for await (const response of alertDeletionSettingsFinder.find()) {
-          // For each rules settings, call the library function to delete alerts
-          for (const settings of response.saved_objects) {
-            const namespace =
-              settings.namespaces && settings.namespaces.length > 0
-                ? settings.namespaces[0]
-                : undefined;
-            const spaceId = SavedObjectsUtils.namespaceIdToString(namespace);
-
-            try {
-              const { numAlertsDeleted, errors } = await this.deleteAlertsForSpace(
-                settings.attributes,
-                spaceId,
-                abortController
-              );
-
-              if (errors && errors.length > 0) {
-                this.logFailedDeletion(runDate, numAlertsDeleted, [spaceId], errors?.join(', '));
-              } else {
-                this.logSuccessfulDeletion(runDate, numAlertsDeleted, [spaceId]);
-              }
-            } catch (err) {
-              this.logFailedDeletion(runDate, 0, taskInstance.params.spaceIds, err.message);
-
-              // do we want to retry this task? if so, we should throw a retryable error, otherwise
-              // we'll just return.
-            }
-          }
+      for (const result of results.saved_objects) {
+        if (result.error) {
+          this.logger.error(
+            `Error encountered while fetching rules settings: ${result.error.message}`
+          );
+          this.logFailedDeletion(runDate, 0, taskInstance.params.spaceIds, result.error.message);
+          continue;
         }
-      } finally {
-        await alertDeletionSettingsFinder.close();
+
+        const namespace =
+          result.namespaces && result.namespaces.length > 0 ? result.namespaces[0] : undefined;
+        const spaceId = SavedObjectsUtils.namespaceIdToString(namespace);
+
+        if (!result.attributes.alertDeletion) {
+          this.logger.error(`Undefined alert deletion rules settings for space "${spaceId}}"`);
+          this.logFailedDeletion(runDate, 0, [spaceId], 'Undefined alert deletion rules settings');
+          continue;
+        }
+
+        try {
+          const { numAlertsDeleted, errors } = await this.deleteAlertsForSpace(
+            result.attributes.alertDeletion,
+            spaceId,
+            abortController
+          );
+
+          if (errors && errors.length > 0) {
+            this.logFailedDeletion(runDate, numAlertsDeleted, [spaceId], errors?.join(', '));
+          } else {
+            this.logSuccessfulDeletion(runDate, numAlertsDeleted, [spaceId]);
+          }
+        } catch (err) {
+          this.logFailedDeletion(runDate, 0, taskInstance.params.spaceIds, err.message);
+        }
       }
     } catch (err) {
       this.logger.error(`Error encountered while running alert deletion task: ${err.message}`, {
@@ -242,14 +251,11 @@ export class AlertDeletionClient {
       });
 
       this.logFailedDeletion(runDate, 0, taskInstance.params.spaceIds, err.message);
-
-      // do we want to retry this task? if so, we should throw a retryable error, otherwise
-      // we'll just return.
     }
   };
 
   private async deleteAlertsForSpace(
-    settings: RulesSettingsAlertDeletionProperties,
+    settings: RulesSettingsAlertDeletion,
     spaceId: string,
     abortController: AbortController
   ): Promise<{ numAlertsDeleted: number; errors?: string[] }> {
@@ -365,7 +371,6 @@ export class AlertDeletionClient {
         // query for alerts to delete, sorted to return oldest first
         const searchResponse: SearchResponse<AlertFilteredSource> = await esClient.search(
           {
-            index: indices,
             query,
             size: PAGE_SIZE,
             sort: [{ [TIMESTAMP]: 'asc' }],

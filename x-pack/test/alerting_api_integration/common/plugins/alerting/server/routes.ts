@@ -806,13 +806,15 @@ export function defineRoutes(
     }
   );
 
-  router.get(
+  router.post(
     {
       path: '/api/alerts_fixture/schedule_alert_deletion',
       validate: {
-        body: schema.object({
-          spaceIds: schema.arrayOf(schema.string()),
-        }),
+        body: schema.maybe(
+          schema.object({
+            spaceIds: schema.maybe(schema.arrayOf(schema.string())),
+          })
+        ),
       },
     },
     async (
@@ -822,7 +824,13 @@ export function defineRoutes(
     ): Promise<IKibanaResponse<any>> => {
       try {
         const alerting = await alertingStart;
-        const result = await alerting.scheduleAlertDeletion(req.body.spaceIds);
+        let spaceIds = req.body?.spaceIds;
+        if (spaceIds == null) {
+          const [, { spaces }] = await core.getStartServices();
+          const currentSpaceId = spaces ? spaces.spacesService.getSpaceId(req) : 'default';
+          spaceIds = [currentSpaceId];
+        }
+        const result = await alerting.scheduleAlertDeletion(spaceIds);
         return res.ok({
           body: { result },
         });

@@ -15,11 +15,13 @@ export const transformAlertDeletionSettingsRequest: RewriteRequestCase<
   is_active_alerts_deletion_enabled: isActiveAlertsDeletionEnabled,
   inactive_alerts_deletion_threshold: inactiveAlertsDeletionThreshold,
   is_inactive_alerts_deletion_enabled: isInactiveAlertsDeletionEnabled,
+  category_ids: categoryIds,
 }) => {
   return {
     activeAlertsDeletionThreshold,
     isActiveAlertsDeletionEnabled,
     inactiveAlertsDeletionThreshold,
     isInactiveAlertsDeletionEnabled,
+    categoryIds,
   };
 };

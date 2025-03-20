@@ -17,6 +17,7 @@ export const transformAlertDeletionSettingsToResponse = (
       is_active_alerts_deletion_enabled: settings.isActiveAlertsDeletionEnabled,
       inactive_alerts_deletion_threshold: settings.inactiveAlertsDeletionThreshold,
       is_inactive_alerts_deletion_enabled: settings.isInactiveAlertsDeletionEnabled,
+      ...(settings.categoryIds ? { category_ids: settings.categoryIds } : {}),
       created_at: settings.createdAt,
       created_by: settings.createdBy,
       updated_at: settings.updatedAt,

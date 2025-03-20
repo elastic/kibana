@@ -24,6 +24,7 @@ export const alertDeletionSettingsResponseBodySchema = schema.object({
   is_active_alerts_deletion_enabled: schema.boolean(),
   inactive_alerts_deletion_threshold: schema.number({ min: 1, max: 1000 }),
   is_inactive_alerts_deletion_enabled: schema.boolean(),
+  category_ids: schema.maybe(schema.arrayOf(schema.string())),
   created_at: schema.string(),
   created_by: schema.nullable(schema.string()),
   updated_at: schema.string(),
