@@ -24,6 +24,7 @@ export const createGroupFilter = (
   multiValueFields?: string[]
 ): StrictFilter[] => {
   const shouldIgnoreFieldSize = checkIsFlattenResults(selectedGroup, multiValueFields);
+
   return values != null && values.length > 0
     ? values.reduce(
         (acc: StrictFilter[], query) => [
