@@ -28,6 +28,7 @@ export const SearchQuery = () => {
       render={({ field }) => (
         <EuiFieldText
           data-test-subj="searchPlaygroundSearchModeFieldText"
+          prepend="{query}"
           {...field}
           value={searchBarValue}
           icon="search"

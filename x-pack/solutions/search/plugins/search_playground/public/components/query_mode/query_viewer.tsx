@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSplitPanel,
+  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -41,15 +42,26 @@ export const ElasticsearchQueryViewer = ({
       <EuiSplitPanel.Inner grow={false} css={QueryViewTitlePanel(euiTheme)}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiBadge>
-              <FormattedMessage
-                id="xpack.searchPlayground.viewQuery.elasticGenerated.badge"
-                defaultMessage="Elastic-generated"
-              />
-            </EuiBadge>
+            <EuiFlexGroup gutterSize="s">
+              <EuiText>
+                <h5>
+                  <FormattedMessage
+                    id="xpack.searchPlayground.viewQuery.queryViewer.title"
+                    defaultMessage="Query"
+                  />
+                </h5>
+              </EuiText>
+              <EuiBadge>
+                <FormattedMessage
+                  id="xpack.searchPlayground.viewQuery.elasticGenerated.badge"
+                  defaultMessage="Elastic-generated"
+                />
+              </EuiBadge>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              fill
               size="s"
               color="primary"
               iconSide="left"

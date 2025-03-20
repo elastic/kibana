@@ -6,14 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiSplitPanel,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiSplitPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -26,14 +19,11 @@ export interface ElasticsearchQueryOutputProps {
   queryError?: unknown;
   isError: boolean;
   isLoading: boolean;
-  executeQuery: () => void;
 }
 
 export const ElasticsearchQueryOutput = ({
   queryResponse,
-  executeQuery,
   isError,
-  isLoading,
   queryError,
 }: ElasticsearchQueryOutputProps) => {
   const { euiTheme } = useEuiTheme();
@@ -76,39 +66,14 @@ export const ElasticsearchQueryOutput = ({
             css={FullHeight}
             data-test-subj="ViewElasticsearchQueryResponseEmptyState"
           >
-            <EuiEmptyPrompt
-              color="plain"
-              title={
-                <h2>
-                  <FormattedMessage
-                    id="xpack.searchPlayground.viewQuery.queryOutput.emptyPrompt.title"
-                    defaultMessage="Review the raw output of your query"
-                  />
-                </h2>
-              }
-              body={
-                <p>
-                  <FormattedMessage
-                    id="xpack.searchPlayground.viewQuery.queryOutput.emptyPrompt.body"
-                    defaultMessage="Run your query above to view the raw JSON output here."
-                  />
-                </p>
-              }
-              actions={
-                <EuiButton
-                  data-test-subj="queryOutputEmptyPrompRunQuery"
-                  iconSide="left"
-                  iconType="play"
-                  onClick={executeQuery}
-                  isLoading={isLoading}
-                >
-                  <FormattedMessage
-                    id="xpack.searchPlayground.viewQuery.queryOutput.emptyPrompt.action"
-                    defaultMessage="Run your query"
-                  />
-                </EuiButton>
-              }
-            />
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.searchPlayground.viewQuery.queryOutput.emptyPrompt.body"
+                  defaultMessage="Run your query above to view the raw JSON output here."
+                />
+              </p>
+            </EuiText>
           </EuiFlexGroup>
         )}
       </EuiSplitPanel.Inner>

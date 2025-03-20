@@ -57,7 +57,6 @@ export const SearchQueryMode: React.FC = () => {
                   <EuiResizableButton accountForScrollbars="both" />
                   <EuiResizablePanel initialSize={40} minSize="25%" tabIndex={0} paddingSize="none">
                     <ElasticsearchQueryOutput
-                      executeQuery={executeQuery}
                       queryResponse={data}
                       queryError={error}
                       isError={isError}
