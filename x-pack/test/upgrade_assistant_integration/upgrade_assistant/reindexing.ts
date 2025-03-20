@@ -292,6 +292,9 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ indexNames: [test1, test2, test3] })
           .expect(200);
 
+        // eslint-disable-next-line no-console
+        console.log(JSON.stringify(result.body.errors, null, 2));
+
         expect(result.body.enqueued.length).to.equal(3);
         expect(result.body.errors.length).to.equal(0);
 
