@@ -97,6 +97,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
 
   const {
     dataOutputOptions,
+    dataOutputValueOfSelected,
     monitoringOutputOptions,
     isLoading: isLoadingOptions,
   } = useOutputOptions(agentPolicy);
@@ -112,7 +113,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     maxAgentPoliciesWithInactivityTimeout !== undefined &&
     totalAgentPoliciesWithInactivityTimeout > (maxAgentPoliciesWithInactivityTimeout ?? 0);
   const { dataDownloadSourceOptions, isLoading: isLoadingDownloadSources } =
-    useDownloadSourcesOptions(agentPolicy);
+    useDownloadSourcesOptions();
 
   const { fleetServerHostsOptions, isLoading: isLoadingFleetServerHostsOption } =
     useFleetServerHostsOptions(agentPolicy);
@@ -657,7 +658,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         >
           <EuiSuperSelect
             disabled={disabled || isManagedPolicy}
-            valueOfSelected={agentPolicy.data_output_id || DEFAULT_SELECT_VALUE}
+            valueOfSelected={dataOutputValueOfSelected}
             fullWidth
             isLoading={isLoadingOptions}
             onChange={(e) => {

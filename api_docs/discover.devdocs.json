@@ -2154,6 +2154,48 @@
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverServices.apmSourcesAccess",
+            "type": "Object",
+            "tags": [],
+            "label": "apmSourcesAccess",
+            "description": [],
+            "signature": [
+              "{ getApmIndices: (options?: Omit<",
+              {
+                "pluginId": "apmSourcesAccess",
+                "scope": "public",
+                "docId": "kibApmSourcesAccessPluginApi",
+                "section": "def-public.SourcesApiOptions",
+                "text": "SourcesApiOptions"
+              },
+              ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
+              {
+                "pluginId": "apmSourcesAccess",
+                "scope": "public",
+                "docId": "kibApmSourcesAccessPluginApi",
+                "section": "def-public.SourcesApiOptions",
+                "text": "SourcesApiOptions"
+              },
+              ", \"body\"> | undefined) => Promise<",
+              "ApmIndexSettingsResponse",
+              ">; saveApmIndices: (options: ",
+              {
+                "pluginId": "apmSourcesAccess",
+                "scope": "public",
+                "docId": "kibApmSourcesAccessPluginApi",
+                "section": "def-public.SourcesApiOptions",
+                "text": "SourcesApiOptions"
+              },
+              " & { body: Partial<Record<\"error\" | \"transaction\" | \"span\" | \"metric\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
+              "SavedObject",
+              "<{}>>; } | undefined"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

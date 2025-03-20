@@ -18,6 +18,7 @@
     "@kbn/config",
     "@kbn/dev-utils",
     "@kbn/apm-config-loader",
+    "@kbn/projects-solutions-groups",
   ],
   "exclude": [
     "target/**/*",

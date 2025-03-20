@@ -13,6 +13,7 @@ import {
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createConnector, deleteConnectors } from '../../common/connectors';
 import { deleteConversations } from '../../common/conversations';
+import { interceptRequest } from '../../common/intercept_request';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
@@ -21,6 +22,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   const supertest = getService('supertest');
   const log = getService('log');
   const retry = getService('retry');
+  const driver = getService('__webdriver__');
 
   const { header } = getPageObjects(['header', 'security']);
   const PageObjects = getPageObjects(['common', 'error', 'navigationalSearch', 'security']);
@@ -77,9 +79,16 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
       describe('when changing access to Shared', () => {
         before(async () => {
-          await testSubjects.click(ui.pages.conversations.access.sharedOption);
-          await testSubjects.existOrFail(ui.pages.conversations.access.loadingBadge);
-          await testSubjects.missingOrFail(ui.pages.conversations.access.loadingBadge);
+          await interceptRequest(
+            driver.driver,
+            '*observability_ai_assistant\\/conversation\\/*',
+            (responseFactory) => {
+              return responseFactory.continue();
+            },
+            async () => {
+              await testSubjects.click(ui.pages.conversations.access.sharedOption);
+            }
+          );
         });
 
         it('should update the badge to "Shared"', async () => {
@@ -104,10 +113,17 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
       describe('when changing access to Private', () => {
         before(async () => {
-          await testSubjects.click(ui.pages.conversations.access.shareButton);
-          await testSubjects.click(ui.pages.conversations.access.privateOption);
-          await testSubjects.existOrFail(ui.pages.conversations.access.loadingBadge);
-          await testSubjects.missingOrFail(ui.pages.conversations.access.loadingBadge);
+          await interceptRequest(
+            driver.driver,
+            '*observability_ai_assistant\\/conversation\\/*',
+            (responseFactory) => {
+              return responseFactory.continue();
+            },
+            async () => {
+              await testSubjects.click(ui.pages.conversations.access.shareButton);
+              await testSubjects.click(ui.pages.conversations.access.privateOption);
+            }
+          );
         });
 
         it('should update the badge to "Private"', async () => {

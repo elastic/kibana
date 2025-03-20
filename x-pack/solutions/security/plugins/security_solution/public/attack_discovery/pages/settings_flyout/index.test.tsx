@@ -6,14 +6,16 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { SettingsFlyout } from '.';
 import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { ATTACK_DISCOVERY_SETTINGS } from './translations';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
+jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../sourcerer/containers');
 jest.mock('react-router-dom', () => ({
@@ -46,6 +48,8 @@ const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
 describe('SettingsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
 
     mockUseKibana.mockReturnValue({
       services: {
@@ -92,6 +96,14 @@ describe('SettingsFlyout', () => {
     expect(defaultProps.onClose).toHaveBeenCalled();
   });
 
+  it('should not render Settings tab', () => {
+    expect(screen.queryByRole('tab', { name: 'Settings' })).not.toBeInTheDocument();
+  });
+
+  it('should not render Schedule tab', () => {
+    expect(screen.queryByRole('tab', { name: 'Schedule' })).not.toBeInTheDocument();
+  });
+
   describe('when the save button is clicked', () => {
     beforeEach(() => {
       render(
@@ -126,6 +138,45 @@ describe('SettingsFlyout', () => {
 
     it('invokes onClose', () => {
       expect(defaultProps.onClose).toHaveBeenCalled();
+    });
+  });
+
+  describe('when `assistantAttackDiscoverySchedulingEnabled` feature flag is enabled', () => {
+    beforeEach(() => {
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+      render(
+        <TestProviders>
+          <SettingsFlyout {...defaultProps} />
+        </TestProviders>
+      );
+    });
+
+    it('should render Settings tab', () => {
+      expect(screen.getByRole('tab', { name: 'Settings' })).toBeInTheDocument();
+    });
+
+    it('should render Schedule tab', () => {
+      expect(screen.getByRole('tab', { name: 'Schedule' })).toBeInTheDocument();
+    });
+
+    it('should switch to Settings tab and show `AlertSelectionQuery`', async () => {
+      const scheduleTabButton = screen.getByRole('tab', { name: 'Schedule' });
+      act(() => {
+        fireEvent.click(scheduleTabButton); // clicking invokes tab switching
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('emptySchedule')).toBeInTheDocument();
+      });
+    });
+
+    it('should switch to Settings tab and show `AlertSelectionRange`', async () => {
+      const scheduleTabButton = screen.getByRole('tab', { name: 'Schedule' });
+      act(() => {
+        fireEvent.click(scheduleTabButton); // clicking invokes tab switching
+      });
+      await waitFor(() => {
+        expect(screen.getByTestId('createSchedule')).toBeInTheDocument();
+      });
     });
   });
 });

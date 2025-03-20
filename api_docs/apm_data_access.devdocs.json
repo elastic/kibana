@@ -496,12 +496,31 @@
             "label": "getApmIndices",
             "description": [],
             "signature": [
-              "() => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/check_privileges.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "apmDataAccess",
+                "id": "def-server.ApmDataAccessPrivilegesCheck.getApmIndices.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/check_privileges.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -1907,21 +1926,6 @@
     "misc": [
       {
         "parentPluginId": "apmDataAccess",
-        "id": "def-server.APMDataAccessConfig",
-        "type": "Type",
-        "tags": [],
-        "label": "APMDataAccessConfig",
-        "description": [],
-        "signature": [
-          "{ readonly indices: Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>; }"
-        ],
-        "path": "x-pack/solutions/observability/plugins/apm_data_access/server/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "apmDataAccess",
         "id": "def-server.ApmDataAccessServices",
         "type": "Type",
         "tags": [],
@@ -2006,21 +2010,6 @@
           "<AnyApmDocumentType>[]; }); size: number; track_total_hits: number | boolean; }"
         ],
         "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "apmDataAccess",
-        "id": "def-server.APMIndices",
-        "type": "Type",
-        "tags": [],
-        "label": "APMIndices",
-        "description": [],
-        "signature": [
-          "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
-        ],
-        "path": "x-pack/solutions/observability/plugins/apm_data_access/server/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

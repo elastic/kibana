@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useStatusAction } from './use_status_action';
 
@@ -15,18 +13,19 @@ import { basicCase } from '../../../containers/mock';
 import { CaseStatuses } from '../../../../common/types/domain';
 import { useUserPermissions } from '../../user_actions/use_user_permissions';
 import { useShouldDisableStatus } from './use_should_disable_status';
+import { TestProviders } from '../../../common/mock';
+import { coreMock } from '@kbn/core/public/mocks';
+import React from 'react';
 
 jest.mock('../../user_actions/use_user_permissions');
 jest.mock('./use_should_disable_status');
 jest.mock('../../../containers/api');
 
 describe('useStatusAction', () => {
-  let appMockRender: AppMockRenderer;
   const onAction = jest.fn();
   const onActionSuccess = jest.fn();
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
     (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
 
@@ -45,7 +44,7 @@ describe('useStatusAction', () => {
           isDisabled: false,
         }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -85,7 +84,7 @@ describe('useStatusAction', () => {
     const { result } = renderHook(
       () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -103,10 +102,11 @@ describe('useStatusAction', () => {
 
       await waitFor(() => {
         expect(onAction).toHaveBeenCalled();
-        expect(onActionSuccess).toHaveBeenCalled();
-        expect(updateSpy).toHaveBeenCalledWith({
-          cases: [{ status, id: basicCase.id, version: basicCase.version }],
-        });
+      });
+
+      expect(onActionSuccess).toHaveBeenCalled();
+      expect(updateSpy).toHaveBeenCalledWith({
+        cases: [{ status, id: basicCase.id, version: basicCase.version }],
       });
     }
   });
@@ -120,10 +120,12 @@ describe('useStatusAction', () => {
   it.each(singleCaseTests)(
     'shows the success toaster correctly when updating the status of the case: %s',
     async (_, index, expectedMessage) => {
+      const coreStart = coreMock.createStart();
+
       const { result } = renderHook(
         () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
         {
-          wrapper: appMockRender.AppWrapper,
+          wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
         }
       );
 
@@ -135,7 +137,7 @@ describe('useStatusAction', () => {
       });
 
       await waitFor(() => {
-        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
           title: expectedMessage,
           className: 'eui-textBreakWord',
         });
@@ -152,10 +154,12 @@ describe('useStatusAction', () => {
   it.each(multipleCasesTests)(
     'shows the success toaster correctly when updating the status of the case: %s',
     async (_, index, expectedMessage) => {
+      const coreStart = coreMock.createStart();
+
       const { result } = renderHook(
         () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
         {
-          wrapper: appMockRender.AppWrapper,
+          wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
         }
       );
 
@@ -167,7 +171,7 @@ describe('useStatusAction', () => {
       });
 
       await waitFor(() => {
-        expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
           title: expectedMessage,
           className: 'eui-textBreakWord',
         });
@@ -187,7 +191,7 @@ describe('useStatusAction', () => {
     const { result } = renderHook(
       () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -201,7 +205,7 @@ describe('useStatusAction', () => {
       const { result } = renderHook(
         () => useStatusAction({ onAction, onActionSuccess, isDisabled: true }),
         {
-          wrapper: appMockRender.AppWrapper,
+          wrapper: TestProviders,
         }
       );
 
@@ -219,7 +223,7 @@ describe('useStatusAction', () => {
     const { result } = renderHook(
       () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 
@@ -235,7 +239,7 @@ describe('useStatusAction', () => {
     const { result } = renderHook(
       () => useStatusAction({ onAction, onActionSuccess, isDisabled: false }),
       {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       }
     );
 

@@ -11,6 +11,8 @@ import { PublishingSubject } from '@kbn/presentation-publishing';
 import { LensRuntimeState } from '../types';
 
 export interface PanelManagementApi {
+  // distinguish show and edit capabilities for read only mode
+  canShowConfig: () => boolean;
   isEditingEnabled: () => boolean;
   isNewPanel: () => boolean;
   onStopEditing: (isCancel: boolean, state: LensRuntimeState | undefined) => void;
@@ -22,15 +24,20 @@ export function setupPanelManagement(
   {
     isNewlyCreated$,
     setAsCreated,
+    isReadOnly,
+    canEdit,
   }: {
     isNewlyCreated$: PublishingSubject<boolean>;
     setAsCreated: () => void;
+    isReadOnly: () => boolean;
+    canEdit: () => boolean;
   }
 ): PanelManagementApi {
   const isEditing$ = new BehaviorSubject(false);
 
   return {
-    isEditingEnabled: () => true,
+    canShowConfig: isReadOnly,
+    isEditingEnabled: canEdit,
     isNewPanel: () => isNewlyCreated$.getValue(),
     onStopEditing: (isCancel: boolean = false, state: LensRuntimeState | undefined) => {
       isEditing$.next(false);

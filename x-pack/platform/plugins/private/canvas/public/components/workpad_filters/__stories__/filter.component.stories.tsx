@@ -6,7 +6,6 @@
  */
 
 import { EuiText, EuiTextColor } from '@elastic/eui';
-import { storiesOf } from '@storybook/react';
 import React, { FC } from 'react';
 import { FormattedFilterViewInstance } from '../../../../types';
 import { Filter } from '../filter.component';
@@ -38,16 +37,30 @@ const component: FC<any> = ({ value }) => (
   </EuiText>
 );
 
-storiesOf('components/WorkpadFilters/FilterComponent', module)
-  .add('default', () => <Filter filter={filter} />)
-  .add('with component field', () => (
-    <Filter filter={{ ...filter, value: { ...filter.value, component } }} />
-  ))
-  .add('with custom filter fields', () => (
+export default {
+  title: 'components/WorkpadFilters/FilterComponent',
+};
+
+export const Default = {
+  render: () => <Filter filter={filter} />,
+  name: 'default',
+};
+
+export const WithComponentField = {
+  render: () => <Filter filter={{ ...filter, value: { ...filter.value, component } }} />,
+
+  name: 'with component field',
+};
+
+export const WithCustomFilterFields = {
+  render: () => (
     <Filter
       filter={{
         ...filter,
         customField: { label: 'Custom Field', formattedValue: 'Some unknown field' },
       }}
     />
-  ));
+  ),
+
+  name: 'with custom filter fields',
+};

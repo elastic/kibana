@@ -172,9 +172,7 @@
         "type": "Interface",
         "tags": [],
         "label": "ObservabilityLogsAIAssistantFeatureRenderDeps",
-        "description": [
-          "\nFeatures types\nHere goes the contract definition for the client features that can be registered\nand that will be consumed by Discover.\n\nAllow to register an AIAssistant scoped to investigate log entries.\nIt will be opinionatedly used as an additional tool to investigate a log document and\nwill be shown on the logs-overview preset tab of the UnifiedDocViewer."
-        ],
+        "description": [],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -318,6 +316,8 @@
             "section": "def-public.ObservabilityLogsAIAssistantFeature",
             "text": "ObservabilityLogsAIAssistantFeature"
           },
+          " | ",
+          "StreamsFeature",
           " | ",
           "ObservabilityCreateSLOFeature",
           " | ",

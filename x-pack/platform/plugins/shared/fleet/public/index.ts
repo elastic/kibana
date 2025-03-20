@@ -10,6 +10,7 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 import { lazy } from 'react';
 
 import { FleetPlugin } from './plugin';
+
 export type { GetPackagesResponse } from './types';
 export { installationStatuses } from '../common/constants';
 
@@ -89,3 +90,6 @@ export const AvailablePackagesHook = () => {
     './applications/integrations/sections/epm/screens/home/hooks/use_available_packages'
   );
 };
+
+export { useGetPackagesQuery } from './hooks/use_request/epm';
+export { useGetSettingsQuery } from './hooks/use_request/settings';

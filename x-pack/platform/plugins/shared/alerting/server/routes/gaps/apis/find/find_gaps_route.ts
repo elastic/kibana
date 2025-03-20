@@ -23,6 +23,12 @@ export const findGapsRoute = (
   router.post(
     {
       path: INTERNAL_ALERTING_GAPS_FIND_API_PATH,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: findGapsBodySchemaV1,
       },

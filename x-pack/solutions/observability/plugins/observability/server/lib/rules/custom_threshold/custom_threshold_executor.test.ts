@@ -183,7 +183,7 @@ const setup = () => {
     ...alertsServices,
     getSearchSourceClient: jest.fn().mockResolvedValue({
       ...searchSourceCommonMock,
-      create: jest.fn(() => Promise.resolve(mockedSearchSource)),
+      createLazy: jest.fn(() => Promise.resolve(mockedSearchSource)),
     }),
   };
 
@@ -1573,6 +1573,11 @@ describe('The custom threshold alert type', () => {
                 value: 'a',
               },
             ],
+            grouping: {
+              host: {
+                name: 'a',
+              },
+            },
             host: {
               name: 'a',
             },

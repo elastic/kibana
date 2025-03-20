@@ -511,11 +511,11 @@
               },
               "<",
               {
-                "pluginId": "dashboard",
-                "scope": "public",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-public.DashboardLocatorParams",
-                "text": "DashboardLocatorParams"
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
               },
               ">"
             ],
@@ -564,13 +564,13 @@
                 "section": "def-public.DataPublicPluginStart",
                 "text": "DataPublicPluginStart"
               },
-              "; dashboard: ",
+              "; share: ",
               {
-                "pluginId": "dashboard",
+                "pluginId": "share",
                 "scope": "public",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-public.DashboardStart",
-                "text": "DashboardStart"
+                "docId": "kibSharePluginApi",
+                "section": "def-public.SharePublicStart",
+                "text": "SharePublicStart"
               },
               "; }, unknown, ",
               "CoreStart",
@@ -793,26 +793,6 @@
                 "text": "SerializableRecord"
               },
               ">): void; }"
-            ],
-            "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "dashboardEnhanced",
-            "id": "def-public.StartDependencies.dashboard",
-            "type": "Object",
-            "tags": [],
-            "label": "dashboard",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "dashboard",
-                "scope": "public",
-                "docId": "kibDashboardPluginApi",
-                "section": "def-public.DashboardStart",
-                "text": "DashboardStart"
-              }
             ],
             "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/plugin.ts",
             "deprecated": false,

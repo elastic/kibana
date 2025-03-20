@@ -34,7 +34,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // check side nav links
       await solutionNavigation.sidenav.expectSectionExists('search_project_nav');
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Indices' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
@@ -45,10 +45,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // check Data
       // > Index Management
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
@@ -170,7 +170,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // navigate back to serverless search overview
       await svlCommonNavigation.clickLogo();
       await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Indices` });
       await testSubjects.existOrFail(`elasticsearchStartPage`);
@@ -188,7 +188,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     it("management apps from the sidenav hide the 'stack management' root from the breadcrumbs", async () => {
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:index_management' });
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'elasticsearchIndexManagement' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
         'Data',
         'Index Management',
@@ -258,7 +258,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectOnlyDefinedLinks([
         'search_project_nav',
         'data',
-        'management:index_management',
+        'elasticsearchIndexManagement',
         'serverlessConnectors',
         'serverlessWebCrawlers',
         'build',

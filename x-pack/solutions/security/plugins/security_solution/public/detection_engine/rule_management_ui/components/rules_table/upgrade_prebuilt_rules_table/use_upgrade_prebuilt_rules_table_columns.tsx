@@ -246,7 +246,7 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
     () => [
       RULE_NAME_COLUMN,
       MODIFIED_COLUMN,
-      CONFLICT_COLUMN,
+      ...(isRulesCustomizationEnabled ? [CONFLICT_COLUMN] : []),
       ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
       {

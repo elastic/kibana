@@ -66,7 +66,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
     describe('escaping', () => {
       it('should handle escapes in webhook', async () => {
-        // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/alert_types.ts,
+        // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
         // const EscapableStrings
         const template = '{{context.escapableDoubleQuote}} -- {{context.escapableLineFeed}}';
         const rule = await createRule({
@@ -81,7 +81,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       });
 
       it('should handle escapes in slack', async () => {
-        // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/alert_types.ts,
+        // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
         // const EscapableStrings
         const template =
           '{{context.escapableBacktic}} -- {{context.escapableBold}} -- {{context.escapableBackticBold}} -- {{context.escapableHtml}} -- {{context.escapableLink}}';
@@ -101,7 +101,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       });
 
       it('should handle context variable object expansion', async () => {
-        // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/alert_types.ts,
+        // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
         // const DeepContextVariables
         const template = '{{context.deep}}';
         const rule = await createRule({
@@ -113,7 +113,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         });
         const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
         expect(body).to.be(
-          '{"objectA":{"stringB":"B","arrayC":[{"stringD":"D1","numberE":42},{"stringD":"D2","numberE":43}],"objectF":{"stringG":"G","nullG":null}},"stringH":"H","arrayI":[44,45],"nullJ":null,"dateL":"2023-04-20T04:13:17.858Z"}'
+          '{"objectA":{"stringB":"B","arrayC":[{"stringD":"D1","numberE":42},{"stringD":"D2","numberE":43}],"objectF":{"stringG":"G","nullG":null}},"stringH":"H","arrayI":[44,45],"nullJ":null,"dateL":"2023-04-20T04:13:17.858Z","encodeableUrl":"https://www.elastic.co?foo=bar&amp;baz= qux"}'
         );
       });
 
@@ -165,7 +165,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       });
 
       it('should handle asJSON', async () => {
-        // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/alert_types.ts,
+        // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
         // const DeepContextVariables
         const template = `{{#context.deep.objectA}}
           {{{arrayC}}} {{{arrayC.asJSON}}}
@@ -185,7 +185,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       });
 
       it('should handle EvalMath', async () => {
-        // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/alert_types.ts,
+        // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
         // const DeepContextVariables
         const template = `{{#context.deep}}avg({{arrayI.0}}, {{arrayI.1}})/100 => {{#EvalMath}}
           round((arrayI[0] + arrayI[1]) / 2 / 100, 2)
@@ -202,7 +202,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       });
 
       it('should handle FormatDate', async () => {
-        // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/alert_types.ts,
+        // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
         // const DeepContextVariables
         const template = `{{#context.deep}}{{#FormatDate}}
           {{{dateL}}} ; America/New_York; dddd MMM Do YYYY HH:mm:ss
@@ -220,7 +220,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
     });
 
     it('should handle FormatNumber', async () => {
-      // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/alert_types.ts,
+      // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
       // const DeepContextVariables
       const template = `{{#context.deep}}{{#FormatNumber}}
         {{{arrayI.1}}}; en-US; style: currency, currency: EUR
@@ -234,6 +234,36 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       });
       const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
       expect(body.trim()).to.be('€45.00');
+    });
+
+    it('should handle EncodeURI', async () => {
+      // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
+      // const DeepContextVariables
+      const template = `{{#context.deep}}{{#EncodeURI}}{{{encodeableUrl}}}{{/EncodeURI}}{{/context.deep}}`;
+      const rule = await createRule({
+        id: slackConnector.id,
+        group: 'default',
+        params: {
+          message: `message {{rule.id}} - ${template}`,
+        },
+      });
+      const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
+      expect(body.trim()).to.be('https://www.elastic.co?foo=bar&baz=%20qux');
+    });
+
+    it('should handle EncodeURIComponent', async () => {
+      // from x-pack/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
+      // const DeepContextVariables
+      const template = `{{#context.deep}}{{#EncodeURIComponent}}{{{encodeableUrl}}}{{/EncodeURIComponent}}{{/context.deep}}`;
+      const rule = await createRule({
+        id: slackConnector.id,
+        group: 'default',
+        params: {
+          message: `message {{rule.id}} - ${template}`,
+        },
+      });
+      const body = await retry.try(async () => waitForActionBody(slackSimulatorURL, rule.id));
+      expect(body.trim()).to.be('https%3A%2F%2Fwww.elastic.co%3Ffoo%3Dbar%26baz%3D%20qux');
     });
 
     async function createRule(action: any) {

@@ -350,6 +350,13 @@ export const useTimelineEventsHandler = ({
     [pageName, skip, id, activeBatch, startTracking, data.search, dataViewId]
   );
 
+  const refetchPagination = useMemo(() => {
+    return {
+      activePage: 0,
+      querySize: limit,
+    };
+  }, [limit]);
+
   const refetchGrid = useCallback(() => {
     /*
      *
@@ -363,17 +370,14 @@ export const useTimelineEventsHandler = ({
       sort,
       fieldRequested: timelineRequest?.fieldRequested ?? fields,
       fields: timelineRequest?.fieldRequested ?? fields,
-      pagination: {
-        activePage: 0,
-        querySize: limit,
-      },
+      pagination: refetchPagination,
     };
 
     setTimelineRequest(newTimelineRequest);
 
     timelineSearch(newTimelineRequest);
     setActiveBatch(0);
-  }, [timelineRequest, timelineSearch, limit, language, sort, fields]);
+  }, [timelineRequest, timelineSearch, refetchPagination, language, sort, fields]);
 
   useEffect(() => {
     if (indexNames.length === 0) {

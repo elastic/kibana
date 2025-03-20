@@ -36,7 +36,7 @@ export const EntityAnalyticsManagementPage = () => {
   const styles = getEntityAnalyticsRiskScorePageStyles(euiTheme);
   const privileges = useMissingRiskEnginePrivileges();
   const [includeClosedAlerts, setIncludeClosedAlerts] = useState(false);
-  const [from, setFrom] = useState(localStorage.getItem('dateStart') || 'now-30m');
+  const [from, setFrom] = useState(localStorage.getItem('dateStart') || 'now-30d');
   const [to, setTo] = useState(localStorage.getItem('dateEnd') || 'now');
   const { data: riskEngineStatus } = useRiskEngineStatus({
     refetchInterval: TEN_SECONDS,

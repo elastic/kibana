@@ -1445,6 +1445,52 @@
           },
           {
             "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.IndexManagementPluginSetup.renderIndexManagementApp",
+            "type": "Function",
+            "tags": [],
+            "label": "renderIndexManagementApp",
+            "description": [],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/index-management-shared-types",
+                "scope": "common",
+                "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+                "section": "def-common.IndexManagementAppMountParams",
+                "text": "IndexManagementAppMountParams"
+              },
+              ") => Promise<() => void>"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-management-shared-types",
+                "id": "def-common.IndexManagementPluginSetup.renderIndexManagementApp.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/index-management-shared-types",
+                    "scope": "common",
+                    "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+                    "section": "def-common.IndexManagementAppMountParams",
+                    "text": "IndexManagementAppMountParams"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
             "id": "def-common.IndexManagementPluginSetup.locator",
             "type": "Object",
             "tags": [],
@@ -2163,6 +2209,29 @@
           "string"
         ],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-management-shared-types",
+        "id": "def-common.IndexManagementAppMountParams",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexManagementAppMountParams",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "management",
+            "scope": "public",
+            "docId": "kibManagementPluginApi",
+            "section": "def-public.ManagementAppMountParams",
+            "text": "ManagementAppMountParams"
+          },
+          ", \"history\" | \"setBreadcrumbs\"> & { element: HTMLElement | null; }"
+        ],
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

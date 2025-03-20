@@ -35,49 +35,49 @@ export class MarkdownStorybookMock extends AbstractStorybookMock<
 > {
   propArguments = {
     readOnly: {
-      control: 'boolean',
+      control: { control: 'boolean' },
       defaultValue: false,
     },
     openLinksInNewTab: {
-      control: 'boolean',
+      control: { control: 'boolean' },
       defaultValue: true,
     },
     placeholder: {
       control: {
-        type: 'text',
+        control: 'text',
       },
       defaultValue: '',
     },
     markdownContent: {
       control: {
-        type: 'text',
+        control: 'text',
       },
       defaultValue: '',
     },
     ariaLabelContent: {
       control: {
-        type: 'text',
+        control: 'text',
       },
       defaultValue: 'markdown component',
     },
     height: {
       control: {
-        type: 'select',
+        control: 'select',
         defaultValue: 'full',
         label: 'height',
         options: [0, 20, 50, 'full'],
       },
     },
     enableTooltipSupport: {
-      control: 'boolean',
+      control: { control: 'boolean' },
       defaultValue: false,
     },
     validateLinks: {
-      control: 'boolean',
+      control: { control: 'boolean' },
       defaultValue: false,
     },
     enableSoftLineBreaks: {
-      control: 'boolean',
+      control: { control: 'boolean' },
       defaultValue: false,
     },
   };

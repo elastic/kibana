@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { generateShortId, OtelEdotDocument, otelEdot } from '@kbn/apm-synthtrace-client';
+import {
+  generateShortId,
+  OtelEdotDocument,
+  otelEdot,
+  generateLongId,
+} from '@kbn/apm-synthtrace-client';
 import { times } from 'lodash';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
@@ -17,7 +22,7 @@ const scenario: Scenario<OtelEdotDocument> = async (runOptions) => {
     generate: ({ range, clients: { otelEsClient } }) => {
       const { numOtelTraces = 5 } = runOptions.scenarioOpts || {};
       const { logger } = runOptions;
-      const traceId = generateShortId();
+      const traceId = generateLongId();
       const spanId = generateShortId();
 
       const otelEdotDocs = times(numOtelTraces / 2).map((index) => otelEdot.create(traceId));

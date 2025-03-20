@@ -1280,6 +1280,22 @@
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
           },
           {
+            "plugin": "@kbn/test-suites-src",
+            "path": "src/platform/test/plugin_functional/test_suites/saved_objects_management/export_transform.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-src",
+            "path": "src/platform/test/plugin_functional/test_suites/saved_objects_management/export_transform.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-src",
+            "path": "src/platform/test/plugin_functional/test_suites/saved_objects_management/hidden_from_http_apis.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-src",
+            "path": "src/platform/test/plugin_functional/test_suites/saved_objects_management/hidden_from_http_apis.ts"
+          },
+          {
             "plugin": "savedObjectsManagement",
             "path": "src/platform/plugins/shared/saved_objects_management/server/lib/find_relationships.test.ts"
           },

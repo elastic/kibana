@@ -36,7 +36,6 @@ const configSchema = schema.object({
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     maxTraceItems: schema.number({ defaultValue: 5000 }),
-    serviceMapApiV2Enabled: schema.boolean({ defaultValue: false }),
   }),
   searchAggregatedTransactions: schema.oneOf(
     [

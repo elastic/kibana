@@ -38,7 +38,6 @@ export const getSharedParamsMock = <T extends RuleParams = QueryRuleParams>({
   },
   searchAfterSize: 100,
   bulkCreate: jest.fn(),
-  wrapHits: jest.fn(),
   ruleDataClient: createRuleDataClientMock(),
   runtimeMappings: undefined,
   aggregatableTimestampField: '@timestamp',
@@ -46,5 +45,7 @@ export const getSharedParamsMock = <T extends RuleParams = QueryRuleParams>({
   exceptionFilter: undefined,
   alertWithSuppression: jest.fn(),
   refreshOnIndexingAlerts: false,
+  ignoreFields: {},
+  ignoreFieldsRegexes: [],
   ...rewrites,
 });

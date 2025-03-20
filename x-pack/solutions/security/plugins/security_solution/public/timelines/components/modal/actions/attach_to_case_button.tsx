@@ -45,7 +45,7 @@ export const AttachToCaseButton = React.memo<AttachToCaseButtonProps>(({ timelin
     cases,
     application: { navigateToApp },
   } = useKibana().services;
-  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
+  const userCasesPermissions = useMemo(() => cases.helpers.canUseCases([APP_ID]), [cases]);
 
   const [isPopoverOpen, setPopover] = useState(false);
   const [isCaseModalOpen, openCaseModal] = useState(false);

@@ -21,9 +21,11 @@ import { resolveGridRow } from './resolve_grid_row';
 export const movePanelsToRow = (layout: GridLayoutData, startingRow: string, newRow: string) => {
   const newLayout = cloneDeep(layout);
   const panelsToMove = newLayout[startingRow].panels;
-  const maxRow = Math.max(
-    ...Object.values(newLayout[newRow].panels).map(({ row, height }) => row + height)
-  );
+  const startingPanels = Object.values(newLayout[newRow].panels);
+  const maxRow =
+    startingPanels.length > 0
+      ? Math.max(...startingPanels.map(({ row, height }) => row + height))
+      : 0;
   Object.keys(panelsToMove).forEach((index) => (panelsToMove[index].row += maxRow));
   newLayout[newRow].panels = { ...newLayout[newRow].panels, ...panelsToMove };
   newLayout[newRow] = resolveGridRow(newLayout[newRow]);

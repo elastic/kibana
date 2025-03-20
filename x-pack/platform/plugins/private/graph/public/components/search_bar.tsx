@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiToolTip,
+  euiBreakpoint,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
@@ -19,6 +26,7 @@ import {
 } from '@kbn/unified-search-plugin/public/types';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
+import { css } from '@emotion/react';
 import { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
 import { openSourceModal } from '../services/source_modal';
 import {
@@ -97,6 +105,8 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
     fetchPattern();
   }, [currentDatasource, indexPatternProvider, onIndexPatternChange]);
 
+  const euiThemeContext = useEuiTheme();
+
   const kibana = useKibana<
     IUnifiedSearchPluginServices & {
       contentManagement: ContentManagementPublicStart;
@@ -131,8 +141,14 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
             })}
           >
             <EuiButton
-              className="gphSearchBar__datasourceButton"
               data-test-subj="graphDatasourceButton"
+              css={css`
+                max-width: 320px;
+                ${euiBreakpoint(euiThemeContext, ['xs', 's'])} {
+                  width: 100%;
+                  max-width: none;
+                }
+              `}
               onClick={() => {
                 confirmWipeWorkspace(
                   () =>

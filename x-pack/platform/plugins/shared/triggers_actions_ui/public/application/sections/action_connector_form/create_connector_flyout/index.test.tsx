@@ -142,7 +142,6 @@ describe('CreateConnectorFlyout', () => {
         onConnectorCreated={onConnectorCreated}
       />
     );
-    await act(() => Promise.resolve());
 
     expect(queryByTestId('create-connector-flyout-save-test-btn')).not.toBeInTheDocument();
   });
@@ -421,6 +420,36 @@ describe('CreateConnectorFlyout', () => {
       );
       await act(() => Promise.resolve());
       expect(getByText(TECH_PREVIEW_LABEL)).toBeInTheDocument();
+    });
+  });
+
+  describe('Filters', () => {
+    it('displays search field', async () => {
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+
+      expect(await screen.findByTestId('createConnectorsModalSearch')).toBeInTheDocument();
+    });
+
+    it('does not show the search field after an action type is selected', async () => {
+      appMockRenderer.render(
+        <CreateConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          onConnectorCreated={onConnectorCreated}
+          onTestConnector={onTestConnector}
+        />
+      );
+      expect(await screen.findByTestId('createConnectorsModalSearch')).toBeInTheDocument();
+
+      await userEvent.click(await screen.findByTestId(`${actionTypeModel.id}-card`));
+      expect(await screen.queryByTestId('createConnectorsModalSearch')).not.toBeInTheDocument();
     });
   });
 

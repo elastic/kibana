@@ -14,11 +14,11 @@ import { combineLatest, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
 
-import { DragPreview } from '../drag_preview';
+import { GridPanelDragPreview } from '../grid_panel/grid_panel_drag_preview';
 import { GridPanel } from '../grid_panel';
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { getPanelKeysInOrder } from '../utils/resolve_grid_row';
 import { GridRowHeader } from './grid_row_header';
+import { getPanelKeysInOrder } from '../utils/resolve_grid_row';
 
 export interface GridRowProps {
   rowId: string;
@@ -150,13 +150,13 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
           }
           css={[styles.fullHeight, styles.grid]}
           role="region"
-          aria-labelledby={`kbnGridRowTile-${rowId}`}
+          aria-labelledby={`kbnGridRowTitle-${rowId}`}
         >
           {/* render the panels **in order** for accessibility, using the memoized panel components */}
           {panelIdsInOrder.map((panelId) => (
             <GridPanel key={panelId} panelId={panelId} rowId={rowId} />
           ))}
-          <DragPreview rowId={rowId} />
+          <GridPanelDragPreview rowId={rowId} />
         </div>
       )}
     </div>

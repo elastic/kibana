@@ -49,6 +49,8 @@ describe('createPlaywrightConfig', () => {
     expect(config.use).toEqual({
       serversConfigDir: SCOUT_SERVERS_ROOT,
       [VALID_CONFIG_MARKER]: true,
+      actionTimeout: 10000,
+      navigationTimeout: 20000,
       screenshot: 'only-on-failure',
       testIdAttribute: 'data-test-subj',
       trace: 'on-first-retry',

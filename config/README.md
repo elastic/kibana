@@ -2,7 +2,8 @@ as work on serverless picks up we will add config values to these files that
 define how Kibana will run in "serverless" modes. To start Kibana locally with
 this configuration, pass `--serverless={mode}` or run `yarn serverless-{mode}`
 
-valid modes are currently: `es`, `oblt`, and `security`
+[//]: # (BOOKMARK - List of Kibana project types)
+valid modes are currently: `es`, `oblt`, `security` and `chat`
 
 configuration is applied in the following order, later values override
  1. serverless.yml (serverless configs go first)

@@ -14,6 +14,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { i18n } from '@kbn/i18n';
 import {} from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
 import { groupBy } from 'lodash';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { stringify } from '../../../endpoint/utils/stringify';
 import { ENDPOINT_AUTHZ_ERROR_MESSAGE } from '../../../endpoint/errors';
 import {
@@ -175,7 +176,11 @@ export class BaseValidator {
    * Validates that by-policy artifacts is permitted and that each policy referenced in the item is valid
    * @protected
    */
-  protected async validateByPolicyItem(item: ExceptionItemLikeOptions): Promise<void> {
+  protected async validateByPolicyItem(
+    item: ExceptionItemLikeOptions,
+    /** Should be provided when an existing item is being updated. Will `undefined` on create flows */
+    currentItem?: ExceptionListItemSchema
+  ): Promise<void> {
     if (this.isItemByPolicy(item)) {
       const spaceId = this.endpointAppContext.experimentalFeatures
         .endpointManagementSpaceAwarenessEnabled
@@ -190,16 +195,17 @@ export class BaseValidator {
         return;
       }
 
-      const policiesFromFleet = await packagePolicy.getByIDs(soClient, policyIds, {
-        ignoreMissing: true,
-      });
+      const policiesFromFleet: PackagePolicy[] =
+        (await packagePolicy.getByIDs(soClient, policyIds, {
+          ignoreMissing: true,
+        })) ?? [];
 
       this.logger.debug(
         () =>
           `Lookup of policy ids:\n[${policyIds.join(
             ' | '
           )}] for space [${spaceId}] returned:\n${stringify(
-            (policiesFromFleet ?? []).map((policy) => ({
+            policiesFromFleet.map((policy) => ({
               id: policy.id,
               name: policy.name,
               spaceIds: policy.spaceIds,
@@ -207,15 +213,21 @@ export class BaseValidator {
           )}`
       );
 
-      if (!policiesFromFleet) {
-        throw new EndpointArtifactExceptionValidationError(
-          `invalid policy ids: ${policyIds.join(', ')}`
-        );
-      }
-
-      const invalidPolicyIds = policyIds.filter(
+      let invalidPolicyIds: string[] = policyIds.filter(
         (policyId) => !policiesFromFleet.some((policy) => policyId === policy.id)
       );
+
+      if (
+        this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled &&
+        invalidPolicyIds.length > 0 &&
+        currentItem
+      ) {
+        const currentItemPolicyIds = getPolicyIdsFromArtifact(currentItem);
+
+        // Check to see if the invalid policy IDs are ones that the current item (pre-update) already has,
+        // which implies that they are valid, but not visible in the active space.
+        invalidPolicyIds = invalidPolicyIds.filter((id) => !currentItemPolicyIds.includes(id));
+      }
 
       if (invalidPolicyIds.length) {
         throw new EndpointArtifactExceptionValidationError(
@@ -226,7 +238,7 @@ export class BaseValidator {
   }
 
   /**
-   * If the item being updated is `by policy`, method validates if anyting was changes in regard to
+   * If the item being updated is `by policy`, method validates if anything was changes in regard to
    * the effected scope of the by policy settings.
    *
    * @param updatedItem

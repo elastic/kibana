@@ -8,11 +8,11 @@
 // NOTE: we ask the LLM to `provide insights`. We do NOT use the feature name, `DefendInsights`, in the prompt.
 export const getEventsContextPrompt = ({
   anonymizedEvents,
-  prompt,
+  defendInsightsPrompt,
 }: {
   anonymizedEvents: string[];
-  prompt: string;
-}) => `${prompt}
+  defendInsightsPrompt: string;
+}) => `${defendInsightsPrompt}
 
 Use context from the following events to provide insights:
 

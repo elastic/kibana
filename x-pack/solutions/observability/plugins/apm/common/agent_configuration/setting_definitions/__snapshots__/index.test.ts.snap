@@ -78,6 +78,16 @@ Array [
     "validationName": "(\\"true\\" | \\"false\\")",
   },
   Object {
+    "key": "deactivate_all_instrumentations",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "deactivate_instrumentations",
+    "type": "text",
+    "validationName": "string",
+  },
+  Object {
     "key": "dedot_custom_metrics",
     "type": "boolean",
     "validationName": "(\\"true\\" | \\"false\\")",
@@ -243,6 +253,21 @@ Array [
     "key": "sanitize_field_names",
     "type": "text",
     "validationName": "string",
+  },
+  Object {
+    "key": "send_logs",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "send_metrics",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "send_traces",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
   },
   Object {
     "key": "server_timeout",

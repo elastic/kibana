@@ -308,6 +308,20 @@ describe('param', () => {
     expect(text).toBe('?');
     expect(node).toMatchObject({
       type: 'literal',
+      paramKind: '?',
+      literalType: 'param',
+      paramType: 'unnamed',
+    });
+  });
+
+  test('unnamed (double)', () => {
+    const node = Builder.param.build('??');
+    const text = BasicPrettyPrinter.expression(node);
+
+    expect(text).toBe('??');
+    expect(node).toMatchObject({
+      type: 'literal',
+      paramKind: '??',
       literalType: 'param',
       paramType: 'unnamed',
     });
@@ -320,6 +334,21 @@ describe('param', () => {
     expect(text).toBe('?the_name');
     expect(node).toMatchObject({
       type: 'literal',
+      paramKind: '?',
+      literalType: 'param',
+      paramType: 'named',
+      value: 'the_name',
+    });
+  });
+
+  test('named (double)', () => {
+    const node = Builder.param.build('??the_name');
+    const text = BasicPrettyPrinter.expression(node);
+
+    expect(text).toBe('??the_name');
+    expect(node).toMatchObject({
+      type: 'literal',
+      paramKind: '??',
       literalType: 'param',
       paramType: 'named',
       value: 'the_name',
@@ -333,6 +362,21 @@ describe('param', () => {
     expect(text).toBe('?123');
     expect(node).toMatchObject({
       type: 'literal',
+      paramKind: '?',
+      literalType: 'param',
+      paramType: 'positional',
+      value: 123,
+    });
+  });
+
+  test('positional (double)', () => {
+    const node = Builder.param.build('??123');
+    const text = BasicPrettyPrinter.expression(node);
+
+    expect(text).toBe('??123');
+    expect(node).toMatchObject({
+      type: 'literal',
+      paramKind: '??',
       literalType: 'param',
       paramType: 'positional',
       value: 123,

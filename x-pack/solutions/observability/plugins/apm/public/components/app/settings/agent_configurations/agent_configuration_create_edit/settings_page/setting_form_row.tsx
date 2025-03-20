@@ -174,7 +174,12 @@ export function SettingFormRow({
         </>
       }
     >
-      <EuiFormRow label={setting.key} error={message} isInvalid={isInvalid}>
+      <EuiFormRow
+        label={setting.key}
+        error={message}
+        isInvalid={isInvalid}
+        data-test-subj={`row_${setting.key}`}
+      >
         <FormRow onChange={onChange} setting={setting} value={value} />
       </EuiFormRow>
     </EuiDescribedFormGroup>

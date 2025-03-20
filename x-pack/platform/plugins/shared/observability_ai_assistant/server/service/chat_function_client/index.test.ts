@@ -5,10 +5,11 @@
  * 2.0.
  */
 import dedent from 'dedent';
-import { ChatFunctionClient, GET_DATA_ON_SCREEN_FUNCTION_NAME } from '.';
+import { ChatFunctionClient } from '.';
 import { FunctionVisibility } from '../../../common/functions/types';
 import { Logger } from '@kbn/logging';
 import { RegisterInstructionCallback } from '../types';
+import { GET_DATA_ON_SCREEN_FUNCTION_NAME } from '../../functions/get_data_on_screen';
 
 describe('chatFunctionClient', () => {
   describe('when executing a function with invalid arguments', () => {

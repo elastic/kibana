@@ -98,7 +98,7 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
         type: ActionType.Refreshed,
         timestamp: expect.any(moment),
       },
-      value: `AVGAntivirus /Applications/AVGAntivirus.app/Contents/Backend/services/com.avg.activity${
+      value: `/Applications/AVGAntivirus.app/Contents/Backend/services/com.avg.activity${
         signerValue ? ` ${signerValue}` : ''
       }`,
       remediation: {

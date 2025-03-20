@@ -120,3 +120,5 @@ export {
   InferenceEndpointProvider,
   elasticModelIds,
 } from './src/inference_endpoints';
+
+export { Tokenizer } from './src/utils/tokenizer';

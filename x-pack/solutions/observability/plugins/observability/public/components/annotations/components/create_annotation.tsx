@@ -42,7 +42,7 @@ export interface CreateAnnotationProps {
   deleteAnnotation: (data: { annotations: Annotation[] }) => void;
 }
 
-export function CreateAnnotation({
+function CreateAnnotation({
   onSave,
   onCancel,
   isLoading,

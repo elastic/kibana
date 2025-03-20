@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { getDefendInsightsPrompt } from '../../../helpers/prompts';
 import { getEventsContextPrompt } from '.';
-
-const insightType = 'incompatible_antivirus';
+import { DEFEND_INSIGHTS } from '../../../../../../../prompt/prompts';
 
 describe('getEventsContextPrompt', () => {
-  it('generates the correct prompt', () => {
+  it('generates the correct prompt', async () => {
     const anonymizedEvents = ['event 1', 'event 2', 'event 3'];
 
-    const expected = `${getDefendInsightsPrompt({ type: insightType })}
+    const expected = `${DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.DEFAULT}
 
 Use context from the following events to provide insights:
 
@@ -29,7 +27,7 @@ event 3
 
     const prompt = getEventsContextPrompt({
       anonymizedEvents,
-      prompt: getDefendInsightsPrompt({ type: insightType }),
+      defendInsightsPrompt: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.DEFAULT,
     });
 
     expect(prompt).toEqual(expected);

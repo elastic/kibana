@@ -56,6 +56,7 @@ export function AnnotationsList() {
   const renderToolsLeft = () => {
     return (
       <DeleteAnnotations
+        key="delete-annotations"
         selection={selection}
         isLoading={isDeleteLoading}
         permissions={permissions}
@@ -65,7 +66,14 @@ export function AnnotationsList() {
   };
   const renderToolsRight = () => {
     return [
-      <DatePicker start={start} end={end} setStart={setStart} setEnd={setEnd} refetch={refetch} />,
+      <DatePicker
+        key="date-picker"
+        start={start}
+        end={end}
+        setStart={setStart}
+        setEnd={setEnd}
+        refetch={refetch}
+      />,
     ];
   };
   const allTags = data?.items?.map((obj) => obj.tags ?? []).flat() ?? [];

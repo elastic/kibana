@@ -83,11 +83,17 @@ import { buildCreateRuleExceptionListItemsProps } from './modules/exceptions';
 // ... omitted client setup stuff
 
 // Core logic
-const ruleCopies = duplicateRuleParams(basicRule, 200);
-const response = await detectionsClient.bulkCreateRules({ body: ruleCopies });
-const createdRules: RuleResponse[] = response.data.filter(
-(r) => r.id != null
-) as RuleResponse[];
+const bodyWithCreatedRule = await createRule(supertest, log, basicRule);
+const ruleCopies = duplicateRuleParams(bodyWithCreatedRule, 200);
+const { body } = await detectionsClient.
+                  .performRulesBulkAction({
+                    query: { dry_run: false },
+                    body: {
+                      ids: ruleCopies.map((rule) => rule.id),
+                      action: 'duplicate',
+                    },
+                  })
+const createdRules: RuleResponse[] = body.attributes.results.created;
 
 // This map looks a bit confusing, but the concept is simple: take the rules we just created and
 // create a *function* per rule to create an exception for that rule. We want a function to call later instead of just

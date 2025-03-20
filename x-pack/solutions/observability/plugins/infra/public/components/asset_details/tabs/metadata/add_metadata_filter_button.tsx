@@ -102,7 +102,7 @@ export const AddMetadataFilterButton = ({ item }: AddMetadataFilterButtonProps) 
           iconType="filter"
           data-test-subj="infraAssetDetailsMetadataAddFilterButton"
           aria-label={i18n.translate('xpack.infra.metadataEmbeddable.AddFilterAriaLabel', {
-            defaultMessage: 'Add Filter',
+            defaultMessage: 'Add filter and reload page',
           })}
           onClick={handleAddFilter}
         />

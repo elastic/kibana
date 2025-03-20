@@ -12,6 +12,7 @@ import Fs from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import { run } from '@kbn/dev-cli-runner';
+import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 import { discoverPlugins } from './discover_plugins';
 import { generatePluginList } from './generate_plugin_list';
 
@@ -27,16 +28,13 @@ export function runPluginListCli() {
     log.info('looking for x-pack plugins');
     const xpackLegacyPlugins = discoverPlugins('x-pack/plugins');
     const xpackPlatformPlugins = discoverPlugins('x-pack/platform/plugins');
-    const xpackSearchPlugins = discoverPlugins('x-pack/solutions/search/plugins');
-    const xpackSecurityPlugins = discoverPlugins('x-pack/solutions/security/plugins');
-    const xpackObservabilityPlugins = discoverPlugins('x-pack/solutions/observability/plugins');
+    const solutionsPlugins = KIBANA_SOLUTIONS.flatMap((solution) =>
+      discoverPlugins(`x-pack/solutions/${solution}/plugins`)
+    );
+
     log.success(
       `found ${
-        xpackLegacyPlugins.length +
-        xpackPlatformPlugins.length +
-        xpackSearchPlugins.length +
-        xpackSecurityPlugins.length +
-        xpackObservabilityPlugins.length
+        xpackLegacyPlugins.length + xpackPlatformPlugins.length + solutionsPlugins.length
       } plugins`
     );
 
@@ -45,13 +43,7 @@ export function runPluginListCli() {
       OUTPUT_PATH,
       generatePluginList(
         [...ossLegacyPlugins, ...ossPlatformPlugins],
-        [
-          ...xpackLegacyPlugins,
-          ...xpackPlatformPlugins,
-          ...xpackSearchPlugins,
-          ...xpackSecurityPlugins,
-          ...xpackObservabilityPlugins,
-        ]
+        [...xpackLegacyPlugins, ...xpackPlatformPlugins, ...solutionsPlugins]
       )
     );
   });

@@ -160,7 +160,7 @@ export function MachineLearningAnomalyExplorerProvider(
       });
       // changing to the dashboard app might take some time
       const embeddable = await testSubjects.find('mlAnomalySwimlaneEmbeddableWrapper', 30 * 1000);
-      const swimlane = await embeddable.findByClassName('mlSwimLaneContainer');
+      const swimlane = await embeddable.findByTestSubject('mlSwimLaneContainer');
       expect(await swimlane.isDisplayed()).to.eql(
         true,
         'Anomaly swim lane should be displayed in dashboard'

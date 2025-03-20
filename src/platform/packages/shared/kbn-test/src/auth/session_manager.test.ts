@@ -320,6 +320,23 @@ describe('SamlSessionManager', () => {
       expect(email).toBe(cloudEmail);
     });
 
+    test(`'getSupportedRoles' return empty array when roles by default`, async () => {
+      const samlSessionManager = new SamlSessionManager({
+        ...samlSessionManagerOptions,
+      });
+      const roles = samlSessionManager.getSupportedRoles();
+      expect(roles).toEqual([]);
+    });
+
+    test(`'getSupportedRoles' return the correct roles when roles were defined`, async () => {
+      const samlSessionManager = new SamlSessionManager({
+        ...samlSessionManagerOptions,
+        supportedRoles,
+      });
+      const roles = samlSessionManager.getSupportedRoles();
+      expect(roles).toBe(supportedRoles.roles);
+    });
+
     test(`'getUserData' should call security API and return user profile data`, async () => {
       const testData: UserProfile = {
         username: '92qab123',

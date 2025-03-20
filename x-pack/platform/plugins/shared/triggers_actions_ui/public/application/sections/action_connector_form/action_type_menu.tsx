@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useState, useMemo } from 'react';
+import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isEmpty } from 'lodash';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
@@ -24,7 +25,31 @@ interface Props {
   setHasActionsUpgradeableByTrial?: (value: boolean) => void;
   setAllActionTypes?: (actionsType: ActionTypeIndex) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
+  searchValue?: string;
 }
+
+interface RegisteredActionType {
+  iconClass: IconType;
+  selectMessage: string;
+  actionType: ActionType;
+  name: string;
+  isExperimental: boolean | undefined;
+}
+
+const filterActionTypes = (actionTypes: RegisteredActionType[], searchValue: string) => {
+  if (isEmpty(searchValue)) {
+    return actionTypes;
+  }
+  return actionTypes.filter((actionType) => {
+    const searchTargets = [actionType.name, actionType.selectMessage, actionType.actionType?.name]
+      .filter(Boolean)
+      .map((text) => text.toLowerCase());
+
+    const searchValueLowerCase = searchValue.toLowerCase();
+
+    return searchTargets.some((searchTarget) => searchTarget.includes(searchValueLowerCase));
+  });
+};
 
 export const ActionTypeMenu = ({
   onActionTypeChange,
@@ -32,6 +57,7 @@ export const ActionTypeMenu = ({
   setHasActionsUpgradeableByTrial,
   setAllActionTypes,
   actionTypeRegistry,
+  searchValue = '',
 }: Props) => {
   const {
     http,
@@ -39,6 +65,7 @@ export const ActionTypeMenu = ({
   } = useKibana().services;
   const [loadingActionTypes, setLoadingActionTypes] = useState<boolean>(false);
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
+
   useEffect(() => {
     (async () => {
       try {
@@ -95,7 +122,12 @@ export const ActionTypeMenu = ({
       };
     });
 
-  const cardNodes = registeredActionTypes
+  const filteredConnectors = useMemo(
+    () => filterActionTypes(registeredActionTypes, searchValue),
+    [registeredActionTypes, searchValue]
+  );
+
+  const cardNodes = filteredConnectors
     .sort((a, b) => actionTypeCompare(a.actionType, b.actionType))
     .map((item, index) => {
       const checkEnabledResult = checkActionTypeEnabled(item.actionType);
