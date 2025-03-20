@@ -17,9 +17,12 @@ type StrictFilter = Filter & {
 
 export const createGroupFilter = (
   selectedGroup: string,
-  values?: string[] | null
-): StrictFilter[] =>
-  values != null && values.length > 0
+  values?: string[] | null,
+  multiValueFields?: string[]
+): StrictFilter[] => {
+  const shouldIgnoreFieldSize = checkIsFlattenResults(selectedGroup, multiValueFields);
+
+  return values != null && values.length > 0
     ? values.reduce(
         (acc: StrictFilter[], query) => [
           ...acc,
