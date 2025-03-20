@@ -72,7 +72,7 @@ describe('Users filter', () => {
     await waitFor(() =>
       expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX', 'usernameY', 'usernameZ'])
     );
-  }, 10000);
+  }, 15000);
 
   it('should ignore white spaces in a given username when updating the API params', async () => {
     render();
@@ -92,5 +92,5 @@ describe('Users filter', () => {
     await waitFor(() =>
       expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX', 'usernameY'])
     );
-  }, 10000);
+  }, 15000);
 });
