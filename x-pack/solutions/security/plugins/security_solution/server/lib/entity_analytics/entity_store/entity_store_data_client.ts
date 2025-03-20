@@ -13,7 +13,9 @@ import type {
   IScopedClusterClient,
   AuditEvent,
   AnalyticsServiceSetup,
+  KibanaRequest,
 } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import type { HealthStatus, SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -23,6 +25,7 @@ import moment from 'moment';
 import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { estypes } from '@elastic/elasticsearch';
+import { getAllMissingPrivileges } from '../../../../common/entity_analytics/privileges';
 import { merge } from '../../../../common/utils/objects/merge';
 import { getEnabledStoreEntityTypes } from '../../../../common/entity_analytics/entity_store/utils';
 import { EntityType } from '../../../../common/entity_analytics/types';
@@ -97,6 +100,7 @@ import {
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
 import { createEngineDescription } from './installation/engine_description';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
+import { getEntityStoreSourceIndicesPrivileges } from './utils/get_entity_store_privileges';
 import type { ApiKeyManager } from './auth/api_key';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
@@ -126,6 +130,8 @@ interface EntityStoreClientOpts {
   telemetry?: AnalyticsServiceSetup;
   config: EntityStoreConfig;
   apiKeyManager?: ApiKeyManager;
+  security: SecurityPluginStart;
+  request: KibanaRequest;
 }
 
 interface SearchEntitiesParams {
@@ -786,6 +792,41 @@ export class EntityStoreDataClient {
 
     const { engines } = await this.engineClient.list();
 
+    if (engines.length === 0) {
+      logger.debug(
+        `In namespace ${this.options.namespace}: No entity engines found, skipping data view index application`
+      );
+      return {
+        successes: [],
+        errors: [],
+      };
+    }
+
+    const indexPatterns = await buildIndexPatterns(
+      this.options.namespace,
+      this.options.appClient,
+      this.options.dataViewsService
+    );
+
+    const privileges = await getEntityStoreSourceIndicesPrivileges(
+      this.options.request,
+      this.options.security,
+      indexPatterns
+    );
+
+    if (!privileges.has_all_required) {
+      const missingPrivilegesMsg = getAllMissingPrivileges(privileges).elasticsearch.index.map(
+        ({ indexName, privileges: missingPrivileges }) =>
+          `Missing [${missingPrivileges.join(', ')}] privileges for index '${indexName}'.`
+      );
+
+      throw new Error(
+        `The current user does not have the required indices privileges.\n${missingPrivilegesMsg.join(
+          '\n'
+        )}`
+      );
+    }
+
     const updateDefinitionPromises: Array<Promise<EngineDataviewUpdateResult>> = engines.map(
       async (engine) => {
         const originalStatus = engine.status;
@@ -800,12 +841,6 @@ export class EntityStoreDataClient {
             `Error updating entity store: There are changes already in progress for engine ${id}`
           );
         }
-
-        const indexPatterns = await buildIndexPatterns(
-          this.options.namespace,
-          this.options.appClient,
-          this.options.dataViewsService
-        );
 
         // Skip update if index patterns are the same
         if (isEqual(definition.indexPatterns, indexPatterns)) {

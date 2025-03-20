@@ -34,12 +34,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('DataSourceSelector', () => {
     before(async () => {
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await PageObjects.observabilityLogsExplorer.removeInstalledPackages();
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
     });
 
     describe('as consistent behavior', () => {
