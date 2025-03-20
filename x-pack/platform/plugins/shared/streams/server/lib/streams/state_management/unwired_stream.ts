@@ -91,6 +91,10 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
     return { isValid: true, errors: [] };
   }
 
+  // The actions append_processor_to_ingest_pipeline and delete_processor_from_ingest_pipeline are unique to UnwiredStreams
+  // Because there is no guarantee that there is a dedicated index template and ingest pipeline for UnwiredStreams
+  // These actions are merged across UnwiredStream instances as part of ExecutionPlan.plan()
+  // This is to enable us to clean up any pipeline Streams creates when it is no longer needed
   protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
     const actions: ElasticsearchAction[] = [];
     if (this._updated_definition.ingest.processing.length > 0) {

@@ -24,8 +24,7 @@ type UnwiredStreamPipelineAction =
   | AppendProcessorToIngestPipelineAction
   | DeleteProcessorFromIngestPipelineAction;
 
-// Should this be a static method on UnwiredStream instead?
-export async function mergeUnwiredStreamPipelineActions(
+export async function translateUnwiredStreamPipelineActions(
   actionsByType: ActionsByType,
   scopedClusterClient: IScopedClusterClient
 ) {

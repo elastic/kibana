@@ -32,7 +32,7 @@ import {
   deleteIngestPipeline,
   upsertIngestPipeline,
 } from '../ingest_pipelines/manage_ingest_pipelines';
-import { mergeUnwiredStreamPipelineActions } from './merge_unwired_stream_pipeline_actions';
+import { translateUnwiredStreamPipelineActions } from './translate_unwired_stream_pipeline_actions';
 
 interface UpsertComponentTemplateAction {
   type: 'upsert_component_template';
@@ -208,7 +208,11 @@ export class ExecutionPlan {
 
   async plan(elasticsearchActions: ElasticsearchAction[]) {
     this.actionsByType = Object.assign(this.actionsByType, groupBy(elasticsearchActions, 'type'));
-    await mergeUnwiredStreamPipelineActions(
+
+    // UnwiredStreams sometimes share index templates and ingest pipelines (user managed or Streams managed)
+    // In order to modify this pipelines in an atomic way and be able to clean up any Streams managed pipeline when no longer needed
+    // We need to translate some actions
+    await translateUnwiredStreamPipelineActions(
       this.actionsByType,
       this.dependencies.scopedClusterClient
     );
