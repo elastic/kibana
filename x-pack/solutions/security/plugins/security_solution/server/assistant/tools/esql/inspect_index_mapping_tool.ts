@@ -8,86 +8,89 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { tool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
-import type { InspectIndexMapping } from './utils/inspect_index_utils';
-import { shallowObjectViewTruncated, getEntriesAtKey } from './utils/inspect_index_utils';
+import { shallowObjectViewTruncated, getNestedValue, mapFieldDescriptorToNestedObject } from './utils/inspect_index_utils';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 
 const toolDetails = {
   name: 'inspect_index_mapping',
-  description: `Use this tool to inspect an index mapping. The tool with fetch the mappings of the provided indexName and then return the data at the given propertyKey. For example:
-Example index mapping:
+  description: `Use this tool when there is a "Unknown column" error or to see which fields and types are used in the index. Call this tool repeatedly to inspect nested fields. For example:
+This is an example of the fields in logs-*:
+\`\`\`
+${JSON.stringify({
+    "field1": {
+      "type": "keyword",
+    },
+    "field2": {
+      "nested_field": {
+        "type": "keyword"
+      }
+    }
+  }, null, 2)}
+\`\`\`
+To get the properties of the root object, call the tool with an empty string as the key. For example:
 \`\`\`
 {
-    "mappings": {
-        "properties": {
-            "field1": {
-                "type": "keyword"
-            },
-            "field2": {
-                "properties": {
-                    "nested_field": {
-                        "type": "keyword"
-                    }
-                }
-            }
-        }
+    "indexName": "logs-*",
+    "key": "" // empty string to get the root object
+}
+\`\`\`
+Output:
+\`\`\`
+{
+    "field1": {
+      "type": "keyword",
+    },
+    "field2": {
+      "nested_field": "Object" // shallow view of the nested object
     }
 }
-\`\`\`
-Input:
-\`\`\`
-{
-    "indexName": "my_index",
-    "propertyKey": "mappings.properties"
-}
-\`\`\`
-Output:
-\`\`\`
-{
-    "field1": "Object",
-    "field2": "Object"
-}
 \`\`\
-The tool can be called repeatedly to explode objects. For example:
-Input:
+The tool can be called repeatedly to explore the nested fields. For example:
 \`\`\`
-{
-    "indexName": "my_index",
-    "propertyKey": "mappings.properties.field1"
-}
+${JSON.stringify({
+    "indexName": "logs-*",
+    "key": "field2.nested_field"
+}, null, 2)}
 \`\`\`
 Output:
 \`\`\`
-{
+${JSON.stringify({
     "type": "keyword",
-}
+}, null, 2)}
 \`\`\``,
 };
 
 export const getInspectIndexMappingTool = ({ esClient }: { esClient: ElasticsearchClient }) => {
+  const indexPatternsFetcher = new IndexPatternsFetcher(esClient);
+
   return tool(
-    async ({ indexName, propertyKey }) => {
-      const indexMapping = await esClient.indices.getMapping({
-        index: indexName,
-      });
+    async ({ indexName, key }) => {
 
-      const entriesAtKey = getEntriesAtKey(
-        indexMapping[indexName] as unknown as InspectIndexMapping,
-        propertyKey.split('.')
-      );
-      const result = shallowObjectViewTruncated(entriesAtKey, 20000);
+      const { fields } = await indexPatternsFetcher.getFieldsForWildcard({
+        pattern: indexName,
+        fieldCapsOptions: {
+          allow_no_indices: false,
+          includeUnmapped: false
+        }
+      })
 
-      return `Object at ${propertyKey} \n${JSON.stringify(result, null, 2)}`;
+      const nestedObject = mapFieldDescriptorToNestedObject(fields)
+      const value = getNestedValue(nestedObject, key)
+      const shallowObjectView = shallowObjectViewTruncated(value, 30000);
+      const message = `${key} in the index ${indexName} looks like this:\n${JSON.stringify(shallowObjectView, null, 2)}`
+
+      return message;
     },
     {
       name: toolDetails.name,
       description: toolDetails.description,
       schema: z.object({
-        indexName: z.string().describe(`The index name to get the properties of.`),
-        propertyKey: z
+        indexName: z.string().describe(`The index name to get the properties of. For example "logs-*" or "traces.default.2022-01-01"`),
+        key: z
           .string()
           .optional()
-          .default('mappings.properties')
-          .describe(`The key to get the properties of.`),
+          .default('')
+          .describe(`The field to get the properties of. Use an empty string to get the root object or key1.key2 to get nested properties.`),
       }),
     }
   );

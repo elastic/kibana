@@ -47,12 +47,6 @@ function checkMessageRoleSequenceValid(
       roleSequenceValid: true,
     };
   }
-  if (prevMessage.role === message.role) {
-    return {
-      roleSequenceValid: false,
-      intermediaryRole: MessageRole.Assistant,
-    };
-  }
 
   return {
     roleSequenceValid: true,

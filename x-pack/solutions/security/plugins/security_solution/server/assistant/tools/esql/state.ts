@@ -21,7 +21,7 @@ export const EsqlSelfHealingAnnotation = Annotation.Root({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
     default: () => 6,
   }),
-  shouldSelfHeal: Annotation<boolean>({
+  shouldValidate: Annotation<boolean>({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
     default: () => true,
   }),

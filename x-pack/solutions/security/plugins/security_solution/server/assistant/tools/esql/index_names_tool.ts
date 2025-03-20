@@ -7,32 +7,27 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { tool } from '@langchain/core/tools';
-import { generateIndexNamesWithWildcards } from './utils/index_names_utils';
 
-const toolDetails = {
+export const toolDetails = {
   name: 'available_index_names',
   description:
-    'Get the available indices in the elastic search cluster. Use this when there is an unknown index error or you need to get the indeces that can be queried. Using the response select an appropriate index name.',
+    'Get the available indices in the elastic search cluster. Use this when there is an unknown index error or you need to get the available indices.',
 };
 
 export const getIndexNamesTool = ({ esClient }: { esClient: ElasticsearchClient }) => {
   return tool(
     async () => {
-      const indexNames: string[] = await esClient.cat
-        .indices({
-          format: 'json',
-          expand_wildcards: 'all',
-        })
-        .then(
-          (response) =>
-            response
-              .map((index) => index.index)
-              .filter((index) => index != null)
-              .sort() as string[]
-        );
-      return `These are the full names of the available indeces. To query them, you must use the full index name verbatim or you can use the "*" character as a wildcard anywhere within the index name.\n\n${generateIndexNamesWithWildcards(
-        indexNames
-      ).join('\n')}`;
+
+      const indicesResolveIndexResponse = await esClient.indices.resolveIndex({
+        name: "*",
+        expand_wildcards: 'open',
+      });
+
+      const resolvedIndexNames = Object.values(indicesResolveIndexResponse).flat().map((item) => item.name).sort();
+
+      return `You can use the wildcard character "*" to query multiple indices at once. For example, if you want to query all logs indices that start with "logs-", you can use "logs-*". If the precice index was not specified in the task, it is best to make a more general query using a wildcard. Bellow are the available indecies:
+      
+${resolvedIndexNames.join('\n')}`;
     },
     {
       name: toolDetails.name,

@@ -37,7 +37,7 @@ const createLlmInstance = () => {
   return mockLlm;
 };
 
-async function getAgentGraph(logger: Logger): Promise<Drawable> {
+async function getSiemMigrationGraph(logger: Logger): Promise<Drawable> {
   const model = createLlmInstance();
   const telemetryClient = {} as SiemMigrationTelemetryClient;
   const graph = getRuleMigrationAgent({
@@ -83,7 +83,7 @@ export const drawGraph = async ({
 
 export const draw = async () => {
   await drawGraph({
-    getGraphAsync: getAgentGraph,
+    getGraphAsync: getSiemMigrationGraph,
     outputFilename: '../../docs/siem_migration/img/agent_graph.png',
   });
 

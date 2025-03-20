@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { InspectIndexMapping } from './inspect_index_utils';
 import {
+  getNestedValue,
+  mapFieldDescriptorToNestedObject,
+  minimise,
   shallowObjectView,
-  getEntriesAtKey,
   shallowObjectViewTruncated,
 } from './inspect_index_utils';
 
@@ -33,7 +34,7 @@ describe('inspect index', () => {
   it.each([
     [
       sampleMapping1,
-      ['mappings', 'properties'],
+      'mappings.properties',
       {
         field1: {
           type: 'keyword',
@@ -49,15 +50,31 @@ describe('inspect index', () => {
     ],
     [
       sampleMapping1,
-      ['mappings', 'properties', 'field1'],
+      'mappings.properties.field1',
       {
         type: 'keyword',
       },
     ],
+    [
+      {
+        foo: [{bar: 1}, {bar: 2}]
+      },
+      'foo.1.bar',
+      2,
+    ],
+    [
+      {
+        foo: [{bar: 1}, {bar: 2}]
+      },
+      '',
+      {
+        foo: [{bar: 1}, {bar: 2}]
+      },
+    ],
   ])(
     'getEntriesAtKey input %s returns %s',
-    (mapping: InspectIndexMapping, key: string[], expectedResult: InspectIndexMapping) => {
-      expect(getEntriesAtKey(mapping, key)).toEqual(expectedResult);
+    (mapping: unknown, key: string, expectedResult: unknown) => {
+      expect(getNestedValue(mapping, key)).toEqual(expectedResult);
     }
   );
 
@@ -69,6 +86,25 @@ describe('inspect index', () => {
       1,
       {
         type: 'keyword',
+      },
+    ],
+    [
+      {
+        field1: {
+          type: 'keyword',
+        },
+        field2: {
+          properties: {
+            nested_field: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+      1,
+      {
+        field1: "Object",
+        field2: "Object",
       },
     ],
     [
@@ -130,15 +166,34 @@ describe('inspect index', () => {
         field2: 'Object',
       },
     ],
+    [
+      {
+        field1: [1,2,3],
+        field2: {
+          properties: {
+            nested_field: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+      2,
+      {
+        field1: [1,2,3],
+        field2: {
+          properties: 'Object',
+        },
+      },
+    ],
   ])(
     'shallowObjectView input %s returns %s',
-    (mapping: InspectIndexMapping, maxDepth: number, expectedResult: unknown) => {
+    (mapping: unknown, maxDepth: number, expectedResult: unknown) => {
       expect(shallowObjectView(mapping, maxDepth)).toEqual(expectedResult);
     }
   );
 
   it('shallowObjectView returns undefined for undefined mapping', () => {
-    expect(shallowObjectView(undefined)).toEqual('undefined');
+    expect(shallowObjectView(undefined)).toEqual(undefined);
   });
 
   it('shallowObjectView returns mapping for string mapping', () => {
@@ -168,5 +223,53 @@ describe('inspect index', () => {
         },
       },
     });
+  });
+
+  it('shallowObjectViewTruncated does not reduce depth if maxCharacters is not exceeded', () => {
+    const x = [
+      {
+        name: '@timestamp',
+        type: 'date',
+        esTypes: [ 'date' ],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
+        fixedInterval: undefined,
+        timeZone: undefined,
+        timeSeriesMetric: undefined,
+        timeSeriesDimension: undefined
+      },
+      {
+        name: 'Effective_process.entity_id',
+        type: 'string',
+        esTypes: [ 'keyword' ],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
+        fixedInterval: undefined,
+        timeZone: undefined,
+        timeSeriesMetric: undefined,
+        timeSeriesDimension: undefined
+      },
+      {
+        name: 'Effective_process.executable',
+        type: 'string',
+        esTypes: [ 'keyword' ],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
+        fixedInterval: undefined,
+        timeZone: undefined,
+        timeSeriesMetric: undefined,
+        timeSeriesDimension: undefined
+      },]
+
+      const all = mapFieldDescriptorToNestedObject(x.map(minimise))
+      const inner = getNestedValue(all, 'Effective_process')
+      const result = shallowObjectView(inner, 2)
+      console.log(JSON.stringify(result, null, 2))
   });
 });

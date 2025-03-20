@@ -5,64 +5,49 @@
  * 2.0.
  */
 
-export type InspectIndexMapping =
-  | { [key: string]: InspectIndexMapping | undefined | string }
-  | undefined
-  | string;
+import { FieldDescriptor } from "@kbn/data-views-plugin/server";
+import { get } from "lodash";
 
 /**
- * Recursively gets the entries at a given key in an index mapping
+ * Gets the entries at a given key in an index mapping
  */
-export const getEntriesAtKey = (
-  mapping: InspectIndexMapping,
-  keys: string[]
-): InspectIndexMapping => {
-  if (mapping === undefined) {
-    return undefined;
-  }
-  if (keys.length === 0) {
-    return mapping;
-  }
-
-  if (typeof mapping !== 'object') {
-    return mapping;
-  }
-
-  const key = keys.shift();
-  if (key === undefined) {
-    return mapping;
-  }
-
-  return getEntriesAtKey(mapping[key], keys);
+export const getNestedValue = (obj: unknown, keyPath: string) => {
+  return keyPath ? get(obj, keyPath) : obj;
 };
 
 /**
- * Inspects an index mapping and returns a shallow view of the mapping
- * @param mapping The mapping to inspect
+ * Returns a shallow view of the object
+ * @param obj The object
  * @param maxDepth The maximum depth to recurse into the object
  * @returns A shallow view of the mapping
  */
 export const shallowObjectView = (
-  mapping: InspectIndexMapping,
+  obj: unknown,
   maxDepth = 1
-): string | Record<string, string> => {
-  if (mapping === undefined) {
-    return 'undefined';
+): object | string | undefined => {
+  if (obj === undefined || typeof obj === "string" || typeof obj === "number" || typeof obj === "boolean") {
+    return obj?.toString() ?? undefined;
   }
 
-  if (typeof mapping === 'string') {
-    return mapping;
+  if (Array.isArray(obj)) {
+    return maxDepth <= 0 ? "Array" : obj;
   }
 
-  if (maxDepth <= 0) {
-    return 'Object';
+  if (typeof obj === "object" && obj !== null) {
+    if (maxDepth <= 0) {
+      return "Object";
+    }
+    return Object.fromEntries(
+      Object.entries(obj).map(([key, value]) => [
+        key,
+        typeof value === "object" ? shallowObjectView(value, maxDepth - 1) : value?.toString() ?? undefined
+      ])
+    );
   }
 
-  return Object.keys(mapping).reduce((acc, key) => {
-    acc[key] = shallowObjectView(mapping[key], maxDepth - 1) as string;
-    return acc;
-  }, {} as Record<string, string>);
+  return "unknown";
 };
+
 
 /**
  * Same as shallowObjectView but reduces the maxDepth if the stringified view is longer than maxCharacters
@@ -71,14 +56,41 @@ export const shallowObjectView = (
  * @param maxDepth The maximum depth to recurse into the object
  * @returns A shallow view of the mapping
  */
+
 export const shallowObjectViewTruncated = (
-  mapping: InspectIndexMapping,
+  obj: unknown,
   maxCharacters: number,
   maxDepth = 4
-): string | Record<string, string> => {
-  const view = shallowObjectView(mapping, maxDepth);
-  if (JSON.stringify(view).length > maxCharacters) {
-    return shallowObjectView(view, 1);
+): object | string | undefined => {
+  const view = shallowObjectView(obj, maxDepth);
+  if (maxDepth > 1 && view && JSON.stringify(view).length > maxCharacters) {
+    return shallowObjectViewTruncated(view, maxCharacters, maxDepth - 1);
   }
   return view;
 };
+
+export const minimise = <T extends FieldDescriptor>(fieldDescriptor: T): Pick<FieldDescriptor, 'name' | 'type' | 'subType'> => {
+  return {
+    name: fieldDescriptor.name,
+    type: fieldDescriptor.type,
+    subType: fieldDescriptor.subType
+  }
+}
+
+export type NestedObject = { [key: string]: NestedValue };
+export type NestedValue = string | NestedObject | undefined | NestedValue[];
+
+export const mapFieldDescriptorToNestedObject = <T extends { name: string }>(arr: T[]): NestedObject => {
+  return arr.reduce<NestedObject>((acc, obj) => {
+    const keys = obj.name.split(".");
+    keys.reduce((nested: NestedObject, key, index) => {
+      if (!(key in nested)) {
+        nested[key] = index === keys.length - 1
+          ? Object.fromEntries(Object.entries(obj).filter(([k]) => k !== "name"))
+          : {};
+      }
+      return nested[key] as NestedObject;
+    }, acc);
+    return acc;
+  }, {});
+}
