@@ -10,6 +10,10 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
+import {
+  getAllMissingPrivileges,
+  getMissingPrivilegesErrorMessage,
+} from '../../../../../common/entity_analytics/privileges';
 import { EntityType } from '../../../../../common/search_strategy';
 import type { InitEntityEngineResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
 import {
@@ -20,6 +24,7 @@ import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
 import { buildInitRequestBodyValidation } from './validation';
+import { buildIndexPatterns } from '../utils';
 
 export const initEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -51,15 +56,41 @@ export const initEntityEngineRoute = (
         const siemResponse = buildSiemResponse(response);
         const secSol = await context.securitySolution;
         const { pipelineDebugMode } = config.entityAnalytics.entityStore.developer;
+        const { getSpaceId, getAppClient, getDataViewsService } = await context.securitySolution;
+        const entityStoreClient = secSol.getEntityStoreDataClient();
+
+        const securitySolutionIndices = await buildIndexPatterns(
+          getSpaceId(),
+          getAppClient(),
+          getDataViewsService()
+        );
+
+        const privileges = await entityStoreClient.getEntityStoreInitPrivileges(
+          securitySolutionIndices
+        );
+
+        if (!privileges.has_all_required) {
+          const missingPrivilegesMsg = getMissingPrivilegesErrorMessage(
+            getAllMissingPrivileges(privileges)
+          );
+
+          // TODO test it
+          return siemResponse.error({
+            statusCode: 403,
+            body: `User does not have the required privileges to initialize the entity engine\n${missingPrivilegesMsg}`,
+          });
+        }
 
         await checkAndInitAssetCriticalityResources(context, logger);
 
         try {
-          const body: InitEntityEngineResponse = await secSol
-            .getEntityStoreDataClient()
-            .init(EntityType[request.params.entityType], request.body, {
+          const body: InitEntityEngineResponse = await entityStoreClient.init(
+            EntityType[request.params.entityType],
+            request.body,
+            {
               pipelineDebugMode,
-            });
+            }
+          );
 
           return response.ok({ body });
         } catch (e) {

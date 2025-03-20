@@ -10,14 +10,11 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
 import { ASSET_INVENTORY_STATUS_API_PATH } from '../../../../common/api/asset_inventory/constants';
 import { API_VERSIONS } from '../../../../common/constants';
-
 import type { AssetInventoryRoutesDeps } from '../types';
-import { getEntityStorePrivileges } from '../../entity_analytics/entity_store/utils/get_entity_store_privileges';
 
 export const statusAssetInventoryRoute = (
   router: AssetInventoryRoutesDeps['router'],
-  logger: Logger,
-  getStartServices: AssetInventoryRoutesDeps['getStartServices']
+  logger: Logger
 ) => {
   router.versioned
     .get({
@@ -35,14 +32,13 @@ export const statusAssetInventoryRoute = (
         validate: false,
       },
 
-      async (context, request, response) => {
+      async (context, _, response) => {
         const siemResponse = buildSiemResponse(response);
         const secSol = await context.securitySolution;
 
         try {
-          const [_, { security }] = await getStartServices();
-
-          const entityStorePrivileges = await getEntityStorePrivileges(request, security, []);
+          const entityStoreClient = secSol.getEntityStoreDataClient();
+          const entityStorePrivileges = await entityStoreClient.getEntityStoreInitPrivileges([]);
 
           const body = await secSol.getAssetInventoryClient().status(secSol, entityStorePrivileges);
 
