@@ -294,6 +294,10 @@ export interface CommandBaseDefinition<CommandName extends string> {
   alias?: string;
   description: string;
   /**
+   * How do I write this command? What is the pattern?
+   */
+  declaration: string;
+  /**
    * Displays a Technical preview label in the autocomplete
    */
   preview?: boolean;
