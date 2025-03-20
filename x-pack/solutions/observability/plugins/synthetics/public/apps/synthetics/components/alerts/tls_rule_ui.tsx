@@ -47,11 +47,15 @@ export const TLSRuleComponent: React.FC<{
 
   const dataView = useSyntheticsDataView();
 
-  const monitorTypeField = dataView.getFieldByName('monitor.type');
+  let filtersForSuggestions: Filter[] = [];
 
-  const filtersForSuggestions: Filter[] = monitorTypeField
-    ? [buildPhrasesFilter(monitorTypeField, tlsMonitorTypes, dataView)]
-    : [];
+  // filtersForSuggestions can be applied only if dataView is available
+  if (dataView) {
+    const monitorTypeField = dataView.getFieldByName('monitor.type');
+    filtersForSuggestions = monitorTypeField
+      ? [buildPhrasesFilter(monitorTypeField, tlsMonitorTypes, dataView)]
+      : [];
+  }
 
   return (
     <>
