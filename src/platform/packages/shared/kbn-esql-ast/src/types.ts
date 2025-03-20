@@ -387,28 +387,51 @@ export interface ESQLStringLiteral extends ESQLAstBaseItem {
 }
 
 // @internal
-export interface ESQLParamLiteral<ParamType extends string = string> extends ESQLAstBaseItem {
+export interface ESQLParamLiteral<
+  ParamType extends string = string,
+  ParamKind extends ESQLParamKinds = ESQLParamKinds
+> extends ESQLAstBaseItem {
   type: 'literal';
   literalType: 'param';
+  paramKind: ParamKind;
   paramType: ParamType;
   value: string | number;
 }
+
+export type ESQLParamKinds = '?' | '??';
 
 /**
  * *Unnamed* parameter is not named, just a question mark "?".
  *
  * @internal
  */
-export type ESQLUnnamedParamLiteral = ESQLParamLiteral<'unnamed'>;
+export type ESQLUnnamedParamLiteral<ParamKind extends ESQLParamKinds = ESQLParamKinds> =
+  ESQLParamLiteral<'unnamed', ParamKind>;
 
 /**
  * *Named* parameter is a question mark followed by a name "?name".
  *
  * @internal
  */
-export interface ESQLNamedParamLiteral extends ESQLParamLiteral<'named'> {
+export interface ESQLNamedParamLiteral<ParamKind extends ESQLParamKinds = ESQLParamKinds>
+  extends ESQLParamLiteral<'named', ParamKind> {
   value: string;
 }
+
+/**
+ * *Positional* parameter is a question mark followed by a number "?1".
+ *
+ * @internal
+ */
+export interface ESQLPositionalParamLiteral<ParamKind extends ESQLParamKinds = ESQLParamKinds>
+  extends ESQLParamLiteral<'positional', ParamKind> {
+  value: number;
+}
+
+export type ESQLParam =
+  | ESQLUnnamedParamLiteral
+  | ESQLNamedParamLiteral
+  | ESQLPositionalParamLiteral;
 
 export interface ESQLIdentifier extends ESQLAstBaseItem {
   type: 'identifier';
@@ -418,19 +441,6 @@ export const isESQLNamedParamLiteral = (node: ESQLAstItem): node is ESQLNamedPar
   isESQLAstBaseItem(node) &&
   (node as ESQLNamedParamLiteral).literalType === 'param' &&
   (node as ESQLNamedParamLiteral).paramType === 'named';
-/**
- * *Positional* parameter is a question mark followed by a number "?1".
- *
- * @internal
- */
-export interface ESQLPositionalParamLiteral extends ESQLParamLiteral<'positional'> {
-  value: number;
-}
-
-export type ESQLParam =
-  | ESQLUnnamedParamLiteral
-  | ESQLNamedParamLiteral
-  | ESQLPositionalParamLiteral;
 
 export interface ESQLMessage {
   type: 'error' | 'warning';
