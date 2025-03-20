@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiFieldSearchProps } from '@elastic/eui';
 import {
   EuiSelectable,
@@ -32,7 +32,7 @@ import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
 import { css } from '@emotion/react';
 import { APP_UI_ID } from '../../../../common';
-import { useAppUrl } from '../../../common/lib/kibana';
+import { useAppUrl, useToasts } from '../../../common/lib/kibana';
 import { LinkToApp } from '../../../common/components/endpoint';
 import { useFetchIntegrationPolicyList } from '../../hooks/policy/use_fetch_integration_policy_list';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -155,7 +155,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
       perPage = 20,
     } = {},
     selectedPolicyIds,
-    searchFields = ['name', 'description', 'policy_ids', 'package.name'],
+    searchFields = ['id', 'name', 'description', 'policy_ids', 'package.name'],
     onChange,
     height,
     useCheckbox = false,
@@ -167,6 +167,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
   }) => {
     // TODO:PT add support for showing static selections (for Global, Unassigned)
     const { euiTheme } = useEuiTheme();
+    const toasts = useToasts();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { getAppUrl } = useAppUrl();
     const { canReadPolicyManagement, canWriteIntegrationPolicies } =
@@ -374,6 +375,17 @@ export const PolicySelector = memo<PolicySelectorProps>(
       },
       []
     );
+
+    useEffect(() => {
+      if (error) {
+        toasts.addError(error, {
+          title: i18n.translate('xpack.securitySolution.policySelector.apiFetchErrorToastTitle', {
+            defaultMessage: 'Failed to fetch list of policies',
+          }),
+          toastMessage: error.body ? JSON.stringify(error.body) : undefined,
+        });
+      }
+    }, [toasts, error]);
 
     return (
       <PolicySelectorContainer data-test-subj={dataTestSubj} height={height}>
