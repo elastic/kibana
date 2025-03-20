@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   useFormContext,
   useFieldArray,
@@ -24,7 +25,6 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { SortableList } from '../../sortable_list';
 import { GrokFormState } from '../../types';
 import { GrokAiSuggestions } from './grok_ai_suggestions';
