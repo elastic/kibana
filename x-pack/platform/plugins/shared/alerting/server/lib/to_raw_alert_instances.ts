@@ -16,7 +16,8 @@ export function toRawAlertInstances<
   RecoveryActionGroupId extends string
 >(
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {}
+  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {},
+  shouldOptimizeTaskState: boolean = false
 ): {
   rawActiveAlerts: Record<string, RawAlertInstance>;
   rawRecoveredAlerts: Record<string, RawAlertInstance>;
@@ -30,7 +31,21 @@ export function toRawAlertInstances<
 
   for (const id of keys(recoveredAlerts)) {
     const alert = recoveredAlerts[id];
-    rawRecoveredAlerts[id] = alert.toRaw(true);
+    if (shouldOptimizeTaskState) {
+      // return recovered alerts if they are flapping or if the flapping array is not at capacity
+      // this is a space saving effort that will stop tracking a recovered alert if it wasn't flapping and doesn't have state changes
+      // in the last max capcity number of executions
+      const flapping = alert.getFlapping();
+      const flappingHistory: boolean[] = alert.getFlappingHistory() || [];
+      const numStateChanges = flappingHistory.filter((f) => f).length;
+      if (flapping) {
+        rawRecoveredAlerts[id] = alert.toRaw(true);
+      } else if (numStateChanges > 0) {
+        rawRecoveredAlerts[id] = alert.toRaw(true);
+      }
+    } else {
+      rawRecoveredAlerts[id] = alert.toRaw(true);
+    }
   }
   return { rawActiveAlerts, rawRecoveredAlerts };
 }
