@@ -44897,6 +44897,8 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                description:
+                                  type: string
                                 ingest:
                                   allOf:
                                     - type: object
@@ -45324,6 +45326,7 @@ paths:
                                         - wired
                               required:
                                 - ingest
+                                - description
                           required:
                             - stream
                     - allOf:
@@ -45342,6 +45345,8 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                description:
+                                  type: string
                                 ingest:
                                   allOf:
                                     - type: object
@@ -45622,6 +45627,7 @@ paths:
                                         - unwired
                               required:
                                 - ingest
+                                - description
                           required:
                             - stream
                 - allOf:
@@ -45640,12 +45646,12 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
+                            description:
+                              type: string
                             group:
                               additionalProperties: false
                               type: object
                               properties:
-                                description:
-                                  type: string
                                 members:
                                   items:
                                     minLength: 1
@@ -45655,6 +45661,7 @@ paths:
                                 - members
                           required:
                             - group
+                            - description
                       required:
                         - stream
       responses: {}
@@ -45834,8 +45841,6 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
-                    description:
-                      type: string
                     members:
                       items:
                         minLength: 1
