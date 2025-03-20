@@ -459,6 +459,7 @@ src/platform/packages/shared/kbn-field-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
 src/platform/packages/shared/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-ftr-common-functional-ui-services @elastic/appex-qa
+src/platform/packages/shared/kbn-grok-ui @elastic/streams-program-team
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
 src/platform/packages/shared/kbn-guided-onboarding @elastic/appex-sharedux
 src/platform/packages/shared/kbn-i18n @elastic/kibana-core
@@ -887,6 +888,7 @@ x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
+x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-ux-infra_services-team
 x-pack/platform/plugins/shared/automatic_import @elastic/security-scalability
 x-pack/platform/plugins/shared/cases @elastic/response-ops
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
@@ -1625,6 +1627,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /.ci/.storybook @elastic/kibana-operations
 
 # QA - Appex QA
+.buildkite/scout_ci_config.yml @elastic/appex-qa
 /x-pack/test/.gitignore @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/es/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/oblt/roles.yml @elastic/appex-qa
@@ -2220,6 +2223,9 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution_ess/public/upselling/pages/attack_discovery @elastic/security-generative-ai
 /x-pack/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/security-scalability
+
+# AI4DSOC in Security Solution
+/x-pack/test/security_solution_cypress/cypress/e2e/ai4dsoc @elastic/security-engineering-productivity
 
 # Security Solution cross teams ownership
 /x-pack/test/security_solution_cypress/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting

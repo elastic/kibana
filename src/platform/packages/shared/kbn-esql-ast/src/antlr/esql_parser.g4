@@ -63,6 +63,7 @@ processingCommand
     | {this.isDevVersion()}? changePointCommand
     | {this.isDevVersion()}? insistCommand
     | {this.isDevVersion()}? forkCommand
+    | {this.isDevVersion()}? rrfCommand
     ;
 
 whereCommand
@@ -147,6 +148,7 @@ identifier
 identifierPattern
     : ID_PATTERN
     | parameter
+    | {this.isDevVersion()}? doubleParameter
     ;
 
 parameter
@@ -154,9 +156,15 @@ parameter
     | NAMED_OR_POSITIONAL_PARAM    #inputNamedOrPositionalParam
     ;
 
+doubleParameter
+    : DOUBLE_PARAMS                        #inputDoubleParams
+    | NAMED_OR_POSITIONAL_DOUBLE_PARAMS    #inputNamedOrPositionalDoubleParams
+    ;
+
 identifierOrParameter
     : identifier
     | parameter
+    | {this.isDevVersion()}? doubleParameter
     ;
 
 limitCommand
@@ -268,3 +276,7 @@ forkSubQueryProcessingCommand
     | sortCommand
     | limitCommand
     ;
+
+rrfCommand
+   : DEV_RRF
+   ;
