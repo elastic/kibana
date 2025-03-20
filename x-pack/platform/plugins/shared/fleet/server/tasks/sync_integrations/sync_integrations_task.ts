@@ -229,7 +229,6 @@ export class SyncIntegrationsTask {
       }),
       integrations: [],
       custom_assets: {},
-      custom_assets_error: {},
     };
 
     const packageSavedObjects = await getInstalledPackageSavedObjects(soClient, {

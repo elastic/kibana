@@ -214,7 +214,6 @@ describe('SyncIntegrationsTask', () => {
                 type: 'ingest_pipeline',
               },
             },
-            custom_assets_error: {},
           },
         },
         expect.anything()

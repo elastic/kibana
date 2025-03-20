@@ -36,5 +36,5 @@ export interface SyncIntegrationsData {
   custom_assets: {
     [key: string]: CustomAssetsData;
   };
-  custom_assets_error: CustomAssetsError;
+  custom_assets_error?: CustomAssetsError;
 }

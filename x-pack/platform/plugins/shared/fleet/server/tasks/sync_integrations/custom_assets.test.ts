@@ -29,17 +29,17 @@ describe('custom assets', () => {
   describe('findIntegration', () => {
     it('should return system integration', () => {
       const integration = findIntegration('logs-system.auth@custom', integrations);
-      expect(integration.package_name).toEqual('system');
+      expect(integration?.package_name).toEqual('system');
     });
 
     it('should return endpoint integration', () => {
       const integration = findIntegration('endpoint@custom', integrations);
-      expect(integration.package_name).toEqual('endpoint');
+      expect(integration?.package_name).toEqual('endpoint');
     });
 
     it('should return synthetics integration', () => {
       const integration = findIntegration('synthetics-tcp@custom', integrations);
-      expect(integration.package_name).toEqual('synthetics');
+      expect(integration?.package_name).toEqual('synthetics');
     });
 
     it('should return undefined', () => {
@@ -152,6 +152,8 @@ describe('custom assets', () => {
         },
       };
       const previousSyncIntegrationsData = {
+        remote_es_hosts: [],
+        integrations: [],
         custom_assets: {
           'component_template:logs-system.auth@custom': {
             is_deleted: false,
@@ -196,6 +198,8 @@ describe('custom assets', () => {
         },
       };
       const previousSyncIntegrationsData = {
+        remote_es_hosts: [],
+        integrations: [],
         custom_assets: {
           'component_template:logs-system.auth@custom': {
             is_deleted: true,
