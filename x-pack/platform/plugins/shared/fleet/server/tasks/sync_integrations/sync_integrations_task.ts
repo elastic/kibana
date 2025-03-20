@@ -31,7 +31,7 @@ export const TYPE = 'fleet:sync-integrations-task';
 export const VERSION = '1.0.2';
 const TITLE = 'Fleet Sync Integrations Task';
 const SCOPE = ['fleet'];
-const INTERVAL = '1m';
+const INTERVAL = '5m';
 const TIMEOUT = '5m';
 
 interface SyncIntegrationsTaskSetupContract {
