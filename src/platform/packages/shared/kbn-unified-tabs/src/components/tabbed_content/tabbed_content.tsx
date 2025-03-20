@@ -21,12 +21,13 @@ import {
   closeOtherTabs,
   closeTabsToTheRight,
 } from '../../utils/manage_tabs';
-import { TabItem } from '../../types';
+import type { TabItem, TabsServices } from '../../types';
 
 export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> {
   initialItems: TabItem[];
   initialSelectedItemId?: string;
   'data-test-subj'?: string;
+  services: TabsServices;
   renderContent: (selectedItem: TabItem) => React.ReactNode;
   createItem: () => TabItem;
   onChanged: (state: TabbedContentState) => void;
@@ -41,6 +42,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   initialItems,
   initialSelectedItemId,
   maxItemsCount,
+  services,
   renderContent,
   createItem,
   onChanged,
@@ -101,16 +103,17 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   const getTabMenuItems = useMemo(() => {
     return getTabMenuItemsFn({
       tabsState: state,
+      maxItemsCount,
       onDuplicate: (item) => {
         const newItem = createItem();
         newItem.label = `${item.label} (copy)`;
-        changeState((prevState) => insertTabAfter(prevState, newItem, item));
+        changeState((prevState) => insertTabAfter(prevState, newItem, item, maxItemsCount));
       },
       onCloseOtherTabs: (item) => changeState((prevState) => closeOtherTabs(prevState, item)),
       onCloseTabsToTheRight: (item) =>
         changeState((prevState) => closeTabsToTheRight(prevState, item)),
     });
-  }, [changeState, createItem, state]);
+  }, [changeState, createItem, state, maxItemsCount]);
 
   return (
     <EuiFlexGroup
@@ -126,6 +129,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           maxItemsCount={maxItemsCount}
           tabContentId={tabContentId}
           getTabMenuItems={getTabMenuItems}
+          services={services}
           onAdd={onAdd}
           onLabelEdited={onLabelEdited}
           onSelect={onSelect}

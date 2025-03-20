@@ -320,3 +320,15 @@ export const CONFIRM_WARNING_MODAL_LABELS = (entryType: string) => {
     ),
   };
 };
+
+export const NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE = i18n.translate(
+  'xpack.securitySolution.translations.noGlobalArtifactManagementAllowedMessage',
+  { defaultMessage: 'Management of global artifacts requires additional privilege' }
+);
+
+export const ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE = (count: number): string =>
+  i18n.translate('xpack.securitySolution.translations.artifactPoliciesNotAccessibleInActiveSpace', {
+    defaultMessage:
+      'This artifact is associated with {count} {count, plural, =1 {policy that is} other {policies that are}} not accessible in active space',
+    values: { count },
+  });
