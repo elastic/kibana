@@ -45,8 +45,8 @@ export interface GroupingQueryArgs {
     from: string;
     to: string;
   };
-  shouldFlattenMultiValueField?: boolean;
-  countDocumentsBy?: string;
+  multiValueFieldsToFlatten?: string[];
+  countByKeyForMultiValueFields?: string;
 }
 
 export interface MainAggregation extends NamedAggregation {

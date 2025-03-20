@@ -37,7 +37,7 @@ type StaticGroupingProps<T> = Pick<
   | 'onGroupToggle'
   | 'unit'
   | 'groupsUnit'
-  | 'shouldIgnoreFieldSize'
+  | 'multiValueFields'
 >;
 
 /** Type for dynamic grouping component props where T is the consumer `GroupingAggregation`
