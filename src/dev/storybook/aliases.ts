@@ -30,16 +30,10 @@ export const storybookAliases = {
   esql_editor: 'src/platform/packages/private/kbn-esql-editor/.storybook',
   event_stacktrace: 'x-pack/platform/packages/shared/kbn-event-stacktrace/.storybook',
   expandable_flyout: 'x-pack/solutions/security/packages/expandable-flyout/.storybook',
-  expression_error: 'src/platform/plugins/shared/expression_error/.storybook',
-  expression_image: 'src/platform/plugins/shared/expression_image/.storybook',
   expression_metric_vis:
     'src/platform/plugins/shared/chart_expressions/expression_legacy_metric/.storybook',
-  expression_metric: 'src/platform/plugins/shared/expression_metric/.storybook',
   expression_partition_vis:
     'src/platform/plugins/shared/chart_expressions/expression_partition_vis/.storybook',
-  expression_repeat_image: 'src/platform/plugins/shared/expression_repeat_image/.storybook',
-  expression_reveal_image: 'src/platform/plugins/shared/expression_reveal_image/.storybook',
-  expression_shape: 'src/platform/plugins/shared/expression_shape/.storybook',
   expression_tagcloud:
     'src/platform/plugins/shared/chart_expressions/expression_tagcloud/.storybook',
   fleet: 'x-pack/platform/plugins/shared/fleet/.storybook',

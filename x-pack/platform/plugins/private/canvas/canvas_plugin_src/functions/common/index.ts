@@ -20,6 +20,7 @@ import { date } from './date';
 import { doFn } from './do';
 import { dropdownControl } from './dropdownControl';
 import { eq } from './eq';
+// import { error } from './error';
 import { exactly } from './exactly';
 import { filterrows } from './filterrows';
 import { formatdate } from './formatdate';
@@ -29,13 +30,19 @@ import { gt } from './gt';
 import { gte } from './gte';
 import { head } from './head';
 import { ifFn } from './if';
+// import { image } from './image';
 import { joinRows } from './join_rows';
 import { lt } from './lt';
 import { lte } from './lte';
 import { mapCenter } from './map_center';
+// import { metric } from './metric';
 import { neq } from './neq';
 import { ply } from './ply';
 import { render } from './render';
+import { revealImage } from './reveal_image';
+import { repeatImage } from './repeat_image';
+import { shape } from './shape';
+import { progress } from './progress';
 import { replace } from './replace';
 import { rounddate } from './rounddate';
 import { rowCount } from './rowCount';
@@ -67,6 +74,7 @@ export const functions = [
   doFn,
   dropdownControl,
   eq,
+  // error,
   exactly,
   filterrows,
   formatdate,
@@ -76,17 +84,23 @@ export const functions = [
   gte,
   head,
   ifFn,
+  // image,
   lt,
   lte,
   joinRows,
   mapCenter,
+  // metric,
   neq,
   ply,
+  progress,
   render,
+  repeatImage,
   replace,
+  revealImage,
   rounddate,
   rowCount,
   seriesStyle,
+  shape,
   sort,
   staticColumn,
   string,
