@@ -236,14 +236,14 @@ describe('determineDelayedAlerts', () => {
       startedAt: null,
       ruleRunMetricsStore,
     });
-    expect(newAlerts['2'].getState().duration).toBe('0');
-    expect(newAlerts['2'].getState().start).toBeTruthy();
+    expect(newAlerts['2']?.getState().duration).toBe('0');
+    expect(newAlerts['2']?.getState().start).toBeTruthy();
 
-    expect(trackedActiveAlerts['2'].getState().duration).toBe('0');
-    expect(trackedActiveAlerts['2'].getState().start).toBeTruthy();
+    expect(trackedActiveAlerts['2']?.getState().duration).toBe('0');
+    expect(trackedActiveAlerts['2']?.getState().start).toBeTruthy();
 
-    expect(activeAlerts['2'].getState().duration).toBe('0');
-    expect(activeAlerts['2'].getState().start).toBeTruthy();
+    expect(activeAlerts['2']?.getState().duration).toBe('0');
+    expect(activeAlerts['2']?.getState().start).toBeTruthy();
 
     expect(ruleRunMetricsStore.setNumberOfDelayedAlerts).toHaveBeenCalledWith(0);
   });
