@@ -11,7 +11,7 @@ import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/p
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import { EuiSpacer } from '@elastic/eui';
 import { Filter, buildPhrasesFilter } from '@kbn/es-query';
-import { AlertTlsComponent } from './alert_tls';
+import { AlertTlsCondition } from './alert_tls';
 import { getDynamicSettingsAction, selectDynamicSettings } from '../../state/settings';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
 import { AlertSearchBar } from './query_bar';
@@ -72,7 +72,7 @@ export const TLSRuleComponent: React.FC<{
       />
       <TLSRuleViz ruleParams={ruleParams} />
       <EuiSpacer size="m" />
-      <AlertTlsComponent
+      <AlertTlsCondition
         ageThreshold={
           ruleParams.certAgeThreshold ??
           settings?.certAgeThreshold ??
