@@ -61,7 +61,7 @@ export interface GroupingProps<T> {
   // usefull in combination with shouldFlattenMultiValueField param in GroupingQueryArgs
   // because if the field is a multi-value field, and we emit each value separatly the size of the field will be ignored
   // when filtering by it
-  shouldIgnoreFieldSize?: boolean;
+  multiValueFields?: string[];
 }
 
 const GroupingComponent = <T,>({
@@ -85,7 +85,7 @@ const GroupingComponent = <T,>({
   tracker,
   unit = defaultUnit,
   groupsUnit = GROUPS_UNIT,
-  shouldIgnoreFieldSize,
+  multiValueFields,
 }: GroupingProps<T>) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
@@ -143,7 +143,7 @@ const GroupingComponent = <T,>({
                       : createGroupFilter(
                           selectedGroup,
                           Array.isArray(groupBucket.key) ? groupBucket.key : [groupBucket.key],
-                          shouldIgnoreFieldSize
+                          multiValueFields
                         )
                   }
                   groupNumber={groupNumber}
@@ -179,7 +179,7 @@ const GroupingComponent = <T,>({
               }
               selectedGroup={selectedGroup}
               groupingLevel={groupingLevel}
-              shouldIgnoreFieldSize={shouldIgnoreFieldSize}
+              multiValueFields={multiValueFields}
             />
             {groupingLevel > 0 ? null : <EuiSpacer size="s" />}
           </span>
@@ -200,7 +200,7 @@ const GroupingComponent = <T,>({
       tracker,
       trigger,
       unit,
-      shouldIgnoreFieldSize,
+      multiValueFields,
     ]
   );
 
