@@ -695,32 +695,32 @@
                 "path": "x-pack/platform/plugins/shared/automatic_import/public/services/telemetry/service.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/telemetry/fleet_usage_sender.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/telemetry/fleet_usage_sender.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/telemetry/fleet_usage_sender.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/telemetry/fleet_usage_sender.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/telemetry/fleet_usage_sender.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/telemetry/fleet_usage_sender.ts"
+              },
+              {
                 "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/usage/event_tracker.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/telemetry/fleet_usage_sender.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/telemetry/fleet_usage_sender.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/telemetry/fleet_usage_sender.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/telemetry/fleet_usage_sender.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/telemetry/fleet_usage_sender.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
               {
                 "plugin": "datasetQuality",

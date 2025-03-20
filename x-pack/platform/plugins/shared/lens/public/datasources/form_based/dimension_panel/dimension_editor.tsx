@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './dimension_editor.scss';
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -25,6 +24,7 @@ import {
   EuiPanel,
   EuiBasicTable,
   EuiButtonIcon,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 import { NameInput } from '@kbn/visualization-ui-components';
@@ -75,6 +75,7 @@ import { ParamEditorProps } from '../operations/definitions';
 import { WrappingHelpPopover } from '../help_popover';
 import { isColumn } from '../operations/definitions/helpers';
 import type { FieldChoiceWithOperationType } from './field_select';
+import { operationsButtonStyles } from './shared_styles';
 import type { IndexPattern, IndexPatternField } from '../../../types';
 import { documentField } from '../document_field';
 
@@ -141,7 +142,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const temporaryQuickFunction = Boolean(temporaryState === quickFunctionsName);
   const temporaryStaticValue = Boolean(temporaryState === staticValueOperationName);
-  const { euiTheme } = useEuiTheme();
+
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
 
   const updateLayer = useCallback(
     (newLayer: Partial<FormBasedLayer>) =>
@@ -534,7 +537,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         isActive,
         size: 's',
         isDisabled: !!disabledStatus,
-        className: 'lnsIndexPatternDimensionEditor__operation',
+        css: operationsButtonStyles(euiThemeContext),
         'data-test-subj': `lns-indexPatternDimension-${operationType}${
           compatibleWithCurrentField ? '' : ' incompatible'
         }`,
@@ -811,7 +814,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         fullWidth
       >
         <EuiListGroup
-          className={sideNavItems.length > 3 ? 'lnsIndexPatternDimensionEditor__columns' : ''}
+          css={sideNavItems.length > 3 ? operationsTwoColumnsStyles(euiThemeContext) : undefined}
           gutterSize="none"
           color="primary"
           listItems={
@@ -1290,3 +1293,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
     </div>
   );
 }
+
+const operationsTwoColumnsStyles = ({ euiTheme }: UseEuiTheme) => {
+  return css`
+    display: block;
+    column-count: 2;
+    column-gap: ${euiTheme.size.m};
+  `;
+};
