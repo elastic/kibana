@@ -17,6 +17,7 @@ import {
   setAdHocDataViews,
   setDataView,
   setDefaultProfileAdHocDataViews,
+  setTabs,
   updateTabs,
 } from './actions';
 
@@ -25,15 +26,21 @@ export type { DiscoverInternalState, InternalStateDataRequestParams } from './ty
 export { type InternalStateStore, createInternalStateStore, createTab } from './internal_state';
 
 export const internalStateActions = {
-  ...omit(internalStateSlice.actions, 'setDataViewId', 'setDefaultProfileAdHocDataViewIds'),
+  ...omit(
+    internalStateSlice.actions,
+    'setTabs',
+    'setDataViewId',
+    'setDefaultProfileAdHocDataViewIds'
+  ),
   loadDataViewList,
+  setTabs,
+  updateTabs,
   setDataView,
   setAdHocDataViews,
   setDefaultProfileAdHocDataViews,
   appendAdHocDataViews,
   replaceAdHocDataViewWithId,
   initializeSession,
-  updateTabs,
 };
 
 export {
