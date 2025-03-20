@@ -143,8 +143,6 @@ export async function createMcpServer({
         updatedBefore,
       });
 
-      logger.info(`Retrieved ${caseContent.length} support cases`);
-
       logger.info(`Retrieved ${JSON.stringify(caseContent)}`);
 
       return {
