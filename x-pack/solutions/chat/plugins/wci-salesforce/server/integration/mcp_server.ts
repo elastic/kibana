@@ -8,7 +8,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod';
-import { retrieveCases } from './tools';
+import { retrieveCases, retrieveSimiliarCases } from './tools';
 
 // Define enum field structure upfront
 interface Field {
@@ -153,8 +153,44 @@ export async function createMcpServer({
     }
   );
 
+  server.tool(
+    'retrieve_similiar_cases',
+    `Retrieves Salesforce support cases that are semantically similiar to the one the user is refrencing`,
+    {
+      caseNumber: z
+        .string()
+        .optional()
+        .describe('Salesforce case number identifier (preferred lookup method)'),
+      id: z
+        .string()
+        .optional()
+        .describe(
+          'Salesforce internal ID of the support case (use only when specifically requested)'
+        ),
+      size: z.number().int().positive().default(10).describe('Maximum number of cases to return'),
+      semanticQuery: z
+        .string()
+        .describe('Natural language query to search case content semantically')
+    },
+    async ({
+      id,
+      size,
+      caseNumber,
+      semanticQuery,
+    }) => {
+  
+        const similiarCases = await retrieveSimiliarCases(elasticsearchClient, logger, index, {id, size, caseNumber, semanticQuery})
+  
+        return {
+          content: similiarCases,
+        };
+      }
+    );
+
   return server;
 }
+
+
 
 /**
  * Retrieves possible values for enum fields from Elasticsearch using _terms_enum API

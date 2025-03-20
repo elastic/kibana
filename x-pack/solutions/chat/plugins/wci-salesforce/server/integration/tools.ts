@@ -60,48 +60,12 @@ export async function retrieveCases(
 
     const response = await esClient.search<SearchResponse<SupportCase>>(searchRequest);
 
-    // Let's keep this here for now
-    const contextFields = [
-      { field: 'title', type: 'keyword' },
-      { field: 'description', type: 'text' },
-      { field: 'content', type: 'text' },
-      { field: 'metadata.case_number', type: 'keyword' },
-      { field: 'metadata.priority', type: 'keyword' },
-      { field: 'metadata.status', type: 'keyword' },
-      { field: 'owner.email', type: 'keyword' },
-      { field: 'owner.name', type: 'keyword' },
-    ];
-
     const contentFragments = response.hits.hits.map((hit) => {
       const source = hit._source as SupportCase;
 
-      // Helper function to safely get nested values
-      const getNestedValue = (obj: any, path: string[]): string => {
-        return (
-          path
-            .reduce((prev, curr) => {
-              return prev && typeof prev === 'object' && curr in prev ? prev[curr] : '';
-            }, obj)
-            ?.toString() || ''
-        );
-      };
-
       return {
         type: 'text' as const,
-        text: contextFields
-          .map(({ field }) => {
-            const fieldPath = field.split('.');
-            let value = '';
-
-            // Use the helper function for both nested and non-nested fields
-            value =
-              fieldPath.length > 1
-                ? getNestedValue(source, fieldPath)
-                : (source[field as keyof SupportCase] || '').toString();
-
-            return `${field}: ${value}`;
-          })
-          .join('\n'),
+        text: formatCaseFields(logger, source)
       };
     });
 
@@ -116,6 +80,80 @@ export async function retrieveCases(
       },
     ];
   }
+}
+
+export async function retrieveSimiliarCases(
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  indexName: string,
+  params: CaseRetrievalParams = {}
+): Promise<Array<{ type: 'text'; text: string }>> {
+  
+  try {
+    const queryBody = buildQuery(params)
+    const searchRequest: SearchRequest = {
+      index: indexName,
+      query: queryBody,
+      size: params.size || 10,
+    };
+
+    const response = await esClient.search<SearchResponse<SupportCase>>(searchRequest);
+
+    const contentFragments = response.hits.hits.map((hit) => {
+      const source = hit._source as SupportCase;
+      return {
+        type: 'text' as const,
+        text: formatCaseFields(logger, source)
+      };
+    });
+
+    return contentFragments;
+
+  } catch (error) {
+    logger.error(`Search failed: ${error}`);
+
+    return [
+      {
+        type: 'text' as const,
+        text: `Error: Search failed: ${error}`,
+      },
+    ];
+  }
+}
+
+function formatCaseFields(logger: Logger, source: SupportCase): any {
+
+  const contextFields = [
+    { field: 'title', type: 'keyword' },
+    { field: 'description', type: 'text' },
+    { field: 'content', type: 'text' },
+    { field: 'metadata.case_number', type: 'keyword' },
+    { field: 'metadata.priority', type: 'keyword' },
+    { field: 'metadata.status', type: 'keyword' },
+  ];
+
+  const getNestedValue = (obj: any, path: string[]): string => {
+    return (
+      path
+        .reduce((prev, curr) => {
+          return prev && typeof prev === 'object' && curr in prev ? prev[curr] : '';
+        }, obj)
+        ?.toString() || ''
+    );
+  };
+
+  contextFields.map(({ field }) => {
+    const fieldPath = field.split('.');
+    let value = '';
+
+    value = fieldPath.length > 1
+        ? getNestedValue(source, fieldPath)
+        : (source[field as keyof SupportCase] || '').toString();
+        return `${field}: ${value}`;
+        }).join('\n')
+  
+  logger.info(`Received Fields: ${contextFields}`)
+  return contextFields
 }
 
 function buildQuery(params: CaseRetrievalParams): any {
@@ -154,3 +192,5 @@ function buildQuery(params: CaseRetrievalParams): any {
 
   return { bool: { must: mustClauses } };
 }
+
+
