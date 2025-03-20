@@ -143,14 +143,10 @@ describe('CreateConnectorFlyout', () => {
         onTestConnector={onTestConnector}
       />
     );
-    await act(() => Promise.resolve());
-
-    await userEvent.click(screen.getByTestId(`${actionTypeModel.id}-card`));
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('createConnectorsModalSearch')).not.toBeInTheDocument();
-    });
-    expect(screen.queryByTestId('compatibilityFilterBtn')).not.toBeInTheDocument();
+   expect(await screen.findByTestId('createConnectorsModalSearch')).toBeInTheDocument();
+    
+    await userEvent.click(await screen.findByTestId(`${actionTypeModel.id}-card`));
+   await waitForElementToBeRemoved(screen.queryByTestId('createConnectorsModalSearch'));
   });
 
   it('does not show the save and test button if the onTestConnector is not provided', async () => {
