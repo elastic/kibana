@@ -648,7 +648,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     maps: {
       connectToEms: `${ELASTIC_DOCS}explore-analyze/visualize/maps/maps-connect-to-ems`,
-      guide: isServerless ? `${ELASTIC_DOCS}explore-analyze/visualize/maps` : `${ELASTIC_DOCS}explore-analyze/visualize/maps`,
+      guide: isServerless
+        ? `${ELASTIC_DOCS}explore-analyze/visualize/maps`
+        : `${ELASTIC_DOCS}explore-analyze/visualize/maps`,
       importGeospatialPrivileges: `${ELASTIC_DOCS}explore-analyze/visualize/maps/import-geospatial-data#import-geospatial-privileges`,
       gdalTutorial: `https://www.elastic.co/blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal`,
       termJoinsExample: `${ELASTIC_DOCS}explore-analyze/visualize/maps/terms-join#_example_term_join`,
