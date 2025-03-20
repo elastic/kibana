@@ -168,11 +168,9 @@ export function dashboardAttributesOut(
   } = attributes;
 
   // Inject any tag names from references into the attributes
-  const tags = new Set<string>();
-  const tagRefs = references?.filter(({ type }) => type === 'tag');
-  if (getTagNamesFromReferences && tagRefs && tagRefs.length) {
-    const tagNames = getTagNamesFromReferences(tagRefs);
-    tagNames.forEach((tagName) => tags.add(tagName));
+  let tags: string[] | undefined;
+  if (getTagNamesFromReferences && references && references.length) {
+    tags = getTagNamesFromReferences(references);
   }
 
   // try to maintain a consistent (alphabetical) order of keys
@@ -187,7 +185,7 @@ export function dashboardAttributesOut(
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
-    ...(tags.size && { tags: Array.from(tags) }),
+    ...(tags && { tags }),
     ...(timeFrom && { timeFrom }),
     timeRestore: timeRestore ?? false,
     ...(timeTo && { timeTo }),
@@ -287,7 +285,7 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
   };
 };
 
-export const itemAttrsToSavedObject = ({
+export const itemAttrsToSavedObject = async ({
   attributes,
   replaceTagReferencesByName,
   incomingReferences = [],
@@ -313,7 +311,7 @@ export const itemAttrsToSavedObject = ({
     // Tags can be specified as an attribute or in the incomingReferences.
     const soReferences =
       replaceTagReferencesByName && tags && tags.length
-        ? replaceTagReferencesByName(incomingReferences, tags)
+        ? await replaceTagReferencesByName(incomingReferences, tags)
         : incomingReferences;
     return { attributes: soAttributes, references: soReferences, error: null };
   } catch (e) {

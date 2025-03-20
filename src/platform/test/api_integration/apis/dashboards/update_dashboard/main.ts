@@ -144,6 +144,36 @@ export default function ({ getService }: FtrProviderContext) {
         expect(referenceIds).to.contain('dd7caf20-9efd-11e7-acb3-3dab96693fab');
         expect(response.body.item.references).to.have.length(1);
       });
+
+      it('creates tag if a saved object matching a tag name is not found', async () => {
+        const randomTagName = `tag-${Math.random() * 1000}`;
+        const response = await supertest
+          .put(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
+          .set('kbn-xsrf', 'true')
+          .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+          .send({
+            ...updatedDashboard,
+            attributes: {
+              ...updatedDashboard.attributes,
+              tags: ['foo', 'bar', 'buzz', randomTagName],
+            },
+          });
+
+        expect(response.status).to.be(201);
+        expect(response.body.item.attributes.tags).to.contain('foo');
+        expect(response.body.item.attributes.tags).to.contain('bar');
+        expect(response.body.item.attributes.tags).to.contain('buzz');
+        expect(response.body.item.attributes.tags).to.contain(randomTagName);
+        expect(response.body.item.attributes.tags).to.have.length(4);
+        const referenceIds = response.body.item.references.map(
+          (ref: SavedObjectReference) => ref.id
+        );
+        expect(referenceIds).to.contain('tag-1');
+        expect(referenceIds).to.contain('tag-2');
+        expect(referenceIds).to.contain('tag-3');
+        expect(referenceIds).to.contain('dd7caf20-9efd-11e7-acb3-3dab96693fab');
+        expect(response.body.item.references).to.have.length(5);
+      });
     });
   });
 }

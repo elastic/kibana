@@ -16,7 +16,7 @@ import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management
 import { StorageContext } from '@kbn/content-management-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
+import type { ITagsClient, Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
 import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
@@ -32,6 +32,10 @@ import type {
   DashboardUpdateOut,
   DashboardSearchOptions,
 } from './latest';
+
+const getRandomColor = (): string => {
+  return '#' + String(Math.floor(Math.random() * 16777215).toString(16)).padStart(6, '0');
+};
 
 const searchArgsToSOFindOptions = (
   query: SearchQuery,
@@ -78,38 +82,95 @@ export class DashboardStorage {
   private savedObjectsTagging?: SavedObjectTaggingStart;
   private throwOnResultValidationError: boolean;
 
-  private getTagNamesFromReferences = (references: SavedObjectReference[], allTags: Tag[]) => {
-    return this.savedObjectsTagging
-      ? this.savedObjectsTagging
-          .getTagsFromReferences(references, allTags)
-          .tags.map((tag) => tag.name)
-      : [];
-  };
-
-  private replaceTagReferencesByName = (
-    references: SavedObjectReference[],
-    newTagNames: string[],
-    allTags: Tag[]
-  ) => {
-    const combinedTagNames = this.getUniqueTagNames(references, newTagNames, allTags);
-    const newTagIds = this.convertTagNamesToIds(combinedTagNames, allTags);
-    return this.savedObjectsTagging?.replaceTagReferences(references, newTagIds) ?? references;
-  };
+  private getTagNamesFromReferences(references: SavedObjectReference[], allTags: Tag[]) {
+    return Array.from(
+      new Set(
+        this.savedObjectsTagging
+          ? this.savedObjectsTagging
+              .getTagsFromReferences(references, allTags)
+              .tags.map((tag) => tag.name)
+          : []
+      )
+    );
+  }
 
   private getUniqueTagNames(
     references: SavedObjectReference[],
     newTagNames: string[],
     allTags: Tag[]
-  ): string[] {
+  ) {
     const referenceTagNames = this.getTagNamesFromReferences(references, allTags);
-    return Array.from(new Set([...referenceTagNames, ...newTagNames]));
+    return new Set([...referenceTagNames, ...newTagNames]);
   }
 
-  private convertTagNamesToIds(tagNames: string[], allTags: Tag[]): string[] {
-    // convertTagNameToId could return undefined, so flatMap is used to filter out undefined values
-    return tagNames.flatMap(
+  private async replaceTagReferencesByName(
+    references: SavedObjectReference[],
+    newTagNames: string[],
+    allTags: Tag[],
+    tagsClient?: ITagsClient
+  ) {
+    const combinedTagNames = this.getUniqueTagNames(references, newTagNames, allTags);
+    const newTagIds = await this.convertTagNamesToIds(combinedTagNames, allTags, tagsClient);
+    return this.savedObjectsTagging?.replaceTagReferences(references, newTagIds) ?? references;
+  }
+
+  private async convertTagNamesToIds(
+    tagNames: Set<string>,
+    allTags: Tag[],
+    tagsClient?: ITagsClient
+  ): Promise<string[]> {
+    const combinedTagNames = await this.createTagsIfNeeded(tagNames, allTags, tagsClient);
+
+    return Array.from(combinedTagNames).flatMap(
       (tagName) => this.savedObjectsTagging?.convertTagNameToId(tagName, allTags) ?? []
     );
+  }
+
+  private async createTagsIfNeeded(
+    tagNames: Set<string>,
+    allTags: Tag[],
+    tagsClient?: ITagsClient
+  ) {
+    const tagsToCreate = Array.from(tagNames).filter(
+      (tagName) => !allTags.some((tag) => tag.name === tagName)
+    );
+    const tagCreationResults = await Promise.allSettled(
+      tagsToCreate.flatMap(
+        (tagName) =>
+          tagsClient?.create({
+            name: tagName,
+            description: '',
+            color: getRandomColor(),
+          }) ?? []
+      )
+    );
+
+    for (const result of tagCreationResults) {
+      if (result.status === 'rejected') {
+        this.logger.error(`Error creating tag: ${result.reason}`);
+      } else {
+        this.logger.info(`Tag created: ${result.value.name}`);
+      }
+    }
+
+    const createdTags = tagCreationResults
+      .filter((result): result is PromiseFulfilledResult<Tag> => result.status === 'fulfilled')
+      .map((result) => result.value);
+
+    // Remove tags that were not created
+    const invalidTagNames = tagsToCreate.filter(
+      (tagName) => !createdTags.some((tag) => tag.name === tagName)
+    );
+    invalidTagNames.forEach((tagName) => tagNames.delete(tagName));
+
+    // Add newly created tags to allTags
+    allTags.push(...createdTags);
+
+    const combinedTagNames = new Set([
+      ...tagNames,
+      ...createdTags.map((createdTag) => createdTag.name),
+    ]);
+    return combinedTagNames;
   }
 
   async get(ctx: StorageContext, id: string): Promise<DashboardGetOut> {
@@ -197,10 +258,10 @@ export class DashboardStorage {
       attributes: soAttributes,
       references: soReferences,
       error: attributesError,
-    } = itemAttrsToSavedObject({
+    } = await itemAttrsToSavedObject({
       attributes: dataToLatest,
       replaceTagReferencesByName: (references: SavedObjectReference[], newTagNames: string[]) =>
-        this.replaceTagReferencesByName(references, newTagNames, allTags),
+        this.replaceTagReferencesByName(references, newTagNames, allTags, tagsClient),
       incomingReferences: options.references,
     });
     if (attributesError) {
@@ -279,10 +340,10 @@ export class DashboardStorage {
       attributes: soAttributes,
       references: soReferences,
       error: attributesError,
-    } = itemAttrsToSavedObject({
+    } = await itemAttrsToSavedObject({
       attributes: dataToLatest,
       replaceTagReferencesByName: (references: SavedObjectReference[], newTagNames: string[]) =>
-        this.replaceTagReferencesByName(references, newTagNames, allTags),
+        this.replaceTagReferencesByName(references, newTagNames, allTags, tagsClient),
       incomingReferences: options.references,
     });
     if (attributesError) {

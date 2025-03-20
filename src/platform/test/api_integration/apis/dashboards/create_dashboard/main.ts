@@ -206,7 +206,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body.item.references).to.have.length(2);
       });
 
-      it('ignores tags if a saved object matching the a tag is not found', async () => {
+      it('creates tags if a saved object matching a tag name is not found', async () => {
         const title = `foo-${Date.now()}-${Math.random()}`;
         const response = await supertest
           .post(PUBLIC_API_PATH)
@@ -219,13 +219,13 @@ export default function ({ getService }: FtrProviderContext) {
             },
           });
         expect(response.status).to.be(200);
-        expect(response.body.item.attributes.tags).to.contain('foo');
-        expect(response.body.item.attributes.tags).to.have.length(1);
+        expect(response.body.item.attributes.tags).to.contain('foo', 'not-found-tag');
+        expect(response.body.item.attributes.tags).to.have.length(2);
         const referenceIds = response.body.item.references.map(
           (ref: SavedObjectReference) => ref.id
         );
         expect(referenceIds).to.contain('tag-1');
-        expect(response.body.item.references).to.have.length(1);
+        expect(response.body.item.references).to.have.length(2);
       });
 
       it('with tags specified as references', async () => {
@@ -296,7 +296,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             attributes: {
               title,
-              tags: ['foo', 'bizz'],
+              tags: ['foo', 'buzz'],
             },
             references: [
               {
@@ -308,7 +308,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
         expect(response.status).to.be(200);
         expect(response.body.item.attributes.tags).to.contain('foo');
-        expect(response.body.item.attributes.tags).to.contain('bizz');
+        expect(response.body.item.attributes.tags).to.contain('buzz');
         expect(response.body.item.attributes.tags).to.have.length(2);
         const referenceIds = response.body.item.references.map(
           (ref: SavedObjectReference) => ref.id
