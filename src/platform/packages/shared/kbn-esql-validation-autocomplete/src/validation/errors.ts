@@ -294,21 +294,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         ),
         type: 'warning',
       };
-    case 'unsupportedSetting':
-      return {
-        message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.unsupportedSetting',
-          {
-            defaultMessage: 'Unsupported setting [{setting}], expected [{expected}]',
-            values: {
-              setting: out.setting,
-              expected: out.expected,
-            },
-          }
-        ),
-        type: 'error',
-      };
-    case 'unsupportedSettingCommandValue':
+    case 'unsupportedMode':
       return {
         message: i18n.translate(
           'kbn-esql-validation-autocomplete.esql.validation.unsupportedSettingValue',
