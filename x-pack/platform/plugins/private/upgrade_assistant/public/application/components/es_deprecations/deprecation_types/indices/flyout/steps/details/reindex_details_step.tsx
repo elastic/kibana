@@ -75,7 +75,8 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   const correctiveAction = deprecation.correctiveAction as ReindexAction | undefined;
   const isESTransformTarget = !!correctiveAction?.transformIds?.length;
   const isMLAnomalyIndex = Boolean(indexName?.startsWith(ML_ANOMALIES_PREFIX));
-  const { excludedActions = [], indexSizeInBytes = 0 } = (deprecation.correctiveAction as ReindexAction) || {};
+  const { excludedActions = [], indexSizeInBytes = 0 } =
+    (deprecation.correctiveAction as ReindexAction) || {};
   const readOnlyExcluded = excludedActions.includes('readOnly');
   const reindexExcluded = excludedActions.includes('reindex');
 
@@ -246,21 +247,21 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
               {canShowReadonlyButton && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      onClick={startReadonly}
-                      disabled={loading}
-                      color={'primary'}
-                      fill={isLargeIndex || reindexExcluded}
-                      data-test-subj="startIndexReadonlyButton"
-                    >
-                      <FormattedMessage
-                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.startIndexReadonlyButton"
-                        defaultMessage="Mark as read-only"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                )}
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={startReadonly}
+                    disabled={loading}
+                    color={'primary'}
+                    fill={isLargeIndex || reindexExcluded}
+                    data-test-subj="startIndexReadonlyButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.startIndexReadonlyButton"
+                      defaultMessage="Mark as read-only"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
               {canShowReindexButton && (
                 <EuiFlexItem grow={false}>
                   <EuiButton

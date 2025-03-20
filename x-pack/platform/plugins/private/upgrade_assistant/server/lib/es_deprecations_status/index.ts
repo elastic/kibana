@@ -31,8 +31,10 @@ export async function getESUpgradeStatus(
 
     // Get all indices with reindex actions to fetch their sizes
     const indicesNeedingSize = enrichedDeprecations
-      .filter(deprecation => deprecation.correctiveAction?.type === 'reindex' && deprecation.index)
-      .map(deprecation => deprecation.index!);
+      .filter(
+        (deprecation) => deprecation.correctiveAction?.type === 'reindex' && deprecation.index
+      )
+      .map((deprecation) => deprecation.index!);
 
     // Get index stats if we have indices that need size information
     let indexSizes: Record<string, number> = {};
@@ -40,7 +42,7 @@ export async function getESUpgradeStatus(
       try {
         const response = await dataClient.indices.stats({
           index: indicesNeedingSize,
-          metric: ['store']
+          metric: ['store'],
         });
 
         // Extract index sizes from response
@@ -69,7 +71,8 @@ export async function getESUpgradeStatus(
 
           // Add index size information if available
           if (deprecation.index && indexSizes[deprecation.index]) {
-            (deprecation.correctiveAction as ReindexAction).indexSizeInBytes = indexSizes[deprecation.index];
+            (deprecation.correctiveAction as ReindexAction).indexSizeInBytes =
+              indexSizes[deprecation.index];
           }
         }
         return deprecation;
