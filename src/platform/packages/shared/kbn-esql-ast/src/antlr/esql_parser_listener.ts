@@ -38,6 +38,8 @@ import { IdentifierContext } from "./esql_parser.js";
 import { IdentifierPatternContext } from "./esql_parser.js";
 import { InputParamContext } from "./esql_parser.js";
 import { InputNamedOrPositionalParamContext } from "./esql_parser.js";
+import { InputDoubleParamsContext } from "./esql_parser.js";
+import { InputNamedOrPositionalDoubleParamsContext } from "./esql_parser.js";
 import { IdentifierOrParameterContext } from "./esql_parser.js";
 import { LimitCommandContext } from "./esql_parser.js";
 import { SortCommandContext } from "./esql_parser.js";
@@ -66,6 +68,7 @@ import { ForkSubQueryContext } from "./esql_parser.js";
 import { SingleForkSubQueryCommandContext } from "./esql_parser.js";
 import { CompositeForkSubQueryContext } from "./esql_parser.js";
 import { ForkSubQueryProcessingCommandContext } from "./esql_parser.js";
+import { RrfCommandContext } from "./esql_parser.js";
 import { MatchExpressionContext } from "./esql_parser.js";
 import { LogicalNotContext } from "./esql_parser.js";
 import { BooleanDefaultContext } from "./esql_parser.js";
@@ -397,6 +400,30 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitInputNamedOrPositionalParam?: (ctx: InputNamedOrPositionalParamContext) => void;
 	/**
+	 * Enter a parse tree produced by the `inputDoubleParams`
+	 * labeled alternative in `esql_parser.doubleParameter`.
+	 * @param ctx the parse tree
+	 */
+	enterInputDoubleParams?: (ctx: InputDoubleParamsContext) => void;
+	/**
+	 * Exit a parse tree produced by the `inputDoubleParams`
+	 * labeled alternative in `esql_parser.doubleParameter`.
+	 * @param ctx the parse tree
+	 */
+	exitInputDoubleParams?: (ctx: InputDoubleParamsContext) => void;
+	/**
+	 * Enter a parse tree produced by the `inputNamedOrPositionalDoubleParams`
+	 * labeled alternative in `esql_parser.doubleParameter`.
+	 * @param ctx the parse tree
+	 */
+	enterInputNamedOrPositionalDoubleParams?: (ctx: InputNamedOrPositionalDoubleParamsContext) => void;
+	/**
+	 * Exit a parse tree produced by the `inputNamedOrPositionalDoubleParams`
+	 * labeled alternative in `esql_parser.doubleParameter`.
+	 * @param ctx the parse tree
+	 */
+	exitInputNamedOrPositionalDoubleParams?: (ctx: InputNamedOrPositionalDoubleParamsContext) => void;
+	/**
 	 * Enter a parse tree produced by `esql_parser.identifierOrParameter`.
 	 * @param ctx the parse tree
 	 */
@@ -682,6 +709,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitForkSubQueryProcessingCommand?: (ctx: ForkSubQueryProcessingCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.rrfCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterRrfCommand?: (ctx: RrfCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.rrfCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitRrfCommand?: (ctx: RrfCommandContext) => void;
 	/**
 	 * Enter a parse tree produced by the `matchExpression`
 	 * labeled alternative in `esql_parser.booleanExpression`.
