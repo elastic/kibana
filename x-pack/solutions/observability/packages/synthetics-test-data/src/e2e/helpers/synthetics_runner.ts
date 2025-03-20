@@ -175,6 +175,13 @@ export class SyntheticsRunner {
       if (i < noOfRuns - 1) {
         console.log(`Run ${i + 1} completed, reloading test files...`);
         // need to reload again since runner resets the journeys
+        const failedJourneys = Object.entries(currResults).filter(
+          ([_journey, result]) => result.status !== 'succeeded'
+        );
+        if (CI && failedJourneys.length === 0) {
+          console.log('All journeys succeeded, skipping reload');
+          break;
+        }
         await this.reloadTestFiles(results, CI);
       }
     }
