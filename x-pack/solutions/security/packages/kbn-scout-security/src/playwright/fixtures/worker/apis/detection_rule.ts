@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { KbnClient, measurePerformanceAsync, ScoutLogger } from '@kbn/scout';
-import { ScoutSpaceParallelFixture } from '@kbn/scout/src/playwright/fixtures/worker';
+import {
+  KbnClient,
+  measurePerformanceAsync,
+  ScoutLogger,
+  ScoutParallelWorkerFixtures,
+} from '@kbn/scout';
 import { CUSTOM_QUERY_RULE, CustomQueryRule } from '../../../constants/detection_rules';
 
 const DETECTION_ENGINE_RULES_URL = '/api/detection_engine/rules';
@@ -24,7 +28,7 @@ export const getDetectionRuleApiService = ({
 }: {
   kbnClient: KbnClient;
   log: ScoutLogger;
-  scoutSpace?: ScoutSpaceParallelFixture;
+  scoutSpace?: ScoutParallelWorkerFixtures['scoutSpace'];
 }): DetectionRuleApiService => {
   const basePath = scoutSpace?.id ? `/s/${scoutSpace?.id}` : '';
 
