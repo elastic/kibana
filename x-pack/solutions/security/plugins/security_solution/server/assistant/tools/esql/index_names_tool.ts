@@ -17,13 +17,15 @@ export const toolDetails = {
 export const getIndexNamesTool = ({ esClient }: { esClient: ElasticsearchClient }) => {
   return tool(
     async () => {
-
       const indicesResolveIndexResponse = await esClient.indices.resolveIndex({
-        name: "*",
+        name: '*',
         expand_wildcards: 'open',
       });
 
-      const resolvedIndexNames = Object.values(indicesResolveIndexResponse).flat().map((item) => item.name).sort();
+      const resolvedIndexNames = Object.values(indicesResolveIndexResponse)
+        .flat()
+        .map((item) => item.name)
+        .sort();
 
       return `You can use the wildcard character "*" to query multiple indices at once. For example, if you want to query all logs indices that start with "logs-", you can use "logs-*". If the precice index was not specified in the task, it is best to make a more general query using a wildcard. Bellow are the available indecies:
       
