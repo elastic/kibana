@@ -6,13 +6,21 @@
  */
 
 import { z } from '@kbn/zod';
+import { SavedObject } from '@kbn/core/server';
 
-interface ContentPack {
-  content: string;
+type ContentPackVersion = 'v1';
+
+interface ContentPackHeader {
+  content_pack_version: ContentPackVersion;
 }
 
-const contentPackSchema: z.Schema<ContentPack> = z.object({
-  content: z.string(),
+const contentPackHeaderSchema: z.Schema<ContentPackHeader> = z.object({
+  content_pack_version: z.literal('v1'),
 });
 
-export { contentPackSchema, type ContentPack };
+interface ContentPackSavedObject {
+  type: 'saved_object';
+  content: SavedObject;
+}
+
+export { contentPackHeaderSchema, type ContentPackHeader, type ContentPackSavedObject };
