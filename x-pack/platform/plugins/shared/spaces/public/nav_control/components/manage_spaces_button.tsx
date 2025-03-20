@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, withEuiTheme, type WithEuiThemeProps } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { CSSProperties } from 'react';
 import React, { Component } from 'react';
 
@@ -22,11 +23,12 @@ interface Props {
   navigateToApp: ApplicationStart['navigateToApp'];
 }
 
-export class ManageSpacesButton extends Component<Props, {}> {
+class ManageSpacesButtonUI extends Component<Props & WithEuiThemeProps, {}> {
   public render() {
     if (!this.props.capabilities.spaces.manage) {
       return null;
     }
+    const { euiTheme } = this.props.theme;
 
     return (
       <EuiButton
@@ -36,6 +38,10 @@ export class ManageSpacesButton extends Component<Props, {}> {
         onClick={this.navigateToManageSpaces}
         style={this.props.style}
         data-test-subj="manageSpaces"
+        css={css`
+          margin: ${euiTheme.size.m};
+          width: calc(100% - ${euiTheme.size.m} * 2);
+        `}
       >
         <FormattedMessage
           id="xpack.spaces.manageSpacesButton.manageSpacesButtonLabel"
@@ -53,3 +59,5 @@ export class ManageSpacesButton extends Component<Props, {}> {
     this.props.navigateToApp('management', { path: 'kibana/spaces' });
   };
 }
+
+export const ManageSpacesButton = withEuiTheme(ManageSpacesButtonUI);

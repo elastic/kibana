@@ -217,14 +217,9 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
   };
 
   private renderManageButton = () => {
-    const { euiTheme } = this.props.theme;
     return (
       <ManageSpacesButton
         key="manageSpacesButton"
-        css={css`
-          margin: ${euiTheme.size.m};
-          width: calc(100% - ${euiTheme.size.m} * 2});
-        `}
         size="s"
         onClick={this.props.onClickManageSpaceBtn}
         capabilities={this.props.capabilities}
