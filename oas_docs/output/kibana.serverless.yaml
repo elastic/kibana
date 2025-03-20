@@ -59933,31 +59933,52 @@ components:
                 metrics:
                   description: List of metrics with their name, aggregation type, and field.
                   items:
-                    type: object
-                    properties:
-                      aggregation:
-                        description: The aggregation type of the metric.
-                        enum:
-                          - sum
-                          - doc_count
-                        example: sum
-                        type: string
-                      field:
-                        description: The field of the metric.
-                        example: processor.processed
-                        type: string
-                      filter:
-                        description: The filter to apply to the metric.
-                        example: 'processor.outcome: "success"'
-                        type: string
-                      name:
-                        description: The name of the metric. Only valid options are A-Z
-                        example: A
-                        pattern: ^[A-Z]$
-                        type: string
-                    required:
-                      - name
-                      - aggregation
+                    oneOf:
+                      - type: object
+                        properties:
+                          aggregation:
+                            description: The aggregation type of the metric.
+                            enum:
+                              - sum
+                            example: sum
+                            type: string
+                          field:
+                            description: The field of the metric.
+                            example: processor.processed
+                            type: string
+                          filter:
+                            description: The filter to apply to the metric.
+                            example: 'processor.outcome: *'
+                            type: string
+                          name:
+                            description: The name of the metric. Only valid options are A-Z
+                            example: A
+                            pattern: ^[A-Z]$
+                            type: string
+                        required:
+                          - name
+                          - aggregation
+                          - field
+                      - type: object
+                        properties:
+                          aggregation:
+                            description: The aggregation type of the metric.
+                            enum:
+                              - doc_count
+                            example: doc_count
+                            type: string
+                          filter:
+                            description: The filter to apply to the metric.
+                            example: 'processor.outcome: *'
+                            type: string
+                          name:
+                            description: The name of the metric. Only valid options are A-Z
+                            example: A
+                            pattern: ^[A-Z]$
+                            type: string
+                        required:
+                          - name
+                          - aggregation
                   type: array
               required:
                 - metrics
@@ -59983,31 +60004,52 @@ components:
                 metrics:
                   description: List of metrics with their name, aggregation type, and field.
                   items:
-                    type: object
-                    properties:
-                      aggregation:
-                        description: The aggregation type of the metric.
-                        enum:
-                          - sum
-                          - doc_count
-                        example: sum
-                        type: string
-                      field:
-                        description: The field of the metric.
-                        example: processor.processed
-                        type: string
-                      filter:
-                        description: The filter to apply to the metric.
-                        example: 'processor.outcome: *'
-                        type: string
-                      name:
-                        description: The name of the metric. Only valid options are A-Z
-                        example: A
-                        pattern: ^[A-Z]$
-                        type: string
-                    required:
-                      - name
-                      - aggregation
+                    oneOf:
+                      - type: object
+                        properties:
+                          aggregation:
+                            description: The aggregation type of the metric.
+                            enum:
+                              - sum
+                            example: sum
+                            type: string
+                          field:
+                            description: The field of the metric.
+                            example: processor.processed
+                            type: string
+                          filter:
+                            description: The filter to apply to the metric.
+                            example: 'processor.outcome: *'
+                            type: string
+                          name:
+                            description: The name of the metric. Only valid options are A-Z
+                            example: A
+                            pattern: ^[A-Z]$
+                            type: string
+                        required:
+                          - name
+                          - aggregation
+                          - field
+                      - type: object
+                        properties:
+                          aggregation:
+                            description: The aggregation type of the metric.
+                            enum:
+                              - doc_count
+                            example: doc_count
+                            type: string
+                          filter:
+                            description: The filter to apply to the metric.
+                            example: 'processor.outcome: *'
+                            type: string
+                          name:
+                            description: The name of the metric. Only valid options are A-Z
+                            example: A
+                            pattern: ^[A-Z]$
+                            type: string
+                        required:
+                          - name
+                          - aggregation
                   type: array
               required:
                 - metrics
