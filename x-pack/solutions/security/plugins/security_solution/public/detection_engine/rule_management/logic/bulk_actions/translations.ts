@@ -14,7 +14,7 @@ import {
   BulkActionEditTypeEnum,
   BulkActionTypeEnum,
 } from '../../../../../common/api/detection_engine/rule_management';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../common/translations';
 import type { BulkActionResponse, BulkActionSummary } from '../../api/api';
 
 export function summarizeBulkSuccess(action: BulkActionType): string {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFormRow, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEmpty, camelCase } from 'lodash/fp';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import { camelCase, isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { isEqual } from 'lodash';
 import type { Threat, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
-import * as Rulei18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as Rulei18n from '../../../common/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { threatDefault } from '../step_about_rule/default_value';
 import { MyAddItemButton } from '../add_item_form';
@@ -76,6 +76,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
       const mitreConfig = await lazyMitreConfiguration();
       setTacticsOptions(mitreConfig.tactics);
     }
+
     getMitre();
   }, []);
 

@@ -28,33 +28,33 @@ import type {
   ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
-} from '../../../../detection_engine/rule_creation/components/alert_suppression_edit';
-import type { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit';
-import type { FieldValueQueryBar } from '../../../../detection_engine/rule_creation_ui/components/query_bar_field';
-import type { FieldValueTimeline } from '../../../../detection_engine/rule_creation/components/pick_timeline';
-import type { FieldValueThreshold } from '../../../../detection_engine/rule_creation_ui/components/threshold_input';
+} from '../rule_creation/components/alert_suppression_edit';
+import type { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../rule_creation/components/threshold_alert_suppression_edit';
+import type { FieldValueQueryBar } from '../rule_creation_ui/components/query_bar_field';
+import type { FieldValueTimeline } from '../rule_creation/components/pick_timeline';
+import type { FieldValueThreshold } from '../rule_creation_ui/components/threshold_input';
 import type {
+  AlertSuppression,
+  AlertSuppressionMissingFieldsStrategy,
   BuildingBlockType,
+  InvestigationFields,
+  RelatedIntegration,
   RelatedIntegrationArray,
+  RequiredFieldInput,
+  RuleAction,
   RuleAuthorArray,
   RuleLicense,
   RuleNameOverride,
   SetupGuide,
-  TimestampOverride,
-  AlertSuppressionMissingFieldsStrategy,
-  InvestigationFields,
-  RuleAction,
-  AlertSuppression,
   ThresholdAlertSuppression,
-  RelatedIntegration,
-  RequiredFieldInput,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
-import type { SortOrder } from '../../../../../common/api/detection_engine';
-import type { EqlOptions } from '../../../../../common/search_strategy';
+  TimestampOverride,
+} from '../../../common/api/detection_engine/model/rule_schema';
+import type { SortOrder } from '../../../common/api/detection_engine';
+import type { EqlOptions } from '../../../common/search_strategy';
 import type {
-  RuleResponseAction,
   ResponseAction,
-} from '../../../../../common/api/detection_engine/model/rule_response_actions';
+  RuleResponseAction,
+} from '../../../common/api/detection_engine/model/rule_response_actions';
 
 export interface EuiBasicTableSortTypes {
   field: string;

@@ -8,7 +8,7 @@
 import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { EuiFlexItem } from '@elastic/eui';
 import type {
   Severity,
@@ -20,35 +20,35 @@ import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { requiredOptional } from '@kbn/zod-helpers';
-import { toSimpleRuleSchedule } from '../../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
+import { toSimpleRuleSchedule } from '../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import {
-  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
-  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
-} from '../../../../detection_engine/rule_creation/components/alert_suppression_edit';
-import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit';
-import type { ResponseAction } from '../../../../../common/api/detection_engine/model/rule_response_actions';
-import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
-import { assertUnreachable } from '../../../../../common/utility_types';
+} from '../rule_creation/components/alert_suppression_edit';
+import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../rule_creation/components/threshold_alert_suppression_edit';
+import type { ResponseAction } from '../../../common/api/detection_engine/model/rule_response_actions';
+import { normalizeThresholdField } from '../../../common/detection_engine/utils';
+import { assertUnreachable } from '../../../common/utility_types';
 import {
   transformRuleToAlertAction,
   transformRuleToAlertResponseAction,
-} from '../../../../../common/detection_engine/transform_actions';
+} from '../../../common/detection_engine/transform_actions';
 import type {
   AboutStepRule,
   AboutStepRuleDetails,
+  ActionsStepRule,
   DefineStepRule,
   ScheduleStepRule,
-  ActionsStepRule,
 } from './types';
-import { DataSourceType, AlertSuppressionDurationType } from './types';
-import { SeverityLevel } from '../../../../detection_engine/rule_creation_ui/components/step_about_rule/data';
-import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
-import type { RuleAction, RuleResponse } from '../../../../../common/api/detection_engine';
-import { normalizeMachineLearningJobId } from '../../../../common/utils/normalize_machine_learning_job_id';
-import { convertDateMathToDuration } from '../../../../common/utils/date_math';
-import { DEFAULT_HISTORY_WINDOW_SIZE } from '../../../../common/constants';
+import { AlertSuppressionDurationType, DataSourceType } from './types';
+import { SeverityLevel } from '../rule_creation_ui/components/step_about_rule/data';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../common/detection_engine/constants';
+import type { RuleAction, RuleResponse } from '../../../common/api/detection_engine';
+import { normalizeMachineLearningJobId } from '../../common/utils/normalize_machine_learning_job_id';
+import { convertDateMathToDuration } from '../../common/utils/date_math';
+import { DEFAULT_HISTORY_WINDOW_SIZE } from '../../common/constants';
 
 export interface GetStepsData {
   aboutRuleData: AboutStepRule;
@@ -305,14 +305,7 @@ export const getModifiedAboutDetailsData = (rule: RuleResponse): AboutStepRuleDe
 
 export const useQuery = () => new URLSearchParams(useLocation().search);
 
-export type PrePackagedRuleInstallationStatus =
-  | 'ruleInstalled'
-  | 'ruleNotInstalled'
-  | 'ruleNeedUpdate'
-  | 'someRuleUninstall'
-  | 'unknown';
-
-export type PrePackagedTimelineInstallationStatus =
+type PrePackagedTimelineInstallationStatus =
   | 'timelinesNotInstalled'
   | 'timelinesInstalled'
   | 'someTimelineUninstall'
@@ -422,7 +415,7 @@ const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
   assertUnreachable(ruleType);
 };
 
-export const getActionMessageRuleParams = (ruleType: Type): string[] => {
+const getActionMessageRuleParams = (ruleType: Type): string[] => {
   const ruleParamsKeys = [
     ...commonRuleParamsKeys,
     ...getRuleSpecificRuleParamKeys(ruleType),

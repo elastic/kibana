@@ -10,42 +10,20 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
-import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
+import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server';
 import { convertRulesFilterToKQL } from '../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
-  PerformRuleUpgradeResponseBody,
+  GetPrebuiltRulesStatusResponseBody,
   InstallSpecificRulesRequest,
   PerformRuleInstallationResponseBody,
-  GetPrebuiltRulesStatusResponseBody,
-  ReviewRuleUpgradeResponseBody,
+  PerformRuleUpgradeRequestBody,
+  PerformRuleUpgradeResponseBody,
   ReviewRuleInstallationResponseBody,
   ReviewRuleUpgradeRequestBody,
-  PerformRuleUpgradeRequestBody,
+  ReviewRuleUpgradeResponseBody,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
-import type {
-  BulkDuplicateRules,
-  BulkActionEditPayload,
-  BulkActionType,
-  BulkManualRuleRun,
-  CoverageOverviewResponse,
-  GetRuleManagementFiltersResponse,
-  BulkActionsDryRunErrCode,
-} from '../../../../common/api/detection_engine/rule_management';
-import {
-  RULE_MANAGEMENT_FILTERS_URL,
-  RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
-  BulkActionTypeEnum,
-} from '../../../../common/api/detection_engine/rule_management';
-import {
-  DETECTION_ENGINE_RULES_BULK_ACTION,
-  DETECTION_ENGINE_RULES_IMPORT_URL,
-  DETECTION_ENGINE_RULES_PREVIEW,
-  DETECTION_ENGINE_RULES_URL,
-  DETECTION_ENGINE_RULES_URL_FIND,
-} from '../../../../common/constants';
-
 import {
   BOOTSTRAP_PREBUILT_RULES_URL,
   GET_PREBUILT_RULES_STATUS_URL,
@@ -55,6 +33,27 @@ import {
   REVIEW_RULE_INSTALLATION_URL,
   REVIEW_RULE_UPGRADE_URL,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
+import type {
+  BulkActionEditPayload,
+  BulkActionsDryRunErrCode,
+  BulkActionType,
+  BulkDuplicateRules,
+  BulkManualRuleRun,
+  CoverageOverviewResponse,
+  GetRuleManagementFiltersResponse,
+} from '../../../../common/api/detection_engine/rule_management';
+import {
+  BulkActionTypeEnum,
+  RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
+  RULE_MANAGEMENT_FILTERS_URL,
+} from '../../../../common/api/detection_engine/rule_management';
+import {
+  DETECTION_ENGINE_RULES_BULK_ACTION,
+  DETECTION_ENGINE_RULES_IMPORT_URL,
+  DETECTION_ENGINE_RULES_PREVIEW,
+  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_RULES_URL_FIND,
+} from '../../../../common/constants';
 
 import type { RulesReferencedByExceptionListsSchema } from '../../../../common/api/detection_engine/rule_exceptions';
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/api/detection_engine/rule_exceptions';
@@ -62,7 +61,7 @@ import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../com
 import type { RulePreviewResponse, RuleResponse } from '../../../../common/api/detection_engine';
 
 import { KibanaServices } from '../../../common/lib/kibana';
-import * as i18n from '../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../common/translations';
 import type {
   CreateRulesProps,
   ExportDocumentsProps,

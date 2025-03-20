@@ -7,12 +7,12 @@
 
 import React, { useCallback } from 'react';
 import { EuiToolTip } from '@elastic/eui';
-import { useKibana } from '../../../../../../common/lib/kibana';
-import { SecuritySolutionLinkButton } from '../../../../../../common/components/links';
-import { APP_UI_ID } from '../../../../../../../common/constants';
-import { SecurityPageName } from '../../../../../../app/types';
-import { getEditRuleUrl } from '../../../../../../common/components/link_to/redirect_to_detection_engine';
-import * as ruleI18n from '../../translations';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { SecuritySolutionLinkButton } from '../../../../../common/components/links';
+import { APP_UI_ID } from '../../../../../../common/constants';
+import { SecurityPageName } from '../../../../../app/types';
+import { getEditRuleUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
+import * as ruleI18n from '../../../../common/translations';
 
 interface EditRuleSettingButtonLinkProps {
   ruleId: string;

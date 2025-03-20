@@ -22,7 +22,7 @@ import type { AlertsGroupingAggregation } from './types';
 import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 import type { GenericBuckets } from '../../../../../common/search_strategy';
 import { PopoverItems } from '../../../../common/components/popover_items';
-import { COLUMN_TAGS } from '../../../pages/detection_engine/rules/translations';
+import { COLUMN_TAGS } from '../../../../detection_engine/common/translations';
 
 export const renderGroupPanel: GroupPanelRenderer<AlertsGroupingAggregation> = (
   selectedGroup,

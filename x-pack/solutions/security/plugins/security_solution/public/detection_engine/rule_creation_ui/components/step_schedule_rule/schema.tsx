@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { ScheduleStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import type { ScheduleStepRule } from '../../../common/types';
 import type { FormSchema } from '../../../../shared_imports';
 
 export const schema: FormSchema<ScheduleStepRule> = {
