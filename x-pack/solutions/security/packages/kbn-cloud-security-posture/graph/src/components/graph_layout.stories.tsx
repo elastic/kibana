@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ThemeProvider, css } from '@emotion/react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { Writable } from '@kbn/utility-types';
 import { GlobalStylesStorybookDecorator } from '../../.storybook/decorators';
 import type {
@@ -23,7 +23,7 @@ export default {
   title: 'Components/Graph Components/Graph Layout',
   description: 'CDR - Graph visualization',
   argTypes: {
-    interactive: { control: 'boolean', defaultValue: true },
+    interactive: { control: { control: 'boolean' }, defaultValue: true },
   },
   decorators: [GlobalStylesStorybookDecorator],
 };
@@ -162,7 +162,7 @@ const extractEdges = (
   return { nodes: Object.values(nodes).reverse(), edges };
 };
 
-const Template: Story<GraphData> = ({ nodes, edges, interactive }: GraphData) => {
+const Template: StoryFn<GraphData> = ({ nodes, edges, interactive }: GraphData) => {
   return (
     <ThemeProvider theme={{ darkMode: false }}>
       <Graph
