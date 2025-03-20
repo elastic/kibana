@@ -3425,11 +3425,9 @@
           "SettingsStart",
           "; cases?: ",
           "CasesService",
-          " | undefined; }; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; getBulkActions?: ((query: Pick<",
-          "QueryDslQueryContainer",
-          ", \"ids\" | \"bool\">, refresh: () => void) => ",
+          " | undefined; }; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; additionalBulkActions?: ",
           "BulkActionsPanelConfig",
-          "[]) | undefined; actionsColumnWidth?: number | undefined; fieldsBrowserOptions?: ",
+          "[] | undefined; actionsColumnWidth?: number | undefined; fieldsBrowserOptions?: ",
           {
             "pluginId": "@kbn/response-ops-alerts-fields-browser",
             "scope": "public",
@@ -5703,11 +5701,9 @@
               "SettingsStart",
               "; cases?: ",
               "CasesService",
-              " | undefined; }; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; getBulkActions?: ((query: Pick<",
-              "QueryDslQueryContainer",
-              ", \"ids\" | \"bool\">, refresh: () => void) => ",
+              " | undefined; }; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; additionalBulkActions?: ",
               "BulkActionsPanelConfig",
-              "[]) | undefined; actionsColumnWidth?: number | undefined; fieldsBrowserOptions?: ",
+              "[] | undefined; actionsColumnWidth?: number | undefined; fieldsBrowserOptions?: ",
               {
                 "pluginId": "@kbn/response-ops-alerts-fields-browser",
                 "scope": "public",
@@ -11991,11 +11987,9 @@
           "SettingsStart",
           "; cases?: ",
           "CasesService",
-          " | undefined; }; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; getBulkActions?: ((query: Pick<",
-          "QueryDslQueryContainer",
-          ", \"ids\" | \"bool\">, refresh: () => void) => ",
+          " | undefined; }; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; additionalBulkActions?: ",
           "BulkActionsPanelConfig",
-          "[]) | undefined; actionsColumnWidth?: number | undefined; fieldsBrowserOptions?: ",
+          "[] | undefined; actionsColumnWidth?: number | undefined; fieldsBrowserOptions?: ",
           {
             "pluginId": "@kbn/response-ops-alerts-fields-browser",
             "scope": "public",
@@ -14255,11 +14249,9 @@
           "SettingsStart",
           "; cases?: ",
           "CasesService",
-          " | undefined; }; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; getBulkActions?: ((query: Pick<",
-          "QueryDslQueryContainer",
-          ", \"ids\" | \"bool\">, refresh: () => void) => ",
+          " | undefined; }; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; additionalBulkActions?: ",
           "BulkActionsPanelConfig",
-          "[]) | undefined; actionsColumnWidth?: number | undefined; fieldsBrowserOptions?: ",
+          "[] | undefined; actionsColumnWidth?: number | undefined; fieldsBrowserOptions?: ",
           {
             "pluginId": "@kbn/response-ops-alerts-fields-browser",
             "scope": "public",
@@ -16604,11 +16596,9 @@
           "SettingsStart",
           "; cases?: ",
           "CasesService",
-          " | undefined; }; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; getBulkActions?: ((query: Pick<",
-          "QueryDslQueryContainer",
-          ", \"ids\" | \"bool\">, refresh: () => void) => ",
+          " | undefined; }; consumers?: string[] | undefined; showInspectButton?: boolean | undefined; casesConfiguration?: { featureId: string; owner: (\"cases\" | \"observability\" | \"securitySolution\")[]; appId?: string | undefined; syncAlerts?: boolean | undefined; } | undefined; hideBulkActions?: boolean | undefined; additionalBulkActions?: ",
           "BulkActionsPanelConfig",
-          "[]) | undefined; actionsColumnWidth?: number | undefined; fieldsBrowserOptions?: ",
+          "[] | undefined; actionsColumnWidth?: number | undefined; fieldsBrowserOptions?: ",
           {
             "pluginId": "@kbn/response-ops-alerts-fields-browser",
             "scope": "public",
@@ -20072,6 +20062,43 @@
             "path": "x-pack/solutions/observability/plugins/observability/server/routes/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.ObservabilityRouteHandlerResources.response",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "KibanaSuccessResponseFactory",
+              " & ",
+              "KibanaRedirectionResponseFactory",
+              " & ",
+              "KibanaNotModifiedResponseFactory",
+              " & ",
+              "KibanaErrorResponseFactory",
+              " & { file<T extends string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              "ResponseErrorAttributes",
+              " | undefined; } | undefined>(options: ",
+              "FileHttpResponseOptions",
+              "<T>): ",
+              "IKibanaResponse",
+              "<any>; custom<T extends string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              "ResponseErrorAttributes",
+              " | undefined; } | undefined>(options: ",
+              "CustomHttpResponseOptions",
+              "<T>): ",
+              "IKibanaResponse",
+              "<any>; }"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability/server/routes/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -20126,7 +20153,7 @@
         "label": "APIEndpoint",
         "description": [],
         "signature": [
-          "\"GET /internal/observability/assistant/alert_details_contextual_insights\" | \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\""
+          "\"GET /internal/observability/assistant/alert_details_contextual_insights\" | \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\" | \"GET /internal/observability/alerts/related_dashboards\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/server/routes/get_global_observability_server_route_repository.ts",
         "deprecated": false,
@@ -20159,7 +20186,33 @@
         "label": "ObservabilityAPIReturnType",
         "description": [],
         "signature": [
-          "{ \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\": ",
+          "{ \"GET /internal/observability/alerts/related_dashboards\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/observability/alerts/related_dashboards\", Zod.ZodObject<{ query: Zod.ZodObject<{ alertId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { alertId: string; }, { alertId: string; }>; }, \"strip\", Zod.ZodTypeAny, { query: { alertId: string; }; }, { query: { alertId: string; }; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", ",
+          "IKibanaResponse",
+          "<any> | { suggestedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; linkedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          ">; \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -20291,7 +20344,33 @@
         "label": "ObservabilityServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\": ",
+          "{ \"GET /internal/observability/alerts/related_dashboards\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/observability/alerts/related_dashboards\", Zod.ZodObject<{ query: Zod.ZodObject<{ alertId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { alertId: string; }, { alertId: string; }>; }, \"strip\", Zod.ZodTypeAny, { query: { alertId: string; }; }, { query: { alertId: string; }; }>, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          ", ",
+          "IKibanaResponse",
+          "<any> | { suggestedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; linkedDashboards: { id: string; title: string; matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; relevantPanelCount: number; relevantPanels: { matchedBy: { index?: string[] | undefined; fields?: string[] | undefined; }; panel: { type: string; panelConfig: Record<string, any>; panelIndex: string; title?: string | undefined; }; }[]; }[]; }, ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          ">; \"GET /api/observability/rules/alerts/dynamic_index_pattern 2023-10-31\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -26606,6 +26685,21 @@
         "description": [],
         "signature": [
           "\"SLO_LIST_LOCATOR\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.syntheticsAddMonitorLocatorID",
+        "type": "string",
+        "tags": [],
+        "label": "syntheticsAddMonitorLocatorID",
+        "description": [],
+        "signature": [
+          "\"SYNTHETICS_ADD_MONITOR_LOCATOR\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability/common/index.ts",
         "deprecated": false,

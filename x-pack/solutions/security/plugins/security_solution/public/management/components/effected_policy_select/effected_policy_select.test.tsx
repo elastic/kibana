@@ -9,14 +9,25 @@ import type { EffectedPolicySelectProps } from './effected_policy_select';
 import { EffectedPolicySelect } from './effected_policy_select';
 import React from 'react';
 import { forceHTMLElementOffsetWidth } from './test_utils';
-import { fireEvent, act } from '@testing-library/react';
+import { fireEvent, act, waitFor } from '@testing-library/react';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
+import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
+import { useLicense as _useLicense } from '../../../common/hooks/use_license';
+import type { LicenseService } from '../../../../common/license';
+import { buildPerPolicyTag } from '../../../../common/endpoint/service/artifacts/utils';
+import { ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE } from '../../common/translations';
+import { fleetBulkGetPackagePoliciesListHttpMock } from '../../mocks';
+import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 
 jest.mock('../../../common/components/user_privileges');
+jest.mock('../../../common/hooks/use_license');
+
+const useLicenseMock = _useLicense as jest.Mock;
 
 describe('when using EffectedPolicySelect component', () => {
   const generator = new EndpointDocGenerator('effected-policy-select');
@@ -43,15 +54,19 @@ describe('when using EffectedPolicySelect component', () => {
   afterAll(() => resetHTMLElementOffsetWidth());
 
   beforeEach(() => {
+    mockedContext = createAppRootMockRenderer();
+
     // Default props
     componentProps = {
+      item: new ExceptionsListItemGenerator('seed').generateTrustedApp({
+        tags: [GLOBAL_ARTIFACT_TAG],
+      }),
       options: [],
-      isGlobal: true,
-      isPlatinumPlus: true,
       onChange: handleOnChange,
       'data-test-subj': 'test',
     };
-    mockedContext = createAppRootMockRenderer();
+
+    (useLicenseMock() as jest.Mocked<LicenseService>).isPlatinumPlus.mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -60,7 +75,8 @@ describe('when using EffectedPolicySelect component', () => {
 
   describe('and no policy entries exist', () => {
     it('should display no options available message', () => {
-      const { getByTestId } = render({ isGlobal: false });
+      componentProps.item.tags = [];
+      const { getByTestId } = render();
       const euiSelectableMessageElement =
         getByTestId('test-policiesSelectable').getElementsByClassName('euiSelectableMessage')[0];
       expect(euiSelectableMessageElement).not.toBeNull();
@@ -100,45 +116,44 @@ describe('when using EffectedPolicySelect component', () => {
         options: [policy],
       };
 
-      handleOnChange.mockImplementation((selection) => {
+      handleOnChange.mockImplementation((updatedItem) => {
         componentProps = {
           ...componentProps,
-          ...selection,
+          item: updatedItem,
         };
         renderResult.rerender(<EffectedPolicySelect {...componentProps} />);
       });
     });
 
     it('should display policies', () => {
-      const { getByTestId } = render({ isGlobal: false });
+      componentProps.item.tags = [];
+      const { getByTestId } = render();
       expect(getByTestId(policyTestSubj));
     });
 
     it('should hide policy items if global is checked', () => {
-      const { queryByTestId } = render({ isGlobal: true });
+      const { queryByTestId } = render();
       expect(queryByTestId(policyTestSubj)).toBeNull();
     });
 
-    it('should enable policy items if global is unchecked', async () => {
-      const { getByTestId } = render({ isGlobal: false });
+    it('should show policy items when user clicks per-policy', async () => {
+      const { getByTestId } = render();
       selectPerPolicy();
-      expect(getByTestId(policyTestSubj).getAttribute('aria-disabled')).toEqual('false');
+
+      expect(getByTestId(policyTestSubj)).not.toBeNull();
     });
 
-    it('should call onChange with selection when global is toggled', () => {
+    it('should call onChange with updated item', () => {
       render();
 
       selectPerPolicy();
       expect(handleOnChange.mock.calls[0][0]).toEqual({
-        isGlobal: false,
-        selected: [],
+        ...componentProps.item,
+        tags: [],
       });
 
       selectGlobalPolicy();
-      expect(handleOnChange.mock.calls[1][0]).toEqual({
-        isGlobal: true,
-        selected: [],
-      });
+      expect(handleOnChange.mock.calls[1][0]).toEqual(componentProps.item);
     });
 
     it('should maintain policies selection even if global was checked, and user switched back to per policy', () => {
@@ -147,24 +162,28 @@ describe('when using EffectedPolicySelect component', () => {
 
       selectPerPolicy();
       clickOnPolicy();
-      expect(handleOnChange.mock.calls[1][0]).toEqual({
-        isGlobal: false,
-        selected: [componentProps.options[0]],
-      });
+      // FYI: If wondering why `componentProps.item` is being used successfully here and below:
+      // its because `handlOnChange` is setup above to re-render the component everytime an update
+      // is received, thus it will always reflect the latest state of the artifact
+      expect(handleOnChange).toHaveBeenLastCalledWith(componentProps.item);
 
       // Toggle isGlobal back to True
       selectGlobalPolicy();
-      expect(handleOnChange.mock.calls[2][0]).toEqual({
-        isGlobal: true,
-        selected: [componentProps.options[0]],
-      });
+      expect(handleOnChange).toHaveBeenLastCalledWith(componentProps.item);
     });
 
-    it('should show loader only when by polocy selected', () => {
-      const { queryByTestId } = render({ isLoading: true });
+    it('should show loader only when by policy selected', () => {
+      componentProps.isLoading = true;
+      const { queryByTestId, getByTestId, rerender } = render();
       expect(queryByTestId('loading-spinner')).toBeNull();
-      selectPerPolicy();
-      expect(queryByTestId('loading-spinner')).not.toBeNull();
+
+      componentProps.item = {
+        ...componentProps.item,
+        tags: [],
+      };
+      rerender(<EffectedPolicySelect {...componentProps} />);
+
+      expect(getByTestId('loading-spinner')).not.toBeNull();
     });
 
     it('should hide policy link when no policy management privileges', () => {
@@ -176,7 +195,8 @@ describe('when using EffectedPolicySelect component', () => {
           canReadPolicyManagement: false,
         },
       });
-      const { queryByTestId } = render({ isGlobal: false });
+      componentProps.item.tags = [];
+      const { queryByTestId } = render();
       expect(queryByTestId('test-policyLink')).toBeNull();
     });
 
@@ -189,7 +209,8 @@ describe('when using EffectedPolicySelect component', () => {
           canReadPolicyManagement: true,
         },
       });
-      const { getByTestId } = render({ isGlobal: false });
+      componentProps.item.tags = [];
+      const { getByTestId } = render();
       expect(getByTestId('test-policyLink'));
     });
 
@@ -202,8 +223,57 @@ describe('when using EffectedPolicySelect component', () => {
           canReadPolicyManagement: true,
         },
       });
-      const { getByTestId } = render({ isGlobal: false });
+      componentProps.item.tags = [];
+      const { getByTestId } = render();
       expect(getByTestId('test-policyLink'));
+    });
+
+    describe('and space awareness is enabled', () => {
+      let httpMocks: ReturnType<typeof fleetBulkGetPackagePoliciesListHttpMock>;
+
+      beforeEach(() => {
+        mockedContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
+        componentProps.item.tags = [buildPerPolicyTag('321')];
+        httpMocks = fleetBulkGetPackagePoliciesListHttpMock(mockedContext.coreStart.http);
+        httpMocks.responseProvider.bulkPackagePolicies.mockReturnValue({
+          items: [new FleetPackagePolicyGenerator('seed').generate({ id: 'abc123' })],
+        });
+      });
+
+      it('should display count of policies assigned to artifact that are not accessible in active space', async () => {
+        const { getByTestId } = render();
+
+        await waitFor(() => {
+          expect(getByTestId('test-unAccessiblePoliciesCallout').textContent).toEqual(
+            ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE(1)
+          );
+        });
+      });
+
+      it('should disable global button if user has no global artifact privilege', async () => {
+        (useUserPrivileges as jest.Mock).mockReturnValue({
+          ...initialUserPrivilegesState(),
+          endpointPrivileges: {
+            loading: false,
+            canManageGroupPolicies: false,
+          },
+        });
+        const { getByTestId } = render();
+
+        expect((getByTestId('test-global') as HTMLButtonElement).disabled).toBe(true);
+      });
+
+      it('should preserve assignment to policies not currently accessible in active space', async () => {
+        const { getByTestId } = render();
+        await waitFor(() => {
+          expect(getByTestId('test-unAccessiblePoliciesCallout'));
+        });
+        clickOnPolicy();
+
+        expect(handleOnChange).toHaveBeenLastCalledWith(
+          expect.objectContaining({ tags: ['policy:321', 'policy:abc123'] })
+        );
+      });
     });
   });
 });
