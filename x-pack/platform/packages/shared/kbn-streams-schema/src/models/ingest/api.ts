@@ -47,26 +47,27 @@ interface UnwiredIngestResponse {
 
 type IngestGetResponse = WiredIngestResponse | UnwiredIngestResponse;
 
+/**
+ * PUT /streams/{name}/_ingest
+ * Wired or Unwired IngestUpsertRequest
+ * There is no description here.
+ */
 interface WiredIngestUpsertRequest {
   ingest: WiredIngest;
-  description: string;
 }
 
 interface UnwiredIngestUpsertRequest {
   ingest: UnwiredIngest;
-  description: string;
 }
 
 type IngestUpsertRequest = WiredIngestUpsertRequest | UnwiredIngestUpsertRequest;
 
 const wiredIngestUpsertRequestSchema: z.Schema<WiredIngestUpsertRequest> = z.object({
   ingest: wiredIngestSchema,
-  description: z.string(),
 });
 
 const unwiredIngestUpsertRequestSchema: z.Schema<UnwiredIngestUpsertRequest> = z.object({
   ingest: unwiredIngestSchema,
-  description: z.string(),
 });
 
 const ingestUpsertRequestSchema: z.Schema<IngestUpsertRequest> = z.union([
@@ -93,14 +94,16 @@ interface UnwiredStreamGetResponse extends StreamGetResponseBase {
 type IngestStreamGetResponse = WiredStreamGetResponse | UnwiredStreamGetResponse;
 
 /**
- * Ingest stream upsert request
+ * PUT /streams/{name}
+ * Wired or Unwired (Ingest) Stream Upsert Request
+ * Don't confuse that with IngestUpsertRequest
  */
 interface UnwiredStreamUpsertRequest extends StreamUpsertRequestBase {
-  stream: UnwiredIngestUpsertRequest;
+  stream: UnwiredIngestUpsertRequest & { description: string };
 }
 
 interface WiredStreamUpsertRequest extends StreamUpsertRequestBase {
-  stream: WiredIngestUpsertRequest;
+  stream: WiredIngestUpsertRequest & { description: string };
 }
 
 type IngestStreamUpsertRequest = WiredStreamUpsertRequest | UnwiredStreamUpsertRequest;

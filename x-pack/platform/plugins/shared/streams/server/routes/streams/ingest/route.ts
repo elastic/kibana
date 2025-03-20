@@ -84,15 +84,19 @@ const upsertIngestRoute = createServerRoute({
     const { streamsClient, assetClient } = await getScopedClients({
       request,
     });
+    const name = params.path.name;
+    const existingStream = await streamsClient.getStream(name).catch(() => undefined);
 
     if (
-      isWiredStreamDefinition({ name: params.path.name, ...params.body }) &&
+      isWiredStreamDefinition({
+        name,
+        description: existingStream?.description ?? '',
+        ...params.body,
+      }) &&
       !(await streamsClient.isStreamsEnabled())
     ) {
       throw badData('Streams are not enabled for Wired streams.');
     }
-
-    const name = params.path.name;
 
     const assets = await assetClient.getAssets({
       entityId: name,
@@ -107,7 +111,7 @@ const upsertIngestRoute = createServerRoute({
 
     const upsertRequest = {
       dashboards,
-      stream: ingestUpsertRequest,
+      stream: { ...ingestUpsertRequest, description: existingStream?.description ?? '' },
     } as StreamUpsertRequest;
 
     return await streamsClient.upsertStream({
