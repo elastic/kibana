@@ -13,6 +13,7 @@ import {
   addTab,
   selectTab,
   insertTabAfter,
+  replaceTabWith,
   closeTab,
   closeOtherTabs,
   closeTabsToTheRight,
@@ -54,13 +55,24 @@ describe('manage_tabs', () => {
 
   describe('addTab', () => {
     it('adds a tab', () => {
+      const maxItemsCount = 100;
       const newItem = { id: 'tab-5', label: 'Tab 5' };
       const prevState = { items, selectedItem: items[0] };
-      const nextState = addTab(prevState, newItem);
+      const nextState = addTab(prevState, newItem, maxItemsCount);
 
       expect(nextState.items).not.toBe(items);
       expect(nextState.items).toEqual([...items, newItem]);
       expect(nextState.selectedItem).toBe(newItem);
+    });
+
+    it('should not add a tab if limit is reached', () => {
+      const maxItemsCount = items.length;
+      const newItem = { id: 'tab-5', label: 'Tab 5' };
+      const prevState = { items, selectedItem: items[0] };
+      const nextState = addTab(prevState, newItem, maxItemsCount);
+
+      expect(nextState.items).toBe(items);
+      expect(nextState.selectedItem).toBe(items[0]);
     });
   });
 
@@ -83,21 +95,52 @@ describe('manage_tabs', () => {
     });
   });
 
+  describe('replaceTabWith', () => {
+    it('replaces a tab with another tab', () => {
+      const newItem = { id: 'tab-5', label: 'Tab 5' };
+      const prevState = { items, selectedItem: items[0] };
+      const nextState = replaceTabWith(prevState, items[2], newItem);
+
+      expect(nextState.items).not.toBe(items);
+      expect(nextState.items).toEqual([items[0], items[1], newItem, items[3], items[4]]);
+      expect(nextState.selectedItem).toBe(newItem);
+    });
+
+    it("skips replacing a tab if it's not from the list", () => {
+      const limitedItems = [items[0], items[1]];
+      const prevState = { items: limitedItems, selectedItem: items[0] };
+      const nextState = replaceTabWith(prevState, items[2], items[3]);
+
+      expect(nextState.items).toBe(limitedItems);
+      expect(nextState.selectedItem).toBe(items[0]);
+    });
+  });
+
   describe('insertTabAfter', () => {
     it('inserts a tab after another tab', () => {
       const newItem = { id: 'tab-5', label: 'Tab 5' };
       const prevState = { items, selectedItem: items[0] };
-      const nextState = insertTabAfter(prevState, newItem, items[2]);
+      const nextState = insertTabAfter(prevState, newItem, items[2], undefined);
 
       expect(nextState.items).not.toBe(items);
       expect(nextState.items).toEqual([items[0], items[1], items[2], newItem, items[3], items[4]]);
       expect(nextState.selectedItem).toBe(newItem);
     });
 
+    it('should not insert a tab if the limit is reached', () => {
+      const maxItemsCount = items.length;
+      const newItem = { id: 'tab-5', label: 'Tab 5' };
+      const prevState = { items, selectedItem: items[0] };
+      const nextState = insertTabAfter(prevState, newItem, items[2], maxItemsCount);
+
+      expect(nextState.items).toBe(items);
+      expect(nextState.selectedItem).toBe(items[0]);
+    });
+
     it('inserts a tab after the last tab', () => {
       const newItem = { id: 'tab-5', label: 'Tab 5' };
       const prevState = { items, selectedItem: items[0] };
-      const nextState = insertTabAfter(prevState, newItem, items[items.length - 1]);
+      const nextState = insertTabAfter(prevState, newItem, items[items.length - 1], 100);
 
       expect(nextState.items).not.toBe(items);
       expect(nextState.items).toEqual([items[0], items[1], items[2], items[3], items[4], newItem]);

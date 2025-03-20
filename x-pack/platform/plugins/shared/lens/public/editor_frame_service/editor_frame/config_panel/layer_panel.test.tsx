@@ -18,7 +18,7 @@ import {
   createMockVisualization,
   createMockFramePublicAPI,
   createMockDatasource,
-  mountWithProvider,
+  mountWithReduxStore,
   createMockedDragDropContext,
   renderWithReduxStore,
 } from '../../../mocks';
@@ -27,6 +27,7 @@ import { DimensionButton } from '@kbn/visualization-ui-components';
 import { LensAppState } from '../../../state_management';
 import type { ProviderProps } from '@kbn/dom-drag-drop/src';
 import { LayerPanelProps } from './types';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 jest.mock('../../../id_generator');
 
@@ -117,6 +118,7 @@ describe('LayerPanel', () => {
       getUserMessages: () => [],
       displayLayerSettings: true,
       onDropToDimension,
+      data: dataPluginMock.createStartContract(),
     };
   }
   let props: LayerPanelProps;
@@ -701,7 +703,7 @@ describe('LayerPanel', () => {
         target.columnId !== 'a' ? { dropTypes: ['field_replace'], nextLabel: '' } : undefined
       );
 
-      const { instance } = await mountWithProvider(
+      const { instance } = mountWithReduxStore(
         <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingField })}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
@@ -760,7 +762,7 @@ describe('LayerPanel', () => {
         nextLabel: '',
       });
 
-      const { instance } = await mountWithProvider(
+      const { instance } = mountWithReduxStore(
         <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
@@ -820,7 +822,7 @@ describe('LayerPanel', () => {
       const holder = document.createElement('div');
       document.body.appendChild(holder);
 
-      const { instance } = await mountWithProvider(
+      const { instance } = mountWithReduxStore(
         <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>,
@@ -858,7 +860,7 @@ describe('LayerPanel', () => {
         ],
       });
 
-      const { instance } = await mountWithProvider(
+      const { instance } = mountWithReduxStore(
         <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>
@@ -895,7 +897,7 @@ describe('LayerPanel', () => {
         ],
       });
 
-      const { instance } = await mountWithProvider(
+      const { instance } = mountWithReduxStore(
         <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel {...getDefaultProps()} activeVisualization={mockVis} />
         </ChildDragDropProvider>
@@ -936,7 +938,7 @@ describe('LayerPanel', () => {
       mockDatasource.onDrop.mockReturnValue(true);
       const updateVisualization = jest.fn();
 
-      const { instance } = await mountWithProvider(
+      const { instance } = mountWithReduxStore(
         <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel
             {...getDefaultProps()}
@@ -987,7 +989,7 @@ describe('LayerPanel', () => {
       mockDatasource.onDrop.mockReturnValue(false);
       const updateVisualization = jest.fn();
 
-      const { instance } = await mountWithProvider(
+      const { instance } = mountWithReduxStore(
         <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel
             {...getDefaultProps()}
@@ -1027,7 +1029,7 @@ describe('LayerPanel', () => {
 
       mockDatasource.onDrop.mockReturnValue(true);
 
-      const { instance } = await mountWithProvider(
+      const { instance } = mountWithReduxStore(
         <ChildDragDropProvider value={createMockedDragDropContext({ dragging: draggingOperation })}>
           <LayerPanel {...getDefaultProps()} />
         </ChildDragDropProvider>

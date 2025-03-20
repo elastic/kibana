@@ -15,7 +15,6 @@ import {
   BulkActionsDryRunErrCodeEnum,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
-import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import { isEsqlRule } from '../../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { invariant } from '../../../../../../common/utils/invariant';
@@ -108,10 +107,7 @@ export const validateBulkEditRule = async ({
     if (!canRuleBeEdited) {
       await throwDryRunError(
         () => invariant(canRuleBeEdited, "Elastic rule can't be edited"),
-        ruleCustomizationStatus.customizationDisabledReason ===
-          PrebuiltRulesCustomizationDisabledReason.FeatureFlag
-          ? BulkActionsDryRunErrCodeEnum.IMMUTABLE
-          : BulkActionsDryRunErrCodeEnum.PREBUILT_CUSTOMIZATION_LICENSE
+        BulkActionsDryRunErrCodeEnum.PREBUILT_CUSTOMIZATION_LICENSE
       );
     }
   }

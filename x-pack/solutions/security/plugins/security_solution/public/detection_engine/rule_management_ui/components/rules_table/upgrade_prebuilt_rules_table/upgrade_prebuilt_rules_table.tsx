@@ -20,7 +20,6 @@ import React, { useCallback, useState } from 'react';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
-import { RulesChangelogLink } from '../rules_changelog_link';
 import { UpgradePrebuiltRulesTableButtons } from './upgrade_prebuilt_rules_table_buttons';
 import type { UpgradePrebuiltRulesSortingOptions } from './upgrade_prebuilt_rules_table_context';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
@@ -97,9 +96,13 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
           ) : (
             <>
               <EuiFlexGroup direction="column">
+                {/*
+                TODO: The rules changelog link is not yet available for v9. Uncomment this when it is available.
+                Issue to uncomment: https://github.com/elastic/kibana/issues/213709
                 <EuiFlexItem grow={false} css={{ alignSelf: 'start' }}>
                   <RulesChangelogLink />
                 </EuiFlexItem>
+                */}
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup
                     alignItems="flexStart"
