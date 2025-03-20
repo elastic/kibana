@@ -12,7 +12,7 @@ import {
   isUserMessageItem,
   isAssistantMessageItem,
   isToolCallItem,
-} from '../utils/conversation_items';
+} from '../../utils/conversation_items';
 import { ChatConversationMessage } from './chat_conversation_message';
 import { ChatConversationToolCall } from './chat_conversation_tool_call';
 

@@ -10,7 +10,7 @@ import { parseToolName } from '@kbn/wci-common';
 import { IntegrationToolComponentProps } from '@kbn/wci-browser';
 import { useWorkChatServices } from './use_workchat_service';
 import { useIntegrationList } from './use_integration_list';
-import { ChatDefaultToolCallRendered } from '../components/chat_default_tool_call';
+import { ChatDefaultToolCallRendered } from '../components/chat/chat_default_tool_call';
 
 type WiredToolComponentProps = Omit<IntegrationToolComponentProps, 'integration'>;
 

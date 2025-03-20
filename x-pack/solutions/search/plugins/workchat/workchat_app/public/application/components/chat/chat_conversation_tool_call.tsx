@@ -8,9 +8,9 @@
 import React from 'react';
 import { EuiComment } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ToolCallConversationItem } from '../utils/conversation_items';
+import type { ToolCallConversationItem } from '../../utils/conversation_items';
+import { useIntegrationToolView } from '../../hooks/use_integration_tool_view';
 import { ChatMessageAvatar } from './chat_message_avatar';
-import { useIntegrationToolView } from '../hooks/use_integration_tool_view';
 
 interface ChatConversationMessageProps {
   toolCall: ToolCallConversationItem;

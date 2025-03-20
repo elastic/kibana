@@ -9,9 +9,9 @@ import React, { useCallback, useRef, useEffect } from 'react';
 import { css } from '@emotion/css';
 import { EuiFlexItem, EuiPanel, useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/core/public';
-import { ConversationEventChanges } from '../../../common/chat_events';
-import { useConversation } from '../hooks/use_conversation';
-import { useStickToBottom } from '../hooks/use_stick_to_bottom';
+import { ConversationEventChanges } from '../../../../common/chat_events';
+import { useConversation } from '../../hooks/use_conversation';
+import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
 import { ChatInputForm } from './chat_input_form';
 import { ChatConversation } from './chat_conversation';
 
