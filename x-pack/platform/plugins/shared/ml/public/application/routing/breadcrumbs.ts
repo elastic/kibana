@@ -169,7 +169,15 @@ export const CHANGE_POINT_DETECTION: ChromeBreadcrumb = Object.freeze({
 
 export const DATA_DRIFT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.settings.breadcrumbs.dataComparisonLabel', {
-    defaultMessage: 'Data drift',
+    defaultMessage: 'Data Drift',
+  }),
+  href: '/data_drift_index_select',
+  deepLinkId: 'ml:dataDrift',
+});
+
+export const DATA_DRIFT_INDEX_SELECT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.settings.breadcrumbs.dataComparisonLabel', {
+    defaultMessage: 'Select Data View',
   }),
   href: '/data_drift_index_select',
   deepLinkId: 'ml:dataDrift',
@@ -190,7 +198,7 @@ type ManagementBreadcrumb = keyof typeof managementBreadcrumbs;
 
 const breadcrumbs = {
   ML_BREADCRUMB,
-  DATA_DRIFT_BREADCRUMB,
+  DATA_DRIFT_INDEX_SELECT_BREADCRUMB,
   DATA_VISUALIZER_BREADCRUMB,
   AIOPS_BREADCRUMB_LOG_RATE_ANALYSIS,
   AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS,
