@@ -179,7 +179,7 @@ export async function createMcpServer({
       semanticQuery,
     }) => {
   
-        const similiarCases = await retrieveSimiliarCases(elasticsearchClient, logger, index, {id, size, caseNumber, semanticQuery})
+        const similiarCases = await retrieveSimiliarCases(elasticsearchClient, logger, index, {id, size, caseNumber})
   
         return {
           content: similiarCases,
@@ -189,8 +189,6 @@ export async function createMcpServer({
 
   return server;
 }
-
-
 
 /**
  * Retrieves possible values for enum fields from Elasticsearch using _terms_enum API

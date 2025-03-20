@@ -91,14 +91,39 @@ export async function retrieveSimiliarCases(
   
   try {
     const queryBody = buildQuery(params)
-    const searchRequest: SearchRequest = {
+    const caseRequest: SearchRequest = {
       index: indexName,
       query: queryBody,
       size: params.size || 10,
     };
 
-    const response = await esClient.search<SearchResponse<SupportCase>>(searchRequest);
+    const initialResponse = await esClient.search<SearchResponse<SupportCase>>(caseRequest);
 
+    let content = undefined
+    if (initialResponse.hits?.hits?.length == 1) {
+      content  = (initialResponse.hits.hits[0]._source as SupportCase).content
+    } else {
+      return [
+        {
+          type: 'text' as const,
+          text: `Error: Search failed: No case found`,
+        },
+      ];
+    }
+
+    const similiarQuery = {
+        "match": {
+          "content_semantic": content
+      }
+    }
+    
+    const searchRequest: SearchRequest = {
+      index: indexName,
+      query: similiarQuery,
+      size: params.size || 10,
+    };
+
+    const response = await esClient.search<SearchResponse<SupportCase>>(searchRequest);
     const contentFragments = response.hits.hits.map((hit) => {
       const source = hit._source as SupportCase;
       return {
