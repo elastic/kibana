@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { imageFunction } from '@kbn/expression-image-plugin/__fixtures__';
+// import { imageFunction } from '../../../canvas_plugin_src/functions/common/image';
 import { ExampleContext } from '../../test/context_example';
 
 import { sharedWorkpads } from '../../test';
@@ -38,45 +38,45 @@ export const ContextualAustin = {
   name: 'contextual: austin',
 };
 
-export const Component = {
-  render: () => (
-    <ExampleContext style={{ height: 100, width: 100 }}>
-      <RenderedElementComponent
-        index={0}
-        fn={imageFunction()}
-        element={{
-          id: '123',
-          position: {
-            left: 0,
-            top: 0,
-            height: 100,
-            width: 100,
-            angle: 0,
-            parent: null,
-          },
-          expressionRenderable: {
-            state: 'ready',
-            value: {
-              type: 'render',
-              as: 'image',
-              value: {
-                type: 'image',
-                mode: 'contain',
-                dataurl:
-                  'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NC42MiA1MS4wMyI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiNmZmY7fS5jbHMtMSwuY2xzLTJ7c3Ryb2tlOiNmMzY7c3Ryb2tlLW1pdGVybGltaXQ6MTA7c3Ryb2tlLXdpZHRoOjJweDt9LmNscy0ye2ZpbGw6bm9uZTt9PC9zdHlsZT48L2RlZnM+PHRpdGxlPkZsYWcgSWNvbjwvdGl0bGU+PGcgaWQ9IkxheWVyXzIiIGRhdGEtbmFtZT0iTGF5ZXIgMiI+PGcgaWQ9IkxheWVyXzEtMiIgZGF0YS1uYW1lPSJMYXllciAxIj48cG9seWdvbiBjbGFzcz0iY2xzLTEiIHBvaW50cz0iNDIuOTMgMjguMTUgMSAyOC4xNSAxIDEgNDIuOTMgMSAzNS40NyAxNC41OCA0Mi45MyAyOC4xNSIvPjxsaW5lIGNsYXNzPSJjbHMtMiIgeDE9IjEiIHkxPSIxIiB4Mj0iMSIgeTI9IjUxLjAzIi8+PC9nPjwvZz48L3N2Zz4=',
-              },
-              css: '.canvasRenderEl{\n\n}',
-              containerStyle: {
-                type: 'containerStyle',
-                overflow: 'hidden',
-              },
-            },
-            error: null,
-          },
-        }}
-      />
-    </ExampleContext>
-  ),
+// export const Component = {
+//   render: () => (
+//     <ExampleContext style={{ height: 100, width: 100 }}>
+//       <RenderedElementComponent
+//         index={0}
+//         fn={imageFunction()}
+//         element={{
+//           id: '123',
+//           position: {
+//             left: 0,
+//             top: 0,
+//             height: 100,
+//             width: 100,
+//             angle: 0,
+//             parent: null,
+//           },
+//           expressionRenderable: {
+//             state: 'ready',
+//             value: {
+//               type: 'render',
+//               as: 'image',
+//               value: {
+//                 type: 'image',
+//                 mode: 'contain',
+//                 dataurl:
+//                   'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NC42MiA1MS4wMyI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiNmZmY7fS5jbHMtMSwuY2xzLTJ7c3Ryb2tlOiNmMzY7c3Ryb2tlLW1pdGVybGltaXQ6MTA7c3Ryb2tlLXdpZHRoOjJweDt9LmNscy0ye2ZpbGw6bm9uZTt9PC9zdHlsZT48L2RlZnM+PHRpdGxlPkZsYWcgSWNvbjwvdGl0bGU+PGcgaWQ9IkxheWVyXzIiIGRhdGEtbmFtZT0iTGF5ZXIgMiI+PGcgaWQ9IkxheWVyXzEtMiIgZGF0YS1uYW1lPSJMYXllciAxIj48cG9seWdvbiBjbGFzcz0iY2xzLTEiIHBvaW50cz0iNDIuOTMgMjguMTUgMSAyOC4xNSAxIDEgNDIuOTMgMSAzNS40NyAxNC41OCA0Mi45MyAyOC4xNSIvPjxsaW5lIGNsYXNzPSJjbHMtMiIgeDE9IjEiIHkxPSIxIiB4Mj0iMSIgeTI9IjUxLjAzIi8+PC9nPjwvZz48L3N2Zz4=',
+//               },
+//               css: '.canvasRenderEl{\n\n}',
+//               containerStyle: {
+//                 type: 'containerStyle',
+//                 overflow: 'hidden',
+//               },
+//             },
+//             error: null,
+//           },
+//         }}
+//       />
+//     </ExampleContext>
+//   ),
 
-  name: 'component',
-};
+//   name: 'component',
+// };

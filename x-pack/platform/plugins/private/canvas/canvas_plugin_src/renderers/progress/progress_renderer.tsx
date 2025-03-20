@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
-import { ProgressOutput, Progress } from './types';
+import { ProgressOutput } from './types';
 
 const strings = {
   getDisplayName: () =>
@@ -31,8 +31,6 @@ const strings = {
 };
 
 export type ProgressRendererConfig = ProgressOutput;
-
-export const getAvailableProgressShapes = () => Object.values(Progress);
 
 export const getProgressRenderer =
   (core: CoreStart) => (): ExpressionRenderDefinition<ProgressRendererConfig> => ({

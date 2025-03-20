@@ -6,3 +6,5 @@
  */
 
 export { getProgressRenderer, progressRendererFactory } from './progress_renderer';
+export type { ProgressRendererConfig, ExpressionProgressFunction, NodeDimensions, Progress, ProgressArguments, ProgressOutput, SvgTextAttributes, ViewBoxParams } from './types';
+export { getAvailableProgressShapes } from './types';

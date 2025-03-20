@@ -17,6 +17,7 @@ import { context } from './context';
 import { columns } from './columns';
 import { csv } from './csv';
 import { date } from './date';
+// import { debug } from './debug';
 import { doFn } from './do';
 import { dropdownControl } from './dropdownControl';
 import { eq } from './eq';
@@ -71,6 +72,7 @@ export const functions = [
   context,
   csv,
   date,
+  // debug,
   doFn,
   dropdownControl,
   eq,

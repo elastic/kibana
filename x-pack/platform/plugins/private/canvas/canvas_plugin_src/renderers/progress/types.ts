@@ -34,7 +34,7 @@ export enum Progress {
   WHEEL = 'wheel',
 }
 
-interface ProgressArguments {
+export interface ProgressArguments {
   barColor: string;
   barWeight: number;
   font: Style;
@@ -55,3 +55,5 @@ export type ExpressionProgressFunction = () => ExpressionFunctionDefinition<
   ProgressArguments,
   ExpressionValueRender<ProgressArguments>
 >;
+
+export const getAvailableProgressShapes = () => Object.values(Progress);

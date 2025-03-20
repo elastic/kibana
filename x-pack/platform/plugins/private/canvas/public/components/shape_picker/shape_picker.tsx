@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGrid, EuiFlexItem, EuiLink } from '@elastic/eui';
-import { Shape } from '@kbn/expression-shape-plugin/common';
+import { Shape } from '../../../canvas_plugin_src/renderers/shape';
 import { ShapePreview } from '../shape_preview';
 
 interface Props {
