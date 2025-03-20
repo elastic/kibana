@@ -11,6 +11,7 @@ import { EuiIcon, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { Workspace } from '../../types';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
+import { gphFormGroupSmallStyles } from '../components.styles';
 
 interface SelectStyleProps {
   workspace: Workspace;
@@ -27,7 +28,7 @@ export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
         })}
       </div>
 
-      <div className="form-group form-group-sm gphFormGroup--small">
+      <div className="form-group form-group-sm" css={gphFormGroupSmallStyles}>
         {colors.map((c) => {
           const onSelectColor = () => {
             workspace.colorSelected(c);
