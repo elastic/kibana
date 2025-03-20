@@ -14,6 +14,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { MlFeatures, NLPSettings, ExperimentalFeatures } from '../../../common/constants/app';
 import type { MlStartDependencies } from '../../plugin';
 import { App } from '../app';
+import type { ManagementSectionId } from '.';
 
 const renderApp = (
   coreStart: CoreStart,
@@ -23,7 +24,7 @@ const renderApp = (
   mlFeatures: MlFeatures,
   experimentalFeatures: ExperimentalFeatures,
   nlpSettings: NLPSettings,
-  entryPoint: string
+  entryPoint: ManagementSectionId
 ) => {
   ReactDOM.render(
     React.createElement(App, {
@@ -53,7 +54,7 @@ export async function mountApp(
   mlFeatures: MlFeatures,
   experimentalFeatures: ExperimentalFeatures,
   nlpSettings: NLPSettings,
-  entryPoint: string
+  entryPoint: ManagementSectionId
 ) {
   const [coreStart] = await core.getStartServices();
 
