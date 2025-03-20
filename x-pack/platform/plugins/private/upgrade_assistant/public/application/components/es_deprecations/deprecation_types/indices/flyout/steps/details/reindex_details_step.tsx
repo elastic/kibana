@@ -97,7 +97,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
     showDefaultGuidance = true;
   }
 
-  // Determine if the index is larger than 1GB (1073741824 bytes)
+  // Determine if the index is larger than 1GB
   const isLargeIndex = indexSizeInBytes > 1073741824;
 
   const canShowActionButtons = !isCompleted && !hasFetchFailed && hasRequiredPrivileges;
@@ -214,16 +214,9 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                     `/app/management/data/index_management/indices/index_details?indexName=${indexName}`
                   )}`,
                   indexBlockUrl: docLinks.links.upgradeAssistant.indexBlocks,
+                  isLargeIndex,
                 })}
               />
-              {isLargeIndex && (
-                <p>
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.largeIndexGuidance"
-                    defaultMessage=" Note: This index is larger than 1GB. For large indices, marking as read-only is recommended over reindexing to minimize resource usage."
-                  />
-                </p>
-              )}
             </Fragment>
           )}
         </EuiText>
