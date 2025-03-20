@@ -28,6 +28,8 @@
     "@kbn/code-editor",
     "@kbn/ui-theme",
     "@kbn/calculate-auto",
+    "@kbn/charts-plugin",
+    "@kbn/discover-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/es-query",
     "@kbn/server-route-repository-client",
@@ -59,6 +61,6 @@
     "@kbn/licensing-plugin",
     "@kbn/datemath",
     "@kbn/xstate-utils",
-    "@kbn/core-analytics-browser",
+    "@kbn/core-analytics-browser"
   ]
 }

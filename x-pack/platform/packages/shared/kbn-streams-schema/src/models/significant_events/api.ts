@@ -11,8 +11,10 @@ import { StreamQueryKql } from '../base/api';
  * SignificantEvents Get Response
  */
 
-type SignificantEventsGetResponse = Array<
-  StreamQueryKql & { occurrences: Array<{ date: string; count: number }> }
->;
+type SignificantEventsResponse = StreamQueryKql & {
+  occurrences: Array<{ date: string; count: number }>;
+};
 
-export type { SignificantEventsGetResponse };
+type SignificantEventsGetResponse = SignificantEventsResponse[];
+
+export type { SignificantEventsResponse, SignificantEventsGetResponse };

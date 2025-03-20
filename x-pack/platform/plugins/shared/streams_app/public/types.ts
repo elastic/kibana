@@ -21,6 +21,8 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
@@ -43,8 +45,10 @@ export interface StreamsAppSetupDependencies {
 
 export interface StreamsAppStartDependencies {
   streams: StreamsPluginStart;
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  discover?: DiscoverStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   share: SharePublicStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;

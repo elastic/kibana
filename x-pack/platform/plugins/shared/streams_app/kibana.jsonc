@@ -11,6 +11,7 @@
     "configPath": ["xpack", "streamsApp"],
     "requiredPlugins": [
       "streams",
+      "charts",
       "data",
       "dataViews",
       "unifiedSearch",
@@ -21,12 +22,8 @@
       "datasetQuality",
       "licensing"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ],
-    "optionalPlugins": [
-      "observabilityAIAssistant"
-    ],
+    "requiredBundles": ["kibanaReact"],
+    "optionalPlugins": ["discover", "observabilityAIAssistant"],
     "extraPublicDirs": []
   }
 }
