@@ -95,7 +95,22 @@ include::upgrade-notes.asciidoc[]
 coming::[8.18.0]
 
 Review the following information about the {kib} 8.18.0 release.
+[float]
+[[known-issues-8.18.0]]
+=== Known issues
 
+// tag::known-issue-211850[]
+.Upgrade Assistant - Rollup jobs need to be stopped before rollup indices are reindexed.
+[%collapsible]
+====
+*Details* +
+Rollup indices, like all indices, created in 7.x or earlier need to be reindexed in preparation for migration to 9.0. However, in addition to the normal reindex process the rollup job also needs to be accounted for. It needs to be stopped before reindexing begins otherwise there may be a gap in rollup data. The job can be restarted when reindexing is complete.
+
+This needs to be performed manually until addressed in the upgrade assistant code.
+
+For more information, refer to https://github.com/elastic/kibana/issues/211850[#211850].
+====
+// end::known-issue-211850[]
 [float]
 [[breaking-changes-8.18.0]]
 === Breaking changes
