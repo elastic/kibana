@@ -291,7 +291,7 @@ describe('Recurrence scheduler helper', () => {
           startDate: moment('11/23/2021'),
         })
       ).toEqual({
-        bymonth: [10],
+        bymonth: [11],
         bymonthday: [23],
         byweekday: [],
         freq: 0,

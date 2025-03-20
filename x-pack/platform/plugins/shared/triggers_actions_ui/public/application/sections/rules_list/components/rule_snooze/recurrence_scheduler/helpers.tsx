@@ -183,7 +183,7 @@ export const buildCustomRecurrenceSchedulerState = ({
       : [];
 
   const bymonthday = useByMonthDay ? [startDate.date()] : [];
-  const bymonth = startDate && frequency === RRuleFrequency.YEARLY ? [startDate.month()] : [];
+  const bymonth = startDate && frequency === RRuleFrequency.YEARLY ? [startDate.month() + 1] : [];
   return {
     freq: frequency,
     interval,
