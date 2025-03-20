@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout';
+import { globalSetupHook } from '@kbn/scout-security';
 import { archives } from '@kbn/scout-security/src/playwright/constants';
 
 globalSetupHook('Ingest archives to Elasticsearch', async ({ esArchiver, log }) => {
