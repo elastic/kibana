@@ -9,7 +9,6 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import '../helpers.scss';
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import { LensPluginStartDependencies } from '../../../plugin';
 import { DatasourceMap, VisualizationMap } from '../../../types';

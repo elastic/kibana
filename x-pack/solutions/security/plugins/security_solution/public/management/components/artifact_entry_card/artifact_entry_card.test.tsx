@@ -203,8 +203,9 @@ describe.each([
 
       policies = {
         'policy-1': {
-          children: 'Policy one',
+          children: 'Policy one title',
           'data-test-subj': 'policyMenuItem',
+          href: 'http://some/path/to/policy-1',
         },
       };
     });
@@ -239,7 +240,11 @@ describe.each([
         ).not.toBeNull();
 
         expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual(
-          'Policy oneView details'
+          'Policy one titleView details'
+        );
+
+        expect((renderResult.getByTestId('policyMenuItem') as HTMLAnchorElement).href).toEqual(
+          policies!['policy-1'].href
         );
       });
 
@@ -259,12 +264,12 @@ describe.each([
           renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
         ).not.toBeNull();
 
-        expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual('Policy one');
+        expect(renderResult.getByTestId('policyMenuItem').textContent).toEqual('Policy one title');
       });
     });
 
-    it('should display policy ID if no policy menu item found in `policies` prop', async () => {
-      render();
+    it('should display disabled button with policy ID if no policy menu item found in `policies` prop', async () => {
+      render(); // Important: no polices provided to component on input
       await act(async () => {
         await fireEvent.click(
           renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-button')
@@ -275,7 +280,18 @@ describe.each([
         renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-popoverPanel')
       ).not.toBeNull();
 
-      expect(renderResult.getByText('policy-1').textContent).not.toBeNull();
+      expect(
+        renderResult.getByTestId('testCard-subHeader-effectScope-popupMenu-item-0-truncateWrapper')
+          .textContent
+      ).toEqual('policy-1');
+
+      expect(
+        (
+          renderResult.getByTestId(
+            'testCard-subHeader-effectScope-popupMenu-item-0'
+          ) as HTMLButtonElement
+        ).disabled
+      ).toBe(true);
     });
 
     it('should pass item to decorator function and display its result', () => {

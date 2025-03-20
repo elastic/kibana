@@ -16,7 +16,7 @@ import { css } from '@emotion/react';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { DefaultDragHandle } from './drag_handle/default_drag_handle';
 import { useDragHandleApi } from './drag_handle/use_drag_handle_api';
-import { ResizeHandle } from './resize_handle';
+import { ResizeHandle } from './grid_panel_resize_handle';
 
 export interface GridPanelProps {
   panelId: string;
@@ -49,6 +49,14 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
       grid-row-end: ${initialPanel.row + 1 + initialPanel.height};
     `;
   }, [gridLayoutStateManager, rowId, panelId]);
+
+  useEffect(() => {
+    return () => {
+      // remove reference on unmount
+      delete gridLayoutStateManager.panelRefs.current[rowId][panelId];
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(
     () => {
