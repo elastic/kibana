@@ -27,14 +27,8 @@ describe('InterceptDisplayManager', () => {
 
   it('does not render the dialog shell when there is not intercept to display', () => {
     const ackProductIntercept = jest.fn();
-    const intercept$ = new Rx.BehaviorSubject<Intercept>({
-      id: '1',
-      title: 'title',
-      steps: [],
-      onFinish: jest.fn(),
-    });
 
-    render(<InterceptDisplayManager ackIntercept={ackProductIntercept} intercept$={intercept$} />);
+    render(<InterceptDisplayManager ackIntercept={ackProductIntercept} intercept$={Rx.EMPTY} />);
 
     expect(screen.queryByRole('dialog')).toBeNull();
   });
@@ -51,14 +45,23 @@ describe('InterceptDisplayManager', () => {
     const intercept$ = new Rx.BehaviorSubject<Intercept>({
       id: '1',
       title: 'title',
-      steps: [interceptStep],
+      steps: [
+        { ...interceptStep, id: 'start' },
+        interceptStep,
+        { ...interceptStep, id: 'completion' },
+      ],
       onFinish: jest.fn(),
     });
 
-    render(<InterceptDisplayManager ackIntercept={ackProductIntercept} intercept$={intercept$} />);
+    render(
+      <InterceptDisplayManager
+        ackIntercept={ackProductIntercept}
+        intercept$={intercept$.asObservable()}
+      />
+    );
 
     expect(screen.queryByRole('dialog')).not.toBeNull();
-    expect(screen.getByTestId(`interceptStep-${interceptStep.id}`)).not.toBeNull();
+    expect(screen.getByTestId(`interceptStep-start`)).not.toBeNull();
     expect(screen.getByText('Hello World')).not.toBeNull();
     expect(screen.getByText('This is a test')).not.toBeNull();
   });
@@ -67,26 +70,39 @@ describe('InterceptDisplayManager', () => {
     const user = userEvent.setup();
 
     const ackProductIntercept = jest.fn();
+    const interceptStep: Intercept['steps'][number] = {
+      id: 'hello',
+      title: 'Hello World',
+      content: () => <>{'This is a test'}</>,
+    };
+
     const intercept$ = new Rx.BehaviorSubject<Intercept>({
       id: '1',
       title: 'title',
       steps: [
-        {
-          id: 'hello',
-          title: 'Hello World',
-          content: () => <>{'This is a test'}</>,
-        },
+        { ...interceptStep, id: 'start' },
+        interceptStep,
+        { ...interceptStep, id: 'completion' },
       ],
       onFinish: jest.fn(),
     });
 
-    render(<InterceptDisplayManager ackIntercept={ackProductIntercept} intercept$={intercept$} />);
+    render(
+      <InterceptDisplayManager
+        ackIntercept={ackProductIntercept}
+        intercept$={intercept$.asObservable()}
+      />
+    );
 
     expect(screen.queryByRole('dialog')).not.toBeNull();
 
     await user.click(screen.getByTestId('productInterceptDismiss'));
 
-    expect(ackProductIntercept).toHaveBeenCalledWith('1', 'dismissed');
+    expect(ackProductIntercept).toHaveBeenCalledWith({
+      ackType: 'dismissed',
+      interceptId: '1',
+      interceptTitle: 'title',
+    });
 
     expect(screen.queryByRole('dialog')).toBeNull();
   });
@@ -96,13 +112,19 @@ describe('InterceptDisplayManager', () => {
 
     const ackProductIntercept = jest.fn();
 
+    const interceptStep: Intercept['steps'][number] = {
+      id: 'hello',
+      title: 'Hello World',
+      content: () => <>{'This is a test'}</>,
+    };
+
     const productIntercept: Intercept = {
       id: '1',
       title: 'title',
       steps: [
+        { ...interceptStep, id: 'start' },
         {
-          id: 'hello',
-          title: 'Hello World',
+          ...interceptStep,
           content: function InterceptContentTest({ onValue }) {
             return (
               <input
@@ -114,6 +136,7 @@ describe('InterceptDisplayManager', () => {
             );
           },
         },
+        { ...interceptStep, id: 'completion' },
       ],
       onProgress: jest.fn(),
       onFinish: jest.fn(),
@@ -121,9 +144,17 @@ describe('InterceptDisplayManager', () => {
 
     const intercept$ = new Rx.BehaviorSubject<Intercept>(productIntercept);
 
-    render(<InterceptDisplayManager ackIntercept={ackProductIntercept} intercept$={intercept$} />);
+    render(
+      <InterceptDisplayManager
+        ackIntercept={ackProductIntercept}
+        intercept$={intercept$.asObservable()}
+      />
+    );
 
     expect(screen.queryByRole('dialog')).not.toBeNull();
+
+    // transition user to next step in intercept dialog
+    await user.click(screen.getByTestId('productInterceptProgressionButton'));
 
     expect(screen.queryByTestId('intercept-test-input')).not.toBeNull();
 
