@@ -162,13 +162,9 @@ npx playwright test --config <plugin-path>/ui_tests/[playwright.config.ts|parall
 We use `project` flag to define test target, where tests to be run: local servers or Elastic Cloud. Currently we only support local servers.
 
 ### Adding A New Test
-In the plugin you want to add tests:
-1. Create a folder called `ui_tests` if needed
-2. Inside the folder create the playwright config and 
-3. Create a `tests` folder inside `ui_tests`
-4. Create the global setup inside the tests folder
+Any new test should be added in the `x-pack/solutions/security/plugins/security_solution/ui_tests` folder.
 
-You have an example in: `x-pack/solutions/security/plugins/security_solution/public/flyout/ui_tests`
+You have an example in: `x-pack/solutions/security/plugins/security_solution/ui_tests/parallel_tests/flyout/alert_details_url_sync.spec.ts`
 
 ### Adding Page Objects
 1. **Create a New Page Object:** Add your Page Object to the src/playwright/fixtures/test/page_objects directory. For instance:
