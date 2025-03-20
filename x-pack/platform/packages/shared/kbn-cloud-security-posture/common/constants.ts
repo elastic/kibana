@@ -69,5 +69,3 @@ export const INTERNAL_FEATURE_FLAGS = {
 export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';
-
-export const VALID_SEVERITIES: VulnSeverity[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL', 'UNKNOWN'];
