@@ -783,6 +783,6 @@ export const NO_AVAILABLE_SOLUTIONS_WARNING_SUBTITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.noAvailableSolutionsWarning.subtitle',
   {
     defaultMessage:
-      "You don't have access to all solution types required for alert filtering. If you save, your alert filter settings may be reset.",
+      "You don't have access to all solution types required for alert filtering. If you save, your alert filter settings will be reset.",
   }
 );

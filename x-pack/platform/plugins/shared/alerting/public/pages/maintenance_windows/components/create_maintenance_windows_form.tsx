@@ -293,9 +293,12 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     return m;
   }, [closeModal, archiveMaintenanceWindow, isModalVisible, maintenanceWindowId, onSuccess]);
 
+  const showNoAvailableSolutionsWarning =
+    availableSolutions.length === 0 && isScopedQueryEnabled && isEditMode;
+
   return (
     <Form form={form} data-test-subj="createMaintenanceWindowForm">
-      {availableSolutions.length === 0 && isScopedQueryEnabled && isEditMode && (
+      {showNoAvailableSolutionsWarning && (
         <>
           <EuiCallOut
             data-test-subj="maintenanceWindowNoAvailableSolutionsWarning"

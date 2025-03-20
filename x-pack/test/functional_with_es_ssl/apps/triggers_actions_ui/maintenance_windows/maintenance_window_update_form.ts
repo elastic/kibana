@@ -76,7 +76,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    it('should show callout when update a maintenance window with chosen earlier solutions', async () => {
+    it('should show callout when update a maintenance window with old chosen solutions', async () => {
       const createdMaintenanceWindow = await createMaintenanceWindow({
         name: 'Test Maintenance Window',
         getService,
