@@ -9,10 +9,11 @@
 
 import fs from 'fs';
 import { Command } from '@kbn/dev-cli-runner';
-import { SCOUT_OUTPUT_ROOT } from '@kbn/scout-info';
-import { resolve } from 'path';
+import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
+import path from 'path';
 import { getScoutPlaywrightConfigs, DEFAULT_TEST_PATH_PATTERNS } from '../config';
 import { measurePerformance } from '../common';
+import { validateWithScoutCiConfig } from '../config/discovery';
 
 /**
  * Discover Playwright configuration files with Scout tests
@@ -24,18 +25,19 @@ export const discoverPlaywrightConfigs: Command<void> = {
 
   Common usage:
     node scripts/scout discover-playwright-configs --searchPaths <search_paths>
-    node scripts/scout discover-playwright-configs --save
+    node scripts/scout discover-playwright-configs --validate // validate if all plugins are registered in the Scout CI config
+    node scripts/scout discover-playwright-configs --save // save the discovered Playwright config files to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
     node scripts/scout discover-playwright-configs
   `,
   flags: {
     string: ['searchPaths'],
-    boolean: ['save'],
-    default: { searchPaths: DEFAULT_TEST_PATH_PATTERNS, save: false },
+    boolean: ['save', 'validate'],
+    default: { searchPaths: DEFAULT_TEST_PATH_PATTERNS, save: false, validate: false },
   },
   run: ({ flagsReader, log }) => {
     const searchPaths = flagsReader.arrayOfStrings('searchPaths')!;
 
-    const pluginsMap = measurePerformance(log, 'Discovering playwright config files', () => {
+    let pluginsMap = measurePerformance(log, 'Discovering Playwright config files', () => {
       return getScoutPlaywrightConfigs(searchPaths, log);
     });
 
@@ -44,23 +46,36 @@ export const discoverPlaywrightConfigs: Command<void> = {
         ? 'No Playwright config files found'
         : `Found Playwright config files in '${pluginsMap.size}' plugins`;
 
-    if (pluginsMap.size > 0 && flagsReader.boolean('save')) {
-      const scoutConfigsFilePath = resolve(SCOUT_OUTPUT_ROOT, 'scout_playwright_configs.json');
-      fs.writeFileSync(
-        scoutConfigsFilePath,
-        JSON.stringify(Object.fromEntries(pluginsMap), null, 2)
-      );
-      log.info(`${finalMessage}. Saved to '${scoutConfigsFilePath}'`);
-      return;
+    if (!flagsReader.boolean('save')) {
+      log.info(finalMessage);
+
+      pluginsMap.forEach((data, plugin) => {
+        log.info(`${data.group} / [${plugin}] plugin:`);
+        data.configs.map((file) => {
+          log.info(`- ${file}`);
+        });
+      });
     }
 
-    log.info(finalMessage);
+    if (flagsReader.boolean('validate')) {
+      pluginsMap = validateWithScoutCiConfig(log, pluginsMap);
+    }
 
-    pluginsMap.forEach((data, plugin) => {
-      log.info(`${data.group} / [${plugin}] plugin:`);
-      data.configs.map((file) => {
-        log.info(`- ${file}`);
-      });
-    });
+    if (flagsReader.boolean('save')) {
+      const dirPath = path.dirname(SCOUT_PLAYWRIGHT_CONFIGS_PATH);
+
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+      }
+
+      fs.writeFileSync(
+        SCOUT_PLAYWRIGHT_CONFIGS_PATH,
+        JSON.stringify(Object.fromEntries(pluginsMap), null, 2)
+      );
+
+      log.info(
+        `${finalMessage}.\nSaved '${pluginsMap.size}' plugins to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'`
+      );
+    }
   },
 };

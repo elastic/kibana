@@ -8,7 +8,7 @@
  */
 
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { RuleTypeWithDescription } from '../common/types';
+import type { RuleTypeWithDescription } from '../common/types';
 import { hasFieldsForAad } from './has_fields_for_aad';
 
 describe('hasFieldsForAad', () => {

@@ -112,12 +112,6 @@ describe('autocomplete', () => {
     testSuggestions('from a metadata _id | eval var0 = a | /', commands);
   });
 
-  describe('rename', () => {
-    testSuggestions('from a | rename /', getFieldNamesByType('any'));
-    testSuggestions('from a | rename keywordField /', ['AS $0'], ' ');
-    testSuggestions('from a | rename keywordField as /', ['var0']);
-  });
-
   for (const command of ['keep', 'drop']) {
     describe(command, () => {
       testSuggestions(`from a | ${command} /`, getFieldNamesByType('any'));
@@ -333,11 +327,12 @@ describe('autocomplete', () => {
     // EVAL argument
     testSuggestions('FROM index1 | EVAL b/', [
       'var0 = ',
-      ...getFieldNamesByType('any'),
+      ...getFieldNamesByType('any').map((name) => `${name} `),
       ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
     ]);
 
     testSuggestions('FROM index1 | EVAL var0 = f/', [
+      ...getFieldNamesByType('any').map((name) => `${name} `),
       ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
     ]);
 
@@ -405,13 +400,13 @@ describe('autocomplete', () => {
     );
 
     // RENAME field
-    testSuggestions('FROM index1 | RENAME f/', getFieldNamesByType('any'));
+    testSuggestions(
+      'FROM index1 | RENAME f/',
+      getFieldNamesByType('any').map((name) => `${name} `)
+    );
 
     // RENAME field AS
-    testSuggestions('FROM index1 | RENAME field A/', ['AS $0']);
-
-    // RENAME field AS var0
-    testSuggestions('FROM index1 | RENAME field AS v/', ['var0']);
+    testSuggestions('FROM index1 | RENAME field A/', ['AS ']);
 
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [
@@ -1014,10 +1009,6 @@ describe('autocomplete', () => {
       'AND $0',
       'NOT',
       'OR $0',
-      // pipe doesn't make sense here, but Monaco will filter it out.
-      // see https://github.com/elastic/kibana/issues/199401 for an explanation
-      // of why this happens
-      '| ',
     ]);
     testSuggestions('FROM a | WHERE doubleField IS N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 32 } },
@@ -1028,10 +1019,6 @@ describe('autocomplete', () => {
       'AND $0',
       'NOT',
       'OR $0',
-      // pipe doesn't make sense here, but Monaco will filter it out.
-      // see https://github.com/elastic/kibana/issues/199401 for an explanation
-      // of why this happens
-      '| ',
     ]);
     testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 35 } },
