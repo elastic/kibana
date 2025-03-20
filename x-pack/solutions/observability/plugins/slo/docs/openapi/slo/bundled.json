@@ -134,17 +134,22 @@
           {
             "name": "size",
             "in": "query",
+            "description": "The page size to use for cursor-based pagination, must be greater or equal than 1",
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "default": 1
             },
-            "example": 25,
-            "description": "Size provided for cursor based pagination"
+            "example": 1
           },
           {
             "name": "searchAfter",
             "in": "query",
+            "description": "The cursor to use for fetching the results from, when using a cursor-base pagination.",
             "schema": {
-              "type": "string"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           },
           {
@@ -1251,38 +1256,70 @@
                     "description": "List of metrics with their name, aggregation type, and field.",
                     "type": "array",
                     "items": {
-                      "type": "object",
-                      "required": [
-                        "name",
-                        "aggregation",
-                        "field"
-                      ],
-                      "properties": {
-                        "name": {
-                          "description": "The name of the metric. Only valid options are A-Z",
-                          "type": "string",
-                          "example": "A",
-                          "pattern": "^[A-Z]$"
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "aggregation",
+                            "field"
+                          ],
+                          "properties": {
+                            "name": {
+                              "description": "The name of the metric. Only valid options are A-Z",
+                              "type": "string",
+                              "example": "A",
+                              "pattern": "^[A-Z]$"
+                            },
+                            "aggregation": {
+                              "description": "The aggregation type of the metric.",
+                              "type": "string",
+                              "example": "sum",
+                              "enum": [
+                                "sum"
+                              ]
+                            },
+                            "field": {
+                              "description": "The field of the metric.",
+                              "type": "string",
+                              "example": "processor.processed"
+                            },
+                            "filter": {
+                              "description": "The filter to apply to the metric.",
+                              "type": "string",
+                              "example": "processor.outcome: *"
+                            }
+                          }
                         },
-                        "aggregation": {
-                          "description": "The aggregation type of the metric. Only valid option is \"sum\"",
-                          "type": "string",
-                          "example": "sum",
-                          "enum": [
-                            "sum"
-                          ]
-                        },
-                        "field": {
-                          "description": "The field of the metric.",
-                          "type": "string",
-                          "example": "processor.processed"
-                        },
-                        "filter": {
-                          "description": "The filter to apply to the metric.",
-                          "type": "string",
-                          "example": "processor.outcome: \"success\""
+                        {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "aggregation"
+                          ],
+                          "properties": {
+                            "name": {
+                              "description": "The name of the metric. Only valid options are A-Z",
+                              "type": "string",
+                              "example": "A",
+                              "pattern": "^[A-Z]$"
+                            },
+                            "aggregation": {
+                              "description": "The aggregation type of the metric.",
+                              "type": "string",
+                              "example": "doc_count",
+                              "enum": [
+                                "doc_count"
+                              ]
+                            },
+                            "filter": {
+                              "description": "The filter to apply to the metric.",
+                              "type": "string",
+                              "example": "processor.outcome: *"
+                            }
+                          }
                         }
-                      }
+                      ]
                     }
                   },
                   "equation": {
@@ -1304,38 +1341,70 @@
                     "description": "List of metrics with their name, aggregation type, and field.",
                     "type": "array",
                     "items": {
-                      "type": "object",
-                      "required": [
-                        "name",
-                        "aggregation",
-                        "field"
-                      ],
-                      "properties": {
-                        "name": {
-                          "description": "The name of the metric. Only valid options are A-Z",
-                          "type": "string",
-                          "example": "A",
-                          "pattern": "^[A-Z]$"
+                      "oneOf": [
+                        {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "aggregation",
+                            "field"
+                          ],
+                          "properties": {
+                            "name": {
+                              "description": "The name of the metric. Only valid options are A-Z",
+                              "type": "string",
+                              "example": "A",
+                              "pattern": "^[A-Z]$"
+                            },
+                            "aggregation": {
+                              "description": "The aggregation type of the metric.",
+                              "type": "string",
+                              "example": "sum",
+                              "enum": [
+                                "sum"
+                              ]
+                            },
+                            "field": {
+                              "description": "The field of the metric.",
+                              "type": "string",
+                              "example": "processor.processed"
+                            },
+                            "filter": {
+                              "description": "The filter to apply to the metric.",
+                              "type": "string",
+                              "example": "processor.outcome: *"
+                            }
+                          }
                         },
-                        "aggregation": {
-                          "description": "The aggregation type of the metric. Only valid option is \"sum\"",
-                          "type": "string",
-                          "example": "sum",
-                          "enum": [
-                            "sum"
-                          ]
-                        },
-                        "field": {
-                          "description": "The field of the metric.",
-                          "type": "string",
-                          "example": "processor.processed"
-                        },
-                        "filter": {
-                          "description": "The filter to apply to the metric.",
-                          "type": "string",
-                          "example": "processor.outcome: *"
+                        {
+                          "type": "object",
+                          "required": [
+                            "name",
+                            "aggregation"
+                          ],
+                          "properties": {
+                            "name": {
+                              "description": "The name of the metric. Only valid options are A-Z",
+                              "type": "string",
+                              "example": "A",
+                              "pattern": "^[A-Z]$"
+                            },
+                            "aggregation": {
+                              "description": "The aggregation type of the metric.",
+                              "type": "string",
+                              "example": "doc_count",
+                              "enum": [
+                                "doc_count"
+                              ]
+                            },
+                            "filter": {
+                              "description": "The filter to apply to the metric.",
+                              "type": "string",
+                              "example": "processor.outcome: *"
+                            }
+                          }
                         }
-                      }
+                      ]
                     }
                   },
                   "equation": {
@@ -2418,26 +2487,71 @@
         "title": "Find SLO definitions response",
         "description": "A paginated response of SLO definitions matching the query.\n",
         "type": "object",
-        "properties": {
-          "page": {
-            "type": "number",
-            "example": 2
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "number",
+                "example": 1
+              },
+              "perPage": {
+                "type": "number",
+                "example": 25
+              },
+              "total": {
+                "type": "number",
+                "example": 34
+              },
+              "results": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/slo_with_summary_response"
+                }
+              }
+            }
           },
-          "perPage": {
-            "type": "number",
-            "example": 100
-          },
-          "total": {
-            "type": "number",
-            "example": 123
-          },
-          "results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/slo_definition_response"
+          {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "number",
+                "default": 1,
+                "description": "for backward compability"
+              },
+              "perPage": {
+                "type": "number",
+                "example": 25,
+                "description": "for backward compability"
+              },
+              "size": {
+                "type": "number",
+                "example": 25
+              },
+              "searchAfter": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "some-slo-id",
+                  "other-cursor-id"
+                ],
+                "description": "the cursor to provide to get the next paged results"
+              },
+              "total": {
+                "type": "number",
+                "example": 34
+              },
+              "results": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/slo_with_summary_response"
+                }
+              }
             }
           }
-        }
+        ]
       },
       "delete_slo_instances_request": {
         "title": "Delete SLO instances request",
