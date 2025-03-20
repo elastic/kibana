@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
 type ContentPackVersion = 'v1';
 
