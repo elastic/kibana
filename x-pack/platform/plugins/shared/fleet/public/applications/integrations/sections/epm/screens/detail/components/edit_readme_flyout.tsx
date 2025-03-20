@@ -41,6 +41,7 @@ export const EditReadmeFlyout: React.FunctionComponent<{
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
+            {/* TODO: need to get the icon from the integration and use it here */}
             <EuiIcon type="pencil" />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -56,6 +57,7 @@ export const EditReadmeFlyout: React.FunctionComponent<{
           placeholder="Edit the readme content here..."
           value={editedContent!}
           onChange={(e) => setEditedContent}
+          onParse={onParse}
           readOnly={false}
           height={600}
         />

@@ -404,6 +404,13 @@ export function Detail() {
 
   const saveReadMeChanges = (updatedReadMe: string | undefined) => {
     console.log('saving the changes', updatedReadMe);
+    setIsEditReadMeOpen(false);
+
+    // TODO: save the updated read me content by calling the api as needed
+
+    // refresh the UI by passing something down to the component that shows the readme content
+
+    // show the toast at the bottom
   };
   const handleEditReadMeClick = useCallback<ReactEventHandler>(
     (ev) => {
@@ -581,7 +588,7 @@ export function Detail() {
                           isTourVisible={isOverviewPage && isGuidedOnboardingActive}
                           tourOffset={10}
                         >
-                          <EuiFlexGroup>
+                          <EuiFlexGroup justifyContent="center">
                             <EuiFlexItem>
                               <EditReadMeButton onClick={handleEditReadMeClick} />
                             </EuiFlexItem>

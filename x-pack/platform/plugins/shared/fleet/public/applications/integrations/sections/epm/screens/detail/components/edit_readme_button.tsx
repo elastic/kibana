@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
 
 interface EditReadMeButtonProps {
@@ -14,7 +14,7 @@ interface EditReadMeButtonProps {
 export function EditReadMeButton(props: EditReadMeButtonProps) {
   const { onClick } = props;
   return (
-    <EuiButtonIcon
+    <EuiButtonEmpty
       onClick={(e: React.MouseEvent) => onClick(e)}
       iconType="pencil"
       aria-label="Edit"
