@@ -5,31 +5,39 @@
  * 2.0.
  */
 
-import { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { ProductInterceptPrompter } from './lib/prompter';
 import type { ConfigSchema } from '../common/config';
 
 export class ProductInterceptPublicPlugin implements Plugin {
   private readonly config: ConfigSchema;
-  private readonly prompter = new ProductInterceptPrompter();
+  private readonly prompter?: ProductInterceptPrompter;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
+
+    if (this.config.enabled) {
+      this.prompter = new ProductInterceptPrompter();
+    }
   }
 
-  public setup() {
+  public setup(core: CoreSetup) {
+    this.prompter?.setup({
+      analytics: core.analytics,
+    });
+
     return {};
   }
 
   public start(core: CoreStart) {
-    if (this.config.enabled) {
-      this.prompter.start({
-        http: core.http,
-        notifications: core.notifications,
-        userProfile: core.userProfile,
-        analytics: core.analytics,
-      });
-    }
+    this.prompter?.start({
+      http: core.http,
+      notifications: core.notifications,
+      userProfile: core.userProfile,
+      analytics: core.analytics,
+    });
+
+    return {};
   }
 
   public stop() {}
