@@ -81,6 +81,8 @@ export function DashboardApp({
       return;
     }
 
+    console.log(incomingEmbeddable);
+
     isDashboardAppInNoDataState()
       .then((isInNotDataState) => {
         if (!canceled && isInNotDataState) {
