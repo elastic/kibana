@@ -10,3 +10,33 @@ import { schema } from '@kbn/config-schema';
 export const updateQueryDelaySettingsBodySchema = schema.object({
   delay: schema.number(),
 });
+
+export const updateAlertDeletionSettingsBodySchema = schema.object({
+  is_active_alerts_deletion_enabled: schema.boolean({
+    meta: {
+      description: 'Enable deletion of active alerts when set to true',
+    },
+  }),
+  active_alerts_deletion_threshold: schema.number({
+    min: 1,
+    max: 1000,
+    meta: {
+      description:
+        'Threshold (in days) for deleting active alerts older than this value, applies only when deletion is enabled',
+    },
+  }),
+  is_inactive_alerts_deletion_enabled: schema.boolean({
+    meta: {
+      description:
+        'Enable deletion of inactive alerts (recovered/closed/untracked) when set to true',
+    },
+  }),
+  inactive_alerts_deletion_threshold: schema.number({
+    min: 1,
+    max: 1000,
+    meta: {
+      description:
+        'Threshold (in days) for deleting inactive alerts (recovered/closed/untracked) older than this value, applies only when deletion is enabled',
+    },
+  }),
+});

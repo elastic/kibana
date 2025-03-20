@@ -11,14 +11,13 @@ import { DefendInsightType, Replacements } from '@kbn/elastic-assistant-common';
 
 import type { GraphState } from '../../types';
 import { mockAnonymizedEvents } from '../../mock/mock_anonymized_events';
-import { getDefaultRefinePrompt } from '../refine/helpers/get_default_refine_prompt';
-import { getDefendInsightsPrompt } from '../helpers/prompts';
 import { getRetrieveAnonymizedEventsNode } from '.';
+import { DEFEND_INSIGHTS } from '../../../../../prompt/prompts';
 
 const insightType = DefendInsightType.Enum.incompatible_antivirus;
 const initialGraphState: GraphState = {
   insights: null,
-  prompt: getDefendInsightsPrompt({ type: insightType }),
+  prompt: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.DEFAULT,
   anonymizedEvents: [],
   combinedGenerations: '',
   combinedRefinements: '',
@@ -30,7 +29,8 @@ const initialGraphState: GraphState = {
   maxHallucinationFailures: 5,
   maxRepeatedGenerations: 3,
   refinements: [],
-  refinePrompt: getDefaultRefinePrompt(),
+  refinePrompt: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.REFINE,
+  continuePrompt: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.CONTINUE,
   replacements: {},
   unrefinedResults: null,
 };
