@@ -73,10 +73,6 @@ describe('ResolveAllConflicts', () => {
     retries,
     onRetriesChange,
     onDestinationMapChange,
-    resolveAllConflictsLinkStyle: {
-      name: 'mock-style',
-      styles: 'font-size:1.0000rem;;label:copy_status_summary_indicator--resolveAllConflictsLink;',
-    },
   };
   const openPopover = async (wrapper: ReactWrapper) => {
     await act(async () => {
