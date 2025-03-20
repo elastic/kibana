@@ -44,6 +44,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const isServerless = buildFlavor === 'serverless';
 
   return deepFreeze({
+    settings: `${ELASTIC_DOCS}reference/kibana/configuration-reference`,
     elasticStackGetStarted: isServerless
       ? `${ELASTIC_DOCS}deploy-manage/deploy/elastic-cloud/serverless`
       : `${ELASTIC_DOCS}get-started`,

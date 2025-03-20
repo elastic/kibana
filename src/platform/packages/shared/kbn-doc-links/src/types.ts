@@ -23,6 +23,7 @@ export interface DocLinksMeta {
  * @public
  */
 export interface DocLinks {
+  readonly settings: string;
   readonly elasticStackGetStarted: string;
   readonly apiReference: string;
   readonly upgrade: {
