@@ -20,7 +20,10 @@ const italic = css`
   font-style: italic;
 `;
 
-export const SalesforceTool: React.FC<IntegrationToolComponentProps> = ({ toolCall, complete }) => {
+export const SalesforceTool: React.FC<IntegrationToolComponentProps> = ({
+  toolCall,
+  toolResult,
+}) => {
   const toolNode = (
     <EuiTextColor className={bold} color="success">
       {toolCall.toolName}
@@ -32,7 +35,7 @@ export const SalesforceTool: React.FC<IntegrationToolComponentProps> = ({ toolCa
     </EuiTextColor>
   );
 
-  if (complete) {
+  if (toolResult) {
     return (
       <EuiText size="s">
         <FormattedMessage

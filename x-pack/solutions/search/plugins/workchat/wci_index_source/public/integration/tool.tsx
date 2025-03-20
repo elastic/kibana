@@ -13,6 +13,7 @@ import { IntegrationToolComponentProps } from '@kbn/wci-browser';
 
 const bold = css`
   font-weight: bold;
+  font-style: normal;
 `;
 
 const italic = css`
@@ -20,28 +21,29 @@ const italic = css`
 `;
 
 export const IndexSourceTool: React.FC<IntegrationToolComponentProps> = ({
+  integration,
   toolCall,
-  complete,
+  toolResult,
 }) => {
-  const toolNode = (
+  const integrationNode = (
     <EuiTextColor className={bold} color="success">
-      {toolCall.toolName}
+      {integration.name}
     </EuiTextColor>
   );
   const argsNode = (
-    <EuiTextColor className={italic} color="accent">
-      {JSON.stringify(toolCall.args)}
+    <EuiTextColor className={bold} color="accent">
+      &quot;{toolCall.args.query}&quot;
     </EuiTextColor>
   );
 
-  if (complete) {
+  if (toolResult) {
     return (
-      <EuiText size="s">
+      <EuiText size="s" className={italic}>
         <FormattedMessage
           id="xpack.workchatApp.wci_index_source.chat.toolCall.calledToolLabel"
-          defaultMessage="called index source {tool} with arguments {args}"
+          defaultMessage="searched for {args} using index source {integration}."
           values={{
-            tool: toolNode,
+            integration: integrationNode,
             args: argsNode,
           }}
         />
@@ -49,12 +51,12 @@ export const IndexSourceTool: React.FC<IntegrationToolComponentProps> = ({
     );
   } else {
     return (
-      <EuiText size="s">
+      <EuiText size="s" className={italic}>
         <FormattedMessage
           id="xpack.workchatApp.wci_index_source.chat.toolCall.callingToolLabel"
-          defaultMessage="called index source {tool} with arguments {args}"
+          defaultMessage="is searching for {args} using index source {integration}."
           values={{
-            tool: toolNode,
+            integration: integrationNode,
             args: argsNode,
           }}
         />
