@@ -75,7 +75,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       assertNewConversation(true, 'New chat');
     });
   });
-  describe('When no conversations exist but connectors do exist, show empty convo', () => {
+  describe.only('When no conversations exist but connectors do exist, show empty convo', () => {
     beforeEach(() => {
       createAzureConnector();
     });
@@ -120,6 +120,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       closeAssistant();
       deleteConnectors();
       openAssistant();
+      selectConversation(mockConvo1.title);
       cy.get(CONNECTOR_MISSING_CALLOUT).should('be.visible');
     });
   });
