@@ -9,12 +9,12 @@ import type { ElasticsearchClient, SavedObjectsClient, Logger } from '@kbn/core/
 
 import semverGte from 'semver/functions/gte';
 
-import type { PackageClient } from '../services';
-import { outputService } from '../services';
+import type { PackageClient } from '../../services';
+import { outputService } from '../../services';
 
-import { PackageNotFoundError } from '../errors';
+import { PackageNotFoundError } from '../../errors';
 
-import type { SyncIntegrationsData } from './sync_integrations_task';
+import type { SyncIntegrationsData } from './model';
 
 const FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX = 'fleet-synced-integrations-ccr-*';
 

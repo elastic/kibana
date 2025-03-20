@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { keyBy } from 'lodash';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
@@ -15,20 +16,22 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
-import { SO_SEARCH_LIMIT, outputType } from '../../common/constants';
-import type { NewRemoteElasticsearchOutput } from '../../common/types';
+import { SO_SEARCH_LIMIT, outputType } from '../../../common/constants';
+import type { NewRemoteElasticsearchOutput } from '../../../common/types';
 
-import { appContextService, outputService } from '../services';
-import { getInstalledPackageSavedObjects } from '../services/epm/packages/get';
-import { FLEET_SYNCED_INTEGRATIONS_INDEX_NAME } from '../services/setup/fleet_synced_integrations';
+import { appContextService, outputService } from '../../services';
+import { getInstalledPackageSavedObjects } from '../../services/epm/packages/get';
+import { FLEET_SYNCED_INTEGRATIONS_INDEX_NAME } from '../../services/setup/fleet_synced_integrations';
 
 import { syncIntegrationsOnRemote } from './sync_integrations_on_remote';
+import { getCustomAssets } from './custom_assets';
+import type { SyncIntegrationsData } from './model';
 
 export const TYPE = 'fleet:sync-integrations-task';
-export const VERSION = '1.0.1';
+export const VERSION = '1.0.2';
 const TITLE = 'Fleet Sync Integrations Task';
 const SCOPE = ['fleet'];
-const INTERVAL = '5m';
+const INTERVAL = '1m';
 const TIMEOUT = '5m';
 
 interface SyncIntegrationsTaskSetupContract {
@@ -39,19 +42,6 @@ interface SyncIntegrationsTaskSetupContract {
 
 interface SyncIntegrationsTaskStartContract {
   taskManager: TaskManagerStartContract;
-}
-
-export interface SyncIntegrationsData {
-  remote_es_hosts: Array<{
-    name: string;
-    hosts: string[];
-    sync_integrations: boolean;
-  }>;
-  integrations: Array<{
-    package_name: string;
-    package_version: string;
-    updated_at: string;
-  }>;
 }
 
 export class SyncIntegrationsTask {
@@ -229,6 +219,8 @@ export class SyncIntegrationsTask {
         };
       }),
       integrations: [],
+      custom_assets: {},
+      custom_assets_error: {},
     };
 
     const packageSavedObjects = await getInstalledPackageSavedObjects(soClient, {
@@ -242,6 +234,9 @@ export class SyncIntegrationsTask {
         updated_at: item.updated_at ?? new Date().toISOString(),
       };
     });
+
+    const customAssets = await getCustomAssets(esClient, newDoc.integrations, this.abortController);
+    newDoc.custom_assets = keyBy(customAssets, (asset) => `${asset.type}:${asset.name}`);
 
     await esClient.update(
       {

@@ -14,13 +14,13 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { CoreSetup } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { createAppContextStartContractMock, createMockPackageService } from '../mocks';
+import { createAppContextStartContractMock, createMockPackageService } from '../../mocks';
 
-import { appContextService, outputService } from '../services';
+import { appContextService, outputService } from '../../services';
 
 import { SyncIntegrationsTask, TYPE, VERSION } from './sync_integrations_task';
 
-jest.mock('../services', () => ({
+jest.mock('../../services', () => ({
   appContextService: {
     getExperimentalFeatures: jest.fn().mockReturnValue({ enableSyncIntegrationsOnRemote: true }),
     start: jest.fn(),
@@ -32,7 +32,7 @@ jest.mock('../services', () => ({
 
 const mockOutputService = outputService as jest.Mocked<typeof outputService>;
 
-jest.mock('../services/epm/packages/get', () => ({
+jest.mock('../../services/epm/packages/get', () => ({
   getInstalledPackageSavedObjects: jest.fn().mockResolvedValue({
     saved_objects: [
       {
@@ -129,6 +129,8 @@ describe('SyncIntegrationsTask', () => {
       const [{ elasticsearch }] = await mockCore.getStartServices();
       esClient = elasticsearch.client.asInternalUser as ElasticsearchClientMock;
       esClient.indices.exists.mockResolvedValue(true);
+      esClient.cluster.getComponentTemplate.mockResolvedValue({ component_templates: [] });
+      esClient.ingest.getPipeline.mockResolvedValue({});
     });
 
     afterEach(() => {
@@ -181,6 +183,8 @@ describe('SyncIntegrationsTask', () => {
               { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: true },
               { hosts: ['https://remote2:9200'], name: 'remote2', sync_integrations: false },
             ],
+            custom_assets: {},
+            custom_assets_error: {},
           },
           doc_as_upsert: true,
         },
