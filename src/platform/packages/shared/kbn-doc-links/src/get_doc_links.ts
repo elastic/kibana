@@ -19,27 +19,26 @@ export interface GetDocLinkOptions {
 export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): DocLinks => {
   const meta = getDocLinksMeta({ kibanaBranch, buildFlavor });
 
-  // const DOC_LINK_VERSION = meta.version;
-  // const ECS_VERSION = meta.ecs_version;
-  // const ELASTIC_WEBSITE_URL = meta.elasticWebsiteUrl;
+  const DOC_LINK_VERSION = meta.version;
+  const ECS_VERSION = meta.ecs_version;
+  const ELASTIC_WEBSITE_URL = meta.elasticWebsiteUrl;
   const ELASTIC_GITHUB = meta.elasticGithubUrl;
   const SEARCH_LABS_URL = meta.searchLabsUrl;
   const ELASTIC_DOCS = meta.docsWebsiteUrl;
 
-  // const ELASTICSEARCH_DOCS = `https://www.elastic.co/guide/en/elasticsearch/reference/current/`;
-  // const KIBANA_DOCS = `https://www.elastic.co/guide/en/kibana/current/`;
-  // const KIBANA_REF = `${ELASTIC_DOCS}reference/kibana/`;
-  // const FLEET_DOCS = `https://www.elastic.co/guide/en/fleet/current/`;
-  // const INTEGRATIONS_DEV_DOCS = `https://www.elastic.co/guide/en/integrations-developer/current/`;
-  // const PLUGIN_DOCS = `https://www.elastic.co/guide/en/elasticsearch/plugins/current/`;
-  // const OBSERVABILITY_DOCS = `https://www.elastic.co/guide/en/observability/current/`;
-  // const APM_DOCS = `https://www.elastic.co/guide/en/apm/`;
-  // const SECURITY_SOLUTION_DOCS = `https://www.elastic.co/guide/en/security/current/`;
-  // const ENTERPRISE_SEARCH_DOCS = `https://www.elastic.co/guide/en/enterprise-search/current/`;
-  // const ESRE_DOCS = `https://www.elastic.co/guide/en/esre/current/`;
-  // const SEARCH_UI_DOCS = `https://www.elastic.co/guide/en/search-ui/current/`;
-  // const MACHINE_LEARNING_DOCS = `https://www.elastic.co/guide/en/machine-learning/current/`;
-  // const SERVERLESS_DOCS = `https://www.elastic.co/guide/en/serverless/current/`;
+  const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
+  const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
+// const KIBANA_REF = `${ELASTIC_DOCS}reference/kibana/`;
+  const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
+  const INTEGRATIONS_DEV_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/current/`;
+  const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
+  const OBSERVABILITY_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/`;
+  const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
+  const ENTERPRISE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/`;
+  const ESRE_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/esre/${DOC_LINK_VERSION}/`;
+  const SEARCH_UI_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/search-ui/current/`;
+  const MACHINE_LEARNING_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/machine-learning/${DOC_LINK_VERSION}/`;
+  const SERVERLESS_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/serverless/current/`;
   const SEARCH_LABS_REPO = `${ELASTIC_GITHUB}elasticsearch-labs/`;
   const isServerless = buildFlavor === 'serverless';
 
@@ -61,22 +60,22 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       customLinks: isServerless
         ? `${ELASTIC_DOCS}solutions/observability/apps/create-custom-links`
         : `${ELASTIC_DOCS}solutions/observability/apps/create-custom-links`,
-      droppedTransactionSpans: `https://www.elastic.co/guide/en/apm/guide/current/data-model-spans.html#data-model-dropped-spans`,
-      upgrading: `https://www.elastic.co/guide/en/apm/guide/current/upgrade.html`,
-      metaData: `https://www.elastic.co/guide/en/apm/guide/current/data-model-metadata.html`,
-      overview: `https://www.elastic.co/guide/en/apm/guide/current/apm-overview.html`,
+      droppedTransactionSpans: `${OBSERVABILITY_DOCS}apm-data-model-spans.html#apm-data-model-dropped-spans`,
+      upgrading: `${OBSERVABILITY_DOCS}apm-upgrade.html`,
+      metaData: `${OBSERVABILITY_DOCS}apm-data-model-metadata.html`,
+      overview: `${OBSERVABILITY_DOCS}apm.html`,
       tailSamplingPolicies: isServerless
         ? `${ELASTIC_DOCS}solutions/observability/apps/transaction-sampling`
-        : `https://www.elastic.co/guide/en/observability/current/apm-sampling.html#apm-tail-based-sampling`,
-      elasticAgent: `https://www.elastic.co/guide/en/apm/guide/current/upgrade-to-apm-integration.html`,
+        : `${OBSERVABILITY_DOCS}configure-tail-based-sampling.html`,
+      elasticAgent: ``${OBSERVABILITY_DOCS}/apm-upgrade-to-apm-integration.html`,
       storageExplorer: `${ELASTIC_DOCS}solutions/observability/apps/storage-explorer`,
       spanCompression: isServerless
         ? `${ELASTIC_DOCS}solutions/observability/apps/spans`
-        : `https://www.elastic.co/guide/en/observability/current/apm-data-model-spans.html#apm-spans-span-compression`,
+        : `${OBSERVABILITY_DOCS}apm-data-model-spans.html#apm-spans-span-compression`,
       transactionSampling: isServerless
-        ? `${ELASTIC_DOCS}solutions/observability/apps/transaction-sampling`
-        : `${ELASTIC_DOCS}solutions/observability/apps/transaction-sampling`,
-      indexLifecycleManagement: `https://www.elastic.co/guide/en/apm/guide/current/ilm-how-to.html`,
+        ? `${SERVERLESS_DOCS}observability-apm-transaction-sampling.html`
+        : `${OBSERVABILITY_DOCS}sampling.html`,
+      indexLifecycleManagement: `${OBSERVABILITY_DOCS}apm-ilm-how-to.html`,
     },
     canvas: {
       guide: `${ELASTIC_DOCS}explore-analyze/visualize/canvas`,
@@ -87,7 +86,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     console: {
       guide: `${ELASTIC_DOCS}explore-analyze/query-filter/tools/console`,
-      serverlessGuide: `https://www.elastic.co/guide/en/serverless/current/devtools-run-api-requests-in-the-console.html`,
+      serverlessGuide: `${SERVERLESS_DOCS}devtools-run-api-requests-in-the-console.html`,
     },
     dashboard: {
       guide: `${ELASTIC_DOCS}explore-analyze/dashboards`,
@@ -267,7 +266,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mapping: `${ELASTIC_DOCS}manage-data/data-store/mapping/map-runtime-field`,
     },
     scriptedFields: {
-      scriptFields: `https://www.elastic.co/guide/en/elasticsearch/reference/8.18/search-request-body.html`,
+      scriptFields: `${ELASTICSEARCH_DOCS}search-fields.html#script-fields`,
       scriptAggs: `${ELASTIC_DOCS}explore-analyze/query-filter/aggregations`,
       painless: `${ELASTIC_DOCS}explore-analyze/scripting/modules-scripting-painless`,
       painlessApi: `https://www.elastic.co/guide/en/elasticsearch/painless/8.18/painless-api-reference.html`,
@@ -275,7 +274,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       painlessSyntax: `${ELASTIC_DOCS}reference/scripting-languages/painless/painless-language-specification`,
       painlessWalkthrough: `${ELASTIC_DOCS}reference/scripting-languages/painless/brief-painless-walkthrough`,
       painlessLanguage: `${ELASTIC_DOCS}reference/scripting-languages/painless/painless-language-specification`,
-      luceneExpressions: `${ELASTIC_DOCS}explore-analyze/scripting/modules-scripting-expression`,
+      luceneExpressions: `${ELASTIC_DOCS}explore-analyze/scripting/modules-scripting-expression`
     },
     indexPatterns: {
       introduction: isServerless
