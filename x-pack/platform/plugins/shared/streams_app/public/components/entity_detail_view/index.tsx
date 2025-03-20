@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/css';
@@ -25,6 +25,7 @@ import { StreamsAppPageBody } from '../streams_app_page_body';
 import { StreamsAppPageHeader } from '../streams_app_page_header';
 import { StreamsAppPageHeaderTitle } from '../streams_app_page_header/streams_app_page_header_title';
 import { useKibana } from '../../hooks/use_kibana';
+import { StreamDescription } from './stream_description';
 
 export interface EntityViewTab {
   name: string;
@@ -96,21 +97,21 @@ export function EntityDetailViewWithoutParams({
             <StreamsAppPageHeaderTitle
               title={
                 <EuiFlexGroup gutterSize="s" alignItems="center">
-                  {entity.displayName}
+                  <EuiTitle size="l">
+                    <h1>{entity.displayName}</h1>
+                  </EuiTitle>
                   {definition && isUnwiredStreamDefinition(definition.stream) ? (
-                    <>
-                      {' '}
-                      <EuiBadge>
-                        {i18n.translate(
-                          'xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel',
-                          { defaultMessage: 'Classic' }
-                        )}
-                      </EuiBadge>
-                    </>
+                    <EuiBadge>
+                      {i18n.translate(
+                        'xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel',
+                        { defaultMessage: 'Classic' }
+                      )}
+                    </EuiBadge>
                   ) : null}
                   {definition && <LifecycleBadge lifecycle={definition.effective_lifecycle} />}
                 </EuiFlexGroup>
               }
+              description={definition && <StreamDescription definition={definition} />}
             />
           }
         >
