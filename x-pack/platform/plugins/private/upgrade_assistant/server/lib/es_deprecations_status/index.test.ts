@@ -67,11 +67,14 @@ describe('getESUpgradeStatus', () => {
 
   // Mock the indices.stats API call for index sizes
   esClient.indices.stats.mockResponse({
+    _shards: { failed: 0, successful: 1, total: 1 },
+    _all: {},
     indices: {
       'test-index-1': {
         total: {
           store: {
             size_in_bytes: 500000000, // 500MB
+            reserved_in_bytes: 500000000, // 500MB
           },
         },
       },
@@ -79,6 +82,7 @@ describe('getESUpgradeStatus', () => {
         total: {
           store: {
             size_in_bytes: 1500000000, // 1.5GB
+            reserved_in_bytes: 500000000, // 500MB
           },
         },
       },
