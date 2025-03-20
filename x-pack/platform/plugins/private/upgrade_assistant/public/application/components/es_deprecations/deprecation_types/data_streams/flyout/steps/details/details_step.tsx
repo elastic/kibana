@@ -253,9 +253,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
                     color={
                       status === DataStreamMigrationStatus.cancelled
                         ? 'warning'
-                        : readOnlyExcluded
-                        ? 'primary'
-                        : 'accent'
+                        : 'primary'
                     }
                     iconType={status === DataStreamMigrationStatus.cancelled ? 'play' : undefined}
                     onClick={() => initAction('reindex')}
