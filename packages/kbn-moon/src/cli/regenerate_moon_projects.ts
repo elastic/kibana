@@ -205,7 +205,7 @@ export function regenerateMoonProjects() {
             allPackageIds,
           });
         } else {
-          projectConfig.tasks.typecheck = { script: `echo 'stubbed:noop'` };
+          projectConfig.tasks.typecheck = { script: `echo 'stubbed:noop'`, outputs: [] };
           projectConfig.tasks.lint_with_types = { script: `echo 'stubbed:noop'` };
           log.warning(`Skipping ${pkg.name} - no tsconfig.json found.`);
         }
