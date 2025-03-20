@@ -48,8 +48,8 @@ export const getCustomAssets = async (
       acc.push({
         type: 'component_template',
         name: template.name,
-        package_name: integration?.package_name ?? '',
-        package_version: integration?.package_version ?? '',
+        package_name: integration.package_name ?? '',
+        package_version: integration.package_version ?? '',
         is_deleted: false,
         template: template.component_template.template,
       });
@@ -75,8 +75,8 @@ export const getCustomAssets = async (
       acc.push({
         type: 'ingest_pipeline',
         name: pipeline,
-        package_name: integration?.package_name ?? '',
-        package_version: integration?.package_version ?? '',
+        package_name: integration.package_name ?? '',
+        package_version: integration.package_version ?? '',
         is_deleted: false,
         pipeline: ingestPipelines[pipeline],
       });

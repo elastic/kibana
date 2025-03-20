@@ -259,24 +259,13 @@ export class SyncIntegrationsTask {
       };
     }
 
-    if (previousSyncIntegrationsData) {
-      await esClient.update(
-        {
-          id: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
-          index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
-          doc: newDoc,
-        },
-        { signal: this.abortController.signal }
-      );
-    } else {
-      await esClient.index(
-        {
-          id: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
-          index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
-          body: newDoc,
-        },
-        { signal: this.abortController.signal }
-      );
-    }
+    await esClient.index(
+      {
+        id: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+        index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+        body: newDoc,
+      },
+      { signal: this.abortController.signal }
+    );
   };
 }
