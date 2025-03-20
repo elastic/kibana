@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { imageFunction } from '@kbn/expression-image-plugin/__fixtures__';
 import { ExampleContext } from '../../test/context_example';
@@ -15,18 +14,32 @@ import { RenderedElement, RenderedElementComponent } from '../rendered_element';
 
 const { austin, hello } = sharedWorkpads;
 
-storiesOf('shareables/RenderedElement', module)
-  .add('contextual: hello', () => (
+export default {
+  title: 'shareables/RenderedElement',
+};
+
+export const ContextualHello = {
+  render: () => (
     <ExampleContext style={{ height: 720 }}>
       <RenderedElement element={hello.pages[0].elements[0]} index={0} />
     </ExampleContext>
-  ))
-  .add('contextual: austin', () => (
+  ),
+
+  name: 'contextual: hello',
+};
+
+export const ContextualAustin = {
+  render: () => (
     <ExampleContext style={{ height: 720, background: '#000' }}>
       <RenderedElement element={austin.pages[0].elements[0]} index={0} />
     </ExampleContext>
-  ))
-  .add('component', () => (
+  ),
+
+  name: 'contextual: austin',
+};
+
+export const Component = {
+  render: () => (
     <ExampleContext style={{ height: 100, width: 100 }}>
       <RenderedElementComponent
         index={0}
@@ -63,4 +76,7 @@ storiesOf('shareables/RenderedElement', module)
         }}
       />
     </ExampleContext>
-  ));
+  ),
+
+  name: 'component',
+};
