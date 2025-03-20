@@ -222,6 +222,16 @@ export function SloManagementTable() {
       },
     },
     {
+      field: 'enabled',
+      width: '10%',
+      name: i18n.translate('xpack.slo.sloManagementTable.columns.enabledLabel', {
+        defaultMessage: 'Active Status',
+      }),
+      render: (item: SLODefinitionResponse['enabled']) => {
+        return item ? 'Enabled' : 'Disabled';
+      },
+    },
+    {
       field: 'version',
       width: '10%',
       name: i18n.translate('xpack.slo.sloManagementTable.columns.versionLabel', {

@@ -56,13 +56,7 @@ export const sloKeys = {
     page: number;
     perPage: number;
     includeOutdatedOnly: boolean;
-  }) => {
-    const keyParams =
-      params && Object.keys(params).length
-        ? [...sloKeys.all, ...Object.keys(params)]
-        : { ...sloKeys.all };
-    return ['slo', 'definitions'] as const;
-  },
+  }) => [...sloKeys.all, params, 'definitions'],
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
   health: (list: Array<{ sloId: string; sloInstanceId: string }>) =>
     [...sloKeys.all, 'health', list] as const,

@@ -18,7 +18,7 @@ export interface UseFetchSloDefinitionsResponse {
   refetch: () => void;
 }
 
-interface Params {
+export interface SLODefinitionParams {
   name?: string;
   includeOutdatedOnly?: boolean;
   page?: number;
@@ -30,7 +30,7 @@ export function useFetchSloDefinitions({
   includeOutdatedOnly = false,
   page = 1,
   perPage = 100,
-}: Params): UseFetchSloDefinitionsResponse {
+}: SLODefinitionParams): UseFetchSloDefinitionsResponse {
   const { sloClient } = usePluginContext();
   const search = name.endsWith('*') ? name : `${name}*`;
 
@@ -40,7 +40,12 @@ export function useFetchSloDefinitions({
       try {
         return await sloClient.fetch('GET /api/observability/slos/_definitions 2023-10-31', {
           params: {
-            query: { search, includeOutdatedOnly, page: String(page), perPage: String(perPage) },
+            query: {
+              ...(search !== undefined && { search }),
+              ...(includeOutdatedOnly !== undefined && { includeOutdatedOnly }),
+              ...(page !== undefined && { page: String(page) }),
+              ...(perPage !== undefined && { perPage: String(perPage) }),
+            },
           },
           signal,
         });
