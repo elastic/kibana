@@ -10,12 +10,12 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SupportCase } from './types';
 
 interface CaseRetrievalParams {
-  id?: string[];
+  id?: string[] | string;
   size?: number;
   ownerEmail?: string[];
   priority?: string[];
   closed?: boolean;
-  caseNumber?: string[];
+  caseNumber?: string[] | string;
   createdAfter?: string;
   createdBefore?: string;
   semanticQuery?: string;
