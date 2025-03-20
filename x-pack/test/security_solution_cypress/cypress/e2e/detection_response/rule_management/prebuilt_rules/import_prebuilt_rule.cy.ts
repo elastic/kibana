@@ -25,15 +25,6 @@ describe(
   'Detection rules, Prebuilt Rules Import workflow - With Rule Customization',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'prebuiltRulesCustomizationEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     describe('when file is unmodified prebuilt rule with matching rule_id', () => {

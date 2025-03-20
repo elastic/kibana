@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { noop } from 'lodash';
 import { RootCauseAnalysisContainer } from '.';
 // @ts-ignore
 import fullAnalysis from '../mock/complete_root_cause_analysis.json';
 
-const stories: Meta<{}> = {
+const stories: Meta = {
   title: 'RCA/Container',
   component: RootCauseAnalysisContainer,
 };
@@ -27,27 +27,27 @@ const handlers = {
   onClearAnalysisClick: noop,
 };
 
-export const Empty: Story<{}> = () => {
+export const Empty: StoryFn = () => {
   return <RootCauseAnalysisContainer completeInBackground loading={false} {...handlers} />;
 };
 
-export const Loading: Story<{}> = () => {
+export const Loading: StoryFn = () => {
   return <RootCauseAnalysisContainer completeInBackground loading {...handlers} />;
 };
 
-export const LoadingWithoutCompleteInBackground: Story<{}> = () => {
+export const LoadingWithoutCompleteInBackground: StoryFn = () => {
   return <RootCauseAnalysisContainer completeInBackground={false} loading {...handlers} />;
 };
 
 const error = new Error('Failed to load analysis');
 
-export const WithError: Story<{}> = () => {
+export const WithError: StoryFn = () => {
   return (
     <RootCauseAnalysisContainer completeInBackground loading={false} {...handlers} error={error} />
   );
 };
 
-export const Completed: Story<{}> = () => {
+export const Completed: StoryFn = () => {
   return (
     <RootCauseAnalysisContainer
       completeInBackground

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
+import { FieldDefinition, WiredStreamDefinition, isRoot } from '@kbn/streams-schema';
 import { MalformedFieldsError } from '../errors/malformed_fields_error';
 
 export function validateAncestorFields({
@@ -29,6 +29,19 @@ export function validateAncestorFields({
         );
       }
     }
+  }
+}
+
+export function validateSystemFields(definition: WiredStreamDefinition) {
+  if (isRoot(definition.name)) {
+    // the root stream is allowed to have system fields
+    return;
+  }
+  // child streams are not supposed to have system fields
+  if (Object.values(definition.ingest.wired.fields).some((field) => field.type === 'system')) {
+    throw new MalformedFieldsError(
+      `Stream ${definition.name} is not allowed to have system fields`
+    );
   }
 }
 
