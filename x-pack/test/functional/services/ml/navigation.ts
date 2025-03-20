@@ -160,6 +160,17 @@ export function MachineLearningNavigationProvider({
       await this.assertTabEnabled('ad_settings', expectedValue);
     },
 
+    async navigateToStackManagement({ expectMlLink = true }: { expectMlLink?: boolean } = {}) {
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.common.navigateToApp('management');
+        if (expectMlLink) {
+          await testSubjects.existOrFail('anomaly_detection', { timeout: 2000 });
+        } else {
+          await testSubjects.missingOrFail('anomaly_detection', { timeout: 2000 });
+        }
+      });
+    },
+
     async navigateToOverview() {
       await this.navigateToArea('~mlMainTab & ~overview', 'mlAppPageOverview');
     },
@@ -176,10 +187,20 @@ export function MachineLearningNavigationProvider({
       });
     },
 
+    async navigateToMemoryUsageManagement() {
+      await this.navigateToStackManagementMlSection('overview', 'mlStackManagementOverviewPage');
+      await retry.tryForTime(5 * 1000, async () => {
+        await testSubjects.click('mlManagementOverviewPageTabs overview');
+        await testSubjects.existOrFail('mlMemoryUsagePanel');
+      });
+    },
+
+    // @todo: verify if this needs to be replaced?
     async navigateToNotificationsTab() {
       await testSubjects.click('mlManagementOverviewPageTabs notifications');
     },
 
+    // @todo: verify if this needs to be replaced?
     async navigateToMemoryUsage() {
       await this.navigateToArea('~mlMainTab & ~nodesOverview', 'mlPageMemoryUsage');
     },

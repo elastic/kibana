@@ -149,6 +149,7 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
             {canViewMlNodes ? (
               <>
                 <CollapsiblePanel
+                  dataTestSubj="mlMemoryUsagePanel"
                   isOpen={panelsExtendedState.memoryUsage}
                   onToggle={(update) => {
                     setPanelsExtendedState({ ...panelsExtendedState, memoryUsage: update });
@@ -178,6 +179,7 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
             {canViewMlNodes ? (
               <>
                 <CollapsiblePanel
+                  dataTestSubj="mlNodesPanel"
                   isOpen={panelsState.nodes}
                   onToggle={(update) => {
                     setPanelsState({ ...panelsState, nodes: update });

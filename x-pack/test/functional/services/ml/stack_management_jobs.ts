@@ -15,8 +15,8 @@ import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detectio
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import type { MachineLearningJobTableProvider } from './job_table';
-import type { MachineLearningDataFrameAnalyticsTableProvider } from './data_frame_analytics_table';
+import type { MlDFAJobTable } from './data_frame_analytics_table';
+import type { MlADJobTable } from './job_table';
 
 type SyncFlyoutObjectType =
   | 'MissingObjects'
@@ -30,8 +30,8 @@ export function MachineLearningStackManagementJobsProvider(
     jobTable,
     dataFrameAnalyticsTable,
   }: {
-    jobTable: MachineLearningJobTableProvider;
-    dataFrameAnalyticsTable: MachineLearningDataFrameAnalyticsTableProvider;
+    jobTable: MlADJobTable;
+    dataFrameAnalyticsTable: MlDFAJobTable;
   }
 ) {
   const retry = getService('retry');
@@ -505,47 +505,21 @@ export function MachineLearningStackManagementJobsProvider(
 
     async parseTable(mlSavedObjectType: MlSavedObjectType) {
       if (mlSavedObjectType === 'anomaly-detector') {
-        return await jobTable.parseTable();
+        return await jobTable.parseJobTable();
       }
       if (mlSavedObjectType === 'data-frame-analytics') {
-        return await dataFrameAnalyticsTable.parseTable();
+        return await dataFrameAnalyticsTable.parseAnalyticsTable();
       }
     },
     async getIdsFromTables(mlSavedObjectType: MlSavedObjectType) {
-      if (mlSavedObjectType === 'anomaly-detector') {
-        const ids = (await jobTable.parseJobTable()).map((row) => row.id);
-        return ids;
-      }
-      if (mlSavedObjectType === 'data-frame-analytics') {
-        const rows = await dataFrameAnalyticsTable.parseAnalyticsTable();
-        const ids = rows.map((row) => row.id);
-        return ids;
-      }
+      const rows = (await this.parseTable(mlSavedObjectType)) ?? [];
+      const ids = rows.map((row) => row.id);
+      return ids;
     },
 
     async getSpacesFromTable(mlSavedObjectType: MlSavedObjectType, id: string) {
-      const spaces: string[] = [];
-      let rows: any[] = [];
-
-      if (mlSavedObjectType === 'anomaly-detector') {
-        rows = await jobTable.parseJobTable();
-        // spaces = rows.map((row) => row.spaces);
-      }
-      if (mlSavedObjectType === 'data-frame-analytics') {
-        rows = await dataFrameAnalyticsTable.parseAnalyticsTable();
-      }
-
+      const rows = (await this.parseTable(mlSavedObjectType)) ?? [];
       const ids = rows.map((row) => row.id);
-
-      // const dataTestSubj = this.getTableDataTestSubj(mlSavedObjectType);
-      // const tableListContainer = await testSubjects.find(dataTestSubj);
-      // const rows = await tableListContainer.findAllByClassName('euiTableRow');
-
-      // const ids = await Promise.all(
-      //   rows.map(async (r) =>
-      //     (await r.findByTestSubject('mlSpaceManagementTableColumnId')).getVisibleText()
-      //   )
-      // );
 
       const matchedRowIndex = ids.indexOf(id);
       if (matchedRowIndex === -1) {
@@ -554,7 +528,7 @@ export function MachineLearningStackManagementJobsProvider(
 
       const row = rows[matchedRowIndex];
 
-      return row.spaces;
+      return row?.spaces ?? [];
     },
 
     async filterTableWithSearchString(
