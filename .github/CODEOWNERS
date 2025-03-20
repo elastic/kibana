@@ -515,6 +515,7 @@ x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/platform/plugins/private/graph @elastic/kibana-visualizations
 examples/grid_example @elastic/kibana-presentation
 src/platform/packages/private/kbn-grid-layout @elastic/kibana-presentation
+src/platform/packages/shared/kbn-grok-ui @elastic/streams-program-team
 x-pack/platform/plugins/private/grokdebugger @elastic/kibana-management
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
 src/platform/packages/shared/kbn-guided-onboarding @elastic/appex-sharedux
