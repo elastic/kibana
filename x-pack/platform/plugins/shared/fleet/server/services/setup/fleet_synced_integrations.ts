@@ -48,47 +48,7 @@ export const FLEET_SYNCED_INTEGRATIONS_INDEX_CONFIG = {
           },
         },
       },
-      custom_assets_error: {
-        properties: {
-          timestamp: {
-            type: 'date',
-          },
-          error: {
-            type: 'text',
-          },
-        },
-      },
     },
-    dynamic_templates: [
-      {
-        custom_asset_template: {
-          path_match: 'custom_assets.*',
-          mapping: {
-            dynamic: false,
-            properties: {
-              type: {
-                type: 'keyword',
-              },
-              name: {
-                type: 'keyword',
-              },
-              package_name: {
-                type: 'keyword',
-              },
-              package_version: {
-                type: 'keyword',
-              },
-              is_deleted: {
-                type: 'boolean',
-              },
-              deleted_at: {
-                type: 'date',
-              },
-            },
-          },
-        },
-      },
-    ],
   },
 };
 

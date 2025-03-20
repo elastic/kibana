@@ -18,7 +18,12 @@ export interface CustomAssetsData {
   package_version: string;
   is_deleted: boolean;
   deleted_at?: string;
-  [key: string]: any; // TODO?
+  [key: string]: any;
+}
+
+export interface CustomAssetsError {
+  timestamp: string;
+  error: string;
 }
 
 export interface SyncIntegrationsData {
@@ -31,8 +36,5 @@ export interface SyncIntegrationsData {
   custom_assets: {
     [key: string]: CustomAssetsData;
   };
-  custom_assets_error: {
-    timestamp: string;
-    error: string;
-  };
+  custom_assets_error: CustomAssetsError;
 }

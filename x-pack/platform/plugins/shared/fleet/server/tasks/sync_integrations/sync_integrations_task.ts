@@ -163,22 +163,27 @@ export class SyncIntegrationsTask {
     );
   };
 
-  private hadAnyRemoteESSyncEnabled = async (esClient: ElasticsearchClient): Promise<boolean> => {
+  private getSyncedIntegrationDoc = async (
+    esClient: ElasticsearchClient
+  ): Promise<SyncIntegrationsData | undefined> => {
     try {
       const res = await esClient.get({
         id: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
         index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
       });
-      if (!(res._source as any)?.remote_es_hosts.some((host: any) => host.sync_integrations)) {
-        return false;
-      }
+      return res._source as SyncIntegrationsData;
     } catch (error) {
       if (error.statusCode === 404) {
-        return false;
+        return undefined;
       }
       throw error;
     }
-    return true;
+  };
+
+  private hadAnyRemoteESSyncEnabled = (
+    remoteEsHosts: SyncIntegrationsData['remote_es_hosts']
+  ): boolean => {
+    return remoteEsHosts.some((host) => host.sync_integrations);
   };
 
   private updateSyncedIntegrationsData = async (
@@ -202,8 +207,12 @@ export class SyncIntegrationsTask {
       (output) => (output as NewRemoteElasticsearchOutput).sync_integrations
     );
 
+    const previousSyncIntegrationsData = await this.getSyncedIntegrationDoc(esClient);
+
     if (!isSyncEnabled) {
-      const hadAnyRemoteESSyncEnabled = await this.hadAnyRemoteESSyncEnabled(esClient);
+      const hadAnyRemoteESSyncEnabled =
+        previousSyncIntegrationsData &&
+        this.hadAnyRemoteESSyncEnabled(previousSyncIntegrationsData.remote_es_hosts);
       if (!hadAnyRemoteESSyncEnabled) {
         return;
       }
@@ -235,17 +244,40 @@ export class SyncIntegrationsTask {
       };
     });
 
-    const customAssets = await getCustomAssets(esClient, newDoc.integrations, this.abortController);
-    newDoc.custom_assets = keyBy(customAssets, (asset) => `${asset.type}:${asset.name}`);
+    try {
+      const customAssets = await getCustomAssets(
+        esClient,
+        newDoc.integrations,
+        this.abortController,
+        previousSyncIntegrationsData
+      );
+      newDoc.custom_assets = keyBy(customAssets, (asset) => `${asset.type}:${asset.name}`);
+    } catch (error) {
+      this.logger.warn(`[SyncIntegrationsTask] error getting custom assets: ${error}`);
+      newDoc.custom_assets_error = {
+        timestamp: new Date().toISOString(),
+        error: error.message,
+      };
+    }
 
-    await esClient.update(
-      {
-        id: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
-        index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
-        doc: newDoc,
-        doc_as_upsert: true,
-      },
-      { signal: this.abortController.signal }
-    );
+    if (previousSyncIntegrationsData) {
+      await esClient.update(
+        {
+          id: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+          index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+          doc: newDoc,
+        },
+        { signal: this.abortController.signal }
+      );
+    } else {
+      await esClient.index(
+        {
+          id: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+          index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
+          body: newDoc,
+        },
+        { signal: this.abortController.signal }
+      );
+    }
   };
 }

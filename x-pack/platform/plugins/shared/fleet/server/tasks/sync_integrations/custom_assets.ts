@@ -9,7 +9,9 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { CustomAssetsData, IntegrationsData } from './model';
 
-const findIntegration = (assetName: string, integrations: IntegrationsData[]) => {
+const DELETED_ASSET_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+export const findIntegration = (assetName: string, integrations: IntegrationsData[]) => {
   const matches = assetName.match(/^(\w*)?(?:\-)?(\w*)(?:\-)?(?:\.)?(?:\w*)?@custom$/);
   if (!matches) return undefined;
 
@@ -26,7 +28,8 @@ const findIntegration = (assetName: string, integrations: IntegrationsData[]) =>
 export const getCustomAssets = async (
   esClient: ElasticsearchClient,
   integrations: IntegrationsData[],
-  abortController: AbortController
+  abortController: AbortController,
+  previousSyncIntegrationsData: SyncIntegrationsData | undefined
 ): Promise<CustomAssetsData[]> => {
   const customTemplates = await esClient.cluster.getComponentTemplate(
     {
@@ -79,5 +82,37 @@ export const getCustomAssets = async (
     return acc;
   }, []);
 
-  return [...customAssetsComponentTemplates, ...customAssetsIngestPipelines];
+  const updatedAssets = [...customAssetsComponentTemplates, ...customAssetsIngestPipelines];
+
+  const deletedAssets = updateDeletedAssets(previousSyncIntegrationsData, updatedAssets);
+
+  return [...updatedAssets, ...deletedAssets];
 };
+
+function updateDeletedAssets(
+  previousSyncIntegrationsData: SyncIntegrationsData | undefined,
+  updatedAssets: CustomAssetsData[]
+): CustomAssetsData[] {
+  const deletedAssets = [];
+
+  Object.values(previousSyncIntegrationsData?.custom_assets ?? {}).forEach((existingAsset) => {
+    if (existingAsset.is_deleted) {
+      if (Date.now() - Date.parse(existingAsset.deleted_at) < DELETED_ASSET_TTL) {
+        deletedAssets.push(existingAsset);
+      }
+    } else {
+      const matchingAsset = updatedAssets.find(
+        (asset) => existingAsset.name === asset.name && existingAsset.type === asset.type
+      );
+      if (!matchingAsset) {
+        deletedAssets.push({
+          ...existingAsset,
+          is_deleted: true,
+          deleted_at: new Date().toISOString(),
+        });
+      }
+    }
+  });
+
+  return deletedAssets;
+}
