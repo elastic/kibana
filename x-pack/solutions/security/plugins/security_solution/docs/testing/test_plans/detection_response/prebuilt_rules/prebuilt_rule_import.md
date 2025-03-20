@@ -30,15 +30,15 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Technical requirements](#technical-requirements)
   - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
-  - [Importing single prebuilt non-customized rules](#importing-single-prebuilt-non-customized-rules)
+  - [Importing a single non-customized prebuilt rule](#importing-a-single-non-customized-prebuilt-rule)
     - [**Scenario: Importing a non-customized rule when it's not installed**](#scenario-importing-a-non-customized-rule-when-its-not-installed)
     - [**Scenario: Importing a non-customized rule on top of an installed non-customized rule**](#scenario-importing-a-non-customized-rule-on-top-of-an-installed-non-customized-rule)
     - [**Scenario: Importing a non-customized rule on top of an installed customized rule**](#scenario-importing-a-non-customized-rule-on-top-of-an-installed-customized-rule)
-  - [Importing single prebuilt customized rules](#importing-single-prebuilt-customized-rules)
+  - [Importing a single customized prebuilt rule](#importing-a-single-customized-prebuilt-rule)
     - [**Scenario: Importing a customized rule when it's not installed**](#scenario-importing-a-customized-rule-when-its-not-installed)
     - [**Scenario: Importing a customized rule on top of an installed non-customized rule**](#scenario-importing-a-customized-rule-on-top-of-an-installed-non-customized-rule)
     - [**Scenario: Importing a customized rule on top of an installed customized rule**](#scenario-importing-a-customized-rule-on-top-of-an-installed-customized-rule)
-  - [Importing single custom rules](#importing-single-custom-rules)
+  - [Importing a single custom rule](#importing-a-single-custom-rule)
     - [**Scenario: Importing a new custom rule**](#scenario-importing-a-new-custom-rule)
     - [**Scenario: Importing a custom rule on top of an existing custom rule**](#scenario-importing-a-custom-rule-on-top-of-an-existing-custom-rule)
   - [Importing multiple rules in bulk](#importing-multiple-rules-in-bulk)
@@ -119,7 +119,7 @@ User stories:
 
 ## Scenarios
 
-### Importing single prebuilt non-customized rules
+### Importing a single non-customized prebuilt rule
 
 #### **Scenario: Importing a non-customized rule when it's not installed**
 
@@ -169,7 +169,7 @@ And the updated rule should be marked as non-customized
 And the updated rule's parameters should match the import payload
 ```
 
-### Importing single prebuilt customized rules
+### Importing a single customized prebuilt rule
 
 #### **Scenario: Importing a customized rule when it's not installed**
 
@@ -219,7 +219,7 @@ And the updated rule should be marked as customized
 And the updated rule's parameters should match the import payload
 ```
 
-### Importing single custom rules
+### Importing a single custom rule
 
 #### **Scenario: Importing a new custom rule**
 
@@ -258,7 +258,7 @@ This scenario is a "smoke test" for all the user stories from the [Product requi
 **Automation**: 1 API integration test, 1 e2e test.
 
 ```Gherkin
-Given the import payload contains prebuilt non-customized, prebuilt customized, and custom rules
+Given the import payload contains non-customized prebuilt, customized prebuilt, and custom rules
 And the prebuilt rules have a base version in the installed package
 And the custom rules' rule_id does NOT match any rule assets from the installed package
 And the rules are not installed or created yet
@@ -276,7 +276,7 @@ This scenario is a "smoke test" for all the user stories from the [Product requi
 **Automation**: 1 API integration test, 1 e2e test.
 
 ```Gherkin
-Given the import payload contains prebuilt non-customized, prebuilt customized, and custom rules
+Given the import payload contains non-customized prebuilt, customized prebuilt, and custom rules
 And the prebuilt rules have a base version in the installed package
 And the custom rules' rule_id does NOT match any rule assets from the installed package
 And the rules are already installed or created
@@ -420,7 +420,7 @@ If this rule is not installed, it should be created with `is_customized` field s
 
 ```Gherkin
 Given the import payload contains a prebuilt rule
-And its rule_id matches one or a few rule assets from the installed package
+And its rule_id matches one or more rule assets from the installed package
 And its version does NOT match any of those rule assets
 And this rule is not installed yet
 When the user imports the rule
@@ -439,7 +439,7 @@ If this rule is already installed, it should be updated. Its `is_customized` fie
 
 ```Gherkin
 Given the import payload contains a non-customized prebuilt rule
-And its rule_id matches one or a few rule assets from the installed package
+And its rule_id matches one or more rule assets from the installed package
 And its version does NOT match any of those rule assets
 And this rule is already installed and marked as non-customized
 And the installed rule is NOT equal to the import payload
@@ -459,7 +459,7 @@ If this rule is already installed, it should be updated. Its `is_customized` fie
 
 ```Gherkin
 Given the import payload contains a customized prebuilt rule
-And its rule_id matches one or a few rule assets from the installed package
+And its rule_id matches one or more rule assets from the installed package
 And its version does NOT match any of those rule assets
 And this rule is already installed and marked as non-customized
 And the installed rule is equal to the import payload
@@ -479,7 +479,7 @@ If this rule is already installed, it should be updated. Its `is_customized` fie
 
 ```Gherkin
 Given the import payload contains a non-customized prebuilt rule
-And its rule_id matches one or a few rule assets from the installed package
+And its rule_id matches one or more rule assets from the installed package
 And its version does NOT match any of those rule assets
 And this rule is already installed and marked as customized
 And the installed rule is equal to the import payload
@@ -509,7 +509,7 @@ Then the import should be rejected with a message "rule_id field is required"
 
 ```Gherkin
 Given the import payload contains a prebuilt rule without a version field
-And its rule_id matches one or a few rule assets from the installed package
+And its rule_id matches one or more rule assets from the installed package
 When the user imports the rule
 Then the import should be rejected with a message "version field is required"
 ```
