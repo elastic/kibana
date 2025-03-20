@@ -48046,16 +48046,20 @@ paths:
           name: kqlQuery
           schema:
             type: string
-        - description: Size provided for cursor based pagination
-          example: 25
+        - description: The page size to use for cursor-based pagination, must be greater or equal than 1
+          example: 1
           in: query
           name: size
           schema:
+            default: 1
             type: integer
-        - in: query
+        - description: The cursor to use for fetching the results from, when using a cursor-base pagination.
+          in: query
           name: searchAfter
           schema:
-            type: string
+            items:
+              type: string
+            type: array
         - description: The page to use for pagination, must be greater or equal than 1
           example: 1
           in: query
@@ -67272,20 +67276,50 @@ components:
     SLOs_find_slo_definitions_response:
       description: |
         A paginated response of SLO definitions matching the query.
-      properties:
-        page:
-          example: 2
-          type: number
-        perPage:
-          example: 100
-          type: number
-        results:
-          items:
-            $ref: '#/components/schemas/SLOs_slo_definition_response'
-          type: array
-        total:
-          example: 123
-          type: number
+      oneOf:
+        - type: object
+          properties:
+            page:
+              example: 1
+              type: number
+            perPage:
+              example: 25
+              type: number
+            results:
+              items:
+                $ref: '#/components/schemas/SLOs_slo_with_summary_response'
+              type: array
+            total:
+              example: 34
+              type: number
+        - type: object
+          properties:
+            page:
+              default: 1
+              description: for backward compability
+              type: number
+            perPage:
+              description: for backward compability
+              example: 25
+              type: number
+            results:
+              items:
+                $ref: '#/components/schemas/SLOs_slo_with_summary_response'
+              type: array
+            searchAfter:
+              description: the cursor to provide to get the next paged results
+              example:
+                - some-slo-id
+                - other-cursor-id
+              items:
+                type: string
+              type: array
+            size:
+              example: 25
+              type: number
+            total:
+              example: 34
+              type: number
       title: Find SLO definitions response
       type: object
     SLOs_find_slo_response:
@@ -67495,31 +67529,52 @@ components:
                 metrics:
                   description: List of metrics with their name, aggregation type, and field.
                   items:
-                    type: object
-                    properties:
-                      aggregation:
-                        description: The aggregation type of the metric. Only valid option is "sum"
-                        enum:
-                          - sum
-                        example: sum
-                        type: string
-                      field:
-                        description: The field of the metric.
-                        example: processor.processed
-                        type: string
-                      filter:
-                        description: The filter to apply to the metric.
-                        example: 'processor.outcome: "success"'
-                        type: string
-                      name:
-                        description: The name of the metric. Only valid options are A-Z
-                        example: A
-                        pattern: ^[A-Z]$
-                        type: string
-                    required:
-                      - name
-                      - aggregation
-                      - field
+                    oneOf:
+                      - type: object
+                        properties:
+                          aggregation:
+                            description: The aggregation type of the metric.
+                            enum:
+                              - sum
+                            example: sum
+                            type: string
+                          field:
+                            description: The field of the metric.
+                            example: processor.processed
+                            type: string
+                          filter:
+                            description: The filter to apply to the metric.
+                            example: 'processor.outcome: *'
+                            type: string
+                          name:
+                            description: The name of the metric. Only valid options are A-Z
+                            example: A
+                            pattern: ^[A-Z]$
+                            type: string
+                        required:
+                          - name
+                          - aggregation
+                          - field
+                      - type: object
+                        properties:
+                          aggregation:
+                            description: The aggregation type of the metric.
+                            enum:
+                              - doc_count
+                            example: doc_count
+                            type: string
+                          filter:
+                            description: The filter to apply to the metric.
+                            example: 'processor.outcome: *'
+                            type: string
+                          name:
+                            description: The name of the metric. Only valid options are A-Z
+                            example: A
+                            pattern: ^[A-Z]$
+                            type: string
+                        required:
+                          - name
+                          - aggregation
                   type: array
               required:
                 - metrics
@@ -67545,31 +67600,52 @@ components:
                 metrics:
                   description: List of metrics with their name, aggregation type, and field.
                   items:
-                    type: object
-                    properties:
-                      aggregation:
-                        description: The aggregation type of the metric. Only valid option is "sum"
-                        enum:
-                          - sum
-                        example: sum
-                        type: string
-                      field:
-                        description: The field of the metric.
-                        example: processor.processed
-                        type: string
-                      filter:
-                        description: The filter to apply to the metric.
-                        example: 'processor.outcome: *'
-                        type: string
-                      name:
-                        description: The name of the metric. Only valid options are A-Z
-                        example: A
-                        pattern: ^[A-Z]$
-                        type: string
-                    required:
-                      - name
-                      - aggregation
-                      - field
+                    oneOf:
+                      - type: object
+                        properties:
+                          aggregation:
+                            description: The aggregation type of the metric.
+                            enum:
+                              - sum
+                            example: sum
+                            type: string
+                          field:
+                            description: The field of the metric.
+                            example: processor.processed
+                            type: string
+                          filter:
+                            description: The filter to apply to the metric.
+                            example: 'processor.outcome: *'
+                            type: string
+                          name:
+                            description: The name of the metric. Only valid options are A-Z
+                            example: A
+                            pattern: ^[A-Z]$
+                            type: string
+                        required:
+                          - name
+                          - aggregation
+                          - field
+                      - type: object
+                        properties:
+                          aggregation:
+                            description: The aggregation type of the metric.
+                            enum:
+                              - doc_count
+                            example: doc_count
+                            type: string
+                          filter:
+                            description: The filter to apply to the metric.
+                            example: 'processor.outcome: *'
+                            type: string
+                          name:
+                            description: The name of the metric. Only valid options are A-Z
+                            example: A
+                            pattern: ^[A-Z]$
+                            type: string
+                        required:
+                          - name
+                          - aggregation
                   type: array
               required:
                 - metrics
