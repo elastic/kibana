@@ -7,7 +7,6 @@
 
 import type { RouteSecurity } from '@kbn/core-http-server';
 
-import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { API_VERSIONS } from '../../../common/constants';
 
 import type { FleetAuthz } from '../../../common';
@@ -120,8 +119,6 @@ export const READ_PACKAGE_INFO_SECURITY: RouteSecurity = {
 };
 
 export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
-  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
-
   router.versioned
     .get({
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
@@ -395,61 +392,59 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       installPackageFromRegistryHandler
     );
 
-  if (experimentalFeatures.useSpaceAwareness) {
-    router.versioned
-      .post({
-        path: EPM_API_ROUTES.INSTALL_KIBANA_ASSETS_PATTERN,
-        security: INSTALL_PACKAGES_SECURITY,
-        summary: `Install Kibana assets for a package`,
-        options: {
-          tags: ['oas-tag:Elastic Package Manager (EPM)'],
-        },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.public.v1,
-          validate: {
-            request: InstallKibanaAssetsRequestSchema,
-            response: {
-              200: {
-                body: () => InstallKibanaAssetsResponseSchema,
-              },
-              400: {
-                body: genericErrorResponse,
-              },
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.INSTALL_KIBANA_ASSETS_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Install Kibana assets for a package`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: InstallKibanaAssetsRequestSchema,
+          response: {
+            200: {
+              body: () => InstallKibanaAssetsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
             },
           },
         },
-        installPackageKibanaAssetsHandler
-      );
+      },
+      installPackageKibanaAssetsHandler
+    );
 
-    router.versioned
-      .delete({
-        path: EPM_API_ROUTES.DELETE_KIBANA_ASSETS_PATTERN,
-        security: INSTALL_PACKAGES_SECURITY,
-        summary: `Delete Kibana assets for a package`,
-        options: {
-          tags: ['oas-tag:Elastic Package Manager (EPM)'],
-        },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.public.v1,
-          validate: {
-            request: DeleteKibanaAssetsRequestSchema,
-            response: {
-              200: {
-                body: () => InstallKibanaAssetsResponseSchema,
-              },
-              400: {
-                body: genericErrorResponse,
-              },
+  router.versioned
+    .delete({
+      path: EPM_API_ROUTES.DELETE_KIBANA_ASSETS_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Delete Kibana assets for a package`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: DeleteKibanaAssetsRequestSchema,
+          response: {
+            200: {
+              body: () => InstallKibanaAssetsResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
             },
           },
         },
-        deletePackageKibanaAssetsHandler
-      );
-  }
+      },
+      deletePackageKibanaAssetsHandler
+    );
 
   router.versioned
     .post({

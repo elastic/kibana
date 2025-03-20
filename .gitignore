@@ -63,6 +63,7 @@ webpackstats.json
 !/config/README.md
 !/config/serverless.yml
 !/config/serverless.es.yml
+!/config/serverless.chat.yml
 !/config/serverless.oblt.yml
 !/config/serverless.security.yml
 !/config/serverless.security.essentials.yml
