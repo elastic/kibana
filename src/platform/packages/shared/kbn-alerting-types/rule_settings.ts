@@ -40,7 +40,7 @@ export interface RulesSettingsAlertDeletionProperties {
   isInactiveAlertsDeletionEnabled: boolean;
   activeAlertsDeletionThreshold: number;
   inactiveAlertsDeletionThreshold: number;
-  categoryIds?: string[];
+  categoryIds?: string[] | null;
 }
 
 export type RulesSettingsAlertDeletion = RulesSettingsAlertDeletionProperties &

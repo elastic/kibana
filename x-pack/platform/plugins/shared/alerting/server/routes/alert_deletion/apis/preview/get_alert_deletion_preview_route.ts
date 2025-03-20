@@ -45,7 +45,6 @@ export const getAlertDeletionPreviewRoute = (
         const spaceId = rulesClient.getSpaceId();
         const settings = transformRequestToAlertDeletionPreviewV1(req.query);
 
-        // TODO: clarify what happens when spaceId is undefined
         const affectedAlertCount = await alertDeletionClient.previewTask(
           settings,
           spaceId || 'default'

@@ -6,18 +6,20 @@
  */
 
 import type { RulesSettingsAlertDeletionProperties } from '@kbn/alerting-types';
-import type { AlertDeletionPreviewQueryV1 } from '../../../../shared';
+import type { AlertDeletionPreviewQueryV1 } from '../../../../../common/routes/rule/apis/alert_deletion';
 
 export const transformRequestToAlertDeletionPreview = ({
   is_active_alerts_deletion_enabled: isActiveAlertsDeletionEnabled,
   is_inactive_alerts_deletion_enabled: isInactiveAlertsDeletionEnabled,
   active_alerts_deletion_threshold: activeAlertsDeletionThreshold,
   inactive_alerts_deletion_threshold: inactiveAlertsDeletionThreshold,
+  category_ids: categoryIds,
 }: AlertDeletionPreviewQueryV1): RulesSettingsAlertDeletionProperties => {
   return {
     isActiveAlertsDeletionEnabled,
     isInactiveAlertsDeletionEnabled,
     activeAlertsDeletionThreshold,
     inactiveAlertsDeletionThreshold,
+    categoryIds,
   };
 };
