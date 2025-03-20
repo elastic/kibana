@@ -29,7 +29,6 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 
-import './index.scss';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
