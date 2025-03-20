@@ -19,7 +19,10 @@ import { mockGlobalState } from '../../../../public/common/mock';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
 import { EntityType } from '../../../../common/search_strategy';
-import type { InitEntityEngineResponse } from '../../../../common/api/entity_analytics';
+import type {
+  EngineDescriptor,
+  InitEntityEngineResponse,
+} from '../../../../common/api/entity_analytics';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { defaultOptions } from './constants';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -50,12 +53,29 @@ const definition: EntityDefinition = convertToEntityManagerDefinition(
   { namespace: 'test', filter: '' }
 );
 
+const engine: EngineDescriptor = {
+  type: 'user',
+  frequency: '',
+  fieldHistoryLength: 0,
+  indexPattern: '',
+  lookbackPeriod: '',
+  timeout: '',
+  delay: '',
+  status: 'started',
+};
+
 const stubSecurityDataView = createStubDataView({
   spec: {
     id: 'security',
     title: 'security',
   },
 });
+
+const defaultIndexPatterns = [
+  stubSecurityDataView.getIndexPattern(),
+  '.asset-criticality.asset-criticality-default',
+  'risk-score.risk-score-latest-default',
+];
 
 const dataviewService = {
   ...dataViewPluginMocks.createStartContract(),
@@ -427,7 +447,7 @@ describe('EntityStoreDataClient', () => {
     });
 
     it('applies data view indices to the entity store', async () => {
-      mockListDescriptor.mockResolvedValueOnce({ engines: [{}] });
+      mockListDescriptor.mockResolvedValueOnce({ engines: [engine] });
       mockGetEntityDefinition.mockResolvedValueOnce({
         definitions: [definition],
       });
@@ -439,6 +459,25 @@ describe('EntityStoreDataClient', () => {
       expect(response.successes.length).toBe(1);
     });
 
+    it('adds the engine indexPattern to the the entity store', async () => {
+      const indexPattern = 'testIndex';
+      mockListDescriptor.mockResolvedValueOnce({
+        engines: [{ ...engine, indexPattern }],
+      });
+      mockGetEntityDefinition.mockResolvedValueOnce({
+        definitions: [definition],
+      });
+
+      const response = await dataClient.applyDataViewIndices();
+
+      expect(mockUpdateEntityDefinition).toHaveBeenCalled();
+      expect(response.errors.length).toBe(0);
+      expect(response.successes.length).toBe(1);
+      expect(response.successes[0].changes).toEqual({
+        indexPatterns: [...defaultIndexPatterns, 'testIndex'],
+      });
+    });
+
     it('returns empty successes and errors if no engines found', async () => {
       mockListDescriptor.mockResolvedValueOnce({ engines: [] });
 
@@ -448,7 +487,7 @@ describe('EntityStoreDataClient', () => {
       expect(response.errors.length).toBe(0);
     });
 
-    it('throws an error if the user does not have required privileges', async () => {
+    it('return an error if the user does not have required privileges', async () => {
       mockCheckPrivileges.mockReturnValueOnce({
         hasAllRequested: false,
         privileges: {
@@ -456,24 +495,27 @@ describe('EntityStoreDataClient', () => {
           kibana: [],
         },
       });
+      mockListDescriptor.mockResolvedValueOnce({
+        engines: [engine],
+      });
+      mockGetEntityDefinition.mockResolvedValueOnce({
+        definitions: [definition],
+      });
 
-      mockListDescriptor.mockResolvedValueOnce({ engines: [{}] });
+      const result = await dataClient.applyDataViewIndices();
 
-      await expect(dataClient.applyDataViewIndices()).rejects.toThrow(
+      await expect(result.errors.length).toBe(1);
+      await expect(result.errors[0].message).toMatch(
         /The current user does not have the required indices privileges.*/
       );
     });
 
     it('skips update if index patterns are the same', async () => {
-      mockListDescriptor.mockResolvedValueOnce({ engines: [{}] });
+      mockListDescriptor.mockResolvedValueOnce({ engines: [engine] });
       mockGetEntityDefinition.mockResolvedValueOnce({
         definitions: [
           {
-            indexPatterns: [
-              stubSecurityDataView.getIndexPattern(),
-              '.asset-criticality.asset-criticality-default',
-              'risk-score.risk-score-latest-default',
-            ],
+            indexPatterns: defaultIndexPatterns,
           },
         ],
       });
@@ -488,7 +530,7 @@ describe('EntityStoreDataClient', () => {
     it('handles errors during update', async () => {
       const testErrorMessages = 'Update failed';
       mockUpdateEntityDefinition.mockRejectedValueOnce(new Error(testErrorMessages));
-      mockListDescriptor.mockResolvedValueOnce({ engines: [{}] });
+      mockListDescriptor.mockResolvedValueOnce({ engines: [engine] });
       mockGetEntityDefinition.mockResolvedValueOnce({
         definitions: [definition],
       });
