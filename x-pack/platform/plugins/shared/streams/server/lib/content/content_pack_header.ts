@@ -10,7 +10,7 @@ import { ContentPackHeader, contentPackHeaderSchema } from '@kbn/streams-schema'
 import { createSplitStream } from '@kbn/utils';
 
 export async function contentPackHeader(content: Readable): Promise<ContentPackHeader> {
-  return await new Promise((resolve, reject) =>
+  return new Promise((resolve, reject) =>
     content
       .pipe(createSplitStream('\n'))
       .pipe(
