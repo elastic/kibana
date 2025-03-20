@@ -231,7 +231,7 @@ And no button to proceed with applying the action should be displayed
 Given a Kibana installation running under an insufficient license
 When a user selects one or more prebuilt rules in the rule management table
 And user also selects one or more custom rules
-When user attempts to apply a <customizing_bulk_action> bulk action to selected rules
+And user attempts to apply a <customizing_bulk_action> bulk action to selected rules
 Then the user should see a message that this action is not allowed for prebuilt rules under the current license
 And required license name should be included in the message
 And a button to proceed with applying the action only to custom rules should not be displayed
