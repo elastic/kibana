@@ -66,6 +66,7 @@ import { createMaintenanceWindowRoute } from './maintenance_window/apis/external
 import { deleteMaintenanceWindowRoute } from './maintenance_window/apis/external/delete/delete_maintenance_window_route';
 import { archiveMaintenanceWindowRoute } from './maintenance_window/apis/external/archive/archive_maintenance_window_route';
 import { unarchiveMaintenanceWindowRoute } from './maintenance_window/apis/external/unarchive/unarchive_maintenance_window_route';
+import { updateMaintenanceWindowRoute } from './maintenance_window/apis/external/update/update_maintenance_window_route';
 
 import { registerRulesValueSuggestionsRoute } from './suggestions/values_suggestion_rules';
 import { registerFieldsRoute } from './suggestions/fields_rules';
@@ -159,6 +160,7 @@ export function defineRoutes(opts: RouteOptions) {
   deleteMaintenanceWindowRoute(router, licenseState);
   archiveMaintenanceWindowRoute(router, licenseState);
   unarchiveMaintenanceWindowRoute(router, licenseState);
+  updateMaintenanceWindowRoute(router, licenseState);
 
   // backfill APIs
   scheduleBackfillRoute(router, licenseState);

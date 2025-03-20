@@ -79,12 +79,9 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
               expect(response.body.title).to.eql('test-maintenance-window');
               expect(response.body.status).to.eql('upcoming');
               expect(response.body.enabled).to.eql(false);
-
               expect(response.body.scope.alerting.query.kql).to.eql("_id: '1234'");
-
               expect(response.body.created_by).to.eql(scenario.user.username);
               expect(response.body.updated_by).to.eql(scenario.user.username);
-
               expect(response.body.schedule.custom.duration).to.eql('1m');
               expect(response.body.schedule.custom.start).to.eql(start.toISOString());
               expect(response.body.schedule.custom.recurring.every).to.eql('2d');
@@ -127,6 +124,17 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
               // test scenario: incomplete schedule, missing start
             },
           },
+        })
+        .expect(400);
+    });
+
+    it('should throw if creating maintenance window with unknown field', async () => {
+      await supertest
+        .post(`${getUrlPrefix('space1')}/api/alerting/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...createRequestBody,
+          foo: 'bar',
         })
         .expect(400);
     });
