@@ -28,14 +28,6 @@ import {
   isSingleItem,
   noCaseCompare,
 } from '../shared/helpers';
-import {
-  appendSeparatorOption,
-  asOption,
-  byOption,
-  metadataOption,
-  onOption,
-  withOption,
-} from './options';
 
 import { type CommandDefinition } from './types';
 import { ENRICH_MODES, checkAggExistence, checkFunctionContent } from './commands_helpers';
@@ -160,7 +152,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [{ name: 'assignment', type: 'any' }],
     },
     suggest: suggestForRow,
-    options: [],
   },
   {
     name: 'from',
@@ -170,7 +161,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: 'FROM index_pattern [METADATA fields]',
     examples: ['FROM logs', 'FROM logs-*', 'FROM logs_*, events-*'],
-    options: [metadataOption],
     signature: {
       multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
@@ -212,7 +202,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: 'SHOW item',
     examples: ['SHOW INFO'],
-    options: [],
     signature: {
       multipleParams: false,
       params: [{ name: 'functions', type: 'function' }],
@@ -241,7 +230,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       'METRICS <sources> [ <aggregates> [ by <grouping> ]]',
       'METRICS src1, src2 agg1, agg2 by field1, field2',
     ],
-    options: [],
     signature: {
       multipleParams: true,
       params: [
@@ -266,7 +254,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       multipleParams: true,
       params: [{ name: 'expression', type: 'function', optional: true }],
     },
-    options: [byOption],
     validate: statsValidator,
     suggest: suggestForStats,
   },
@@ -286,7 +273,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       multipleParams: true,
       params: [{ name: 'expression', type: 'function', optional: true }],
     },
-    options: [byOption],
     // Reusing the same validation logic as stats command
     validate: statsValidator,
     suggest: () => [],
@@ -309,7 +295,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       multipleParams: true,
       params: [{ name: 'expression', type: 'any' }],
     },
-    options: [],
     suggest: suggestForEval,
   },
   {
@@ -323,7 +308,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       multipleParams: true,
       params: [{ name: 'renameClause', type: 'column' }],
     },
-    options: [asOption],
     suggest: suggestForRename,
   },
   {
@@ -338,7 +322,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       multipleParams: false,
       params: [{ name: 'size', type: 'integer', constantOnly: true }],
     },
-    options: [],
     suggest: suggestForLimit,
   },
   {
@@ -350,7 +333,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     declaration: 'KEEP column1[, ..., columnN]',
     examples: ['… | KEEP a', '… | KEEP a, b'],
     suggest: suggestForKeep,
-    options: [],
     signature: {
       multipleParams: true,
       params: [{ name: 'column', type: 'column', wildcards: true }],
@@ -363,7 +345,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: 'DROP column1[, ..., columnN]',
     examples: ['… | DROP a', '… | DROP a, b'],
-    options: [],
     signature: {
       multipleParams: true,
       params: [{ name: 'column', type: 'column', wildcards: true }],
@@ -421,7 +402,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       '… | SORT c ASC NULLS FIRST',
       '… | SORT a - abs(b)',
     ],
-    options: [],
     signature: {
       multipleParams: true,
       params: [{ name: 'expression', type: 'any' }],
@@ -440,7 +420,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       multipleParams: false,
       params: [{ name: 'expression', type: 'boolean' }],
     },
-    options: [],
     suggest: suggestForWhere,
   },
   {
@@ -451,7 +430,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: 'DISSECT input "pattern" [APPEND_SEPARATOR="<separator>"]',
     examples: ['… | DISSECT a "%{b} %{c}" APPEND_SEPARATOR = ":"'],
-    options: [appendSeparatorOption],
     signature: {
       multipleParams: false,
       params: [
@@ -506,7 +484,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: 'GROK input "pattern"',
     examples: ['… | GROK a "%{IP:b} %{NUMBER:c}"'],
-    options: [],
     signature: {
       multipleParams: false,
       params: [
@@ -523,7 +500,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: 'MV_EXPAND column',
     examples: ['ROW a=[1,2,3] | MV_EXPAND a'],
-    options: [],
     preview: true,
     signature: {
       multipleParams: false,
@@ -544,7 +520,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       '… | ENRICH my-policy ON pivotField',
       '… | ENRICH my-policy ON pivotField WITH a = enrichFieldA, b = enrichFieldB',
     ],
-    options: [onOption, withOption],
     signature: {
       multipleParams: false,
       params: [{ name: 'policyName', type: 'source', innerTypes: ['policy'] }],
@@ -583,7 +558,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     declaration: '',
     hidden: true,
     examples: [],
-    options: [],
     signature: {
       params: [],
       multipleParams: false,
@@ -640,7 +614,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
     },
-    options: [onOption],
     suggest: suggestForJoin,
   },
 ];

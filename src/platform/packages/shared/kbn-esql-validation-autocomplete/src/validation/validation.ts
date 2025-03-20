@@ -19,8 +19,7 @@ import {
   isIdentifier,
   walk,
 } from '@kbn/esql-ast';
-import type { ESQLAstItem, ESQLAstJoinCommand, ESQLIdentifier } from '@kbn/esql-ast/src/types';
-import { CommandOptionsDefinition } from '../definitions/types';
+import type { ESQLAstJoinCommand, ESQLIdentifier } from '@kbn/esql-ast/src/types';
 import { compareTypesWithLiterals } from '../shared/esql_types';
 import {
   areFieldAndVariableTypesCompatible,
@@ -197,38 +196,6 @@ async function validateAst(
   };
 }
 
-function validateArgs({
-  args,
-  commandName,
-  optionName,
-  references,
-}: {
-  args: ESQLAstItem[];
-  commandName: string;
-  optionName?: string;
-  references: ReferenceMaps;
-}): ESQLMessage[] {
-  const messages: ESQLMessage[] = [];
-  for (const arg of args) {
-    if (Array.isArray(arg)) {
-      continue;
-    }
-    if (isColumnItem(arg)) {
-      messages.push(...validateColumnForCommand(arg, commandName, references));
-    } else if (isFunctionItem(arg)) {
-      messages.push(
-        ...validateFunction({
-          fn: arg,
-          parentCommand: commandName,
-          parentOption: optionName,
-          references,
-        })
-      );
-    }
-  }
-  return messages;
-}
-
 function validateCommand(
   command: ESQLCommand,
   references: ReferenceMaps,
@@ -279,14 +246,7 @@ function validateCommand(
               })
             );
           } else if (isOptionItem(arg)) {
-            messages.push(
-              ...validateOption(
-                arg,
-                commandDef.options.find(({ name }) => name === arg.name),
-                command,
-                references
-              )
-            );
+            messages.push(...validateOption(arg, command, references));
           } else if (isColumnItem(arg) || isIdentifier(arg)) {
             if (command.name === 'stats' || command.name === 'inlinestats') {
               messages.push(errors.unknownAggFunction(arg));
@@ -320,24 +280,36 @@ function validateCommand(
 
 function validateOption(
   option: ESQLCommandOption,
-  optionDef: CommandOptionsDefinition | undefined,
   command: ESQLCommand,
   referenceMaps: ReferenceMaps
 ): ESQLMessage[] {
   // check if the arguments of the option are of the correct type
   const messages: ESQLMessage[] = [];
-  if (option.incomplete || command.incomplete || !optionDef) {
+  if (option.incomplete || command.incomplete || option.name === 'metadata') {
     return messages;
   }
-  if (!optionDef.skipCommonValidation) {
-    messages.push(
-      ...validateArgs({
-        args: option.args,
-        commandName: command.name,
-        optionName: option.name,
-        references: referenceMaps,
-      })
-    );
+
+  if (option.name === 'metadata') {
+    // Validation for the metadata statement is handled in the FROM command's validate method
+    return messages;
+  }
+
+  for (const arg of option.args) {
+    if (Array.isArray(arg)) {
+      continue;
+    }
+    if (isColumnItem(arg)) {
+      messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
+    } else if (isFunctionItem(arg)) {
+      messages.push(
+        ...validateFunction({
+          fn: arg,
+          parentCommand: command.name,
+          parentOption: option.name,
+          references: referenceMaps,
+        })
+      );
+    }
   }
 
   return messages;
