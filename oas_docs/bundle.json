@@ -27295,6 +27295,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -27392,6 +27395,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
