@@ -285,6 +285,7 @@ describe('pie_visualization', () => {
   describe('#getConfiguration', () => {
     describe('assigning icons to accessors', () => {
       const colIds = ['1', '2', '3', '4'];
+      const randomColOrder = colIds.slice().reverse();
       const frame = mockFrame();
       frame.datasourceLayers[LAYER_ID]!.getTableSpec = () =>
         colIds.map((id) => ({ columnId: id, fields: [] }));
@@ -296,7 +297,7 @@ describe('pie_visualization', () => {
 
       it('applies palette and collapse icons for single slice-by group', () => {
         const state = getExampleState();
-        state.layers[0].primaryGroups = colIds;
+        state.layers[0].primaryGroups = randomColOrder; // should get order from datasource
         state.layers[0].collapseFns = {
           '1': 'sum',
           '3': 'max',
