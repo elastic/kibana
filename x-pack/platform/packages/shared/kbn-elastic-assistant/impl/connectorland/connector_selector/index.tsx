@@ -14,20 +14,19 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import React, { Suspense, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { some } from 'lodash';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+import { GenerativeAIForSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { AttackDiscoveryStatusIndicator } from './attack_discovery_status_indicator';
 import { useLoadConnectors } from '../use_load_connectors';
 import * as i18n from '../translations';
-import { useLoadActionTypes } from '../use_load_action_types';
 import { useAssistantContext } from '../../assistant_context';
 import { getActionTypeTitle, getGenAiConfig } from '../helpers';
-import { AddConnectorModal } from '../add_connector_modal';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
@@ -57,13 +56,15 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
     stats = null,
   }) => {
     const { euiTheme } = useEuiTheme();
-    const { actionTypeRegistry, http, assistantAvailability, inferenceEnabled } =
+    const { actionTypeRegistry, http, assistantAvailability, inferenceEnabled, triggersActionsUi } =
       useAssistantContext();
-    // Connector Modal State
-    const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
-    const { data: actionTypes } = useLoadActionTypes({ http });
 
-    const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
+    const [isAddConnectorFlyoutOpen, setIsAddConnectorFlyoutOpen] = useState<boolean>(false);
+
+    const ConnectorFlyout = useMemo(
+      () => triggersActionsUi.getAddConnectorFlyout,
+      [triggersActionsUi]
+    );
 
     const { data: aiConnectors, refetch: refetchConnectors } = useLoadConnectors({
       http,
@@ -152,8 +153,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
 
     const cleanupAndCloseModal = useCallback(() => {
       setIsOpen?.(false);
-      setIsConnectorModalVisible(false);
-      setSelectedActionType(null);
+      setIsAddConnectorFlyoutOpen(false);
     }, [setIsOpen]);
 
     const [modalForceOpen, setModalForceOpen] = useState(isOpen);
@@ -162,7 +162,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       (connectorId: string) => {
         if (connectorId === ADD_NEW_CONNECTOR) {
           setModalForceOpen(false);
-          setIsConnectorModalVisible(true);
+          setIsAddConnectorFlyoutOpen(true);
           return;
         }
 
@@ -193,7 +193,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             iconType="plusInCircle"
             isDisabled={localIsDisabled}
             size="xs"
-            onClick={() => setIsConnectorModalVisible(true)}
+            onClick={() => setIsAddConnectorFlyoutOpen(true)}
           >
             {i18n.ADD_CONNECTOR}
           </EuiButtonEmpty>
@@ -218,18 +218,12 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             popoverProps={{ panelMinWidth: 400, anchorPosition: 'downRight' }}
           />
         )}
-        {isConnectorModalVisible && (
-          // Crashing management app otherwise
-          <Suspense fallback>
-            <AddConnectorModal
-              actionTypeRegistry={actionTypeRegistry}
-              actionTypes={actionTypes}
-              onClose={cleanupAndCloseModal}
-              onSaveConnector={onSaveConnector}
-              onSelectActionType={(actionType: ActionType) => setSelectedActionType(actionType)}
-              selectedActionType={selectedActionType}
-            />
-          </Suspense>
+        {isAddConnectorFlyoutOpen && (
+          <ConnectorFlyout
+            onClose={() => setIsAddConnectorFlyoutOpen(false)}
+            onConnectorCreated={onSaveConnector}
+            featureId={GenerativeAIForSecurityConnectorFeatureId}
+          />
         )}
       </>
     );
