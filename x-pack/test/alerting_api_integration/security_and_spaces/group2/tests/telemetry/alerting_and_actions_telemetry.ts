@@ -258,7 +258,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
               threshold: [0],
               searchType: 'esqlQuery',
               esqlQuery: {
-                esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
+                esql: 'from kibana-alerting-test-data | stats c = count(date) | where c < 0',
               },
               timeField: 'date_epoch_millis',
             },
@@ -287,7 +287,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
             notify_when: 'onActiveAlert',
             throttle: null,
             params: {
-              index: '.kibana-alerting-test-data',
+              index: 'kibana-alerting-test-data',
               reference: 'test',
             },
             actions: [
