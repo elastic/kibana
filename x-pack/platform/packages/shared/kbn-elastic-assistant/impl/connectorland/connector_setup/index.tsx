@@ -24,6 +24,9 @@ export interface ConnectorSetupProps {
   updateConversationsOnSaveConnector?: boolean;
 }
 
+/**
+ * @deprecated Use the Connector Flyout from `triggersActionsUi.getAddConnectorFlyout` instead.
+ */
 export const ConnectorSetup = ({
   conversation: defaultConversation,
   onConversationUpdate,

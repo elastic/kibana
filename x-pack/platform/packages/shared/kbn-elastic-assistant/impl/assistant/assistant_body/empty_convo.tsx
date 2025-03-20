@@ -6,13 +6,11 @@
  */
 
 import React, { Dispatch, SetStateAction } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
-import { AssistantBeacon } from '@kbn/ai-assistant-icon';
+import { InstallKnowledgeBase, ReadyToHelp } from '@kbn/ai-assistant-cta';
 import { SystemPrompt } from '../prompt_editor/system_prompt';
-import { SetupKnowledgeBaseButton } from '../../knowledge_base/setup_knowledge_base_button';
-import * as i18n from '../translations';
+import { useKnowledgeBaseInstall } from '../../knowledge_base/use_knowledge_base_install';
 
 interface Props {
   currentSystemPromptId: string | undefined;
@@ -29,40 +27,41 @@ export const EmptyConvo: React.FC<Props> = ({
   setCurrentSystemPromptId,
   setIsSettingsModalVisible,
 }) => {
+  const { isSetupAvailable, isSetupComplete, onInstallKnowledgeBase, isSetupInProgress } =
+    useKnowledgeBaseInstall();
+
+  if (!isSetupComplete) {
+    return (
+      <EuiFlexGroup alignItems="center" justifyContent="center" data-test-subj="emptyConvo">
+        <EuiFlexItem grow={true}>
+          <InstallKnowledgeBase
+            onInstallKnowledgeBase={onInstallKnowledgeBase}
+            isInstallAvailable={isSetupAvailable}
+            isInstalling={isSetupInProgress}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="center" data-test-subj="emptyConvo">
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="center"
+      direction="column"
+      data-test-subj="emptyConvo"
+    >
       <EuiFlexItem grow={false}>
-        <EuiPanel
-          hasShadow={false}
-          css={css`
-            max-width: 400px;
-            text-align: center;
-          `}
-        >
-          <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
-            <EuiFlexItem grow={false}>
-              <AssistantBeacon backgroundColor="emptyShade" size="xl" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText>
-                <h3>{i18n.EMPTY_SCREEN_TITLE}</h3>
-                <p>{i18n.EMPTY_SCREEN_DESCRIPTION}</p>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <SystemPrompt
-                allSystemPrompts={allSystemPrompts}
-                currentSystemPromptId={currentSystemPromptId}
-                isSettingsModalVisible={isSettingsModalVisible}
-                onSystemPromptSelectionChange={setCurrentSystemPromptId}
-                setIsSettingsModalVisible={setIsSettingsModalVisible}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <SetupKnowledgeBaseButton />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
+        <ReadyToHelp type="security" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <SystemPrompt
+          allSystemPrompts={allSystemPrompts}
+          currentSystemPromptId={currentSystemPromptId}
+          isSettingsModalVisible={isSettingsModalVisible}
+          onSystemPromptSelectionChange={setCurrentSystemPromptId}
+          setIsSettingsModalVisible={setIsSettingsModalVisible}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
