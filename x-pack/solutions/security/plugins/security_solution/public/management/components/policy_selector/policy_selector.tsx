@@ -84,11 +84,16 @@ type CustomPolicyDisplayOptions = Pick<
   'disabled' | 'toolTipContent' | 'toolTipProps'
 >;
 
+type AdditionalListItemProps = Omit<EuiSelectableOption, 'prepend'>;
+
 export interface PolicySelectorProps {
   /** The list of policy IDs that are currently selected */
   selectedPolicyIds: string[];
   /** Callback for when selection changes occur. */
-  onChange: (updatedSelectedPolicyIds: string[]) => void;
+  onChange: (
+    updatedSelectedPolicyIds: string[],
+    updatedAdditionalListItems?: AdditionalListItemProps[]
+  ) => void;
   /**
    * Any query options supported by the fleet api. The defaults applied will filter for only
    * Endpoint integration policies sorted by name.
@@ -104,6 +109,11 @@ export interface PolicySelectorProps {
    * Default: `['name', 'id', 'description', 'policy_ids', 'package.name']`
    */
   searchFields?: string[];
+  /**
+   * A set of additional items to include in the selectable list. Items will be displayed at the
+   * bottom of each policy page.
+   */
+  additionalListItems?: AdditionalListItemProps[];
   /** A css size value for the height of the area that shows the policies. Default is `200px` */
   height?: string;
   /**
@@ -125,14 +135,14 @@ export interface PolicySelectorProps {
   policyDisplayOptions?: (
     policy: PackagePolicy
   ) => Pick<EuiSelectableOption, 'disabled' | 'toolTipContent' | 'toolTipProps'>;
-
   /** If `true`, then only a single selection will be allowed. Default is `false` */
   singleSelection?: boolean;
   'data-test-subj'?: string;
 }
 
 /**
- * Provides a component that displays the list of policies fetched from Fleet, which the user can select and unselect.
+ * Provides a component that displays a list of policies fetched from Fleet, which the user can
+ * select and unselect.
  */
 export const PolicySelector = memo<PolicySelectorProps>(
   ({
@@ -152,6 +162,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
     showPolicyLink = false,
     policyDisplayOptions,
     singleSelection = false,
+    additionalListItems = [],
     'data-test-subj': dataTestSubj,
   }) => {
     // TODO:PT add support for showing static selections (for Global, Unassigned)
@@ -251,32 +262,53 @@ export const PolicySelector = memo<PolicySelectorProps>(
         );
       };
 
-      return policyListResponse.items.map<EuiSelectableOption<OptionPolicyData>>((policy) => {
-        const customDisplayOptions: CustomPolicyDisplayOptions = policyDisplayOptions
-          ? policyDisplayOptions(policy)
-          : {};
+      return policyListResponse.items
+        .map<EuiSelectableOption<OptionPolicyData>>((policy) => {
+          const customDisplayOptions: CustomPolicyDisplayOptions = policyDisplayOptions
+            ? policyDisplayOptions(policy)
+            : {};
 
-        return {
-          disabled: false,
-          ...customDisplayOptions,
-          label: policy.name,
-          className: 'policy-name',
-          'data-test-subj': getTestId(`policy-${policy.id}`),
-          policy,
-          checked: isPolicySelected.has(policy.id) ? 'on' : undefined,
-          prepend: useCheckbox ? (
-            <EuiCheckbox
-              id={htmlIdGenerator()()}
-              onChange={NOOP}
-              checked={isPolicySelected.has(policy.id)}
-              disabled={customDisplayOptions.disabled ?? false}
-              data-test-subj={getTestId(`policy-${policy.id}-checkbox`)}
-            />
-          ) : undefined,
-          append: showPolicyLink ? buildLinkToApp(policy) : null,
-        };
-      });
+          return {
+            disabled: false,
+            ...customDisplayOptions,
+            label: policy.name,
+            className: 'policy-name',
+            'data-test-subj': getTestId(`policy-${policy.id}`),
+            policy,
+            checked: isPolicySelected.has(policy.id) ? 'on' : undefined,
+            prepend: useCheckbox ? (
+              <EuiCheckbox
+                id={htmlIdGenerator()()}
+                onChange={NOOP}
+                checked={isPolicySelected.has(policy.id)}
+                disabled={customDisplayOptions.disabled ?? false}
+                data-test-subj={getTestId(`policy-${policy.id}-checkbox`)}
+              />
+            ) : undefined,
+            append: showPolicyLink ? buildLinkToApp(policy) : null,
+          };
+        })
+        .concat(
+          ...additionalListItems.map((additionalItem) => {
+            return {
+              ...additionalItem,
+              'data-type': 'customItem',
+              prepend: useCheckbox ? (
+                <EuiCheckbox
+                  id={htmlIdGenerator()()}
+                  onChange={NOOP}
+                  checked={additionalItem.checked === 'on'}
+                  disabled={additionalItem.disabled ?? false}
+                  data-test-subj={getTestId(
+                    `${additionalItem['data-test-subj'] ?? getTestId('additionalItem')}-checkbox`
+                  )}
+                />
+              ) : null,
+            } as unknown as EuiSelectableOption<OptionPolicyData>;
+          })
+        );
     }, [
+      additionalListItems,
       canReadPolicyManagement,
       canWriteIntegrationPolicies,
       getAppUrl,
@@ -300,14 +332,26 @@ export const PolicySelector = memo<PolicySelectorProps>(
     const handleOnPolicySelectChange = useCallback<
       Required<EuiSelectableProps<OptionPolicyData>>['onChange']
     >(
-      (_updatedOptions, _ev, changedOption) => {
-        return onChange(
-          changedOption.checked === 'on'
+      (updatedOptions, _ev, changedOption) => {
+        // @ts-expect-error
+        const isChangedOptionCustom = changedOption['data-type'] === 'customItem';
+        const updatedPolicyIds = !isChangedOptionCustom
+          ? changedOption.checked === 'on'
             ? selectedPolicyIds.concat(changedOption.policy.id)
             : selectedPolicyIds.filter((id) => id !== changedOption.policy.id)
-        );
+          : selectedPolicyIds;
+
+        const updatedAdditionalItems: AdditionalListItemProps[] = isChangedOptionCustom
+          ? updatedOptions
+              // @ts-expect-error
+              .filter((option) => option['data-type'] === 'customItem')
+              // @ts-expect-error
+              .map(({ prepend, 'data-type': dataType, ...option }) => option)
+          : additionalListItems;
+
+        return onChange(updatedPolicyIds, updatedAdditionalItems);
       },
-      [onChange, selectedPolicyIds]
+      [additionalListItems, onChange, selectedPolicyIds]
     );
 
     const onPageClickHandler: Required<EuiPaginationProps>['onPageClick'] = useCallback(
