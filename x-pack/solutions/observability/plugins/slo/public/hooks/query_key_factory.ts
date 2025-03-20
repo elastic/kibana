@@ -51,8 +51,18 @@ export const sloKeys = {
   historicalSummaries: () => [...sloKeys.all, 'historicalSummary'] as const,
   historicalSummary: (list: Array<{ sloId: string; instanceId: string }>) =>
     [...sloKeys.historicalSummaries(), list] as const,
-  definitions: (search: string, page: number, perPage: number, includeOutdatedOnly: boolean) =>
-    [...sloKeys.all, 'definitions', search, page, perPage, includeOutdatedOnly] as const,
+  definitions: (params?: {
+    search: string;
+    page: number;
+    perPage: number;
+    includeOutdatedOnly: boolean;
+  }) => {
+    const keyParams =
+      params && Object.keys(params).length
+        ? [...sloKeys.all, ...Object.keys(params)]
+        : { ...sloKeys.all };
+    return ['slo', 'definitions'] as const;
+  },
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
   health: (list: Array<{ sloId: string; sloInstanceId: string }>) =>
     [...sloKeys.all, 'health', list] as const,

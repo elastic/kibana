@@ -205,20 +205,6 @@ export function SloManagementTable() {
 
   const columns: Array<EuiBasicTableColumn<SLODefinitionResponse>> = [
     {
-      field: 'revision',
-      width: '10%',
-      name: i18n.translate('xpack.slo.sloManagementTable.columns.revisionLabel', {
-        defaultMessage: 'Revision',
-      }),
-    },
-    {
-      field: 'version',
-      width: '10%',
-      name: i18n.translate('xpack.slo.sloManagementTable.columns.versionLabel', {
-        defaultMessage: 'Version',
-      }),
-    },
-    {
       field: 'name',
       name: i18n.translate('xpack.slo.sloManagementTable.columns.nameLabel', {
         defaultMessage: 'Name',
@@ -234,6 +220,13 @@ export function SloManagementTable() {
           </EuiLink>
         );
       },
+    },
+    {
+      field: 'version',
+      width: '10%',
+      name: i18n.translate('xpack.slo.sloManagementTable.columns.versionLabel', {
+        defaultMessage: 'Version',
+      }),
     },
     {
       field: 'tags',

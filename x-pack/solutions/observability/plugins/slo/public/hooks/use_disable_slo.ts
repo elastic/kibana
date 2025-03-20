@@ -44,6 +44,7 @@ export function useDisableSlo() {
       onSuccess: (_data, { name }) => {
         queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
         queryClient.invalidateQueries({ queryKey: sloKeys.details(), exact: false });
+        queryClient.invalidateQueries({ queryKey: sloKeys.definitions(), exact: false });
 
         toasts.addSuccess(
           i18n.translate('xpack.slo.disable.successNotification', {

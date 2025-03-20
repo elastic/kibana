@@ -35,7 +35,7 @@ export function useFetchSloDefinitions({
   const search = name.endsWith('*') ? name : `${name}*`;
 
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({
-    queryKey: sloKeys.definitions(search, page, perPage, includeOutdatedOnly),
+    queryKey: sloKeys.definitions({ search, page, perPage, includeOutdatedOnly }),
     queryFn: async ({ signal }) => {
       try {
         return await sloClient.fetch('GET /api/observability/slos/_definitions 2023-10-31', {
