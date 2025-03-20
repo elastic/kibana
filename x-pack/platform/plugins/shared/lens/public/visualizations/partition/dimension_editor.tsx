@@ -36,7 +36,7 @@ import {
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { getSortedAccessorsForGroup } from './to_expression';
 
-type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
+export type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
   paletteService: PaletteRegistry;
   palettes: KbnPalettes;
   isDarkMode: boolean;
