@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiCard } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
@@ -44,12 +44,6 @@ export const IntegrationCard = memo(
     } = useKibana();
     const { getHref } = useLink();
 
-    const icons = useMemo(
-      () => (!integration.icons || !integration.icons.length ? [] : integration.icons),
-      [integration]
-    );
-
-    // TODO this logic might need to be revesited once the integration work is done
     const onClick = useCallback(() => {
       const url = getHref(INTEGRATION_DETAILS_PAGE, {
         pkgkey: `${integration.name}-${integration.version}`,
@@ -72,7 +66,7 @@ export const IntegrationCard = memo(
         hasBorder
         icon={
           <CardIcon
-            icons={icons}
+            icons={integration.icons}
             integrationName={integration.title}
             packageName={integration.name}
             size="xl"

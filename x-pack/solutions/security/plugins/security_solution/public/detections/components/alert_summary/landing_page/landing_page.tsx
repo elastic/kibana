@@ -63,7 +63,7 @@ export interface LandingPageProps {
  */
 export const LandingPage = memo(({ packages }: LandingPageProps) => {
   const { euiTheme } = useEuiTheme();
-  const { onClick: moreIntegrations } = useAddIntegrationsUrl(); // TODO this link might have to be revesited once the integration work is done
+  const { onClick: moreIntegrations } = useAddIntegrationsUrl(); // TODO this link might have to be revisited once the integration work is done
 
   // We only want to show the 2 top integrations, Splunk and GoogleSecOps, in that specific order
   const primaryPackages = useMemo(
