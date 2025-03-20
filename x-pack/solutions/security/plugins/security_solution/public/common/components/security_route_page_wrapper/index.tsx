@@ -66,14 +66,16 @@ export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWra
     return <Redirect to="" />;
   }
 
+  const isAuthorized = link != null && !link.unauthorized;
+
   // Allows a redirect to the home page if the link is undefined or unauthorized.
   // This is used in the AI for SOC tier (for the Alert Summary page for example), as it does not make sense to show the NoPrivilegesPage.
-  if (redirectIfUnauthorized && (link == null || link.unauthorized)) {
+  if (redirectIfUnauthorized && !isAuthorized) {
     return <Redirect to="" />;
   }
 
   // Show the no privileges page if the link is undefined or unauthorized.
-  if (link == null || link.unauthorized) {
+  if (!isAuthorized) {
     return (
       <>
         <SpyRoute pageName={pageName} />
