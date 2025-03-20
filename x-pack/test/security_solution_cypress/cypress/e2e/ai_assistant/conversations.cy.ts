@@ -75,7 +75,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       assertNewConversation(true, 'New chat');
     });
   });
-  describe.only('When no conversations exist but connectors do exist, show empty convo', () => {
+  describe('When no conversations exist but connectors do exist, show empty convo', () => {
     beforeEach(() => {
       createAzureConnector();
     });
