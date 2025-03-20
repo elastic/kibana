@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
+import type { EuiFieldSearchProps } from '@elastic/eui';
 import {
   EuiSelectable,
   type EuiSelectableProps,
@@ -15,6 +16,7 @@ import {
   EuiPanel,
   EuiPagination,
   EuiProgress,
+  EuiFieldSearch,
 } from '@elastic/eui';
 import type { GetPackagePoliciesRequest, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { INTEGRATIONS_PLUGIN_ID, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
@@ -23,6 +25,7 @@ import styled from '@emotion/styled';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import type { EuiPaginationProps } from '@elastic/eui/src/components/pagination/pagination';
 import { i18n } from '@kbn/i18n';
+import useDebounce from 'react-use/lib/useDebounce';
 import { APP_UI_ID } from '../../../../common';
 import { useAppUrl } from '../../../common/lib/kibana';
 import { LinkToApp } from '../../../common/components/endpoint';
@@ -76,6 +79,13 @@ export interface PolicySelectorProps {
     GetPackagePoliciesRequest['query'],
     'perPage' | 'kuery' | 'sortField' | 'sortOrder' | 'withAgentCount'
   >;
+  /**
+   * A list of Integration policy fields that should be used when user enters a search value. The
+   * fields should match those that are defined in the `PackagePolicy` type, including deep
+   * references like `package.name`, etc.
+   * Default: `['name', 'id', 'description', 'policy_ids', 'package.name']`
+   */
+  searchFields?: string[];
   /** A css size value for the height of the area that shows the policies. Default is `200px` */
   height?: string;
   /**
@@ -109,6 +119,7 @@ export interface PolicySelectorProps {
 export const PolicySelector = memo<PolicySelectorProps>(
   ({
     queryOptions: {
+      // TODO:PT define central `const` for this and refactor other areas that currently use it
       kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
       sortField = 'name',
       sortOrder = 'asc',
@@ -116,6 +127,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
       perPage = 20,
     } = {},
     selectedPolicyIds,
+    searchFields = ['name', 'description', 'policy_ids', 'package.name'],
     onChange,
     height,
     useCheckbox = false,
@@ -131,6 +143,33 @@ export const PolicySelector = memo<PolicySelectorProps>(
     const { canReadPolicyManagement, canWriteIntegrationPolicies } =
       useUserPrivileges().endpointPrivileges;
     const [page, setPage] = useState(1);
+    const [userSearchValue, setUserSearchValue] = useState('');
+    const [searchKuery, setSearchKuery] = useState('');
+
+    // Delays setting the `searchKuery` for a few seconds - allowing the user to pause typing - so
+    // that we don't call the API on every character change.
+    useDebounce(
+      () => {
+        if (userSearchValue) {
+          const kueryWithSearchValue: string = searchFields
+            .map((field) => `(${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.${field}:*${userSearchValue}*)`)
+            .join(' OR ');
+
+          if (kuery) {
+            setSearchKuery(`(${kuery}) AND (${kueryWithSearchValue})`);
+            return;
+          }
+
+          setSearchKuery(kueryWithSearchValue);
+          return;
+        }
+
+        setSearchKuery(kuery);
+      },
+      300,
+      [userSearchValue, kuery]
+    );
+
     const {
       data: policyListResponse,
       isFetching,
@@ -138,7 +177,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
       error,
     } = useFetchIntegrationPolicyList(
       {
-        kuery,
+        kuery: searchKuery,
         sortOrder,
         sortField,
         perPage,
@@ -258,10 +297,36 @@ export const PolicySelector = memo<PolicySelectorProps>(
       []
     );
 
+    const onSearchHandler: Required<EuiFieldSearchProps>['onSearch'] = useCallback(
+      (updatedSearchValue) => {
+        setUserSearchValue(updatedSearchValue);
+      },
+      []
+    );
+
+    const onSearchInputChangeHandler: Required<EuiFieldSearchProps>['onChange'] = useCallback(
+      (ev) => {
+        setUserSearchValue(ev.target.value);
+      },
+      []
+    );
+
     return (
       <PolicySelectorContainer data-test-subj={dataTestSubj} height={height}>
         <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
-          {'search bar here'}
+          <EuiFieldSearch
+            placeholder={i18n.translate(
+              'xpack.securitySolution.policySelector.searchbarPlaceholder',
+              { defaultMessage: 'Search policies' }
+            )}
+            value={userSearchValue}
+            onSearch={onSearchHandler}
+            onChange={onSearchInputChangeHandler}
+            incremental={false}
+            isClearable
+            fullWidth
+            compressed
+          />
         </EuiPanel>
 
         <div className="selectable-container">
