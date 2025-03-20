@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiForm,
   EuiFormRow,
+  EuiSelect,
   EuiDescribedFormGroup,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -106,6 +107,18 @@ export const AgentEditView: React.FC<AgentEditViewProps> = ({ agentId }) => {
                   name="description"
                   value={editState.description}
                   onChange={(e) => setFieldValue('description', e.target.value)}
+                />
+              </EuiFormRow>
+              <EuiFormRow label="Visibility">
+                <EuiSelect
+                  data-test-subj="workchatAppAgentEditViewSelect"
+                  name="public"
+                  value={editState.public ? 'public' : 'private'}
+                  options={[
+                    { value: 'public', text: 'Public - everyone can use it' },
+                    { value: 'private', text: 'Private - only you can use it' },
+                  ]}
+                  onChange={(e) => setFieldValue('public', e.target.value === 'public')}
                 />
               </EuiFormRow>
             </EuiDescribedFormGroup>

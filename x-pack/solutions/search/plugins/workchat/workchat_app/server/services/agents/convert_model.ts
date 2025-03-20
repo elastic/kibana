@@ -22,6 +22,7 @@ export const savedObjectToModel = ({ attributes }: SavedObject<AgentAttributes>)
       name: attributes.user_name,
     },
     configuration: attributes.configuration,
+    public: attributes.access_control.public,
   };
 };
 
@@ -57,7 +58,7 @@ export const createRequestToRaw = ({
     user_id: user.id,
     user_name: user.name,
     access_control: {
-      public: false,
+      public: createRequest.public,
     },
   };
 };

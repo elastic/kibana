@@ -13,6 +13,7 @@ export interface AgentEditState {
   name: string;
   description: string;
   systemPrompt: string;
+  public: boolean;
 }
 
 const emptyState = (): AgentEditState => {
@@ -20,6 +21,7 @@ const emptyState = (): AgentEditState => {
     name: '',
     description: '',
     systemPrompt: '',
+    public: false,
   };
 };
 
@@ -43,6 +45,7 @@ export const useAgentEdition = ({
           name: agent.name,
           description: agent.description,
           systemPrompt: agent.configuration.systemPrompt ?? '',
+          public: agent.public,
         });
       }
     };
@@ -62,6 +65,7 @@ export const useAgentEdition = ({
       configuration: {
         systemPrompt: editState.systemPrompt,
       },
+      public: editState.public,
     };
 
     (agentId ? agentService.update(agentId, payload) : agentService.create(payload)).then(

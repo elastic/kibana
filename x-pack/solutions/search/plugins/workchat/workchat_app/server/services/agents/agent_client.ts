@@ -20,7 +20,9 @@ interface AgentClientOptions {
   user: UserNameAndId;
 }
 
-export type AgentUpdatableFields = Partial<Pick<Agent, 'name' | 'description' | 'configuration'>>;
+export type AgentUpdatableFields = Partial<
+  Pick<Agent, 'name' | 'description' | 'configuration' | 'public'>
+>;
 
 /**
  * Agent client scoped to a current user.

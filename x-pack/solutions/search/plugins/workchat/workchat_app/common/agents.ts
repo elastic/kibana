@@ -16,9 +16,13 @@ export interface Agent {
   description: string;
   lastUpdated: string;
   user: UserNameAndId;
+  public: boolean;
   configuration: Record<string, any>;
 }
 
-export type AgentCreateRequest = Pick<Agent, 'name' | 'description' | 'configuration'> & {
+export type AgentCreateRequest = Pick<
+  Agent,
+  'name' | 'description' | 'configuration' | 'public'
+> & {
   id?: string;
 };

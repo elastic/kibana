@@ -60,10 +60,11 @@ export const registerAgentRoutes = ({ getServices, router, logger }: RouteDepend
       validate: {
         body: schema.object({
           name: schema.string(),
-          description: schema.string(),
+          description: schema.string({ defaultValue: '' }),
           configuration: schema.object({
             systemPrompt: schema.maybe(schema.string()),
           }),
+          public: schema.boolean({ defaultValue: false }),
         }),
       },
     },
@@ -101,10 +102,11 @@ export const registerAgentRoutes = ({ getServices, router, logger }: RouteDepend
         }),
         body: schema.object({
           name: schema.string(),
-          description: schema.string(),
+          description: schema.string({ defaultValue: '' }),
           configuration: schema.object({
             systemPrompt: schema.maybe(schema.string()),
           }),
+          public: schema.boolean({ defaultValue: false }),
         }),
       },
     },
