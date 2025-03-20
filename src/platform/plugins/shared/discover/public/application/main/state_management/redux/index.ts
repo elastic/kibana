@@ -23,7 +23,7 @@ import {
 
 export type { DiscoverInternalState, InternalStateDataRequestParams } from './types';
 
-export { type InternalStateStore, createInternalStateStore, createTab } from './internal_state';
+export { type InternalStateStore, createInternalStateStore, createTabItem } from './internal_state';
 
 export const internalStateActions = {
   ...omit(
