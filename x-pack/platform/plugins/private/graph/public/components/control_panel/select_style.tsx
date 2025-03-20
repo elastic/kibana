@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { Workspace } from '../../types';
 
 interface SelectStyleProps {
@@ -35,7 +36,7 @@ export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
             <EuiIcon
               type="stopFilled"
               color={c}
-              className="gphColorPicker__color"
+              css={colorPickerIconStyles}
               aria-hidden="true"
               onClick={onSelectColor}
             />
@@ -45,3 +46,13 @@ export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
     </div>
   );
 };
+
+const colorPickerIconStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    margin: euiTheme.size.xs,
+    cursor: 'pointer',
+
+    '&:hover, &:focus': {
+      transform: 'scale(1.4)',
+    },
+  });
