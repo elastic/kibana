@@ -8,22 +8,40 @@
  */
 
 import type { TabbedContentState } from '@kbn/unified-tabs/src/components/tabbed_content/tabbed_content';
-import { createInternalStateAsyncThunk } from '../utils';
+import { differenceBy } from 'lodash';
 import type { TabState } from '../types';
 import { selectAllTabs, selectCurrentTab } from '../selectors';
+import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
+import { createTabRuntimeState } from '../runtime_state';
 
-export const updateTabs = createInternalStateAsyncThunk(
-  'internalState/updateTabs',
-  async (
-    {
-      updateState: { items, selectedItem },
-      stopSyncing,
-    }: {
-      updateState: TabbedContentState;
-      stopSyncing?: () => void;
-    },
-    { getState, extra: { urlStateStorage } }
-  ) => {
+export const setTabs: InternalStateThunkActionCreator<
+  [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
+> =
+  (params) =>
+  (dispatch, getState, { runtimeStateManager }) => {
+    const previousTabs = selectAllTabs(getState());
+    const removedTabs = differenceBy(previousTabs, params.allTabs, (tab) => tab.id);
+    const addedTabs = differenceBy(params.allTabs, previousTabs, (tab) => tab.id);
+
+    for (const tab of removedTabs) {
+      delete runtimeStateManager.tabs.byId[tab.id];
+    }
+
+    for (const tab of addedTabs) {
+      runtimeStateManager.tabs.byId[tab.id] = createTabRuntimeState();
+    }
+
+    dispatch(internalStateSlice.actions.setTabs(params));
+  };
+
+interface UpdateTabsParams {
+  updateState: TabbedContentState;
+  stopSyncing?: () => void;
+}
+
+export const updateTabs: InternalStateThunkActionCreator<[UpdateTabsParams], Promise<void>> =
+  ({ updateState: { items, selectedItem }, stopSyncing }) =>
+  async (dispatch, getState, { urlStateStorage }) => {
     const allTabs = selectAllTabs(getState());
     const currentTab = selectCurrentTab(getState());
     let updatedTabs: TabState[] = items.map(
@@ -54,6 +72,10 @@ export const updateTabs = createInternalStateAsyncThunk(
       }
     }
 
-    return { updatedTabs, selectedTabId: selectedItem?.id ?? currentTab.id };
-  }
-);
+    dispatch(
+      setTabs({
+        allTabs: updatedTabs,
+        selectedTabId: selectedItem?.id ?? currentTab.id,
+      })
+    );
+  };
