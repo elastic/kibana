@@ -47,6 +47,7 @@ import {
   usePermissionCheckQuery,
   useIntegrationsStateContext,
   useGetSettingsQuery,
+  sendGetFileByPath,
 } from '../../../../hooks';
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
@@ -80,6 +81,7 @@ import {
   IconPanel,
   LoadingIconPanel,
   AddIntegrationButton,
+  EditReadMeButton,
 } from './components';
 import { AssetsPage } from './assets';
 import { OverviewPage } from './overview';
@@ -91,6 +93,7 @@ import { Configs } from './configs';
 
 import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 import { InstallButton } from './settings/install_button';
+import { EditReadmeFlyout } from './components/edit_readme_flyout';
 
 export type DetailViewPanelName =
   | 'overview'
@@ -166,7 +169,10 @@ export function Detail() {
   const isCloud = !!services?.cloud?.cloudId;
   const agentPolicyIdFromContext = getAgentPolicyId();
   const isOverviewPage = panel === 'overview';
+  // edit readme state
 
+  const [isEditReadMeOpen, setIsEditReadMeOpen] = useState(false);
+  const [readMeContent, setReadMeContent] = useState<string>('');
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
   const setPackageInstallStatus = useSetPackageInstallStatus();
@@ -396,6 +402,23 @@ export function Detail() {
     [integrationInfo, isLoading, packageInfo, href, queryParams]
   );
 
+  const saveReadMeChanges = (updatedReadMe: string | undefined) => {
+    console.log('saving the changes', updatedReadMe);
+  };
+  const handleEditReadMeClick = useCallback<ReactEventHandler>(
+    (ev) => {
+      // edit button clicked so need to open the modal to edit the read me
+      const readmePath = packageInfo?.readme;
+      if (!readmePath) {
+        return;
+      }
+      sendGetFileByPath(readmePath).then((res) => {
+        setReadMeContent(res.data || '');
+        setIsEditReadMeOpen(true);
+      });
+    },
+    [packageInfo?.readme]
+  );
   const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
     (ev) => {
       ev.preventDefault();
@@ -558,19 +581,26 @@ export function Detail() {
                           isTourVisible={isOverviewPage && isGuidedOnboardingActive}
                           tourOffset={10}
                         >
-                          <AddIntegrationButton
-                            userCanInstallPackages={userCanInstallPackages}
-                            href={getHref('add_integration_to_policy', {
-                              pkgkey,
-                              ...(integration ? { integration } : {}),
-                              ...(agentPolicyIdFromContext
-                                ? { agentPolicyId: agentPolicyIdFromContext }
-                                : {}),
-                            })}
-                            missingSecurityConfiguration={missingSecurityConfiguration}
-                            packageName={integrationInfo?.title || packageInfo.title}
-                            onClick={handleAddIntegrationPolicyClick}
-                          />
+                          <EuiFlexGroup>
+                            <EuiFlexItem>
+                              <EditReadMeButton onClick={handleEditReadMeClick} />
+                            </EuiFlexItem>
+                            <EuiFlexItem>
+                              <AddIntegrationButton
+                                userCanInstallPackages={userCanInstallPackages}
+                                href={getHref('add_integration_to_policy', {
+                                  pkgkey,
+                                  ...(integration ? { integration } : {}),
+                                  ...(agentPolicyIdFromContext
+                                    ? { agentPolicyId: agentPolicyIdFromContext }
+                                    : {}),
+                                })}
+                                missingSecurityConfiguration={missingSecurityConfiguration}
+                                packageName={integrationInfo?.title || packageInfo.title}
+                                onClick={handleAddIntegrationPolicyClick}
+                              />
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
                         </WithGuidedOnboardingTour>
                       ),
                     },
@@ -610,6 +640,7 @@ export function Detail() {
       showVersionSelect,
       versionLabel,
       versionOptions,
+      handleEditReadMeClick,
     ]
   );
 
@@ -866,6 +897,14 @@ export function Detail() {
           </Route>
           <Redirect to={INTEGRATIONS_ROUTING_PATHS.integration_details_overview} />
         </Routes>
+      )}
+      {isEditReadMeOpen && (
+        <EditReadmeFlyout
+          readMeContent={readMeContent}
+          integrationName={packageInfo?.title || 'UNDEFINED'}
+          onClose={() => setIsEditReadMeOpen(false)}
+          onSave={saveReadMeChanges}
+        />
       )}
     </WithHeaderLayout>
   );
