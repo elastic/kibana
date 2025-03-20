@@ -14,6 +14,9 @@ import { TestProviders } from '../../../common/mock';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { ATTACK_DISCOVERY_SETTINGS } from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
+import { getDefaultQuery } from '../helpers';
+import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../common/lib/kibana');
@@ -38,6 +41,40 @@ const defaultProps = {
   setQuery: jest.fn(),
   setStart: jest.fn(),
   start: undefined,
+};
+
+const customProps = {
+  end: 'now-15m',
+  filters: [
+    {
+      meta: {
+        disabled: false,
+        negate: false,
+        alias: null,
+        index: 'f06caf10-dfc1-4669-8f38-d11e4fcfc8af',
+        key: 'host.name',
+        field: 'host.name',
+        params: {
+          query: 'Host1',
+        },
+        type: 'phrase',
+      },
+      query: {
+        match_phrase: {
+          'host.name': 'Host1',
+        },
+      },
+    },
+  ],
+  localStorageAttackDiscoveryMaxAlerts: '123',
+  onClose: jest.fn(),
+  query: { query: 'user.name : "user1" ', language: 'kuery' },
+  setEnd: jest.fn(),
+  setFilters: jest.fn(),
+  setLocalStorageAttackDiscoveryMaxAlerts: jest.fn(),
+  setQuery: jest.fn(),
+  setStart: jest.fn(),
+  start: 'now-45m',
 };
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -138,6 +175,44 @@ describe('SettingsFlyout', () => {
 
     it('invokes onClose', () => {
       expect(defaultProps.onClose).toHaveBeenCalled();
+    });
+  });
+
+  describe('when the save button is clicked after the reset button is clicked', () => {
+    beforeEach(() => {
+      render(
+        <TestProviders>
+          <SettingsFlyout {...customProps} />
+        </TestProviders>
+      );
+
+      const reset = screen.getByTestId('reset');
+      fireEvent.click(reset);
+
+      const save = screen.getByTestId('save');
+      fireEvent.click(save);
+    });
+
+    it('invokes setEnd with default `end` value', () => {
+      expect(customProps.setEnd).toHaveBeenCalledWith(DEFAULT_END);
+    });
+
+    it('invokes setFilters with default `filters` value', () => {
+      expect(customProps.setFilters).toHaveBeenCalledWith([]);
+    });
+
+    it('invokes setQuery with default `query` value', () => {
+      expect(customProps.setQuery).toHaveBeenCalledWith(getDefaultQuery());
+    });
+
+    it('invokes setStart with default `start` value', () => {
+      expect(customProps.setStart).toHaveBeenCalledWith(DEFAULT_START);
+    });
+
+    it('invokes setLocalStorageAttackDiscoveryMaxAlerts with default `maxAlerts` value', () => {
+      expect(customProps.setLocalStorageAttackDiscoveryMaxAlerts).toHaveBeenCalledWith(
+        `${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`
+      );
     });
   });
 
