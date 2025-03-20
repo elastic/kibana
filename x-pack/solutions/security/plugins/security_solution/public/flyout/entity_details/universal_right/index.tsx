@@ -13,14 +13,15 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
-import type { EsHitRecord } from '@kbn/discover-utils';
+import { useGetGenericEntity } from './hooks/use_get_generic_entity';
+import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
 import { UniversalEntityFlyoutHeader } from './header';
 import { UniversalEntityFlyoutContent } from './content';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 
 export interface UniversalEntityPanelProps {
   entity: EntityEcs;
-  source: EsHitRecord['_source'];
+  source: GenericEntityRecord;
   /** this is because FlyoutPanelProps defined params as Record<string, unknown> {@link FlyoutPanelProps#params} */
   [key: string]: unknown;
 }
@@ -30,20 +31,18 @@ export interface UniversalEntityPanelExpandableFlyoutProps extends FlyoutPanelPr
   params: UniversalEntityPanelProps;
 }
 
-const isDate = (value: unknown): value is Date => value instanceof Date;
-
 export const UniversalEntityPanel = ({ entity, source }: UniversalEntityPanelProps) => {
   useEffect(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, UNIVERSAL_ENTITY_FLYOUT_OPENED);
   }, [entity]);
 
-  const docTimestamp = source?.['@timestamp'];
-  const timestamp = isDate(docTimestamp) ? docTimestamp : undefined;
+  const t = useGetGenericEntity('dd-bVZUBMP-yNCPysK_w');
+  console.log('doc', t.data);
 
   return (
     <>
       <FlyoutNavigation flyoutIsExpandable={false} />
-      <UniversalEntityFlyoutHeader entity={entity} timestamp={timestamp} />
+      <UniversalEntityFlyoutHeader entity={entity} source={source} />
       <UniversalEntityFlyoutContent source={source} />
     </>
   );

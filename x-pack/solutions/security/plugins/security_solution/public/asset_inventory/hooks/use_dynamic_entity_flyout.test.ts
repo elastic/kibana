@@ -34,14 +34,16 @@ const entity: EntityEcs = {
   id: '123',
   name: 'test-entity',
   type: 'container',
-  tags: ['tag1', 'tag2'],
-  labels: { label1: 'value1', label2: 'value2' },
-  criticality: 'high_impact',
-  category: 'test',
+  sub_type: 'test',
 };
 
 const source = {
   '@timestamp': '2025-10-01T12:00:00.000Z',
+  tags: ['tag1', 'tag2'],
+  labels: { label1: 'value1', label2: 'value2' },
+  asset: {
+    criticality: 'high_impact',
+  },
 };
 
 describe('useDynamicEntityFlyout', () => {

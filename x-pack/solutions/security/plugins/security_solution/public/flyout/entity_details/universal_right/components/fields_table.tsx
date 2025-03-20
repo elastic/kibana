@@ -10,6 +10,8 @@ import { EuiCode, EuiCodeBlock, EuiInMemoryTable, EuiText } from '@elastic/eui';
 import React from 'react';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
+import { EcsFlat } from '@elastic/ecs';
+import { TableFieldNameCell } from '../../../document_details/right/components/table_field_name_cell';
 
 interface FlattenedItem {
   key: string; // flattened dot notation object path for an object;
@@ -58,6 +60,10 @@ const columns: EuiInMemoryTableProps<FlattenedItem>['columns'] = [
       defaultMessage: 'Field',
     }),
     width: '25%',
+    render: (field, data) => {
+      console.log(data);
+      return <TableFieldNameCell field={field} dataType={EcsFlat[data]} />;
+    },
   },
   {
     field: 'value',
