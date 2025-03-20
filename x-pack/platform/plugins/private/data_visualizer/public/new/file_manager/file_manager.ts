@@ -570,6 +570,7 @@ export class FileUploadManager {
       index: indexName,
       dataView: dataViewResp ? { id: dataViewResp.id!, title: dataView! } : undefined,
       inferenceId: this.inferenceId ?? undefined,
+      timeFieldName: this.timeFieldName ?? undefined,
       files: this.getFiles().map((file) => {
         const status = file.getStatus();
         return {
@@ -655,36 +656,3 @@ export class FileUploadManager {
     }
   }
 }
-
-// function ss(
-//   settings: IndicesIndexSettings | string,
-//   currentSettings: IndicesIndexSettings,
-//   settings$: BehaviorSubject<Config<IndicesIndexSettings>>
-// ) {
-//   if (typeof settings === 'string') {
-//     try {
-//       const json = JSON.parse(settings);
-//       // const currentSettings = this.getSettings();
-//       // compare the stringified versions of the settings to ignore whitespace differences
-//       const tempSettingString = JSON.stringify(currentSettings.json);
-//       const tempIncomingSettingsString = JSON.stringify(json);
-//       if (tempSettingString === tempIncomingSettingsString) {
-//         return;
-//       }
-
-//       settings$.next({
-//         json,
-//         string: settings,
-//         valid: true,
-//       });
-//     } catch (e) {
-//       // do nothing
-//     }
-//   } else {
-//     settings$.next({
-//       json: settings,
-//       string: '',
-//       valid: true,
-//     });
-//   }
-// }

@@ -23,6 +23,8 @@ export function useFileUpload(
     },
   } = useDataVisualizerKibana();
 
+  const [importResults, setImportResults] = useState<FileUploadResults | null>(null);
+
   const [indexName, setIndexName] = useState<string>(
     fileUploadManager.getExistingIndexName() ?? ''
   );
@@ -66,6 +68,7 @@ export function useFileUpload(
       if (onUploadComplete && res) {
         onUploadComplete(res);
       }
+      setImportResults(res);
     });
   }, [fileUploadManager, indexName, onUploadComplete]);
 
@@ -111,5 +114,6 @@ export function useFileUpload(
     canImport,
     mappings,
     settings,
+    importResults,
   };
 }

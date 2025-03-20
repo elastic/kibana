@@ -11,7 +11,10 @@ import type { FC } from 'react';
 import React from 'react';
 import type { FileUploadResults } from '@kbn/file-upload-common';
 import type { ResultLinks } from '../../common/app';
-import type { GetAdditionalLinks } from '../application/common/components/results_links';
+import {
+  ResultsLinks,
+  type GetAdditionalLinks,
+} from '../application/common/components/results_links';
 import { FileClashWarning } from './file_clash_warning';
 import type { FileUploadManager } from './file_manager';
 import { STATUS } from './file_manager/file_manager';
@@ -20,9 +23,9 @@ import { FileStatus } from './file_status';
 import { IndexInput } from './index_input';
 import { OverallUploadStatus } from './overall_upload_status';
 import { ImportErrors } from './import_errors';
-import { DataViewIllustration } from './data_view_illustration';
 import { useFileUpload } from './use_file_upload';
 import { AdvancedSection } from './advanced_section';
+import { UploadImage } from './upload_image';
 
 interface Props {
   fileUploadManager: FileUploadManager;
@@ -45,6 +48,7 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose }) => {
     canImport,
     mappings,
     settings,
+    importResults,
   } = useFileUpload(fileUploadManager);
 
   // eslint-disable-next-line no-console
@@ -123,13 +127,7 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose }) => {
         ) : null}
         {uploadInProgress ? (
           <>
-            <EuiFlexGroup>
-              <EuiFlexItem />
-              <EuiFlexItem grow={false}>
-                <DataViewIllustration />
-              </EuiFlexItem>
-              <EuiFlexItem />
-            </EuiFlexGroup>
+            <UploadImage />
 
             <EuiSpacer size="xl" />
 
@@ -158,6 +156,19 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose }) => {
 
         <EuiFlexItem grow={true} />
       </EuiFlexGroup>
+
+      {uploadStatus.overallImportStatus === STATUS.COMPLETED && importResults !== null ? (
+        <>
+          <ResultsLinks
+            index={importResults.index}
+            dataViewId={importResults.dataView?.id}
+            timeFieldName={importResults.timeFieldName}
+            createDataView={importResults.dataView?.id !== undefined}
+            getAdditionalLinks={[]}
+            resultLinks={undefined}
+          />
+        </>
+      ) : null}
     </>
   );
 };

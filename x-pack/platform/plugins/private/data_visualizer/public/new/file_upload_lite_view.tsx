@@ -33,8 +33,8 @@ import { FileStatus } from './file_status';
 import { IndexInput } from './index_input';
 import { OverallUploadStatus } from './overall_upload_status';
 import { ImportErrors } from './import_errors';
-import { DataViewIllustration } from './data_view_illustration';
 import { useFileUpload } from './use_file_upload';
+import { UploadImage } from './upload_image';
 
 interface Props {
   fileUploadManager: FileUploadManager;
@@ -173,13 +173,7 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, props, onClos
           ) : null}
           {uploadInProgress ? (
             <>
-              <EuiFlexGroup>
-                <EuiFlexItem />
-                <EuiFlexItem grow={false}>
-                  <DataViewIllustration />
-                </EuiFlexItem>
-                <EuiFlexItem />
-              </EuiFlexGroup>
+              <UploadImage />
 
               <EuiSpacer size="xl" />
 
