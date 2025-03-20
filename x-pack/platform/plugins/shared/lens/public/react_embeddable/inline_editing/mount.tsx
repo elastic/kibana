@@ -10,6 +10,7 @@ import { TracksOverlays } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { type UseEuiTheme } from '@elastic/eui';
 
 /**
  * Shared logic to mount the inline config panel
@@ -41,6 +42,7 @@ export function mountInlineEditPanel(
       ),
       {
         className: 'lnsConfigPanel__overlay',
+        css: inlineFlyoutStyles,
         size: 's',
         'data-test-subj': 'customizeLens',
         type: 'push',
@@ -60,3 +62,22 @@ export function mountInlineEditPanel(
     }
   }
 }
+
+// styles needed to display extra drop targets that are outside of the config panel main area while also allowing to scroll vertically
+const inlineFlyoutStyles = ({ euiTheme }: UseEuiTheme) => `
+  clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
+  max-inline-size: 640px;
+  min-inline-size: 256px;
+  background:${euiTheme.colors.backgroundBaseSubdued};
+  @include euiBreakpoint('xs', 's', 'm') {
+    clip-path: none;
+  }
+  .kbnOverlayMountWrapper {
+    padding-left: 400px;
+    margin-left: -400px;
+    pointer-events: none;
+    .euiFlyoutFooter {
+      pointer-events: auto;
+    }
+  }
+`;
