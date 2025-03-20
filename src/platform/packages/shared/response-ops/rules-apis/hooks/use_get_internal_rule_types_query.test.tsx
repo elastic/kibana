@@ -43,7 +43,7 @@ describe('useGetInternalRuleTypesQuery', () => {
   });
 
   it('should call the getInternalRuleTypes API', async () => {
-    const { rerender, result } = renderHook(
+    const { result } = renderHook(
       () =>
         useGetInternalRuleTypesQuery({
           http,
@@ -53,15 +53,8 @@ describe('useGetInternalRuleTypesQuery', () => {
       }
     );
 
-    rerender();
-    await waitFor(() => {
-      expect(mockGetInternalRuleTypes).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          http,
-        })
-      );
-
-      expect(result.current.data).toEqual(mockInternalRuleTypes);
-    });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(mockGetInternalRuleTypes).toHaveBeenCalled();
+    expect(result.current.data).toEqual(mockInternalRuleTypes);
   });
 });

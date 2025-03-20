@@ -12,16 +12,81 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
 const http = httpServiceMock.createStartContract();
 
+const ruleTypeResponse = {
+  id: '1',
+  name: 'name',
+  action_groups: [
+    {
+      id: 'default',
+      name: 'Default',
+    },
+  ],
+  action_variables: {
+    context: [],
+    state: [],
+  },
+  alerts: [],
+  authorized_consumers: {},
+  category: 'test',
+  default_action_group_id: 'default',
+  default_schedule_interval: '10m',
+  does_set_recovery_context: false,
+  enabled_in_license: true,
+  has_alerts_mappings: true,
+  has_fields_for_a_a_d: false,
+  is_exportable: true,
+  minimum_license_required: 'basic',
+  producer: 'test',
+  solution: 'stack',
+  recovery_action_group: {
+    id: 'recovered',
+    name: 'Recovered',
+  },
+  rule_task_timeout: '10m',
+};
+
+const expectedRuleType = {
+  id: '1',
+  name: 'name',
+  actionGroups: [
+    {
+      id: 'default',
+      name: 'Default',
+    },
+  ],
+  actionVariables: {
+    context: [],
+    state: [],
+  },
+  alerts: [],
+  authorizedConsumers: {},
+  category: 'test',
+  defaultActionGroupId: 'default',
+  defaultScheduleInterval: '10m',
+  doesSetRecoveryContext: false,
+  enabledInLicense: true,
+  hasAlertsMappings: true,
+  hasFieldsForAAD: false,
+  isExportable: true,
+  minimumLicenseRequired: 'basic',
+  producer: 'test',
+  solution: 'stack',
+  recoveryActionGroup: {
+    id: 'recovered',
+    name: 'Recovered',
+  },
+  ruleTaskTimeout: '10m',
+};
+
 describe('getInternalRuleTypes', () => {
-  it('should call the internal rule types API', async () => {
-    const resolvedValue = [{ id: 'a' }, { id: 'b' }, { id: 'c' }];
-    http.get.mockResolvedValueOnce(resolvedValue);
+  it('should call the internal rule types API and transform the response case', async () => {
+    http.get.mockResolvedValueOnce([ruleTypeResponse]);
 
     const result = await getInternalRuleTypes({
       http,
     });
 
-    expect(result).toEqual(resolvedValue);
+    expect(result).toEqual([expectedRuleType]);
 
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [

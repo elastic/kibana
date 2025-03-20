@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { internalRuleTypesRoute } from './internal_rule_types';
+import { getRuleTypesRoute } from './get_rule_types_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
@@ -25,16 +25,16 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-describe('internalRuleTypesRoute', () => {
+describe('ruleTypesRoute', () => {
   it('lists rule types with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    internalRuleTypesRoute(router, licenseState);
+    getRuleTypesRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/_rule_types"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule_types"`);
 
     const listTypes = [
       {
@@ -68,7 +68,7 @@ describe('internalRuleTypesRoute', () => {
       } as RegistryAlertTypeWithAuth,
     ];
     const expectedResult: Array<
-      AsApiContract<Omit<RegistryAlertTypeWithAuth, 'validLegacyConsumers'>>
+      AsApiContract<Omit<RegistryAlertTypeWithAuth, 'validLegacyConsumers' | 'solution'>>
     > = [
       {
         id: '1',
@@ -93,7 +93,6 @@ describe('internalRuleTypesRoute', () => {
         },
         category: 'test',
         producer: 'test',
-        solution: 'stack',
         enabled_in_license: true,
         has_alerts_mappings: true,
         has_fields_for_a_a_d: false,
@@ -135,7 +134,6 @@ describe('internalRuleTypesRoute', () => {
               "name": "Recovered",
             },
             "rule_task_timeout": "10m",
-            "solution": "stack",
           },
         ],
       }
@@ -152,11 +150,11 @@ describe('internalRuleTypesRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    internalRuleTypesRoute(router, licenseState);
+    getRuleTypesRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/_rule_types"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule_types"`);
 
     const listTypes = [
       {
@@ -210,11 +208,11 @@ describe('internalRuleTypesRoute', () => {
       throw new Error('OMG');
     });
 
-    internalRuleTypesRoute(router, licenseState);
+    getRuleTypesRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/_rule_types"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule_types"`);
 
     const listTypes = [
       {

@@ -6,33 +6,31 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { TypesRulesResponseBodyV1 } from '../../../../../common/routes/rule/apis/list_types';
-import { typesRulesResponseSchemaV1 } from '../../../../../common/routes/rule/apis/list_types';
+import type { GetRuleTypesInternalResponseBodyV1 } from '../../../../../common/routes/rule/apis/internal_list_types';
+import { getRuleTypesInternalResponseSchemaV1 } from '../../../../../common/routes/rule/apis/internal_list_types';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
-import { BASE_ALERTING_API_PATH } from '../../../../types';
-import { transformRuleTypesResponseV1 } from './transforms';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { transformRuleTypesInternalResponseV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
-export const ruleTypesRoute = (
+export const getRuleTypesInternalRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.get(
     {
-      path: `${BASE_ALERTING_API_PATH}/rule_types`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/_rule_types`,
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
-        access: 'public',
-        summary: `Get the rule types`,
-        tags: ['oas-tag:alerting'],
+        access: 'internal',
       },
       validate: {
         request: {},
         response: {
           200: {
-            body: () => typesRulesResponseSchemaV1,
+            body: () => getRuleTypesInternalResponseSchemaV1,
             description: 'Indicates a successful call.',
           },
           401: {
@@ -46,7 +44,8 @@ export const ruleTypesRoute = (
         const rulesClient = await (await context.alerting).getRulesClient();
         const ruleTypes = await rulesClient.listRuleTypes();
 
-        const responseBody: TypesRulesResponseBodyV1 = transformRuleTypesResponseV1(ruleTypes);
+        const responseBody: GetRuleTypesInternalResponseBodyV1 =
+          transformRuleTypesInternalResponseV1(ruleTypes);
 
         return res.ok({
           body: responseBody,

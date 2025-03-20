@@ -6,25 +6,27 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { TypesRulesResponseBodyV1 } from '../../../../../common/routes/rule/apis/internal_list_types';
-import { typesRulesResponseSchemaV1 } from '../../../../../common/routes/rule/apis/internal_list_types';
+import type { TypesRulesResponseBodyV1 } from '../../../../../common/routes/rule/apis/list_types';
+import { typesRulesResponseSchemaV1 } from '../../../../../common/routes/rule/apis/list_types';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformRuleTypesResponseV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
-export const internalRuleTypesRoute = (
+export const getRuleTypesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.get(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/_rule_types`,
+      path: `${BASE_ALERTING_API_PATH}/rule_types`,
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: {
-        access: 'internal',
+        access: 'public',
+        summary: `Get the rule types`,
+        tags: ['oas-tag:alerting'],
       },
       validate: {
         request: {},

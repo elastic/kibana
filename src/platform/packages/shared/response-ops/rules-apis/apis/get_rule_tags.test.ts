@@ -27,6 +27,7 @@ describe('getRuleTags', () => {
       search: 'test',
       page: 2,
       perPage: 30,
+      ruleTypeIds: ['test-rule-type'],
     });
 
     expect(result).toEqual({
@@ -43,7 +44,7 @@ describe('getRuleTags', () => {
           "query": Object {
             "page": 2,
             "per_page": 30,
-            "rule_type_ids": undefined,
+            "rule_type_ids": "[\\"test-rule-type\\"]",
             "search": "test",
           },
         },

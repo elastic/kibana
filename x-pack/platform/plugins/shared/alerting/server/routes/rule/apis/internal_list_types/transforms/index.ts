@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { transformRuleTypesResponse } from './transform_rule_types_response/latest';
-export { transformRuleTypesResponse as transformRuleTypesResponseV1 } from './transform_rule_types_response/v1';
+export { transformRuleTypesInternalResponse } from './transform_rule_types_internal_response/latest';
+export { transformRuleTypesInternalResponse as transformRuleTypesInternalResponseV1 } from './transform_rule_types_internal_response/v1';

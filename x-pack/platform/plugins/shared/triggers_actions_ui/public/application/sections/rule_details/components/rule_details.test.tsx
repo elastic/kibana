@@ -89,6 +89,7 @@ const ruleType: RuleType = {
   authorizedConsumers,
   enabledInLicense: true,
   category: 'my-category',
+  isExportable: true,
 };
 
 describe('rule_details', () => {

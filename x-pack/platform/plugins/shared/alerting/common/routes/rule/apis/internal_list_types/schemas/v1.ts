@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { typesRulesSchema } from '../../list_types/schemas/v1';
 
-export const typesRulesResponseBodySchema = schema.arrayOf(
+export const getRuleTypesInternalResponseBodySchema = schema.arrayOf(
   typesRulesSchema.extends({
     solution: schema.oneOf(
       [schema.literal('stack'), schema.literal('observability'), schema.literal('security')],
@@ -21,6 +21,6 @@ export const typesRulesResponseBodySchema = schema.arrayOf(
   })
 );
 
-export const typesRulesResponseSchema = schema.object({
-  body: typesRulesResponseBodySchema,
+export const getRuleTypesInternalResponseSchema = schema.object({
+  body: getRuleTypesInternalResponseBodySchema,
 });

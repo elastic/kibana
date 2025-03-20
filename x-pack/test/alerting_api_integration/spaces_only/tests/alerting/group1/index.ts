@@ -28,7 +28,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./get_action_error_log'));
     loadTestFile(require.resolve('./get_rule_tags'));
     loadTestFile(require.resolve('./rule_types'));
-    loadTestFile(require.resolve('./internal_rule_types'));
+    loadTestFile(require.resolve('./rule_types_internal'));
     loadTestFile(require.resolve('./event_log'));
   });
 }

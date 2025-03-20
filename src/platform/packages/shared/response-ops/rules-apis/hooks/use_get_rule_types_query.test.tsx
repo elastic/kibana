@@ -10,19 +10,16 @@
 import React, { PropsWithChildren } from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useGetInternalRuleTypesQuery } from './use_get_internal_rule_types_query';
-import { InternalRuleType, getInternalRuleTypes } from '../apis/get_internal_rule_types';
+import { useGetRuleTypesQuery } from './use_get_rule_types_query';
+import type { RuleType } from '@kbn/triggers-actions-ui-types';
+import { getRuleTypes } from '../apis/get_rule_types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { testQueryClientConfig } from '../test_utils';
 
-const mockInternalRuleTypes = [
-  { id: 'a' },
-  { id: 'b' },
-  { id: 'c' },
-] as unknown as InternalRuleType[];
+const mockRuleTypes = [{ id: 'a' }, { id: 'b' }, { id: 'c' }] as unknown as RuleType[];
 
-jest.mock('../apis/get_internal_rule_types');
-const mockGetInternalRuleTypes = jest.mocked(getInternalRuleTypes);
+jest.mock('../apis/get_rule_types');
+const mockGetRuleTypes = jest.mocked(getRuleTypes);
 
 const http = httpServiceMock.createStartContract();
 
@@ -32,9 +29,9 @@ export const Wrapper = ({ children }: PropsWithChildren) => {
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 };
 
-describe('useGetInternalRuleTypesQuery', () => {
+describe('useGetRuleTypesQuery', () => {
   beforeEach(() => {
-    mockGetInternalRuleTypes.mockResolvedValue(mockInternalRuleTypes);
+    mockGetRuleTypes.mockResolvedValue(mockRuleTypes);
   });
 
   afterEach(() => {
@@ -42,26 +39,22 @@ describe('useGetInternalRuleTypesQuery', () => {
     jest.clearAllMocks();
   });
 
-  it('should call the getInternalRuleTypes API', async () => {
-    const { rerender, result } = renderHook(
+  it('should call the getRuleTypes API', async () => {
+    const { result } = renderHook(
       () =>
-        useGetInternalRuleTypesQuery({
-          http,
-        }),
+        useGetRuleTypesQuery(
+          {
+            http,
+          },
+          { enabled: true }
+        ),
       {
         wrapper: Wrapper,
       }
     );
 
-    rerender();
-    await waitFor(() => {
-      expect(mockGetInternalRuleTypes).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          http,
-        })
-      );
-
-      expect(result.current.data).toEqual(mockInternalRuleTypes);
-    });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(mockGetRuleTypes).toHaveBeenCalled();
+    expect(result.current.data).toEqual(mockRuleTypes);
   });
 });

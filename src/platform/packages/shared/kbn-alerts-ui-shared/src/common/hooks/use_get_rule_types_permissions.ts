@@ -21,7 +21,7 @@ import { useGetRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get
 import { i18n } from '@kbn/i18n';
 import { ALERTS_FEATURE_ID } from '../constants';
 
-export interface UseGetRuleTypesWithPermissionsParams {
+export interface UseGetRuleTypesPermissionsParams {
   http: HttpStart;
   toasts: ToastsStart;
   filteredRuleTypes?: string[];
@@ -37,7 +37,7 @@ const getFilteredIndex = ({
 }: {
   data: Array<RuleType<string, string>>;
   filteredRuleTypes?: string[];
-  registeredRuleTypes: UseGetRuleTypesWithPermissionsParams['registeredRuleTypes'];
+  registeredRuleTypes: UseGetRuleTypesPermissionsParams['registeredRuleTypes'];
 }) => {
   const index: RuleTypeIndexWithDescriptions = new Map();
   const registeredRuleTypesDictionary = registeredRuleTypes ? keyBy(registeredRuleTypes, 'id') : {};
@@ -70,7 +70,7 @@ export const useGetRuleTypesPermissions = ({
   registeredRuleTypes,
   context,
   enabled = true,
-}: UseGetRuleTypesWithPermissionsParams) => {
+}: UseGetRuleTypesPermissionsParams) => {
   const onErrorFn = (error: unknown) => {
     if (error) {
       toasts.addDanger(

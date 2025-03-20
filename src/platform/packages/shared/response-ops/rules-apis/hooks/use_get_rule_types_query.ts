@@ -25,10 +25,7 @@ export const useGetRuleTypesQuery = (
     onError,
     enabled,
     context,
-  }: Pick<
-    UseQueryOptions<typeof getRuleTypes>,
-    'onError' | 'refetchOnWindowFocus' | 'enabled' | 'context'
-  >
+  }: Pick<UseQueryOptions<typeof getRuleTypes>, 'onError' | 'enabled' | 'context'>
 ) => {
   return useQuery({
     queryKey: getKey(),

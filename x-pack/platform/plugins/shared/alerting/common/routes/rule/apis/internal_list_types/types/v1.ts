@@ -7,7 +7,12 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { typesRulesResponseSchemaV1, typesRulesResponseBodySchemaV1 } from '..';
+import type {
+  getRuleTypesInternalResponseSchemaV1,
+  getRuleTypesInternalResponseBodySchemaV1,
+} from '..';
 
-export type TypesRulesResponse = TypeOf<typeof typesRulesResponseSchemaV1>;
-export type TypesRulesResponseBody = TypeOf<typeof typesRulesResponseBodySchemaV1>;
+export type GetRuleTypesInternalResponse = TypeOf<typeof getRuleTypesInternalResponseSchemaV1>;
+export type GetRuleTypesInternalResponseBody = TypeOf<
+  typeof getRuleTypesInternalResponseBodySchemaV1
+>;

@@ -7,11 +7,11 @@
 
 import { isBoolean } from 'lodash/fp';
 import type { RegistryAlertTypeWithAuth } from '../../../../../../authorization';
-import type { TypesRulesResponseBodyV1 } from '../../../../../../../common/routes/rule/apis/internal_list_types';
+import type { GetRuleTypesInternalResponseBodyV1 } from '../../../../../../../common/routes/rule/apis/internal_list_types';
 
-export const transformRuleTypesResponse = (
+export const transformRuleTypesInternalResponse = (
   ruleTypes: RegistryAlertTypeWithAuth[]
-): TypesRulesResponseBodyV1 => {
+): GetRuleTypesInternalResponseBodyV1 => {
   return ruleTypes.map((ruleType: RegistryAlertTypeWithAuth) => {
     return {
       ...(ruleType.actionGroups ? { action_groups: ruleType.actionGroups } : {}),

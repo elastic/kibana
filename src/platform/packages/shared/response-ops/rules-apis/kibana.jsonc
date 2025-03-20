@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/response-ops-rules-apis",
   "owner": "@elastic/response-ops",
   "group": "platform",

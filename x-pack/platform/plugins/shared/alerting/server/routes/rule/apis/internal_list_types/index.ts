@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { internalRuleTypesRoute } from './internal_rule_types';
+export { getRuleTypesInternalRoute } from './get_rule_types_internal_route';
