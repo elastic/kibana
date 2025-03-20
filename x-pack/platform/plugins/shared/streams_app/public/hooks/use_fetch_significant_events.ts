@@ -5,14 +5,23 @@
  * 2.0.
  */
 
+import { calculateAuto } from '@kbn/calculate-auto';
+import moment from 'moment';
 import { useKibana } from './use_kibana';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 
-export const useFetchSignificantEvents = (name?: string) => {
+export const useFetchSignificantEvents = ({
+  name,
+  range,
+}: {
+  name?: string;
+  range: { from: string; to: string };
+}) => {
   const {
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
+        data,
       },
     },
   } = useKibana();
@@ -23,15 +32,23 @@ export const useFetchSignificantEvents = (name?: string) => {
         return Promise.resolve(undefined);
       }
 
+      const nowm = moment();
+
+      const { min = nowm.clone().subtract(1, 'days'), max = nowm } =
+        data.query.timefilter.timefilter.calculateBounds(range);
+
+      const bucketSize =
+        calculateAuto.near(50, moment.duration(max.diff(min))) ?? moment.duration(6, 'hour');
+
       const response = await streamsRepositoryClient.fetch(
         'GET /api/streams/{name}/significant_events 2023-10-31',
         {
           params: {
             path: { name },
             query: {
-              from: '2025-03-19T00:00:00.000Z',
-              to: '2025-03-21T00:00:00.000Z',
-              bucketSize: '1h',
+              from: min.toISOString(),
+              to: max.toISOString(),
+              bucketSize: `${bucketSize.asMinutes()}m`,
             },
           },
           signal,
@@ -40,7 +57,7 @@ export const useFetchSignificantEvents = (name?: string) => {
 
       return response;
     },
-    [name, streamsRepositoryClient]
+    [name, range, streamsRepositoryClient]
   );
 
   return {

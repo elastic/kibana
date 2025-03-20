@@ -4,9 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBasicTable, EuiLink, EuiTableFieldDataColumnType } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiSuperDatePicker,
+  EuiTableFieldDataColumnType,
+  OnTimeChangeProps,
+} from '@elastic/eui';
 import { IngestStreamGetResponse, SignificantEventsResponse } from '@kbn/streams-schema';
-import React from 'react';
+import React, { useState } from 'react';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';
@@ -22,7 +30,15 @@ export function StreamDetailSignificantEventsView({
       start: { discover },
     },
   } = useKibana();
-  const { isLoading, data } = useFetchSignificantEvents(definition?.stream.name);
+  const [range, setRange] = useState({ from: 'now-1d', to: 'now' });
+  const { isLoading, data: significantEvents } = useFetchSignificantEvents({
+    name: definition?.stream.name,
+    range,
+  });
+
+  const onTimeChange = ({ start, end }: OnTimeChangeProps) => {
+    setRange({ from: start, to: end });
+  };
 
   const columns: Array<EuiTableFieldDataColumnType<SignificantEventsResponse>> = [
     {
@@ -54,12 +70,28 @@ export function StreamDetailSignificantEventsView({
   ];
 
   return (
-    <EuiBasicTable
-      tableCaption="Significant Events"
-      items={data ?? []}
-      rowHeader="title"
-      columns={columns}
-      loading={isLoading}
-    />
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="row" alignItems="flexStart" justifyContent="flexEnd">
+          <EuiSuperDatePicker
+            isLoading={isLoading}
+            start={range.from}
+            end={range.to}
+            onTimeChange={onTimeChange}
+            showUpdateButton
+          />
+        </EuiFlexGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiBasicTable
+          tableCaption="Significant Events"
+          items={significantEvents ?? []}
+          rowHeader="title"
+          columns={columns}
+          loading={isLoading}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
