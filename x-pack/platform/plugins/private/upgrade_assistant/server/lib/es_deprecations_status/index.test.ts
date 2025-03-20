@@ -64,6 +64,26 @@ describe('getESUpgradeStatus', () => {
 
   // @ts-expect-error not full interface of response
   esClient.indices.resolveIndex.mockResponse(resolvedIndices);
+  
+  // Mock the indices.stats API call for index sizes
+  esClient.indices.stats.mockResponse({
+    indices: {
+      'test-index-1': {
+        total: {
+          store: {
+            size_in_bytes: 500000000 // 500MB
+          }
+        }
+      },
+      'test-index-2': {
+        total: {
+          store: {
+            size_in_bytes: 1500000000 // 1.5GB
+          }
+        }
+      }
+    }
+  });
 
   it('calls /_migration/deprecations', async () => {
     await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions });

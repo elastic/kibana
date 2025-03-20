@@ -75,7 +75,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   const correctiveAction = deprecation.correctiveAction as ReindexAction | undefined;
   const isESTransformTarget = !!correctiveAction?.transformIds?.length;
   const isMLAnomalyIndex = Boolean(indexName?.startsWith(ML_ANOMALIES_PREFIX));
-  const { excludedActions = [] } = (deprecation.correctiveAction as ReindexAction) || {};
+  const { excludedActions = [], indexSizeInBytes = 0 } = (deprecation.correctiveAction as ReindexAction) || {};
   const readOnlyExcluded = excludedActions.includes('readOnly');
   const reindexExcluded = excludedActions.includes('reindex');
 
@@ -95,6 +95,13 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   } else {
     showDefaultGuidance = true;
   }
+
+  // Determine if the index is larger than 1GB (1073741824 bytes)
+  const isLargeIndex = indexSizeInBytes > 1073741824;
+
+  const canShowActionButtons = !isCompleted && !hasFetchFailed && hasRequiredPrivileges;
+  const canShowReindexButton = canShowActionButtons && !reindexExcluded;
+  const canShowReadonlyButton = canShowActionButtons && !readOnlyExcluded && !isReadonly;
 
   return (
     <Fragment>
@@ -208,6 +215,14 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                   indexBlockUrl: docLinks.links.upgradeAssistant.indexBlocks,
                 })}
               />
+              {isLargeIndex && (
+                <p>
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.largeIndexGuidance"
+                    defaultMessage=" Note: This index is larger than 1GB. For large indices, marking as read-only is recommended over reindexing to minimize resource usage."
+                  />
+                </p>
+              )}
             </Fragment>
           )}
         </EuiText>
@@ -230,18 +245,13 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
-              {!isReadonly &&
-                !hasFetchFailed &&
-                !isCompleted &&
-                hasRequiredPrivileges &&
-                !isESTransformTarget &&
-                !readOnlyExcluded && (
+              {canShowReadonlyButton && (
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       onClick={startReadonly}
                       disabled={loading}
-                      color={reindexExcluded ? 'primary' : 'accent'}
-                      fill={reindexExcluded}
+                      color={'primary'}
+                      fill={isLargeIndex || reindexExcluded}
                       data-test-subj="startIndexReadonlyButton"
                     >
                       <FormattedMessage
@@ -251,10 +261,10 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                     </EuiButton>
                   </EuiFlexItem>
                 )}
-              {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && !reindexExcluded && (
+              {canShowReindexButton && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    fill
+                    fill={!isLargeIndex || readOnlyExcluded}
                     color={reindexStatus === ReindexStatus.cancelled ? 'warning' : 'primary'}
                     iconType={reindexStatus === ReindexStatus.cancelled ? 'play' : undefined}
                     onClick={startReindex}
