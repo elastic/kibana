@@ -52,7 +52,7 @@ import { getRuleTagsRoute } from './rule/apis/tags/get_rule_tags';
 import { getScheduleFrequencyRoute } from './rule/apis/get_schedule_frequency';
 import { bulkUntrackAlertsRoute } from './rule/apis/bulk_untrack';
 import { bulkUntrackAlertsByQueryRoute } from './rule/apis/bulk_untrack_by_query';
-import { getAlertDeletionPreviewRoute } from './alert_deletion/get_alert_deletion_preview_route';
+import { getAlertDeletionPreviewRoute } from './alert_deletion/apis/preview/get_alert_deletion_preview_route';
 
 import { createMaintenanceWindowRoute } from './maintenance_window/apis/create/create_maintenance_window_route';
 import { getMaintenanceWindowRoute } from './maintenance_window/apis/get/get_maintenance_window_route';
@@ -80,7 +80,7 @@ import { findGapsRoute } from './gaps/apis/find/find_gaps_route';
 import { fillGapByIdRoute } from './gaps/apis/fill/fill_gap_by_id_route';
 import { getRuleIdsWithGapsRoute } from './gaps/apis/get_rule_ids_with_gaps/get_rule_ids_with_gaps_route';
 import { getGapsSummaryByRuleIdsRoute } from './gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route';
-import type { AlertDeletionClient } from '../alert_deletion';
+
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
   licenseState: ILicenseState;

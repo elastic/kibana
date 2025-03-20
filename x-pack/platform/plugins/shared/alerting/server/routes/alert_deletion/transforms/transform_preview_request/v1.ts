@@ -6,7 +6,7 @@
  */
 
 import type { RulesSettingsAlertDeletionProperties } from '@kbn/alerting-types';
-import { AlertDeletionPreviewQueryV1 } from '../../shared';
+import type { AlertDeletionPreviewQueryV1 } from '../../../../shared';
 
 export const transformRequestToAlertDeletionPreview = ({
   is_active_alerts_deletion_enabled: isActiveAlertsDeletionEnabled,

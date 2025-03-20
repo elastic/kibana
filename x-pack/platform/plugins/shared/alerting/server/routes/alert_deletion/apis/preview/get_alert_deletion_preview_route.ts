@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../types';
-import { verifyAccessAndContext } from '../lib';
-import { API_PRIVILEGES } from '../../../common';
-import { AlertDeletionPreviewResponseV1, alertDeletionPreviewQuerySchemaV1 } from './shared';
+import type { IRouter } from '@kbn/core/server';
+import type { AlertDeletionPreviewResponseV1 } from '../../../../../common/routes/rule/apis/alert_deletion';
+import { alertDeletionPreviewQuerySchemaV1 } from '../../../../../common/routes/rule/apis/alert_deletion';
+import type { ILicenseState } from '../../../../lib';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import { verifyAccessAndContext } from '../../../lib';
+import { API_PRIVILEGES } from '../../../../../common';
 import {
   transformAlertDeletionPreviewToResponse,
   transformRequestToAlertDeletionPreviewV1,
-} from './transforms';
+} from '../../transforms';
 
 export const getAlertDeletionPreviewRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

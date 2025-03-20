@@ -6,8 +6,9 @@
  */
 
 import type { AlertDeletionPreview } from '@kbn/alerting-types';
-import { AlertDeletionPreviewResponseV1 } from '../../shared';
+import type { AlertDeletionPreviewResponseV1 } from '../../../../shared';
 
+// TODO: This shouldn't be in shared folder
 export const transformAlertDeletionPreviewToResponse = ({
   affectedAlertCount,
 }: AlertDeletionPreview): AlertDeletionPreviewResponseV1 => {

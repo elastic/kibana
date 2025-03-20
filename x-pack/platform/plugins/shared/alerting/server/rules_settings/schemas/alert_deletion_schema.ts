@@ -6,12 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-
-export const alertDeletionCategoryIdTypes = {
-  OBSERVABILITY: 'observability',
-  SECURITY_SOLUTION: 'securitySolution',
-  MANAGEMENT: 'management',
-} as const;
+import { alertDeletionCategoryIdTypes } from '../../../common/constants';
 
 export const alertDeletionSchema = schema.object({
   isActiveAlertsDeletionEnabled: schema.boolean(),
