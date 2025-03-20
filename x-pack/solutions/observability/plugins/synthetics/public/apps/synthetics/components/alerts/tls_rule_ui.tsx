@@ -10,7 +10,7 @@ import React, { useCallback, useEffect } from 'react';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import { EuiSpacer } from '@elastic/eui';
-import { Filter, buildPhrasesFilter } from '@kbn/es-query';
+import { buildPhrasesFilter } from '@kbn/es-query';
 import { AlertTlsCondition } from './alert_tls';
 import { getDynamicSettingsAction, selectDynamicSettings } from '../../state/settings';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
@@ -46,16 +46,13 @@ export const TLSRuleComponent: React.FC<{
   );
 
   const dataView = useSyntheticsDataView();
+  const monitorTypeField = dataView?.getFieldByName('monitor.type');
 
-  let filtersForSuggestions: Filter[] = [];
-
-  // filtersForSuggestions can be applied only if dataView is available
-  if (dataView) {
-    const monitorTypeField = dataView.getFieldByName('monitor.type');
-    filtersForSuggestions = monitorTypeField
+  // filtersForSuggestions can be applied only if dataView and monitorTypeField are available
+  const filtersForSuggestions =
+    dataView && monitorTypeField
       ? [buildPhrasesFilter(monitorTypeField, tlsMonitorTypes, dataView)]
-      : [];
-  }
+      : undefined;
 
   return (
     <>
