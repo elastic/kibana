@@ -8,8 +8,8 @@
 import assert from 'assert';
 import { Readable } from 'stream';
 import { ContentPackHeader } from '@kbn/streams-schema';
-import { contentPackHeader } from './content_pack_header';
 import { createIntersperseStream, createListStream, createMapStream } from '@kbn/utils';
+import { contentPackHeader } from './content_pack_header';
 
 const createContentPack = (objects: any[]): Readable => {
   return createListStream(objects)
