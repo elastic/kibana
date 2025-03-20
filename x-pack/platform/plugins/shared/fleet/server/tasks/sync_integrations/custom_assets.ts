@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type { CustomAssetsData, IntegrationsData } from './model';
+import type { CustomAssetsData, IntegrationsData, SyncIntegrationsData } from './model';
 
 const DELETED_ASSET_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -42,7 +42,7 @@ export const getCustomAssets = async (
   );
 
   const customAssetsComponentTemplates = customTemplates.component_templates.reduce(
-    (acc, template) => {
+    (acc: CustomAssetsData[], template) => {
       const integration = findIntegration(template.name, integrations);
       if (!integration) return acc;
       acc.push({
@@ -68,19 +68,22 @@ export const getCustomAssets = async (
     }
   );
 
-  const customAssetsIngestPipelines = Object.keys(ingestPipelines).reduce((acc, pipeline) => {
-    const integration = findIntegration(pipeline, integrations);
-    if (!integration) return acc;
-    acc.push({
-      type: 'ingest_pipeline',
-      name: pipeline,
-      package_name: integration?.package_name ?? '',
-      package_version: integration?.package_version ?? '',
-      is_deleted: false,
-      pipeline: ingestPipelines[pipeline],
-    });
-    return acc;
-  }, []);
+  const customAssetsIngestPipelines = Object.keys(ingestPipelines).reduce(
+    (acc: CustomAssetsData[], pipeline) => {
+      const integration = findIntegration(pipeline, integrations);
+      if (!integration) return acc;
+      acc.push({
+        type: 'ingest_pipeline',
+        name: pipeline,
+        package_name: integration?.package_name ?? '',
+        package_version: integration?.package_version ?? '',
+        is_deleted: false,
+        pipeline: ingestPipelines[pipeline],
+      });
+      return acc;
+    },
+    []
+  );
 
   const updatedAssets = [...customAssetsComponentTemplates, ...customAssetsIngestPipelines];
 
@@ -93,26 +96,31 @@ function updateDeletedAssets(
   previousSyncIntegrationsData: SyncIntegrationsData | undefined,
   updatedAssets: CustomAssetsData[]
 ): CustomAssetsData[] {
-  const deletedAssets = [];
+  const deletedAssets: CustomAssetsData[] = [];
 
-  Object.values(previousSyncIntegrationsData?.custom_assets ?? {}).forEach((existingAsset) => {
-    if (existingAsset.is_deleted) {
-      if (Date.now() - Date.parse(existingAsset.deleted_at) < DELETED_ASSET_TTL) {
-        deletedAssets.push(existingAsset);
-      }
-    } else {
-      const matchingAsset = updatedAssets.find(
-        (asset) => existingAsset.name === asset.name && existingAsset.type === asset.type
-      );
-      if (!matchingAsset) {
-        deletedAssets.push({
-          ...existingAsset,
-          is_deleted: true,
-          deleted_at: new Date().toISOString(),
-        });
+  Object.values(previousSyncIntegrationsData?.custom_assets ?? {}).forEach(
+    (existingAsset: CustomAssetsData) => {
+      if (existingAsset.is_deleted) {
+        if (
+          existingAsset.deleted_at &&
+          Date.now() - Date.parse(existingAsset.deleted_at) < DELETED_ASSET_TTL
+        ) {
+          deletedAssets.push(existingAsset);
+        }
+      } else {
+        const matchingAsset = updatedAssets.find(
+          (asset) => existingAsset.name === asset.name && existingAsset.type === asset.type
+        );
+        if (!matchingAsset) {
+          deletedAssets.push({
+            ...existingAsset,
+            is_deleted: true,
+            deleted_at: new Date().toISOString(),
+          });
+        }
       }
     }
-  });
+  );
 
   return deletedAssets;
 }
