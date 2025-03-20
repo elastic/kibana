@@ -5,5 +5,4 @@ ui_tests:
     - discover_enhanced
     - maps
     - observability_onboarding
-  disabled:
     - security_solution
