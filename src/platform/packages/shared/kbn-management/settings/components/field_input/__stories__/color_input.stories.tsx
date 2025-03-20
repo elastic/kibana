@@ -9,5 +9,9 @@
 
 import { getInputStory, getStory } from './common';
 
-export default getStory('Color Input', 'An input with a color value.');
+const Story = getStory('Color Input', 'An input with a color value.');
 export const ColorInput = getInputStory('color' as const);
+
+export default {
+  ...Story,
+};

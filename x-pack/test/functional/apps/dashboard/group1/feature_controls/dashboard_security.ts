@@ -12,7 +12,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const securityService = getService('security');
   const config = getService('config');
-  const { dashboard, security, error } = getPageObjects(['dashboard', 'security', 'error']);
+  const { common, dashboard, security, error } = getPageObjects([
+    'common',
+    'dashboard',
+    'security',
+    'error',
+  ]);
   const appsMenu = getService('appsMenu');
   const panelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
@@ -25,6 +30,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     ensureCurrentUrl: false,
     shouldLoginIfPrompted: false,
   };
+
+  const from = 'Sep 20, 2015 @ 00:00:00.000';
+  const to = 'Sep 21, 2015 @ 00:00:00.000';
 
   // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
 
@@ -257,6 +265,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.login('global_dashboard_read_user', 'global_dashboard_read_user-password', {
           expectSpaceSelector: false,
         });
+        await common.setTime({ from, to });
       });
 
       after(async () => {
@@ -331,6 +340,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
       });
+
+      it('loads an annotation from the library in the lens chart', async () => {
+        await testSubjects.existOrFail('xyVisAnnotationIcon', { timeout: 10000 });
+      });
     });
 
     describe('global dashboard read-only with url_create privileges', () => {
@@ -362,6 +375,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             expectSpaceSelector: false,
           }
         );
+        await common.setTime({ from, to });
       });
 
       after(async () => {
@@ -421,6 +435,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('allows clearing the currently loaded saved query', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+      });
+
+      it('loads an annotation from the library in the lens chart', async () => {
+        await testSubjects.existOrFail('xyVisAnnotationIcon', { timeout: 10000 });
       });
     });
 
