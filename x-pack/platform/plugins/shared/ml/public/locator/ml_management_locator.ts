@@ -48,9 +48,6 @@ export class MlManagementLocatorInternal {
       case ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE:
         path = formatAnomalyDetectionJobManagementUrl('', params.pageState);
         break;
-      // case ML_PAGES.SUPPLIED_CONFIGURATIONS:
-      //   path = formatSuppliedConfigurationsManagementUrl('', params.pageState);
-      //   break;
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE:
         path = formatAnomalyDetectionCreateJobSelectType('', params.pageState);
         break;

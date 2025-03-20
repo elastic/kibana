@@ -22,7 +22,7 @@ export enum MANAGEMENT_SECTION_IDS {
   TRAINED_MODELS = 'trained_models',
   AD_SETTINGS = 'ad_settings',
 }
-type ManagementSectionId = `${MANAGEMENT_SECTION_IDS}`;
+export type ManagementSectionId = `${MANAGEMENT_SECTION_IDS}`;
 
 export const MANAGEMENT_SECTIONS = {
   [MANAGEMENT_SECTION_IDS.OVERVIEW]: i18n.translate('xpack.ml.management.overviewTitle', {

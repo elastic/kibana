@@ -21,7 +21,7 @@ export type NavigationID =
   | 'aiops_labs';
 
 export type MlNodeDefinition = NodeDefinitionWithChildren<DeepLinkId, NavigationID>;
-// TODO: is this default nav still used? It likely needs to be updated to reflect changes - work out how to test
+
 export const defaultNavigation: MlNodeDefinition = {
   id: 'rootNav:ml',
   title: i18n.translate('defaultNavigation.ml.machineLearning', {

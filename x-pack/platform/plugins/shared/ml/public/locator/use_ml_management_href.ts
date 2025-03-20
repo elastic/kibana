@@ -11,7 +11,6 @@ import type { MlLocatorParams } from '../../common/types/locator';
 
 /**
  * Provides a URL to ML management pages
- * TODO remove basePath parameter
  */
 export const useMlManagementHref = (
   ml: MlPluginSetup | undefined,

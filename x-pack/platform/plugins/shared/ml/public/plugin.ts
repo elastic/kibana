@@ -183,8 +183,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   } {
     this.sharedMlServices = getMlSharedServices(core.http);
     const deps = {
-      // embeddable: pluginsSetup.embeddable,
-      // embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
       home: pluginsSetup.home,
       licenseManagement: pluginsSetup.licenseManagement,
       management: pluginsSetup.management,

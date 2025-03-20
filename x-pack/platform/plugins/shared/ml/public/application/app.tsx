@@ -31,6 +31,7 @@ import { EnabledFeaturesContextProvider, MlServerInfoContextProvider } from './c
 import type { StartServices } from './contexts/kibana';
 import { getMlGlobalServices } from './util/get_services';
 import { MlTelemetryContextProvider } from './contexts/ml/ml_telemetry_context';
+import type { ManagementSectionId } from './management';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
@@ -46,7 +47,7 @@ interface AppProps {
   mlFeatures: MlFeatures;
   experimentalFeatures: ExperimentalFeatures;
   nlpSettings: NLPSettings;
-  entryPoint?: string; // This will need to be defined as finite set of possible ids - maybe the id used to register the app in the management section
+  entryPoint?: ManagementSectionId;
 }
 
 const localStorage = new Storage(window.localStorage);

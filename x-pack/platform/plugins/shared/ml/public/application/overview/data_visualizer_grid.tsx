@@ -55,7 +55,7 @@ export const DataVisualizerGrid: FC<{ buttonType?: 'empty' | 'full'; isEsqlEnabl
           'xpack.ml.datavisualizer.selector.technicalPreviewBadge.contentMsg',
           {
             defaultMessage:
-              'The Elasticsearch Query Language (ES|QL) provides a powerful way to filter, transform, and analyze data stored in Elastic Search.',
+              'The Elasticsearch Query Language (ES|QL) provides a powerful way to filter, transform, and analyze data stored in Elasticsearch.',
           }
         )}
         iconType="esqlVis"
