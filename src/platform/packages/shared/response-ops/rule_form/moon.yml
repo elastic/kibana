@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/core-i18n-browser'
   - '@kbn/core-theme-browser'
   - '@kbn/core-user-profile-browser'
+  - '@kbn/fields-metadata-plugin'
 tags:
   - platform
   - shared-browser

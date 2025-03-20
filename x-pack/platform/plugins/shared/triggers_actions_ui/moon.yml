@@ -70,7 +70,6 @@ dependsOn:
   - '@kbn/visualization-utils'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/alerting-rule-utils'
-  - '@kbn/core-application-browser'
   - '@kbn/cloud-plugin'
   - '@kbn/response-ops-alerts-apis'
   - '@kbn/response-ops-alerts-table'
@@ -79,6 +78,8 @@ dependsOn:
   - '@kbn/rrule'
   - '@kbn/core-notifications-browser-mocks'
   - '@kbn/response-ops-rule-params'
+  - '@kbn/fields-metadata-plugin'
+  - '@kbn/share-plugin'
 tags:
   - platform
   - plugin

@@ -18,6 +18,7 @@ dependsOn:
   - '@kbn/core-application-browser'
   - '@kbn/utility-types'
   - '@kbn/share-plugin'
+  - '@kbn/management-plugin'
 tags:
   - platform
   - shared-common

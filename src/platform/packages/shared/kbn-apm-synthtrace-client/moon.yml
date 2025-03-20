@@ -16,6 +16,7 @@ project:
 dependsOn:
   - '@kbn/datemath'
   - '@kbn/safer-lodash-set'
+  - '@kbn/tooling-log'
 tags:
   - platform
   - shared-common

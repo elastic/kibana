@@ -54,6 +54,7 @@ dependsOn:
   - '@kbn/ai-assistant-icon'
   - '@kbn/security-authorization-core-common'
   - '@kbn/core-http-browser'
+  - '@kbn/sse-utils'
 tags:
   - platform
   - plugin

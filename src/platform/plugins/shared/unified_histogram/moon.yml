@@ -24,7 +24,6 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/i18n'
   - '@kbn/es-query'
-  - '@kbn/embeddable-plugin'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/datemath'
   - '@kbn/core-ui-settings-browser-mocks'

@@ -76,6 +76,7 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/search-types'
   - '@kbn/visualizations-plugin'
+  - '@kbn/expression-utils'
 tags:
   - platform
   - plugin

@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/analytics'
   - '@kbn/usage-collection-plugin'
   - '@kbn/deeplinks-management'
+  - '@kbn/discover-utils'
 tags:
   - platform
   - plugin

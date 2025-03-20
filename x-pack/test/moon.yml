@@ -117,7 +117,6 @@ dependsOn:
   - '@kbn/observability-ai-assistant-plugin'
   - '@kbn/stack-connectors-plugin'
   - '@kbn/stack-alerts-plugin'
-  - '@kbn/apm-data-access-plugin'
   - '@kbn/profiling-utils'
   - '@kbn/profiling-data-access-plugin'
   - '@kbn/es'
@@ -173,6 +172,7 @@ dependsOn:
   - '@kbn/response-ops-rule-params'
   - '@kbn/scout-info'
   - '@kbn/inference-common'
+  - '@kbn/apm-sources-access-plugin'
 tags:
   - platform
   - test-helper

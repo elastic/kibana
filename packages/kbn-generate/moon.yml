@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/dev-cli-errors'
   - '@kbn/tooling-log'
   - '@kbn/repo-packages'
+  - '@kbn/projects-solutions-groups'
 tags:
   - common
   - shared-common

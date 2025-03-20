@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/scout-reporting'
   - '@kbn/apm-synthtrace'
   - '@kbn/apm-synthtrace-client'
+  - '@kbn/projects-solutions-groups'
 tags:
   - platform
   - test-helper

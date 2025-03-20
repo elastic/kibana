@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/repo-packages'
   - '@kbn/some-dev-log'
   - '@kbn/stdio-dev-helpers'
+  - '@kbn/projects-solutions-groups'
 tags:
   - platform
   - shared-common

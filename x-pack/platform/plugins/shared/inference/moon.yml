@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/field-types'
   - '@kbn/expressions-plugin'
   - '@kbn/inference-langchain'
+  - '@kbn/sse-utils-server'
 tags:
   - platform
   - plugin

@@ -1,0 +1,37 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/serverless-chat'
+type: unknown
+owners:
+  defaultOwner: '@elastic/search-kibana'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/serverless-chat'
+  description: Moon project for @kbn/serverless-chat
+  channel: ''
+  owner: '@elastic/search-kibana'
+  metadata:
+    sourceRoot: x-pack/solutions/chat/plugins/serverless_chat
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/serverless'
+  - '@kbn/config-schema'
+  - '@kbn/serverless-chat-settings'
+tags:
+  - chat
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - index.ts
+    - common/**/*.ts
+    - public/**/*.ts
+    - public/**/*.tsx
+    - server/**/*.ts
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

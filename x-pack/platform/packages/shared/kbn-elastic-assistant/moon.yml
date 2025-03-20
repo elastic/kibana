@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/shared-ux-router'
   - '@kbn/inference-endpoint-ui-common'
+  - '@kbn/datemath'
 tags:
   - platform
   - shared-browser

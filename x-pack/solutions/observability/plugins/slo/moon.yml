@@ -104,7 +104,9 @@ dependsOn:
   - '@kbn/response-ops-rule-params'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/security-plugin'
+  - '@kbn/response-ops-rule-form'
   - '@kbn/server-route-repository-utils'
+  - '@kbn/fields-metadata-plugin'
 tags:
   - observability
   - plugin

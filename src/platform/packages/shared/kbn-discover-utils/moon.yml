@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/logs-data-access-plugin'
   - '@kbn/i18n-react'
   - '@kbn/navigation-plugin'
+  - '@kbn/apm-sources-access-plugin'
 tags:
   - platform
   - shared-common

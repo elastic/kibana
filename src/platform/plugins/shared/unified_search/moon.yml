@@ -2,7 +2,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/unified-search-plugin'
 type: unknown
 owners:
-  defaultOwner: '@elastic/kibana-visualizations'
+  defaultOwner: '@elastic/kibana-presentation'
 toolchain:
   default: node
 language: typescript
@@ -10,7 +10,7 @@ project:
   name: '@kbn/unified-search-plugin'
   description: Moon project for @kbn/unified-search-plugin
   channel: ''
-  owner: '@elastic/kibana-visualizations'
+  owner: '@elastic/kibana-presentation'
   metadata:
     sourceRoot: src/platform/plugins/shared/unified_search
 dependsOn:

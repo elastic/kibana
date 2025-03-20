@@ -81,6 +81,7 @@ dependsOn:
   - '@kbn/core-user-profile-server-internal'
   - '@kbn/core-feature-flags-server-internal'
   - '@kbn/core-http-rate-limiter-internal'
+  - '@kbn/projects-solutions-groups'
 tags:
   - platform
   - shared-server

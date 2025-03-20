@@ -1,0 +1,29 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/projects-solutions-groups'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-core'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/projects-solutions-groups'
+  description: Moon project for @kbn/projects-solutions-groups
+  channel: ''
+  owner: '@elastic/kibana-core'
+  metadata:
+    sourceRoot: src/platform/packages/private/kbn-projects-solutions-groups
+dependsOn: []
+tags:
+  - platform
+  - shared-common
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

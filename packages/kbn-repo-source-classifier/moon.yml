@@ -17,6 +17,7 @@ dependsOn:
   - '@kbn/import-resolver'
   - '@kbn/repo-info'
   - '@kbn/repo-packages'
+  - '@kbn/projects-solutions-groups'
 tags:
   - common
   - shared-common

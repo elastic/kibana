@@ -16,7 +16,6 @@ project:
 dependsOn:
   - '@kbn/config-schema'
   - '@kbn/core'
-  - '@kbn/i18n'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/data-plugin'
   - '@kbn/inspector-plugin'
@@ -31,6 +30,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/elastic-agent-utils'
   - '@kbn/observability-utils-common'
+  - '@kbn/apm-sources-access-plugin'
 tags:
   - observability
   - plugin

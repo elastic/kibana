@@ -1,0 +1,31 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/newsfeed-test-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-core'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/newsfeed-test-plugin'
+  description: Moon project for @kbn/newsfeed-test-plugin
+  channel: ''
+  owner: '@elastic/kibana-core'
+  metadata:
+    sourceRoot: src/platform/test/common/plugins/newsfeed
+dependsOn:
+  - '@kbn/core'
+tags:
+  - platform
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

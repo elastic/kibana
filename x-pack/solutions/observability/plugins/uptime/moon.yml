@@ -81,6 +81,8 @@ dependsOn:
   - '@kbn/charts-theme'
   - '@kbn/charts-plugin'
   - '@kbn/response-ops-rule-params'
+  - '@kbn/response-ops-rule-form'
+  - '@kbn/fields-metadata-plugin'
 tags:
   - observability
   - plugin

@@ -19,6 +19,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/zod'
   - '@kbn/zod-helpers'
+  - '@kbn/utility-types'
 tags:
   - platform
   - shared-server

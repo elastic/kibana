@@ -1,0 +1,37 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/expression-utils'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-presentation'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/expression-utils'
+  description: Moon project for @kbn/expression-utils
+  channel: ''
+  owner: '@elastic/kibana-presentation'
+  metadata:
+    sourceRoot: src/platform/packages/private/kbn-expression-utils
+dependsOn: []
+tags:
+  - platform
+  - shared-common
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

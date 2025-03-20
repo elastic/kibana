@@ -129,8 +129,11 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/charts-theme'
   - '@kbn/response-ops-rule-params'
+  - '@kbn/response-ops-rule-form'
   - '@kbn/unsaved-changes-prompt'
+  - '@kbn/fields-metadata-plugin'
   - '@kbn/core-analytics-browser'
+  - '@kbn/deeplinks-analytics'
 tags:
   - platform
   - plugin

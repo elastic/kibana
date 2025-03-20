@@ -79,6 +79,7 @@ dependsOn:
   - '@kbn/core-security-server-mocks'
   - '@kbn/core-http-server-utils'
   - '@kbn/response-ops-rule-params'
+  - '@kbn/datemath'
 tags:
   - platform
   - plugin

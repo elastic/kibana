@@ -82,7 +82,9 @@ dependsOn:
   - '@kbn/ml-field-stats-flyout'
   - '@kbn/ml-validators'
   - '@kbn/core-user-profile-browser-mocks'
+  - '@kbn/response-ops-rule-form'
   - '@kbn/response-ops-rule-params'
+  - '@kbn/fields-metadata-plugin'
 tags:
   - platform
   - plugin

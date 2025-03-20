@@ -48,6 +48,8 @@ dependsOn:
   - '@kbn/core-plugins-server'
   - '@kbn/logs-shared-plugin'
   - '@kbn/tooling-log'
+  - '@kbn/ebt-tools'
+  - '@kbn/apm-plugin'
 tags:
   - observability
   - plugin

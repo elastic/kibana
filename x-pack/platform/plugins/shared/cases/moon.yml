@@ -59,7 +59,6 @@ dependsOn:
   - '@kbn/shared-ux-file-upload'
   - '@kbn/shared-ux-file-mocks'
   - '@kbn/saved-objects-finder-plugin'
-  - '@kbn/utility-types-jest'
   - '@kbn/ui-actions-plugin'
   - '@kbn/core-lifecycle-browser'
   - '@kbn/core-saved-objects-api-server-mocks'

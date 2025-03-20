@@ -14,7 +14,7 @@ project:
   metadata:
     sourceRoot: src/platform/packages/private/kbn-repo-packages
 dependsOn:
-  - '@kbn/repo-info'
+  - '@kbn/projects-solutions-groups'
 tags:
   - platform
   - shared-common

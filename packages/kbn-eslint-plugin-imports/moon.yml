@@ -18,6 +18,7 @@ dependsOn:
   - '@kbn/repo-source-classifier'
   - '@kbn/repo-info'
   - '@kbn/repo-packages'
+  - '@kbn/projects-solutions-groups'
 tags:
   - common
   - shared-common
