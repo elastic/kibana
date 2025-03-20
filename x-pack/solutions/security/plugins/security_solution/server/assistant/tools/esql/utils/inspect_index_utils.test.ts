@@ -8,7 +8,6 @@
 import {
   getNestedValue,
   mapFieldDescriptorToNestedObject,
-  minimise,
   shallowObjectView,
   shallowObjectViewTruncated,
 } from './inspect_index_utils';
@@ -57,18 +56,18 @@ describe('inspect index', () => {
     ],
     [
       {
-        foo: [{bar: 1}, {bar: 2}]
+        foo: [{ bar: 1 }, { bar: 2 }]
       },
       'foo.1.bar',
       2,
     ],
     [
       {
-        foo: [{bar: 1}, {bar: 2}]
+        foo: [{ bar: 1 }, { bar: 2 }]
       },
       '',
       {
-        foo: [{bar: 1}, {bar: 2}]
+        foo: [{ bar: 1 }, { bar: 2 }]
       },
     ],
   ])(
@@ -168,7 +167,7 @@ describe('inspect index', () => {
     ],
     [
       {
-        field1: [1,2,3],
+        field1: [1, 2, 3],
         field2: {
           properties: {
             nested_field: {
@@ -179,7 +178,7 @@ describe('inspect index', () => {
       },
       2,
       {
-        field1: [1,2,3],
+        field1: [1, 2, 3],
         field2: {
           properties: 'Object',
         },
@@ -225,12 +224,20 @@ describe('inspect index', () => {
     });
   });
 
-  it('shallowObjectViewTruncated does not reduce depth if maxCharacters is not exceeded', () => {
-    const x = [
+  it('shallowObjectViewTruncated reduces depth if maxCharacters is exceeded', () => {
+    expect(shallowObjectViewTruncated(sampleMapping1, 50)).toEqual({
+      mappings: {
+        properties: "Object",
+      }
+    });
+  });
+
+  it('fieldDescriptor maps to nested object', () => {
+    const fieldDescriptors = [
       {
         name: '@timestamp',
         type: 'date',
-        esTypes: [ 'date' ],
+        esTypes: ['date'],
         searchable: true,
         aggregatable: true,
         readFromDocValues: true,
@@ -243,7 +250,7 @@ describe('inspect index', () => {
       {
         name: 'Effective_process.entity_id',
         type: 'string',
-        esTypes: [ 'keyword' ],
+        esTypes: ['keyword'],
         searchable: true,
         aggregatable: true,
         readFromDocValues: true,
@@ -256,7 +263,7 @@ describe('inspect index', () => {
       {
         name: 'Effective_process.executable',
         type: 'string',
-        esTypes: [ 'keyword' ],
+        esTypes: ['keyword'],
         searchable: true,
         aggregatable: true,
         readFromDocValues: true,
@@ -267,9 +274,7 @@ describe('inspect index', () => {
         timeSeriesDimension: undefined
       },]
 
-      const all = mapFieldDescriptorToNestedObject(x.map(minimise))
-      const inner = getNestedValue(all, 'Effective_process')
-      const result = shallowObjectView(inner, 2)
-      console.log(JSON.stringify(result, null, 2))
+    const nestedObject = mapFieldDescriptorToNestedObject(fieldDescriptors)
+    expect(nestedObject).toEqual({ "@timestamp": { "aggregatable": true, "esTypes": ["date"], "fixedInterval": undefined, "metadata_field": false, "readFromDocValues": true, "searchable": true, "timeSeriesDimension": undefined, "timeSeriesMetric": undefined, "timeZone": undefined, "type": "date" }, "Effective_process": { "entity_id": { "aggregatable": true, "esTypes": ["keyword"], "fixedInterval": undefined, "metadata_field": false, "readFromDocValues": true, "searchable": true, "timeSeriesDimension": undefined, "timeSeriesMetric": undefined, "timeZone": undefined, "type": "string" }, "executable": { "aggregatable": true, "esTypes": ["keyword"], "fixedInterval": undefined, "metadata_field": false, "readFromDocValues": true, "searchable": true, "timeSeriesDimension": undefined, "timeSeriesMetric": undefined, "timeZone": undefined, "type": "string" } } })
   });
 });

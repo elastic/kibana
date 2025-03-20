@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { FieldDescriptor } from "@kbn/data-views-plugin/server";
 import { get } from "lodash";
 
 /**
@@ -68,14 +67,6 @@ export const shallowObjectViewTruncated = (
   }
   return view;
 };
-
-export const minimise = <T extends FieldDescriptor>(fieldDescriptor: T): Pick<FieldDescriptor, 'name' | 'type' | 'subType'> => {
-  return {
-    name: fieldDescriptor.name,
-    type: fieldDescriptor.type,
-    subType: fieldDescriptor.subType
-  }
-}
 
 export type NestedObject = { [key: string]: NestedValue };
 export type NestedValue = string | NestedObject | undefined | NestedValue[];
