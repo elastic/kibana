@@ -217,6 +217,10 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 ],
               },
               {
+                title: 'Machine Learning',
+                children: [{ link: 'management:trained_models', breadcrumbStatus: 'hidden' }],
+              },
+              {
                 title: i18n.translate('xpack.serverlessSearch.nav.mngt.content', {
                   defaultMessage: 'Content',
                 }),

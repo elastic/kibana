@@ -414,6 +414,7 @@ export const OverviewPage: FC = () => {
       <EuiFlexGroup>
         <EuiFlexItem>
           <OverviewFooterItem
+            icon="dashboardApp"
             title={i18n.translate('xpack.ml.overview.manageMlAssetsTitle', {
               defaultMessage: 'Manage ML Assets',
             })}
@@ -432,6 +433,7 @@ export const OverviewPage: FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <OverviewFooterItem
+            icon="machineLearningApp"
             title={i18n.translate('xpack.ml.overview.trainedModelsTitle', {
               defaultMessage: 'Trained Models',
             })}
@@ -451,6 +453,7 @@ export const OverviewPage: FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <OverviewFooterItem
+            icon="documentation"
             title={i18n.translate('xpack.ml.overview.browseDocumentationTitle', {
               defaultMessage: 'Browse documentation',
             })}

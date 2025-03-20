@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 
 interface OverviewFooterItemProps {
+  icon: 'machineLearningApp' | 'documentation' | 'dashboardApp';
   title: string;
   description: string;
   docLink: string;
@@ -25,6 +26,7 @@ interface OverviewFooterItemProps {
 }
 
 export const OverviewFooterItem: FC<OverviewFooterItemProps> = ({
+  icon,
   title,
   description,
   docLink,
@@ -36,7 +38,7 @@ export const OverviewFooterItem: FC<OverviewFooterItemProps> = ({
         display="base"
         color="primary"
         href={docLink}
-        iconType="documentation"
+        iconType={icon}
         aria-label={i18n.translate('xpack.ml.overviewFooterItem.documentationLink', {
           defaultMessage: 'Documentation link',
         })}

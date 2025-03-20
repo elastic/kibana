@@ -111,6 +111,16 @@ const stackManagementLinks: Array<NodeDefinition<AppDeepLinkId, string, string>>
     ],
   },
   {
+    title: 'Machine Learning',
+    children: [
+      { link: 'management:overview' },
+      { link: 'management:anomaly_detection' },
+      { link: 'management:analytics' },
+      { link: 'management:trained_models' },
+      { link: 'management:supplied_configurations' },
+    ],
+  },
+  {
     title: i18n.translate(
       'xpack.securitySolutionServerless.navLinks.projectSettings.mngt.content',
       { defaultMessage: 'Content' }

@@ -309,6 +309,16 @@ export const createNavigationTree = ({
                 ],
               },
               {
+                title: 'Machine Learning',
+                children: [
+                  { link: 'management:overview' },
+                  { link: 'management:anomaly_detection' },
+                  { link: 'management:analytics' },
+                  { link: 'management:trained_models' },
+                  { link: 'management:supplied_configurations' },
+                ],
+              },
+              {
                 title: i18n.translate('xpack.serverlessObservability.nav.mngt.content', {
                   defaultMessage: 'Content',
                 }),
