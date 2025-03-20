@@ -36,6 +36,7 @@ import { RulesTableContextProvider } from '../../components/rules_table/rules_ta
 import { useInvalidateFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { RuleUpdateCallouts } from '../../components/rule_update_callouts/rule_update_callouts';
+import { BlogPostPrebuiltRuleCustomizationCallout } from '../../../../detections/components/callouts/blog_post_prebuilt_rule_customization_callout';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -175,6 +176,7 @@ const RulesPageComponent: React.FC = () => {
             kibanaServices={kibanaServices}
             categories={[DEFAULT_APP_CATEGORIES.security.id]}
           />
+          <BlogPostPrebuiltRuleCustomizationCallout />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>
