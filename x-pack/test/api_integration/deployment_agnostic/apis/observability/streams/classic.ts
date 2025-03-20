@@ -126,33 +126,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(effectiveLifecycle).to.eql(isServerless ? { dsl: {} } : { ilm: { policy: 'logs' } });
 
-      expect(elasticsearchAssets).to.eql([
-        {
-          type: 'ingest_pipeline',
-          id: 'logs@default-pipeline',
-        },
-        {
-          type: 'component_template',
-          id: 'logs@mappings',
-        },
-        {
-          type: 'component_template',
-          id: 'logs@settings',
-        },
-        {
-          type: 'component_template',
-          id: 'logs@custom',
-        },
-        { type: 'component_template', id: 'ecs@mappings' },
-        {
-          type: 'index_template',
-          id: 'logs',
-        },
-        {
-          type: 'data_stream',
-          id: 'logs-test-default',
-        },
-      ]);
+      expect(elasticsearchAssets).to.eql({
+        ingestPipeline: 'logs@default-pipeline',
+        componentTemplates: ['logs@mappings', 'logs@settings', 'logs@custom', 'ecs@mappings'],
+        indexTemplate: 'logs',
+        dataStream: 'logs-test-default',
+      });
     });
 
     it('Executes processing on classic streams', async () => {
