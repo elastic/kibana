@@ -10,6 +10,8 @@ import type { SavedObjectsClientContract, Logger, SavedObject } from '@kbn/core/
 import type { UserNameAndId } from '../../../common/shared';
 import type { Agent, AgentCreateRequest } from '../../../common/agents';
 import { agentTypeName, type AgentAttributes } from '../../saved_objects/agents';
+import { WorkchatError } from '../../errors';
+import { createBuilder } from '../../utils/so_filters';
 import { savedObjectToModel, createRequestToRaw, updateToAttributes } from './convert_model';
 
 interface AgentClientOptions {
@@ -57,9 +59,14 @@ export class AgentClientImpl implements AgentClient {
   }
 
   async list(): Promise<Agent[]> {
+    const builder = createBuilder(agentTypeName);
+    const filter = builder
+      .or(builder.equals('user_id', this.user.id), builder.equals('access_control.public', true))
+      .toKQL();
+
     const { saved_objects: results } = await this.client.find<AgentAttributes>({
       type: agentTypeName,
-      filter: `${agentTypeName}.attributes.user_id: ${this.user.id}`,
+      filter,
       perPage: 1000,
     });
 
@@ -100,13 +107,25 @@ export class AgentClientImpl implements AgentClient {
   }
 
   private async _rawGet({ agentId }: { agentId: string }): Promise<SavedObject<AgentAttributes>> {
+    const builder = createBuilder(agentTypeName);
+
+    const filter = builder
+      .and(
+        builder.equals('agent_id', agentId),
+        builder.or(
+          builder.equals('user_id', this.user.id),
+          builder.equals('access_control.public', true)
+        )
+      )
+      .toKQL();
+
     const { saved_objects: results } = await this.client.find<AgentAttributes>({
       type: agentTypeName,
-      filter: `${agentTypeName}.attributes.user_id: ${this.user.id} AND ${agentTypeName}.attributes.agent_id: ${agentId}`,
+      filter,
     });
     if (results.length > 0) {
       return results[0];
     }
-    throw new Error(`Conversation ${agentId} not found`);
+    throw new WorkchatError(`Conversation ${agentId} not found`, 404);
   }
 }

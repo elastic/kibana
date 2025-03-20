@@ -5,37 +5,46 @@
  * 2.0.
  */
 
-type FilterValue = string | number;
+interface KqlFilterBase {
+  toKQL(): string;
+}
+
+type FilterValue = string | number | boolean;
+
+interface FilterBuilder {
+  or(...clauses: KqlFilterBase[]): KqlFilterBase;
+  and(...clauses: KqlFilterBase[]): KqlFilterBase;
+  equals(field: string, value: FilterValue): KqlFilterBase;
+}
 
 /**
- * Creates a single KQL filter string based on the provided values.
- *
- * @example
- * ```ts
- * const filter = createBasicFilter('myType', { name: 'foo', category: ['a', 'b']});
- * >>> 'myType.attributes.name: foo AND myType.attributes.category: (a OR b)'
- * ```
+ * Create a savedObject filter builder for given SO type.
  */
-export const createSimpleFilter = (
-  soTypeName: string,
-  filterValues: Record<string, FilterValue | FilterValue[] | undefined>
-): string => {
-  const filterPath = (fieldName: string) => `${soTypeName}.attributes.${fieldName}`;
-  const filterValue = (value: FilterValue | FilterValue[]) => {
-    if (Array.isArray(value)) {
-      return `(${value.join(' OR ')})`;
-    } else {
-      return `${value}`;
-    }
+export const createBuilder = (soType: string): FilterBuilder => {
+  const fieldPath = (fieldName: string) => `${soType}.attributes.${fieldName}`;
+  const fieldValue = (value: FilterValue) => `${value}`;
+
+  const or = (...clauses: KqlFilterBase[]): KqlFilterBase => {
+    return {
+      toKQL: () => clauses.map((clause) => '(' + clause.toKQL() + ')').join(' OR '),
+    };
   };
 
-  return Object.entries(filterValues).reduce((filter, [fieldName, fieldValue]) => {
-    if (fieldValue !== undefined) {
-      if (filter.length) {
-        filter += ' AND ';
-      }
-      filter += `${filterPath(fieldName)}: ${filterValue(fieldValue)}`;
-    }
-    return filter;
-  }, '');
+  const and = (...clauses: KqlFilterBase[]): KqlFilterBase => {
+    return {
+      toKQL: () => clauses.map((clause) => '(' + clause.toKQL() + ')').join(' AND '),
+    };
+  };
+
+  const equals = (name: string, value: FilterValue): KqlFilterBase => {
+    return {
+      toKQL: () => `${fieldPath(name)}: ${fieldValue(value)}`,
+    };
+  };
+
+  return {
+    or,
+    and,
+    equals,
+  };
 };

@@ -6,4 +6,4 @@
  */
 
 export { getConnectorList } from './get_connector_list';
-export { createSimpleFilter } from './so_filters';
+export { createBuilder } from './so_filters';

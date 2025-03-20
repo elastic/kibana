@@ -12,7 +12,7 @@ import {
   conversationTypeName,
   type ConversationAttributes,
 } from '../../saved_objects/conversations';
-import { createSimpleFilter } from '../../utils/so_filters';
+import { createBuilder } from '../../utils/so_filters';
 import { WorkchatError } from '../../errors';
 import type { ClientUser } from './types';
 import { savedObjectToModel, createRequestToRaw, updateToAttributes } from './convert_model';
@@ -49,12 +49,16 @@ export class ConversationClientImpl implements ConversationClient {
   }
 
   async list(options: ConversationListOptions = {}): Promise<Conversation[]> {
+    const builder = createBuilder(conversationTypeName);
+    const filter = builder
+      .and(
+        builder.equals('user_id', this.user.id),
+        ...(options.agentId ? [builder.equals('agent_id', options.agentId)] : [])
+      )
+      .toKQL();
     const { saved_objects: results } = await this.client.find<ConversationAttributes>({
       type: conversationTypeName,
-      filter: createSimpleFilter(conversationTypeName, {
-        user_id: this.user.id,
-        agent_id: options.agentId,
-      }),
+      filter,
       perPage: 1000,
     });
 
@@ -110,12 +114,17 @@ export class ConversationClientImpl implements ConversationClient {
   }: {
     conversationId: string;
   }): Promise<SavedObject<ConversationAttributes>> {
+    const builder = createBuilder(conversationTypeName);
+    const filter = builder
+      .and(
+        builder.equals('user_id', this.user.id),
+        builder.equals('conversation_id', conversationId)
+      )
+      .toKQL();
+
     const { saved_objects: results } = await this.client.find<ConversationAttributes>({
       type: conversationTypeName,
-      filter: createSimpleFilter(conversationTypeName, {
-        user_id: this.user.id,
-        conversation_id: conversationId,
-      }),
+      filter,
     });
     if (results.length > 0) {
       return results[0];
