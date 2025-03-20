@@ -45,7 +45,7 @@ export async function mergeUnwiredStreamPipelineActions(
 
     if (pipeline) {
       if (pipeline._meta?.managed_by === MANAGED_BY_STREAMS) {
-        updateExistingStreamsManagedPipeline({
+        await updateExistingStreamsManagedPipeline({
           pipelineName,
           pipeline,
           actions,
@@ -53,7 +53,7 @@ export async function mergeUnwiredStreamPipelineActions(
           scopedClusterClient,
         });
       } else {
-        updateExistingUserManagedPipeline({
+        await updateExistingUserManagedPipeline({
           pipelineName,
           actions,
           actionsByType,
@@ -61,7 +61,7 @@ export async function mergeUnwiredStreamPipelineActions(
         });
       }
     } else {
-      createStreamsManagedPipeline({
+      await createStreamsManagedPipeline({
         actions,
         actionsByType,
         scopedClusterClient,
@@ -89,7 +89,7 @@ async function createStreamsManagedPipeline({
   }
   const indexTemplate = await getIndexTemplate(targetTemplateNames[0], scopedClusterClient);
 
-  const pipelineName = `${indexTemplate.name}@custom`;
+  const pipelineName = `${indexTemplate.name}-pipeline`;
 
   actionsByType.upsert_ingest_pipeline.push({
     type: 'upsert_ingest_pipeline',
