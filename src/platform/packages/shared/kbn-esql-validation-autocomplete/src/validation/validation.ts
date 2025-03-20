@@ -1355,6 +1355,7 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getVariables: [],
   canSuggestVariables: [],
   getJoinIndices: [],
+  getCurrentAppId: [],
 };
 
 /**

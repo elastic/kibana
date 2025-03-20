@@ -56,10 +56,13 @@ export interface SuggestionRawDefinition {
   sortText?: string;
   /**
    * Suggestions can trigger a command by id. This is useful to trigger specific actions in some contexts
+   * https://microsoft.github.io/monaco-editor/typedoc/interfaces/languages.Command.html
    */
   command?: {
     title: string;
     id: string;
+    arguments?: any[];
+    tooltip?: string;
   };
   /**
    * The range that should be replaced when the suggestion is applied

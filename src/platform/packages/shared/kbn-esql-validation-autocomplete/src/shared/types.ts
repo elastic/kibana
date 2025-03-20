@@ -49,6 +49,8 @@ export interface ESQLCallbacks {
   getVariables?: () => ESQLControlVariable[] | undefined;
   canSuggestVariables?: () => boolean;
   getJoinIndices?: () => Promise<{ indices: JoinIndexAutocompleteItem[] }>;
+  /** Returns the current Kibana app ID, e.g. discover, dashboard etc. */
+  getCurrentAppId?: () => Promise<string | undefined>;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

@@ -23,7 +23,11 @@ import {
   suggestionIntersection,
   suggestionUnion,
 } from './util';
-import { TRIGGER_SUGGESTION_COMMAND, buildFieldsDefinitionsWithMetadata } from '../../factories';
+import {
+  TRIGGER_SUGGESTION_COMMAND,
+  buildFieldsDefinitionsWithMetadata,
+  getLookupIndexCreateSuggestion,
+} from '../../factories';
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 
@@ -139,13 +143,21 @@ export const suggest: CommandSuggestFunction<'join'> = async ({
 
     case 'after_mnemonic':
     case 'index': {
+      const indexNameInput = commandText.split(' ').pop() ?? '';
+      const isCreateCommandEnabled = (await callbacks?.getCurrentAppId?.()) === 'discover';
       const joinIndices = await callbacks?.getJoinIndices?.();
+      const suggestions: SuggestionRawDefinition[] = [];
 
-      if (!joinIndices) {
-        return [];
+      if (isCreateCommandEnabled) {
+        const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(indexNameInput);
+        suggestions.push(createIndexCommandSuggestion);
       }
 
-      return joinIndicesToSuggestions(joinIndices.indices);
+      if (joinIndices) {
+        suggestions.push(...joinIndicesToSuggestions(joinIndices.indices));
+      }
+
+      return suggestions;
     }
 
     case 'after_index': {
