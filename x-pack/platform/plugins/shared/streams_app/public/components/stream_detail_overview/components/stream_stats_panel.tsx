@@ -10,6 +10,7 @@ import {
   EuiIconTip,
   EuiPanel,
   EuiText,
+  formatNumber,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -97,12 +98,6 @@ const StatItem = ({ label, value, withBorder = false }: StatItemProps) => {
   );
 };
 
-function formatNumber(val: number) {
-  return Number(val).toLocaleString('en', {
-    maximumFractionDigits: 1,
-  });
-}
-
 export function StreamStatsPanel({
   definition,
   dataStreamStats,
@@ -144,7 +139,7 @@ export function StreamStatsPanel({
           <EuiFlexGroup>
             <StatItem
               label={documentCountLabel}
-              value={docCount ? formatNumber(docCount.details.count || 0) : '-'}
+              value={docCount ? formatNumber(docCount.details.count || 0, 'decimal0') : '-'}
             />
             <StatItem
               label={
