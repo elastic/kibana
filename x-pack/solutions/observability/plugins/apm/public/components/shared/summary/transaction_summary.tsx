@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import url from 'url';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { Summary } from '.';
 import { TimestampTooltip } from '../timestamp_tooltip';
@@ -25,13 +26,28 @@ interface Props {
 
 function getTransactionResultSummaryItem(transaction: Transaction) {
   const result = transaction.transaction.result;
-  const url = transaction.url?.full || transaction.transaction?.page?.url;
+  const urlFull = transaction.url?.full || transaction.transaction?.page?.url;
+  // URL fields from Otel
+  const urlScheme = transaction.url?.scheme;
+  const urlPath = transaction.url?.path;
+  const serverAddress = transaction?.server?.address;
+  const serverPort = transaction?.server?.port;
 
-  if (url) {
-    const method = transaction.http?.request?.method;
-    const status = transaction.http?.response?.status_code;
+  const hasURLFromFields = urlFull && urlScheme && urlPath && serverAddress && serverPort;
 
-    return <HttpInfoSummaryItem method={method} status={status} url={url} />;
+  const method = transaction.http?.request?.method;
+  const status = transaction.http?.response?.status_code;
+  const urlFromFields = hasURLFromFields
+    ? url.format({
+        protocol: urlScheme, // 'https',
+        hostname: serverAddress, // 'example.com',
+        port: serverPort, // 443,
+        pathname: urlPath, // '/some/path',
+      })
+    : urlFull;
+
+  if (urlFromFields || method || status) {
+    return <HttpInfoSummaryItem method={method} status={status} url={urlFromFields} />;
   }
 
   if (result) {
