@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { RootCauseAnalysisObservationPanel } from '.';
 
-const stories: Meta<{}> = {
+const stories: Meta = {
   title: 'RCA/ObservationPanel',
   component: RootCauseAnalysisObservationPanel,
 };
@@ -19,13 +19,13 @@ const content =
 
 export default stories;
 
-export const Default: Story<{}> = () => {
+export const Default: StoryFn = () => {
   return (
     <RootCauseAnalysisObservationPanel title={'High rate of HTTP 500 errors'} content={content} />
   );
 };
 
-export const Loading: Story<{}> = () => {
+export const Loading: StoryFn = () => {
   return (
     <RootCauseAnalysisObservationPanel
       title={'High rate of HTTP 500 errors'}
