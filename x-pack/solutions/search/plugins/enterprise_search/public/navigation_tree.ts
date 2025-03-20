@@ -121,16 +121,14 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     {
-                      breadcrumbStatus:
-                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
                       getIsActive: ({ pathNameSerialized, prepend }) => {
                         return (
                           pathNameSerialized.startsWith(
-                            prepend('/app/management/data/index_management/')
+                            prepend('/app/elasticsearch/index_management/indices')
                           ) || pathNameSerialized.startsWith(prepend('/app/elasticsearch/indices'))
                         );
                       },
-                      link: 'management:index_management',
+                      link: 'elasticsearchIndexManagement',
                     },
                     { link: 'enterpriseSearchContent:connectors' },
                     { link: 'enterpriseSearchContent:webCrawlers' },
