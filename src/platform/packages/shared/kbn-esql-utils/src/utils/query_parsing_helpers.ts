@@ -202,7 +202,7 @@ export const getValuesFromQueryField = (queryString: string) => {
 };
 
 // this is for backward compatibility, if the query is of fields or functions type
-// and the query is not set with ?? or ? in the query, we should set it
+// and the query is not set with ?? in the query, we should set it
 // https://github.com/elastic/elasticsearch/pull/122459
 export const fixESQLQueryWithVariables = (
   queryString: string,

@@ -68,13 +68,13 @@ export const areValuesIntervalsValid = (values: string[]) => {
 export const getVariablePrefix = (variableType: ESQLVariableType) => {
   switch (variableType) {
     case ESQLVariableType.FIELDS:
-      return '??field';
+      return 'field';
     case ESQLVariableType.FUNCTIONS:
-      return '??function';
+      return 'function';
     case ESQLVariableType.TIME_LITERAL:
-      return '?interval';
+      return 'interval';
     default:
-      return '?variable';
+      return 'variable';
   }
 };
 
@@ -102,12 +102,19 @@ export const getFlyoutStyling = () => {
   `;
 };
 
-export const validateVariableName = (variableName: string) => {
+export const validateVariableName = (variableName: string, prefix: '??' | '?') => {
   let text = variableName
     // variable name can only contain letters, numbers, underscores and questionmarks
     .replace(/[^a-zA-Z0-9_?]/g, '');
-  if (text.charAt(0) === '_') {
-    text = text.substring(1);
+
+  // Ensure the variable name always starts with prefix
+  if (!text.startsWith(prefix)) {
+    text = `${prefix}${text.replace(/^\?+/, '')}`;
+  }
+
+  // Remove unnecessary leading underscores
+  if (text.charAt(prefix.length) === '_') {
+    text = `${prefix}${text.substring(prefix.length + 1)}`;
   }
 
   return text;
