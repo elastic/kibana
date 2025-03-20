@@ -649,7 +649,7 @@ describe('create()', () => {
       ...rulesClientParams,
       kibanaVersion: 'v7.10.0',
     });
-    const data = getMockData({ dashboards: [] });
+    const data = getMockData();
     const createdAttributes = {
       ...data,
       legacyId: '123',
@@ -676,7 +676,6 @@ describe('create()', () => {
           },
         },
       ],
-      dashboards: [],
     };
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '123',
@@ -716,7 +715,6 @@ describe('create()', () => {
         "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
-        "dashboards": Array [],
         "enabled": true,
         "executionStatus": Object {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
