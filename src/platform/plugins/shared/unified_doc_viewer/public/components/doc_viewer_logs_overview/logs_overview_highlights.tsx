@@ -72,6 +72,7 @@ export function LogsOverviewHighlights({
             label={serviceLabel}
             fieldMetadata={fieldsMetadata[fieldConstants.SERVICE_NAME_FIELD]}
             {...getHighlightProps(fieldConstants.SERVICE_NAME_FIELD)}
+            truncate
           />
         )}
         {shouldRenderHighlight(fieldConstants.HOST_NAME_FIELD) && (
@@ -80,6 +81,7 @@ export function LogsOverviewHighlights({
             label={hostNameLabel}
             fieldMetadata={fieldsMetadata[fieldConstants.HOST_NAME_FIELD]}
             {...getHighlightProps(fieldConstants.HOST_NAME_FIELD)}
+            truncate
           />
         )}
         {shouldRenderHighlight(fieldConstants.TRACE_ID_FIELD) && (
@@ -88,6 +90,7 @@ export function LogsOverviewHighlights({
             label={traceLabel}
             fieldMetadata={fieldsMetadata[fieldConstants.TRACE_ID_FIELD]}
             {...getHighlightProps(fieldConstants.TRACE_ID_FIELD)}
+            truncate
           />
         )}
         {shouldRenderHighlight(fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD) && (
@@ -96,6 +99,7 @@ export function LogsOverviewHighlights({
             label={orchestratorClusterNameLabel}
             fieldMetadata={fieldsMetadata[fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD]}
             {...getHighlightProps(fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD)}
+            truncate
           />
         )}
         {shouldRenderHighlight(fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD) && (
@@ -104,6 +108,7 @@ export function LogsOverviewHighlights({
             label={orchestratorResourceIdLabel}
             fieldMetadata={fieldsMetadata[fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD]}
             {...getHighlightProps(fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD)}
+            truncate
           />
         )}
       </HighlightSection>
@@ -133,6 +138,7 @@ export function LogsOverviewHighlights({
             label={cloudRegionLabel}
             fieldMetadata={fieldsMetadata[fieldConstants.CLOUD_REGION_FIELD]}
             {...getHighlightProps(fieldConstants.CLOUD_REGION_FIELD)}
+            truncate
           />
         )}
         {shouldRenderHighlight(fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD) && (
@@ -141,6 +147,7 @@ export function LogsOverviewHighlights({
             label={cloudAvailabilityZoneLabel}
             fieldMetadata={fieldsMetadata[fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD]}
             {...getHighlightProps(fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD)}
+            truncate
           />
         )}
         {shouldRenderHighlight(fieldConstants.CLOUD_PROJECT_ID_FIELD) && (
@@ -149,6 +156,7 @@ export function LogsOverviewHighlights({
             label={cloudProjectIdLabel}
             fieldMetadata={fieldsMetadata[fieldConstants.CLOUD_PROJECT_ID_FIELD]}
             {...getHighlightProps(fieldConstants.CLOUD_PROJECT_ID_FIELD)}
+            truncate
           />
         )}
         {shouldRenderHighlight(fieldConstants.CLOUD_INSTANCE_ID_FIELD) && (
@@ -157,6 +165,7 @@ export function LogsOverviewHighlights({
             label={cloudInstanceIdLabel}
             fieldMetadata={fieldsMetadata[fieldConstants.CLOUD_INSTANCE_ID_FIELD]}
             {...getHighlightProps(fieldConstants.CLOUD_INSTANCE_ID_FIELD)}
+            truncate
           />
         )}
       </HighlightSection>
@@ -171,6 +180,7 @@ export function LogsOverviewHighlights({
             label={logPathFileLabel}
             fieldMetadata={fieldsMetadata[fieldConstants.LOG_FILE_PATH_FIELD]}
             {...getHighlightProps(fieldConstants.LOG_FILE_PATH_FIELD)}
+            truncate
           />
         )}
         {shouldRenderHighlight(fieldConstants.DATASTREAM_DATASET_FIELD) && (
@@ -179,6 +189,7 @@ export function LogsOverviewHighlights({
             label={datasetLabel}
             fieldMetadata={fieldsMetadata[fieldConstants.DATASTREAM_DATASET_FIELD]}
             {...getHighlightProps(fieldConstants.DATASTREAM_DATASET_FIELD)}
+            truncate
           />
         )}
         {shouldRenderHighlight(fieldConstants.DATASTREAM_NAMESPACE_FIELD) && (
@@ -188,6 +199,7 @@ export function LogsOverviewHighlights({
             fieldMetadata={fieldsMetadata[fieldConstants.DATASTREAM_NAMESPACE_FIELD]}
             useBadge
             {...getHighlightProps(fieldConstants.DATASTREAM_NAMESPACE_FIELD)}
+            truncate
           />
         )}
         {shouldRenderHighlight(fieldConstants.AGENT_NAME_FIELD) && (
@@ -196,6 +208,7 @@ export function LogsOverviewHighlights({
             label={shipperLabel}
             fieldMetadata={fieldsMetadata[fieldConstants.AGENT_NAME_FIELD]}
             {...getHighlightProps(fieldConstants.AGENT_NAME_FIELD)}
+            truncate
           />
         )}
       </HighlightSection>

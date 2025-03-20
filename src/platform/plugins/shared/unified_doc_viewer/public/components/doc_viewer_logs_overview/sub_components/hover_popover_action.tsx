@@ -16,7 +16,9 @@ import {
   EuiToolTip,
   PopoverAnchorPosition,
   type EuiPopoverProps,
+  EuiLink,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useUIFieldActions } from '../../../hooks/use_field_actions';
 
 interface HoverPopoverActionProps {
@@ -27,7 +29,18 @@ interface HoverPopoverActionProps {
   title?: unknown;
   anchorPosition?: PopoverAnchorPosition;
   display?: EuiPopoverProps['display'];
+  truncate?: boolean;
 }
+
+const MAX_CHAR_LENGTH = 500;
+
+const readMore = i18n.translate('unifiedDocViewer.observability.traces.details.readMore', {
+  defaultMessage: 'Read more',
+});
+
+const readLess = i18n.translate('unifiedDocViewer.observability.traces.details.readLess', {
+  defaultMessage: 'Read less',
+});
 
 export const HoverActionPopover = ({
   children,
@@ -37,8 +50,10 @@ export const HoverActionPopover = ({
   formattedValue,
   anchorPosition = 'upCenter',
   display = 'inline-block',
+  truncate,
 }: HoverPopoverActionProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const leaveTimer = useRef<NodeJS.Timeout | null>(null);
   const uiFieldActions = useUIFieldActions({ field, value, formattedValue });
 
@@ -53,24 +68,46 @@ export const HoverActionPopover = ({
     setIsPopoverOpen(true);
   };
 
+  const getTitleText = () => {
+    if (Array.isArray(title)) {
+      return title.join(' ');
+    } else if (typeof title === 'string') {
+      return title;
+    }
+    return title as string;
+  };
+
   const onMouseLeave = () => {
     leaveTimer.current = setTimeout(() => setIsPopoverOpen(false), 100);
   };
+
+  const titleText = getTitleText();
+  const shouldTruncate = truncate && titleText.length > MAX_CHAR_LENGTH;
+  const displayTitle =
+    shouldTruncate && !isExpanded ? `${titleText.slice(0, MAX_CHAR_LENGTH)}...` : titleText;
 
   return (
     <span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
       <EuiPopover
         button={children}
         isOpen={isPopoverOpen}
-        anchorPosition={anchorPosition}
+        anchorPosition={shouldTruncate ? 'leftCenter' : anchorPosition}
         closePopover={closePopoverPlaceholder}
         panelPaddingSize="s"
         panelStyle={{ minWidth: '24px' }}
         display={display}
       >
         {(title as string) && (
-          <EuiPopoverTitle className="eui-textBreakWord" css={{ maxWidth: '200px' }}>
-            {title as string}
+          <EuiPopoverTitle
+            className="eui-textBreakWord"
+            css={{ maxWidth: '300px', display: 'flex', flexDirection: 'column' }}
+          >
+            {displayTitle}
+            {shouldTruncate && (
+              <EuiLink onClick={() => setIsExpanded(!isExpanded)}>
+                {isExpanded ? readLess : readMore}
+              </EuiLink>
+            )}
           </EuiPopoverTitle>
         )}
         <EuiFlexGroup wrap gutterSize="none" alignItems="center" justifyContent="spaceBetween">
