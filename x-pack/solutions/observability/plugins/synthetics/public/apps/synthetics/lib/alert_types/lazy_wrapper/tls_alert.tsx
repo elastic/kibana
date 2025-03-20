@@ -6,43 +6,30 @@
  */
 
 import React from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
 import { CoreStart } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
-import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { TLSRuleComponent } from '../../../components/alerts/tls_rule_ui';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { kibanaService } from '../../../../../utils/kibana_service';
-import { store } from '../../../state';
+import { getSyntheticsAppProps } from '../../../render_app';
+import { SyntheticsSharedContext } from '../../../contexts/synthetics_shared_context';
 
 interface Props {
   coreStart: CoreStart;
   plugins: ClientPluginsStart;
   ruleParams: RuleTypeParamsExpressionProps<TLSRuleParams>['ruleParams'];
   setRuleParams: RuleTypeParamsExpressionProps<TLSRuleParams>['setRuleParams'];
-  id?: string;
 }
 
 // eslint-disable-next-line import/no-default-export
-export default function TLSAlert({ coreStart, plugins, ruleParams, setRuleParams, id }: Props) {
+export default function TLSAlert({ coreStart, plugins, ruleParams, setRuleParams }: Props) {
   kibanaService.coreStart = coreStart;
+  const props = getSyntheticsAppProps();
+
   return (
-    <ReduxProvider store={store}>
-      <KibanaContextProvider services={{ ...coreStart, ...plugins }}>
-        {id ? (
-          <EuiText>
-            <FormattedMessage
-              id="xpack.synthetics.alertRule.monitorTLS.description"
-              defaultMessage="Manage synthetics monitor TLS rule actions."
-            />
-          </EuiText>
-        ) : (
-          <TLSRuleComponent ruleParams={ruleParams} setRuleParams={setRuleParams} />
-        )}
-      </KibanaContextProvider>
-    </ReduxProvider>
+    <SyntheticsSharedContext {...props}>
+      <TLSRuleComponent ruleParams={ruleParams} setRuleParams={setRuleParams} />
+    </SyntheticsSharedContext>
   );
 }
