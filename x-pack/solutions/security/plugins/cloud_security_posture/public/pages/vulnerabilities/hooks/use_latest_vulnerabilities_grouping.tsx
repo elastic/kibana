@@ -214,11 +214,8 @@ export const useLatestVulnerabilitiesGrouping = ({
         }),
       },
     ],
-    shouldFlattenMultiValueField:
-      VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS.includes(currentSelectedGroup),
-    ...(VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS.includes(currentSelectedGroup) && {
-      countDocumentsBy: EVENT_ID,
-    }),
+    multiValueFieldsToFlatten: VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS,
+    countByKeyForMultiValueFields: EVENT_ID,
   });
 
   const { data, isFetching } = useGroupedVulnerabilities({

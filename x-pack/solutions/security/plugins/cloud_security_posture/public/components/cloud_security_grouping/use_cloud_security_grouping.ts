@@ -62,18 +62,13 @@ export const useCloudSecurityGrouping = ({
     query: urlQuery.query,
   });
 
-  // check if at least of the groupBy fields might contain multiple value
-  const isGroupByFieldsContainMultipleValues = urlQuery.groupBy?.some((field) =>
-    VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS.includes(field)
-  );
-
   const grouping = useGrouping({
     componentProps: {
       unit,
       groupPanelRenderer,
       getGroupStats,
       groupsUnit,
-      shouldIgnoreFieldSize: isGroupByFieldsContainMultipleValues,
+      multiValueFields: VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS,
     },
     defaultGroupingOptions,
     fields: dataView.fields,

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getEmptyValue } from './helpers';
-import type { GroupingAggregation, ParsedGroupingAggregation } from '../..';
+import { checkIsFlattenResults, getEmptyValue } from './helpers';
+import { GroupingAggregation, ParsedGroupingAggregation } from '../..';
 import type { GroupingQueryArgs, GroupingQuery } from './types';
 /** The maximum number of groups to render */
 export const DEFAULT_GROUP_BY_FIELD_SIZE = 10;
@@ -47,89 +47,105 @@ export const getGroupingQuery = ({
   statsAggregations,
   uniqueValue,
   timeRange,
-  shouldFlattenMultiValueField = false,
-  countDocumentsBy,
-}: GroupingQueryArgs): GroupingQuery => ({
-  size: 0,
-  runtime_mappings: {
-    ...runtimeMappings,
-    groupByField: {
-      type: 'keyword',
-      script: {
-        source:
-          // when size()==0, emits a uniqueValue as the value to represent this group
-          "if (doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) }" +
-          /*
-           * condition to decide between joining values or flattening based on shouldFlattenMultiValueField and groupByField parameters
-           * if shouldFlattenMultiValueField is true, and the selectedGroup field is an array, then emit each value in the array
-           * this is usefull when we would like to group documents based on each uniqueValue
-           * Else, join the values with uniqueValue. We cannot simply emit the value like doc[params['selectedGroup']].value,
-           * the runtime field will only return the first value in an array.
-           * The docs advise that if the field has multiple values, "Scripts can call the emit method multiple times to emit multiple values."
-           * However, this gives us a group for each value instead of combining the values like we're aiming for.
-           * Instead of .value, we can retrieve all values with .join().
-           * Instead of joining with a "," we should join with a unique value to avoid splitting a value that happens to contain a ",".
-           * We will format into a proper array in parseGroupingQuery
-           */
-          (shouldFlattenMultiValueField
-            ? " else { for (def id : doc[params['selectedGroup']]) { emit(id) }}"
-            : " else { emit(doc[params['selectedGroup']].join(params['uniqueValue']))}"),
-        params: {
-          selectedGroup: groupByField,
-          uniqueValue,
-        },
-      },
-    },
-  },
-  aggs: {
-    groupByFields: {
-      terms: {
-        field: 'groupByField',
-        size: MAX_QUERY_SIZE,
-      },
-      aggs: {
-        bucket_truncate: {
-          bucket_sort: {
-            sort,
-            from: pageNumber,
-            size,
+  multiValueFieldsToFlatten = [],
+  countByKeyForMultiValueFields,
+}: GroupingQueryArgs): GroupingQuery => {
+  const shouldFlattenMultiValueField = checkIsFlattenResults(
+    groupByField,
+    multiValueFieldsToFlatten
+  );
+
+  return {
+    size: 0,
+    runtime_mappings: {
+      ...runtimeMappings,
+      groupByField: {
+        type: 'keyword',
+        script: {
+          source:
+            // when size()==0, emits a uniqueValue as the value to represent this group
+            "if (doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) }" +
+            /*
+             * condition to decide between joining values or flattening based on shouldFlattenMultiValueField and groupByField parameters
+             * if shouldFlattenMultiValueField is true, and the selectedGroup field is an array, then emit each value in the array
+             * this is usefull when we would like to group documents based on each uniqueValue
+             * Else, join the values with uniqueValue. We cannot simply emit the value like doc[params['selectedGroup']].value,
+             * the runtime field will only return the first value in an array.
+             * The docs advise that if the field has multiple values, "Scripts can call the emit method multiple times to emit multiple values."
+             * However, this gives us a group for each value instead of combining the values like we're aiming for.
+             * Instead of .value, we can retrieve all values with .join().
+             * Instead of joining with a "," we should join with a unique value to avoid splitting a value that happens to contain a ",".
+             * We will format into a proper array in parseGroupingQuery
+             */
+            (shouldFlattenMultiValueField
+              ? " else { for (def id : doc[params['selectedGroup']]) { emit(id) }}"
+              : " else { emit(doc[params['selectedGroup']].join(params['uniqueValue']))}"),
+          params: {
+            selectedGroup: groupByField,
+            uniqueValue,
           },
         },
-        ...(statsAggregations
-          ? statsAggregations.reduce((aggObj, subAgg) => Object.assign(aggObj, subAgg), {})
-          : {}),
       },
     },
-    // if countDocumentsBy is provided, we will count the number of documents by this field
-    // otherwise we will count the number of documents by groupByField
-    unitsCount: { value_count: { field: countDocumentsBy ?? 'groupByField' } },
-    groupsCount: { cardinality: { field: 'groupByField' } },
+    aggs: {
+      groupByFields: {
+        terms: {
+          field: 'groupByField',
+          size: MAX_QUERY_SIZE,
+        },
+        aggs: {
+          bucket_truncate: {
+            bucket_sort: {
+              sort,
+              from: pageNumber,
+              size,
+            },
+          },
+          ...(statsAggregations
+            ? statsAggregations.reduce((aggObj, subAgg) => Object.assign(aggObj, subAgg), {})
+            : {}),
+        },
+      },
+      // if shouldFlattenMultiValueField = true its preferable to pass countByKeyForMultiValueFields
+      // this field will be used to count the number of documents
+      // if not passed the counting will have duplicates since we are counting the number of values
+      // of the groupByField stores instead of the actuall documents count
+      // else , shouldFlattenMultiValueField = false - count documents by groupByField
+      unitsCount: {
+        value_count: {
+          field: shouldFlattenMultiValueField
+            ? countByKeyForMultiValueFields ?? 'groupByField'
+            : 'groupByField',
+        },
+      },
+      groupsCount: { cardinality: { field: 'groupByField' } },
 
-    ...(rootAggregations
-      ? rootAggregations.reduce((aggObj, subAgg) => Object.assign(aggObj, subAgg), {})
-      : {}),
-  },
-  query: {
-    bool: {
-      filter: [
-        ...additionalFilters,
-        ...(timeRange
-          ? [
-              {
-                range: {
-                  '@timestamp': {
-                    gte: timeRange.from,
-                    lte: timeRange.to,
+      ...(rootAggregations
+        ? rootAggregations.reduce((aggObj, subAgg) => Object.assign(aggObj, subAgg), {})
+        : {}),
+    },
+    query: {
+      bool: {
+        filter: [
+          ...additionalFilters,
+          ...(timeRange
+            ? [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: timeRange.from,
+                      lte: timeRange.to,
+                    },
                   },
                 },
-              },
-            ]
-          : []),
-      ],
+              ]
+            : []),
+        ],
+      },
     },
-  },
-  _source: false,
-});
+    _source: false,
+  };
+};
 
 /**
  * Parses the grouping query response to add the isNullGroup

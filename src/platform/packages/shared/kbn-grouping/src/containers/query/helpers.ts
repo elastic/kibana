@@ -11,6 +11,9 @@ import type { Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
 export const getEmptyValue = () => '—';
 
+export const checkIsFlattenResults = (groupByField: string, fields: string[] = []): boolean =>
+  fields.includes(groupByField);
+
 type StrictFilter = Filter & {
   query: Record<string, any>;
 };
@@ -18,8 +21,10 @@ type StrictFilter = Filter & {
 export const createGroupFilter = (
   selectedGroup: string,
   values?: string[] | null,
-  shouldIgnoreFieldSize?: boolean
+  multiValueFields?: string[]
 ): StrictFilter[] => {
+  const shouldIgnoreFieldSize = checkIsFlattenResults(selectedGroup, multiValueFields);
+
   return values != null && values.length > 0
     ? values.reduce(
         (acc: StrictFilter[], query) => [
