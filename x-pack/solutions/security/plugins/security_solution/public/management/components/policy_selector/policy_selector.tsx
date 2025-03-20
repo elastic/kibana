@@ -9,6 +9,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { EuiFieldSearchProps } from '@elastic/eui';
 import {
   EuiSelectable,
+  useEuiTheme,
   type EuiSelectableProps,
   type EuiSelectableOption,
   EuiCheckbox,
@@ -17,6 +18,9 @@ import {
   EuiPagination,
   EuiProgress,
   EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
 import type { GetPackagePoliciesRequest, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { INTEGRATIONS_PLUGIN_ID, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
@@ -26,6 +30,7 @@ import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import type { EuiPaginationProps } from '@elastic/eui/src/components/pagination/pagination';
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
+import { css } from '@emotion/react';
 import { APP_UI_ID } from '../../../../common';
 import { useAppUrl } from '../../../common/lib/kibana';
 import { LinkToApp } from '../../../common/components/endpoint';
@@ -33,13 +38,26 @@ import { useFetchIntegrationPolicyList } from '../../hooks/policy/use_fetch_inte
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { getPolicyDetailPath } from '../../common/routing';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { getEmptyTagValue } from '../../../common/components/empty_value';
 
 const NOOP = () => {};
 const PolicySelectorContainer = styled.div<{ height?: string }>`
-  .selectable-container {
+  .header-container {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .body-container {
     height: ${(props) => props.height ?? '200px'};
-    width: 100%;
     position: relative;
+    border-top: none;
+    border-bottom: none;
+    border-radius: 0;
+  }
+
+  .footer-container {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
   }
 
   .searchbar {
@@ -137,7 +155,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
     'data-test-subj': dataTestSubj,
   }) => {
     // TODO:PT add support for showing static selections (for Global, Unassigned)
-
+    const { euiTheme } = useEuiTheme();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { getAppUrl } = useAppUrl();
     const { canReadPolicyManagement, canWriteIntegrationPolicies } =
@@ -150,6 +168,8 @@ export const PolicySelector = memo<PolicySelectorProps>(
     // that we don't call the API on every character change.
     useDebounce(
       () => {
+        setPage(1);
+
         if (userSearchValue) {
           const kueryWithSearchValue: string = searchFields
             .map((field) => `(${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.${field}:*${userSearchValue}*)`)
@@ -189,7 +209,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
 
     const listProps: EuiSelectableProps['listProps'] = useMemo(() => {
       return {
-        bordered: true,
+        bordered: false,
         showIcons: !useCheckbox,
       };
     }, [useCheckbox]);
@@ -313,7 +333,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
 
     return (
       <PolicySelectorContainer data-test-subj={dataTestSubj} height={height}>
-        <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
+        <EuiPanel paddingSize="s" hasShadow={false} hasBorder className="header-container">
           <EuiFieldSearch
             placeholder={i18n.translate(
               'xpack.securitySolution.policySelector.searchbarPlaceholder',
@@ -329,7 +349,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
           />
         </EuiPanel>
 
-        <div className="selectable-container">
+        <EuiPanel paddingSize="s" hasShadow={false} hasBorder className="body-container">
           {isFetching && <EuiProgress size="xs" color="accent" position="absolute" />}
 
           <EuiSelectable<OptionPolicyData>
@@ -345,20 +365,58 @@ export const PolicySelector = memo<PolicySelectorProps>(
           >
             {listBuilderCallback}
           </EuiSelectable>
-        </div>
+        </EuiPanel>
 
-        <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
-          {policyListResponse && (
-            <EuiPagination
-              aria-label={i18n.translate(
-                'xpack.securitySolution.policySelector.policyListPagination',
-                { defaultMessage: 'Policy list pagination' }
+        <EuiPanel paddingSize="s" hasShadow={false} hasBorder className="footer-container">
+          <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
+            <EuiFlexItem
+              grow
+              css={css`
+                border-right: ${euiTheme.border.thin};
+                padding-right: ${euiTheme.size.s};
+              `}
+            >
+              <EuiText size="s">
+                <FormattedMessage
+                  id="xpack.securitySolution.policySelector.selectedCount"
+                  defaultMessage="{count} {count, plural, =1 {policy} other {policies}} selected"
+                  values={{ count: selectedPolicyIds.length }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                border-right: ${euiTheme.border.thin};
+                padding-right: ${euiTheme.size.s};
+              `}
+            >
+              <EuiText size="s">
+                <FormattedMessage
+                  id="xpack.securitySolution.policySelector.totalPoliciesFound"
+                  defaultMessage="{count} {count, plural, =1 {policy} other {policies}} found"
+                  values={{ count: policyListResponse?.total ?? 0 }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {policyListResponse && policyListResponse.total > 0 ? (
+                <EuiPagination
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.policySelector.policyListPagination',
+                    { defaultMessage: 'Policy list pagination' }
+                  )}
+                  pageCount={Math.ceil((policyListResponse?.total ?? 0) / perPage)}
+                  activePage={(policyListResponse?.page ?? 1) - 1}
+                  onPageClick={onPageClickHandler}
+                />
+              ) : (
+                <EuiText size="s" color="textSu">
+                  {getEmptyTagValue()}
+                </EuiText>
               )}
-              pageCount={Math.ceil((policyListResponse?.total ?? 0) / perPage)}
-              activePage={(policyListResponse?.page ?? 1) - 1}
-              onPageClick={onPageClickHandler}
-            />
-          )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPanel>
       </PolicySelectorContainer>
     );
