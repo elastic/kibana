@@ -9995,6 +9995,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -10222,6 +10225,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -10297,6 +10303,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -10438,6 +10447,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -10673,6 +10685,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -11756,6 +11771,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -13048,6 +13066,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -14078,6 +14099,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -14171,6 +14195,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -14346,6 +14373,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -15342,6 +15372,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -16649,6 +16682,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -17677,6 +17713,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -17759,6 +17798,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -17784,6 +17826,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -18388,6 +18433,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -18536,6 +18584,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -18679,6 +18730,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -18799,6 +18853,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -19381,6 +19438,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -19470,6 +19530,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -19698,6 +19761,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -19829,6 +19895,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -19888,6 +19957,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -19998,6 +20070,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -20105,6 +20180,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -20221,6 +20299,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -20335,6 +20416,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -20461,6 +20545,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -20542,6 +20629,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -20606,6 +20696,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -20700,6 +20793,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -20788,6 +20884,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -20865,6 +20964,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -20945,6 +21047,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -21400,6 +21505,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -21880,6 +21988,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -22086,6 +22197,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -22172,6 +22286,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -22271,6 +22388,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -22420,6 +22540,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -22530,6 +22653,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -22602,6 +22728,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -22749,6 +22878,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -22931,6 +23063,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -23065,6 +23200,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -23143,6 +23281,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -23244,6 +23385,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -23387,6 +23531,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -23486,6 +23633,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -23694,6 +23844,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -23808,6 +23961,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -24409,6 +24565,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -24591,6 +24750,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -24868,6 +25030,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -25099,6 +25264,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -25158,6 +25326,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -25234,6 +25405,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -25403,6 +25577,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -26113,6 +26290,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -26330,6 +26510,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -27024,6 +27207,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -27341,6 +27527,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -27411,6 +27600,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -27572,6 +27764,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -27629,6 +27824,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -27827,6 +28025,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -28154,6 +28355,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -28229,6 +28433,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -28419,6 +28626,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -28745,6 +28955,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -28838,6 +29051,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -28863,6 +29079,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -28948,6 +29167,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -29022,6 +29244,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -29047,6 +29272,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -29116,6 +29344,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -29196,6 +29427,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -29221,6 +29455,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -30395,6 +30632,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -32675,6 +32915,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -32752,6 +32995,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -32777,6 +33023,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -33943,6 +34192,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -36207,6 +36459,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -36283,6 +36538,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -37003,6 +37261,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -38283,6 +38544,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -38308,6 +38572,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -38993,6 +39260,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -39205,6 +39475,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -39318,6 +39591,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -40523,6 +40799,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -40606,6 +40885,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -41258,6 +41540,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -42557,6 +42842,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -42582,6 +42870,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -42705,6 +42996,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -42882,6 +43176,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -42957,6 +43254,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -43072,6 +43372,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -43252,6 +43555,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -43340,6 +43646,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -43459,6 +43768,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -43654,6 +43966,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -43760,6 +44075,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -43920,6 +44238,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -44016,6 +44337,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -48329,6 +48653,108 @@
           "streams"
         ],
         "x-state": "Technical Preview"
+      }
+    },
+    "/api/streams/{name}/content/export": {
+      "post": {
+        "description": "Exports the content associated to a stream.",
+        "operationId": "post-streams-name-content-export",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {},
+                    "type": "object"
+                  },
+                  {
+                    "enum": [
+                      "null"
+                    ],
+                    "nullable": true
+                  },
+                  {
+                    "not": {}
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Export stream content",
+        "tags": [
+          "streams"
+        ]
+      }
+    },
+    "/api/streams/{name}/content/import": {
+      "post": {
+        "description": "Links content objects to a stream.",
+        "operationId": "post-streams-name-content-import",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "content": {}
+                },
+                "required": [
+                  "content"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Import content into a stream",
+        "tags": [
+          "streams"
+        ]
       }
     },
     "/api/streams/{name}/dashboards": {

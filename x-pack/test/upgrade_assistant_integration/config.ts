@@ -40,8 +40,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     esTestCluster: {
       ...xPackFunctionalTestsConfig.get('esTestCluster'),
-      // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/209048
-      // dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),
+      dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),
     },
   };
 }
