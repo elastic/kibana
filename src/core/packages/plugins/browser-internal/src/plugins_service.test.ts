@@ -115,6 +115,7 @@ describe('PluginsService', () => {
         ...mockSetupDeps.http,
         staticAssets: expect.any(Object),
       },
+      injection: expect.any(Object),
     };
     // @ts-expect-error this file was not being type checked properly in the past, error is legit
     mockStartDeps = {
@@ -147,6 +148,7 @@ describe('PluginsService', () => {
         ...mockStartDeps.http,
         staticAssets: expect.any(Object),
       },
+      injection: expect.any(Object),
     };
 
     // Reset these for each test.

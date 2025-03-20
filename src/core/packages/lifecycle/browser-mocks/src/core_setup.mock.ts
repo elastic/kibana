@@ -10,6 +10,7 @@
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -44,6 +45,7 @@ export function createCoreSetupMock({
       Promise.resolve([createCoreStartMock({ basePath }), pluginStartDeps, pluginStartContract])
     ),
     http: httpServiceMock.createSetupContract({ basePath }),
+    injection: injectionServiceMock.createSetupContract(),
     notifications: notificationServiceMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
     settings: settingsServiceMock.createSetupContract(),
