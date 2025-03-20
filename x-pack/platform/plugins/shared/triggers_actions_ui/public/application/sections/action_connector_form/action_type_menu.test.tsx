@@ -181,7 +181,6 @@ describe('connector_add_flyout', () => {
         return Promise.resolve(validationResult);
       },
       actionConnectorFields: null,
-      name: 'Jira',
     });
 
     const actionType2 = actionTypeRegistryMock.createMockActionTypeModel({
@@ -193,7 +192,6 @@ describe('connector_add_flyout', () => {
         return Promise.resolve(validationResult);
       },
       actionConnectorFields: null,
-      name: 'Webhook',
     });
 
     beforeEach(() => {
