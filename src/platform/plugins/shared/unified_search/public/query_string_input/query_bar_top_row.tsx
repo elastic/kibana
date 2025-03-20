@@ -91,7 +91,8 @@ export const strings = {
     }),
   getRunQueryShortcutLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.shortcutLabel', {
-      defaultMessage: `(shortcut ${textBasedRunShortcut})`,
+      defaultMessage: `(shortcut {textBasedRunShortcut})`,
+      values: { textBasedRunShortcut },
     }),
   getRunButtonLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.runButton', {
