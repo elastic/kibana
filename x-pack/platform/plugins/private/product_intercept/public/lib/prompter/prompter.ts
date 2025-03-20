@@ -45,8 +45,7 @@ export class ProductInterceptPrompter {
               const interceptId = response.runs + runCount;
 
               notifications.intercepts.add({
-                title: 'hello',
-                // ideally this will come from a predefined place, so it's configurable
+                title: 'kibana_product_intercept',
                 steps: [
                   {
                     id: 'start',
@@ -135,16 +134,16 @@ export class ProductInterceptPrompter {
                   });
                 },
                 onFinish({ response: feedbackResponse }) {
+                  // maybe bump user profile run count
                   userProfile.update({});
 
-                  // maybe bump user profile run count and close the dialog
                   eventReporter.reportInterceptInteraction({
                     interactionType: 'completion',
                     interceptId,
                   });
                 },
                 onDismiss() {
-                  // maybe do something user
+                  // still update user profile run count, a dismissal is still an interaction
                   eventReporter.reportInterceptInteraction({
                     interactionType: 'dismissal',
                     interceptId,

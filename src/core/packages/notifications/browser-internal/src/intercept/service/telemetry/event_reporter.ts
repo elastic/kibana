@@ -29,9 +29,16 @@ export class InterceptTelemetry {
     };
   }
 
-  private reportInterceptInteraction({ interactionType }: { interactionType: string }) {
+  private reportInterceptInteraction({
+    interactionType,
+    interceptTitle,
+  }: {
+    interactionType: string;
+    interceptTitle: string;
+  }) {
     this.reportEvent?.(EventMetric.INTERCEPT_INTERACTION, {
       [EventFieldType.INTERACTION_TYPE]: interactionType,
+      [EventFieldType.INTERCEPT_TITLE]: interceptTitle,
     });
   }
 }
