@@ -11,8 +11,15 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import type { DiscoverInternalState } from './types';
 import type { InternalStateDispatch, InternalStateThunkDependencies } from './internal_state';
 
-export const createInternalStateAsyncThunk = createAsyncThunk.withTypes<{
-  state: DiscoverInternalState;
-  dispatch: InternalStateDispatch;
-  extra: InternalStateThunkDependencies;
-}>();
+// For some reason if this is not explicitly typed, TypeScript fails with the following error:
+// TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
+type CreateInternalStateAsyncThunk = ReturnType<
+  typeof createAsyncThunk.withTypes<{
+    state: DiscoverInternalState;
+    dispatch: InternalStateDispatch;
+    extra: InternalStateThunkDependencies;
+  }>
+>;
+
+export const createInternalStateAsyncThunk: CreateInternalStateAsyncThunk =
+  createAsyncThunk.withTypes();

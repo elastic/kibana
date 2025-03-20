@@ -9,7 +9,7 @@
 
 import type { DiscoverStateContainer } from './discover_state';
 import { createSearchSessionRestorationDataProvider } from './discover_state';
-import { internalStateActions } from './redux';
+import { internalStateActions, selectCurrentTab, selectCurrentTabRuntimeState } from './redux';
 import type { History } from 'history';
 import { createBrowserHistory, createMemoryHistory } from 'history';
 import { createSearchSourceMock, dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -439,10 +439,20 @@ describe('Discover state', () => {
 
     test('setDataView', async () => {
       const { state, runtimeStateManager } = await getState('');
-      expect(runtimeStateManager.currentDataView$.getValue()).toBeUndefined();
+      expect(
+        selectCurrentTabRuntimeState(
+          state.internalState.getState(),
+          runtimeStateManager
+        ).currentDataView$.getValue()
+      ).toBeUndefined();
       state.actions.setDataView(dataViewMock);
-      expect(runtimeStateManager.currentDataView$.getValue()).toBe(dataViewMock);
-      expect(state.internalState.getState().dataViewId).toBe(dataViewMock.id);
+      expect(
+        selectCurrentTabRuntimeState(
+          state.internalState.getState(),
+          runtimeStateManager
+        ).currentDataView$.getValue()
+      ).toBe(dataViewMock);
+      expect(selectCurrentTab(state.internalState.getState()).dataViewId).toBe(dataViewMock.id);
     });
 
     test('fetchData', async () => {
@@ -1092,7 +1102,9 @@ describe('Discover state', () => {
       const unsubscribe = state.actions.initializeAndSync();
       await state.actions.onDataViewCreated(dataViewComplexMock);
       await waitFor(() => {
-        expect(state.internalState.getState().dataViewId).toBe(dataViewComplexMock.id);
+        expect(selectCurrentTab(state.internalState.getState()).dataViewId).toBe(
+          dataViewComplexMock.id
+        );
       });
       expect(state.appState.getState().dataSource).toEqual(
         createDataViewDataSource({ dataViewId: dataViewComplexMock.id! })
@@ -1122,7 +1134,7 @@ describe('Discover state', () => {
         );
       await state.actions.onDataViewCreated(dataViewAdHoc);
       await waitFor(() => {
-        expect(state.internalState.getState().dataViewId).toBe(dataViewAdHoc.id);
+        expect(selectCurrentTab(state.internalState.getState()).dataViewId).toBe(dataViewAdHoc.id);
       });
       expect(state.appState.getState().dataSource).toEqual(
         createDataViewDataSource({ dataViewId: dataViewAdHoc.id! })
@@ -1144,12 +1156,14 @@ describe('Discover state', () => {
           defaultUrlState: undefined,
         })
       );
-      const selectedDataViewId = state.internalState.getState().dataViewId;
+      const selectedDataViewId = selectCurrentTab(state.internalState.getState()).dataViewId;
       expect(selectedDataViewId).toBe(dataViewMock.id);
       const unsubscribe = state.actions.initializeAndSync();
       await state.actions.onDataViewEdited(dataViewMock);
       await waitFor(() => {
-        expect(state.internalState.getState().dataViewId).toBe(selectedDataViewId);
+        expect(selectCurrentTab(state.internalState.getState()).dataViewId).toBe(
+          selectedDataViewId
+        );
       });
       unsubscribe();
     });
@@ -1161,7 +1175,7 @@ describe('Discover state', () => {
       const previousId = dataViewAdHoc.id;
       await state.actions.onDataViewEdited(dataViewAdHoc);
       await waitFor(() => {
-        expect(state.internalState.getState().dataViewId).not.toBe(previousId);
+        expect(selectCurrentTab(state.internalState.getState()).dataViewId).not.toBe(previousId);
       });
       unsubscribe();
     });
@@ -1250,7 +1264,7 @@ describe('Discover state', () => {
       const initialUrlState =
         '/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())';
       expect(getCurrentUrl()).toBe(initialUrlState);
-      expect(state.internalState.getState().dataViewId).toBe(dataViewMock.id!);
+      expect(selectCurrentTab(state.internalState.getState()).dataViewId).toBe(dataViewMock.id!);
 
       // Change the data view, this should change the URL and trigger a fetch
       await state.actions.onChangeDataView(dataViewComplexMock.id!);
@@ -1261,7 +1275,9 @@ describe('Discover state', () => {
       await waitFor(() => {
         expect(state.dataState.fetch).toHaveBeenCalledTimes(1);
       });
-      expect(state.internalState.getState().dataViewId).toBe(dataViewComplexMock.id!);
+      expect(selectCurrentTab(state.internalState.getState()).dataViewId).toBe(
+        dataViewComplexMock.id!
+      );
 
       // Undo all changes to the saved search, this should trigger a fetch, again
       await state.actions.undoSavedSearchChanges();
@@ -1270,7 +1286,7 @@ describe('Discover state', () => {
       await waitFor(() => {
         expect(state.dataState.fetch).toHaveBeenCalledTimes(2);
       });
-      expect(state.internalState.getState().dataViewId).toBe(dataViewMock.id!);
+      expect(selectCurrentTab(state.internalState.getState()).dataViewId).toBe(dataViewMock.id!);
 
       unsubscribe();
     });
