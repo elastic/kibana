@@ -20,10 +20,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { InputOverrides } from '@kbn/file-upload-plugin/common';
 import type { FileAnalysis } from '../file_manager/file_wrapper';
 import { STATUS, type UploadStatus } from '../file_manager/file_manager';
 import { FieldsStatsGrid } from '../../application/common/components/fields_stats_grid';
-import { AnalysisSummary } from '../../application/file_data_visualizer/components/analysis_summary';
+
 import { FileContents } from '../../application/file_data_visualizer/components/file_contents';
 import { FileCouldNotBeRead } from '../../application/file_data_visualizer/components/file_data_visualizer_view/file_error_callouts';
 import { FileClashResult } from './file_clash';
@@ -31,6 +32,9 @@ import { Mappings } from './mappings';
 import { IngestPipeline } from './pipeline';
 import { UploadProgress } from './progress';
 import { AnalysisExplanation } from './analysis_explanation';
+
+import { AnalysisOverrides } from './analysis_overrides';
+import { AnalysisSummary } from '../../application/file_data_visualizer/components/analysis_summary';
 
 enum TAB {
   SUMMARY,
@@ -50,6 +54,7 @@ interface Props {
   showFileContentPreview?: boolean;
   showFileSummary?: boolean;
   lite: boolean;
+  analyzeFileWithOverrides?: (overrides: InputOverrides) => void;
 }
 
 export const FileStatus: FC<Props> = ({
@@ -61,6 +66,7 @@ export const FileStatus: FC<Props> = ({
   showFileContentPreview,
   showFileSummary,
   setPipeline,
+  analyzeFileWithOverrides,
 }) => {
   const fileClash = uploadStatus.fileClashes[index] ?? {
     clash: false,
@@ -196,7 +202,16 @@ export const FileStatus: FC<Props> = ({
                   <EuiSpacer size="s" />
 
                   {selectedTab === TAB.SUMMARY ? (
-                    <AnalysisSummary results={fileStatus.results!} showTitle={false} />
+                    <>
+                      <AnalysisSummary results={fileStatus.results!} showTitle={false} />
+
+                      {analyzeFileWithOverrides ? (
+                        <AnalysisOverrides
+                          fileStatus={fileStatus}
+                          analyzeFileWithOverrides={analyzeFileWithOverrides}
+                        />
+                      ) : null}
+                    </>
                   ) : null}
 
                   {selectedTab === TAB.STATS ? (
@@ -240,6 +255,12 @@ export const FileStatus: FC<Props> = ({
                     loaded={false}
                     showEditFlyout={() => {}}
                   />
+                  {analyzeFileWithOverrides ? (
+                    <AnalysisOverrides
+                      fileStatus={fileStatus}
+                      analyzeFileWithOverrides={analyzeFileWithOverrides}
+                    />
+                  ) : null}
                 </>
               ) : null}
             </EuiAccordion>

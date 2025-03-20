@@ -9,7 +9,9 @@ import { BehaviorSubject } from 'rxjs';
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import type {
   FindFileStructureResponse,
+  FormattedOverrides,
   IngestPipeline,
+  InputOverrides,
 } from '@kbn/file-upload-plugin/common/types';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { isSupportedFormat } from '../../../common/constants';
@@ -25,6 +27,7 @@ interface AnalysisResults {
   results: FindFileStructureResponse | null;
   explanation: string[] | undefined;
   serverSettings: ReturnType<typeof processResults> | null;
+  overrides: FormattedOverrides;
   analysisError?: any;
 }
 
@@ -56,6 +59,7 @@ export class FileWrapper {
     results: null,
     explanation: undefined,
     serverSettings: null,
+    overrides: {},
     loaded: false,
     importStatus: STATUS.NOT_STARTED,
     fileName: '',
@@ -89,7 +93,7 @@ export class FileWrapper {
     this.analyzedFile$.complete();
   }
 
-  public async analyzeFile() {
+  public async analyzeFile(overrides: InputOverrides = {}) {
     this.setStatus({ analysisStatus: STATUS.STARTED });
     readFile(this.file).then(async ({ data, fileContents }) => {
       // return after file has been read
@@ -102,7 +106,7 @@ export class FileWrapper {
         analysisResults = await this.analyzeTika(data);
         parsedFileContents = analysisResults.fileContents;
       } else {
-        analysisResults = await this.analyzeStandardFile(fileContents, {});
+        analysisResults = await this.analyzeStandardFile(fileContents, overrides);
       }
       const supportedFormat = isSupportedFormat(analysisResults.results?.format ?? '');
 
@@ -127,17 +131,25 @@ export class FileWrapper {
       results: standardResults.results,
       explanation: standardResults.results.explanation,
       serverSettings,
+      overrides: {},
       analysisStatus: STATUS.COMPLETED,
     };
   }
 
   private async analyzeStandardFile(
     fileContents: string,
-    overrides: Record<string, string>,
+    overrides: InputOverrides,
     isRetry = false
   ): Promise<AnalysisResults> {
     try {
-      const resp = await this.fileUpload.analyzeFile(fileContents, overrides);
+      const resp = await this.fileUpload.analyzeFile(
+        fileContents,
+        overrides as Record<string, string>
+      );
+
+      // const overrideDefaults = this.analyzedFile$.getValue().serverSettings;
+      // const formattedOverrides = createUrlOverrides(overrides, overrideDefaults);
+      // const resp = await this.fileUpload.analyzeFile(fileContents, formattedOverrides);
       const serverSettings = processResults(resp);
 
       return {
@@ -145,6 +157,7 @@ export class FileWrapper {
         results: resp.results,
         explanation: resp.results.explanation,
         serverSettings,
+        overrides: resp.overrides ?? {},
         analysisStatus: STATUS.COMPLETED,
       };
     } catch (e) {
@@ -154,6 +167,7 @@ export class FileWrapper {
         explanation: undefined,
         serverSettings: null,
         analysisError: e,
+        overrides: {},
         analysisStatus: STATUS.FAILED,
       };
     }

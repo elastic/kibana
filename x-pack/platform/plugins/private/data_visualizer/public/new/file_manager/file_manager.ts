@@ -17,6 +17,7 @@ import type {
   FindFileStructureResponse,
   IngestPipeline,
   InitializeImportResponse,
+  InputOverrides,
 } from '@kbn/file-upload-plugin/common/types';
 import type {
   IndicesIndexSettings,
@@ -38,6 +39,7 @@ import {
   getFormatClashes,
   getMappingClashInfo,
 } from './merge_tools';
+import { createUrlOverrides } from '../../application/common/components/utils';
 
 export enum STATUS {
   NA,
@@ -47,7 +49,7 @@ export enum STATUS {
   FAILED,
 }
 
-interface Config<T> {
+export interface Config<T> {
   json: T;
   string: string;
   valid: boolean;
@@ -253,6 +255,17 @@ export class FileUploadManager {
     filesToDestroy.forEach((file) => {
       file.destroy();
     });
+  }
+
+  public analyzeFileWithOverrides(index: number) {
+    return async (overrides: InputOverrides) => {
+      const files = this.getFiles();
+      const file = files[index];
+      if (file) {
+        const formattedOverrides = createUrlOverrides(overrides, {});
+        await file.analyzeFile(formattedOverrides);
+      }
+    };
   }
 
   public getExistingIndexName() {

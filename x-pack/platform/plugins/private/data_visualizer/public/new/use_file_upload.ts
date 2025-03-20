@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FileUploadResults } from '@kbn/file-upload-common';
 import useObservable from 'react-use/lib/useObservable';
-import type { FileUploadManager } from './file_manager';
+import type { FileUploadManager } from './file_manager/file_manager';
 import { STATUS } from './file_manager/file_manager';
 import { CLASH_ERROR_TYPE } from './file_manager/merge_tools';
 import { useDataVisualizerKibana } from '../application/kibana_context';

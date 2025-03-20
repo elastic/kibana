@@ -47,6 +47,9 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose }) => {
     settings,
   } = useFileUpload(fileUploadManager);
 
+  // eslint-disable-next-line no-console
+  console.log('filesStatus', filesStatus);
+
   const showImportControls =
     uploadStatus.overallImportStatus === STATUS.NOT_STARTED &&
     uploadStatus.analysisStatus !== STATUS.FAILED &&
@@ -86,6 +89,7 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose }) => {
                 index={i}
                 lite={false}
                 setPipeline={fileUploadManager.updatePipeline(i)}
+                analyzeFileWithOverrides={fileUploadManager.analyzeFileWithOverrides(i)}
               />
             ))}
 
