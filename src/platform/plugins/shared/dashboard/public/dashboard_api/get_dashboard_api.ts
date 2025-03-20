@@ -60,7 +60,6 @@ export function getDashboardApi({
   savedObjectResult?: LoadDashboardReturn;
   savedObjectId?: string;
 }) {
-  console.log('incomingEmbeddable', incomingEmbeddable);
   const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = savedObjectResult?.managed ?? false;
