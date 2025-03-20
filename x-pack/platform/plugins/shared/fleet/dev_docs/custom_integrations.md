@@ -12,7 +12,7 @@ This guide covers how to setup a custom integration in Kibana. It covers how to 
 
 2. Once this is complete, navigate to the `Integrations` section in Kibana and click on `Create New Integration` in the top right.
 
-3. From here you will need to continue by clicking on `Create Integration` or you may upload a zip folder with the custom integration if you have it. See the docs here: `placeholder`.
+3. From here you will need to continue by clicking on `Create Integration` or you may upload a zip folder with the custom integration if you have it. See the docs here for more explanation: [Install Package](https://github.com/elastic/elastic-package/blob/main/docs/howto/install_package.md#kibana--870-1) and [API Docs](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-epm-packages).
 
 ## Using the custom integration flow
 
