@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { KueryNode, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { SyntheticsEsClient } from '../../../lib';
@@ -28,14 +28,16 @@ export async function queryFilterMonitors({
     return;
   }
 
-  // This is just to check if the kqlQuery is valid, if it is not the fromKueryExpression will throw an error
+  let kueryNode: KueryNode;
+
+  // This is to check if the kqlQuery is valid, if it is not the fromKueryExpression will throw an error
   try {
-    fromKueryExpression(ruleParams.kqlQuery);
+    kueryNode = fromKueryExpression(ruleParams.kqlQuery);
   } catch (error) {
     return;
   }
 
-  const filters = toElasticsearchQuery(fromKueryExpression(ruleParams.kqlQuery));
+  const filters = toElasticsearchQuery(kueryNode);
   const { body: result } = await esClient.search(
     {
       size: 0,
