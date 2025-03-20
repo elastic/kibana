@@ -1349,7 +1349,7 @@ describe('validation logic', () => {
         'Unknown policy [_]',
       ]);
       testErrorsAndWarnings(`from a_index | enrich _:policy`, [
-        'Unrecognized value [_] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]',
+        'Unrecognized value [_] for ENRICH, mode needs to be one of [_any, _coordinator, _remote]',
       ]);
       testErrorsAndWarnings(`from a_index | enrich :policy`, [
         "SyntaxError: token recognition error at: ':'",
@@ -1363,7 +1363,7 @@ describe('validation logic', () => {
         'Unknown policy [_any]',
       ]);
       testErrorsAndWarnings(`from a_index | enrich any:policy`, [
-        'Unrecognized value [any] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]',
+        'Unrecognized value [any] for ENRICH, mode needs to be one of [_any, _coordinator, _remote]',
       ]);
       testErrorsAndWarnings(`from a_index | enrich policy `, []);
       testErrorsAndWarnings('from a_index | enrich `this``is fine`', [
@@ -1391,7 +1391,7 @@ describe('validation logic', () => {
       }
 
       testErrorsAndWarnings(`from a_index | enrich _unknown:policy`, [
-        'Unrecognized value [_unknown] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]',
+        'Unrecognized value [_unknown] for ENRICH, mode needs to be one of [_any, _coordinator, _remote]',
       ]);
       testErrorsAndWarnings(`from a_index |enrich missing-policy `, [
         'Unknown policy [missing-policy]',
