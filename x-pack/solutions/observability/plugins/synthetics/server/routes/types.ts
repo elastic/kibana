@@ -86,7 +86,7 @@ export type SyntheticsRouteWrapper = (
   uptimeRoute: SyntheticsRoute<Record<string, unknown>>,
   server: SyntheticsServerSetup,
   syntheticsMonitorClient: SyntheticsMonitorClient
-) => UMKibanaRoute;
+) => UMKibanaRoute & { security: RouteSecurity };
 
 export interface RouteContext<
   Params = Record<string, any>,

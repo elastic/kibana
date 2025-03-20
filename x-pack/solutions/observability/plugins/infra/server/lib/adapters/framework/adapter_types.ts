@@ -10,7 +10,7 @@ import type { Lifecycle } from '@hapi/hapi';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { JsonArray, JsonValue } from '@kbn/utility-types';
-import type { RouteConfig, RouteMethod } from '@kbn/core/server';
+import type { RouteConfig, RouteMethod, RouteSecurity } from '@kbn/core/server';
 import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
@@ -204,8 +204,8 @@ export interface InfraFieldDef {
 
 export type InfraRouteConfig<Params, Query, Body, Method extends RouteMethod> = {
   method: RouteMethod;
-} & Omit<RouteConfig<Params, Query, Body, Method>, 'security'>;
+} & Omit<RouteConfig<Params, Query, Body, Method>, 'security'> & { security?: RouteSecurity };
 
 export type InfraVersionedRouteConfig<Method extends RouteMethod> = {
   method: RouteMethod;
-} & Omit<VersionedRouteConfig<Method>, 'security'>;
+} & Omit<VersionedRouteConfig<Method>, 'security'> & { security?: RouteSecurity };

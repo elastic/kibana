@@ -93,4 +93,4 @@ export interface SortedSearchHit extends SearchHit {
 
 export type LogsSharedVersionedRouteConfig<Method extends RouteMethod> = {
   method: RouteMethod;
-} & VersionedRouteConfig<Method>;
+} & Omit<VersionedRouteConfig<Method>, 'security'>;

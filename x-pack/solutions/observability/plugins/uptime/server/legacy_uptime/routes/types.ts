@@ -80,7 +80,7 @@ export type UMRestApiRouteFactory<ClientContract = unknown> = (
 export type UMKibanaRouteWrapper = (
   uptimeRoute: UptimeRoute<any>,
   server: UptimeServerSetup
-) => UMKibanaRoute;
+) => UMKibanaRoute & { security: RouteSecurity };
 
 export interface UptimeRouteContext {
   uptimeEsClient: UptimeEsClient;

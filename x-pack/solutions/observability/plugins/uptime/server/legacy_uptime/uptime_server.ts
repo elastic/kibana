@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, RouteSecurity } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { getRequestValidation } from '@kbn/core-http-server';
 import { INITIAL_REST_VERSION } from '../../common/constants';
@@ -50,7 +50,7 @@ export const initUptimeServer = (
       path,
       validate,
       options,
-      security: security as RouteSecurity,
+      security,
     };
 
     switch (method) {
@@ -89,7 +89,7 @@ export const initUptimeServer = (
             options: {
               tags: options?.tags,
             },
-            security: security as RouteSecurity,
+            security,
           })
           .addVersion(
             {
@@ -117,7 +117,7 @@ export const initUptimeServer = (
             options: {
               tags: options?.tags,
             },
-            security: security as RouteSecurity,
+            security,
           })
           .addVersion(
             {

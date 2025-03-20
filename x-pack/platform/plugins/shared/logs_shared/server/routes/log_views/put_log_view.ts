@@ -17,12 +17,6 @@ export const initPutLogViewRoute = ({ framework, getStartServices }: LogsSharedB
       access: 'internal',
       method: 'put',
       path: LOG_VIEW_URL,
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the LogView client',
-        },
-      },
     })
     .addVersion(
       {
