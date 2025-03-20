@@ -1,0 +1,39 @@
+{
+  "id": "dashboards-illustration",
+  "common": {
+    "--dashboards-illustration-fill-one": "var(--eui-color-primary)",
+    "--dashboards-illustration-fill-two": "var(--eui-color-accent)",
+    "--dashboards-illustration-fill-three": "var(--eui-color-warning)",
+    "--dashboards-illustration-fill-four": "var(--eui-color-success)"
+  },
+  "light": {
+    "--dashboards-illustration-fill-five": "#e4eaf2",
+    "--dashboards-illustration-fill-six": "#f5f7fa"
+  },
+  "dark": {
+    "--dashboards-illustration-fill-five": "#343741",
+    "--dashboards-illustration-fill-six": "#343741"
+  },
+  "amsterdam": {
+    "common": {
+      "--dashboards-illustration-fill-seven": "#0066b1",
+      "--dashboards-illustration-fill-eight": "#fa744e",
+      "--dashboards-illustration-fill-nine": "#f990c6",
+      "--dashboards-illustration-fill-ten": "#f9b110",
+      "--dashboards-illustration-fill-eleven": "#1ba9f5"
+    },
+    "light": {},
+    "dark": {}
+  },
+  "borealis": {
+    "common": {
+      "--dashboards-illustration-fill-seven": "#0b53c2",
+      "--dashboards-illustration-fill-eight": "#ffae69",
+      "--dashboards-illustration-fill-nine": "#fecae1",
+      "--dashboards-illustration-fill-ten": "#d8ab62",
+      "--dashboards-illustration-fill-eleven": "#2696ff"
+    },
+    "light": {},
+    "dark": {}
+  }
+}
