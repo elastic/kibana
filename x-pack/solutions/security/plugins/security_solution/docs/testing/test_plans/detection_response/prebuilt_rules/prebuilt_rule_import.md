@@ -52,6 +52,11 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Converting a custom rule to a non-customized prebuilt rule on import**](#scenario-converting-a-custom-rule-to-a-non-customized-prebuilt-rule-on-import)
     - [**Scenario: Converting a prebuilt rule to a custom rule on import**](#scenario-converting-a-prebuilt-rule-to-a-custom-rule-on-import)
     - [**Scenario: Making an imported custom rule upgradeable to a prebuilt rule**](#scenario-making-an-imported-custom-rule-upgradeable-to-a-prebuilt-rule)
+  - [Handling historical base versions](#handling-historical-base-versions)
+    - [**Scenario: Importing an old rule when it's not installed**](#scenario-importing-an-old-rule-when-its-not-installed)
+    - [**Scenario: Importing an old rule on top of an installed rule of the same version**](#scenario-importing-an-old-rule-on-top-of-an-installed-rule-of-the-same-version)
+    - [**Scenario: Importing an older rule on top of an installed rule of a newer version**](#scenario-importing-an-older-rule-on-top-of-an-installed-rule-of-a-newer-version)
+    - [**Scenario: Importing an newer rule on top of an installed rule of an older version**](#scenario-importing-an-newer-rule-on-top-of-an-installed-rule-of-an-older-version)
   - [Handling missing base versions](#handling-missing-base-versions)
     - [**Scenario: Importing a prebuilt rule with a missing base version when it's not installed**](#scenario-importing-a-prebuilt-rule-with-a-missing-base-version-when-its-not-installed)
     - [**Scenario: Importing a prebuilt rule with a missing base version when it's already installed but not equal to the import payload**](#scenario-importing-a-prebuilt-rule-with-a-missing-base-version-when-its-already-installed-but-not-equal-to-the-import-payload)
@@ -404,6 +409,115 @@ Then the rule should be upgraded to the asset's version
 And the upgraded rule should be prebuilt
 And the upgraded rule should be marked as non-customized
 And the upgraded rule's parameters should match the asset
+```
+
+### Handling historical base versions
+
+Importing prebuilt rules which version matches one of the older, historical rule assets from the installed package.
+
+#### **Scenario: Importing an old rule when it's not installed**
+
+**Automation**: 1 API integration test that tests 2 different rules at the same time, one rule per each example.
+
+```Gherkin
+Given the import payload contains a prebuilt rule
+And this rule has a base version in the installed package which is NOT the latest one
+And this rule has newer versions in the installed package
+And this rule <is_equal> to its base version
+And this rule is not installed
+When the user imports the rule
+Then the rule should be created
+And the created rule should be prebuilt
+And the created rule should be marked as <created_customized>
+And the created rule's version should match the import payload
+And the created rule's parameters should match the import payload
+And the created rule should be available for upgrade to its latest version
+
+Examples:
+  | is_equal     | created_customized |
+  | is equal     | non-customized     |
+  | is NOT equal | customized         |
+```
+
+#### **Scenario: Importing an old rule on top of an installed rule of the same version**
+
+**Automation**: 1 API integration test that tests 4 different rules at the same time, one rule per each example.
+
+```Gherkin
+Given the import payload contains a prebuilt rule
+And this rule has a base version in the installed package which is NOT the latest one
+And this rule has newer versions in the installed package
+And this rule <is_equal> to its base version
+And this rule is already installed and is <installed_customized>
+And the installed rule's version is equal to the imported rule's version
+When the user imports the rule
+Then the rule should be updated
+And the updated rule should be prebuilt
+And the updated rule should be marked as <updated_customized>
+And the updated rule's version should stay unchanged
+And the updated rule's parameters should match the import payload
+And the updated rule should be available for upgrade to its latest version
+
+Examples:
+  | is_equal     | installed_customized | updated_customized |
+  | is equal     | non-customized       | non-customized     |
+  | is equal     | customized           | non-customized     |
+  | is NOT equal | non-customized       | customized         |
+  | is NOT equal | customized           | customized         |
+```
+
+#### **Scenario: Importing an older rule on top of an installed rule of a newer version**
+
+**Automation**: 1 API integration test that tests 4 different rules at the same time, one rule per each example.
+
+```Gherkin
+Given the import payload contains a prebuilt rule
+And this rule has a base version in the installed package which is NOT the latest one
+And this rule has newer versions in the installed package
+And this rule <is_equal> to its base version
+And this rule is already installed and is <installed_customized>
+And the imported rule's version is less than the installed rule's version
+When the user imports the rule
+Then the rule should be updated
+And the updated rule should be prebuilt
+And the updated rule should be marked as <updated_customized>
+And the updated rule's version should match the import payload
+And the updated rule's parameters should match the import payload
+And the updated rule should be available for upgrade to its latest version
+
+Examples:
+  | is_equal     | installed_customized | updated_customized |
+  | is equal     | non-customized       | non-customized     |
+  | is equal     | customized           | non-customized     |
+  | is NOT equal | non-customized       | customized         |
+  | is NOT equal | customized           | customized         |
+```
+
+#### **Scenario: Importing an newer rule on top of an installed rule of an older version**
+
+**Automation**: 1 API integration test that tests 4 different rules at the same time, one rule per each example.
+
+```Gherkin
+Given the import payload contains a prebuilt rule
+And this rule has a base version in the installed package which is NOT the latest one
+And this rule has newer versions in the installed package
+And this rule <is_equal> to its base version
+And this rule is already installed and is <installed_customized>
+And the imported rule's version is greater than the installed rule's version
+When the user imports the rule
+Then the rule should be updated
+And the updated rule should be prebuilt
+And the updated rule should be marked as <updated_customized>
+And the updated rule's version should match the import payload
+And the updated rule's parameters should match the import payload
+And the updated rule should be available for upgrade to its latest version
+
+Examples:
+  | is_equal     | installed_customized | updated_customized |
+  | is equal     | non-customized       | non-customized     |
+  | is equal     | customized           | non-customized     |
+  | is NOT equal | non-customized       | customized         |
+  | is NOT equal | customized           | customized         |
 ```
 
 ### Handling missing base versions
