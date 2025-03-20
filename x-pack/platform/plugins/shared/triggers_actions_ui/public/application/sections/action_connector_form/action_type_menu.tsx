@@ -26,7 +26,6 @@ interface Props {
   setAllActionTypes?: (actionsType: ActionTypeIndex) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
   searchValue?: string;
-  selectedCategories?: Array<{ label: string; key?: string }>;
 }
 
 interface RegisteredActionType {
@@ -59,7 +58,6 @@ export const ActionTypeMenu = ({
   setAllActionTypes,
   actionTypeRegistry,
   searchValue = '',
-  selectedCategories = [],
 }: Props) => {
   const {
     http,
