@@ -8,7 +8,7 @@
  */
 
 import fastIsEqual from 'fast-deep-equal';
-import { filter, map, max } from 'lodash';
+import { filter, map, max, omit } from 'lodash';
 import { BehaviorSubject, merge } from 'rxjs';
 import { v4 as uuidv4, v4 } from 'uuid';
 
@@ -429,11 +429,12 @@ export function initializePanelsManager(
 
         const panels = Object.keys(panels$.value).reduce((acc, id) => {
           const childApi = children$.value[id];
+
+          const panel = panels$.value[id];
           const serializeResult = apiHasSerializableState(childApi)
             ? childApi.serializeState()
-            : { rawState: {} };
-          acc[id] = { ...panels$.value[id], explicitInput: { ...serializeResult.rawState, id } };
-
+            : { rawState: panel?.explicitInput ?? {} };
+          acc[id] = { ...panel, explicitInput: { ...serializeResult.rawState, id } };
           references.push(...prefixReferencesFromPanel(id, serializeResult.references ?? []));
 
           return acc;
