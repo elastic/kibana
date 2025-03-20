@@ -157,6 +157,14 @@ export interface BulkInstallPackagesResponse {
   items: Array<BulkInstallPackageInfo | IBulkInstallPackageHTTPError>;
 }
 
+export interface BulkUpgradePackagesResponse {
+  taskId: string;
+}
+
+export interface GetOneBulkUpgradePackagesResponse {
+  status: string;
+}
+
 export interface BulkInstallPackagesRequest {
   body: {
     packages: string[];

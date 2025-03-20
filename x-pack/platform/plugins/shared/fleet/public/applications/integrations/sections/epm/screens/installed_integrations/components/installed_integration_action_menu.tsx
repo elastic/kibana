@@ -5,13 +5,28 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import React, { useState, useMemo, useCallback } from 'react';
+import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const InstalledIntegrationsActionMenu: React.FunctionComponent = () => {
+import { useStartServices } from '../../../../../../../hooks';
+import type { InstalledPackageUIPackageListItem } from '../types';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { ConfirmBulkUpgradeModal } from './confirm_bulk_upgrade_modal';
+
+export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
+  selectedItems: InstalledPackageUIPackageListItem[];
+}> = ({ selectedItems }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const startServices = useStartServices();
+
   const button = (
-    <EuiButton iconType="arrowDown" iconSide="right" disabled onClick={() => {}}>
+    <EuiButton
+      iconType="arrowDown"
+      disabled={selectedItems.length === 0}
+      iconSide="right"
+      onClick={() => setIsOpen((s) => !s)}
+    >
       <FormattedMessage
         id="xpack.fleet.epmInstalledIntegrations.actionButton"
         defaultMessage="Actions"
@@ -19,5 +34,58 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent = () => {
     </EuiButton>
   );
 
-  return button;
+  const openUpgradeModal = useCallback(() => {
+    const ref = startServices.overlays.openModal(
+      toMountPoint(
+        <ConfirmBulkUpgradeModal
+          onClose={() => {
+            ref.close();
+          }}
+          selectedItems={selectedItems}
+        />,
+        startServices
+      )
+    );
+  }, [selectedItems, startServices]);
+
+  const items = useMemo(() => {
+    const hasUpgreadableIntegrations = selectedItems.some(
+      (item) =>
+        item.ui.installation_status === 'upgrade_available' ||
+        item.ui.installation_status === 'upgrade_failed'
+    );
+
+    return [
+      <EuiContextMenuItem
+        key="upgrade"
+        icon="refresh"
+        disabled={!hasUpgreadableIntegrations}
+        onClick={openUpgradeModal}
+      >
+        <FormattedMessage
+          id="xpack.fleet.epmInstalledIntegrations.bulkUpgradeButton"
+          defaultMessage={'Upgrade {count, plural, one {# integration} other {# integrations}}'}
+          values={{
+            count: selectedItems.length,
+          }}
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem key="edit" icon="pencil" onClick={() => {}}>
+        TODO
+      </EuiContextMenuItem>,
+    ];
+  }, [selectedItems, openUpgradeModal]);
+
+  return (
+    <EuiPopover
+      id="fleet.epmInstalledIntegrations.bulkActionPopover"
+      button={button}
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenuPanel size="s" items={items} />
+    </EuiPopover>
+  );
 };

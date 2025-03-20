@@ -369,6 +369,10 @@ export const BulkInstallPackagesFromRegistryResponseSchema = schema.object({
   items: schema.arrayOf(BulkInstallPackagesResponseItemSchema),
 });
 
+export const BulkUpgradePackagesResponseSchema = schema.object({ taskId: schema.string() });
+
+export const GetOneBulkUpgradePackagesResponseSchema = schema.object({ status: schema.string() });
+
 export const DeletePackageResponseSchema = schema.object({
   items: schema.arrayOf(AssetReferenceSchema),
 });
@@ -546,6 +550,27 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
       { minSize: 1 }
     ),
     force: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+export const GetOneBulkUpgradePackagesRequestSchema = {
+  params: schema.object({
+    taskId: schema.string(),
+  }),
+};
+
+export const BulkUpgradePackagesRequestSchema = {
+  body: schema.object({
+    packages: schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        version: schema.maybe(schema.string()),
+      }),
+      { minSize: 1 }
+    ),
+    prerelease: schema.maybe(schema.boolean()),
+    force: schema.boolean({ defaultValue: false }),
+    upgrade_package_policies: schema.boolean({ defaultValue: false }),
   }),
 };
 
