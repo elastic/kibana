@@ -21,6 +21,7 @@ import type {
   AssetSOObject,
   InstallResultStatus,
   PackageMetadata,
+  InstallationInfo,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {
@@ -90,7 +91,7 @@ export interface GetInfoRequest {
 }
 
 export interface GetInfoResponse {
-  item: PackageInfo;
+  item: PackageInfo & { installationInfo?: InstallationInfo };
   metadata?: PackageMetadata;
 }
 
