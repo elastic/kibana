@@ -8,9 +8,9 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import React, { type PropsWithChildren, createContext, useContext, useMemo, useState } from 'react';
+import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, skip } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { useInternalStateSelector } from './hooks';
 import type { DiscoverInternalState } from './types';
 
@@ -43,10 +43,8 @@ export const createTabRuntimeState = (): ReactiveTabRuntimeState => ({
   currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
 });
 
-export const useRuntimeState = <T,>(stateSubject$: BehaviorSubject<T>) => {
-  const [stateObservable$] = useState(() => stateSubject$.pipe(skip(1)));
-  return useObservable(stateObservable$, stateSubject$.getValue());
-};
+export const useRuntimeState = <T,>(stateSubject$: BehaviorSubject<T>) =>
+  useObservable(stateSubject$, stateSubject$.getValue());
 
 export const selectCurrentTabRuntimeState = (
   internalState: DiscoverInternalState,
