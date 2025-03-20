@@ -21,7 +21,7 @@ import {
   updateTabs,
 } from './actions';
 
-export type { DiscoverInternalState, InternalStateDataRequestParams } from './types';
+export type { DiscoverInternalState, TabState, InternalStateDataRequestParams } from './types';
 
 export { type InternalStateStore, createInternalStateStore, createTabItem } from './internal_state';
 

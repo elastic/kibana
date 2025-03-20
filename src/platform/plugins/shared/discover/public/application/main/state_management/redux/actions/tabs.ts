@@ -38,7 +38,7 @@ export const setTabs: InternalStateThunkActionCreator<
     dispatch(internalStateSlice.actions.setTabs(params));
   };
 
-interface UpdateTabsParams {
+export interface UpdateTabsParams {
   updateState: TabbedContentState;
   stopSyncing?: () => void;
 }
