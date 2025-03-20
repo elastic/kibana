@@ -115,7 +115,7 @@ export const generateAPIKey = async (
   const apiKey = await deps.security.authc.apiKeys.grantAsInternalUser(req, {
     name: 'Privilege Monitoring API key',
     role_descriptors: {
-      privmon_admin: privilegeMonitoringRuntimePrivileges,
+      privmon_admin: privilegeMonitoringRuntimePrivileges([]),
     },
     metadata: {
       description: 'API key used to manage the resources in the privilege monitoring engine',

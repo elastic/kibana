@@ -72,3 +72,55 @@ export const generateEntityDiscoveryAPIKey = async (
     };
   }
 };
+
+// "role_descriptors": {
+//   "entity_discovery_admin": {
+//     "cluster": [
+//       "manage_transform",
+//       "manage_ingest_pipelines",
+//       "manage_index_templates"
+//     ],
+//       "indices": [
+//         {
+//           "names": [
+//             ".entities*"
+//           ],
+//           "privileges": [
+//             "create_index",
+//             "delete_index",
+//             "index",
+//             "create_doc",
+//             "auto_configure",
+//             "read"
+//           ],
+//           "allow_restricted_indices": false
+//         },
+//         {
+//           "names": [
+//             ".entities*"
+//           ],
+//           "privileges": [
+//             "read",
+//             "view_index_metadata"
+//           ],
+//           "allow_restricted_indices": false
+//         }
+//       ],
+//         "applications": [
+//           {
+//             "application": "kibana-.kibana",
+//             "privileges": [
+//               "saved_object:entity-definition/*"
+//             ],
+//             "resources": [
+//               "*"
+//             ]
+//           }
+//         ],
+//           "run_as": [],
+//             "metadata": { },
+//     "transient_metadata": {
+//       "enabled": true
+//     }
+//   }
+// }
