@@ -8,6 +8,8 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import {
+  EuiButtonIcon,
+  EuiCopy,
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
@@ -141,7 +143,19 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               title: i18n.translate('xpack.fleet.agentDetails.lastActivityLabel', {
                 defaultMessage: 'Last activity',
               }),
-              description: agent.last_checkin ? agent.last_checkin : '-',
+              description: agent.last_checkin ? (
+                <EuiCopy textToCopy={agent.last_checkin}>
+                  {(copy) => (
+                    <span>
+                      {agent.last_checkin}
+                      &nbsp;
+                      <EuiButtonIcon iconType="copyClipboard" onClick={copy} />
+                    </span>
+                  )}
+                </EuiCopy>
+              ) : (
+                '-'
+              ),
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.lastCheckinMessageLabel', {
