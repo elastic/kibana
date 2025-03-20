@@ -64,8 +64,8 @@ export const SUPPLIED_CONFIGURATIONS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumb
   text: i18n.translate('xpack.ml.suppliedConfigurationsManagementLabel', {
     defaultMessage: 'Supplied configurations',
   }),
-  appId: 'supplied_configurations',
-  path: '',
+  appId: `anomaly_detection`,
+  path: 'ad_supplied_configurations',
   deepLinkId: 'ml:suppliedConfigurations',
 };
 
