@@ -54,17 +54,4 @@ describe('content_pack_saved_objects', () => {
 
     assert.deepStrictEqual(savedObjects, []);
   });
-
-  it('assumes a valid content pack format (ignores first line)', async () => {
-    const contentPackNoHeader = createContentPack([
-      { type: 'saved_object', content: { id: 'foo', type: 'dashboard' } },
-      { type: 'saved_object', content: { id: 'bar', type: 'dashboard' } },
-    ]);
-    const savedObjects = await createPromiseFromStreams([
-      contentPackSavedObjects(contentPackNoHeader),
-      createConcatStream([]),
-    ]);
-
-    assert.deepStrictEqual(savedObjects, [{ id: 'bar', type: 'dashboard' }]);
-  });
 });

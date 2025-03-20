@@ -12,7 +12,6 @@ import { createFilterStream, createMapStream, createSplitStream } from '@kbn/uti
 export function contentPackSavedObjects(content: Readable): Readable {
   return content
     .pipe(createSplitStream('\n'))
-    .drop(1)
     .pipe(createFilterStream((line: string) => line.length > 0))
     .pipe(createMapStream((line: string) => JSON.parse(line)))
     .pipe(createFilterStream((object: any) => object.type === 'saved_object' && object.content))

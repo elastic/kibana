@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
+import { Readable, Transform } from 'stream';
 import { ContentPackHeader, contentPackHeaderSchema } from '@kbn/streams-schema';
 import { createSplitStream } from '@kbn/utils';
 
@@ -13,15 +13,21 @@ export async function contentPackHeader(content: Readable): Promise<ContentPackH
   return await new Promise((resolve, reject) =>
     content
       .pipe(createSplitStream('\n'))
-      .take(1)
-      .on('data', (line: string) => {
-        try {
-          const metadata = contentPackHeaderSchema.parse(JSON.parse(line));
-          resolve(metadata);
-        } catch (err) {
-          reject(err);
-        }
-      })
+      .pipe(
+        new Transform({
+          objectMode: true,
+          transform(line, enc, callback) {
+            try {
+              const header = contentPackHeaderSchema.parse(JSON.parse(line));
+              callback(null, header);
+              this.destroy();
+            } catch (err) {
+              callback(err);
+            }
+          },
+        })
+      )
+      .on('data', resolve)
       .on('error', reject)
   );
 }
