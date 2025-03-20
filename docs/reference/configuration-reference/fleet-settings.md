@@ -2,6 +2,10 @@
 navigation_title: "{{fleet}} settings"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/fleet-settings-kb.html
+applies_to:
+  deployment:
+    ess: all
+    self: all
 ---
 
 # {{fleet}} settings in {{kib}} [fleet-settings-kb]
@@ -9,15 +13,14 @@ mapped_pages:
 
 ::::{note}
 In {{ecloud}}, {{fleet}} flags are already configured.
-
+If a setting is applicable to {{ecloud}} Hosted environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
 ::::
 
-
-You can configure `xpack.fleet` settings in your `kibana.yml`. By default, {{fleet}} is enabled. To use {{fleet}}, you also need to configure {{kib}} and {{es}} hosts.
+By default, {{fleet}} is enabled. To use {{fleet}}, you also need to configure {{kib}} and {{es}} hosts.
 
 Many {{fleet}} settings can also be configured directly through the {{fleet}} UI. See [Fleet UI settings](docs-content://reference/ingestion-tools/fleet/fleet-settings.md) for details.
 
-See the [{{fleet}}](docs-content://reference/ingestion-tools/fleet/index.md) docs for more information about {{fleet}}.
+Go to the [{{fleet}}](docs-content://reference/ingestion-tools/fleet/index.md) docs for more information about {{fleet}}.
 
 ## General {{fleet}} settings [general-fleet-settings-kb]
 
@@ -27,6 +30,9 @@ See the [{{fleet}}](docs-content://reference/ingestion-tools/fleet/index.md) doc
 `xpack.fleet.isAirGapped`
 :   Set to `true` to indicate {{fleet}} is running in an air-gapped environment. Refer to [Air-gapped environments](docs-content://reference/ingestion-tools/fleet/air-gapped.md) for details. Enabling this flag helps Fleet skip needless requests and improve the user experience for air-gapped environments.
 
+`xpack.fleet.createArtifactsBulkBatchSize` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+:   Allow to configure batch size for creating and updating Fleet user artifacts.  Examples include creation of Trusted Applications and Endpoint Exceptions in Security. It is available in {{ecloud}} 8.9.0 and later versions.
+% TBD: Supported only in Elastic Cloud?
 
 ## {{package-manager}} settings [fleet-data-visualizer-settings]
 
@@ -342,13 +348,13 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
     :::::
 
 
-`xpack.fleet.enableExperimental`
+`xpack.fleet.enableExperimental` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   List of experimental feature flag to enable in Fleet.
+    It is available in {{ecloud}} 8.6.0 and later versions.
 
-::::{note}
-Experimental features should not be enabled in production environments. The features in this section are experimental and may be changed or removed completely in future releases. Elastic will make a best effort to fix any issues, but experimental features are not supported to the same level as generally available (GA) features.
-
-::::
+    ::::{note}
+    Experimental features should not be enabled in production environments. The features in this section are experimental and may be changed or removed completely in future releases. Elastic will make a best effort to fix any issues, but experimental features are not supported to the same level as generally available (GA) features.
+    ::::
 
 
 `xpack.fleet.enableManagedLogsAndMetricsDataviews`
