@@ -18,6 +18,7 @@ import {
   PluginPackage,
   getPluginPackagesFilter,
 } from '@kbn/repo-packages';
+import { type KibanaProject } from '@kbn/projects-solutions-groups';
 
 import { getVersionInfo, VersionInfo } from './version_info';
 import {
@@ -274,5 +275,9 @@ export class Config {
 
   getDistPluginsFromRepo() {
     return getPackages(this.repoRoot).filter((p) => !p.isDevOnly() && this.pluginFilter(p));
+  }
+
+  getSolutionPluginsFromRepo(project: KibanaProject) {
+    return getPackages(this.repoRoot).filter((p) => p.group === project && this.pluginFilter(p));
   }
 }
