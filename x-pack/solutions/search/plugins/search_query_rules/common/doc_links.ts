@@ -12,9 +12,7 @@ class QueryRulesDocLinks {
 
   constructor() {}
 
-  setDocLinks(newDocLinks: DocLinks) {
-    // this.queryRulesApi = newDocLinks.
-  }
+  setDocLinks(newDocLinks: DocLinks) {}
 }
 
 export const docLinks = new QueryRulesDocLinks();
