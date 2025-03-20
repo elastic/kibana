@@ -130,7 +130,6 @@ export const Tab: React.FC<TabProps> = (props) => {
               css={getTabButtonCss(euiTheme)}
               className="unifiedTabs__tabBtn"
               data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
-              title={item.label}
               type="button"
               onClick={onSelectEvent}
               onDoubleClick={handleDoubleClick}
