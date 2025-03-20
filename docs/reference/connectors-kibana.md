@@ -46,7 +46,7 @@ Some connector types are paid commercial features, while others are free. For a 
 
 Rules use connectors to route actions to different destinations like log files, ticketing systems, and messaging tools. While each {{kib}} app can offer their own types of rules, they typically share connectors. **{{stack-manage-app}} > {{connectors-ui}}** offers a central place to view and manage all the connectors in the current space.
 
-:::{image} ../images/connector-listing.png
+:::{image} images/connector-listing.png
 :alt: Example connector listing in the {{rules-ui}} UI
 :class: screenshot
 :::
@@ -66,14 +66,14 @@ Use the [action configuration settings](/reference/configuration-reference/alert
 
 In **{{stack-manage-app}} > {{connectors-ui}}**, you can find a list of the connectors in the current space. You can use the search bar to find specific connectors by name and type. The **Type** dropdown also enables you to filter to a subset of connector types.
 
-:::{image} ../images/connector-filter-by-type.png
+:::{image} images/connector-filter-by-type.png
 :alt: Filtering the connector list by types of connectors
 :class: screenshot
 :::
 
 You can delete individual connectors using the trash icon. Alternatively, select multiple connectors and delete them in bulk using the **Delete** button.
 
-:::{image} ../images/connector-delete.png
+:::{image} images/connector-delete.png
 :alt: Deleting connectors individually or in bulk
 :class: screenshot
 :::
@@ -89,7 +89,7 @@ You can delete a connector even if there are still actions referencing it. When 
 
 New connectors can be created with the **Create connector** button, which guides you to select the type of connector and configure its properties.
 
-:::{image} ../images/connector-select-type.png
+:::{image} images/connector-select-type.png
 :alt: Connector select type
 :class: screenshot
 :::
@@ -108,14 +108,14 @@ You can also manage connectors as resources with the [Elasticstack provider](htt
 
 To import and export connectors, use the [Saved Objects Management UI](docs-content://explore-analyze/find-and-organize/saved-objects.md).
 
-:::{image} ../images/connectors-import-banner.png
+:::{image} images/connectors-import-banner.png
 :alt: Connectors import banner
 :class: screenshot
 :::
 
 If a connector is missing sensitive information after the import, a **Fix** button appears in **{{connectors-ui}}**.
 
-:::{image} ../images/connectors-with-missing-secrets.png
+:::{image} images/connectors-with-missing-secrets.png
 :alt: Connectors with missing secrets
 :class: screenshot
 :::

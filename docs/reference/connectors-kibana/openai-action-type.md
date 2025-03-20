@@ -14,7 +14,7 @@ The OpenAI connector uses [axios](https://github.com/axios/axios) to send a POST
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
 
-:::{image} ../../images/gen-ai-connector.png
+:::{image} ../images/gen-ai-connector.png
 :alt: OpenAI connector
 :class: screenshot
 :::
@@ -52,7 +52,7 @@ API key
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../../images/gen-ai-params-test.png
+:::{image} ../images/gen-ai-params-test.png
 :alt: OpenAI params test
 :class: screenshot
 :::

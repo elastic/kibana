@@ -14,12 +14,12 @@ The {{sn-itsm}} connector uses the [import set API](https://developer.servicenow
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. You must choose whether to use OAuth for authentication.
 
-:::{image} ../../images/servicenow-connector-basic.png
+:::{image} ../images/servicenow-connector-basic.png
 :alt: ServiceNow connector using basic auth
 :class: screenshot
 :::
 
-:::{image} ../../images/servicenow-connector-oauth.png
+:::{image} ../images/servicenow-connector-oauth.png
 :alt: ServiceNow connector using OAuth
 :class: screenshot
 :::
@@ -64,7 +64,7 @@ Username
 
 When you create or edit a connector, use the **Test** tab to test its actions:
 
-:::{image} ../../images/servicenow-params-test.png
+:::{image} ../images/servicenow-params-test.png
 :alt: ServiceNow params test
 :class: screenshot
 :::

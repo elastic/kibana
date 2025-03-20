@@ -14,12 +14,12 @@ The {{sn-itom}} connector uses the [event API](https://docs.servicenow.com/bundl
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. You must choose whether to use OAuth for authentication.
 
-:::{image} ../../images/servicenow-itom-connector-basic.png
+:::{image} ../images/servicenow-itom-connector-basic.png
 :alt: {{sn-itom}} connector using basic auth
 :class: screenshot
 :::
 
-:::{image} ../../images/servicenow-itom-connector-oauth.png
+:::{image} ../images/servicenow-itom-connector-oauth.png
 :alt: {{sn-itom}} connector using OAuth
 :class: screenshot
 :::
@@ -64,7 +64,7 @@ Username
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../../images/servicenow-itom-params-test.png
+:::{image} ../images/servicenow-itom-params-test.png
 :alt: {{sn-itom}} params test
 :class: screenshot
 :::

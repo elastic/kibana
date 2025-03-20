@@ -227,7 +227,7 @@ You’d notice that you were navigated to **Dashboard** app with the **same stat
 
 Historically {{kib}} Analyze groups apps achieve that behavior relying on state in the URL. If you’d have a closer look on a link in the navigation, you’d notice that state is stored inside that link, and it also gets updated whenever relevant state changes happen:
 
-![State is stored inside the navigation link](../images/state_inside_the_link.png "")
+![State is stored inside the navigation link](images/state_inside_the_link.png "")
 
 This is where [separation](#query-params) into `_a` and `_g` query params comes into play. What is considered a **global** state gets constantly updated in those navigation links. In the example above it was a time filter. This is backed by [KbnUrlTracker](https://github.com/elastic/kibana/tree/master/src/platform/plugins/shared/kibana_utils/public/state_management/url/kbn_url_tracker.ts#L57) util. You can use it to achieve similar behavior.
 

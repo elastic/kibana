@@ -66,7 +66,7 @@ Sensitive properties, such as passwords, can also be stored in the [{{kib}} keys
 
 go to the **{{connectors-ui}}** page using the navigation menu or the [global search field](docs-content://get-started/the-stack.md#kibana-navigation-search). Preconfigured connectors appear regardless of which space you are in. They are tagged as “preconfigured”, and you cannot delete them.
 
-:::{image} ../../images/preconfigured-connectors-managing.png
+:::{image} ../images/preconfigured-connectors-managing.png
 :alt: Connectors managing tab with pre-configured
 :class: screenshot
 :::
@@ -93,7 +93,7 @@ This functionality is in technical preview and may be changed or removed in a fu
 
 When you subsequently create rules, you can use the `Alert history Elasticsearch index (preconfigured)` connector.
 
-:::{image} ../../images/pre-configured-alert-history-connector.png
+:::{image} ../images/pre-configured-alert-history-connector.png
 :alt: Creating a rule action that uses the pre-configured alert history connector
 :class: screenshot
 :::

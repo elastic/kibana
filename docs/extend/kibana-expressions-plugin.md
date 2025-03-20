@@ -34,7 +34,7 @@ filters
 [/source]
 ```
 
-:::{image} ../images/expressions_plugin.png
+:::{image} images/expressions_plugin.png
 :alt: Rendered metric
 :class: screenshot
 :::
