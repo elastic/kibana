@@ -168,15 +168,11 @@ export async function createMcpServer({
           'Salesforce internal ID of the support case (use only when specifically requested)'
         ),
       size: z.number().int().positive().default(10).describe('Maximum number of cases to return'),
-      semanticQuery: z
-        .string()
-        .describe('Natural language query to search case content semantically')
     },
     async ({
       id,
       size,
       caseNumber,
-      semanticQuery,
     }) => {
   
         const similiarCases = await retrieveSimiliarCases(elasticsearchClient, logger, index, {id, size, caseNumber})
