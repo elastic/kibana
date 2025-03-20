@@ -85,18 +85,14 @@ export class State {
 
     if (dryRun) {
       const changedStreams = desiredState.changedStreams();
-      const elasticsearchActions = desiredState.determineElasticsearchActions(
-        changedStreams,
-        desiredState,
-        startingState
-      );
+      const elasticsearchActions = await desiredState.plannedActions(startingState);
       return {
         changedStreams,
         elasticsearchActions,
       };
     } else {
       try {
-        await desiredState.commitChanges(desiredState, startingState);
+        await desiredState.commitChanges(startingState);
       } catch (error) {
         await desiredState.attemptRollback(startingState);
       }
@@ -207,10 +203,18 @@ export class State {
     return this.all().filter((stream) => stream.hasChanged());
   }
 
-  async commitChanges(desiredState: State, startingState: State) {
+  async plannedActions(startingState: State) {
     const executionPlan = new ExecutionPlan(this.dependencies);
     await executionPlan.plan(
-      await this.determineElasticsearchActions(this.changedStreams(), desiredState, startingState)
+      await this.determineElasticsearchActions(this.changedStreams(), this, startingState)
+    );
+    return executionPlan.plannedActions();
+  }
+
+  async commitChanges(startingState: State) {
+    const executionPlan = new ExecutionPlan(this.dependencies);
+    await executionPlan.plan(
+      await this.determineElasticsearchActions(this.changedStreams(), this, startingState)
     );
     await executionPlan.execute();
   }
@@ -219,8 +223,7 @@ export class State {
     // Here we should forcefully mark the changed streams as created in their previous state
     // To get a full set of creation actions to ensure we restore it
     // We can use the same logic for resync but applied to all streams in the state
-    const brokenState = this;
-    const rollbackTargets = brokenState.changedStreams().map((stream) => {
+    const rollbackTargets = this.changedStreams().map((stream) => {
       if (startingState.has(stream.definition.name)) {
         return startingState.get(stream.definition.name)!;
       } else {
@@ -232,7 +235,7 @@ export class State {
 
     const executionPlan = new ExecutionPlan(this.dependencies);
     await executionPlan.plan(
-      await this.determineElasticsearchActions(rollbackTargets, startingState, brokenState)
+      await this.determineElasticsearchActions(rollbackTargets, startingState, this)
     );
     await executionPlan.execute();
   }

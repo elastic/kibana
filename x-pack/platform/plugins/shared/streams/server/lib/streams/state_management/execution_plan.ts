@@ -218,6 +218,10 @@ export class ExecutionPlan {
     );
   }
 
+  plannedActions() {
+    return this.actionsByType;
+  }
+
   async execute() {
     const {
       upsert_component_template,
