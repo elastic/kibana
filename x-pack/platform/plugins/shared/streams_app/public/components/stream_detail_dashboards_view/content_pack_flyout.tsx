@@ -93,7 +93,9 @@ export function ImportContentPackFlyout({
                     .map((line: string) => JSON.parse(line))
                     .filter(
                       (asset: { type?: string }) =>
-                        asset.type === 'dashboard' || asset.type === 'processor'
+                        asset.type === 'dashboard' ||
+                        asset.type === 'processor' ||
+                        asset.type === 'lifecycle'
                     )
                     .map((asset: any, index: number) => {
                       if (asset.type === 'dashboard') {
@@ -101,6 +103,15 @@ export function ImportContentPackFlyout({
                           id: asset.id,
                           name: asset.attributes.title,
                           type: asset.type,
+                          raw: asset,
+                        };
+                      }
+
+                      if (asset.type === 'lifecycle') {
+                        return {
+                          id: `lifecycle-${index}`,
+                          type: asset.type,
+                          name: 'Lifecycle',
                           raw: asset,
                         };
                       }
@@ -141,7 +152,12 @@ export function ImportContentPackFlyout({
                   name: 'Type',
                   sortable: true,
                   render: (type: string) => {
-                    const iconType = type === 'dashboard' ? 'dashboardApp' : 'pipelineApp';
+                    const iconType =
+                      type === 'dashboard'
+                        ? 'dashboardApp'
+                        : type === 'processor'
+                        ? 'pipelineApp'
+                        : 'pipelineApp';
                     return (
                       <EuiBadge color="hollow" iconType={iconType} iconSide="left">
                         {capitalize(type)}

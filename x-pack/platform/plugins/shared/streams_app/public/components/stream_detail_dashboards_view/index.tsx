@@ -8,7 +8,12 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
-import { IngestStreamGetResponse, ProcessorDefinition } from '@kbn/streams-schema';
+import {
+  IngestStreamGetResponse,
+  ProcessorDefinition,
+  isDslLifecycle,
+  isIlmLifecycle,
+} from '@kbn/streams-schema';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
 import { AddDashboardFlyout } from './add_dashboard_flyout';
@@ -20,8 +25,10 @@ import { useKibana } from '../../hooks/use_kibana';
 
 export function StreamDetailDashboardsView({
   definition,
+  refreshDefinition,
 }: {
   definition?: IngestStreamGetResponse;
+  refreshDefinition: () => void;
 }) {
   const [query, setQuery] = useState('');
 
@@ -33,15 +40,34 @@ export function StreamDetailDashboardsView({
 
   const [isUnlinkLoading, setIsUnlinkLoading] = useState(false);
   const linkedDashboards = useMemo(() => {
-    const processors = (definition?.stream.ingest.processing ?? []).map(
+    if (!definition) return [];
+
+    const processors = definition.stream.ingest.processing.map(
       (processor: ProcessorDefinition, i: number) => {
         const label = processorLabel(processor);
         return { id: `processor-${i}`, label, tags: [] };
       }
     );
 
-    return [...processors, ...(dashboardsFetch.value?.dashboards ?? [])];
-  }, [dashboardsFetch.value?.dashboards]);
+    return [
+      ...processors,
+      ...(isDslLifecycle(definition.effective_lifecycle) ||
+      isIlmLifecycle(definition.effective_lifecycle)
+        ? [
+            {
+              id: 'lifecycle',
+              label: isDslLifecycle(definition.effective_lifecycle)
+                ? `DSL (${
+                    definition.effective_lifecycle.dsl.data_retention || 'Indefinite'
+                  } retention)`
+                : `ILM (policy ${definition.effective_lifecycle.ilm.policy})`,
+              tags: [],
+            },
+          ]
+        : []),
+      ...(dashboardsFetch.value?.dashboards ?? []),
+    ];
+  }, [definition, dashboardsFetch.value?.dashboards]);
 
   const filteredDashboards = useMemo(() => {
     return linkedDashboards.filter((dashboard) => {
@@ -104,6 +130,7 @@ export function StreamDetailDashboardsView({
                     | (
                         | { type: 'dashboard'; id: string }
                         | { type: 'processor'; processor: ProcessorDefinition }
+                        | { type: 'lifecycle' }
                       )[] = selectedDashboards.map((asset) => {
                     if (asset.id.startsWith('processor-')) {
                       const id = Number(asset.id.split('-')[1]);
@@ -111,6 +138,10 @@ export function StreamDetailDashboardsView({
                         type: 'processor',
                         processor: definition.stream.ingest.processing[id],
                       };
+                    }
+
+                    if (asset.id === 'lifecycle') {
+                      return { type: 'lifecycle' };
                     }
 
                     return { type: 'dashboard', id: asset.id };
@@ -204,6 +235,7 @@ export function StreamDetailDashboardsView({
           <ImportContentPackFlyout
             definition={definition}
             onImport={() => {
+              refreshDefinition();
               dashboardsFetch.refresh();
               setIsImportFlyoutOpen(false);
             }}
