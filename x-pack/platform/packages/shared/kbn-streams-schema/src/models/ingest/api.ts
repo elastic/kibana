@@ -50,7 +50,6 @@ type IngestGetResponse = WiredIngestResponse | UnwiredIngestResponse;
 /**
  * PUT /streams/{name}/_ingest
  * Wired or Unwired IngestUpsertRequest
- * There is no description here.
  */
 interface WiredIngestUpsertRequest {
   ingest: WiredIngest;
@@ -96,7 +95,6 @@ type IngestStreamGetResponse = WiredStreamGetResponse | UnwiredStreamGetResponse
 /**
  * PUT /streams/{name}
  * Wired or Unwired (Ingest) Stream Upsert Request
- * Don't confuse that with IngestUpsertRequest
  */
 interface UnwiredStreamUpsertRequest extends StreamUpsertRequestBase {
   stream: UnwiredIngestUpsertRequest & { description: string };
