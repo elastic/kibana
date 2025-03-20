@@ -22,6 +22,6 @@ This guide covers how to setup a custom integration in Kibana. It covers how to 
 2. Next, give your integration some details, this is how it will be shown in Kibana.
 3. For the third step, you will need to define the data stream to fit your needs. If you'd like to use some example datasets, some can be found in the archived Elastic repo [using this link](https://github.com/elastic/examples/tree/master/Common%20Data%20Formats/apache_logs).
    - Upload one of the example log files and fill in the fields to fit your needs. In this example, we used the `apache_logs` file and set the Data collection method to `File Stream` ![Custom Integrations Image](./screenshots/custom_integrations_1.png)
-4. Finally, click on `Analyze Logs` and wait for it to complete. If it fails, the error popup will explain why. Common issues include: bad api keys, rate limits, or a incorrectly-formatted log file.
+4. Finally, click on `Analyze Logs` and wait for it to complete. If it fails, the error popup will explain why. Common issues include: bad api keys, rate limits, or an incorrectly-formatted log file.
 
 _Once complete, you can find the integration in the `Integrations` section of Kibana by searching for it directly._
