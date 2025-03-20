@@ -101,7 +101,7 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
             type: ActionType.Refreshed,
             timestamp: currentTime,
           },
-          value: `${defendInsight.group} ${filePath}${signatureValue ? ` ${signatureValue}` : ''}`,
+          value: `${filePath}${signatureValue ? ` ${signatureValue}` : ''}`,
           metadata: {
             notes: {
               llm_model: apiConfig.model ?? '',

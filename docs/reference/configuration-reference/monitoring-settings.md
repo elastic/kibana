@@ -2,10 +2,13 @@
 navigation_title: "Monitoring settings"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/monitoring-settings-kb.html
+applies_to:
+  deployment:
+    ess: all
+    self: all
 ---
 
 # Monitoring settings in {{kib}} [monitoring-settings-kb]
-
 
 By default, **{{stack-monitor-app}}** is enabled, but data collection is disabled. When you first start {{kib}} monitoring, you are prompted to enable data collection. If you are using {{stack-security-features}}, you must be signed in as a user with the `cluster:manage` privilege to enable data collection. The built-in `superuser` role has this privilege and the built-in `elastic` user has this role.
 
@@ -13,16 +16,19 @@ You can adjust how monitoring data is collected from {{kib}} and displayed in {{
 
 To control how data is collected from your {{es}} nodes, you configure [`xpack.monitoring.collection` settings](elasticsearch://reference/elasticsearch/configuration-reference/monitoring-settings.md) in `elasticsearch.yml`. To control how monitoring data is collected from Logstash, configure monitoring settings in `logstash.yml`.
 
-For more information, see [Monitor a cluster](docs-content://deploy-manage/monitor.md).
+For more information, check out [Monitor a cluster](docs-content://deploy-manage/monitor.md).
 
+:::{note}
+If a setting is applicable to {{ecloud}} Hosted environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
+:::
 
 ## General monitoring settings [monitoring-general-settings]
 
 `monitoring.cluster_alerts.email_notifications.enabled`
-:   [7.11.0] When enabled, sends email notifications for Watcher alerts to the specified email address. The default is `true`.
+:   Deprecated in 7.11. When enabled, sends email notifications for Watcher alerts to the specified email address. The default is `true`.
 
 `monitoring.cluster_alerts.email_notifications.email_address` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
-:   [7.11.0] When enabled, specifies the email address where you want to receive cluster alert notifications.
+:   Deprecated in 7.11. When enabled, specifies the email address where you want to receive cluster alert notifications.
 
 `monitoring.ui.ccs.enabled`
 :   Set to `true` (default) to enable [cross-cluster search](docs-content://solutions/search/cross-cluster-search.md) of your monitoring data. The [`remote_cluster_client`](docs-content://deploy-manage/remote-clusters/remote-clusters-settings.md) role must exist on each node.
