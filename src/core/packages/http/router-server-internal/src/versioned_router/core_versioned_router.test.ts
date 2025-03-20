@@ -101,6 +101,13 @@ describe('Versioned router', () => {
           "options": Object {
             "access": "internal",
             "discontinued": "x.y.z",
+            "security": Object {
+              "authz": Object {
+                "requiredPrivileges": Array [
+                  "foo",
+                ],
+              },
+            },
           },
           "path": "/test/{id}",
         },
@@ -111,6 +118,13 @@ describe('Versioned router', () => {
           "options": Object {
             "access": "internal",
             "description": "Post test description",
+            "security": Object {
+              "authz": Object {
+                "requiredPrivileges": Array [
+                  "foo",
+                ],
+              },
+            },
             "summary": "Post test",
           },
           "path": "/test",
@@ -121,6 +135,13 @@ describe('Versioned router', () => {
           "method": "delete",
           "options": Object {
             "access": "internal",
+            "security": Object {
+              "authz": Object {
+                "requiredPrivileges": Array [
+                  "foo",
+                ],
+              },
+            },
           },
           "path": "/test",
         },

@@ -43,6 +43,13 @@ describe('createVersionedRouterMock#getRoute', () => {
         "config": Object {
           "access": "internal",
           "path": "/foo",
+          "security": Object {
+            "authz": Object {
+              "requiredPrivileges": Array [
+                "foo",
+              ],
+            },
+          },
         },
         "versions": Object {},
       }
@@ -60,6 +67,13 @@ describe('createVersionedRouterMock#getRoute', () => {
         "config": Object {
           "access": "internal",
           "path": "/foo",
+          "security": Object {
+            "authz": Object {
+              "requiredPrivileges": Array [
+                "foo",
+              ],
+            },
+          },
         },
         "versions": Object {
           "1": Object {

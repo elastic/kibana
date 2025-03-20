@@ -1119,6 +1119,11 @@ test('exposes route details of incoming request to a route handler', async () =>
         access: 'internal',
         tags: [],
         timeout: {},
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
       },
     });
 });
@@ -1341,6 +1346,11 @@ test('exposes route details of incoming request to a route handler (POST + paylo
         tags: [],
         timeout: {
           payload: 10000,
+        },
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
         },
         body: {
           parse: true, // hapi populates the default

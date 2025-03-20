@@ -97,8 +97,7 @@ describe('request logging', () => {
         route: {
           method: 'get',
           path: '/',
-          security: { authz: { enabled: false, reason: '' } },
-          routepath: '/',
+          routePath: '/',
           options: expect.any(Object),
         },
         uuid: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
@@ -132,8 +131,8 @@ describe('request logging', () => {
           isInternalApiRequest: false,
           auth: { isAuthenticated: false },
           route: {
-            path: '/',  security: { authz: { enabled: false, reason: '' } },
-            routepath: '/',  security: { authz: { enabled: false, reason: '' } },
+            path: '/',
+            routePath: '/',
             method: 'get',
             options: {
               authRequired: true,
@@ -141,7 +140,7 @@ describe('request logging', () => {
               deprecated: undefined,
               access: 'internal',
               tags: [],
-              security: undefined,
+              security: [Object],
               timeout: [Object],
               body: undefined
             }

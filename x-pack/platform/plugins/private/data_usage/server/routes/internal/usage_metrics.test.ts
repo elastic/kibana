@@ -57,6 +57,12 @@ describe('registerUsageMetricsRoute', () => {
     expect(router.versioned.post).toHaveBeenCalledWith({
       access: 'internal',
       path: DATA_USAGE_METRICS_API_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: expect.any(String),
+        },
+      },
     });
   });
 
