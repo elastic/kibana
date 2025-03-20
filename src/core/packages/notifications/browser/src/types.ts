@@ -144,10 +144,13 @@ interface CompletionInterceptStep extends InterceptSteps {
 
 export interface Intercept {
   id: string;
+  /**
+   * Title of the current intercept being displayed, used for platform telemetry purposes
+   */
   title: string;
   steps: [StartingInterceptStep, ...InterceptSteps[], CompletionInterceptStep];
   /**
-   * Provides the response of the user interaction with the dialog for a particular step.
+   * Provides the response of the user interaction with the dialog for a particular step. Progress will not fire for the start or completion steps.
    */
   onProgress?: (stepId: string, stepResponse: unknown) => void;
   /**

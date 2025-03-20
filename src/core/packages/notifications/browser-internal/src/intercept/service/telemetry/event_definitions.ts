@@ -11,10 +11,12 @@ import { type RootSchema, type EventTypeOpts } from '@elastic/ebt/client';
 
 export enum EventMetric {
   INTERCEPT_INTERACTION = 'intercept_interaction',
+  INTERCEPT_REGISTRATION = 'intercept_registration',
 }
 
 export enum EventFieldType {
   INTERACTION_TYPE = 'interaction_type',
+  INTERCEPT_TITLE = 'intercept_title',
 }
 
 const fields: Record<EventFieldType, RootSchema<unknown>> = {
@@ -23,6 +25,15 @@ const fields: Record<EventFieldType, RootSchema<unknown>> = {
       type: 'keyword',
       _meta: {
         description: 'The type of interaction that occurred with the intercept',
+        optional: false,
+      },
+    },
+  },
+  [EventFieldType.INTERCEPT_TITLE]: {
+    [EventFieldType.INTERCEPT_TITLE]: {
+      type: 'keyword',
+      _meta: {
+        description: 'Title of the intercept',
         optional: false,
       },
     },
@@ -38,6 +49,13 @@ export const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
     eventType: EventMetric.INTERCEPT_INTERACTION,
     schema: {
       ...fields[EventFieldType.INTERACTION_TYPE],
+      ...fields[EventFieldType.INTERCEPT_TITLE],
+    },
+  },
+  {
+    eventType: EventMetric.INTERCEPT_REGISTRATION,
+    schema: {
+      ...fields[EventFieldType.INTERCEPT_TITLE],
     },
   },
 ];

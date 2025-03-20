@@ -25,13 +25,27 @@ export class InterceptTelemetry {
     this.reportEvent = analytics.reportEvent;
 
     return {
+      reportInterceptRegistration: this.reportInterceptRegistration.bind(this),
       reportInterceptInteraction: this.reportInterceptInteraction.bind(this),
     };
   }
 
-  private reportInterceptInteraction({ interactionType }: { interactionType: string }) {
+  private reportInterceptRegistration({ interceptTitle }: { interceptTitle: string }) {
+    this.reportEvent?.(EventMetric.INTERCEPT_REGISTRATION, {
+      [EventFieldType.INTERCEPT_TITLE]: interceptTitle,
+    });
+  }
+
+  private reportInterceptInteraction({
+    interactionType,
+    interceptTitle,
+  }: {
+    interactionType: string;
+    interceptTitle: string;
+  }) {
     this.reportEvent?.(EventMetric.INTERCEPT_INTERACTION, {
       [EventFieldType.INTERACTION_TYPE]: interactionType,
+      [EventFieldType.INTERCEPT_TITLE]: interceptTitle,
     });
   }
 }

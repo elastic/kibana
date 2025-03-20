@@ -92,7 +92,11 @@ export function InterceptDisplayManager({ ackIntercept, intercept$ }: InterceptD
           currentIntercept?.onFinish?.({ response: feedbackStore.current });
           setCurrentStepIndex(0);
           // this will cause the component to unmount
-          ackIntercept(currentIntercept!.id, 'completed');
+          ackIntercept({
+            interceptId: currentIntercept!.id,
+            interceptTitle: currentIntercept!.title,
+            ackType: 'completed',
+          });
         }
 
         return Math.min(prevStepIndex + 1, currentIntercept!.steps.length);
@@ -102,7 +106,11 @@ export function InterceptDisplayManager({ ackIntercept, intercept$ }: InterceptD
   );
 
   const dismissProductIntercept = useCallback(() => {
-    ackIntercept(currentIntercept!.id, 'dismissed');
+    ackIntercept({
+      interceptId: currentIntercept!.id,
+      interceptTitle: currentIntercept!.title,
+      ackType: 'dismissed',
+    });
     currentIntercept?.onDismiss?.();
     setCurrentIntercept(null);
   }, [ackIntercept, currentIntercept]);
