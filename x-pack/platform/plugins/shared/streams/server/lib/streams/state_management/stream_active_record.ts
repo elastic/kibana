@@ -87,6 +87,11 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     }
   }
 
+  // Used only when we try to rollback an existing stream or resync the stored State
+  markAsCreated(): void {
+    this.changeStatus = 'upserted';
+  }
+
   // Used only when we failed to create a new stream and need to flip the stream to create deletion actions
   // from the same definition that we attempted to create
   markAsDeleted(): void {

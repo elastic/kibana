@@ -66,6 +66,14 @@ export class State {
     return new State(newStreams, this.dependencies);
   }
 
+  static async resync(dependencies: StateDependencies) {
+    const currentState = await State.currentState(dependencies);
+    currentState.all().map((stream) => stream.markAsCreated());
+    // This way all current streams will look like they have been added
+    const emptyState = new State([], dependencies);
+    await currentState.commitChanges(emptyState);
+  }
+
   // What should this function return?
   static async attemptChanges(
     requestedChanges: StreamChange[],
@@ -220,12 +228,11 @@ export class State {
   }
 
   async attemptRollback(startingState: State) {
-    // Here we should forcefully mark the changed streams as created in their previous state
-    // To get a full set of creation actions to ensure we restore it
-    // We can use the same logic for resync but applied to all streams in the state
     const rollbackTargets = this.changedStreams().map((stream) => {
       if (startingState.has(stream.definition.name)) {
-        return startingState.get(stream.definition.name)!;
+        const changedStreamToRevert = stream.clone();
+        changedStreamToRevert.markAsCreated();
+        return changedStreamToRevert;
       } else {
         const createdStreamToCleanUp = stream.clone();
         createdStreamToCleanUp.markAsDeleted();
