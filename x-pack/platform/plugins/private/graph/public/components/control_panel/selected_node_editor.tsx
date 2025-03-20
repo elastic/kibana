@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Workspace, WorkspaceNode } from '../../types';
 import { IconRenderer } from '../icon_renderer';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
-import { gphFormGroupSmallStyles } from '../components.styles';
+import { gphFormGroupSmallStyles } from './control_plane.styles';
 
 interface SelectedNodeEditorProps {
   workspace: Workspace;

@@ -11,7 +11,7 @@ import { EuiIcon, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { Workspace } from '../../types';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
-import { gphFormGroupSmallStyles } from '../components.styles';
+import { gphFormGroupSmallStyles } from './control_plane.styles';
 
 interface SelectStyleProps {
   workspace: Workspace;
