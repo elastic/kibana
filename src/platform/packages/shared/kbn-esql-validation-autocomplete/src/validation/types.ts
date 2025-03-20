@@ -159,11 +159,7 @@ export interface ValidationErrors {
     message: string;
     type: { field: string };
   };
-  unsupportedSetting: {
-    message: string;
-    type: { setting: string; expected: string };
-  };
-  unsupportedSettingCommandValue: {
+  unsupportedMode: {
     message: string;
     type: { command: string; value: string; expected: string };
   };

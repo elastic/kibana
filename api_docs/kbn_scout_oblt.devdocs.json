@@ -1070,13 +1070,7 @@
             "text": "KbnClient"
           },
           "; samlAuth: ",
-          {
-            "pluginId": "@kbn/test",
-            "scope": "common",
-            "docId": "kibKbnTestPluginApi",
-            "section": "def-common.SamlSessionManager",
-            "text": "SamlSessionManager"
-          },
+          "SamlAuth",
           "; } & { esArchiver: ",
           "EsArchiverFixture",
           "; } & ",
@@ -1176,13 +1170,7 @@
             "text": "KbnClient"
           },
           "; samlAuth: ",
-          {
-            "pluginId": "@kbn/test",
-            "scope": "common",
-            "docId": "kibKbnTestPluginApi",
-            "section": "def-common.SamlSessionManager",
-            "text": "SamlSessionManager"
-          },
+          "SamlAuth",
           "; } & { scoutSpace: ",
           "ScoutSpaceParallelFixture",
           "; } & { apiServices: ",
@@ -1326,13 +1314,7 @@
             "text": "KbnClient"
           },
           "; samlAuth: ",
-          {
-            "pluginId": "@kbn/test",
-            "scope": "common",
-            "docId": "kibKbnTestPluginApi",
-            "section": "def-common.SamlSessionManager",
-            "text": "SamlSessionManager"
-          },
+          "SamlAuth",
           "; } & { esArchiver: ",
           "EsArchiverFixture",
           "; } & { uiSettings: ",
