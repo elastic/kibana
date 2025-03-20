@@ -240,6 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should reindex a batch in order and report queue state', async () => {
+      console.log('STARTING TEST');
       const assertQueueState = async (
         firstInQueueIndexName: string | undefined,
         queueLength: number
@@ -293,7 +294,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         // eslint-disable-next-line no-console
-        console.log(JSON.stringify(result.body.errors, null, 2));
+        console.log('IS THERE ERROR CONTENT', JSON.stringify(result.body.errors, null, 2));
 
         expect(result.body.enqueued.length).to.equal(3);
         expect(result.body.errors.length).to.equal(0);
