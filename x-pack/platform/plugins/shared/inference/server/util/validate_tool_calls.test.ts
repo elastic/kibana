@@ -54,7 +54,7 @@ describe('validateToolCalls', () => {
         },
       })
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Tool "my_unknown_function" called but was not available"`
+      `"Tool \"my_unknown_function\" called but was not available"`
     );
   });
 
