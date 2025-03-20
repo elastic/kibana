@@ -34,10 +34,9 @@ describe('CreateConnectorFilter', () => {
       <CreateConnectorFilter searchValue="" onSearchValueChange={mockOnSearchValueChange} />
     );
 
-    const searchInput = screen.getByTestId('createConnectorsModalSearch');
+    await userEvent.click(await screen.findByTestId('createConnectorsModalSearch'));
+    await userEvent.paste('Test');
 
-    await userEvent.type(searchInput, 'Test');
-
-    expect(mockOnSearchValueChange).toHaveBeenCalledTimes(4);
+    expect(mockOnSearchValueChange).toHaveBeenCalledWith('Test');
   });
 });

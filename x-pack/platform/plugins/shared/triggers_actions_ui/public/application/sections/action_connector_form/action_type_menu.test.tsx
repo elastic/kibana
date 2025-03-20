@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { act, waitFor, screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
@@ -233,9 +233,7 @@ describe('connector_add_flyout', () => {
         />
       );
 
-      await waitFor(() => {
-        expect(screen.getByTestId('action-type-1-card')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('action-type-1-card')).toBeInTheDocument();
       expect(screen.queryByTestId('action-type-2-card')).not.toBeInTheDocument();
     });
 
@@ -274,9 +272,7 @@ describe('connector_add_flyout', () => {
         />
       );
 
-      await waitFor(() => {
-        expect(screen.getByTestId('action-type-2-card')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('action-type-2-card')).toBeInTheDocument();
       expect(screen.queryByTestId('action-type-1-card')).not.toBeInTheDocument();
     });
   });
