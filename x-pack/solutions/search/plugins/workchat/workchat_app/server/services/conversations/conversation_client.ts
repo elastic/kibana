@@ -12,6 +12,8 @@ import {
   conversationTypeName,
   type ConversationAttributes,
 } from '../../saved_objects/conversations';
+import { createSimpleFilter } from '../../utils/so_filters';
+import { WorkchatError } from '../../errors';
 import type { ClientUser } from './types';
 import { savedObjectToModel, createRequestToRaw, updateToAttributes } from './convert_model';
 
@@ -34,8 +36,6 @@ export interface ConversationClient {
   update(conversationId: string, fields: ConversationUpdatableFields): Promise<Conversation>;
 }
 
-const attributesPath = `${conversationTypeName}.attributes`;
-
 export class ConversationClientImpl implements ConversationClient {
   private readonly client: SavedObjectsClientContract;
   private readonly user: ClientUser;
@@ -49,14 +49,12 @@ export class ConversationClientImpl implements ConversationClient {
   }
 
   async list(options: ConversationListOptions = {}): Promise<Conversation[]> {
-    let filter = `${attributesPath}.user_id: ${this.user.id}`;
-    if (options.agentId) {
-      filter += ` AND ${attributesPath}.agent_id: ${options.agentId}`;
-    }
-
     const { saved_objects: results } = await this.client.find<ConversationAttributes>({
       type: conversationTypeName,
-      filter,
+      filter: createSimpleFilter(conversationTypeName, {
+        user_id: this.user.id,
+        agent_id: options.agentId,
+      }),
       perPage: 1000,
     });
 
@@ -114,11 +112,14 @@ export class ConversationClientImpl implements ConversationClient {
   }): Promise<SavedObject<ConversationAttributes>> {
     const { saved_objects: results } = await this.client.find<ConversationAttributes>({
       type: conversationTypeName,
-      filter: `${conversationTypeName}.attributes.user_id: ${this.user.id} AND ${conversationTypeName}.attributes.conversation_id: ${conversationId}`,
+      filter: createSimpleFilter(conversationTypeName, {
+        user_id: this.user.id,
+        conversation_id: conversationId,
+      }),
     });
     if (results.length > 0) {
       return results[0];
     }
-    throw new Error(`Conversation ${conversationId} not found`);
+    throw new WorkchatError(`Conversation ${conversationId} not found`, 404);
   }
 }

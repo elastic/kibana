@@ -6,6 +6,7 @@
  */
 
 import type { Logger, RequestHandler } from '@kbn/core/server';
+import { isWorkChatError } from '../errors';
 
 export const getHandlerWrapper =
   ({ logger }: { logger: Logger }) =>
@@ -15,7 +16,14 @@ export const getHandlerWrapper =
         return handler(ctx, req, res);
       } catch (e) {
         logger.error(e);
-        throw e;
+        if (isWorkChatError(e)) {
+          return res.customError({
+            body: { message: e.message },
+            statusCode: e.statusCode,
+          });
+        } else {
+          throw e;
+        }
       }
     };
   };
