@@ -13,7 +13,7 @@ import { SalesforceConfigurationForm } from './configuration';
 export function getSalesforceIntegrationComponents(): IntegrationComponentDescriptor {
   return {
     getType: () => IntegrationType.salesforce,
-    getTool: () => SalesforceTool,
+    getToolCallComponent: (name) => SalesforceTool,
     getConfigurationForm: () => SalesforceConfigurationForm,
   };
 }

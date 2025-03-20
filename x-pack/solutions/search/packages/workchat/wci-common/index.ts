@@ -6,4 +6,10 @@
  */
 
 export { IntegrationType } from './src/constants';
-export type { IntegrationConfiguration } from './src/types';
+export type { Integration, IntegrationConfiguration } from './src/integrations';
+export type { ToolCall } from './src/tool_calls';
+export {
+  buildToolName,
+  parseToolName,
+  type ToolNameAndIntegrationId,
+} from './src/integration_tools';

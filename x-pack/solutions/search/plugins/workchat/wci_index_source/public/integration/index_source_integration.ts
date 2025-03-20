@@ -13,7 +13,7 @@ import { IndexSourceConfigurationForm } from './configuration';
 export function indexSourceIntegrationComponents(): IntegrationComponentDescriptor {
   return {
     getType: () => IntegrationType.index_source,
-    getTool: () => IndexSourceTool,
+    getToolCallComponent: (toolName) => IndexSourceTool,
     getConfigurationForm: () => IndexSourceConfigurationForm,
   };
 }
