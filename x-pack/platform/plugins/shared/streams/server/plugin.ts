@@ -25,6 +25,7 @@ import {
 import { AssetService } from './lib/streams/assets/asset_service';
 import { RouteHandlerScopedClients } from './routes/types';
 import { StreamsService } from './lib/streams/service';
+import { StreamsTelemetryService } from './lib/telemetry/service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -48,6 +49,7 @@ export class StreamsPlugin
   public config: StreamsConfig;
   public logger: Logger;
   public server?: StreamsServer;
+  private telemtryService = new StreamsTelemetryService();
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.config = context.config.get();
@@ -63,6 +65,8 @@ export class StreamsPlugin
       logger: this.logger,
     } as StreamsServer;
 
+    this.telemtryService.setup(core.analytics);
+
     const assetService = new AssetService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger);
 
@@ -71,6 +75,7 @@ export class StreamsPlugin
       dependencies: {
         assets: assetService,
         server: this.server,
+        telemetry: this.telemtryService.getClient(),
         getScopedClients: async ({
           request,
         }: {

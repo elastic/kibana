@@ -515,6 +515,7 @@ x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/platform/plugins/private/graph @elastic/kibana-visualizations
 examples/grid_example @elastic/kibana-presentation
 src/platform/packages/private/kbn-grid-layout @elastic/kibana-presentation
+src/platform/packages/shared/kbn-grok-ui @elastic/streams-program-team
 x-pack/platform/plugins/private/grokdebugger @elastic/kibana-management
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
 src/platform/packages/shared/kbn-guided-onboarding @elastic/appex-sharedux
@@ -776,6 +777,7 @@ x-pack/platform/plugins/shared/rule_registry @elastic/response-ops @elastic/obs-
 x-pack/platform/plugins/private/runtime_fields @elastic/kibana-management
 src/platform/packages/shared/kbn-safer-lodash-set @elastic/kibana-security
 x-pack/test/security_api_integration/plugins/saml_provider @elastic/kibana-security
+x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-program-team
 x-pack/test/plugin_api_integration/plugins/sample_task_plugin @elastic/response-ops
 x-pack/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget @elastic/response-ops
 src/platform/test/plugin_functional/plugins/saved_object_export_transforms @elastic/kibana-core
@@ -1615,6 +1617,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /.devcontainer/ @elastic/kibana-operations
 /.eslintrc.js @elastic/kibana-operations
 /.eslintignore @elastic/kibana-operations
+/.ci/.storybook @elastic/kibana-operations
 
 # QA - Appex QA
 /x-pack/test/.gitignore @elastic/appex-qa

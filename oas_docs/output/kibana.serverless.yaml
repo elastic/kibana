@@ -7937,6 +7937,8 @@ paths:
                   succeeded:
                     type: boolean
           description: Successful response
+        '400':
+          description: Invalid request
       summary: Initialize the Entity Store
       tags:
         - Security Entity Analytics API
@@ -8074,6 +8076,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineDescriptor'
           description: Successful response
+        '400':
+          description: Invalid request
       summary: Initialize an Entity Engine
       tags:
         - Security Entity Analytics API
@@ -37477,6 +37481,72 @@ paths:
         - streams
       x-state: Technical Preview
       x-beta: true
+  /api/streams/{name}/content/export:
+    post:
+      description: Exports the content associated to a stream.
+      operationId: post-streams-name-content-export
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Export stream content
+      tags:
+        - streams
+      x-beta: true
+  /api/streams/{name}/content/import:
+    post:
+      description: Links content objects to a stream.
+      operationId: post-streams-name-content-import
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                content: {}
+              required:
+                - content
+      responses: {}
+      summary: Import content into a stream
+      tags:
+        - streams
+      x-beta: true
   /api/streams/{name}/dashboards:
     get:
       description: Fetches all dashboards linked to a stream that are visible to the current user in the current space.
@@ -51288,7 +51358,7 @@ components:
         - dsl
         - response
     Security_Entity_Analytics_API_Interval:
-      description: Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour.
+      description: Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour. Must be less than or equal to half the duration of the lookback period,
       example: 1h
       pattern: ^[1-9]\d*[smh]$
       type: string

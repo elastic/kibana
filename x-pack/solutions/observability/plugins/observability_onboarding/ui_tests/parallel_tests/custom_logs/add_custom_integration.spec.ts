@@ -20,8 +20,8 @@ test.describe(
       await customLogs.goto();
     });
 
-    test.afterEach(async ({ fleetApi }) => {
-      await fleetApi.integration.delete(integrationName);
+    test.afterEach(async ({ apiServices }) => {
+      await apiServices.fleet.integration.delete(integrationName);
     });
 
     test('should be installed, show API Key and correct instructions', async ({
@@ -56,7 +56,7 @@ test.describe(
       await customLogs.selectPlatform('windows');
       await expect(customLogs.autoDownloadConfigurationToggle).toBeDisabled();
       await expect(customLogs.windowsInstallElasticAgentDocLink).toBeVisible();
-      await expect(customLogs.installCodeSnippet).not.toBeVisible();
+      await expect(customLogs.installCodeSnippet).toBeHidden();
       await expect(
         customLogs.configureElasticAgentStep.getByText('Step 2 is disabled')
       ).toBeVisible();
