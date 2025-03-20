@@ -53,11 +53,11 @@ export const getEsqlSelfHealingGraph = ({
   });
 
   const graph = new StateGraph(EsqlSelfHealingAnnotation)
-    .addNode(NL_TO_ESQL_AGENT_NODE, nlToEsqlAgentNode, {retryPolicy: {maxAttempts: 3}})
+    .addNode(NL_TO_ESQL_AGENT_NODE, nlToEsqlAgentNode, { retryPolicy: { maxAttempts: 3 } })
     .addNode(TOOLS_NODE, toolNode)
     .addNode(ESQL_VALIDATOR_NODE, validatorNode, {
       ends: [END, NL_TO_ESQL_AGENT_NODE],
-      retryPolicy: {maxAttempts: 3},
+      retryPolicy: { maxAttempts: 3 },
     })
     .addConditionalEdges(START, stepRouter, {
       [TOOLS_NODE]: TOOLS_NODE,

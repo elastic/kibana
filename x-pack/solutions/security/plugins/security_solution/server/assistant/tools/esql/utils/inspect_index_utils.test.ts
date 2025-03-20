@@ -57,18 +57,18 @@ describe('inspect index', () => {
     ],
     [
       {
-        foo: [{bar: 1}, {bar: 2}]
+        foo: [{ bar: 1 }, { bar: 2 }],
       },
       'foo.1.bar',
       2,
     ],
     [
       {
-        foo: [{bar: 1}, {bar: 2}]
+        foo: [{ bar: 1 }, { bar: 2 }],
       },
       '',
       {
-        foo: [{bar: 1}, {bar: 2}]
+        foo: [{ bar: 1 }, { bar: 2 }],
       },
     ],
   ])(
@@ -103,8 +103,8 @@ describe('inspect index', () => {
       },
       1,
       {
-        field1: "Object",
-        field2: "Object",
+        field1: 'Object',
+        field2: 'Object',
       },
     ],
     [
@@ -168,7 +168,7 @@ describe('inspect index', () => {
     ],
     [
       {
-        field1: [1,2,3],
+        field1: [1, 2, 3],
         field2: {
           properties: {
             nested_field: {
@@ -179,7 +179,7 @@ describe('inspect index', () => {
       },
       2,
       {
-        field1: [1,2,3],
+        field1: [1, 2, 3],
         field2: {
           properties: 'Object',
         },
@@ -230,7 +230,7 @@ describe('inspect index', () => {
       {
         name: '@timestamp',
         type: 'date',
-        esTypes: [ 'date' ],
+        esTypes: ['date'],
         searchable: true,
         aggregatable: true,
         readFromDocValues: true,
@@ -238,12 +238,12 @@ describe('inspect index', () => {
         fixedInterval: undefined,
         timeZone: undefined,
         timeSeriesMetric: undefined,
-        timeSeriesDimension: undefined
+        timeSeriesDimension: undefined,
       },
       {
         name: 'Effective_process.entity_id',
         type: 'string',
-        esTypes: [ 'keyword' ],
+        esTypes: ['keyword'],
         searchable: true,
         aggregatable: true,
         readFromDocValues: true,
@@ -251,12 +251,12 @@ describe('inspect index', () => {
         fixedInterval: undefined,
         timeZone: undefined,
         timeSeriesMetric: undefined,
-        timeSeriesDimension: undefined
+        timeSeriesDimension: undefined,
       },
       {
         name: 'Effective_process.executable',
         type: 'string',
-        esTypes: [ 'keyword' ],
+        esTypes: ['keyword'],
         searchable: true,
         aggregatable: true,
         readFromDocValues: true,
@@ -264,12 +264,13 @@ describe('inspect index', () => {
         fixedInterval: undefined,
         timeZone: undefined,
         timeSeriesMetric: undefined,
-        timeSeriesDimension: undefined
-      },]
+        timeSeriesDimension: undefined,
+      },
+    ];
 
-      const all = mapFieldDescriptorToNestedObject(x.map(minimise))
-      const inner = getNestedValue(all, 'Effective_process')
-      const result = shallowObjectView(inner, 2)
-      console.log(JSON.stringify(result, null, 2))
+    const all = mapFieldDescriptorToNestedObject(x.map(minimise));
+    const inner = getNestedValue(all, 'Effective_process');
+    const result = shallowObjectView(inner, 2);
+    console.log(JSON.stringify(result, null, 2));
   });
 });

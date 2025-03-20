@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { HumanMessage } from '@langchain/core/messages';
 import type { EsqlSelfHealingAnnotation } from './state';
 import { ESQL_VALIDATOR_NODE, NL_TO_ESQL_AGENT_NODE, TOOLS_NODE } from './constants';
-import { HumanMessage } from '@langchain/core/messages';
 
 export const stepRouter = (state: typeof EsqlSelfHealingAnnotation.State): string => {
   const { messages } = state;
@@ -20,8 +20,8 @@ export const stepRouter = (state: typeof EsqlSelfHealingAnnotation.State): strin
     return TOOLS_NODE;
   }
 
-  if (lastMessage instanceof HumanMessage){
-    return NL_TO_ESQL_AGENT_NODE
+  if (lastMessage instanceof HumanMessage) {
+    return NL_TO_ESQL_AGENT_NODE;
   }
 
   return ESQL_VALIDATOR_NODE;
