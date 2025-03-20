@@ -8,10 +8,10 @@
 import React, { useMemo } from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/core/public';
-import type { ConversationEvent } from '../../../common/conversation_events';
-import { getChartConversationItems } from '../utils/get_chart_conversation_items';
+import type { ConversationEvent } from '../../../../common/conversation_events';
+import { getChartConversationItems } from '../../utils/get_chart_conversation_items';
 import { ChatConversationItem } from './chat_conversation_item';
-import type { ChatStatus } from '../hooks/use_chat';
+import type { ChatStatus } from '../../hooks/use_chat';
 
 interface ChatConversationProps {
   conversationEvents: ConversationEvent[];

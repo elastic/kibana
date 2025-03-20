@@ -5,40 +5,16 @@
  * 2.0.
  */
 
-import { IntegrationConfiguration } from '@kbn/wci-common';
 import type { WorkChatAppPluginSetup } from '@kbn/workchat-app/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WCIIndexSoucePluginSetup {}
+export interface WCIIndexSourcePluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WCIIndexSoucePluginStart {}
+export interface WCIIndexSourcePluginStart {}
 
-export interface WCIIndexSoucePluginSetupDependencies {
+export interface WCIIndexSourcePluginSetupDependencies {
   workchatApp: WorkChatAppPluginSetup;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WCIIndexSoucePluginStartDependencies {}
-
-export interface WCIIndexSourceConfiguration extends IntegrationConfiguration {
-  index: string;
-  description: string;
-  fields: {
-    filterFields: WCIIndexSourceFilterField[];
-    contextFields: WCIIndexSourceContextField[];
-  };
-  queryTemplate: string;
-}
-
-export interface WCIIndexSourceFilterField {
-  field: string;
-  type: string;
-  getValues: boolean;
-  description: string;
-}
-
-export interface WCIIndexSourceContextField {
-  field: string;
-  description: string;
-  type?: 'semantic';
-}
+export interface WCIIndexSourcePluginStartDependencies {}

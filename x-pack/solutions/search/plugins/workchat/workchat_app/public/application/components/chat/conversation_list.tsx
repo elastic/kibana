@@ -20,8 +20,8 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ConversationSummary } from '../../../common/conversations';
-import { sortAndGroupConversations } from '../utils/sort_and_group_conversations';
+import type { ConversationSummary } from '../../../../common/conversations';
+import { sortAndGroupConversations } from '../../utils/sort_and_group_conversations';
 
 interface ConversationListProps {
   conversations: ConversationSummary[];

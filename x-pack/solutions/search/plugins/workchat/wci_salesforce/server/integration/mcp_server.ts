@@ -53,36 +53,45 @@ export async function createMcpServer({
   const priorityValues = enumFieldValues.find((f) => f.field === 'priority')?.values || [];
   const statusValues = enumFieldValues.find((f) => f.field === 'status')?.values || [];
 
+  // Create enum types for validation
+  const priorityEnum = z.enum(
+    priorityValues.length ? (priorityValues as [string, ...string[]]) : ['']
+  );
+  const statusEnum = z.enum(statusValues.length ? (statusValues as [string, ...string[]]) : ['']);
+
   server.tool(
     'retrieve_cases',
-    `Retrieves Salesforce support cases`,
+    `Retrieves Salesforce support cases with flexible filtering options`,
     {
       caseNumber: z
-        .string()
+        .array(z.string())
         .optional()
-        .describe('Salesforce case number identifier (preferred lookup method)'),
+        .describe('Salesforce case number identifiers (preferred lookup method)'),
       id: z
-        .string()
+        .array(z.string())
         .optional()
         .describe(
-          'Salesforce internal ID of the support case (use only when specifically requested)'
+          'Salesforce internal IDs of the support cases (use only when specifically requested)'
         ),
       size: z.number().int().positive().default(10).describe('Maximum number of cases to return'),
-      owner: z.string().optional().describe('Email of the case owner/assignee to filter results'),
+      ownerEmail: z
+        .array(z.string())
+        .optional()
+        .describe('Emails of case owners/assignees to filter results'),
       priority: z
-        .enum(priorityValues.length ? (priorityValues as [string, ...string[]]) : [''])
+        .array(priorityEnum)
         .optional()
         .describe(
-          `Case priority level${
-            priorityValues.length ? ` (one of: ${priorityValues.join(', ')})` : ''
+          `Case priority levels${
+            priorityValues.length ? ` (values from: ${priorityValues.join(', ')})` : ''
           }`
         ),
       status: z
-        .enum(statusValues.length ? (statusValues as [string, ...string[]]) : [''])
+        .array(statusEnum)
         .optional()
         .describe(
-          `Current status of the case${
-            statusValues.length ? ` (one of: ${statusValues.join(', ')})` : ''
+          `Current statuses of the cases${
+            statusValues.length ? ` (values from: ${statusValues.join(', ')})` : ''
           }`
         ),
       closed: z.boolean().optional().describe('Filter by case closure status (true/false)'),
@@ -110,7 +119,6 @@ export async function createMcpServer({
     async ({
       id,
       size = 10,
-      owner,
       priority,
       closed,
       caseNumber,
@@ -124,7 +132,6 @@ export async function createMcpServer({
       const caseContent = await retrieveCases(elasticsearchClient, logger, index, {
         id,
         size,
-        owner,
         priority,
         closed,
         caseNumber,
@@ -137,6 +144,8 @@ export async function createMcpServer({
       });
 
       logger.info(`Retrieved ${caseContent.length} support cases`);
+
+      logger.info(`Retrieved ${JSON.stringify(caseContent)}`);
 
       return {
         content: caseContent,
@@ -190,7 +199,7 @@ async function getFieldValues(
   index: string,
   enumFields: Field[]
 ): Promise<FieldWithValues[]> {
-  let fieldValues: FieldWithValues[] = enumFields.map((field) => ({
+  const fieldValues: FieldWithValues[] = enumFields.map((field) => ({
     ...field,
     values: [],
   }));

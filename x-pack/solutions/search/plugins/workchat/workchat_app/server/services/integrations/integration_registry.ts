@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { IntegrationType, WorkchatIntegrationDefinition } from '@kbn/wci-common';
+import { IntegrationType } from '@kbn/wci-common';
+import type { WorkchatIntegrationDefinition } from '@kbn/wci-server';
 
 export class IntegrationRegistry {
   private allowRegistration = true;

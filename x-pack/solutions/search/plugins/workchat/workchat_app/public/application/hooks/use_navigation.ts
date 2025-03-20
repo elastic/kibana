@@ -6,8 +6,8 @@
  */
 
 import { useCallback } from 'react';
+import { WORKCHAT_APP_ID } from '../../../common/features';
 import { useKibana } from './use_kibana';
-import { workchatAppId } from '../constants';
 
 export const useNavigation = () => {
   const {
@@ -16,14 +16,14 @@ export const useNavigation = () => {
 
   const navigateToWorkchatUrl = useCallback(
     (path: string) => {
-      application.navigateToApp(workchatAppId, { path });
+      application.navigateToApp(WORKCHAT_APP_ID, { path });
     },
     [application]
   );
 
   const createWorkchatUrl = useCallback(
     (path: string) => {
-      return application.getUrlForApp(workchatAppId, { path });
+      return application.getUrlForApp(WORKCHAT_APP_ID, { path });
     },
     [application]
   );

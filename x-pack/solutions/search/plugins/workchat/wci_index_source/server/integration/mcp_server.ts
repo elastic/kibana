@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { AggregationsStringTermsAggregate } from '@elastic/elasticsearch/lib/api/types';
-
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod';
-import type { WCIIndexSourceConfiguration } from '../types';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { AggregationsStringTermsAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { WCIIndexSourceConfiguration } from '../../common/types';
 
 type SearchResult = any; // TODO: fix this
 
@@ -124,18 +123,16 @@ export async function createMcpServer({
 
     try {
       const queryClause = query
-      ? JSON.parse(configuration.queryTemplate.replace('{query}', query))
-      : {
-          match_all: {},
-        }
+        ? JSON.parse(configuration.queryTemplate.replace('{query}', query))
+        : {
+            match_all: {},
+          };
 
       result = await elasticsearchClient.search<SearchResult>({
         index,
         query: {
           bool: {
-            must: [
-              queryClause
-            ],
+            must: [queryClause],
             ...(esFilters.length > 0 ? { filter: esFilters } : {}),
           },
         },

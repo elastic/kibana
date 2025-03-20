@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export const PLUGIN_ID = 'workchatApp';
-export const PLUGIN_NAME = 'workchatApp';
+import { IntegrationConfiguration } from '@kbn/wci-common';
+
+export type SalesforceConfiguration = IntegrationConfiguration;

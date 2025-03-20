@@ -10,6 +10,7 @@ import { EuiBasicTable, EuiBasicTableColumn, EuiButton } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Agent } from '../../../../../common/agents';
 import { useNavigation } from '../../../hooks/use_navigation';
+import { appPaths } from '../../../app_paths';
 
 interface AgentListViewProps {
   agents: Agent[];
@@ -30,7 +31,7 @@ export const AgentListView: React.FC<AgentListViewProps> = ({ agents }) => {
           icon: 'documentEdit',
           type: 'icon',
           onClick: ({ id }) => {
-            navigateToWorkchatUrl(`/agents/${id}/edit`);
+            navigateToWorkchatUrl(appPaths.agents.edit({ agentId: id }));
           },
           'data-test-subj': 'agentListTable-edit-btn',
         },

@@ -10,7 +10,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "workchatApp"],
-    "requiredPlugins": ["inference", "actions"],
+    "requiredPlugins": ["inference", "actions", "features"],
     "optionalPlugins": [],
     "requiredBundles": ["kibanaReact"]
   }

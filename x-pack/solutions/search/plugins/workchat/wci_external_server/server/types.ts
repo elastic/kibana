@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { IntegrationConfiguration } from '@kbn/wci-common';
 import type { WorkChatAppPluginSetup } from '@kbn/workchat-app/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -19,8 +18,3 @@ export interface WCIExternalServerPluginSetupDependencies {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WCIExternalServerPluginStartDependencies {}
-
-export interface WCIExternalServerConfiguration extends IntegrationConfiguration {
-  url: string;
-  description: string;
-}

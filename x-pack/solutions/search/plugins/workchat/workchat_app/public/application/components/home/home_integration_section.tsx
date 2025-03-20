@@ -19,10 +19,13 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Integration } from '../../../../common/integrations';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useIntegrationList } from '../../hooks/use_integration_list';
+import { useCapabilities } from '../../hooks/use_capabilities';
+import { appPaths } from '../../app_paths';
 
 export const HomeIntegrationSection: React.FC<{}> = () => {
   const { navigateToWorkchatUrl } = useNavigation();
   const { integrations } = useIntegrationList();
+  const { showManagement } = useCapabilities();
 
   const columns: Array<EuiBasicTableColumn<Integration>> = [
     {
@@ -47,17 +50,19 @@ export const HomeIntegrationSection: React.FC<{}> = () => {
       <EuiSpacer />
       <EuiBasicTable columns={columns} items={integrations} />
       <EuiSpacer />
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={() => {
-              navigateToWorkchatUrl('/integrations');
-            }}
-          >
-            Go to integration management
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {showManagement && (
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={() => {
+                navigateToWorkchatUrl(appPaths.integrations.list);
+              }}
+            >
+              Go to integration management
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
     </KibanaPageTemplate.Section>
   );
 };

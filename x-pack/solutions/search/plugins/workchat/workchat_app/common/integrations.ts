@@ -5,18 +5,8 @@
  * 2.0.
  */
 
-import { IntegrationConfiguration, IntegrationType } from '@kbn/wci-common';
-
-export interface Integration {
-  id: string;
-  name: string;
-  type: IntegrationType;
-  description: string;
-  configuration: IntegrationConfiguration;
-  createdAt: string;
-  updatedAt: string;
-  createdBy: string;
-}
+import { IntegrationType, IntegrationConfiguration } from '@kbn/wci-common';
+export type { Integration } from '@kbn/wci-common';
 
 export interface IntegrationCreateRequest {
   id?: string;

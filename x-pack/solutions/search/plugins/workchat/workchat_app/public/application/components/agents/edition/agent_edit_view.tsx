@@ -23,6 +23,7 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useBreadcrumb } from '../../../hooks/use_breadcrumbs';
 import { useAgentEdition } from '../../../hooks/use_agent_edition';
+import { appPaths } from '../../../app_paths';
 import { agentLabels } from '../i18n';
 
 interface AgentEditViewProps {
@@ -37,7 +38,7 @@ export const AgentEditView: React.FC<AgentEditViewProps> = ({ agentId }) => {
 
   const breadcrumb = useMemo(() => {
     return [
-      { text: agentLabels.breadcrumb.agentsPill, href: createWorkchatUrl('/agents') },
+      { text: agentLabels.breadcrumb.agentsPill, href: createWorkchatUrl(appPaths.agents.list) },
       agentId
         ? { text: agentLabels.breadcrumb.editAgentPill }
         : { text: agentLabels.breadcrumb.createAgensPill },

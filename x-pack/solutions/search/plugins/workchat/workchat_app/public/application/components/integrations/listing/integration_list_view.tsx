@@ -11,6 +11,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { IntegrationType } from '@kbn/wci-common';
 import type { Integration } from '../../../../../common/integrations';
 import { useNavigation } from '../../../hooks/use_navigation';
+import { appPaths } from '../../../app_paths';
 import { integrationTypeToLabel } from '../utils';
 
 interface IntegrationListViewProps {
@@ -37,7 +38,7 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
           icon: 'documentEdit',
           type: 'icon',
           onClick: ({ id }) => {
-            navigateToWorkchatUrl(`/integrations/${id}`);
+            navigateToWorkchatUrl(appPaths.integrations.edit({ integrationId: id }));
           },
           'data-test-subj': 'integrationListTable-edit-btn',
         },
@@ -52,7 +53,7 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
       <KibanaPageTemplate.Section grow={false} paddingSize="m">
         <EuiButton
           onClick={() => {
-            return navigateToWorkchatUrl('/integrations/create');
+            return navigateToWorkchatUrl(appPaths.integrations.create);
           }}
         >
           Create new integration

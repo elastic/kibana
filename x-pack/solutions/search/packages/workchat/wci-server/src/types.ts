@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { MaybePromise } from '@kbn/utility-types';
 import { Client as McpClient } from '@modelcontextprotocol/sdk/client/index';
+import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { IntegrationType } from './constants';
-
+import type { IntegrationType, IntegrationConfiguration } from '@kbn/wci-common';
 /**
  * Represents the definition of a type of integration for WorkChat.
  *
@@ -30,8 +29,6 @@ export interface WorkchatIntegrationDefinition<
    */
   createIntegration(context: IntegrationContext<T>): MaybePromise<WorkChatIntegration>;
 }
-
-export type IntegrationConfiguration = Record<string, any>;
 
 export interface IntegrationContext<T extends IntegrationConfiguration> {
   request: KibanaRequest;
