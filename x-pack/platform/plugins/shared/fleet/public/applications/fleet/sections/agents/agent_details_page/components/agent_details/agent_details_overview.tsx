@@ -19,7 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useAgentVersion, useGetInfoOutputsForPolicy } from '../../../../../hooks';
@@ -141,11 +141,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               title: i18n.translate('xpack.fleet.agentDetails.lastActivityLabel', {
                 defaultMessage: 'Last activity',
               }),
-              description: agent.last_checkin ? (
-                <FormattedRelative value={new Date(agent.last_checkin)} />
-              ) : (
-                '-'
-              ),
+              description: agent.last_checkin ? agent.last_checkin : '-',
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.lastCheckinMessageLabel', {
