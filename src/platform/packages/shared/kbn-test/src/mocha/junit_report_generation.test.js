@@ -75,7 +75,9 @@ describe('dev/mocha/junit report generation', () => {
       // the command line is only processChild.js, no more info to validate here;
     } else {
       const commandLine = testsuite.$['command-line'];
-      expect(commandLine).toMatch(/--config\ssrc\/platform\/packages\/shared\/kbn-test\/jest\.config\.js/);
+      expect(commandLine).toMatch(
+        /--config\ssrc\/platform\/packages\/shared\/kbn-test\/jest\.config\.js/
+      );
       expect(commandLine).toMatch(/--passWithNoTests/);
     }
 
