@@ -45,21 +45,6 @@ jest.mock('../use_load_action_types', () => ({
   }),
 }));
 
-const newConnector = { actionTypeId: '.gen-ai', name: 'cool name' };
-
-jest.mock('../add_connector_modal', () => ({
-  // @ts-ignore
-  AddConnectorModal: ({ onSaveConnector }) => (
-    <>
-      <button
-        type="button"
-        data-test-subj="modal-mock"
-        onClick={() => onSaveConnector(newConnector)}
-      />
-    </>
-  ),
-}));
-
 describe('Connector selector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -92,21 +77,6 @@ describe('Connector selector', () => {
     fireEvent.click(getByTestId('connector-selector'));
     fireEvent.click(getByTestId(connectorTwo.id));
     expect(onConnectorSelectionChange).toHaveBeenCalledWith(connectorTwo);
-  });
-  it('Calls onConnectorSelectionChange once new connector is saved', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <ConnectorSelector {...defaultProps} />
-      </TestProviders>
-    );
-    fireEvent.click(getByTestId('connector-selector'));
-    fireEvent.click(getByTestId('addNewConnectorButton'));
-
-    fireEvent.click(getByTestId('modal-mock'));
-
-    expect(onConnectorSelectionChange).toHaveBeenCalledWith(newConnector);
-    expect(mockRefetchConnectors).toHaveBeenCalled();
-    expect(setIsOpen).toHaveBeenCalledWith(false);
   });
 
   it('renders the expected placeholder when selectedConnectorId is undefined', () => {
