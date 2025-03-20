@@ -2,10 +2,10 @@
   "id": "security-detection-rule-monitoring-<spaceId>",
   "managed": true,
   "coreMigrationVersion": "8.8.0",
-  "typeMigrationVersion": "10.2.0",
+  "typeMigrationVersion": "8.9.0",
   "type": "dashboard",
   "attributes": {
-    "version": 3,
+    "version": 1,
     "description": "This dashboard helps you monitor the health and performance of detection rules.",
     "timeRestore": false,
     "title": "[Elastic Security] Detection rule monitoring",
