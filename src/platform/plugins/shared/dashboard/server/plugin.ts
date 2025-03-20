@@ -68,7 +68,7 @@ export class DashboardPlugin
     const { contentClient } = plugins.contentManagement.register({
       id: CONTENT_ID,
       storage: new DashboardStorage({
-        throwOnResultValidationError: this.initializerContext.env.mode.dev,
+        throwOnResultValidationError: false,
         logger: this.logger.get('storage'),
       }),
       version: {
