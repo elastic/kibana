@@ -1,44 +1,38 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React from 'react';
+
 import { waitFor, renderHook } from '@testing-library/react';
-import { useLoadTagsQuery } from './use_load_tags_query';
+import { useGetRuleTagsQuery } from './use_get_rule_tags_query';
+import { getRuleTags } from '../apis/get_rule_tags';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useKibana } from '../../common/lib/kibana';
-import { IToasts } from '@kbn/core-notifications-browser';
+import { testQueryClientConfig } from '../test_utils';
+import React, { PropsWithChildren } from 'react';
 
 const MOCK_TAGS = ['a', 'b', 'c'];
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../lib/rule_api/aggregate', () => ({
-  loadRuleTags: jest.fn(),
-}));
+jest.mock('../apis/get_rule_tags');
+const mockGetRuleTags = jest.mocked(getRuleTags);
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const { loadRuleTags } = jest.requireMock('../lib/rule_api/aggregate');
+const http = httpServiceMock.createStartContract();
+const notifications = notificationServiceMock.createStartContract();
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      cacheTime: 0,
-    },
-  },
-});
-const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-);
+const queryClient = new QueryClient(testQueryClientConfig);
 
-describe('useLoadTagsQuery', () => {
+export const Wrapper = ({ children }: PropsWithChildren) => {
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+};
+
+describe('useGetRuleTagsQuery', () => {
   beforeEach(() => {
-    useKibanaMock().services.notifications.toasts = {
-      addDanger: jest.fn(),
-    } as unknown as IToasts;
-    loadRuleTags.mockResolvedValue({
+    mockGetRuleTags.mockResolvedValue({
       data: MOCK_TAGS,
       page: 1,
       perPage: 50,
@@ -51,23 +45,25 @@ describe('useLoadTagsQuery', () => {
     jest.clearAllMocks();
   });
 
-  it('should call loadRuleTags API and handle result', async () => {
+  it('should call the getRuleTags API and collect the tags into one array', async () => {
     const { rerender, result } = renderHook(
       () =>
-        useLoadTagsQuery({
+        useGetRuleTagsQuery({
+          http,
+          toasts: notifications.toasts,
           enabled: true,
           search: 'test',
           perPage: 50,
           page: 1,
         }),
       {
-        wrapper,
+        wrapper: Wrapper,
       }
     );
 
     rerender();
     await waitFor(() => {
-      expect(loadRuleTags).toHaveBeenLastCalledWith(
+      expect(mockGetRuleTags).toHaveBeenLastCalledWith(
         expect.objectContaining({
           search: 'test',
           perPage: 50,
@@ -81,7 +77,7 @@ describe('useLoadTagsQuery', () => {
   });
 
   it('should support pagination', async () => {
-    loadRuleTags.mockResolvedValue({
+    mockGetRuleTags.mockResolvedValue({
       data: ['a', 'b', 'c', 'd', 'e'],
       page: 1,
       perPage: 5,
@@ -89,19 +85,21 @@ describe('useLoadTagsQuery', () => {
     });
     const { rerender, result } = renderHook(
       () =>
-        useLoadTagsQuery({
+        useGetRuleTagsQuery({
+          http,
+          toasts: notifications.toasts,
           enabled: true,
           perPage: 5,
           page: 1,
         }),
       {
-        wrapper,
+        wrapper: Wrapper,
       }
     );
 
     rerender();
     await waitFor(() => {
-      expect(loadRuleTags).toHaveBeenLastCalledWith(
+      expect(mockGetRuleTags).toHaveBeenLastCalledWith(
         expect.objectContaining({
           perPage: 5,
           page: 1,
@@ -112,7 +110,7 @@ describe('useLoadTagsQuery', () => {
       expect(result.current.hasNextPage).toEqual(true);
     });
 
-    loadRuleTags.mockResolvedValue({
+    mockGetRuleTags.mockResolvedValue({
       data: ['a', 'b', 'c', 'd', 'e'],
       page: 2,
       perPage: 5,
@@ -121,7 +119,7 @@ describe('useLoadTagsQuery', () => {
 
     result.current.fetchNextPage();
 
-    expect(loadRuleTags).toHaveBeenLastCalledWith(
+    expect(mockGetRuleTags).toHaveBeenLastCalledWith(
       expect.objectContaining({
         perPage: 5,
         page: 2,
@@ -133,7 +131,7 @@ describe('useLoadTagsQuery', () => {
   });
 
   it('should support pagination when there are no tags', async () => {
-    loadRuleTags.mockResolvedValue({
+    mockGetRuleTags.mockResolvedValue({
       data: [],
       page: 1,
       perPage: 5,
@@ -142,19 +140,21 @@ describe('useLoadTagsQuery', () => {
 
     const { rerender, result } = renderHook(
       () =>
-        useLoadTagsQuery({
+        useGetRuleTagsQuery({
+          http,
+          toasts: notifications.toasts,
           enabled: true,
           perPage: 5,
           page: 1,
         }),
       {
-        wrapper,
+        wrapper: Wrapper,
       }
     );
 
     rerender();
     await waitFor(() => {
-      expect(loadRuleTags).toHaveBeenLastCalledWith(
+      expect(mockGetRuleTags).toHaveBeenLastCalledWith(
         expect.objectContaining({
           perPage: 5,
           page: 1,
@@ -167,14 +167,20 @@ describe('useLoadTagsQuery', () => {
   });
 
   it('should call onError if API fails', async () => {
-    loadRuleTags.mockRejectedValue('');
+    mockGetRuleTags.mockRejectedValue('');
 
-    const { result } = renderHook(() => useLoadTagsQuery({ enabled: true }), { wrapper });
-
-    expect(loadRuleTags).toBeCalled();
-    expect(result.current.tags).toEqual([]);
-    await waitFor(() =>
-      expect(useKibanaMock().services.notifications.toasts.addDanger).toBeCalled()
+    const { result } = renderHook(
+      () =>
+        useGetRuleTagsQuery({
+          http,
+          toasts: notifications.toasts,
+          enabled: true,
+        }),
+      { wrapper: Wrapper }
     );
+
+    expect(mockGetRuleTags).toBeCalled();
+    expect(result.current.tags).toEqual([]);
+    await waitFor(() => expect(notifications.toasts.addDanger).toBeCalled());
   });
 });

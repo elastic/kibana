@@ -6718,6 +6718,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/response-ops-alerts-filters-form@link:src/platform/packages/shared/response-ops/alerts-filters-form":
+  version "0.0.0"
+  uid ""
+
 "@kbn/response-ops-alerts-table@link:src/platform/packages/shared/response-ops/alerts-table":
   version "0.0.0"
   uid ""
@@ -6727,6 +6731,10 @@
   uid ""
 
 "@kbn/response-ops-rule-params@link:src/platform/packages/shared/response-ops/rule_params":
+  version "0.0.0"
+  uid ""
+
+"@kbn/response-ops-rules-apis@link:src/platform/packages/shared/response-ops/rules-apis":
   version "0.0.0"
   uid ""
 

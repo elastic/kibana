@@ -7,16 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpSetup } from '@kbn/core/public';
 import type { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
-import { BASE_ALERTING_API_PATH } from '../constants';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { RuleTypeSolution } from '@kbn/alerting-types';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../constants';
 
-const rewriteResponseRes = (results: Array<AsApiContract<RuleType>>): RuleType[] => {
-  return results.map((item) => rewriteBodyReq(item));
+export interface InternalRuleType extends RuleType<string, string> {
+  solution: RuleTypeSolution;
+}
+
+const rewriteResponse = (results: Array<AsApiContract<InternalRuleType>>): InternalRuleType[] => {
+  return results.map((item) => rewriteRuleType(item));
 };
 
-const rewriteBodyReq: RewriteRequestCase<RuleType> = ({
+const rewriteRuleType: RewriteRequestCase<InternalRuleType> = ({
   enabled_in_license: enabledInLicense,
   recovery_action_group: recoveryActionGroup,
   action_groups: actionGroups,
@@ -30,7 +35,7 @@ const rewriteBodyReq: RewriteRequestCase<RuleType> = ({
   has_alerts_mappings: hasAlertsMappings,
   has_fields_for_a_a_d: hasFieldsForAAD,
   ...rest
-}: AsApiContract<RuleType>) => ({
+}: AsApiContract<InternalRuleType>) => ({
   enabledInLicense,
   recoveryActionGroup,
   actionGroups,
@@ -46,9 +51,9 @@ const rewriteBodyReq: RewriteRequestCase<RuleType> = ({
   ...rest,
 });
 
-export async function fetchRuleTypes({ http }: { http: HttpSetup }): Promise<RuleType[]> {
-  const res = await http.get<Array<AsApiContract<RuleType<string, string>>>>(
-    `${BASE_ALERTING_API_PATH}/rule_types`
+export async function getInternalRuleTypes({ http }: { http: HttpStart }) {
+  const res = await http.get<Array<AsApiContract<InternalRuleType>>>(
+    `${INTERNAL_BASE_ALERTING_API_PATH}/_rule_types`
   );
-  return rewriteResponseRes(res);
+  return rewriteResponse(res);
 }
