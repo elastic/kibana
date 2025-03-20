@@ -26,6 +26,7 @@ export const useFetchIntegrationPolicyList = (
 
   return useQuery<GetPackagePoliciesResponse, IHttpFetchError>({
     queryKey: ['fetch-integration-policy-list', query],
+    refetchOnWindowFocus: false,
     ...options,
     queryFn: async () => {
       return http.get<GetPackagePoliciesResponse>(packagePolicyRouteService.getListPath(), {

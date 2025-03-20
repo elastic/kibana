@@ -32,14 +32,10 @@ import { getPolicyDetailPath } from '../../common/routing';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 const NOOP = () => {};
-const DEFAULT_LIST_PROPS: EuiSelectableProps['listProps'] = Object.freeze({
-  bordered: true,
-  showIcons: false,
-});
-const SEARCH_PROPS = Object.freeze({ className: 'searchbar' });
-
-const PolicySelectorContainer = styled.div`
+const PolicySelectorContainer = styled.div<{ height?: string }>`
   .selectable-container {
+    height: ${(props) => props.height ?? '200px'};
+    width: 100%;
     position: relative;
   }
 
@@ -70,6 +66,8 @@ type CustomPolicyDisplayOptions = Pick<
 export interface PolicySelectorProps {
   /** The list of policy IDs that are currently selected */
   selectedPolicyIds: string[];
+  /** Callback for when selection changes occur. */
+  onChange: (updatedSelectedPolicyIds: string[]) => void;
   /**
    * Any query options supported by the fleet api. The defaults applied will filter for only
    * Endpoint integration policies sorted by name.
@@ -78,6 +76,8 @@ export interface PolicySelectorProps {
     GetPackagePoliciesRequest['query'],
     'perPage' | 'kuery' | 'sortField' | 'sortOrder' | 'withAgentCount'
   >;
+  /** A css size value for the height of the area that shows the policies. Default is `200px` */
+  height?: string;
   /**
    * If `true`, then checkboxes will be used next to each item on the list as the selector component.
    * This is the likely choice when using this component in a Form (ex. Artifact create/update form)
@@ -116,12 +116,16 @@ export const PolicySelector = memo<PolicySelectorProps>(
       perPage = 20,
     } = {},
     selectedPolicyIds,
+    onChange,
+    height,
     useCheckbox = false,
     showPolicyLink = false,
     policyDisplayOptions,
     singleSelection = false,
     'data-test-subj': dataTestSubj,
   }) => {
+    // TODO:PT add support for showing static selections (for Global, Unassigned)
+
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { getAppUrl } = useAppUrl();
     const { canReadPolicyManagement, canWriteIntegrationPolicies } =
@@ -226,24 +230,26 @@ export const PolicySelector = memo<PolicySelectorProps>(
     ]);
 
     // FIXME:PT handle API errors
-    // FIXME:PT add loader indicator for when next page of data is retrieved
 
     const listBuilderCallback = useCallback<NonNullable<EuiSelectableProps['children']>>(
-      (list, search) => {
-        return (
-          <>
-            {search} {list}
-          </>
-        );
+      (list, _search) => {
+        return <>{list}</>;
       },
       []
     );
 
     const handleOnPolicySelectChange = useCallback<
       Required<EuiSelectableProps<OptionPolicyData>>['onChange']
-    >((currentOptions) => {
-      // FIXME:PT implement
-    }, []);
+    >(
+      (_updatedOptions, _ev, changedOption) => {
+        return onChange(
+          changedOption.checked === 'on'
+            ? selectedPolicyIds.concat(changedOption.policy.id)
+            : selectedPolicyIds.filter((id) => id !== changedOption.policy.id)
+        );
+      },
+      [onChange, selectedPolicyIds]
+    );
 
     const onPageClickHandler: Required<EuiPaginationProps>['onPageClick'] = useCallback(
       (activePage) => {
@@ -253,7 +259,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
     );
 
     return (
-      <PolicySelectorContainer data-test-subj={dataTestSubj}>
+      <PolicySelectorContainer data-test-subj={dataTestSubj} height={height}>
         <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
           {'search bar here'}
         </EuiPanel>
@@ -268,6 +274,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
             searchable={false}
             singleSelection={singleSelection}
             isLoading={isLoading}
+            height="full"
             // searchProps={SEARCH_PROPS}
             data-test-subj={getTestId('list')}
           >
@@ -276,15 +283,17 @@ export const PolicySelector = memo<PolicySelectorProps>(
         </div>
 
         <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
-          <EuiPagination
-            aria-label={i18n.translate(
-              'xpack.securitySolution.policySelector.policyListPagination',
-              { defaultMessage: 'Policy list pagination' }
-            )}
-            pageCount={Math.ceil((policyListResponse?.total ?? 0) / perPage)}
-            activePage={(policyListResponse?.page ?? 1) - 1}
-            onPageClick={onPageClickHandler}
-          />
+          {policyListResponse && (
+            <EuiPagination
+              aria-label={i18n.translate(
+                'xpack.securitySolution.policySelector.policyListPagination',
+                { defaultMessage: 'Policy list pagination' }
+              )}
+              pageCount={Math.ceil((policyListResponse?.total ?? 0) / perPage)}
+              activePage={(policyListResponse?.page ?? 1) - 1}
+              onPageClick={onPageClickHandler}
+            />
+          )}
         </EuiPanel>
       </PolicySelectorContainer>
     );
