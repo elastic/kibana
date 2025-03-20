@@ -1064,7 +1064,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           setupTechnology={setupTechnology}
           isEditPage={isEditPage}
           hasInvalidRequiredVars={hasInvalidRequiredVars}
-          showCloudConnectors={showCloudConnectors}
+          // temp to show cloud connectors
+          showCloudConnectors={true}
         />
         <EuiSpacer />
       </>
