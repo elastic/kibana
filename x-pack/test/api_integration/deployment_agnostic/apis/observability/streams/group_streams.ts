@@ -31,7 +31,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       after(async () => {
         await disableStreams(apiClient);
-        await esClient.indices.deleteDataStream({ name: 'metrics-test-test' });
+        await esClient.indices.deleteDataStream({ name: 'metrics-test-test' }, { ignore: [404] });
       });
 
       it('successfully creates a GroupStream', async () => {

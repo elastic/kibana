@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import { badData, badRequest } from '@hapi/boom';
 import {
   GroupObjectGetResponse,
   groupObjectUpsertRequestSchema,
-  GroupStreamUpsertRequest,
   isGroupStreamDefinition,
 } from '@kbn/streams-schema';
+import { z } from '@kbn/zod';
 import { createServerRoute } from '../../create_server_route';
 
 const readGroupRoute = createServerRoute({
@@ -90,6 +89,7 @@ const upsertGroupRoute = createServerRoute({
       throw badRequest('A group stream name can not start with [logs.]');
     }
 
+    const existingStream = await streamsClient.getStream(name).catch(() => undefined);
     const assets = await assetClient.getAssets({
       entityId: name,
       entityType: 'stream',
@@ -103,8 +103,8 @@ const upsertGroupRoute = createServerRoute({
 
     const upsertRequest = {
       dashboards,
-      stream: groupUpsertRequest,
-    } as GroupStreamUpsertRequest;
+      stream: { ...groupUpsertRequest, description: existingStream?.description ?? '' },
+    };
 
     return await streamsClient.upsertStream({
       request: upsertRequest,
