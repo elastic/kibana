@@ -289,7 +289,7 @@ describe('inspect index', () => {
         timeZone: undefined,
         type: 'date',
       },
-      Effective_process: {
+      Effective_process: { // eslint-disable-line @typescript-eslint/naming-convention
         entity_id: {
           aggregatable: true,
           esTypes: ['keyword'],
