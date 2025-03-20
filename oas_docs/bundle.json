@@ -10894,6 +10894,18 @@
                                   }
                                 },
                                 "type": "object"
+                              },
+                              "cloud_connectors": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "target_csp": {
+                                    "type": "string"
+                                  },
+                                  "enabled": {
+                                    "type": "boolean"
+                                  }
+                                },
+                                "type": "object"
                               }
                             },
                             "type": "object"

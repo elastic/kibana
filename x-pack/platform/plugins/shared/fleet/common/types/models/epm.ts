@@ -14,7 +14,7 @@ import type {
   monitoringTypes,
   installationStatuses,
 } from '../../constants';
-import type { ValueOf } from '..';
+import type { CloudConnectors, ValueOf } from '..';
 
 import type { PackageSpecManifest, PackageSpecIcon, PackageSpecCategory } from './package_spec';
 
@@ -204,6 +204,7 @@ export interface DeploymentsModesAgentless extends DeploymentsModesDefault {
   organization?: string;
   division?: string;
   team?: string;
+  cloud_connectors?: CloudConnectors;
   resources?: {
     requests: {
       cpu: string;
