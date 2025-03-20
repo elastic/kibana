@@ -11,6 +11,7 @@ import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import inquirer from 'inquirer';
+import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 
 export interface Answers {
   name: string;
@@ -42,7 +43,7 @@ export const INTERNAL_PLUGIN_LOCATIONS: Array<{ name: string; value: string }> =
   },
   {
     name: 'Kibana OSS Functional Testing',
-    value: Path.resolve(REPO_ROOT, 'test/plugin_functional/plugins'),
+    value: Path.resolve(REPO_ROOT, 'src/platform/test/plugin_functional/plugins'),
   },
   {
     name: 'X-Pack',
@@ -56,18 +57,10 @@ export const INTERNAL_PLUGIN_LOCATIONS: Array<{ name: string; value: string }> =
     name: 'X-Pack Platform (shared)',
     value: Path.resolve(REPO_ROOT, 'x-pack/platform/plugins/shared'),
   },
-  {
-    name: 'X-Pack Observability',
-    value: Path.resolve(REPO_ROOT, 'x-pack/solutions/observability/plugins'),
-  },
-  {
-    name: 'X-Pack Security',
-    value: Path.resolve(REPO_ROOT, 'x-pack/solutions/security/plugins'),
-  },
-  {
-    name: 'X-Pack Search',
-    value: Path.resolve(REPO_ROOT, 'x-pack/solutions/search/plugins'),
-  },
+  ...KIBANA_SOLUTIONS.map((solution) => ({
+    name: `X-Pack ${solution}`,
+    value: Path.resolve(REPO_ROOT, `x-pack/solutions/${solution}/plugins`),
+  })),
   {
     name: 'X-Pack Functional Testing',
     value: Path.resolve(REPO_ROOT, 'x-pack/test/plugin_functional/plugins'),
