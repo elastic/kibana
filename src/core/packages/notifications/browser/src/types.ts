@@ -134,10 +134,18 @@ interface InterceptSteps extends Pick<EuiTourStepProps, 'title'> {
   content: FC<{ onValue: (value: unknown) => void }>;
 }
 
+interface StartingInterceptStep extends InterceptSteps {
+  id: 'start';
+}
+
+interface CompletionInterceptStep extends InterceptSteps {
+  id: 'completion';
+}
+
 export interface Intercept {
   id: string;
   title: string;
-  steps: InterceptSteps[];
+  steps: [StartingInterceptStep, ...InterceptSteps[], CompletionInterceptStep];
   /**
    * Provides the response of the user interaction with the dialog for a particular step.
    */
