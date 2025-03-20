@@ -248,7 +248,7 @@ describe('inspect index', () => {
         timeSeriesDimension: undefined,
       },
       {
-        name: 'Effective_process.entity_id',
+        name: 'effective_process.entity_id',
         type: 'string',
         esTypes: ['keyword'],
         searchable: true,
@@ -261,7 +261,7 @@ describe('inspect index', () => {
         timeSeriesDimension: undefined,
       },
       {
-        name: 'Effective_process.executable',
+        name: 'effective_process.executable',
         type: 'string',
         esTypes: ['keyword'],
         searchable: true,
@@ -289,7 +289,7 @@ describe('inspect index', () => {
         timeZone: undefined,
         type: 'date',
       },
-      Effective_process: {
+      effective_process: {
         entity_id: {
           aggregatable: true,
           esTypes: ['keyword'],
