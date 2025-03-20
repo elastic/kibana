@@ -24,6 +24,7 @@ export interface GraphState {
   maxRepeatedGenerations: number;
   refinements: string[];
   refinePrompt: string;
+  continuePrompt: string;
   replacements: Replacements;
   unrefinedResults: DefendInsight[] | null;
   start?: DateMath;
