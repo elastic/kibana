@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type ProjectType = 'observability' | 'security' | 'search';
+// BOOKMARK - List of Kibana project types - TODO unify with the definitions under @kbn/projects-solutions-groups
+export type ProjectType = 'observability' | 'security' | 'search' | 'chat';
