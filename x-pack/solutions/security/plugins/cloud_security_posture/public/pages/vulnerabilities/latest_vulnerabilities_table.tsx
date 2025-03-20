@@ -33,18 +33,20 @@ interface LatestVulnerabilitiesTableProps {
   nonPersistedFilters?: Filter[];
 }
 /**
- * Type Guard for checking if the given source is a CspVulnerabilityFinding
+ * Type Guard for checking if the given source has a vulnerability object
+ * Since id might be empty with the introduction of 3rd party vulnerabilities
+ * we need another to check to know if finding can be displayed in the flyout
  */
-const isCspVulnerabilityFinding = (
+const isVulnerabilityFinding = (
   source: Record<string, any> | undefined
 ): source is CspVulnerabilityFinding => {
-  return source?.vulnerability?.id !== undefined;
+  return 'vulnerability' in (source ?? {});
 };
 
 const getCspVulnerabilityFinding = (
   source: Record<string, any> | undefined
 ): CspVulnerabilityFinding | false => {
-  return isCspVulnerabilityFinding(source) && source;
+  return isVulnerabilityFinding(source) && source;
 };
 
 /**
