@@ -59,6 +59,8 @@ import {
   InlineCastContext,
   IndexPatternContext,
   InlinestatsCommandContext,
+  MatchExpressionContext,
+  MatchBooleanExpressionContext,
 } from '../antlr/esql_parser';
 import {
   createSource,
@@ -83,6 +85,7 @@ import {
   createFunctionCall,
   createParam,
   createLiteralString,
+  createBinaryExpression,
 } from './factories';
 
 import {
@@ -94,8 +97,12 @@ import {
   ESQLAstField,
   ESQLInlineCast,
   ESQLOrderExpression,
+  ESQLBinaryExpression,
+  InlineCastingType,
 } from '../types';
 import { firstItem, lastItem } from '../visitor/utils';
+import { Builder } from '../builder';
+import { getPosition } from './helpers';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
   const fromContexts = ctx.getTypedRuleContexts(IndexPatternContext);
@@ -512,9 +519,15 @@ function collectDefaultExpression(ctx: BooleanExpressionContext) {
 
 export function collectBooleanExpression(ctx: BooleanExpressionContext | undefined): ESQLAstItem[] {
   const ast: ESQLAstItem[] = [];
+
   if (!ctx) {
     return ast;
   }
+
+  if (ctx instanceof MatchExpressionContext) {
+    return [visitMatchExpression(ctx)];
+  }
+
   return ast
     .concat(
       collectLogicalExpression(ctx),
@@ -524,6 +537,41 @@ export function collectBooleanExpression(ctx: BooleanExpressionContext | undefin
     )
     .flat();
 }
+
+type ESQLAstMatchBooleanExpression = ESQLColumn | ESQLBinaryExpression | ESQLInlineCast;
+
+const visitMatchExpression = (ctx: MatchExpressionContext): ESQLAstMatchBooleanExpression => {
+  return visitMatchBooleanExpression(ctx.matchBooleanExpression());
+};
+
+const visitMatchBooleanExpression = (
+  ctx: MatchBooleanExpressionContext
+): ESQLAstMatchBooleanExpression => {
+  let expression: ESQLAstMatchBooleanExpression = createColumn(ctx.qualifiedName());
+  const dataTypeCtx = ctx.dataType();
+  const constantCtx = ctx.constant();
+
+  if (dataTypeCtx) {
+    expression = Builder.expression.inlineCast(
+      {
+        castType: dataTypeCtx.getText().toLowerCase() as InlineCastingType,
+        value: expression,
+      },
+      {
+        location: getPosition(ctx.start, dataTypeCtx.stop),
+        incomplete: Boolean(ctx.exception),
+      }
+    );
+  }
+
+  if (constantCtx) {
+    const constantExpression = getConstant(constantCtx);
+
+    expression = createBinaryExpression(':', ctx, [expression, constantExpression]);
+  }
+
+  return expression;
+};
 
 export function visitField(ctx: FieldContext) {
   if (ctx.qualifiedName() && ctx.ASSIGN()) {

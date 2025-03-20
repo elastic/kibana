@@ -6,9 +6,10 @@
  */
 
 import { test as base } from '@kbn/scout';
+import type { ApiServicesFixture, KbnClient } from '@kbn/scout';
 
 import { extendPageObjects } from '../page_objects';
-import { ObltTestFixtures, ObltWorkerFixtures } from './types';
+import { ObltApiServicesFixture, ObltTestFixtures, ObltWorkerFixtures } from './types';
 
 /**
  * Should be used for the test spec files executed seqentially.
@@ -27,4 +28,17 @@ export const test = base.extend<ObltTestFixtures, ObltWorkerFixtures>({
     const extendedPageObjects = extendPageObjects(pageObjects, page);
     await use(extendedPageObjects);
   },
+  apiServices: [
+    async (
+      { apiServices, kbnClient }: { apiServices: ApiServicesFixture; kbnClient: KbnClient },
+      use: (extendedApiServices: ObltApiServicesFixture) => Promise<void>
+    ) => {
+      const extendedApiServices = apiServices as ObltApiServicesFixture;
+      // extend with Observability specific API services
+      // extendedApiServices.<service_name> = getServiceApiHelper(kbnClient);
+
+      await use(extendedApiServices);
+    },
+    { scope: 'worker' },
+  ],
 });

@@ -122,6 +122,7 @@ export const FlyoutWrapper = ({
           margin-left: -${euiThemeVars.euiFormMaxWidth};
           pointer-events: none;
           .euiFlyoutBody__overflow {
+            transform: initial;
             -webkit-mask-image: none;
             padding-left: inherit;
             margin-left: inherit;
