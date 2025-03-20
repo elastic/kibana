@@ -52,9 +52,9 @@ export const applyDataViewIndicesEntityEngineRoute = (
           if (successes.length === 0 && errors.length > 0) {
             return siemResponse.error({
               statusCode: 500,
-              body: `Error in ApplyEntityEngineDataViewIndices. Errors: [${errorMessages.join(
-                ', '
-              )}]`,
+              body: `Errors applying data view changes to the entity store. Errors: \n${errorMessages.join(
+                '\n\n'
+              )}`,
             });
           }
 
