@@ -6,3 +6,4 @@ ui_tests:
     - maps
     - observability_onboarding
     - security_solution
+  disabled:
