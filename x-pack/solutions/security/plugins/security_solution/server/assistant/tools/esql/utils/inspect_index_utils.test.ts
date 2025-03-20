@@ -56,18 +56,18 @@ describe('inspect index', () => {
     ],
     [
       {
-        foo: [{ bar: 1 }, { bar: 2 }]
+        foo: [{ bar: 1 }, { bar: 2 }],
       },
       'foo.1.bar',
       2,
     ],
     [
       {
-        foo: [{ bar: 1 }, { bar: 2 }]
+        foo: [{ bar: 1 }, { bar: 2 }],
       },
       '',
       {
-        foo: [{ bar: 1 }, { bar: 2 }]
+        foo: [{ bar: 1 }, { bar: 2 }],
       },
     ],
   ])(
@@ -102,8 +102,8 @@ describe('inspect index', () => {
       },
       1,
       {
-        field1: "Object",
-        field2: "Object",
+        field1: 'Object',
+        field2: 'Object',
       },
     ],
     [
@@ -227,8 +227,8 @@ describe('inspect index', () => {
   it('shallowObjectViewTruncated reduces depth if maxCharacters is exceeded', () => {
     expect(shallowObjectViewTruncated(sampleMapping1, 50)).toEqual({
       mappings: {
-        properties: "Object",
-      }
+        properties: 'Object',
+      },
     });
   });
 
@@ -245,7 +245,7 @@ describe('inspect index', () => {
         fixedInterval: undefined,
         timeZone: undefined,
         timeSeriesMetric: undefined,
-        timeSeriesDimension: undefined
+        timeSeriesDimension: undefined,
       },
       {
         name: 'Effective_process.entity_id',
@@ -258,7 +258,7 @@ describe('inspect index', () => {
         fixedInterval: undefined,
         timeZone: undefined,
         timeSeriesMetric: undefined,
-        timeSeriesDimension: undefined
+        timeSeriesDimension: undefined,
       },
       {
         name: 'Effective_process.executable',
@@ -271,10 +271,50 @@ describe('inspect index', () => {
         fixedInterval: undefined,
         timeZone: undefined,
         timeSeriesMetric: undefined,
-        timeSeriesDimension: undefined
-      },]
+        timeSeriesDimension: undefined,
+      },
+    ];
 
-    const nestedObject = mapFieldDescriptorToNestedObject(fieldDescriptors)
-    expect(nestedObject).toEqual({ "@timestamp": { "aggregatable": true, "esTypes": ["date"], "fixedInterval": undefined, "metadata_field": false, "readFromDocValues": true, "searchable": true, "timeSeriesDimension": undefined, "timeSeriesMetric": undefined, "timeZone": undefined, "type": "date" }, "Effective_process": { "entity_id": { "aggregatable": true, "esTypes": ["keyword"], "fixedInterval": undefined, "metadata_field": false, "readFromDocValues": true, "searchable": true, "timeSeriesDimension": undefined, "timeSeriesMetric": undefined, "timeZone": undefined, "type": "string" }, "executable": { "aggregatable": true, "esTypes": ["keyword"], "fixedInterval": undefined, "metadata_field": false, "readFromDocValues": true, "searchable": true, "timeSeriesDimension": undefined, "timeSeriesMetric": undefined, "timeZone": undefined, "type": "string" } } })
+    const nestedObject = mapFieldDescriptorToNestedObject(fieldDescriptors);
+    expect(nestedObject).toEqual({
+      '@timestamp': {
+        aggregatable: true,
+        esTypes: ['date'],
+        fixedInterval: undefined,
+        metadata_field: false,
+        readFromDocValues: true,
+        searchable: true,
+        timeSeriesDimension: undefined,
+        timeSeriesMetric: undefined,
+        timeZone: undefined,
+        type: 'date',
+      },
+      Effective_process: {
+        entity_id: {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          fixedInterval: undefined,
+          metadata_field: false,
+          readFromDocValues: true,
+          searchable: true,
+          timeSeriesDimension: undefined,
+          timeSeriesMetric: undefined,
+          timeZone: undefined,
+          type: 'string',
+        },
+        executable: {
+          aggregatable: true,
+          esTypes: ['keyword'],
+          fixedInterval: undefined,
+          metadata_field: false,
+          readFromDocValues: true,
+          searchable: true,
+          timeSeriesDimension: undefined,
+          timeSeriesMetric: undefined,
+          timeZone: undefined,
+          type: 'string',
+        },
+      },
+    });
   });
 });

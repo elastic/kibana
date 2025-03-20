@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get } from "lodash";
+import { get } from 'lodash';
 
 /**
  * Gets the entries at a given key in an index mapping
@@ -20,33 +20,36 @@ export const getNestedValue = (obj: unknown, keyPath: string) => {
  * @param maxDepth The maximum depth to recurse into the object
  * @returns A shallow view of the mapping
  */
-export const shallowObjectView = (
-  obj: unknown,
-  maxDepth = 1
-): object | string | undefined => {
-  if (obj === undefined || typeof obj === "string" || typeof obj === "number" || typeof obj === "boolean") {
+export const shallowObjectView = (obj: unknown, maxDepth = 1): object | string | undefined => {
+  if (
+    obj === undefined ||
+    typeof obj === 'string' ||
+    typeof obj === 'number' ||
+    typeof obj === 'boolean'
+  ) {
     return obj?.toString() ?? undefined;
   }
 
   if (Array.isArray(obj)) {
-    return maxDepth <= 0 ? "Array" : obj;
+    return maxDepth <= 0 ? 'Array' : obj;
   }
 
-  if (typeof obj === "object" && obj !== null) {
+  if (typeof obj === 'object' && obj !== null) {
     if (maxDepth <= 0) {
-      return "Object";
+      return 'Object';
     }
     return Object.fromEntries(
       Object.entries(obj).map(([key, value]) => [
         key,
-        typeof value === "object" ? shallowObjectView(value, maxDepth - 1) : value?.toString() ?? undefined
+        typeof value === 'object'
+          ? shallowObjectView(value, maxDepth - 1)
+          : value?.toString() ?? undefined,
       ])
     );
   }
 
-  return "unknown";
+  return 'unknown';
 };
-
 
 /**
  * Same as shallowObjectView but reduces the maxDepth if the stringified view is longer than maxCharacters
@@ -68,20 +71,25 @@ export const shallowObjectViewTruncated = (
   return view;
 };
 
-export type NestedObject = { [key: string]: NestedValue };
+export interface NestedObject {
+  [key: string]: NestedValue;
+}
 export type NestedValue = string | NestedObject | undefined | NestedValue[];
 
-export const mapFieldDescriptorToNestedObject = <T extends { name: string }>(arr: T[]): NestedObject => {
+export const mapFieldDescriptorToNestedObject = <T extends { name: string }>(
+  arr: T[]
+): NestedObject => {
   return arr.reduce<NestedObject>((acc, obj) => {
-    const keys = obj.name.split(".");
+    const keys = obj.name.split('.');
     keys.reduce((nested: NestedObject, key, index) => {
       if (!(key in nested)) {
-        nested[key] = index === keys.length - 1
-          ? Object.fromEntries(Object.entries(obj).filter(([k]) => k !== "name"))
-          : {};
+        nested[key] =
+          index === keys.length - 1
+            ? Object.fromEntries(Object.entries(obj).filter(([k]) => k !== 'name'))
+            : {};
       }
       return nested[key] as NestedObject;
     }, acc);
     return acc;
   }, {});
-}
+};
