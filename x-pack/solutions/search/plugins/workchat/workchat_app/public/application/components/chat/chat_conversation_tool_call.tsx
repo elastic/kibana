@@ -8,9 +8,9 @@
 import React from 'react';
 import { EuiComment } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ToolCallConversationItem } from '../utils/conversation_items';
+import type { ToolCallConversationItem } from '../../utils/conversation_items';
+import { useIntegrationToolView } from '../../hooks/use_integration_tool_view';
 import { ChatMessageAvatar } from './chat_message_avatar';
-import { useIntegrationToolView } from '../hooks/use_integration_tool_view';
 
 interface ChatConversationMessageProps {
   toolCall: ToolCallConversationItem;
@@ -23,17 +23,13 @@ const assistantLabel = i18n.translate('xpack.workchatApp.chat.messages.assistant
 export const ChatConversationToolCall: React.FC<ChatConversationMessageProps> = ({ toolCall }) => {
   const ToolView = useIntegrationToolView(toolCall.toolCall.toolName);
 
-  if (!ToolView) {
-    return null;
-  }
-
   return (
     <EuiComment
       username={assistantLabel}
       timelineAvatar={
         <ChatMessageAvatar eventType="tool" loading={toolCall.loading} currentUser={undefined} />
       }
-      event={<ToolView toolCall={toolCall.toolCall} complete={toolCall.toolResult} />}
+      event={<ToolView toolCall={toolCall.toolCall} toolResult={toolCall.toolResult} />}
       eventColor="transparent"
       actions={<></>}
     />

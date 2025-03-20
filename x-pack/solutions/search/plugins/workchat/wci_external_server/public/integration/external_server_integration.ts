@@ -13,7 +13,7 @@ import { ExternalServerConfigurationForm } from './configuration';
 export function getExternalServerIntegrationComponents(): IntegrationComponentDescriptor {
   return {
     getType: () => IntegrationType.external_server,
-    getTool: () => ExternalServerTool,
+    getToolCallComponent: (toolName) => ExternalServerTool,
     getConfigurationForm: () => ExternalServerConfigurationForm,
   };
 }

@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { IntegrationToolComponentProps } from '@kbn/wci-browser';
-import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { EuiTextColor } from '@elastic/eui';
+import { EuiText, EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { IntegrationToolComponentProps } from '@kbn/wci-browser';
 
 const bold = css`
   font-weight: bold;
@@ -20,10 +19,12 @@ const italic = css`
   font-style: italic;
 `;
 
-export const SalesforceTool: React.FC<IntegrationToolComponentProps> = ({
-  toolCall,
-  toolResult,
-}) => {
+/**
+ * Component used as default rendered for the `useIntegrationToolView` hook.
+ */
+export const ChatDefaultToolCallRendered: React.FC<
+  Omit<IntegrationToolComponentProps, 'integration'>
+> = ({ toolCall, toolResult }) => {
   const toolNode = (
     <EuiTextColor className={bold} color="success">
       {toolCall.toolName}
@@ -39,8 +40,8 @@ export const SalesforceTool: React.FC<IntegrationToolComponentProps> = ({
     return (
       <EuiText size="s">
         <FormattedMessage
-          id="xpack.workchatApp.wci_salesforce.chat.toolCall.calledToolLabel"
-          defaultMessage="called Salesforce {tool} with arguments {args}"
+          id="xpack.workchatApp.chat.toolCall.calledToolLabel"
+          defaultMessage="called tool {tool} with arguments {args}"
           values={{
             tool: toolNode,
             args: argsNode,
@@ -52,8 +53,8 @@ export const SalesforceTool: React.FC<IntegrationToolComponentProps> = ({
     return (
       <EuiText size="s">
         <FormattedMessage
-          id="xpack.workchatApp.wci_salesforce.chat.toolCall.callingToolLabel"
-          defaultMessage="called Salesforce {tool} with arguments {args}"
+          id="xpack.workchatApp.chat.toolCall.callingToolLabel"
+          defaultMessage="is calling tool {tool} with arguments {args}"
           values={{
             tool: toolNode,
             args: argsNode,

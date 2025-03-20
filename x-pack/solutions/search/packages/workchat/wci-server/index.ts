@@ -12,5 +12,4 @@ export type {
   IntegrationContext,
   WorkChatIntegration,
   WorkchatIntegrationDefinition,
-  IntegrationConfiguration,
 } from './src/types';

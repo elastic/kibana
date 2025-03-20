@@ -22,7 +22,7 @@ const italic = css`
 
 export const ExternalServerTool: React.FC<IntegrationToolComponentProps> = ({
   toolCall,
-  complete,
+  toolResult,
 }) => {
   const toolNode = (
     <EuiTextColor className={bold} color="success">
@@ -35,7 +35,7 @@ export const ExternalServerTool: React.FC<IntegrationToolComponentProps> = ({
     </EuiTextColor>
   );
 
-  if (complete) {
+  if (toolResult) {
     return (
       <EuiText size="s">
         <FormattedMessage

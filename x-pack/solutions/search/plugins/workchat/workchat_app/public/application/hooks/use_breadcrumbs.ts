@@ -8,7 +8,7 @@
 import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
-import { workchatAppId } from '../constants';
+import { WORKCHAT_APP_ID } from '../../../common/features';
 import { useKibana } from './use_kibana';
 
 export const useBreadcrumb = (breadcrumbs: ChromeBreadcrumb[]) => {
@@ -17,7 +17,7 @@ export const useBreadcrumb = (breadcrumbs: ChromeBreadcrumb[]) => {
   } = useKibana();
 
   const appUrl = useMemo(() => {
-    return application.getUrlForApp(workchatAppId);
+    return application.getUrlForApp(WORKCHAT_APP_ID);
   }, [application]);
 
   const baseCrumbs: ChromeBreadcrumb[] = useMemo(() => {

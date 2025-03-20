@@ -5,4 +5,17 @@
  * 2.0.
  */
 
+import { IntegrationType } from './constants';
+
+export interface Integration {
+  id: string;
+  name: string;
+  type: IntegrationType;
+  description: string;
+  configuration: IntegrationConfiguration;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: string;
+}
+
 export type IntegrationConfiguration = Record<string, any>;

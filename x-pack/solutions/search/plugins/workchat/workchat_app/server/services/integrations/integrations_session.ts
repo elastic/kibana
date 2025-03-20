@@ -8,10 +8,9 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { JsonSchemaObject } from '@n8n/json-schema-to-zod';
 import type { Logger } from '@kbn/core/server';
+import { parseToolName, buildToolName } from '@kbn/wci-common';
 import { IntegrationToolInputSchema, IntegrationTool } from './types';
 import type { IntegrationWithMeta } from './types';
-
-const TOOL_NAME_SEPARATOR = '___';
 
 /**
  * This class is used to manage the integrations session.
@@ -85,7 +84,7 @@ export class IntegrationsSession {
           const toolsResponse = await client.listTools();
           if (toolsResponse && toolsResponse.tools && Array.isArray(toolsResponse.tools)) {
             return toolsResponse.tools.map((tool) => ({
-              name: `${clientId}${TOOL_NAME_SEPARATOR}${tool.name}`,
+              name: buildToolName({ integrationId: clientId, toolName: tool.name }),
               description: tool.description || '',
               inputSchema: (tool.inputSchema || {}) as JsonSchemaObject,
             }));
@@ -104,10 +103,10 @@ export class IntegrationsSession {
   async executeTool(serverToolName: string, params: IntegrationToolInputSchema) {
     await this.ensureConnected();
 
-    const [clientKey, toolName] = serverToolName.split(TOOL_NAME_SEPARATOR);
-    const integration = this.sessionState[clientKey];
+    const { integrationId, toolName } = parseToolName(serverToolName);
+    const integration = this.sessionState[integrationId];
     if (!integration) {
-      throw new Error(`Client not found: ${clientKey}`);
+      throw new Error(`Client not found: ${integrationId}`);
     }
     return integration.client.callTool({
       name: toolName,

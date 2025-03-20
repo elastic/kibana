@@ -15,7 +15,7 @@ import {
   type UserMessageConversationItem,
   type AssistantMessageConversationItem,
   isUserMessageItem,
-} from '../utils/conversation_items';
+} from '../../utils/conversation_items';
 
 type UserOrAssistantMessageItem = UserMessageConversationItem | AssistantMessageConversationItem;
 

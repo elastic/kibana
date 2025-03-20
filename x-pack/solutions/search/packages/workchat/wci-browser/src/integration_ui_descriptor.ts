@@ -7,17 +7,30 @@
 
 import type React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
-import { IntegrationType } from '@kbn/wci-common';
+import { IntegrationType, Integration, ToolCall } from '@kbn/wci-common';
 
 export interface IntegrationComponentDescriptor {
-  getConfigurationForm: () => React.ComponentType<IntegrationConfigurationFormProps>;
-  getTool: () => React.ComponentType<IntegrationToolComponentProps>;
   getType: () => IntegrationType;
+  getConfigurationForm: () => React.ComponentType<IntegrationConfigurationFormProps>;
+  getToolCallComponent: (toolName: string) => React.ComponentType<IntegrationToolComponentProps>;
 }
 
+/**
+ * Props that will be passed to the tool call component
+ */
 export interface IntegrationToolComponentProps {
-  toolCall: any; // TODO: fix this
-  complete: boolean;
+  /**
+   * The integration the call was made with
+   */
+  integration: Integration;
+  /**
+   * The tool call to render
+   */
+  toolCall: ToolCall;
+  /**
+   * If tool call is complete, will contain the string result of the call
+   */
+  toolResult?: string;
 }
 
 export interface IntegrationConfigurationFormProps {

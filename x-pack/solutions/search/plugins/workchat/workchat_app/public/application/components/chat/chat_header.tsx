@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText, EuiPanel } from '@elastic/eui';
-import type { Agent } from '../../../common/agents';
+import type { Agent } from '../../../../common/agents';
 import { ChatHeaderConnectorSelector } from './chat_header_connector_selector';
 
 interface ChatHeaderProps {

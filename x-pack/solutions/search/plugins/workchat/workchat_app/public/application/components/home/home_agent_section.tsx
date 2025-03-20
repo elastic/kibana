@@ -21,6 +21,7 @@ import { Agent } from '../../../../common/agents';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useAgentList } from '../../hooks/use_agent_list';
 import { useCapabilities } from '../../hooks/use_capabilities';
+import { appPaths } from '../../app_paths';
 
 export const HomeAgentSection: React.FC<{}> = () => {
   const { createWorkchatUrl, navigateToWorkchatUrl } = useNavigation();
@@ -32,7 +33,11 @@ export const HomeAgentSection: React.FC<{}> = () => {
       field: 'name',
       name: 'Name',
       render: (value, agent) => {
-        return <EuiLink href={createWorkchatUrl(`/agents/${agent.id}/chat`)}>{value}</EuiLink>;
+        return (
+          <EuiLink href={createWorkchatUrl(appPaths.chat.new({ agentId: agent.id }))}>
+            {value}
+          </EuiLink>
+        );
       },
     },
     { field: 'description', name: 'Description' },
@@ -51,7 +56,7 @@ export const HomeAgentSection: React.FC<{}> = () => {
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={() => {
-                navigateToWorkchatUrl('/agents');
+                navigateToWorkchatUrl(appPaths.agents.list);
               }}
             >
               Go to agent management

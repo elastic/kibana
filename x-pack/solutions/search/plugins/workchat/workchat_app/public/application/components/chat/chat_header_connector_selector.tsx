@@ -9,7 +9,7 @@ import React, { useMemo, useEffect, useCallback } from 'react';
 import { EuiSuperSelect, EuiText, useEuiTheme, EuiSuperSelectOption } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/css';
-import { useConnectors } from '../hooks/use_connectors';
+import { useConnectors } from '../../hooks/use_connectors';
 
 const selectInputDisplayClassName = css`
   margin-right: 8px;
