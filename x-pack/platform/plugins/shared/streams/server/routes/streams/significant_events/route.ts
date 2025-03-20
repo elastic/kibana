@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { AggregationsDateHistogramAggregate } from '@elastic/elasticsearch/lib/api/types';
 import { badRequest } from '@hapi/boom';
-import { z } from '@kbn/zod';
 import { buildEsQuery } from '@kbn/es-query';
+import { SignificantEventsGetResponse } from '@kbn/streams-schema';
+import { z } from '@kbn/zod';
 import { createServerRoute } from '../../create_server_route';
 
 const stringToDate = z.string().transform((arg) => new Date(arg));
@@ -34,7 +36,7 @@ export const readSignificantEventsRoute = createServerRoute({
         'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
-  handler: async ({ params, request, getScopedClients }): Promise<any> => {
+  handler: async ({ params, request, getScopedClients }): Promise<SignificantEventsGetResponse> => {
     const { streamsClient, assetClient, scopedClusterClient } = await getScopedClients({
       request,
     });
@@ -65,15 +67,7 @@ export const readSignificantEventsRoute = createServerRoute({
                     },
                   },
                 },
-                buildEsQuery(
-                  undefined,
-                  {
-                    query: asset.query.kql.query,
-                    language: 'kuery',
-                  },
-                  [],
-                  { allowLeadingWildcards: true }
-                ),
+                buildQuery(asset.query.kql.query),
               ],
             },
           },
@@ -93,22 +87,54 @@ export const readSignificantEventsRoute = createServerRoute({
       ];
     });
 
-    const response = await scopedClusterClient.asCurrentUser.msearch({ searches: searchRequests });
+    const response = await scopedClusterClient.asCurrentUser.msearch<
+      unknown,
+      { occurrences: AggregationsDateHistogramAggregate }
+    >({ searches: searchRequests });
 
     const significantEvents = response.responses.map((queryResponse, queryIndex) => {
       const query = assetLinks[queryIndex];
+      if ('error' in queryResponse) {
+        return {
+          id: query.query.id,
+          title: query.query.title,
+          kql: query.query.kql,
+          occurrences: [],
+        };
+      }
 
       return {
         id: query.query.id,
-        name: query.query.title,
+        title: query.query.title,
         kql: query.query.kql,
-        occurrences: queryResponse?.aggregations?.occurrences.buckets ?? [],
+        occurrences:
+          // @ts-ignore map unrecognized on buckets
+          queryResponse?.aggregations?.occurrences?.buckets.map((bucket) => ({
+            date: bucket.key_as_string,
+            count: bucket.doc_count,
+          })),
       };
     });
 
     return significantEvents;
   },
 });
+
+function buildQuery(kql: string) {
+  try {
+    return buildEsQuery(
+      undefined,
+      {
+        query: kql,
+        language: 'kuery',
+      },
+      [],
+      { allowLeadingWildcards: true }
+    );
+  } catch (err) {
+    return { match_all: {} };
+  }
+}
 
 export const significantEventsRoutes = {
   ...readSignificantEventsRoute,
