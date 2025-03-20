@@ -46,6 +46,15 @@ export const getReindexButtonLabel = (status?: ReindexStatus) => {
   }
 };
 
+const RecommendedOptionBadge = () => (
+  <EuiBadge color="hollow">
+    <FormattedMessage
+      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.recommendedOption"
+      defaultMessage="Recommended"
+    />
+  </EuiBadge>
+);
+
 export const getDefaultGuideanceText = ({
   isClosedIndex,
   readOnlyExcluded,
@@ -75,7 +84,7 @@ export const getDefaultGuideanceText = ({
           </EuiFlexItem>
           {!isLargeIndex && !readOnlyExcluded && (
             <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">Recommended</EuiBadge>
+              <RecommendedOptionBadge />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -110,7 +119,7 @@ export const getDefaultGuideanceText = ({
           </EuiFlexItem>
           {(isLargeIndex || reindexExcluded) && (
             <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">Recommended</EuiBadge>
+              <RecommendedOptionBadge />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
