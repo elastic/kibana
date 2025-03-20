@@ -48,7 +48,7 @@ const PolicySelectorContainer = styled.div<{ height?: string }>`
   }
 
   .body-container {
-    height: ${(props) => props.height ?? '200px'};
+    height: ${(props) => props.height ?? '225px'};
     position: relative;
     border-top: none;
     border-bottom: none;
@@ -114,7 +114,7 @@ export interface PolicySelectorProps {
    * bottom of each policy page.
    */
   additionalListItems?: AdditionalListItemProps[];
-  /** A css size value for the height of the area that shows the policies. Default is `200px` */
+  /** A css size value for the height of the area that shows the policies. Default is `225px` */
   height?: string;
   /**
    * If `true`, then checkboxes will be used next to each item on the list as the selector component.
@@ -155,7 +155,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
       perPage = 20,
     } = {},
     selectedPolicyIds,
-    searchFields = ['id', 'name', 'description', 'policy_ids', 'package.name'],
+    searchFields = ['name', 'description', 'policy_ids', 'package.name'],
     onChange,
     height,
     useCheckbox = false,
@@ -165,7 +165,8 @@ export const PolicySelector = memo<PolicySelectorProps>(
     additionalListItems = [],
     'data-test-subj': dataTestSubj,
   }) => {
-    // TODO:PT add support for showing static selections (for Global, Unassigned)
+    // TODO:PT customise the no options panel
+
     const { euiTheme } = useEuiTheme();
     const toasts = useToasts();
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -218,6 +219,13 @@ export const PolicySelector = memo<PolicySelectorProps>(
       },
       { keepPreviousData: true }
     );
+
+    const selectedCount = useMemo(() => {
+      return (
+        selectedPolicyIds.length +
+        additionalListItems.filter((item) => item.checked === 'on').length
+      );
+    }, [additionalListItems, selectedPolicyIds.length]);
 
     const listProps: EuiSelectableProps['listProps'] = useMemo(() => {
       return {
@@ -320,8 +328,6 @@ export const PolicySelector = memo<PolicySelectorProps>(
       showPolicyLink,
       useCheckbox,
     ]);
-
-    // FIXME:PT handle API errors
 
     const listBuilderCallback = useCallback<NonNullable<EuiSelectableProps['children']>>(
       (list, _search) => {
@@ -435,8 +441,8 @@ export const PolicySelector = memo<PolicySelectorProps>(
               <EuiText size="s">
                 <FormattedMessage
                   id="xpack.securitySolution.policySelector.selectedCount"
-                  defaultMessage="{count} {count, plural, =1 {policy} other {policies}} selected"
-                  values={{ count: selectedPolicyIds.length }}
+                  defaultMessage="{count} selected"
+                  values={{ count: selectedCount }}
                 />
               </EuiText>
             </EuiFlexItem>
