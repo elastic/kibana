@@ -14,26 +14,11 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
 
   const services = new SyntheticsServices(params);
 
-  const firstCheckTime = new Date(Date.now()).toISOString();
+  const firstCheckTime = new Date().toISOString();
 
   const tlsRuleName = 'synthetics-e2e-monitor-tls-rule';
 
   let configId: string;
-
-  const openCreateTLSRuleFlyout = async () => {
-    await page.getByTestId('syntheticsRefreshButtonButton').click();
-    await page.getByTestId('syntheticsAlertsRulesButton').click();
-    await page.getByTestId('manageTlsRuleName').click();
-    await page.getByTestId('createNewTLSRule').click();
-  };
-
-  const createTLSRule = async (ruleName: string) => {
-    await page.getByTestId('ruleFormStep-details').click();
-    await page.waitForSelector('[data-test-subj="ruleFlyoutFooterSaveButton"]');
-    await page.fill('[data-test-subj="ruleDetailsNameInput"]', ruleName);
-    await page.getByTestId('ruleFlyoutFooterSaveButton').click();
-    await page.getByTestId('confirmModalConfirmButton').click();
-  };
 
   before(async () => {
     await services.cleanUp();
@@ -61,6 +46,34 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
     await services.addTestSummaryDocument({ timestamp: firstCheckTime, configId });
   });
 
+  step('Should open the create TLS rule flyout', async () => {
+    await page.getByTestId('syntheticsRefreshButtonButton').click();
+    await page.getByTestId('syntheticsAlertsRulesButton').click();
+    await page.getByTestId('manageTlsRuleName').click();
+    await page.getByTestId('createNewTLSRule').click();
+
+    await expect(page.getByTestId('addRuleFlyoutTitle')).toBeVisible();
+  });
+
+  step('Should filter monitors by type', async () => {
+    await page.getByRole('button', { name: 'Type All' }).click();
+    await page.getByTestId('comboBoxInput').click();
+    await page.getByRole('option', { name: 'http' }).click();
+    await page.getByTestId('ruleDefinition').getByRole('button', { name: 'Type http' }).click();
+    await expect(page.getByTestId('syntheticsRuleVizMonitorQueryIDsButton')).toHaveText(
+      '1 existing monitor'
+    );
+  });
+
+  step('Should filter monitors using the KQL filter bar', async () => {
+    // Using the KQL filter to search for a monitor type of "tcp", 0 existing monitors should be found because the type of the test monitor is 'http'
+    await page.fill('[data-test-subj="queryInput"]', `monitor.type: "tcp" `);
+    await page.keyboard.press('Enter');
+    await expect(page.getByTestId('syntheticsRuleVizMonitorQueryIDsButton')).toHaveText(
+      '0 existing monitors'
+    );
+  });
+
   step('Should create TLS rule', async () => {
     // This is to check that when the user clicks on the "Create new TLS rule" button, a POST request is made to the API
     let requestMade = false;
@@ -70,20 +83,11 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
       }
     });
 
-    await openCreateTLSRuleFlyout();
-
-    await expect(page.getByTestId('syntheticsRuleVizMonitorQueryIDsButton')).toHaveText(
-      '1 existing monitor'
-    );
-
-    // Using the KQL filter to search for a monitor type of "tcp", 0 existing monitors should be found because the type of the test monitor is 'http'
-    await page.fill('[data-test-subj="queryInput"]', `monitor.type: "tcp" `);
-    await page.keyboard.press('Enter');
-    await expect(page.getByTestId('syntheticsRuleVizMonitorQueryIDsButton')).toHaveText(
-      '0 existing monitors'
-    );
-
-    await createTLSRule(tlsRuleName);
+    await page.getByTestId('ruleFormStep-details').click();
+    await page.waitForSelector('[data-test-subj="ruleFlyoutFooterSaveButton"]');
+    await page.fill('[data-test-subj="ruleDetailsNameInput"]', tlsRuleName);
+    await page.getByTestId('ruleFlyoutFooterSaveButton').click();
+    await page.getByTestId('confirmModalConfirmButton').click();
 
     expect(requestMade).toBe(true);
   });
