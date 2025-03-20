@@ -633,7 +633,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; })) => Partial<(",
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }) => Partial<(",
           "MappingBooleanProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingKeywordProperty",
@@ -647,7 +647,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; })>"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/field_definition.ts",
         "deprecated": false,
@@ -690,7 +690,7 @@
               "MappingDoubleNumberProperty",
               " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
               "MappingLongNumberProperty",
-              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; })"
+              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/field_definition.ts",
             "deprecated": false,
@@ -2377,6 +2377,31 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.ContentPack",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentPack",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/content/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.ContentPack.content",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/content/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.DissectProcessorConfig",
         "type": "Interface",
         "tags": [],
@@ -2545,7 +2570,7 @@
             "id": "def-common.FieldDefinition.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[x: string]: (MappingBooleanProperty & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (MappingKeywordProperty & { ...; }) | ... 4 more ... | (MappingLongNumberProperty & { ...; })",
+            "label": "[x: string]: (MappingBooleanProperty & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (MappingKeywordProperty & { ...; }) | ... 5 more ... | { ...; }",
             "description": [],
             "signature": [
               "[x: string]:  (",
@@ -2562,7 +2587,7 @@
               "MappingDoubleNumberProperty",
               " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
               "MappingLongNumberProperty",
-              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; })"
+              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
             "deprecated": false,
@@ -3321,7 +3346,7 @@
             "id": "def-common.InheritedFieldDefinition.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[x: string]: (MappingBooleanProperty & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | ... 5 more ... | (MappingLongNumberProperty & ... 1 more ... & { ...; })",
+            "label": "[x: string]: (MappingBooleanProperty & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | ... 6 more ... | ({ ...; } & { ...; })",
             "description": [],
             "signature": [
               "[x: string]:  (",
@@ -3338,7 +3363,7 @@
               "MappingDoubleNumberProperty",
               " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | (",
               "MappingLongNumberProperty",
-              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; })"
+              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | ({ type: \"system\"; } & { from: string; })"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
             "deprecated": false,
@@ -4231,7 +4256,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; })"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
         "deprecated": false,
@@ -4246,11 +4271,7 @@
         "label": "FieldDefinitionConfigAdvancedParameters",
         "description": [],
         "signature": [
-          "{ meta?: Record<string, string> | undefined; fields?: Record<string, ",
-          "MappingProperty",
-          "> | undefined; copy_to?: ",
-          "Fields",
-          " | undefined; }"
+          "{}"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
         "deprecated": false,
@@ -4479,16 +4500,16 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.WiredIngestStreamEffectiveLifecycle",
-            "text": "WiredIngestStreamEffectiveLifecycle"
+            "section": "def-common.UnwiredIngestStreamEffectiveLifecycle",
+            "text": "UnwiredIngestStreamEffectiveLifecycle"
           },
           " | ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.UnwiredIngestStreamEffectiveLifecycle",
-            "text": "UnwiredIngestStreamEffectiveLifecycle"
+            "section": "def-common.WiredIngestStreamEffectiveLifecycle",
+            "text": "WiredIngestStreamEffectiveLifecycle"
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
@@ -4628,7 +4649,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; })"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | ({ type: \"system\"; } & { from: string; })"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
         "deprecated": false,
@@ -4657,7 +4678,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; })"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | ({ type: \"system\"; } & { name: string; })"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
         "deprecated": false,
@@ -5166,6 +5187,37 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.contentPackSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "contentPackSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.ContentPack",
+            "text": "ContentPack"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.ContentPack",
+            "text": "ContentPack"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/content/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.elasticsearchAssetSchema",
         "type": "Object",
         "tags": [],
@@ -5232,7 +5284,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }), Zod.ZodTypeDef, (",
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }, Zod.ZodTypeDef, (",
           "MappingBooleanProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingKeywordProperty",
@@ -5246,7 +5298,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; })>"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
         "deprecated": false,
@@ -5834,7 +5886,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }), Zod.ZodTypeDef, (",
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | ({ type: \"system\"; } & { name: string; }), Zod.ZodTypeDef, (",
           "MappingBooleanProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | (",
           "MappingKeywordProperty",
@@ -5848,7 +5900,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; })>"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | ({ type: \"system\"; } & { name: string; })>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
         "deprecated": false,

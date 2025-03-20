@@ -13,9 +13,4 @@ export default createTestConfig({
     reportName:
       'Rules Management - Prebuilt Rule Export Integration Tests - Customization enabled - Serverless Env',
   },
-  kbnTestServerArgs: [
-    `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-      'prebuiltRulesCustomizationEnabled',
-    ])}`,
-  ],
 });
