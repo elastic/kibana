@@ -46,11 +46,9 @@ const filterActionTypes = (actionTypes: RegisteredActionType[], searchValue: str
       .filter(Boolean)
       .map((text) => text.toLowerCase());
 
-    const searchValueLowerCase =  searchValue.toLowerCase();
-    
-    return searchTargets.some(
-      (searchTarget) => searchTarget.includes(searchValueLowerCase)
-    );
+    const searchValueLowerCase = searchValue.toLowerCase();
+
+    return searchTargets.some((searchTarget) => searchTarget.includes(searchValueLowerCase));
   });
 };
 
