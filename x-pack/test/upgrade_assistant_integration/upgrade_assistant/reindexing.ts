@@ -240,6 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should reindex a batch in order and report queue state', async () => {
+      // eslint-disable-next-line no-console
       console.log('STARTING TEST');
       const assertQueueState = async (
         firstInQueueIndexName: string | undefined,
