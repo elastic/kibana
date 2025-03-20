@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
+ *
+ * PKI functionality added by Antonio Piazza @antman1p
  */
 
 import React from 'react';
@@ -142,6 +144,82 @@ export const azureAiSecrets: SecretsFieldSchema[] = [
   },
 ];
 
+export const pkiOpenAiConfig: ConfigFieldSchema[] = [
+  {
+    id: 'apiUrl',
+    label: i18n.API_URL_LABEL,
+    isUrlField: true,
+    defaultValue: DEFAULT_URL,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="The OpenAI API endpoint URL with PKI authentication."
+        id="xpack.stackConnectors.components.genAi.pkiOpenAiDocumentation"
+        values={{
+          genAiAPIUrlDocs: (
+            <EuiLink
+              data-test-subj="pki-open-ai-api-doc"
+              href="https://platform.openai.com/docs/api-reference"
+              target="_blank"
+            >
+              {`${i18n.OPENAI} ${i18n.DOCUMENTATION}`}
+            </EuiLink>
+          ),
+        }}
+      />
+    ),
+  },
+  {
+    id: 'certPath',
+    label: i18n.CERT_PATH_LABEL,
+    required: true,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="Path to the PKI certificate file (.pem)"
+        id="xpack.stackConnectors.components.genAi.certPathDocumentation"
+      />
+    ),
+  },
+  {
+    id: 'keyPath',
+    label: i18n.KEY_PATH_LABEL,
+    required: true,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="Path to the PKI private key file (.pem)"
+        id="xpack.stackConnectors.components.genAi.keyPathDocumentation"
+      />
+    ),
+  },
+  {
+    id: 'verificationMode',
+    label: i18n.VERIFICATION_MODE_LABEL,
+    type: 'select',
+    defaultValue: 'full',
+    options: [
+      { value: 'full', label: i18n.VERIFICATION_MODE_FULL },
+      { value: 'certificate', label: i18n.VERIFICATION_MODE_CERTIFICATE },
+      { value: 'none', label: i18n.VERIFICATION_MODE_NONE },
+    ],
+    helpText: (
+      <FormattedMessage
+        defaultMessage="Controls SSL/TLS certificate verification: 'Full' verifies both certificate and hostname, 'Certificate Only' verifies the certificate but not the hostname, and 'None' skips all verification."
+        id="xpack.stackConnectors.components.genAi.verificationModeDocumentation"
+      />
+    ),
+  },
+  {
+    id: 'defaultModel',
+    label: i18n.DEFAULT_MODEL_LABEL,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="If a request does not include a model, it uses the default."
+        id="xpack.stackConnectors.components.genAi.pkiOpenAiDocumentationModel"
+      />
+    ),
+    defaultValue: DEFAULT_OPENAI_MODEL,
+  },
+];
+
 export const providerOptions = [
   {
     value: OpenAiProviderType.OpenAi,
@@ -152,5 +230,10 @@ export const providerOptions = [
     value: OpenAiProviderType.AzureAi,
     text: i18n.AZURE_AI,
     label: i18n.AZURE_AI,
+  },
+  {
+    value: OpenAiProviderType.PkiOpenAi,
+    text: i18n.PKI_OPENAI,
+    label: i18n.PKI_OPENAI,
   },
 ];

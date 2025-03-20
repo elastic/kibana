@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
+ *
+ * PKI functionality added by Antonio Piazza @antman1p
  */
 
 import { i18n } from '@kbn/i18n';
@@ -47,6 +49,53 @@ export const AZURE_AI = i18n.translate('xpack.stackConnectors.components.genAi.a
   defaultMessage: 'Azure OpenAI',
 });
 
+export const PKI_OPENAI = i18n.translate('xpack.stackConnectors.components.genAi.pkiOpenAi', {
+  defaultMessage: 'PKI OpenAI',
+});
+
+export const CERT_PATH_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.certPathLabel',
+  {
+    defaultMessage: 'Certificate Path',
+  }
+);
+
+export const KEY_PATH_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.keyPathLabel',
+  {
+    defaultMessage: 'Private Key Path',
+  }
+);
+
+// New translations for verificationMode
+export const VERIFICATION_MODE_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.verificationModeLabel',
+  {
+    defaultMessage: 'SSL Verification Mode',
+  }
+);
+
+export const VERIFICATION_MODE_FULL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.verificationModeFullLabel',
+  {
+    defaultMessage: 'Full (Certificate and Hostname)',
+  }
+);
+
+export const VERIFICATION_MODE_CERTIFICATE = i18n.translate(
+  'xpack.stackConnectors.components.genAi.verificationModeCertificateLabel',
+  {
+    defaultMessage: 'Certificate Only',
+  }
+);
+
+export const VERIFICATION_MODE_NONE = i18n.translate(
+  'xpack.stackConnectors.components.genAi.verificationModeNoneLabel',
+  {
+    defaultMessage: 'None (Skip Verification)',
+  }
+);
+
 export const DOCUMENTATION = i18n.translate(
   'xpack.stackConnectors.components.genAi.documentation',
   {
@@ -67,6 +116,7 @@ export const BODY_REQUIRED = i18n.translate(
     defaultMessage: 'Body is required.',
   }
 );
+
 export const BODY_INVALID = i18n.translate(
   'xpack.stackConnectors.security.genAi.params.error.invalidBodyText',
   {

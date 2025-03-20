@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
+ * 
+ * PKI functionality added by: Antonio Piazza @antman1p
  */
 
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
@@ -29,7 +31,6 @@ export interface ActionsUsage {
 }
 
 export const byTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_type'] = {
-  // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
   DYNAMIC_KEY: { type: 'long' },
   // Known actions:
   __email: { type: 'long' },
@@ -51,6 +52,7 @@ export const byGenAiProviderTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_t
   // Known providers:
   ['Azure OpenAI']: { type: 'long' },
   ['OpenAI']: { type: 'long' },
+  ['PKI OpenAI']: { type: 'long' }, // Added PKI OpenAI
 };
 
 export const byServiceProviderTypeSchema: MakeSchemaFrom<ActionsUsage>['count_active_email_connectors_by_service_type'] =

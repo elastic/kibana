@@ -18,6 +18,10 @@ export interface ActionParams {
 export interface Config {
   apiProvider: OpenAiProviderType;
   apiUrl: string;
+  defaultModel?: string;
+  certPath?: string; // Already optional
+  keyPath?: string;  // Already optional
+  headers?: Record<string, string>;
 }
 
 export interface Secrets {

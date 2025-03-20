@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
+ * 
+ * PKI functionality added by: Antonio Piazza @antman1p
  */
 
 import type {
@@ -18,6 +20,7 @@ import { PRECONFIGURED_CONNECTOR } from './translations';
 enum OpenAiProviderType {
   OpenAi = 'OpenAI',
   AzureAi = 'Azure OpenAI',
+  PkiOpenAi = 'PKI OpenAI', // Added PKI OpenAI
 }
 
 interface GenAiConfig {

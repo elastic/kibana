@@ -1,0 +1,26 @@
+title: Connector request properties for an OpenAI connector that uses PKI OpenAI
+description: >
+  Defines properties for connectors when type is `.gen-ai` and the API provider is `PKI OpenAI`.
+type: object
+required:
+  - apiProvider
+  - apiUrl
+  - certPath
+  - keyPath
+properties:
+  apiProvider:
+    type: string
+    description: The OpenAI API provider.
+    enum: ['PKI OpenAI']
+  apiUrl:
+    type: string
+    description: The OpenAI API endpoint.
+  certPath:
+    type: string
+    description: Path to the PKI certificate file (.pem).
+  keyPath:
+    type: string
+    description: Path to the PKI private key file (.pem).
+  defaultModel:
+    type: string
+    description: The default model to use for requests.

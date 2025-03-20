@@ -89,6 +89,45 @@ describe('OpenAI Connector', () => {
       );
     });
 
+    test('config validation fails when PKI provider is missing certificate path', () => {
+      const config: Config = {
+        apiUrl: 'https://api.openai.com/v1/chat/completions',
+        apiProvider: OpenAiProviderType.PkiOpenAi,
+        defaultModel: DEFAULT_OPENAI_MODEL,
+        keyPath: '/path/to/key.pem',
+      };
+      expect(() => {
+        configValidator(config, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(
+        '"Error configuring OpenAI action: Error: Certificate path is required for PKI OpenAI provider"'
+      );
+    });
+
+    test('config validation fails when PKI provider is missing key path', () => {
+      const config: Config = {
+        apiUrl: 'https://api.openai.com/v1/chat/completions',
+        apiProvider: OpenAiProviderType.PkiOpenAi,
+        defaultModel: DEFAULT_OPENAI_MODEL,
+        certPath: '/path/to/cert.pem',
+      };
+      expect(() => {
+        configValidator(config, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(
+        '"Error configuring OpenAI action: Error: Private key path is required for PKI OpenAI provider"'
+      );
+    });
+
+    test('config validation passes with valid PKI configuration', () => {
+      const config: Config = {
+        apiUrl: 'https://api.openai.com/v1/chat/completions',
+        apiProvider: OpenAiProviderType.PkiOpenAi,
+        defaultModel: DEFAULT_OPENAI_MODEL,
+        certPath: '/path/to/cert.pem',
+        keyPath: '/path/to/key.pem',
+      };
+      expect(configValidator(config, { configurationUtilities })).toEqual(config);
+    });
+
     test('config validation returns an error if the specified URL is not added to allowedHosts', () => {
       const configUtils = {
         ...actionsConfigMock.create(),

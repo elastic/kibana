@@ -85,6 +85,16 @@ export class GenAiStreamingResponseExamplePlugin implements Plugin<void, void> {
               },
             ],
           };
+        } else if (connector.config?.apiProvider === 'PKI OpenAI') {
+          messageBody = {
+            model: 'gpt-3.5-turbo', // Default model for PKI OpenAI, adjust if needed
+            messages: [
+              {
+                role: 'user',
+                content: request.body.prompt,
+              },
+            ],
+          };
         } else {
           throw Boom.badRequest(
             `Invalid OpenAI connector selected - ${connector.config?.apiProvider} is not a valid provider`

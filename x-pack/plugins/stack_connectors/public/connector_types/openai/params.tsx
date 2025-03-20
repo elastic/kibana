@@ -26,11 +26,8 @@ const ParamsFields: React.FunctionComponent<ActionParamsProps<ActionParams>> = (
   errors,
 }) => {
   const { subAction, subActionParams } = actionParams;
-
   const { body } = subActionParams ?? {};
-
   const typedActionConnector = actionConnector as unknown as OpenAIActionConnector;
-
   const isTest = useMemo(() => executionMode === ActionConnectorMode.Test, [executionMode]);
 
   useEffect(() => {
@@ -48,6 +45,7 @@ const ParamsFields: React.FunctionComponent<ActionParamsProps<ActionParams>> = (
         // update sample data if AzureAi
         sampleBody = DEFAULT_BODY_AZURE;
       }
+      // PKI uses the same body format as regular OpenAI
       editAction('subActionParams', { body: sampleBody }, index);
     }
   }, [typedActionConnector?.config?.apiProvider, editAction, index, subActionParams]);

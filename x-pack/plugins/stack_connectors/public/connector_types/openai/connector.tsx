@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
+ *
+ * PKI Functionality added by Antonio Piazza @antman1p
  */
 
 import React, { useMemo } from 'react';
@@ -26,8 +28,10 @@ import {
   azureAiSecrets,
   openAiConfig,
   openAiSecrets,
+  pkiOpenAiConfig,
   providerOptions,
 } from './constants';
+
 const { emptyField } = fieldValidators;
 
 const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
@@ -40,6 +44,11 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
     () =>
       getFieldDefaultValue<OpenAiProviderType>('config.apiProvider') ?? OpenAiProviderType.OpenAi,
     [getFieldDefaultValue]
+  );
+
+  // Filter out verificationMode from pkiOpenAiConfig for SimpleConnectorForm
+  const pkiOpenAiConfigWithoutVerification = pkiOpenAiConfig.filter(
+    (field) => field.id !== 'verificationMode'
   );
 
   return (
@@ -76,7 +85,6 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           secretsFormSchema={openAiSecrets}
         />
       )}
-      {/* ^v These are intentionally not if/else because of the way the `config.defaultValue` renders */}
       {config != null && config.apiProvider === OpenAiProviderType.AzureAi && (
         <SimpleConnectorForm
           isEdit={isEdit}
@@ -84,6 +92,43 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           configFormSchema={azureAiConfig}
           secretsFormSchema={azureAiSecrets}
         />
+      )}
+      {config != null && config.apiProvider === OpenAiProviderType.PkiOpenAi && (
+        <>
+          <SimpleConnectorForm
+            isEdit={isEdit}
+            readOnly={readOnly}
+            configFormSchema={pkiOpenAiConfigWithoutVerification}
+            secretsFormSchema={openAiSecrets}
+          />
+          <EuiSpacer size="s" />
+          <UseField
+            path="config.verificationMode"
+            component={SelectField}
+            config={{
+              label: i18n.VERIFICATION_MODE_LABEL,
+              defaultValue: 'full',
+              validations: [
+                {
+                  validator: emptyField('SSL Verification Mode is required'),
+                },
+              ],
+            }}
+            componentProps={{
+              euiFieldProps: {
+                'data-test-subj': 'config.verificationMode-select',
+                options: [
+                  { value: 'full', label: i18n.VERIFICATION_MODE_FULL },
+                  { value: 'certificate', label: i18n.VERIFICATION_MODE_CERTIFICATE },
+                  { value: 'none', label: i18n.VERIFICATION_MODE_NONE },
+                ],
+                fullWidth: true,
+                disabled: readOnly,
+                readOnly,
+              },
+            }}
+          />
+        </>
       )}
       {isEdit && (
         <DashboardLink

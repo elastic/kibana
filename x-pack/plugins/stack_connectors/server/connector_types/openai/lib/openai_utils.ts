@@ -6,6 +6,7 @@
  */
 
 import { OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL } from '../../../../common/openai/constants';
+import fs from 'fs';
 
 const APIS_ALLOWING_STREAMING = new Set<string>([OPENAI_CHAT_URL, OPENAI_LEGACY_COMPLETION_URL]);
 
@@ -55,4 +56,19 @@ export const getRequestWithStreamOption = (
 export const removeEndpointFromUrl = (url: string): string => {
   const endpointToRemove = /\/chat\/completions\/?$/;
   return url.replace(endpointToRemove, '');
+};
+
+// Add PKI specific utilities if needed
+export const validatePKICertificates = (certPath: string, keyPath: string): boolean => {
+  try {
+    if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
+      return false;
+    }
+    // Basic validation that files exist and are readable
+    fs.accessSync(certPath, fs.constants.R_OK);
+    fs.accessSync(keyPath, fs.constants.R_OK);
+    return true;
+  } catch (error) {
+    return false;
+  }
 };

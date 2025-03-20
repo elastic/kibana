@@ -153,3 +153,5 @@ oas_docs/output/kibana.tmp2.yaml
 oas_docs/output/kibana.new.yaml
 
 .devcontainer/.env
+
+.github/workflows/build-kibana.yml
