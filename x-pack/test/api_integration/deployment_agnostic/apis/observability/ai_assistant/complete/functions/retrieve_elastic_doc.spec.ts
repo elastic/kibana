@@ -56,6 +56,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
+      afterEach(async () => {
+        llmProxy.clear();
+      });
+
       it('makes 1 requests to the LLM', () => {
         expect(llmProxy.interceptedRequests.length).to.be(1);
       });
