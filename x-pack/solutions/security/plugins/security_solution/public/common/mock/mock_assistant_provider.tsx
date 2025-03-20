@@ -12,6 +12,9 @@ import type { AssistantAvailability } from '@kbn/elastic-assistant';
 import { AssistantProvider } from '@kbn/elastic-assistant';
 import type { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { of } from 'rxjs';
 
 interface Props {
@@ -47,6 +50,9 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
 
   return (
     <AssistantProvider
+      application={applicationServiceMock.createStartContract()}
+      triggersActionsUi={triggersActionsUiMock.createStart()}
+      share={sharePluginMock.createStartContract()}
       actionTypeRegistry={actionTypeRegistry}
       assistantAvailability={assistantAvailability ?? defaultAssistantAvailability}
       augmentMessageCodeBlocks={jest.fn(() => [])}

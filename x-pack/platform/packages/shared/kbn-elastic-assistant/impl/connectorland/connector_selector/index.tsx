@@ -151,7 +151,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
       [addNewConnectorOption, assistantAvailability.hasConnectorsAllPrivilege, connectorOptions]
     );
 
-    const cleanupAndCloseModal = useCallback(() => {
+    const cleanupAndCloseFlyout = useCallback(() => {
       setIsOpen?.(false);
       setIsAddConnectorFlyoutOpen(false);
     }, [setIsOpen]);
@@ -180,9 +180,9 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           ...connector,
         });
         refetchConnectors?.();
-        cleanupAndCloseModal();
+        cleanupAndCloseFlyout();
       },
-      [cleanupAndCloseModal, onConnectorSelectionChange, refetchConnectors]
+      [cleanupAndCloseFlyout, onConnectorSelectionChange, refetchConnectors]
     );
 
     return (
