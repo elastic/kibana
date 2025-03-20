@@ -20,82 +20,42 @@
     "classes": [
       {
         "parentPluginId": "@kbn/inference-common",
-        "id": "def-common.InferenceTaskError",
+        "id": "def-common.Tokenizer",
         "type": "Class",
         "tags": [],
-        "label": "InferenceTaskError",
-        "description": [
-          "\nBase class for all inference API errors."
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceTaskError",
-            "text": "InferenceTaskError"
-          },
-          "<TCode, TMeta> extends Error"
-        ],
-        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
+        "label": "Tokenizer",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/utils/tokenizer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/inference-common",
-            "id": "def-common.InferenceTaskError.Unnamed",
+            "id": "def-common.Tokenizer.count",
             "type": "Function",
             "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
+            "label": "count",
+            "description": [
+              "\nApproximates the number of tokens in a string,\nassuming 4 characters per token."
             ],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
+            "signature": [
+              "(input: string) => number"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/utils/tokenizer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/inference-common",
-                "id": "def-common.InferenceTaskError.Unnamed.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "code",
-                "description": [],
-                "signature": [
-                  "TCode"
-                ],
-                "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/inference-common",
-                "id": "def-common.InferenceTaskError.Unnamed.$2",
+                "id": "def-common.Tokenizer.count.$1",
                 "type": "string",
                 "tags": [],
-                "label": "message",
+                "label": "input",
                 "description": [],
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/inference-common",
-                "id": "def-common.InferenceTaskError.Unnamed.$3",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "meta",
-                "description": [],
-                "signature": [
-                  "TMeta"
-                ],
-                "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/utils/tokenizer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -105,39 +65,51 @@
           },
           {
             "parentPluginId": "@kbn/inference-common",
-            "id": "def-common.InferenceTaskError.status",
-            "type": "number",
-            "tags": [],
-            "label": "status",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/inference-common",
-            "id": "def-common.InferenceTaskError.toJSON",
+            "id": "def-common.Tokenizer.truncate",
             "type": "Function",
             "tags": [],
-            "label": "toJSON",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.InferenceTaskErrorEvent",
-                "text": "InferenceTaskErrorEvent"
-              }
+            "label": "truncate",
+            "description": [
+              "\nIf the text is longer than the amount of tokens,\ntruncate and mark as truncated."
             ],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
+            "signature": [
+              "(input: string, maxTokens: number) => { tokens: number; truncated: boolean; text: string; }"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/utils/tokenizer.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-common",
+                "id": "def-common.Tokenizer.truncate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/utils/tokenizer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/inference-common",
+                "id": "def-common.Tokenizer.truncate.$2",
+                "type": "number",
+                "tags": [],
+                "label": "maxTokens",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/utils/tokenizer.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -581,15 +553,7 @@
           "\nCheck if the provided {@link InferenceTaskEvent} is a {@link ChatCompletionEvent}"
         ],
         "signature": [
-          "(event: ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceTaskEvent",
-            "text": "InferenceTaskEvent"
-          },
-          ") => boolean"
+          "(event: Record<string, unknown> & { type: string; }) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/event_utils.ts",
         "deprecated": false,
@@ -598,18 +562,12 @@
           {
             "parentPluginId": "@kbn/inference-common",
             "id": "def-common.isChatCompletionEvent.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "event",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.InferenceTaskEvent",
-                "text": "InferenceTaskEvent"
-              }
+              "Record<string, unknown> & { type: string; }"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/event_utils.ts",
             "deprecated": false,
@@ -956,15 +914,7 @@
           "\nCheck if the provided {@link InferenceTaskEvent} is a {@link OutputEvent}"
         ],
         "signature": [
-          "(event: ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceTaskEvent",
-            "text": "InferenceTaskEvent"
-          },
-          ") => boolean"
+          "(event: Record<string, unknown> & { type: string; }) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/output/event_utils.ts",
         "deprecated": false,
@@ -973,18 +923,12 @@
           {
             "parentPluginId": "@kbn/inference-common",
             "id": "def-common.isOutputEvent.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "event",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.InferenceTaskEvent",
-                "text": "InferenceTaskEvent"
-              }
+              "Record<string, unknown> & { type: string; }"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/output/event_utils.ts",
             "deprecated": false,
@@ -1282,15 +1226,23 @@
         "signature": [
           "() => ",
           "OperatorFunction",
-          "<T, Exclude<T, ",
+          "<T, Exclude<T, { content: string; tool_calls: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ChatCompletionChunkEvent",
-            "text": "ChatCompletionChunkEvent"
+            "section": "def-common.ChatCompletionChunkToolCall",
+            "text": "ChatCompletionChunkToolCall"
           },
-          ">>"
+          "[]; } & { type: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionEventType",
+            "text": "ChatCompletionEventType"
+          },
+          ".ChatCompletionChunk; }>>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/event_utils.ts",
         "deprecated": false,
@@ -1311,15 +1263,15 @@
         "signature": [
           "() => ",
           "OperatorFunction",
-          "<T, Exclude<T, ",
+          "<T, Exclude<T, { id: string; content: string; } & { type: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.OutputUpdateEvent",
-            "text": "OutputUpdateEvent"
+            "section": "def-common.OutputEventType",
+            "text": "OutputEventType"
           },
-          "<string>>>"
+          ".OutputUpdate; }>>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/output/event_utils.ts",
         "deprecated": false,
@@ -1340,15 +1292,23 @@
         "signature": [
           "() => ",
           "OperatorFunction",
-          "<T, Exclude<T, ",
+          "<T, Exclude<T, { tokens: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ChatCompletionTokenCountEvent",
-            "text": "ChatCompletionTokenCountEvent"
+            "section": "def-common.ChatCompletionTokenCount",
+            "text": "ChatCompletionTokenCount"
           },
-          ">>"
+          "; } & { type: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionEventType",
+            "text": "ChatCompletionEventType"
+          },
+          ".ChatCompletionTokenCount; }>>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/event_utils.ts",
         "deprecated": false,
@@ -1772,48 +1732,6 @@
               "{ [x: string]: any; }"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/connectors.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/inference-common",
-        "id": "def-common.InferenceTaskEventBase",
-        "type": "Interface",
-        "tags": [],
-        "label": "InferenceTaskEventBase",
-        "description": [
-          "\nBase interface for all inference events."
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceTaskEventBase",
-            "text": "InferenceTaskEventBase"
-          },
-          "<TEventType>"
-        ],
-        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_task.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/inference-common",
-            "id": "def-common.InferenceTaskEventBase.type",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "type",
-            "description": [
-              "\nUnique identifier of the event type."
-            ],
-            "signature": [
-              "TEventType"
-            ],
-            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_task.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3065,22 +2983,7 @@
           "\nChunk event, containing a fragment of the total content,\nand potentially chunks of tool calls."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceTaskEventBase",
-            "text": "InferenceTaskEventBase"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ChatCompletionEventType",
-            "text": "ChatCompletionEventType"
-          },
-          ".ChatCompletionChunk> & { content: string; tool_calls: ",
+          "{ content: string; tool_calls: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -3088,7 +2991,15 @@
             "section": "def-common.ChatCompletionChunkToolCall",
             "text": "ChatCompletionChunkToolCall"
           },
-          "[]; }"
+          "[]; } & { type: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionEventType",
+            "text": "ChatCompletionEventType"
+          },
+          ".ChatCompletionChunk; }"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/events.ts",
         "deprecated": false,
@@ -3105,30 +3016,55 @@
           "\nEvents emitted from the {@link ChatCompleteResponse} observable\nreturned from the {@link ChatCompleteAPI}.\n\nThe chatComplete API returns 3 type of events:\n- {@link ChatCompletionChunkEvent}: message chunk events\n- {@link ChatCompletionTokenCountEvent}: token count event\n- {@link ChatCompletionMessageEvent}: message event\n\nNote that chunk events can be emitted any amount of times, but token count will be emitted\nat most once (could not be emitted depending on the underlying connector), and message\nevent will be emitted ex\n"
         ],
         "signature": [
+          "({ content: string; tool_calls: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ChatCompletionChunkEvent",
-            "text": "ChatCompletionChunkEvent"
+            "section": "def-common.ChatCompletionChunkToolCall",
+            "text": "ChatCompletionChunkToolCall"
           },
-          " | ",
+          "[]; } & { type: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ChatCompletionTokenCountEvent",
-            "text": "ChatCompletionTokenCountEvent"
+            "section": "def-common.ChatCompletionEventType",
+            "text": "ChatCompletionEventType"
           },
-          " | ",
+          ".ChatCompletionChunk; }) | ({ tokens: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ChatCompletionMessageEvent",
-            "text": "ChatCompletionMessageEvent"
+            "section": "def-common.ChatCompletionTokenCount",
+            "text": "ChatCompletionTokenCount"
           },
-          "<TToolOptions>"
+          "; } & { type: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionEventType",
+            "text": "ChatCompletionEventType"
+          },
+          ".ChatCompletionTokenCount; }) | ({ content: string; toolCalls: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallsOf",
+            "text": "ToolCallsOf"
+          },
+          "<TToolOptions>[\"toolCalls\"]; } & { type: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionEventType",
+            "text": "ChatCompletionEventType"
+          },
+          ".ChatCompletionMessage; })"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/events.ts",
         "deprecated": false,
@@ -3145,22 +3081,7 @@
           "\nMessage event, sent only once, after all the chunks were emitted, and containing\nthe whole text content and potential tool calls of the response."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceTaskEventBase",
-            "text": "InferenceTaskEventBase"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ChatCompletionEventType",
-            "text": "ChatCompletionEventType"
-          },
-          ".ChatCompletionMessage> & { content: string; toolCalls: ",
+          "{ content: string; toolCalls: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -3168,7 +3089,15 @@
             "section": "def-common.ToolCallsOf",
             "text": "ToolCallsOf"
           },
-          "<TToolOptions>[\"toolCalls\"]; }"
+          "<TToolOptions>[\"toolCalls\"]; } & { type: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionEventType",
+            "text": "ChatCompletionEventType"
+          },
+          ".ChatCompletionMessage; }"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/events.ts",
         "deprecated": false,
@@ -3185,22 +3114,7 @@
           "\nToken count event, send only once, usually (but not necessarily)\nbefore the message event"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceTaskEventBase",
-            "text": "InferenceTaskEventBase"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ChatCompletionEventType",
-            "text": "ChatCompletionEventType"
-          },
-          ".ChatCompletionTokenCount> & { tokens: ",
+          "{ tokens: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -3208,7 +3122,15 @@
             "section": "def-common.ChatCompletionTokenCount",
             "text": "ChatCompletionTokenCount"
           },
-          "; }"
+          "; } & { type: ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ChatCompletionEventType",
+            "text": "ChatCompletionEventType"
+          },
+          ".ChatCompletionTokenCount; }"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/events.ts",
         "deprecated": false,
@@ -3226,11 +3148,11 @@
         ],
         "signature": [
           {
-            "pluginId": "@kbn/inference-common",
+            "pluginId": "@kbn/sse-utils",
             "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceTaskError",
-            "text": "InferenceTaskError"
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
           },
           "<",
           {
@@ -3258,11 +3180,11 @@
         ],
         "signature": [
           {
-            "pluginId": "@kbn/inference-common",
+            "pluginId": "@kbn/sse-utils",
             "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceTaskError",
-            "text": "InferenceTaskError"
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
           },
           "<",
           {
@@ -3290,11 +3212,11 @@
         ],
         "signature": [
           {
-            "pluginId": "@kbn/inference-common",
+            "pluginId": "@kbn/sse-utils",
             "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceTaskError",
-            "text": "InferenceTaskError"
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
           },
           "<",
           {
@@ -3366,11 +3288,11 @@
         ],
         "signature": [
           {
-            "pluginId": "@kbn/inference-common",
+            "pluginId": "@kbn/sse-utils",
             "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceTaskError",
-            "text": "InferenceTaskError"
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
           },
           "<",
           {
@@ -3389,20 +3311,35 @@
       },
       {
         "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.InferenceTaskError",
+        "type": "Type",
+        "tags": [],
+        "label": "InferenceTaskError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/sse-utils",
+            "scope": "common",
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
+          },
+          "<TCode, TMeta>"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
         "id": "def-common.InferenceTaskErrorEvent",
         "type": "Type",
         "tags": [],
         "label": "InferenceTaskErrorEvent",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceTaskEventBase",
-            "text": "InferenceTaskEventBase"
-          },
-          "<",
+          "{ error: { code: string; message: string; meta?: Record<string, any> | undefined; }; } & { type: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -3410,7 +3347,7 @@
             "section": "def-common.InferenceTaskEventType",
             "text": "InferenceTaskEventType"
           },
-          "> & { error: { code: string; message: string; meta?: Record<string, any> | undefined; }; }"
+          "; }"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
         "deprecated": false,
@@ -3425,14 +3362,24 @@
         "label": "InferenceTaskEvent",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceTaskEventBase",
-            "text": "InferenceTaskEventBase"
-          },
-          "<string>"
+          "Record<string, unknown> & { type: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_task.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.InferenceTaskEventBase",
+        "type": "Type",
+        "tags": [],
+        "label": "InferenceTaskEventBase",
+        "description": [
+          "\nBase interface for all inference events."
+        ],
+        "signature": [
+          "keyof TData extends \"type\" ? never : TData & { type: TEventType; }"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_task.ts",
         "deprecated": false,
@@ -3462,11 +3409,11 @@
         ],
         "signature": [
           {
-            "pluginId": "@kbn/inference-common",
+            "pluginId": "@kbn/sse-utils",
             "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceTaskError",
-            "text": "InferenceTaskError"
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
           },
           "<",
           {
@@ -3494,11 +3441,11 @@
         ],
         "signature": [
           {
-            "pluginId": "@kbn/inference-common",
+            "pluginId": "@kbn/sse-utils",
             "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceTaskError",
-            "text": "InferenceTaskError"
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
           },
           "<",
           {
@@ -3526,11 +3473,11 @@
         ],
         "signature": [
           {
-            "pluginId": "@kbn/inference-common",
+            "pluginId": "@kbn/sse-utils",
             "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceTaskError",
-            "text": "InferenceTaskError"
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
           },
           "<",
           {
@@ -3746,14 +3693,7 @@
           "\nCompletion (complete message) event for the {@link OutputAPI}"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceTaskEventBase",
-            "text": "InferenceTaskEventBase"
-          },
-          "<",
+          "{ id: TId; output: TOutput; content: string; } & { type: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -3761,7 +3701,7 @@
             "section": "def-common.OutputEventType",
             "text": "OutputEventType"
           },
-          ".OutputComplete> & { id: TId; output: TOutput; content: string; }"
+          ".OutputComplete; }"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/output/events.ts",
         "deprecated": false,
@@ -3821,22 +3761,23 @@
           "\nEvents emitted from the {@link OutputEvent}."
         ],
         "signature": [
+          "({ id: TId; content: string; } & { type: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.OutputUpdateEvent",
-            "text": "OutputUpdateEvent"
+            "section": "def-common.OutputEventType",
+            "text": "OutputEventType"
           },
-          "<TId> | ",
+          ".OutputUpdate; }) | ({ id: TId; output: TOutput; content: string; } & { type: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.OutputCompleteEvent",
-            "text": "OutputCompleteEvent"
+            "section": "def-common.OutputEventType",
+            "text": "OutputEventType"
           },
-          "<TId, TOutput>"
+          ".OutputComplete; })"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/output/events.ts",
         "deprecated": false,
@@ -3889,14 +3830,7 @@
           "\nUpdate (chunk) event for the {@link OutputAPI}"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceTaskEventBase",
-            "text": "InferenceTaskEventBase"
-          },
-          "<",
+          "{ id: TId; content: string; } & { type: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -3904,7 +3838,7 @@
             "section": "def-common.OutputEventType",
             "text": "OutputEventType"
           },
-          ".OutputUpdate> & { id: TId; content: string; }"
+          ".OutputUpdate; }"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/output/events.ts",
         "deprecated": false,
@@ -4237,6 +4171,28 @@
           "{ readonly RainbowSprinkles: \"rainbow-sprinkles\"; }"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_endpoints.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.InferenceTaskError",
+        "type": "Object",
+        "tags": [],
+        "label": "InferenceTaskError",
+        "description": [],
+        "signature": [
+          "typeof ",
+          {
+            "pluginId": "@kbn/sse-utils",
+            "scope": "common",
+            "docId": "kibKbnSseUtilsPluginApi",
+            "section": "def-common.ServerSentEventError",
+            "text": "ServerSentEventError"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

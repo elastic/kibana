@@ -15,8 +15,8 @@ test.describe(
     const integrationName = generateIntegrationName('mylogs');
     const logsFilePath = `${integrationName}.log`;
 
-    test.afterEach(async ({ fleetApi }) => {
-      await fleetApi.integration.delete(integrationName);
+    test.afterEach(async ({ apiServices }) => {
+      await apiServices.fleet.integration.delete(integrationName);
     });
 
     test('should be displayed when user has no previleges', async ({
@@ -92,10 +92,10 @@ test.describe(
     test('should be displayed when integration with the same name exists', async ({
       browserAuth,
       pageObjects: { customLogs },
-      fleetApi,
+      apiServices,
       page,
     }) => {
-      await fleetApi.integration.install(integrationName);
+      await apiServices.fleet.integration.install(integrationName);
       await browserAuth.loginAsAdmin();
       await customLogs.goto();
 
