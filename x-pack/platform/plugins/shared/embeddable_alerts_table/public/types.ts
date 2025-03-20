@@ -20,15 +20,15 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface EmbeddableAlertsTablePluginSetup {}
+export interface EmbeddableAlertsTablePublicSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface EmbeddableAlertsTablePluginStart {}
+export interface EmbeddableAlertsTablePublicStart {}
 
-export interface SetupDependencies {
+export interface EmbeddableAlertsTablePublicSetupDependencies {
   embeddable: EmbeddableSetup;
 }
 
-export interface StartDependencies {
+export interface EmbeddableAlertsTablePublicStartDependencies {
   uiActions: UiActionsStart;
   data: DataPublicPluginStart;
   http: CoreStart['http'];

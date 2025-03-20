@@ -6,32 +6,34 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { EMBEDDABLE_ALERTS_TABLE_ID } from './constants';
+import { registerAlertsTableEmbeddableFactory } from './factories/register_alerts_table_embeddable_factory';
 import type {
-  EmbeddableAlertsTablePluginSetup,
-  EmbeddableAlertsTablePluginStart,
-  SetupDependencies,
-  StartDependencies,
+  EmbeddableAlertsTablePublicSetup,
+  EmbeddableAlertsTablePublicStart,
+  EmbeddableAlertsTablePublicSetupDependencies,
+  EmbeddableAlertsTablePublicStartDependencies,
 } from './types';
 
 export class EmbeddableAlertsTablePlugin
-  implements Plugin<EmbeddableAlertsTablePluginSetup, EmbeddableAlertsTablePluginStart>
+  implements
+    Plugin<
+      EmbeddableAlertsTablePublicSetup,
+      EmbeddableAlertsTablePublicStart,
+      EmbeddableAlertsTablePublicSetupDependencies,
+      EmbeddableAlertsTablePublicStartDependencies
+    >
 {
-  public setup(core: CoreSetup<StartDependencies>, { embeddable }: SetupDependencies) {
-    embeddable.registerReactEmbeddableFactory(EMBEDDABLE_ALERTS_TABLE_ID, async () => {
-      const startServicesPromise = core.getStartServices();
-
-      const { getEmbeddableAlertsTableFactory } = await import('./embeddable_alerts_table_factory');
-      const [coreStart, deps] = await startServicesPromise;
-      return getEmbeddableAlertsTableFactory(coreStart, deps);
-    });
-
+  public setup(
+    core: CoreSetup<EmbeddableAlertsTablePublicStartDependencies>,
+    { embeddable }: EmbeddableAlertsTablePublicSetupDependencies
+  ) {
+    registerAlertsTableEmbeddableFactory({ embeddable, core });
     return {};
   }
 
-  public start(core: CoreStart, { uiActions }: StartDependencies) {
+  public start({ http }: CoreStart, { uiActions }: EmbeddableAlertsTablePublicStartDependencies) {
     // Waiting for other dependent PRs to be merged to enable this
-    // registerCreateAlertsTableAction(core, uiActions);
+    // registerAddAlertsTableAction({ http, uiActions });
     return {};
   }
 

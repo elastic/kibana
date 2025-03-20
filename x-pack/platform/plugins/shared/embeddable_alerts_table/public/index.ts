@@ -11,4 +11,4 @@ export function plugin() {
   return new EmbeddableAlertsTablePlugin();
 }
 
-export type { EmbeddableAlertsTablePluginSetup, EmbeddableAlertsTablePluginStart } from './types';
+export type { EmbeddableAlertsTablePublicSetup, EmbeddableAlertsTablePublicStart } from './types';

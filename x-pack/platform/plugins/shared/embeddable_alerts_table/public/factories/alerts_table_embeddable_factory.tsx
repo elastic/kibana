@@ -18,17 +18,17 @@ import { AlertActionsCell } from '@kbn/response-ops-alerts-table/components/aler
 import { getTime } from '@kbn/data-plugin/common';
 import { ALERT_TIME_RANGE, TIMESTAMP } from '@kbn/rule-data-utils';
 import { BehaviorSubject } from 'rxjs';
-import type { StartDependencies } from './types';
-import { EMBEDDABLE_ALERTS_TABLE_ID, LOCAL_STORAGE_KEY_PREFIX } from './constants';
+import type { EmbeddableAlertsTablePublicStartDependencies } from '../types';
+import { EMBEDDABLE_ALERTS_TABLE_ID, LOCAL_STORAGE_KEY_PREFIX } from '../constants';
 import type {
   EmbeddableAlertsTableApi,
   EmbeddableAlertsTableRuntimeState,
   EmbeddableAlertsTableSerializedState,
-} from './types';
+} from '../types';
 
-export const getEmbeddableAlertsTableFactory = (
+export const getAlertsTableEmbeddableFactory = (
   core: CoreStart,
-  deps: StartDependencies
+  deps: EmbeddableAlertsTablePublicStartDependencies
 ): ReactEmbeddableFactory<
   EmbeddableAlertsTableSerializedState,
   EmbeddableAlertsTableRuntimeState,
@@ -36,7 +36,7 @@ export const getEmbeddableAlertsTableFactory = (
 > => ({
   type: EMBEDDABLE_ALERTS_TABLE_ID,
   deserializeState: (state) => {
-    return state.rawState as EmbeddableAlertsTableSerializedState;
+    return state.rawState;
   },
   buildEmbeddable: async (state, buildApi, uuid) => {
     const timeRange = initializeTimeRange(state);

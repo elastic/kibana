@@ -8,11 +8,11 @@
 // Write a test that verifies that the `AlertsTableEmbeddable` component renders the `AlertsTable` component with the correct props.
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import type { StartDependencies } from './types';
+import { render, screen } from '@testing-library/react';
+import type { EmbeddableAlertsTablePublicStartDependencies } from '../types';
 import { coreMock } from '@kbn/core/public/mocks';
-import { getEmbeddableAlertsTableFactory } from './embeddable_alerts_table_factory';
-import { LOCAL_STORAGE_KEY_PREFIX } from './constants';
+import { getAlertsTableEmbeddableFactory } from './alerts_table_embeddable_factory';
+import { LOCAL_STORAGE_KEY_PREFIX } from '../constants';
 
 const core = coreMock.createStart();
 jest.mock('@kbn/response-ops-alerts-table', () => ({
@@ -23,7 +23,10 @@ const { AlertsTable: mockAlertsTable } = jest.requireMock('@kbn/response-ops-ale
 const uuid = 'test-uuid';
 
 describe('getEmbeddableAlertsTableFactory', () => {
-  const factory = getEmbeddableAlertsTableFactory(core, {} as StartDependencies);
+  const factory = getAlertsTableEmbeddableFactory(
+    core,
+    {} as EmbeddableAlertsTablePublicStartDependencies
+  );
 
   it('renders AlertsTable with correct props', async () => {
     const { Component } = await factory.buildEmbeddable(
@@ -44,6 +47,7 @@ describe('getEmbeddableAlertsTableFactory', () => {
 
     render(<Component />);
 
+    expect(screen.getByTestId('alertsTable')).toBeInTheDocument();
     expect(mockAlertsTable).toHaveBeenCalledWith(
       expect.objectContaining({
         id: `${LOCAL_STORAGE_KEY_PREFIX}-${uuid}`,
