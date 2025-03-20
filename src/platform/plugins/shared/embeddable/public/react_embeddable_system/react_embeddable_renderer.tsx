@@ -141,6 +141,7 @@ export const ReactEmbeddableRenderer = <
                   })
               );
             }
+            (apiRegistration as any).type = type;
 
             const unsavedChanges = initializeHasUnsavedChanges<SerializedState, RuntimeState>(
               uuid,

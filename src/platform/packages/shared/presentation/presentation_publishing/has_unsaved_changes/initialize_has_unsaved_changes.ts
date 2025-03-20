@@ -40,11 +40,7 @@ const serializedStateComparator = <SerializedState extends object = object>(
   const comparatorFunction = apiHasSerializedStateComparator<SerializedState>(api)
     ? api.isSerializedStateEqual
     : deepEqual;
-  const isEqual = comparatorFunction(stateA, stateB);
-
-  console.log('has changes', !isEqual);
-  return isEqual;
-  // console.log('CHECKING', stateA, stateB, 'for panel', (api as any).uuid, isEqual);
+  return comparatorFunction(stateA, stateB);
 };
 
 export const initializeHasUnsavedChanges = <
@@ -104,12 +100,17 @@ export const initializeHasUnsavedChanges = <
    * set up hasUnsavedChanges$. It should recalculate whether this API has unsaved changes any time the
    * last saved state or the runtime state changes.
    */
-  const compareState = () =>
-    serializedStateComparator(
+  const compareState = () => {
+    const isEqual = serializedStateComparator(
       api,
       lastSavedState$.getValue()?.rawState,
       api.serializeState().rawState
     );
+    if (!isEqual) {
+      console.log((api as any).type, ' has unsaved changes');
+    }
+    return isEqual;
+  };
   const hasUnsavedChanges$ = new BehaviorSubject<boolean>(!compareState());
   subscriptions.push(
     latestComparatorValues$(comparators)

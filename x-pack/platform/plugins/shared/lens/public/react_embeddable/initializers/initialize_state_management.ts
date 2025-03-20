@@ -12,16 +12,24 @@ import {
   type PublishesSavedObjectId,
   type StateComparators,
   type PublishesRendered,
+  HasSerializedStateComparator,
 } from '@kbn/presentation-publishing';
 import { noop } from 'lodash';
+import deepEqual from 'fast-deep-equal';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { BehaviorSubject } from 'rxjs';
-import type { IntegrationCallbacks, LensInternalApi, LensRuntimeState } from '../types';
+import type {
+  IntegrationCallbacks,
+  LensInternalApi,
+  LensRuntimeState,
+  LensSerializedState,
+} from '../types';
 import { buildObservableVariable } from '../helper';
 import { SharingSavedObjectProps } from '../../types';
 
 export interface StateManagementConfig {
   api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateSavedObjectId'> &
+    HasSerializedStateComparator<LensSerializedState> &
     PublishesSavedObjectId &
     PublishesDataViews &
     PublishesDataLoading &
@@ -66,6 +74,13 @@ export function initializeStateManagement(
   const [blockingError$] = buildObservableVariable<Error | undefined>(internalApi.blockingError$);
   return {
     api: {
+      isSerializedStateEqual: (a, b) => {
+        const isEqual = deepEqual(a, b);
+        if (!isEqual) {
+          debugger;
+        }
+        return isEqual;
+      },
       updateAttributes: internalApi.updateAttributes,
       updateSavedObjectId: (newSavedObjectId: LensRuntimeState['savedObjectId']) =>
         savedObjectId$.next(newSavedObjectId),

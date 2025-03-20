@@ -10,6 +10,7 @@
 export { isEmbeddableApiContext, type EmbeddableApiContext } from './embeddable_api_context';
 
 export {
+  runComparators,
   diffComparators$,
   latestComparatorValues$,
   getUnchangingComparator,

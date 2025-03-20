@@ -10,6 +10,7 @@
 import type {
   OptionsListSortingType,
   OptionsListSearchTechnique,
+  OptionsListControlState,
 } from '../../../../common/options_list';
 
 export const DEFAULT_SEARCH_TECHNIQUE: OptionsListSearchTechnique = 'prefix';
@@ -20,3 +21,22 @@ export const OPTIONS_LIST_DEFAULT_SORT: OptionsListSortingType = {
 
 export const MIN_OPTIONS_LIST_REQUEST_SIZE = 10;
 export const MAX_OPTIONS_LIST_REQUEST_SIZE = 1000;
+
+export const OPTIONS_LIST_DEFAULTS = {
+  sort: OPTIONS_LIST_DEFAULT_SORT,
+  searchTechnique: DEFAULT_SEARCH_TECHNIQUE,
+  selectedOptions: [],
+};
+
+export const OPTIONS_LIST_KEYS_TO_COMPARE: Array<keyof OptionsListControlState> = [
+  'searchTechnique',
+  'selectedOptions',
+  'existsSelected',
+  'runPastTimeout',
+  'singleSelect',
+  'dataViewId',
+  'fieldName',
+  'exclude',
+  'title',
+  'sort',
+];

@@ -10,4 +10,4 @@
 export type { ComparatorFunction, ComparatorDefinition, StateComparators } from './types';
 export { diffComparators$ } from './diff_comparators';
 export { getUnchangingComparator } from './fallback_comparator';
-export { latestComparatorValues$ } from './state_comparators';
+export { latestComparatorValues$, runComparators } from './state_comparators';

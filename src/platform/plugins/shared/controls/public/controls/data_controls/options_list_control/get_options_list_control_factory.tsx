@@ -19,10 +19,10 @@ import {
   skip,
   Subject,
 } from 'rxjs';
+import { pick } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
 import { PublishingSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-
 import { OPTIONS_LIST_CONTROL } from '../../../../common';
 import type {
   OptionsListControlState,
@@ -41,6 +41,8 @@ import {
   DEFAULT_SEARCH_TECHNIQUE,
   MIN_OPTIONS_LIST_REQUEST_SIZE,
   OPTIONS_LIST_DEFAULT_SORT,
+  OPTIONS_LIST_DEFAULTS,
+  OPTIONS_LIST_KEYS_TO_COMPARE,
 } from './constants';
 import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';
@@ -271,15 +273,10 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           dataLoading$,
           getTypeDisplayName: OptionsListStrings.control.getDisplayName,
           isSerializedStateEqual: (a, b) => {
-            const defaults = {
-              sort: OPTIONS_LIST_DEFAULT_SORT,
-              searchTechnique: DEFAULT_SEARCH_TECHNIQUE,
-              selectedOptions: [],
-            };
-            const isEqual = deepEqual({ ...defaults, ...a }, { ...defaults, ...b });
-            if (!isEqual) {
-              debugger;
-            }
+            const isEqual = deepEqual(
+              { ...OPTIONS_LIST_DEFAULTS, ...pick(a, OPTIONS_LIST_KEYS_TO_COMPARE) },
+              { ...OPTIONS_LIST_DEFAULTS, ...pick(b, OPTIONS_LIST_KEYS_TO_COMPARE) }
+            );
             return isEqual;
           },
           serializeState: () => {
