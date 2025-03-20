@@ -13,19 +13,18 @@ import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types
 import pRetry from 'p-retry';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  clearConversations,
   clearKnowledgeBase,
   importTinyElserModel,
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
   setupKnowledgeBase,
   waitForKnowledgeBaseReady,
-} from './helpers';
-import { getConversationCreatedEvent } from '../helpers';
+} from '../utils/knowledge_base';
 import {
   LlmProxy,
   createLlmProxy,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { clearConversations, getConversationCreatedEvent } from '../utils/conversation';
 
 const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
 
@@ -308,7 +307,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
         expect(createResponse.status).to.be(200);
 
-        await proxy.waitForAllInterceptorsSettled();
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
         const conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
         const conversationId = conversationCreatedEvent.conversation.id;
 
@@ -321,7 +320,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         });
 
-        await proxy.waitForAllInterceptorsSettled();
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
         const conversation = res.body;
         return conversation;
@@ -470,7 +469,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             },
           },
         });
-        await proxy.waitForAllInterceptorsSettled();
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
         const simulator = await simulatorPromise;
         const requestData = simulator.requestBody;
         expect(requestData.messages[0].content).to.contain(userInstructionText);

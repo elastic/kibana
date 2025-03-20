@@ -97,9 +97,9 @@
           },
           ") => { flattened: Record<string, unknown>; raw: { fields: Record<string, any>; _index?: string | undefined; _id?: string | undefined; _source?: Record<string, unknown> | undefined; sort?: ",
           "SortResults",
-          " | undefined; _score?: number | null | undefined; _explanation?: ",
+          " | undefined; _score?: number | null | undefined; highlight?: Record<string, string[]> | undefined; _explanation?: ",
           "ExplainExplanation",
-          " | undefined; highlight?: Record<string, string[]> | undefined; inner_hits?: Record<string, ",
+          " | undefined; inner_hits?: Record<string, ",
           "SearchInnerHitsResult",
           "> | undefined; matched_queries?: string[] | Record<string, number> | undefined; _nested?: ",
           "SearchNestedIdentity",
@@ -167,6 +167,39 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/log_level_badge_cell/log_level_badge_cell.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-contextual-components",
+        "id": "def-public.isFieldAllowed",
+        "type": "Function",
+        "tags": [],
+        "label": "isFieldAllowed",
+        "description": [],
+        "signature": [
+          "(field: string) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.isFieldAllowed.$1",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

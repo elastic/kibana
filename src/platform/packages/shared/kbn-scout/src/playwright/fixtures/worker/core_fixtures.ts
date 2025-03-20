@@ -14,21 +14,31 @@ import {
   createKbnUrl,
   getEsClient,
   getKbnClient,
-  getLogger,
   createSamlSessionManager,
   createScoutConfig,
   KibanaUrl,
+  getLogger,
+  ScoutLogger,
+  createElasticsearchCustomRole,
+  createCustomRole,
+  ElasticsearchRoleDescriptor,
+  KibanaRole,
 } from '../../../common/services';
-import { ScoutTestOptions } from '../../types';
-import { ScoutTestConfig } from '.';
-import { ScoutLogger } from '../../../common';
+import type { ScoutTestOptions } from '../../types';
+import type { ScoutTestConfig } from '.';
 
 // re-export to import types from '@kbn-scout'
 export type { KbnClient, SamlSessionManager } from '@kbn/test';
-export type { ScoutLogger } from '../../../common';
 export type { Client as EsClient } from '@elastic/elasticsearch';
 export type { KibanaUrl } from '../../../common/services/kibana_url';
 export type { ScoutTestConfig } from '../../../types';
+export type { ScoutLogger } from '../../../common/services/logger';
+
+export interface SamlAuth {
+  session: SamlSessionManager;
+  customRoleName: string;
+  setCustomRole(role: KibanaRole | ElasticsearchRoleDescriptor): Promise<void>;
+}
 
 /**
  * The coreWorkerFixtures setup defines foundational fixtures that are essential
@@ -45,29 +55,36 @@ export const coreWorkerFixtures = base.extend<
     kbnUrl: KibanaUrl;
     esClient: Client;
     kbnClient: KbnClient;
-    samlAuth: SamlSessionManager;
+    samlAuth: SamlAuth;
   }
 >({
-  // Provides a scoped logger instance for each worker. This logger is shared across
-  // all other fixtures within the worker scope.
+  // Provides a scoped logger instance for each worker to use in fixtures and tests.
+  // For parallel workers logger context is matching worker index+1, e.g. '[scout-worker-1]', '[scout-worker-2]', etc.
   log: [
-    ({}, use) => {
-      use(getLogger());
+    ({}, use, workerInfo) => {
+      const workersCount = workerInfo.config.workers;
+      const loggerContext =
+        workersCount === 1 ? 'scout-worker' : `scout-worker-${workerInfo.parallelIndex + 1}`;
+      use(getLogger(loggerContext));
     },
     { scope: 'worker' },
   ],
-
   /**
    * Loads the test server configuration from the source file based on local or cloud
    * target, located by default in '.scout/servers' directory. It supplies Playwright
    * with all server-related information including hosts, credentials, type of deployment, etc.
    */
   config: [
-    ({ log }, use, testInfo) => {
-      const configName = 'local';
-      const projectUse = testInfo.project.use as ScoutTestOptions;
+    ({ log }, use, workerInfo) => {
+      const projectUse = workerInfo.project.use as ScoutTestOptions;
+      if (!projectUse.configName) {
+        throw new Error(
+          `Failed to read the 'configName' property. Make sure to run tests with '--project' flag and target enviroment (local or cloud),
+          e.g. 'npx playwright test --project local --config <path_to_Playwright.config.ts>'`
+        );
+      }
       const serversConfigDir = projectUse.serversConfigDir;
-      const configInstance = createScoutConfig(serversConfigDir, configName, log);
+      const configInstance = createScoutConfig(serversConfigDir, projectUse.configName, log);
 
       use(configInstance);
     },
@@ -107,14 +124,41 @@ export const coreWorkerFixtures = base.extend<
 
   /**
    * Creates a SAML session manager, that handles authentication tasks for tests involving
-   * SAML-based authentication.
+   * SAML-based authentication. Exposes a method to set a custom role for the session.
    *
    * Note: In order to speedup execution of tests, we cache the session cookies for each role
    * after first call.
    */
   samlAuth: [
-    ({ log, config }, use) => {
-      use(createSamlSessionManager(config, log));
+    ({ log, config, esClient, kbnClient }, use, workerInfo) => {
+      let customRoleHash = '';
+      const customRoleName = `custom_role_worker_${workerInfo.parallelIndex}`;
+      const session = createSamlSessionManager(config, log, customRoleName);
+
+      const isCustomRoleSet = (roleHash: string) => roleHash === customRoleHash;
+
+      const isElasticsearchRole = (role: any): role is ElasticsearchRoleDescriptor => {
+        return 'applications' in role;
+      };
+
+      const setCustomRole = async (role: KibanaRole | ElasticsearchRoleDescriptor) => {
+        const newRoleHash = JSON.stringify(role);
+
+        if (isCustomRoleSet(newRoleHash)) {
+          log.info(`Custom role is already set`);
+          return;
+        }
+
+        if (isElasticsearchRole(role)) {
+          await createElasticsearchCustomRole(esClient, customRoleName, role);
+        } else {
+          await createCustomRole(kbnClient, customRoleName, role);
+        }
+
+        customRoleHash = newRoleHash;
+      };
+
+      use({ session, customRoleName, setCustomRole });
     },
     { scope: 'worker' },
   ],

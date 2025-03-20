@@ -98,7 +98,7 @@ export class ObservabilityStreamsWrapperPlugin
               sortKey: 101,
               entries: [
                 {
-                  label: i18n.translate('app_not_found_in_i18nrc.streamsAppLinkTitle', {
+                  label: i18n.translate('xpack.streams.streamsAppLinkTitle', {
                     defaultMessage: 'Streams',
                   }),
                   app: STREAMS_APP_ID,
@@ -117,7 +117,7 @@ export class ObservabilityStreamsWrapperPlugin
 
     coreSetup.application.register({
       id: STREAMS_APP_ID,
-      title: i18n.translate('app_not_found_in_i18nrc.appTitle', {
+      title: i18n.translate('xpack.streams.appTitle', {
         defaultMessage: 'Streams',
       }),
       euiIconType: 'logoObservability',
@@ -141,7 +141,7 @@ export class ObservabilityStreamsWrapperPlugin
                   ? [
                       {
                         id: 'streams',
-                        title: i18n.translate('app_not_found_in_i18nrc.streamsAppDeepLinkTitle', {
+                        title: i18n.translate('xpack.streams.streamsAppDeepLinkTitle', {
                           defaultMessage: 'Streams',
                         }),
                         path: '/',

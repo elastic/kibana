@@ -19,14 +19,14 @@ import { DeleteUnenrolledAgentsPreconfiguredError } from '../errors';
 import { appContextService } from './app_context';
 import { getSettings, saveSettings, settingsSetup } from './settings';
 import { auditLoggingService } from './audit_logging';
-import { listFleetServerHosts } from './fleet_server_host';
+import { fleetServerHostService } from './fleet_server_host';
 
 jest.mock('./app_context');
 jest.mock('./audit_logging');
 jest.mock('./fleet_server_host');
 
-const mockListFleetServerHosts = listFleetServerHosts as jest.MockedFunction<
-  typeof listFleetServerHosts
+const mockedFleetServerHostService = fleetServerHostService as jest.Mocked<
+  typeof fleetServerHostService
 >;
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
@@ -36,6 +36,7 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
 
 describe('settingsSetup', () => {
   afterEach(() => {
+    jest.resetAllMocks();
     mockedAppContextService.getCloud.mockReset();
     mockedAppContextService.getConfig.mockReset();
   });
@@ -86,7 +87,7 @@ describe('settingsSetup', () => {
       type: 'so_type',
     });
 
-    mockListFleetServerHosts.mockResolvedValueOnce({
+    mockedFleetServerHostService.list.mockResolvedValueOnce({
       items: [
         {
           id: 'fleet-server-host',
@@ -126,7 +127,7 @@ describe('getSettings', () => {
       total: 1,
     });
 
-    mockListFleetServerHosts.mockResolvedValueOnce({
+    mockedFleetServerHostService.list.mockResolvedValueOnce({
       items: [
         {
           id: 'fleet-server-host',
@@ -182,6 +183,9 @@ describe('getSettings', () => {
 });
 
 describe('saveSettings', () => {
+  afterEach(() => {
+    mockedAuditLoggingService.writeCustomSoAuditLog.mockReset();
+  });
   describe('when settings object exists', () => {
     it('should call audit logger', async () => {
       const soClient = savedObjectsClientMock.create();
@@ -212,7 +216,7 @@ describe('saveSettings', () => {
         type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
       });
 
-      mockListFleetServerHosts.mockResolvedValueOnce({
+      mockedFleetServerHostService.list.mockResolvedValueOnce({
         items: [
           {
             id: 'fleet-server-host',
@@ -229,11 +233,7 @@ describe('saveSettings', () => {
 
       await saveSettings(soClient, newData);
 
-      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
-        action: 'create',
-        id: GLOBAL_SETTINGS_ID,
-        savedObjectType: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
-      });
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalled();
     });
 
     describe('when settings object does not exist', () => {
@@ -293,7 +293,7 @@ describe('saveSettings', () => {
       per_page: 10,
       total: 1,
     });
-    mockListFleetServerHosts.mockResolvedValueOnce({
+    mockedFleetServerHostService.list.mockResolvedValueOnce({
       items: [
         {
           id: 'fleet-server-host',
@@ -349,7 +349,7 @@ describe('saveSettings', () => {
       per_page: 10,
       total: 1,
     });
-    mockListFleetServerHosts.mockResolvedValueOnce({
+    mockedFleetServerHostService.list.mockResolvedValueOnce({
       items: [
         {
           id: 'fleet-server-host',

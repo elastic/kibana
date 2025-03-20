@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { UnifiedDocViewerLogsOverview } from '@kbn/unified-doc-viewer-plugin/public';
 import React from 'react';
 import type { DocumentProfileProvider } from '../../../../profiles';
-import { ProfileProviderServices } from '../../../profile_provider_services';
+import type { ProfileProviderServices } from '../../../profile_provider_services';
 
 export const createGetDocViewer =
   (services: ProfileProviderServices): DocumentProfileProvider['profile']['getDocViewer'] =>
@@ -22,6 +22,8 @@ export const createGetDocViewer =
     const logsAIAssistantFeature = services.discoverShared.features.registry.getById(
       'observability-logs-ai-assistant'
     );
+
+    const streamsFeature = services.discoverShared.features.registry.getById('streams');
 
     return {
       ...prevDocViewer,
@@ -36,6 +38,7 @@ export const createGetDocViewer =
             <UnifiedDocViewerLogsOverview
               {...props}
               renderAIAssistant={logsAIAssistantFeature?.render}
+              renderStreamsField={streamsFeature?.renderStreamsField}
             />
           ),
         });

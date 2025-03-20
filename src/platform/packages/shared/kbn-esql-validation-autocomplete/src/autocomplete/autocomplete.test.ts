@@ -12,7 +12,6 @@ import { scalarFunctionDefinitions } from '../definitions/generated/scalar_funct
 import { timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitions/commands';
 import { getSafeInsertText, TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND } from './factories';
-import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import {
   policies,
@@ -113,22 +112,6 @@ describe('autocomplete', () => {
     testSuggestions('from a metadata _id | eval var0 = a | /', commands);
   });
 
-  describe('limit', () => {
-    testSuggestions('from a | limit /', ['10 ', '100 ', '1000 ']);
-    testSuggestions('from a | limit 4 /', ['| ']);
-  });
-
-  describe('mv_expand', () => {
-    testSuggestions('from a | mv_expand /', getFieldNamesByType('any'));
-    testSuggestions('from a | mv_expand a /', ['| ']);
-  });
-
-  describe('rename', () => {
-    testSuggestions('from a | rename /', getFieldNamesByType('any'));
-    testSuggestions('from a | rename keywordField /', ['AS $0'], ' ');
-    testSuggestions('from a | rename keywordField as /', ['var0']);
-  });
-
   for (const command of ['keep', 'drop']) {
     describe(command, () => {
       testSuggestions(`from a | ${command} /`, getFieldNamesByType('any'));
@@ -205,84 +188,6 @@ describe('autocomplete', () => {
       });
     });
   }
-
-  describe('enrich', () => {
-    const modes = ['any', 'coordinator', 'remote'];
-    const expectedPolicyNameSuggestions = policies
-      .map(({ name, suggestedAs }) => suggestedAs || name)
-      .map((name) => `${name} `);
-    for (const prevCommand of [
-      '',
-      // '| enrich other-policy ',
-      // '| enrich other-policy on b ',
-      // '| enrich other-policy with c ',
-    ]) {
-      testSuggestions(`from a ${prevCommand}| enrich /`, expectedPolicyNameSuggestions);
-      testSuggestions(
-        `from a ${prevCommand}| enrich _/`,
-        modes.map((mode) => `_${mode}:$0`),
-        '_'
-      );
-      for (const mode of modes) {
-        testSuggestions(
-          `from a ${prevCommand}| enrich _${mode}:/`,
-          expectedPolicyNameSuggestions,
-          ':'
-        );
-        testSuggestions(
-          `from a ${prevCommand}| enrich _${mode.toUpperCase()}:/`,
-          expectedPolicyNameSuggestions,
-          ':'
-        );
-        testSuggestions(
-          `from a ${prevCommand}| enrich _${camelCase(mode)}:/`,
-          expectedPolicyNameSuggestions,
-          ':'
-        );
-      }
-      testSuggestions(`from a ${prevCommand}| enrich policy /`, ['ON $0', 'WITH $0', '| ']);
-      testSuggestions(
-        `from a ${prevCommand}| enrich policy on /`,
-        getFieldNamesByType('any').map((v) => `${v} `)
-      );
-      testSuggestions(`from a ${prevCommand}| enrich policy on b /`, ['WITH $0', '| ']);
-      testSuggestions(
-        `from a ${prevCommand}| enrich policy on b with /`,
-        ['var0 = ', ...getPolicyFields('policy')],
-        ' '
-      );
-      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 /`, ['= $0', ',', '| ']);
-      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = /`, [
-        ...getPolicyFields('policy'),
-      ]);
-      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = keywordField /`, [
-        ',',
-        '| ',
-      ]);
-      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = keywordField, /`, [
-        'var1 = ',
-        ...getPolicyFields('policy'),
-      ]);
-      testSuggestions(
-        `from a ${prevCommand}| enrich policy on b with var0 = keywordField, var1 /`,
-        ['= $0', ',', '| ']
-      );
-      testSuggestions(
-        `from a ${prevCommand}| enrich policy on b with var0 = keywordField, var1 = /`,
-        [...getPolicyFields('policy')]
-      );
-      testSuggestions(
-        `from a ${prevCommand}| enrich policy with /`,
-        ['var0 = ', ...getPolicyFields('policy')],
-        ' '
-      );
-      testSuggestions(`from a ${prevCommand}| enrich policy with keywordField /`, [
-        '= $0',
-        ',',
-        '| ',
-      ]);
-    }
-  });
 
   // @TODO: get updated eval block from main
   describe('values suggestions', () => {
@@ -422,11 +327,12 @@ describe('autocomplete', () => {
     // EVAL argument
     testSuggestions('FROM index1 | EVAL b/', [
       'var0 = ',
-      ...getFieldNamesByType('any'),
+      ...getFieldNamesByType('any').map((name) => `${name} `),
       ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
     ]);
 
     testSuggestions('FROM index1 | EVAL var0 = f/', [
+      ...getFieldNamesByType('any').map((name) => `${name} `),
       ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
     ]);
 
@@ -449,7 +355,7 @@ describe('autocomplete', () => {
     );
 
     // ENRICH policy ON
-    testSuggestions('FROM index1 | ENRICH policy O/', ['ON $0', 'WITH $0', '| ']);
+    testSuggestions('FROM index1 | ENRICH policy O/', ['ON ', 'WITH ', '| ']);
 
     // ENRICH policy ON field
     testSuggestions(
@@ -485,22 +391,22 @@ describe('autocomplete', () => {
     );
 
     // LIMIT argument
-    // Here we actually test that the invoke trigger kind does NOT work
-    // the assumption is that it isn't very useful to see literal suggestions when already typing a number
-    // I'm not sure if this is true or not, but it's the current behavior
-    testSuggestions('FROM a | LIMIT 1/', ['| ']);
+    testSuggestions('FROM a | LIMIT 1/', ['10 ', '100 ', '1000 ']);
 
     // MV_EXPAND field
-    testSuggestions('FROM index1 | MV_EXPAND f/', getFieldNamesByType('any'));
+    testSuggestions(
+      'FROM index1 | MV_EXPAND f/',
+      getFieldNamesByType('any').map((name) => `${name} `)
+    );
 
     // RENAME field
-    testSuggestions('FROM index1 | RENAME f/', getFieldNamesByType('any'));
+    testSuggestions(
+      'FROM index1 | RENAME f/',
+      getFieldNamesByType('any').map((name) => `${name} `)
+    );
 
     // RENAME field AS
-    testSuggestions('FROM index1 | RENAME field A/', ['AS $0']);
-
-    // RENAME field AS var0
-    testSuggestions('FROM index1 | RENAME field AS v/', ['var0']);
+    testSuggestions('FROM index1 | RENAME field A/', ['AS ']);
 
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [
@@ -816,10 +722,7 @@ describe('autocomplete', () => {
           .map(attachTriggerCommand)
           .map((s) => ({ ...s, rangeToReplace: { start: 17, end: 20 } }))
       );
-      testSuggestions(
-        'FROM a | ENRICH policy /',
-        ['ON $0', 'WITH $0', '| '].map(attachTriggerCommand)
-      );
+      testSuggestions('FROM a | ENRICH policy /', ['ON ', 'WITH ', '| '].map(attachTriggerCommand));
 
       testSuggestions(
         'FROM a | ENRICH policy ON /',
@@ -829,12 +732,12 @@ describe('autocomplete', () => {
       );
       testSuggestions(
         'FROM a | ENRICH policy ON @timestamp /',
-        ['WITH $0', '| '].map(attachTriggerCommand)
+        ['WITH ', '| '].map(attachTriggerCommand)
       );
       // nothing fancy with this field list
       testSuggestions('FROM a | ENRICH policy ON @timestamp WITH /', [
         'var0 = ',
-        ...getPolicyFields('policy').map((name) => ({ text: name, command: undefined })),
+        ...getPolicyFields('policy'),
       ]);
       describe('replacement range', () => {
         testSuggestions('FROM a | ENRICH policy ON @timestamp WITH othe/', [
@@ -959,9 +862,10 @@ describe('autocomplete', () => {
           { filterText: '_source', text: '_source, ', command: TRIGGER_SUGGESTION_COMMAND },
         ]);
         // no comma if there are no more fields
-        testSuggestions('FROM a METADATA _id, _ignored, _index, _source, _index_mode, _version/', [
-          { filterText: '_version', text: '_version | ', command: TRIGGER_SUGGESTION_COMMAND },
-        ]);
+        testSuggestions(
+          'FROM a METADATA _id, _ignored, _index, _source, _index_mode, _score, _version/',
+          [{ filterText: '_version', text: '_version | ', command: TRIGGER_SUGGESTION_COMMAND }]
+        );
       });
 
       describe.each(['KEEP', 'DROP'])('%s <field>', (commandName) => {
@@ -1105,10 +1009,6 @@ describe('autocomplete', () => {
       'AND $0',
       'NOT',
       'OR $0',
-      // pipe doesn't make sense here, but Monaco will filter it out.
-      // see https://github.com/elastic/kibana/issues/199401 for an explanation
-      // of why this happens
-      '| ',
     ]);
     testSuggestions('FROM a | WHERE doubleField IS N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 32 } },
@@ -1119,10 +1019,6 @@ describe('autocomplete', () => {
       'AND $0',
       'NOT',
       'OR $0',
-      // pipe doesn't make sense here, but Monaco will filter it out.
-      // see https://github.com/elastic/kibana/issues/199401 for an explanation
-      // of why this happens
-      '| ',
     ]);
     testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 35 } },

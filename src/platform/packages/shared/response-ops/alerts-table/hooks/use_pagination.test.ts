@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { renderHook, act } from '@testing-library/react';
-import { PaginationProps, usePagination } from './use_pagination';
+import type { PaginationProps } from './use_pagination';
+import { usePagination } from './use_pagination';
 
 describe('usePagination', () => {
   const onPageChange = jest.fn();

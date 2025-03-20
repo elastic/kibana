@@ -130,10 +130,17 @@ export const getFieldEditorOpener =
         };
       };
 
-      const dataViewLazy =
-        dataViewLazyOrNot instanceof DataViewLazy
-          ? dataViewLazyOrNot
-          : await dataViews.toDataViewLazy(dataViewLazyOrNot);
+      let dataViewLazy: DataViewLazy;
+
+      if (dataViewLazyOrNot instanceof DataViewLazy) {
+        dataViewLazy = dataViewLazyOrNot;
+      } else {
+        if (dataViewLazyOrNot.id) {
+          // force cache reset to have the latest field attributes
+          dataViews.clearDataViewLazyCache(dataViewLazyOrNot.id);
+        }
+        dataViewLazy = await dataViews.toDataViewLazy(dataViewLazyOrNot);
+      }
 
       const dataViewField = fieldNameToEdit
         ? (await dataViewLazy.getFieldByName(fieldNameToEdit, true)) ||

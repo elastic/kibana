@@ -12,7 +12,7 @@ import {
   StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
 } from './helpers/repository_client';
-import { disableStreams, enableStreams, fetchDocument, indexDocument } from './helpers/requests';
+import { fetchDocument, indexDocument } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -27,11 +27,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Classic streams', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
-      await enableStreams(apiClient);
-    });
-
-    after(async () => {
-      await disableStreams(apiClient);
     });
 
     it('non-wired data streams', async () => {
@@ -44,7 +39,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const {
         body: { streams },
         status,
-      } = await apiClient.fetch('GET /api/streams');
+      } = await apiClient.fetch('GET /api/streams 2023-10-31');
 
       expect(status).to.eql(200);
 
@@ -55,14 +50,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ingest: {
           lifecycle: { inherit: {} },
           processing: [],
-          routing: [],
           unwired: {},
         },
       });
     });
 
     it('Allows setting processing on classic streams', async () => {
-      const putResponse = await apiClient.fetch('PUT /api/streams/{name}', {
+      const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
         params: {
           path: {
             name: TEST_STREAM_NAME,
@@ -72,7 +66,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               ingest: {
                 lifecycle: { inherit: {} },
-                routing: [],
                 processing: [
                   {
                     grok: {
@@ -95,7 +88,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(putResponse.body).to.have.property('acknowledged', true);
 
-      const getResponse = await apiClient.fetch('GET /api/streams/{name}', {
+      const getResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
         params: { path: { name: TEST_STREAM_NAME } },
       });
 
@@ -127,7 +120,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
             },
           ],
-          routing: [],
           unwired: {},
         },
       });
@@ -184,7 +176,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Allows removing processing on classic streams', async () => {
-      const response = await apiClient.fetch('PUT /api/streams/{name}', {
+      const response = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
         params: {
           path: { name: TEST_STREAM_NAME },
           body: {
@@ -193,7 +185,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: [],
-                routing: [],
                 unwired: {},
               },
             },
@@ -223,7 +214,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Allows deleting classic streams', async () => {
-      const deleteStreamResponse = await apiClient.fetch('DELETE /api/streams/{name}', {
+      const deleteStreamResponse = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
         params: {
           path: {
             name: TEST_STREAM_NAME,
@@ -233,7 +224,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(deleteStreamResponse.status).to.eql(200);
 
-      const getStreamsResponse = await apiClient.fetch('GET /api/streams');
+      const getStreamsResponse = await apiClient.fetch('GET /api/streams 2023-10-31');
 
       expect(getStreamsResponse.status).to.eql(200);
 
@@ -279,7 +270,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('Allows adding processing to classic streams without pipeline', async () => {
-        const putResponse = await apiClient.fetch('PUT /api/streams/{name}', {
+        const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
           params: {
             path: {
               name: DATA_STREAM_NAME,
@@ -289,7 +280,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               stream: {
                 ingest: {
                   lifecycle: { inherit: {} },
-                  routing: [],
                   processing: [
                     {
                       grok: {

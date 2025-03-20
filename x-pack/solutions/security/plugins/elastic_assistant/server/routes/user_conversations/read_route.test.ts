@@ -29,7 +29,7 @@ describe('Read conversation route', () => {
     clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
       getConversationMock(getQueryConversationParams())
     );
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
     readConversationRoute(server.router);
   });
 
@@ -68,7 +68,7 @@ describe('Read conversation route', () => {
     });
 
     test('returns 401 Unauthorized when request context getCurrentUser is not defined', async () => {
-      context.elasticAssistant.getCurrentUser.mockReturnValueOnce(null);
+      context.elasticAssistant.getCurrentUser.mockResolvedValueOnce(null);
       const response = await server.inject(
         getConversationReadRequest(),
         requestContextMock.convertContext(context)

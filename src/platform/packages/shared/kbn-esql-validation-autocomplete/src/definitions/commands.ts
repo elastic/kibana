@@ -11,23 +11,19 @@ import { i18n } from '@kbn/i18n';
 import {
   type ESQLColumn,
   type ESQLCommand,
-  type ESQLAstItem,
   type ESQLMessage,
   type ESQLFunction,
   isFunctionExpression,
   isWhereExpression,
-  isFieldExpression,
-  Walker,
+  ESQLCommandMode,
 } from '@kbn/esql-ast';
 import {
-  getFunctionDefinition,
   isAssignment,
   isColumnItem,
   isFunctionItem,
-  isFunctionOperatorParam,
-  isLiteralItem,
+  isSingleItem,
+  noCaseCompare,
 } from '../shared/helpers';
-import { ENRICH_MODES } from './settings';
 import {
   appendSeparatorOption,
   asOption,
@@ -36,18 +32,28 @@ import {
   onOption,
   withOption,
 } from './options';
-import { type CommandDefinition, FunctionDefinitionTypes } from './types';
-import { suggest as suggestForSort } from '../autocomplete/commands/sort';
-import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
+
+import { type CommandDefinition } from './types';
+import { ENRICH_MODES, checkAggExistence, checkFunctionContent } from './commands_helpers';
+
+import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
 import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
-import { suggest as suggestForStats } from '../autocomplete/commands/stats';
-import { suggest as suggestForWhere } from '../autocomplete/commands/where';
-import { suggest as suggestForJoin } from '../autocomplete/commands/join';
+import { suggest as suggestForEnrich } from '../autocomplete/commands/enrich';
+import { suggest as suggestForEval } from '../autocomplete/commands/eval';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
+import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
+import { suggest as suggestForJoin } from '../autocomplete/commands/join';
+import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
+import { suggest as suggestForLimit } from '../autocomplete/commands/limit';
+import { suggest as suggestForMvExpand } from '../autocomplete/commands/mv_expand';
+import { suggest as suggestForRename } from '../autocomplete/commands/rename';
 import { suggest as suggestForRow } from '../autocomplete/commands/row';
 import { suggest as suggestForShow } from '../autocomplete/commands/show';
-import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
-import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
+import { suggest as suggestForSort } from '../autocomplete/commands/sort';
+import { suggest as suggestForStats } from '../autocomplete/commands/stats';
+import { suggest as suggestForWhere } from '../autocomplete/commands/where';
+
+import { getMessageFromId } from '../validation/errors';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -80,45 +86,6 @@ const statsValidator = (command: ESQLCommand) => {
     .filter(isFunctionItem);
 
   if (statsArg.length) {
-    function isAggFunction(arg: ESQLAstItem): arg is ESQLFunction {
-      return (
-        isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === FunctionDefinitionTypes.AGG
-      );
-    }
-    function isOtherFunction(arg: ESQLAstItem): arg is ESQLFunction {
-      return (
-        isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type !== FunctionDefinitionTypes.AGG
-      );
-    }
-
-    function checkAggExistence(arg: ESQLFunction): boolean {
-      if (isWhereExpression(arg)) {
-        return checkAggExistence(arg.args[0] as ESQLFunction);
-      }
-
-      if (isFieldExpression(arg)) {
-        const agg = arg.args[1];
-        const firstFunction = Walker.match(agg, { type: 'function' });
-
-        if (!firstFunction) {
-          return false;
-        }
-
-        return checkAggExistence(firstFunction as ESQLFunction);
-      }
-
-      // TODO the grouping function check may not
-      // hold true for all future cases
-      if (isAggFunction(arg) || isFunctionOperatorParam(arg)) {
-        return true;
-      }
-
-      if (isOtherFunction(arg)) {
-        return (arg as ESQLFunction).args.filter(isFunctionItem).some(checkAggExistence);
-      }
-
-      return false;
-    }
     // first check: is there an agg function somewhere?
     const noAggsExpressions = statsArg.filter((arg) => !checkAggExistence(arg));
 
@@ -142,25 +109,6 @@ const statsValidator = (command: ESQLCommand) => {
         }))
       );
     } else {
-      function isConstantOrAggFn(arg: ESQLAstItem): boolean {
-        return isLiteralItem(arg) || isAggFunction(arg);
-      }
-      // now check that:
-      // * the agg function is at root level
-      // * or if it's a operators function, then all operands are agg functions or literals
-      // * or if it's a eval function then all arguments are agg functions or literals
-      function checkFunctionContent(arg: ESQLFunction) {
-        // TODO the grouping function check may not
-        // hold true for all future cases
-        if (isAggFunction(arg)) {
-          return true;
-        }
-        return (arg as ESQLFunction).args.every(
-          (subArg): boolean =>
-            isConstantOrAggFn(subArg) ||
-            (isOtherFunction(subArg) ? checkFunctionContent(subArg) : false)
-        );
-      }
       // @TODO: improve here the check to get the last instance of the invalidExpression
       // to provide a better location for the error message
       // i.e. STATS round(round(round( a + sum(b) )))
@@ -207,7 +155,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
     suggest: suggestForRow,
     options: [],
-    modes: [],
   },
   {
     name: 'from',
@@ -217,7 +164,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     examples: ['from logs', 'from logs-*', 'from logs_*, events-*'],
     options: [metadataOption],
-    modes: [],
     signature: {
       multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
@@ -231,7 +177,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     examples: ['SHOW INFO'],
     options: [],
-    modes: [],
     signature: {
       multipleParams: false,
       params: [{ name: 'functions', type: 'function' }],
@@ -260,7 +205,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       'metrics src1, src2 agg1, agg2 by field1, field2',
     ],
     options: [],
-    modes: [],
     signature: {
       multipleParams: true,
       params: [
@@ -268,6 +212,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         { name: 'expression', type: 'function', optional: true },
       ],
     },
+    suggest: () => [],
   },
   {
     name: 'stats',
@@ -281,7 +226,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [{ name: 'expression', type: 'function', optional: true }],
     },
     options: [byOption],
-    modes: [],
     validate: statsValidator,
     suggest: suggestForStats,
   },
@@ -301,9 +245,9 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [{ name: 'expression', type: 'function', optional: true }],
     },
     options: [byOption],
-    modes: [],
     // Reusing the same validation logic as stats command
     validate: statsValidator,
+    suggest: () => [],
   },
 
   {
@@ -323,7 +267,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [{ name: 'expression', type: 'any' }],
     },
     options: [],
-    modes: [],
+    suggest: suggestForEval,
   },
   {
     name: 'rename',
@@ -336,7 +280,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [{ name: 'renameClause', type: 'column' }],
     },
     options: [asOption],
-    modes: [],
+    suggest: suggestForRename,
   },
   {
     name: 'limit',
@@ -350,7 +294,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [{ name: 'size', type: 'integer', constantOnly: true }],
     },
     options: [],
-    modes: [],
+    suggest: suggestForLimit,
   },
   {
     name: 'keep',
@@ -361,7 +305,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     examples: ['… | keep a', '… | keep a,b'],
     suggest: suggestForKeep,
     options: [],
-    modes: [],
     signature: {
       multipleParams: true,
       params: [{ name: 'column', type: 'column', wildcards: true }],
@@ -374,7 +317,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     examples: ['… | drop a', '… | drop a,b'],
     options: [],
-    modes: [],
     signature: {
       multipleParams: true,
       params: [{ name: 'column', type: 'column', wildcards: true }],
@@ -431,7 +373,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       '… | sort a - abs(b)',
     ],
     options: [],
-    modes: [],
     signature: {
       multipleParams: true,
       params: [{ name: 'expression', type: 'any' }],
@@ -451,7 +392,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [{ name: 'expression', type: 'boolean' }],
     },
     options: [],
-    modes: [],
     suggest: suggestForWhere,
   },
   {
@@ -462,7 +402,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     examples: ['… | DISSECT a "%{b} %{c}" APPEND_SEPARATOR = ":"'],
     options: [appendSeparatorOption],
-    modes: [],
     signature: {
       multipleParams: false,
       params: [
@@ -480,7 +419,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     examples: ['… | GROK a "%{IP:b} %{NUMBER:c}"'],
     options: [],
-    modes: [],
     signature: {
       multipleParams: false,
       params: [
@@ -497,12 +435,12 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     examples: ['row a=[1,2,3] | mv_expand a'],
     options: [],
-    modes: [],
     preview: true,
     signature: {
       multipleParams: false,
       params: [{ name: 'column', type: 'column', innerTypes: ['any'] }],
     },
+    suggest: suggestForMvExpand,
   },
   {
     name: 'enrich',
@@ -516,10 +454,36 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       '… | enrich my-policy on pivotField with a = enrichFieldA, b = enrichFieldB',
     ],
     options: [onOption, withOption],
-    modes: [ENRICH_MODES],
     signature: {
       multipleParams: false,
       params: [{ name: 'policyName', type: 'source', innerTypes: ['policy'] }],
+    },
+    suggest: suggestForEnrich,
+    validate: (command: ESQLCommand) => {
+      const modeArg = command.args.find((arg) => isSingleItem(arg) && arg.type === 'mode') as
+        | ESQLCommandMode
+        | undefined;
+
+      if (!modeArg) {
+        return [];
+      }
+
+      const acceptedValues = ENRICH_MODES.map(({ name }) => '_' + name);
+      if (acceptedValues.some((value) => noCaseCompare(modeArg.text, value))) {
+        return [];
+      }
+
+      return [
+        getMessageFromId({
+          messageId: 'unsupportedMode',
+          values: {
+            command: 'ENRICH',
+            value: modeArg.text,
+            expected: acceptedValues.join(', '),
+          },
+          locations: modeArg.location,
+        }),
+      ];
     },
   },
   {
@@ -527,12 +491,12 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     description: 'A test fixture to test hidden-ness',
     hidden: true,
     examples: [],
-    modes: [],
     options: [],
     signature: {
       params: [],
       multipleParams: false,
     },
+    suggest: () => [],
   },
   {
     name: 'join',
@@ -579,7 +543,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       // '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field',
       // '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field, index.field2 = index2.field2',
     ],
-    modes: [],
     signature: {
       multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],

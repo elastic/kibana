@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
+import type { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 
 export interface InputOverrides {
   [key: string]: string | undefined;
@@ -98,10 +98,19 @@ export interface HasImportPermission {
 
 export type InputData = any[];
 
-export interface ImportResponse {
+export interface InitializeImportResponse {
   success: boolean;
   id: string;
-  index?: string;
+  index: string;
+  pipelineIds: Array<string | undefined>;
+  error?: {
+    error: estypes.ErrorCause;
+  };
+}
+
+export interface ImportResponse {
+  success: boolean;
+  index: string;
   pipelineId?: string;
   docCount: number;
   failures: ImportFailure[];

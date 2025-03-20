@@ -1129,12 +1129,23 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           source_id: { type: 'keyword', index: false },
           name: { type: 'keyword' },
           is_default: { type: 'boolean' },
           host: { type: 'keyword' },
           proxy_id: { type: 'keyword' },
+        },
+      },
+      modelVersions: {
+        '1': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
         },
       },
     },
@@ -1147,6 +1158,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           is_default: { type: 'boolean' },
@@ -1164,6 +1176,14 @@ export const getSavedObjectTypes = (
               addedMappings: {
                 is_internal: { type: 'boolean', index: false },
               },
+            },
+          ],
+        },
+        '2': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
             },
           ],
         },
@@ -1253,9 +1273,14 @@ export const OUTPUT_INCLUDE_AAD_FIELDS = new Set([
   'channel_buffer_size',
 ]);
 
+// dangerouslyExposeValue added to allow the user with access to the SO to see and edit these values through the UI
 export const OUTPUT_ENCRYPTED_FIELDS = new Set([
   { key: 'ssl', dangerouslyExposeValue: true },
   { key: 'password', dangerouslyExposeValue: true },
+]);
+
+export const FLEET_SERVER_HOST_ENCRYPTED_FIELDS = new Set([
+  { key: 'ssl', dangerouslyExposeValue: true },
 ]);
 
 export function registerEncryptedSavedObjects(
@@ -1276,5 +1301,17 @@ export function registerEncryptedSavedObjects(
     type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['token']),
     attributesToIncludeInAAD: new Set(['policy_id', 'token_plain']),
+  });
+  encryptedSavedObjects.registerType({
+    type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: FLEET_SERVER_HOST_ENCRYPTED_FIELDS,
+    // enforceRandomId allows to create an SO with an arbitrary id
+    enforceRandomId: false,
+  });
+  encryptedSavedObjects.registerType({
+    type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set([{ key: 'ssl', dangerouslyExposeValue: true }]),
+    // enforceRandomId allows to create an SO with an arbitrary id
+    enforceRandomId: false,
   });
 }

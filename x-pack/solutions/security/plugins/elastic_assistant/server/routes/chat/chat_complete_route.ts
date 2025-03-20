@@ -77,7 +77,7 @@ export const chatCompleteRoute = (
             (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
 
           // Perform license and authenticated user checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
@@ -93,7 +93,7 @@ export const chatCompleteRoute = (
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();
 
           let messages;
-          const conversationId = request.body.conversationId;
+          const existingConversationId = request.body.conversationId;
           const connectorId = request.body.connectorId;
 
           let latestReplacements: Replacements = {};
@@ -159,11 +159,10 @@ export const chatCompleteRoute = (
           });
 
           let newConversation: ConversationResponse | undefined | null;
-          if (conversationsDataClient && !conversationId && request.body.persist) {
+          if (conversationsDataClient && !existingConversationId && request.body.persist) {
             newConversation = await createConversationWithUserInput({
               actionTypeId,
               connectorId,
-              conversationId,
               conversationsDataClient,
               promptId: request.body.promptId,
               replacements: latestReplacements,
@@ -178,6 +177,11 @@ export const chatCompleteRoute = (
             }));
           }
 
+          // Do not persist conversation messages if `persist = false`
+          const conversationId = request.body.persist
+            ? existingConversationId ?? newConversation?.id
+            : undefined;
+
           const contentReferencesStore = newContentReferencesStore();
 
           const onLlmResponse = async (
@@ -185,11 +189,11 @@ export const chatCompleteRoute = (
             traceData: Message['traceData'] = {},
             isError = false
           ): Promise<void> => {
-            if (newConversation?.id && conversationsDataClient) {
+            if (conversationId && conversationsDataClient) {
               const contentReferences = pruneContentReferences(content, contentReferencesStore);
 
               await appendAssistantMessageToConversation({
-                conversationId: newConversation?.id,
+                conversationId,
                 conversationsDataClient,
                 messageContent: content,
                 replacements: latestReplacements,
@@ -207,7 +211,7 @@ export const chatCompleteRoute = (
             actionTypeId,
             connectorId,
             isOssModel,
-            conversationId: conversationId ?? newConversation?.id,
+            conversationId,
             context: ctx,
             getElser,
             logger,

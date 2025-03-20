@@ -66,7 +66,6 @@ export const transformToCreateScheme = (
     apiConfig,
     category,
     excludeFromLastConversationStorage,
-    isDefault,
     messages,
     replacements,
   }: ConversationCreateProps
@@ -92,7 +91,6 @@ export const transformToCreateScheme = (
         }
       : undefined,
     exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
-    is_default: isDefault,
     messages: messages?.map((message) => ({
       '@timestamp': message.timestamp,
       content: message.content,

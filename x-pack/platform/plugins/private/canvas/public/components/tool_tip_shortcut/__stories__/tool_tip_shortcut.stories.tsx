@@ -5,18 +5,51 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import React from 'react';
+import type { Meta } from '@storybook/react';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
 
-storiesOf('components/ToolTipShortcut', module)
-  .addDecorator((story) => (
-    <div style={{ width: '100px', backgroundColor: '#343741', padding: '5px' }}>{story()}</div>
-  ))
-  .add('with shortcut', () => <ToolTipShortcut shortcut="G" />)
-  .add('with cmd', () => <ToolTipShortcut shortcut="⌘ + D" />)
-  .add('with alt', () => <ToolTipShortcut shortcut="⌥ + P" />)
-  .add('with left arrow', () => <ToolTipShortcut shortcut="←" />)
-  .add('with right arrow', () => <ToolTipShortcut shortcut="→" />)
-  .add('with up arrow', () => <ToolTipShortcut shortcut="⌘ + SHIFT + ↑" />)
-  .add('with down arrow', () => <ToolTipShortcut shortcut="⌘ + SHIFT + ↓" />);
+export default {
+  title: 'components/ToolTipShortcut',
+
+  decorators: [
+    (story) => (
+      <div style={{ width: '100px', backgroundColor: '#343741', padding: '5px' }}>{story()}</div>
+    ),
+  ],
+} as Meta;
+
+export const WithShortcut = {
+  render: () => <ToolTipShortcut shortcut="G" />,
+  name: 'with shortcut',
+};
+
+export const WithCmd = {
+  render: () => <ToolTipShortcut shortcut="⌘ + D" />,
+  name: 'with cmd',
+};
+
+export const WithAlt = {
+  render: () => <ToolTipShortcut shortcut="⌥ + P" />,
+  name: 'with alt',
+};
+
+export const WithLeftArrow = {
+  render: () => <ToolTipShortcut shortcut="←" />,
+  name: 'with left arrow',
+};
+
+export const WithRightArrow = {
+  render: () => <ToolTipShortcut shortcut="→" />,
+  name: 'with right arrow',
+};
+
+export const WithUpArrow = {
+  render: () => <ToolTipShortcut shortcut="⌘ + SHIFT + ↑" />,
+  name: 'with up arrow',
+};
+
+export const WithDownArrow = {
+  render: () => <ToolTipShortcut shortcut="⌘ + SHIFT + ↓" />,
+  name: 'with down arrow',
+};

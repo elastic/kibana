@@ -644,6 +644,17 @@
             "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/performance_markers.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.perfomanceMarkers.startPageRefresh",
+            "type": "string",
+            "tags": [],
+            "label": "startPageRefresh",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-ebt-tools/src/performance_metrics/performance_markers.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

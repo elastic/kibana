@@ -9,9 +9,9 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 
-import { useGridLayoutEvents } from '../../use_grid_layout_events';
-import { UserInteractionEvent } from '../../use_grid_layout_events/types';
 import { useGridLayoutContext } from '../../use_grid_layout_context';
+import { useGridLayoutPanelEvents } from '../../use_grid_layout_events';
+import { UserInteractionEvent } from '../../use_grid_layout_events/types';
 
 export interface DragHandleApi {
   startDrag: (e: UserInteractionEvent) => void;
@@ -20,17 +20,17 @@ export interface DragHandleApi {
 
 export const useDragHandleApi = ({
   panelId,
-  rowIndex,
+  rowId,
 }: {
   panelId: string;
-  rowIndex: number;
+  rowId: string;
 }): DragHandleApi => {
   const { useCustomDragHandle } = useGridLayoutContext();
 
-  const startInteraction = useGridLayoutEvents({
+  const startInteraction = useGridLayoutPanelEvents({
     interactionType: 'drag',
     panelId,
-    rowIndex,
+    rowId,
   });
 
   const removeEventListenersRef = useRef<(() => void) | null>(null);

@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import type {
   ESQLAstItem,
   ESQLCommand,
@@ -15,13 +14,10 @@ import type {
   ESQLMessage,
   ESQLSource,
 } from '@kbn/esql-ast';
+import { ESQLControlVariable } from '@kbn/esql-types';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type {
-  ESQLCallbacks,
-  ESQLControlVariable,
-  ESQLVariableType,
-  ESQLSourceResult,
-} from '../shared/types';
+import type { ESQLPolicy, ReferenceMaps } from '../validation/types';
+import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 
 /**
  * All supported field types in ES|QL. This is all the types
@@ -197,6 +193,8 @@ export interface FunctionDefinition {
   customParametersSnippet?: string;
 }
 
+export type GetPolicyMetadataFn = (name: string) => Promise<ESQLPolicy | undefined>;
+
 export interface CommandSuggestParams<CommandName extends string> {
   /**
    * The text of the query to the left of the cursor.
@@ -207,10 +205,14 @@ export interface CommandSuggestParams<CommandName extends string> {
    */
   command: ESQLCommand<CommandName>;
   /**
-   * Get a list of columns by type. This includes fields from any sources as well as
-   * variables defined in the query.
+   * Get suggestions for columns by type. This includes fields from any sources as well as
+   * user-defined columns in the query.
    */
   getColumnsByType: GetColumnsByTypeFn;
+  /**
+   * Gets the names of all columns
+   */
+  getAllColumnNames: () => string[];
   /**
    * Check for the existence of a column by name.
    * @param column
@@ -219,9 +221,13 @@ export interface CommandSuggestParams<CommandName extends string> {
   columnExists: (column: string) => boolean;
   /**
    * Gets the name that should be used for the next variable.
+   *
+   * @param extraFieldNames — names that should be recognized as columns
+   * but that won't be found in the current table from Elasticsearch. This is currently only
+   * used to recognize enrichment fields from a policy in the ENRICH command.
    * @returns
    */
-  getSuggestedVariableName: () => string;
+  getSuggestedVariableName: (extraFieldNames?: string[]) => string;
   /**
    * Examine the AST to determine the type of an expression.
    * @param expression
@@ -243,6 +249,14 @@ export interface CommandSuggestParams<CommandName extends string> {
    */
   getSources: () => Promise<ESQLSourceResult[]>;
   /**
+   * Fetch suggestions for all available policies
+   */
+  getPolicies: () => Promise<SuggestionRawDefinition[]>;
+  /**
+   * Get metadata for a policy by name
+   */
+  getPolicyMetadata: GetPolicyMetadataFn;
+  /**
    * Inspect the AST and returns the sources that are used in the query.
    * @param type
    * @returns
@@ -258,14 +272,17 @@ export interface CommandSuggestParams<CommandName extends string> {
    */
   previousCommands?: ESQLCommand[];
   callbacks?: ESQLCallbacks;
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined;
+  getVariables?: () => ESQLControlVariable[] | undefined;
   supportsControls?: boolean;
 }
 
 export type CommandSuggestFunction<CommandName extends string> = (
   params: CommandSuggestParams<CommandName>
-) => Promise<SuggestionRawDefinition[]>;
+) => Promise<SuggestionRawDefinition[]> | SuggestionRawDefinition[];
 
+/**
+ * @deprecated — use CommandDefinition instead
+ */
 export interface CommandBaseDefinition<CommandName extends string> {
   name: CommandName;
 
@@ -284,7 +301,6 @@ export interface CommandBaseDefinition<CommandName extends string> {
    * Whether to show or hide in autocomplete suggestion list
    */
   hidden?: boolean;
-  suggest?: CommandSuggestFunction<CommandName>;
   /** @deprecated this property will disappear in the future */
   signature: {
     multipleParams: boolean;
@@ -308,6 +324,9 @@ export interface CommandTypeDefinition {
   description?: string;
 }
 
+/**
+ * @deprecated options are going away
+ */
 export interface CommandOptionsDefinition<CommandName extends string = string>
   extends CommandBaseDefinition<CommandName> {
   wrapped?: string[];
@@ -320,19 +339,16 @@ export interface CommandOptionsDefinition<CommandName extends string = string>
   ) => ESQLMessage[];
 }
 
-export interface CommandModeDefinition {
-  name: string;
-  description: string;
-  values: Array<{ name: string; description: string }>;
-  prefix?: string;
-}
-
 export interface CommandDefinition<CommandName extends string>
   extends CommandBaseDefinition<CommandName> {
   examples: string[];
-  validate?: (option: ESQLCommand) => ESQLMessage[];
-  /** @deprecated this property will disappear in the future */
-  modes: CommandModeDefinition[];
+  /**
+   * This function is run when the command is being validated, but it does not
+   * prevent the default behavior. If you need a full override, we are currently
+   * doing those directly in the validateCommand function in the validation module.
+   */
+  validate?: (command: ESQLCommand<CommandName>, references: ReferenceMaps) => ESQLMessage[];
+  suggest: CommandSuggestFunction<CommandName>;
   /** @deprecated this property will disappear in the future */
   options: CommandOptionsDefinition[];
 }

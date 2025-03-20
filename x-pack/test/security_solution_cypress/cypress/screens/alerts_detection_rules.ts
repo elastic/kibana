@@ -146,7 +146,12 @@ export const INPUT_FILE = 'input[type=file]';
 
 export const TOASTER = '[data-test-subj="euiToastHeader"]';
 
+export const SUCCESS_TOASTER = '[class*="euiToast-success"] [data-test-subj="euiToastHeader"]';
+
 export const TOASTER_BODY = '[data-test-subj="globalToastList"] [data-test-subj="euiToastBody"]';
+
+export const SUCCESS_TOASTER_BODY =
+  '[data-test-subj="globalToastList"] [class*="euiToast-success"] [data-test-subj="euiToastBody"]';
 
 export const TOASTER_ERROR_BTN = '[data-test-subj="errorToastBtn"]';
 
@@ -194,6 +199,10 @@ export const getInstallSingleRuleButtonByRuleId = (ruleId: string) => {
 
 export const getUpgradeSingleRuleButtonByRuleId = (ruleId: string) => {
   return `[data-test-subj="upgradeSinglePrebuiltRuleButton-${ruleId}"]`;
+};
+
+export const getReviewSingleRuleButtonByRuleId = (ruleId: string) => {
+  return `[data-test-subj="reviewSinglePrebuiltRuleButton-${ruleId}"]`;
 };
 
 export const NO_RULES_AVAILABLE_FOR_INSTALL_MESSAGE =

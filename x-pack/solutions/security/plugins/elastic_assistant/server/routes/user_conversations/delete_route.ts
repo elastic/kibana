@@ -42,7 +42,7 @@ export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) =>
           const { id } = request.params;
 
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,

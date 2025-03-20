@@ -9,7 +9,16 @@
 
 import React from 'react';
 import { Position } from '@elastic/charts';
-import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiIcon,
+  EuiIconProps,
+  EuiText,
+  useEuiFontSize,
+  UseEuiTheme,
+  euiTextTruncate,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import type {
   IconPosition,
   ReferenceLineDecorationConfig,
@@ -105,36 +114,21 @@ export function MarkerBody({
   label: string | undefined;
   isHorizontal: boolean;
 }) {
-  if (!label) {
-    return null;
-  }
-  if (isHorizontal) {
-    return (
-      <div
-        className="eui-textTruncate"
-        css={{ maxWidth: LINES_MARKER_SIZE * 3 }}
-        data-test-subj="xyVisAnnotationText"
-      >
-        {label}
-      </div>
-    );
-  }
+  if (!label) return null;
+
+  const maxWidth = isHorizontal ? LINES_MARKER_SIZE * 3 : LINES_MARKER_SIZE;
+
   return (
     <div
-      className="xyDecorationRotatedWrapper"
       data-test-subj="xyVisAnnotationText"
-      css={{
-        width: LINES_MARKER_SIZE,
-      }}
+      css={[
+        css`
+          ${euiTextTruncate(`${maxWidth}px`)}
+        `,
+        !isHorizontal && styles.rotatedText,
+      ]}
     >
-      <div
-        className="eui-textTruncate xyDecorationRotatedWrapper__label"
-        css={{
-          maxWidth: LINES_MARKER_SIZE * 3,
-        }}
-      >
-        {label}
-      </div>
+      {label}
     </div>
   );
 }
@@ -143,12 +137,12 @@ function NumberIcon({ number }: { number: number }) {
   return (
     <EuiFlexGroup
       justifyContent="spaceAround"
-      className="xyAnnotationNumberIcon"
+      css={styles.numberIcon}
       data-test-subj="xyVisGroupedAnnotationIcon"
       gutterSize="none"
       alignItems="center"
     >
-      <EuiText color="ghost" className="xyAnnotationNumberIcon__text">
+      <EuiText color="ghost" css={[css(useEuiFontSize('xxxs')), styles.numberIconText]}>
         {number < 10 ? number : `9+`}
       </EuiText>
     </EuiFlexGroup>
@@ -176,12 +170,16 @@ export const AnnotationIcon = ({
   if (!iconConfig) {
     return null;
   }
+
+  const shouldRotateIcon = !isHorizontal && iconConfig.shouldRotate && renderedInChart;
+
   return (
     <EuiIcon
       {...rest}
       data-test-subj="xyVisAnnotationIcon"
       type={iconConfig.icon || type}
       className={iconConfig.shouldRotate ? rotateClassName : undefined}
+      css={shouldRotateIcon && styles.rotatedIcon}
     />
   );
 };
@@ -208,16 +206,55 @@ export function Marker({
 }) {
   if (hasIcon(config.icon)) {
     return (
-      <AnnotationIcon type={config.icon} rotateClassName={rotateClassName} renderedInChart={true} />
+      <AnnotationIcon
+        type={config.icon}
+        rotateClassName={rotateClassName}
+        renderedInChart={true}
+        isHorizontal={isHorizontal}
+      />
     );
   }
 
   // if there's some text, check whether to show it as marker, or just show some padding for the icon
   if (config.textVisibility) {
-    if (hasReducedPadding) {
+    if (hasReducedPadding && label) {
       return <MarkerBody label={label} isHorizontal={isHorizontal} />;
     }
     return <EuiIcon type="empty" />;
   }
   return null;
 }
+
+const styles = {
+  numberIcon: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      borderRadius: euiTheme.size.base,
+      minWidth: euiTheme.size.base,
+      height: euiTheme.size.base,
+      backgroundColor: 'currentColor',
+    }),
+
+  numberIconText: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      fontWeight: euiTheme.font.weight.medium,
+      letterSpacing: '-.5px',
+    }),
+
+  rotatedIcon: css({
+    transform: 'rotate(90deg) !important',
+    transformOrigin: 'center',
+  }),
+
+  rotatedText: css({
+    display: 'inline-block',
+    whiteSpace: 'nowrap',
+    transform: 'translate(0, 100%) rotate(-90deg)',
+    transformOrigin: '0 0',
+
+    '&::after': {
+      content: '""',
+      float: 'left',
+      marginTop: '100%',
+    },
+  }),
+};

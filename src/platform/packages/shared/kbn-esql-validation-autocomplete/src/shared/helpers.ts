@@ -11,7 +11,6 @@ import {
   Walker,
   type ESQLAstItem,
   type ESQLColumn,
-  type ESQLCommandMode,
   type ESQLCommandOption,
   type ESQLFunction,
   type ESQLLiteral,
@@ -66,9 +65,6 @@ export function isSingleItem(arg: ESQLAstItem): arg is ESQLSingleAstItem {
   return arg && !Array.isArray(arg);
 }
 
-export function isSettingItem(arg: ESQLAstItem): arg is ESQLCommandMode {
-  return isSingleItem(arg) && arg.type === 'mode';
-}
 export function isFunctionItem(arg: ESQLAstItem): arg is ESQLFunction {
   return isSingleItem(arg) && arg.type === 'function';
 }
@@ -110,7 +106,7 @@ export function isIncompleteItem(arg: ESQLAstItem): boolean {
   return !arg || (!Array.isArray(arg) && arg.incomplete);
 }
 
-export function isMathFunction(query: string, offset: number) {
+function isMathFunction(query: string) {
   const queryTrimmed = query.trimEnd();
   // try to get the full operation token (e.g. "+", "in", "like", etc...) but it requires the token
   // to be spaced out from a field/function (e.g. "field + ") so it is subject to issues
@@ -269,18 +265,26 @@ export function getColumnForASTNode(
 }
 
 /**
+ * Take a column name like "`my``column`"" and return "my`column"
+ */
+export function unescapeColumnName(columnName: string) {
+  // TODO this doesn't cover all escaping scenarios... the best thing to do would be
+  // to use the AST column node parts array, but in some cases the AST node isn't available.
+  if (columnName.startsWith(SINGLE_BACKTICK) && columnName.endsWith(SINGLE_BACKTICK)) {
+    return columnName.slice(1, -1).replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK);
+  }
+  return columnName;
+}
+
+/**
  * This function returns the variable or field matching a column
  */
 export function getColumnByName(
   columnName: string,
   { fields, variables }: Pick<ReferenceMaps, 'fields' | 'variables'>
 ): ESQLRealField | ESQLVariable | undefined {
-  // TODO this doesn't cover all escaping scenarios... the best thing to do would be
-  // to use the AST column node parts array, but in some cases the AST node isn't available.
-  if (columnName.startsWith(SINGLE_BACKTICK) && columnName.endsWith(SINGLE_BACKTICK)) {
-    columnName = columnName.slice(1, -1).replace(DOUBLE_TICKS_REGEX, SINGLE_BACKTICK);
-  }
-  return fields.get(columnName) || variables.get(columnName)?.[0];
+  const unescaped = unescapeColumnName(columnName);
+  return fields.get(unescaped) || variables.get(unescaped)?.[0];
 }
 
 const ARRAY_REGEXP = /\[\]$/;
@@ -755,8 +759,8 @@ export function correctQuerySyntax(_query: string, context: EditorContext) {
     (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
     // monaco.editor.CompletionTriggerKind['Invoke'] === 0
     (context.triggerKind === 0 && unclosedRoundBracketCount === 0) ||
-    (context.triggerCharacter === ' ' && isMathFunction(query, query.length)) ||
-    isComma(query.trimEnd()[query.trimEnd().length - 1])
+    isMathFunction(query) ||
+    /,\s+$/.test(query)
   ) {
     query += EDITOR_MARKER;
   }
