@@ -19,6 +19,7 @@ import {
   EuiPopover,
   EuiContextMenuPanel,
   EuiContextMenuItem,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -103,8 +104,9 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   spacer = true,
   scrollElementId,
 }) => {
-  const localSearchRef = useLocalSearch(list, !!isLoading);
 
+  const localSearchRef = useLocalSearch(list, !!isLoading);
+  const euiTheme = useEuiTheme();
   const [isPopoverOpen, setPopover] = useState(false);
 
   const MAX_SUBCATEGORIES_NUMBER = 6;
@@ -194,7 +196,15 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
         </StickySidebar>
       )}
 
-      <EuiFlexItem grow={5} data-test-subj="epmList.mainColumn" style={{ alignSelf: 'stretch' }}>
+      <EuiFlexItem
+        grow={5}
+        data-test-subj="epmList.mainColumn"
+        style={{
+          position: 'relative',
+          backgroundColor: euiTheme.euiTheme.colors.backgroundBasePlain,
+          alignSelf: 'stretch',
+        }}
+      >
         {showSearchTools && (
           <EuiFlexItem grow={false}>
             <SearchBox
