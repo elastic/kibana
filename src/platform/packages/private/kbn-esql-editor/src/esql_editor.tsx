@@ -55,7 +55,7 @@ import {
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
-import type { ESQLEditorProps, ESQLEditorDeps } from './types';
+import type { ESQLEditorProps, ESQLEditorDeps, ControlsContext } from './types';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -66,8 +66,8 @@ const triggerControl = async (
   position: monaco.Position | null | undefined,
   uiActions: ESQLEditorDeps['uiActions'],
   esqlVariables?: ESQLControlVariable[],
-  onSaveControl?: ESQLEditorProps['onSaveControl'],
-  onCancelControl?: ESQLEditorProps['onCancelControl']
+  onSaveControl?: ControlsContext['onSaveControl'],
+  onCancelControl?: ControlsContext['onCancelControl']
 ) => {
   await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
     queryString,
@@ -99,9 +99,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   hasOutline,
   displayDocumentationAsFlyout,
   disableAutoFocus,
-  onSaveControl,
-  onCancelControl,
-  supportsControls,
+  controlsContext,
   esqlVariables,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -221,7 +219,7 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
-    if (supportsControls) {
+    if (controlsContext?.supportsControls) {
       variablesService?.enableSuggestions();
 
       const variables = variablesService?.esqlVariables;
@@ -234,7 +232,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     } else {
       variablesService?.disableSuggestions();
     }
-  }, [variablesService, supportsControls, esqlVariables]);
+  }, [variablesService, controlsContext, esqlVariables]);
 
   const toggleHistory = useCallback((status: boolean) => {
     setIsHistoryOpen(status);
@@ -287,8 +285,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       position,
       uiActions,
       esqlVariables,
-      onSaveControl,
-      onCancelControl
+      controlsContext?.onSaveControl,
+      controlsContext?.onCancelControl
     );
   });
 
@@ -300,8 +298,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       position,
       uiActions,
       esqlVariables,
-      onSaveControl,
-      onCancelControl
+      controlsContext?.onSaveControl,
+      controlsContext?.onCancelControl
     );
   });
 
@@ -313,8 +311,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       position,
       uiActions,
       esqlVariables,
-      onSaveControl,
-      onCancelControl
+      controlsContext?.onSaveControl,
+      controlsContext?.onCancelControl
     );
   });
 
@@ -326,8 +324,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       position,
       uiActions,
       esqlVariables,
-      onSaveControl,
-      onCancelControl
+      controlsContext?.onSaveControl,
+      controlsContext?.onCancelControl
     );
   });
 
@@ -457,7 +455,7 @@ export const ESQLEditor = memo(function ESQLEditor({
               timeRange,
               abortController,
               undefined,
-              esqlVariables
+              variablesService?.esqlVariables
             ).result;
             const columns: ESQLRealField[] =
               table?.columns.map((c) => {
@@ -500,7 +498,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     return callbacks;
   }, [
     fieldsMetadata,
-    esqlVariables,
     kibana.services?.esql?.getJoinIndicesAutocomplete,
     dataSourcesCache,
     query.esql,
