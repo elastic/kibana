@@ -20,6 +20,7 @@ import { Integration } from '../../../../common/integrations';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useIntegrationList } from '../../hooks/use_integration_list';
 import { useCapabilities } from '../../hooks/use_capabilities';
+import { appPaths } from '../../app_paths';
 
 export const HomeIntegrationSection: React.FC<{}> = () => {
   const { navigateToWorkchatUrl } = useNavigation();
@@ -54,7 +55,7 @@ export const HomeIntegrationSection: React.FC<{}> = () => {
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={() => {
-                navigateToWorkchatUrl('/integrations');
+                navigateToWorkchatUrl(appPaths.integrations.list);
               }}
             >
               Go to integration management

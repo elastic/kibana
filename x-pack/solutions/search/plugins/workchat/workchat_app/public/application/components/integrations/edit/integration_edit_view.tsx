@@ -28,9 +28,10 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useBreadcrumb } from '../../../hooks/use_breadcrumbs';
 import { IntegrationEditState, useIntegrationEdit } from '../../../hooks/use_integration_edit';
 import { useIntegrationDelete } from '../../../hooks/use_integration_delete';
+import { useIntegrationConfigurationForm } from '../../../hooks/use_integration_configuration_form';
+import { appPaths } from '../../../app_paths';
 import { integrationLabels } from '../i18n';
 import { integrationTypeToLabel } from '../utils';
-import { useIntegrationConfigurationForm } from '../../../hooks/use_integration_configuration_form';
 
 interface IntegrationEditViewProps {
   integrationId: string | undefined;
@@ -55,7 +56,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
   useBreadcrumb(breadcrumb);
 
   const handleCancel = useCallback(() => {
-    navigateToWorkchatUrl('/integrations');
+    navigateToWorkchatUrl(appPaths.integrations.list);
   }, [navigateToWorkchatUrl]);
 
   const onSaveSuccess = useCallback(() => {
@@ -64,7 +65,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
         ? integrationLabels.notifications.integrationUpdatedToastText
         : integrationLabels.notifications.integrationCreatedToastText
     );
-    navigateToWorkchatUrl('/integrations');
+    navigateToWorkchatUrl(appPaths.integrations.list);
   }, [integrationId, navigateToWorkchatUrl, notifications]);
 
   const onSaveError = useCallback(
@@ -92,7 +93,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
 
   const onDeleteSuccess = useCallback(() => {
     notifications.toasts.addSuccess(integrationLabels.notifications.integrationDeletedToastText);
-    navigateToWorkchatUrl('/integrations');
+    navigateToWorkchatUrl(appPaths.integrations.list);
   }, [navigateToWorkchatUrl, notifications]);
 
   const onDeleteError = useCallback(
