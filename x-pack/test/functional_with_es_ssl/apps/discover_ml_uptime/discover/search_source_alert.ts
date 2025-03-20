@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const SOURCE_DATA_VIEW = 'search-source-alert';
   const OUTPUT_DATA_VIEW = 'search-source-alert-output';
-  const OTHER_DATA_VIEW = 'search-source-*';
+  const OTHER_DATA_VIEW = 'search-*';
   const ACTION_TYPE_ID = '.index';
   const RULE_NAME = 'test-search-source-alert';
   const ADHOC_RULE_NAME = 'test-adhoc-alert';
