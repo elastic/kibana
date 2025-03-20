@@ -15,35 +15,56 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe.only('updateMaintenanceWindow', () => {
+  const start = new Date();
+  const end = new Date(new Date(start).setMonth(start.getMonth() + 1));
+  const newEnd = new Date(new Date(start).setMonth(start.getMonth() + 2));
+
+  describe('updateMaintenanceWindow', () => {
     const objectRemover = new ObjectRemover(supertest);
     const createRequestBody = {
       title: 'test-maintenance-window',
       enabled: false,
-      start: '2026-02-07T09:17:06.790Z',
-      duration: 60 * 60 * 1000, // 1 hr
-      scope: { query: { kql: "_id: '1234'" } },
+      schedule: {
+        custom: {
+          duration: '1m',
+          start: start.toISOString(),
+          recurring: {
+            every: '2d',
+            end: end.toISOString(),
+            onWeekDay: ['MO', 'FR'],
+          },
+        },
+      },
+      scope: {
+        alerting: {
+          query: {
+            kql: "_id: '1234'",
+          },
+        },
+      },
     };
 
     const updateRequestBody = {
-      title: 'updated-maintenance-window',
+      title: 'test-UPDATE-maintenance-window',
       enabled: true,
-
-      // TODO categoryIds
-      // Updating the scope depends on the removal of categoryIds from the client
-      // See: https://github.com/elastic/kibana/issues/197530
-      // scope: { query: { kql: "_id: '12345'" } },
-
-      // TODO schedule schema
-      // every possible field should be passed
-      // recurring: {
-      //   end: '',
-      //   every: '',
-      //   onWeekDay: '',
-      //   onMonthDay: '',
-      //   onMonth: '',
-      //   ocurrences: 1234,
-      // },
+      schedule: {
+        custom: {
+          duration: '2m',
+          start: end.toISOString(),
+          recurring: {
+            every: '2d',
+            end: newEnd.toISOString(),
+            onWeekDay: ['WE'],
+          },
+        },
+      },
+      scope: {
+        alerting: {
+          query: {
+            kql: "_id: 'foobar'",
+          },
+        },
+      },
     };
     afterEach(() => objectRemover.removeAll());
 
@@ -60,9 +81,8 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
             objectRemover.add(
               space.id,
               createdMaintenanceWindow.id,
-              'rules/maintenance_window',
-              'alerting',
-              true
+              'maintenance_window',
+              'alerting'
             );
           }
 
@@ -92,22 +112,16 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              expect(response.body.title).to.eql('updated-maintenance-window');
+              expect(response.body.title).to.eql('test-UPDATE-maintenance-window');
               expect(response.body.enabled).to.eql(true);
-
+              expect(response.body.scope.alerting.query.kql).to.eql("_id: 'foobar'");
+              expect(response.body.created_by).to.eql('elastic');
               expect(response.body.updated_by).to.eql(scenario.user.username);
-
-              // TODO schedule schema
-              // We want to guarantee every field is returned as expected
-              // expect(response.body.duration).to.eql(updateRequestBody.schedule.custom.duration);
-              // expect(response.body.start).to.eql(updateRequestBody.schedule.custom.start);
-              // expect(response.body.expiration_date).to.eql('???');
-              // expect(response.body.recurring.end).to.eql();
-              // expect(response.body.recurring.every).to.eql();
-              // expect(response.body.recurring.onWeekDay).to.eql();
-              // expect(response.body.recurring.onMonthDay).to.eql();
-              // expect(response.body.recurring.onMonth).to.eql();
-              // expect(response.body.recurring.occurrences).to.eql();
+              expect(response.body.schedule.custom.duration).to.eql('2m');
+              expect(response.body.schedule.custom.start).to.eql(end.toISOString());
+              expect(response.body.schedule.custom.recurring.every).to.eql('2d');
+              expect(response.body.schedule.custom.recurring.end).to.eql(newEnd.toISOString());
+              expect(response.body.schedule.custom.recurring.onWeekDay).to.eql(['WE']);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -116,9 +130,20 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
       });
     }
 
-    it('should throw if creating maintenance window with invalid scoped query', async () => {
-      await supertest
+    it('should throw if updating maintenance window with invalid scoped query', async () => {
+      const { body: createdMaintenanceWindow } = await supertest
         .post(`${getUrlPrefix('space1')}/api/alerting/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send(createRequestBody);
+
+      if (createdMaintenanceWindow.id) {
+        objectRemover.add('space1', createdMaintenanceWindow.id, 'maintenance_window', 'alerting');
+      }
+
+      await supertest
+        .patch(
+          `${getUrlPrefix('space1')}/api/alerting/maintenance_window/${createdMaintenanceWindow.id}`
+        )
         .set('kbn-xsrf', 'foo')
         .send({
           ...updateRequestBody,
@@ -127,6 +152,28 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
               kql: 'invalid_kql:',
             },
           },
+        })
+        .expect(400);
+    });
+
+    it('should throw if updating maintenance window with unknown field', async () => {
+      const { body: createdMaintenanceWindow } = await supertest
+        .post(`${getUrlPrefix('space1')}/api/alerting/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send(createRequestBody);
+
+      if (createdMaintenanceWindow.id) {
+        objectRemover.add('space1', createdMaintenanceWindow.id, 'maintenance_window', 'alerting');
+      }
+
+      await supertest
+        .patch(
+          `${getUrlPrefix('space1')}/api/alerting/maintenance_window/${createdMaintenanceWindow.id}`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({
+          ...updateRequestBody,
+          foo: 'bar',
         })
         .expect(400);
     });

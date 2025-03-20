@@ -13,12 +13,12 @@ import { maintenanceWindowClientMock } from '../../../../../maintenance_window_c
 import { updateMaintenanceWindowRoute } from './update_maintenance_window_route';
 import { getMockMaintenanceWindow } from '../../../../../data/maintenance_window/test_helpers';
 import { MaintenanceWindowStatus } from '../../../../../../common';
-import { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
-import {
+import type { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
+import type {
   UpdateMaintenanceWindowRequestBody,
   UpdateMaintenanceWindowRequestParams,
 } from '../../../../../../common/routes/maintenance_window/external/apis/update';
-import { transformMaintenanceWindowToResponseV1 } from '../common/transforms';
+import { transformInternalMaintenanceWindowToExternalV1 } from '../common/transforms';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
@@ -35,21 +35,22 @@ const mockMaintenanceWindow = {
 } as MaintenanceWindow;
 
 const updateRequestBody = {
-  title: 'test-maintenance-window',
-  enabled: false,
-
-  // TODO schedule schema
-  // schedule: {
-  //   custom: {
-  //     start: '2026-02-07T09:17:06.790Z',
-  //     duration: 60 * 60 * 1000, // 1 hr
-  //   },
-  // },
-
-  // TODO categoryIds
-  // Updating the scope depends on the removal of categoryIds from the client
-  // See: https://github.com/elastic/kibana/issues/197530
-  // scope: { query: { kql: "_id: '1234'" } },
+  title: 'test-update-maintenance-window',
+  enabled: true,
+  schedule: {
+    custom: {
+      duration: '10d',
+      start: '2021-03-07T00:00:00.000Z',
+      recurring: { every: '1d', end: '2022-05-17T05:05:00.000Z', onWeekDay: ['MO', 'FR'] },
+    },
+  },
+  scope: {
+    alerting: {
+      query: {
+        kql: "_id: '1234'",
+      },
+    },
+  },
 } as UpdateMaintenanceWindowRequestBody;
 
 const updateRequestParams = {
@@ -97,25 +98,28 @@ describe('updateMaintenanceWindowRoute', () => {
     expect(maintenanceWindowClient.update).toHaveBeenLastCalledWith({
       id: 'foo-bar',
       data: {
-        title: 'test-maintenance-window',
-        enabled: false,
-
-        // TODO categoryIds
-        // scopedQuery: {
-        //   filters: [],
-        //   kql: "_id: '1234'",
-        // },
-
-        // TODO schedule schema
-        // duration: 60 * 60 * 1000, // 1 hr
-        // rRule: {
-        //   dtstart: '2026-02-07T09:17:06.790Z',
-        //   tzid: 'UTC',
-        // },
+        title: 'test-update-maintenance-window',
+        duration: 864000000,
+        enabled: true,
+        rRule: {
+          bymonth: undefined,
+          bymonthday: undefined,
+          byweekday: ['MO', 'FR'],
+          count: undefined,
+          dtstart: '2021-03-07T00:00:00.000Z',
+          freq: 3,
+          interval: 1,
+          tzid: 'UTC',
+          until: '2022-05-17T05:05:00.000Z',
+        },
+        scopedQuery: {
+          filters: [],
+          kql: "_id: '1234'",
+        },
       },
     });
     expect(res.ok).toHaveBeenLastCalledWith({
-      body: transformMaintenanceWindowToResponseV1(mockMaintenanceWindow),
+      body: transformInternalMaintenanceWindowToExternalV1(mockMaintenanceWindow),
     });
   });
 

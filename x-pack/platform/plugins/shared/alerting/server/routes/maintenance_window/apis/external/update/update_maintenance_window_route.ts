@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../../../../../lib';
+import type { IRouter } from '@kbn/core/server';
+import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
-import {
-  AlertingRequestHandlerContext,
-  BASE_MAINTENANCE_WINDOW_API_PATH,
-} from '../../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../../types';
+import { BASE_MAINTENANCE_WINDOW_API_PATH } from '../../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../../common';
-import { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
-import {
-  updateMaintenanceWindowRequestBodySchemaV1,
-  updateMaintenanceWindowRequestParamsSchemaV1,
+import type { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
+import type {
   UpdateMaintenanceWindowRequestBodyV1,
   UpdateMaintenanceWindowResponseV1,
   UpdateMaintenanceWindowRequestParamsV1,
 } from '../../../../../../common/routes/maintenance_window/external/apis/update';
+import {
+  updateMaintenanceWindowRequestBodySchemaV1,
+  updateMaintenanceWindowRequestParamsSchemaV1,
+} from '../../../../../../common/routes/maintenance_window/external/apis/update';
 import { maintenanceWindowResponseSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/response';
-import { transformMaintenanceWindowToResponseV1 } from '../common/transforms';
+import { transformInternalMaintenanceWindowToExternalV1 } from '../common/transforms';
+
 import { transformUpdateBodyV1 } from './transform_update_body';
 
 export const updateMaintenanceWindowRoute = (
@@ -82,7 +83,7 @@ export const updateMaintenanceWindowRoute = (
         });
 
         const response: UpdateMaintenanceWindowResponseV1 =
-          transformMaintenanceWindowToResponseV1(maintenanceWindow);
+          transformInternalMaintenanceWindowToExternalV1(maintenanceWindow);
 
         return res.ok({
           body: response,

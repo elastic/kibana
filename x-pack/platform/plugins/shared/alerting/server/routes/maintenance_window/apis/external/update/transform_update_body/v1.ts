@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { UpdateMaintenanceWindowRequestBodyV1 } from '../../../../../../../common/routes/maintenance_window/external/apis/update';
-import { UpdateMaintenanceWindowParams } from '../../../../../../application/maintenance_window/methods/update/types';
+import type { UpdateMaintenanceWindowRequestBodyV1 } from '../../../../../../../common/routes/maintenance_window/external/apis/update';
+import type { UpdateMaintenanceWindowParams } from '../../../../../../application/maintenance_window/methods/update/types';
+import { transformCustomScheduleToRRule } from '../../../../../../../common/routes/schedule';
 
 /**
  *  This function converts from the external, human readable, Maintenance Window creation/POST
@@ -15,26 +16,18 @@ import { UpdateMaintenanceWindowParams } from '../../../../../../application/mai
 export const transformUpdateBody = (
   updateBody: UpdateMaintenanceWindowRequestBodyV1
 ): UpdateMaintenanceWindowParams['data'] => {
-  // TODO categoryIds
-  // const kql = updateBody.scope?.query.kql;
+  const kql = updateBody?.scope?.alerting.query.kql;
+  let customSchedule;
 
-  // TODO schedule schema
-  // const customSchedule = updateBody.schedule?.custom;
+  if (updateBody.schedule?.custom) {
+    customSchedule = transformCustomScheduleToRRule(updateBody.schedule.custom);
+  }
 
   return {
-    title: updateBody.title,
-    enabled: updateBody.enabled,
-
-    // TODO categoryIds
-    // Updating the scope depends on the removal of categoryIds from the client
-    // See: https://github.com/elastic/kibana/issues/197530
-    // scopedQuery: kql ? { kql, filters: [] } : null,
-
-    // TODO schedule schema
-    // duration: customSchedule?.duration,
-    // rRule: {
-    //   dtstart: customSchedule?.start ?? '',
-    //   tzid: 'UTC',
-    // },
+    ...(updateBody.title && { title: updateBody.title }),
+    ...(typeof updateBody.enabled !== 'undefined' && { enabled: updateBody.enabled }),
+    ...(customSchedule?.duration && { duration: customSchedule.duration }),
+    ...(customSchedule?.rRule && { rRule: customSchedule.rRule }),
+    ...(kql && { scopedQuery: { kql, filters: [] } }),
   };
 };
