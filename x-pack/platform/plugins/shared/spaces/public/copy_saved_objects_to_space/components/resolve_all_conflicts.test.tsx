@@ -93,20 +93,9 @@ describe('ResolveAllConflicts', () => {
       <EuiPopover
         anchorPosition="downLeft"
         button={
-          <EuiLink
-            css={
-              Object {
-                "name": "mock-style",
-                "styles": "font-size:1.0000rem;;label:copy_status_summary_indicator--resolveAllConflictsLink;",
-              }
-            }
-            onClick={[Function]}
-          >
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="(resolve all)"
-              id="xpack.spaces.management.copyToSpace.resolveAllConflictsLink"
-            />
-          </EuiLink>
+          <ResolveAllButton
+            onButtonClick={[Function]}
+          />
         }
         closePopover={[Function]}
         display="inline-block"

@@ -6,15 +6,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiPanel, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import React, { Component, Fragment } from 'react';
@@ -33,26 +25,25 @@ const SectionPanelTitle = ({
   title: string | ReactNode;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const styles = {
-    collapsiblePanelLogo: css({
-      verticalAlign: 'text-bottom',
-      marginRight: euiTheme.size.s,
-    }),
-  };
   return (
     <EuiFlexGroup alignItems={'baseline'} gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
-          <h2>
-            {iconType && (
-              <Fragment>
-                <EuiIcon type={iconType} size={'xl'} css={styles.collapsiblePanelLogo} />
-              </Fragment>
-            )}
-            {title}
-          </h2>
-        </EuiTitle>
-      </EuiFlexItem>
+      <EuiTitle size="s">
+        <h2>
+          {iconType && (
+            <Fragment>
+              <EuiIcon
+                type={iconType}
+                size={'xl'}
+                css={css`
+                  vertical-align: text-bottom;
+                  margin-right: ${euiTheme.size.s};
+                `}
+              />
+            </Fragment>
+          )}
+          {title}
+        </h2>
+      </EuiTitle>
     </EuiFlexGroup>
   );
 };

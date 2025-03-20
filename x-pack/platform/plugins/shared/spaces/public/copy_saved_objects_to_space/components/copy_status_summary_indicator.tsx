@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiIconTip, EuiLoadingSpinner } from '@elastic/eui';
-import { type SerializedStyles } from '@emotion/react';
+import { EuiBadge, EuiIconTip, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { css, type SerializedStyles } from '@emotion/react';
 import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -28,10 +28,10 @@ interface Props {
   retries: ImportRetry[];
   onRetriesChange: (retries: ImportRetry[]) => void;
   onDestinationMapChange: (value?: Map<string, string>) => void;
-  styles: Styles;
 }
 
-const renderIcon = (props: Props) => {
+const CopyStatusIcon = (props: Props) => {
+  const { euiTheme } = useEuiTheme();
   const {
     space,
     summarizedCopyResult,
@@ -39,7 +39,6 @@ const renderIcon = (props: Props) => {
     retries,
     onRetriesChange,
     onDestinationMapChange,
-    styles,
   } = props;
   const getDataTestSubj = (status: string) => `cts-summary-indicator-${status}-${space.id}`;
 
@@ -89,7 +88,11 @@ const renderIcon = (props: Props) => {
   }
 
   const missingReferences = hasMissingReferences ? (
-    <span css={styles.missingReferencesIcon}>
+    <span
+      css={css`
+        margin-left: ${euiTheme.size.xs};
+      `}
+    >
       <EuiIconTip
         type={'link'}
         color={'warning'}
@@ -115,7 +118,6 @@ const renderIcon = (props: Props) => {
           retries={retries}
           onRetriesChange={onRetriesChange}
           onDestinationMapChange={onDestinationMapChange}
-          resolveAllConflictsLinkStyle={styles.resolveAllConflictsLink}
         />
         <EuiIconTip
           type={'alert'}
@@ -140,12 +142,18 @@ const renderIcon = (props: Props) => {
 };
 
 export const CopyStatusSummaryIndicator = (props: Props) => {
-  const { summarizedCopyResult, styles } = props;
-
+  const { summarizedCopyResult } = props;
+  const { euiTheme } = useEuiTheme();
   return (
     <Fragment>
-      {renderIcon(props)}
-      <EuiBadge css={styles.summaryCountBadge}>{summarizedCopyResult.objects.length}</EuiBadge>
+      <CopyStatusIcon {...props} />
+      <EuiBadge
+        css={css`
+          marginleft: ${euiTheme.size.xs};
+        `}
+      >
+        {summarizedCopyResult.objects.length}
+      </EuiBadge>
     </Fragment>
   );
 };

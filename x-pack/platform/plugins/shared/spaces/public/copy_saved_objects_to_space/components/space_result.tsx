@@ -12,7 +12,6 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
-  useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -48,12 +47,15 @@ const getInitialDestinationMap = (objects: SummarizedCopyToSpaceResult['objects'
 
 export const SpaceResultProcessing = (props: Pick<Props, 'space'>) => {
   const { space } = props;
-
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiAccordion
       id={`copyToSpace-${space.id}`}
       data-test-subj={`cts-space-result-${space.id}`}
-      className="spcCopyToSpaceResult"
+      css={css`
+        padding-bottom: ${euiTheme.size.s};
+        border-bottom: ${euiTheme.border.thin};
+      `}
       buttonContent={
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
@@ -84,28 +86,15 @@ export const SpaceResult = (props: Props) => {
     setDestinationMap(value || getInitialDestinationMap(objects));
   };
   const { euiTheme } = useEuiTheme();
-  const { fontSize } = useEuiFontSize('s');
-  const styles = {
-    spcCopyToSpaceResult: css({
-      paddingBottom: euiTheme.size.s,
-      borderBottom: euiTheme.border.thin,
-    }),
-    summaryCountBadge: css({
-      marginLeft: euiTheme.size.xs,
-    }),
-    missingReferencesIcon: css({
-      marginLeft: euiTheme.size.xs,
-    }),
-    resolveAllConflictsLink: css({
-      fontSize,
-    }),
-  };
 
   return (
     <EuiAccordion
       id={`copyToSpace-${space.id}`}
       data-test-subj={`cts-space-result-${space.id}`}
-      css={styles.spcCopyToSpaceResult}
+      css={css`
+        padding-bottom: ${euiTheme.size.s};
+        border-bottom: ${euiTheme.border.thin};
+      `}
       buttonContent={
         <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
@@ -126,7 +115,6 @@ export const SpaceResult = (props: Props) => {
           onDestinationMapChange={onDestinationMapChange}
           summarizedCopyResult={summarizedCopyResult}
           conflictResolutionInProgress={conflictResolutionInProgress && spaceHasPendingOverwrites}
-          styles={styles}
         />
       }
     >

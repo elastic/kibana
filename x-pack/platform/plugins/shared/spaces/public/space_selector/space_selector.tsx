@@ -162,6 +162,7 @@ export class SpaceSelector extends Component<Props, State> {
                     text-decoration: underline;
                   }
                 `}
+                tabIndex={-1}
                 ref={this.setHeaderRef}
               >
                 <FormattedMessage

@@ -62,19 +62,6 @@ export const SpaceCopyResultDetails = (props: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const styles = {
-    spcCopyToSpaceResultDetails: css({
-      marginTop: euiTheme.size.s,
-      paddingLeft: euiTheme.size.l,
-    }),
-    spcCopyToSpaceResultDetailsRow: css({
-      marginBottom: euiTheme.size.xs,
-    }),
-    savedObjectName: css({
-      minWidth: 0,
-    }),
-    selectControl: css({
-      marginLeft: euiTheme.size.l,
-    }),
     selectControlChildWrapper: css`
       visibility: hidden;
       opacity: 0;
@@ -96,7 +83,12 @@ export const SpaceCopyResultDetails = (props: Props) => {
   };
 
   return (
-    <div css={styles.spcCopyToSpaceResultDetails}>
+    <div
+      css={css`
+        margin-top: ${euiTheme.size.s};
+        padding-left: ${euiTheme.size.l};
+      `}
+    >
       {objects.map((object, index) => {
         const { type, id, name, icon, conflict } = object;
         const pendingObjectRetry = props.retries.find((r) => r.type === type && r.id === id);
@@ -170,14 +162,21 @@ export const SpaceCopyResultDetails = (props: Props) => {
               key={index}
               alignItems="center"
               gutterSize="s"
-              css={styles.spcCopyToSpaceResultDetailsRow}
+              css={css`
+                margin-bottom: ${euiTheme.size.xs};
+              `}
             >
               <EuiFlexItem grow={false}>
                 <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
                   <EuiIcon aria-label={getSavedObjectLabel(type)} type={icon} size="s" />
                 </EuiToolTip>
               </EuiFlexItem>
-              <EuiFlexItem grow={5} css={styles.savedObjectName}>
+              <EuiFlexItem
+                grow={5}
+                css={css`
+                  min-width: 0;
+                `}
+              >
                 <EuiText size="s">
                   <p className="eui-textTruncate" title={name}>
                     {name}
@@ -208,7 +207,11 @@ export const SpaceCopyResultDetails = (props: Props) => {
                 </div>
               </EuiFlexItem>
             </EuiFlexGroup>
-            <div css={styles.selectControl}>
+            <div
+              css={css`
+                margin-left: ${euiTheme.size.l};
+              `}
+            >
               <div css={childWrapperStyles(selectProps.options.length > 0 && isOverwritePending)}>
                 <EuiSuperSelect
                   options={selectProps.options}
