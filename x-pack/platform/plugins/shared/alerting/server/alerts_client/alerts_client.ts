@@ -422,17 +422,16 @@ export class AlertsClient<
     const currentTime = this.startedAtString ?? new Date().toISOString();
     const esClient = await this.options.elasticsearchClientPromise;
 
-    const { rawActiveAlerts, rawRecoveredAlerts } = this.getRawAlertInstancesForState();
-
     const activeAlerts = this.legacyAlertsClient.getProcessedAlerts('active');
     const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recovered');
+    const { rawRecoveredAlerts } = this.getRawAlertInstancesForState();
 
     // TODO - Lifecycle alerts set some other fields based on alert status
     // Example: workflow status - default to 'open' if not set
     // event action: new alert = 'new', active alert: 'active', otherwise 'close'
 
     const activeAlertsToIndex: Array<Alert & AlertData> = [];
-    for (const id of keys(rawActiveAlerts)) {
+    for (const id of keys(activeAlerts)) {
       // See if there's an existing active alert document
       const alert = activeAlerts[id];
       if (alert) {
@@ -497,37 +496,42 @@ export class AlertsClient<
     }
 
     const recoveredAlertsToIndex: Array<Alert & AlertData> = [];
-    for (const id of keys(rawRecoveredAlerts)) {
+    for (const id of keys(recoveredAlerts)) {
       // See if there's an existing alert document
       // If there is not, log an error because there should be
       if (Object.hasOwn(this.fetchedAlerts.data, id)) {
         const alert = recoveredAlerts[id];
-        recoveredAlertsToIndex.push(
-          alert
-            ? buildRecoveredAlert<
-                AlertData,
-                LegacyState,
-                LegacyContext,
-                ActionGroupIds,
-                RecoveryActionGroupId
-              >({
-                alert: this.fetchedAlerts.data[id],
-                legacyAlert: alert,
-                rule: this.rule,
-                runTimestamp: this.runTimestampString,
-                timestamp: currentTime,
-                payload: this.reportedAlerts[id],
-                recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
-                kibanaVersion: this.options.kibanaVersion,
-              })
-            : buildUpdatedRecoveredAlert<AlertData>({
-                alert: this.fetchedAlerts.data[id],
-                legacyRawAlert: rawRecoveredAlerts[id],
-                runTimestamp: this.runTimestampString,
-                timestamp: currentTime,
-                rule: this.rule,
-              })
-        );
+        const legacyRawAlert = rawRecoveredAlerts[id];
+        if (alert) {
+          recoveredAlertsToIndex.push(
+            buildRecoveredAlert<
+              AlertData,
+              LegacyState,
+              LegacyContext,
+              ActionGroupIds,
+              RecoveryActionGroupId
+            >({
+              alert: this.fetchedAlerts.data[id],
+              legacyAlert: alert,
+              rule: this.rule,
+              runTimestamp: this.runTimestampString,
+              timestamp: currentTime,
+              payload: this.reportedAlerts[id],
+              recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
+              kibanaVersion: this.options.kibanaVersion,
+            })
+          );
+        } else if (legacyRawAlert) {
+          recoveredAlertsToIndex.push(
+            buildUpdatedRecoveredAlert<AlertData>({
+              alert: this.fetchedAlerts.data[id],
+              legacyRawAlert,
+              runTimestamp: this.runTimestampString,
+              timestamp: currentTime,
+              rule: this.rule,
+            })
+          );
+        }
       }
     }
 
