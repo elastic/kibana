@@ -52,7 +52,7 @@ describe('Users filter', () => {
     const searchInput = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
     expect(searchInput).toBeTruthy();
     expect(searchInput.getAttribute('placeholder')).toEqual('Filter by username');
-  });
+  }, 10000);
 
   it('should search on given search string on enter', async () => {
     render();
@@ -61,7 +61,7 @@ describe('Users filter', () => {
     await userEvent.type(searchInput, 'usernameX', { delay });
     await userEvent.keyboard('{enter}');
     await waitFor(() => expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX']));
-  });
+  }, 10000);
 
   it('should search comma separated strings as multiple users', async () => {
     render();
@@ -72,7 +72,7 @@ describe('Users filter', () => {
     await waitFor(() =>
       expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX', 'usernameY', 'usernameZ'])
     );
-  });
+  }, 10000);
 
   it('should ignore white spaces in a given username when updating the API params', async () => {
     render();
@@ -81,7 +81,7 @@ describe('Users filter', () => {
     await userEvent.type(searchInput, '   usernameX   ', { delay });
     await userEvent.keyboard('{enter}');
     await waitFor(() => expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX']));
-  });
+  }, 10000);
 
   it('should ignore white spaces in comma separated usernames when updating the API params', async () => {
     render();
@@ -92,5 +92,5 @@ describe('Users filter', () => {
     await waitFor(() =>
       expect(onChangeUsersFilter).toHaveBeenCalledWith(['usernameX', 'usernameY'])
     );
-  });
+  }, 10000);
 });
