@@ -294,10 +294,6 @@ export interface CommandBaseDefinition<CommandName extends string> {
   alias?: string;
   description: string;
   /**
-   * How do I write this command? What is the pattern?
-   */
-  declaration: string;
-  /**
    * Displays a Technical preview label in the autocomplete
    */
   preview?: boolean;
@@ -346,6 +342,10 @@ export interface CommandOptionsDefinition<CommandName extends string = string>
 export interface CommandDefinition<CommandName extends string>
   extends CommandBaseDefinition<CommandName> {
   examples: string[];
+  /**
+   * How do I write this command? What is the pattern?
+   */
+  declaration: string;
   /**
    * This function is run when the command is being validated, but it does not
    * prevent the default behavior. If you need a full override, we are currently

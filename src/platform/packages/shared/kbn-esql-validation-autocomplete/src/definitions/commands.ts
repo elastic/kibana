@@ -16,6 +16,7 @@ import {
   isFunctionExpression,
   isWhereExpression,
   ESQLCommandMode,
+  ESQLCommandOption,
 } from '@kbn/esql-ast';
 import {
   isAssignment,
@@ -54,6 +55,7 @@ import { suggest as suggestForStats } from '../autocomplete/commands/stats';
 import { suggest as suggestForWhere } from '../autocomplete/commands/where';
 
 import { getMessageFromId } from '../validation/errors';
+import { METADATA_FIELDS } from '../shared/constants';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -171,6 +173,34 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [{ name: 'index', type: 'source', wildcards: true }],
     },
     suggest: suggestForFrom,
+    validate: (command: ESQLCommand) => {
+      const metadataStatement = command.args.find(
+        (arg) => isSingleItem(arg) && arg.name === 'metadata'
+      ) as ESQLCommandOption | undefined;
+
+      if (!metadataStatement) {
+        return [];
+      }
+
+      const messages: ESQLMessage[] = [];
+
+      const fields = metadataStatement.args.filter(isColumnItem);
+      for (const field of fields) {
+        if (!METADATA_FIELDS.includes(field.name)) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'unknownMetadataField',
+              values: {
+                value: field.name,
+                availableFields: Array.from(METADATA_FIELDS).join(', '),
+              },
+              locations: field.location,
+            })
+          );
+        }
+      }
+      return messages;
+    },
   },
   {
     name: 'show',
