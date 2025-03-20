@@ -6566,6 +6566,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/projects-solutions-groups@link:src/platform/packages/private/kbn-projects-solutions-groups":
+  version "0.0.0"
+  uid ""
+
 "@kbn/random-sampling@link:x-pack/platform/packages/private/kbn-random-sampling":
   version "0.0.0"
   uid ""
@@ -7155,6 +7159,14 @@
   uid ""
 
 "@kbn/server-route-repository@link:src/platform/packages/shared/kbn-server-route-repository":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-chat-settings@link:src/platform/packages/shared/serverless/settings/chat_project":
+  version "0.0.0"
+  uid ""
+
+"@kbn/serverless-chat@link:x-pack/solutions/chat/plugins/serverless_chat":
   version "0.0.0"
   uid ""
 
