@@ -10,6 +10,7 @@ import { badRequest } from '@hapi/boom';
 import { buildEsQuery } from '@kbn/es-query';
 import { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { isEmpty } from 'lodash';
 import { createServerRoute } from '../../create_server_route';
 
 const stringToDate = z.string().transform((arg) => new Date(arg));
@@ -50,6 +51,9 @@ export const readSignificantEventsRoute = createServerRoute({
     const { from, to, bucketSize } = params.query;
 
     const assetLinks = await assetClient.getAssetLinks(name, ['query']);
+    if (isEmpty(assetLinks)) {
+      return [];
+    }
 
     const searchRequests = assetLinks.flatMap((asset) => {
       return [
