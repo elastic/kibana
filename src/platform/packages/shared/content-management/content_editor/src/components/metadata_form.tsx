@@ -81,6 +81,12 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
             onChange={(e) => {
               setTitle(e.target.value);
             }}
+            aria-label={i18n.translate(
+              'contentManagement.contentEditor.metadataForm.nameInputLabel',
+              {
+                defaultMessage: 'Name',
+              }
+            )}
             fullWidth
             data-test-subj="nameInput"
             readOnly={isReadonly}
@@ -115,6 +121,12 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
             fullWidth
             data-test-subj="descriptionInput"
             readOnly={isReadonly}
+            aria-label={i18n.translate(
+              'contentManagement.contentEditor.metadataForm.descriptionInputLabel',
+              {
+                defaultMessage: 'Description',
+              }
+            )}
           />
         </EuiToolTip>
       </EuiFormRow>
