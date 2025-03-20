@@ -7,23 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CANCEL = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.settingsFlyout.cancelButton',
+export const CLOSE = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.settingsFlyout.closeButton',
   {
-    defaultMessage: 'Cancel',
-  }
-);
-
-export const SAVE = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.settingsFlyout.saveButton',
-  {
-    defaultMessage: 'Save',
-  }
-);
-
-export const RESET = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.settingsFlyout.resetLabel',
-  {
-    defaultMessage: 'Reset',
+    defaultMessage: 'Close',
   }
 );

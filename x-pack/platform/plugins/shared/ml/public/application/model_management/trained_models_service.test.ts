@@ -6,7 +6,6 @@
  */
 import { BehaviorSubject, throwError, of } from 'rxjs';
 import type { Observable } from 'rxjs';
-import type { SavedObjectsApiService } from '../services/ml_api_service/saved_objects';
 import type { TrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import type { ScheduledDeployment } from './trained_models_service';
 import { TrainedModelsService } from './trained_models_service';
@@ -27,7 +26,6 @@ const flushPromises = () =>
 
 describe('TrainedModelsService', () => {
   let mockTrainedModelsApiService: jest.Mocked<TrainedModelsApiService>;
-  let mockSavedObjectsApiService: jest.Mocked<SavedObjectsApiService>;
   let trainedModelsService: TrainedModelsService;
   let scheduledDeploymentsSubject: BehaviorSubject<ScheduledDeployment[]>;
   let mockSetScheduledDeployments: jest.Mock<any, any>;
@@ -101,10 +99,6 @@ describe('TrainedModelsService', () => {
       deleteTrainedModel: jest.fn(),
     } as unknown as jest.Mocked<TrainedModelsApiService>;
 
-    mockSavedObjectsApiService = {
-      trainedModelsSpaces: jest.fn(),
-    } as unknown as jest.Mocked<SavedObjectsApiService>;
-
     mockDeploymentParamsMapper = {
       mapUiToApiDeploymentParams: jest.fn().mockReturnValue({
         modelId: 'test-model',
@@ -129,16 +123,11 @@ describe('TrainedModelsService', () => {
       setScheduledDeployments: mockSetScheduledDeployments,
       displayErrorToast: mockDisplayErrorToast,
       displaySuccessToast: mockDisplaySuccessToast,
-      savedObjectsApiService: mockSavedObjectsApiService,
-      canManageSpacesAndSavedObjects: true,
       telemetryService: mockTelemetryService,
       deploymentParamsMapper: mockDeploymentParamsMapper,
     });
 
     mockTrainedModelsApiService.getTrainedModelsList.mockResolvedValue([]);
-    mockSavedObjectsApiService.trainedModelsSpaces.mockResolvedValue({
-      trainedModels: {},
-    });
   });
 
   afterEach(() => {
@@ -155,11 +144,6 @@ describe('TrainedModelsService', () => {
     ];
 
     mockTrainedModelsApiService.getTrainedModelsList.mockResolvedValue(mockModels);
-    mockSavedObjectsApiService.trainedModelsSpaces.mockResolvedValue({
-      trainedModels: {
-        'test-model-1': ['default'],
-      },
-    });
 
     const sub = trainedModelsService.modelItems$.subscribe((items) => {
       if (items.length > 0) {
