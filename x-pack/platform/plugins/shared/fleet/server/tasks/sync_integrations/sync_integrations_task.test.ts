@@ -14,13 +14,13 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { CoreSetup } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { createAppContextStartContractMock, createMockPackageService } from '../mocks';
+import { createAppContextStartContractMock, createMockPackageService } from '../../mocks';
 
-import { appContextService, outputService } from '../services';
+import { appContextService, outputService } from '../../services';
 
 import { SyncIntegrationsTask, TYPE, VERSION } from './sync_integrations_task';
 
-jest.mock('../services', () => ({
+jest.mock('../../services', () => ({
   appContextService: {
     getExperimentalFeatures: jest.fn().mockReturnValue({ enableSyncIntegrationsOnRemote: true }),
     start: jest.fn(),
@@ -32,12 +32,12 @@ jest.mock('../services', () => ({
 
 const mockOutputService = outputService as jest.Mocked<typeof outputService>;
 
-jest.mock('../services/epm/packages/get', () => ({
+jest.mock('../../services/epm/packages/get', () => ({
   getInstalledPackageSavedObjects: jest.fn().mockResolvedValue({
     saved_objects: [
       {
         attributes: {
-          name: 'package-1',
+          name: 'system',
           version: '0.1.0',
           updated_at: new Date().toISOString(),
         },
@@ -129,6 +129,19 @@ describe('SyncIntegrationsTask', () => {
       const [{ elasticsearch }] = await mockCore.getStartServices();
       esClient = elasticsearch.client.asInternalUser as ElasticsearchClientMock;
       esClient.indices.exists.mockResolvedValue(true);
+      esClient.cluster.getComponentTemplate.mockResolvedValue({
+        component_templates: [
+          {
+            name: 'logs-system.auth@custom',
+            component_template: { template: {} },
+          },
+        ],
+      });
+      esClient.ingest.getPipeline.mockResolvedValue({
+        'logs-system.auth@custom': {
+          processors: [],
+        },
+      });
     });
 
     afterEach(() => {
@@ -141,7 +154,7 @@ describe('SyncIntegrationsTask', () => {
       expect(result).toEqual(getDeleteTaskRunResult());
     });
 
-    it('Should update fleet-synced-integrations doc', async () => {
+    it('Should create fleet-synced-integrations doc', async () => {
       mockOutputService.list.mockResolvedValue({
         items: [
           {
@@ -160,14 +173,14 @@ describe('SyncIntegrationsTask', () => {
       } as any);
       await runTask();
 
-      expect(esClient.update).toHaveBeenCalledWith(
+      expect(esClient.index).toHaveBeenCalledWith(
         {
           id: 'fleet-synced-integrations',
           index: 'fleet-synced-integrations',
-          doc: {
+          body: {
             integrations: [
               {
-                package_name: 'package-1',
+                package_name: 'system',
                 package_version: '0.1.0',
                 updated_at: expect.any(String),
               },
@@ -181,14 +194,78 @@ describe('SyncIntegrationsTask', () => {
               { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: true },
               { hosts: ['https://remote2:9200'], name: 'remote2', sync_integrations: false },
             ],
+            custom_assets: {
+              'component_template:logs-system.auth@custom': {
+                is_deleted: false,
+                name: 'logs-system.auth@custom',
+                package_name: 'system',
+                package_version: '0.1.0',
+                template: {},
+                type: 'component_template',
+              },
+              'ingest_pipeline:logs-system.auth@custom': {
+                is_deleted: false,
+                name: 'logs-system.auth@custom',
+                package_name: 'system',
+                package_version: '0.1.0',
+                pipeline: {
+                  processors: [],
+                },
+                type: 'ingest_pipeline',
+              },
+            },
           },
-          doc_as_upsert: true,
         },
         expect.anything()
       );
     });
 
-    it('Should not update fleet-synced-integrations doc if no outputs with sync enabled', async () => {
+    it('Should save custom assets error', async () => {
+      mockOutputService.list.mockResolvedValue({
+        items: [
+          {
+            type: 'remote_elasticsearch',
+            name: 'remote1',
+            hosts: ['https://remote1:9200'],
+            sync_integrations: true,
+          },
+        ],
+      } as any);
+      esClient.ingest.getPipeline.mockRejectedValue(new Error('es error'));
+      await runTask();
+
+      expect(esClient.index).toHaveBeenCalledWith(
+        {
+          id: 'fleet-synced-integrations',
+          index: 'fleet-synced-integrations',
+          body: {
+            integrations: [
+              {
+                package_name: 'system',
+                package_version: '0.1.0',
+                updated_at: expect.any(String),
+              },
+              {
+                package_name: 'package-2',
+                package_version: '0.2.0',
+                updated_at: expect.any(String),
+              },
+            ],
+            remote_es_hosts: [
+              { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: true },
+            ],
+            custom_assets: {},
+            custom_assets_error: {
+              timestamp: expect.any(String),
+              error: 'es error',
+            },
+          },
+        },
+        expect.anything()
+      );
+    });
+
+    it('Should not index fleet-synced-integrations doc if no outputs with sync enabled', async () => {
       mockOutputService.list.mockResolvedValue({
         items: [
           {
@@ -201,10 +278,10 @@ describe('SyncIntegrationsTask', () => {
       } as any);
       await runTask();
 
-      expect(esClient.update).not.toHaveBeenCalled();
+      expect(esClient.index).not.toHaveBeenCalled();
     });
 
-    it('Should update fleet-synced-integrations doc if sync flag changed from true to false', async () => {
+    it('Should index fleet-synced-integrations doc if sync flag changed from true to false', async () => {
       mockOutputService.list.mockResolvedValue({
         items: [
           {
@@ -224,10 +301,10 @@ describe('SyncIntegrationsTask', () => {
       } as any);
       await runTask();
 
-      expect(esClient.update).toHaveBeenCalled();
+      expect(esClient.index).toHaveBeenCalled();
     });
 
-    it('Should not update fleet-synced-integrations doc if sync flag already false', async () => {
+    it('Should not index fleet-synced-integrations doc if sync flag already false', async () => {
       mockOutputService.list.mockResolvedValue({
         items: [
           {
@@ -243,14 +320,17 @@ describe('SyncIntegrationsTask', () => {
           remote_es_hosts: [
             { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: false },
           ],
+          integrations: [],
+          custom_assets: {},
+          custom_assets_error: {},
         },
       } as any);
       await runTask();
 
-      expect(esClient.update).not.toHaveBeenCalled();
+      expect(esClient.index).not.toHaveBeenCalled();
     });
 
-    it('Should not update fleet-synced-integrations doc if sync doc does not exist', async () => {
+    it('Should not index fleet-synced-integrations doc if sync doc does not exist', async () => {
       mockOutputService.list.mockResolvedValue({
         items: [
           {
@@ -264,7 +344,7 @@ describe('SyncIntegrationsTask', () => {
       esClient.get.mockRejectedValue({ statusCode: 404 });
       await runTask();
 
-      expect(esClient.update).not.toHaveBeenCalled();
+      expect(esClient.index).not.toHaveBeenCalled();
     });
   });
 });
