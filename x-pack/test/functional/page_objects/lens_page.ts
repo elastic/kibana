@@ -397,7 +397,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       reverse = false,
       metaKey?: 'shift' | 'alt' | 'ctrl'
     ) {
-      const field = await find.byCssSelector( 
+      const field = await find.byCssSelector(
         `[data-attr-field="${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
       );
       await field.focus();
