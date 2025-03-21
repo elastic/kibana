@@ -49,7 +49,7 @@ export const AddToDashboard = ({
       const embeddableInput = {};
 
       const state = {
-        input: embeddableInput,
+        serializedState: { rawState: embeddableInput },
         type,
       };
 
