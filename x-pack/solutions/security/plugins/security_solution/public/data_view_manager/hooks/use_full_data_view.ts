@@ -34,13 +34,13 @@ export const useFullDataView = (
 
   useEffect(() => {
     (async () => {
-      if (!dataViewId) {
+      if (!dataViewId || internalStatus !== 'ready') {
         return setRetrievedDataView(undefined);
       }
 
       setRetrievedDataView(await dataViews.get(dataViewId));
     })();
-  }, [dataViews, dataViewId]);
+  }, [dataViews, dataViewId, internalStatus]);
 
   return useMemo(() => {
     if (!newDataViewPickerEnabled) {
