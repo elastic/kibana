@@ -47,15 +47,21 @@ const privilegeSetSchema = schema.object(
   }
 );
 
-const unwindPrivileges = (privileges: AllRequiredCondition | AnyRequiredCondition): string[] => {
-  return privileges.reduce<string[]>((acc, privilege) => {
-    if (typeof privilege === 'object') {
-      return [...acc, ...(privilege.allOf ?? []), ...(privilege.anyOf ?? [])];
-    }
+const unwindNestedPrivileges = (
+  privileges: AllRequiredCondition | AnyRequiredCondition
+): string[] =>
+  privileges.reduce<string[]>(
+    (acc: string[], privilege: string | { anyOf?: string[]; allOf?: string[] }) => {
+      if (typeof privilege === 'object') {
+        acc.push(...(privilege.allOf ?? []), ...(privilege.anyOf ?? []));
+      } else if (typeof privilege === 'string') {
+        acc.push(privilege);
+      }
 
-    return [...acc, privilege];
-  }, []);
-};
+      return acc;
+    },
+    []
+  );
 
 const requiredPrivilegesSchema = schema.arrayOf(
   schema.oneOf([privilegeSetSchema, schema.string()]),
@@ -73,10 +79,10 @@ const requiredPrivilegesSchema = schema.arrayOf(
           allRequired.push(privilege);
         } else {
           if (privilege.anyRequired) {
-            anyRequired.push(...unwindPrivileges(privilege.anyRequired));
+            anyRequired.push(...unwindNestedPrivileges(privilege.anyRequired));
           }
           if (privilege.allRequired) {
-            allRequired.push(...unwindPrivileges(privilege.allRequired));
+            allRequired.push(...unwindNestedPrivileges(privilege.allRequired));
           }
         }
       });
