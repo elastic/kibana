@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { mockIndicatorsFiltersContext } from '../../../../mocks/mock_indicators_filters_context';
@@ -25,7 +25,7 @@ const context = {
   kqlBarIntegration: false,
 };
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   const mockIndicator: Indicator = generateMockIndicator();
   const KibanaReactContext = createKibanaReactContext({
     uiSettings: mockUiSettingsService(),
@@ -43,7 +43,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const EmptyIndicator: Story<void> = () => {
+export const EmptyIndicator: StoryFn = () => {
   return (
     <IndicatorsFlyoutContext.Provider value={context}>
       <IndicatorsFlyoutTable indicator={{ fields: {} } as unknown as Indicator} />
