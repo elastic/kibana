@@ -26,7 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
   const logger = getService('log');
   const es = getService('es');
 
-  describe('Ingest pipeline stats task telemetry.', function () {
+  describe('Security Telemetry - Ingest pipeline stats task.', function () {
     let datastream: string;
     let pipeline: string;
 
