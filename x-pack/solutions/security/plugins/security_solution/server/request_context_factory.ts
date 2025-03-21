@@ -265,6 +265,8 @@ export class RequestContextFactory implements IRequestContextFactory {
             request,
             namespace: getSpaceId(),
           }),
+          security: startPlugins.security,
+          request,
         });
       }),
     };

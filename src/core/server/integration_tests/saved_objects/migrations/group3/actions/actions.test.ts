@@ -66,11 +66,14 @@ describe('migration actions', () => {
   let esCapabilities: ReturnType<typeof elasticsearchServiceMock.createCapabilities>;
 
   beforeAll(async () => {
+    // start ES and get capabilities
     esServer = await startES();
     // we don't need a long timeout for testing purposes
     client = esServer.es.getClient().child({ ...MIGRATION_CLIENT_OPTIONS, requestTimeout: 10_000 });
     esCapabilities = elasticsearchServiceMock.createCapabilities();
+  });
 
+  beforeAll(async () => {
     // Create test fixture data:
     await createIndex({
       client,
@@ -92,12 +95,14 @@ describe('migration actions', () => {
       },
     })();
     const docs = [
-      { _source: { title: 'doc 1' } },
-      { _source: { title: 'doc 2' } },
-      { _source: { title: 'doc 3' } },
-      { _source: { title: 'saved object 4', type: 'another_unused_type' } },
-      { _source: { title: 'f-agent-event 5', type: 'f_agent_event' } },
-      { _source: { title: new Array(1000).fill('a').join(), type: 'large' } }, // "large" saved object
+      { _source: { title: 'doc 1', order: 1 } },
+      { _source: { title: 'doc 2', order: 2 } },
+      { _source: { title: 'doc 3', order: 3 } },
+      { _source: { title: 'saved object 4', type: 'another_unused_type', order: 4 } },
+      { _source: { title: 'f-agent-event 5', type: 'f_agent_event', order: 5 } },
+      {
+        _source: { title: new Array(1000).fill('a').join(), type: 'large' },
+      }, // "large" saved objects
     ] as unknown as SavedObjectsRawDoc[];
     await bulkOverwriteTransformedDocuments({
       client,
@@ -430,7 +435,9 @@ describe('migration actions', () => {
       await indexStatusPromise;
       // Assert that the promise didn't resolve before the index became yellow
 
-      const yellowStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
+      const yellowStatusResponse = await client.cluster.health({
+        index: 'red_then_yellow_index',
+      });
       expect(yellowStatusResponse.status).toBe('yellow');
     });
     it('resolves left with "index_not_yellow_timeout" after waiting for an index status to be yellow timeout', async () => {
@@ -879,7 +886,7 @@ describe('migration actions', () => {
       `);
     });
     it('resolves right and proceeds to add missing documents if there are some existing docs conflicts', async () => {
-      expect.assertions(2);
+      expect.assertions(4);
       // Simulate a reindex that only adds some of the documents from the
       // source index into the target index
       await createIndex({
@@ -888,13 +895,22 @@ describe('migration actions', () => {
         mappings: { properties: {} },
         esCapabilities,
       })();
-      const response = await client.search({ index: 'existing_index_with_docs', size: 1000 });
+
+      const response = await client.search({
+        index: 'existing_index_with_docs',
+        size: 2,
+        sort: 'order',
+      });
+
       const sourceDocs = (response.hits?.hits as SavedObjectsRawDoc[])
         .slice(0, 2)
         .map(({ _id, _source }) => ({
           _id,
           _source,
         }));
+      expect(sourceDocs[0]._source.title).toEqual('doc 1');
+      expect(sourceDocs[1]._source.title).toEqual('doc 2');
+
       await bulkOverwriteTransformedDocuments({
         client,
         index: 'reindex_target_4',

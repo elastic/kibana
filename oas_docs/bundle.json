@@ -4828,6 +4828,298 @@
         ]
       }
     },
+    "/api/alerting/rule/{id}/snooze_schedule": {
+      "post": {
+        "description": "When you snooze a rule, the rule checks continue to run but alerts will not generate actions. You can snooze for a specified period of time and schedule single or recurring downtimes.",
+        "operationId": "post-alerting-rule-id-snooze-schedule",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Identifier of the rule.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "schedule": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "custom": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "duration": {
+                            "description": "The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.",
+                            "type": "string"
+                          },
+                          "recurring": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "end": {
+                                "description": "The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.",
+                                "type": "string"
+                              },
+                              "every": {
+                                "description": "The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.",
+                                "type": "string"
+                              },
+                              "occurrences": {
+                                "description": "The total number of recurrences of the schedule.",
+                                "minimum": 1,
+                                "type": "number"
+                              },
+                              "onMonth": {
+                                "description": "The specific months for a recurring schedule. Valid values are 1-12.",
+                                "items": {
+                                  "maximum": 12,
+                                  "minimum": 1,
+                                  "type": "number"
+                                },
+                                "minItems": 1,
+                                "type": "array"
+                              },
+                              "onMonthDay": {
+                                "description": "The specific days of the month for a recurring schedule. Valid values are 1-31.",
+                                "items": {
+                                  "maximum": 31,
+                                  "minimum": 1,
+                                  "type": "number"
+                                },
+                                "minItems": 1,
+                                "type": "array"
+                              },
+                              "onWeekDay": {
+                                "description": "The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.",
+                                "items": {
+                                  "type": "string"
+                                },
+                                "minItems": 1,
+                                "type": "array"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "start": {
+                            "description": "The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.",
+                            "type": "string"
+                          },
+                          "timezone": {
+                            "description": "The timezone of the schedule. The default timezone is UTC.",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "start",
+                          "duration"
+                        ],
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "schedule"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "body": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "schedule": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "custom": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "duration": {
+                                  "description": "The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.",
+                                  "type": "string"
+                                },
+                                "recurring": {
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "end": {
+                                      "description": "The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.",
+                                      "type": "string"
+                                    },
+                                    "every": {
+                                      "description": "The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.",
+                                      "type": "string"
+                                    },
+                                    "occurrences": {
+                                      "description": "The total number of recurrences of the schedule.",
+                                      "minimum": 1,
+                                      "type": "number"
+                                    },
+                                    "onMonth": {
+                                      "description": "The specific months for a recurring schedule. Valid values are 1-12.",
+                                      "items": {
+                                        "maximum": 12,
+                                        "minimum": 1,
+                                        "type": "number"
+                                      },
+                                      "minItems": 1,
+                                      "type": "array"
+                                    },
+                                    "onMonthDay": {
+                                      "description": "The specific days of the month for a recurring schedule. Valid values are 1-31.",
+                                      "items": {
+                                        "maximum": 31,
+                                        "minimum": 1,
+                                        "type": "number"
+                                      },
+                                      "minItems": 1,
+                                      "type": "array"
+                                    },
+                                    "onWeekDay": {
+                                      "description": "The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.",
+                                      "items": {
+                                        "type": "string"
+                                      },
+                                      "minItems": 1,
+                                      "type": "array"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "start": {
+                                  "description": "The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.",
+                                  "type": "string"
+                                },
+                                "timezone": {
+                                  "description": "The timezone of the schedule. The default timezone is UTC.",
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "start",
+                                "duration"
+                              ],
+                              "type": "object"
+                            },
+                            "id": {
+                              "description": "Identifier of the snooze schedule.",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "schedule"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "body"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given id does not exist."
+          }
+        },
+        "summary": "Schedule a snooze for the rule",
+        "tags": [
+          "alerting"
+        ]
+      }
+    },
+    "/api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}": {
+      "delete": {
+        "operationId": "delete-alerting-rule-ruleid-snooze-schedule-scheduleid",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The identifier for the rule.",
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The identifier for the snooze schedule.",
+            "in": "path",
+            "name": "scheduleId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given id does not exist."
+          }
+        },
+        "summary": "Delete a snooze schedule for a rule",
+        "tags": [
+          "alerting"
+        ]
+      }
+    },
     "/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute": {
       "post": {
         "operationId": "post-alerting-rule-rule-id-alert-alert-id-mute",

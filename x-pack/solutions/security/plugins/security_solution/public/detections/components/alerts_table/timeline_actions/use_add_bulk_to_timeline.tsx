@@ -15,7 +15,7 @@ import {
   dataTableActions,
   TableId,
   tableDefaults,
-  getTableByIdSelector,
+  dataTableSelectors,
 } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import type { CustomBulkAction } from '../../../../../common/types';
@@ -51,6 +51,7 @@ export interface UseAddBulkToTimelineActionProps {
   scopeId: SourcererScopeName;
 }
 
+const fields = ['_id', 'timestamp'];
 /*
  * useAddBulkToTimelineAction  returns a bulk action that can be passed to the
  * TGrid so that multiple items at a time can be added to the timeline.
@@ -81,9 +82,9 @@ export const useAddBulkToTimelineAction = ({
 
   const selectGlobalFiltersQuerySelector = useMemo(() => globalFiltersQuerySelector(), []);
   const filters = useSelector(selectGlobalFiltersQuerySelector);
-  const selectTableById = useMemo(() => getTableByIdSelector(), []);
+  const selectTableById = useMemo(() => dataTableSelectors.createTableSelector(tableId), [tableId]);
   const { selectAll, totalCount, sort, selectedEventIds } = useSelector(
-    (state: State) => selectTableById(state, tableId) ?? tableDefaults
+    (state: State) => selectTableById(state) ?? tableDefaults
   );
 
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
@@ -123,7 +124,7 @@ export const useAddBulkToTimelineAction = ({
     endDate: to,
     startDate: from,
     id: tableId,
-    fields: ['_id', 'timestamp'],
+    fields,
     sort: timelineQuerySortField,
     indexNames: selectedPatterns,
     filterQuery,
