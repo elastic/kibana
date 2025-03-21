@@ -18,6 +18,7 @@ export interface UseSectionsParams {
 }
 
 export interface UseSectionsResult {
+  contextMenuSettings?: Panel['contextSettingsMenuItems'];
   /**
    * The left section to be displayed in the flyout.
    */
@@ -70,15 +71,27 @@ export const useSections = ({ registeredPanels }: UseSectionsParams): UseSection
         : undefined,
     [mostRecentPreview?.params?.banner]
   );
+  const contextMenuSettings = useMemo(
+    () => registeredPanels.find((panel) => panel.key === right?.id)?.contextSettingsMenuItems,
+    [registeredPanels, right]
+  );
 
   return useMemo(
     () => ({
+      contextMenuSettings,
       leftSection,
       rightSection,
       previewSection,
       mostRecentPreviewBanner,
       mostRecentPreview,
     }),
-    [leftSection, rightSection, previewSection, mostRecentPreviewBanner, mostRecentPreview]
+    [
+      contextMenuSettings,
+      leftSection,
+      rightSection,
+      previewSection,
+      mostRecentPreviewBanner,
+      mostRecentPreview,
+    ]
   );
 };

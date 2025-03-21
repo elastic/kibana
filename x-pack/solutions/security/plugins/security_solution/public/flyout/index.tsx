@@ -8,6 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
+import { AnonymizationSwitch } from './ai_for_soc/constants/anonymization_switch';
 import { IOCPanelKey } from './ai_for_soc/constants/panel_keys';
 import type { UniversalEntityPanelExpandableFlyoutProps } from './entity_details/universal_right';
 import { UniversalEntityPanel } from './entity_details/universal_right';
@@ -197,6 +198,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
         <AIForSOCPanel />
       </AIForSOCDetailsProvider>
     ),
+    contextSettingsMenuItems: [<AnonymizationSwitch />],
   },
 ];
 

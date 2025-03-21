@@ -30,6 +30,7 @@ import { FlyoutHeader } from '../shared/components/flyout_header';
 import { DEFAULT_AI_CONNECTOR } from '../../../common/constants';
 import { UserAssetTableType } from '../../explore/users/store/model';
 import { AlertHeaderTitle } from '../document_details/right/components/alert_header_title';
+import { useAlertsContext } from '../../detections/components/alerts_table/alerts_context';
 
 /**
  * Panel to be displayed in the document details expandable flyout right section
@@ -38,6 +39,7 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
   const { eventId, getFieldsData, indexName, dataFormattedForFieldBrowser } =
     useAIForSOCDetailsContext();
 
+  const { showAnonymizedValues } = useAlertsContext();
   const getPromptContext = useCallback(
     async () => getRawData(dataFormattedForFieldBrowser ?? []),
     [dataFormattedForFieldBrowser]
@@ -79,6 +81,7 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
                 defaultConnectorId={defaultConnectorId}
                 isContextReady={(dataFormattedForFieldBrowser ?? []).length > 0}
                 promptContext={promptContext}
+                showAnonymizedValues={showAnonymizedValues}
               />
             </EuiFlexItem>
             <EuiFlexItem>

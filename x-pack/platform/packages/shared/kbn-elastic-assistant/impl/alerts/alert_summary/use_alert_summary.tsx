@@ -24,6 +24,7 @@ interface Props {
   defaultConnectorId: string;
   isContextReady: boolean;
   promptContext: PromptContext;
+  showAnonymizedValues: boolean;
 }
 const notActualPromptJustForTesting =
   'Highlight any host names or user names at the top of your summary.';
@@ -34,6 +35,7 @@ export const useAlertSummary = ({
   defaultConnectorId,
   isContextReady,
   promptContext,
+  showAnonymizedValues,
 }: Props) => {
   const { abortStream, isLoading, sendMessage } = useChatComplete({
     connectorId: defaultConnectorId,
@@ -47,22 +49,24 @@ export const useAlertSummary = ({
   } | null>(null);
   // indicates that an alert summary exists or is being created/fetched
   const [hasAlertSummary, setHasAlertSummary] = useState<boolean>(false);
-  const { data: fetchedAlertSummary, isFetched: isFetchedAlertSummary } = useFetchAlertSummary({
+  const { data: fetchedAlertSummary } = useFetchAlertSummary({
     alertId,
   });
-  const { bulkUpdate, isLoading: isUpdatingAlertSummary } = useBulkUpdateAlertSummary();
+  const { bulkUpdate } = useBulkUpdateAlertSummary();
 
   useEffect(() => {
     if (fetchedAlertSummary.data.length > 0) {
       setHasAlertSummary(true);
       setAlertSummary(
-        replaceAnonymizedValuesWithOriginalValues({
-          messageContent: fetchedAlertSummary.data[0].summary,
-          replacements: fetchedAlertSummary.data[0].replacements,
-        })
+        showAnonymizedValues
+          ? fetchedAlertSummary.data[0].summary
+          : replaceAnonymizedValuesWithOriginalValues({
+              messageContent: fetchedAlertSummary.data[0].summary,
+              replacements: fetchedAlertSummary.data[0].replacements,
+            })
       );
     }
-  }, [fetchedAlertSummary]);
+  }, [fetchedAlertSummary, showAnonymizedValues]);
 
   useEffect(() => {
     const fetchContext = async () => {
@@ -100,10 +104,12 @@ export const useAlertSummary = ({
       setHasAlertSummary(true);
       const rawResponse = await sendMessage(content);
       setAlertSummary(
-        replaceAnonymizedValuesWithOriginalValues({
-          messageContent: rawResponse.response,
-          replacements: content.replacements,
-        })
+        showAnonymizedValues
+          ? rawResponse.response
+          : replaceAnonymizedValuesWithOriginalValues({
+              messageContent: rawResponse.response,
+              replacements: content.replacements,
+            })
       );
 
       if (!rawResponse.isError) {
@@ -136,7 +142,14 @@ export const useAlertSummary = ({
     };
 
     if (messageAndReplacements !== null) fetchSummary(messageAndReplacements);
-  }, [alertId, bulkUpdate, fetchedAlertSummary.data, messageAndReplacements, sendMessage]);
+  }, [
+    alertId,
+    bulkUpdate,
+    fetchedAlertSummary.data,
+    messageAndReplacements,
+    sendMessage,
+    showAnonymizedValues,
+  ]);
 
   useEffect(() => {
     return () => {

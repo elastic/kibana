@@ -20,6 +20,7 @@ const LocalStorageKey = {
   selectedCardItemId: 'securitySolution.onboarding.selectedCardItem',
   integrationSearchTerm: 'securitySolution.onboarding.integrationSearchTerm',
   assistantConnectorId: 'securitySolution.onboarding.assistantCard.connectorId',
+  aiForSOCShowAnonymization: 'securitySolution.aiForSOC.showAnonymization',
 } as const;
 
 /**
@@ -90,3 +91,9 @@ export const useStoredAssistantConnectorId = (spaceId: string) =>
     `${LocalStorageKey.assistantConnectorId}.${spaceId}`,
     undefined
   );
+
+/**
+ * Stores the AI for SOC anonymization switch value
+ */
+export const useStoredAIForSOCShowAnonymization = (spaceId: string) =>
+  useDefinedLocalStorage<boolean>(`${LocalStorageKey.aiForSOCShowAnonymization}.${spaceId}`, false);
