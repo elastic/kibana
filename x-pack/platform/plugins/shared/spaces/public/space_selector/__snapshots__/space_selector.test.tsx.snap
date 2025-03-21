@@ -58,6 +58,7 @@ exports[`it renders with custom logo 1`] = `
               "toString": [Function],
             }
           }
+          tabIndex={-1}
         >
           <MemoizedFormattedMessage
             defaultMessage="Select your space"
@@ -139,6 +140,7 @@ exports[`it renders without crashing 1`] = `
               "toString": [Function],
             }
           }
+          tabIndex={-1}
         >
           <MemoizedFormattedMessage
             defaultMessage="Select your space"
