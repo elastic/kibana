@@ -74,7 +74,6 @@ export const initEntityEngineRoute = (
             getAllMissingPrivileges(privileges)
           );
 
-          // TODO test it
           return siemResponse.error({
             statusCode: 403,
             body: `User does not have the required privileges to initialize the entity engine\n${missingPrivilegesMsg}`,
