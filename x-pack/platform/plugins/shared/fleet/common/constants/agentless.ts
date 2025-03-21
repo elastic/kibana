@@ -29,4 +29,6 @@ export const AGENTLESS_DISABLED_INPUTS = [
   'gcp-pubsub',
   'azure-eventhub',
   'logfile',
+  'aws-s3',
+  'streaming',
 ];
