@@ -853,7 +853,6 @@ export class EntityStoreDataClient {
         const privileges = await this.getEntityStoreSourceIndicesPrivileges(indexPatterns);
 
         if (!privileges.has_all_required) {
-          // test it, make sure it is good!
           const missingPrivilegesMsg = getMissingPrivilegesErrorMessage(
             getAllMissingPrivileges(privileges)
           );
