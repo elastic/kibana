@@ -61,10 +61,10 @@ export const useFetchPolicyData = (
           ? {
               items: bulkFetchResult.data.items,
               total: selectedPolicyIds.length,
-              perPage: queryOptions.perPage,
+              perPage: queryOptions.perPage ?? 20,
               page: bulkFetchPage,
             }
-          : bulkFetchResult.data,
+          : undefined,
         isFetching: bulkFetchResult.isFetching,
         isLoading: bulkFetchResult.isLoading,
         error: bulkFetchResult.error,
