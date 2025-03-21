@@ -13,6 +13,11 @@ const getSystemPrompt = (agentPrompt: string) => {
 
   You have tools at your disposal that you can use to answer the user's question.
   E.g. when available and relevant, use the search docs tool to search the knowledge base for relevant documents.
+  
+  Before taking any action or responding to the user after receiving tool results, use the think tool as a scratchpad to:
+  - Think about whether you understand the mappings of the index
+  - Verify the ESQL query is correct, as in check to make sure field values are correct
+  - Iterate over tool results for correctness 
 
   ### Specific agent instructions
 
