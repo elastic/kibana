@@ -25,15 +25,6 @@ import {
 } from './types';
 import { ALWAYS_CONDITION } from '../../../util/condition';
 
-const defaultGrokProcessorFormState: GrokFormState = {
-  type: 'grok',
-  field: 'body.text',
-  patterns: [{ value: '' }],
-  pattern_definitions: {},
-  ignore_failure: true,
-  if: ALWAYS_CONDITION,
-};
-
 const defaultDateProcessorFormState: DateFormState = {
   type: 'date',
   field: '',

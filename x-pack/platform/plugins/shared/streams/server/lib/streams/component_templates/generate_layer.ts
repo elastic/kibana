@@ -21,7 +21,7 @@ import {
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings } from './logs_layer';
 import { getComponentTemplateName } from './name';
-import { moveFieldsToNamespaces, baseMappings } from './logs_layer';
+import { baseMappings } from './logs_layer';
 
 export function generateLayer(
   name: string,
@@ -68,10 +68,10 @@ export function generateLayer(
       mappings: {
         dynamic: false,
         properties: isRoot(name)
-          ? moveFieldsToNamespaces({
+          ? {
               ...baseMappings,
               ...properties,
-            })
+            }
           : properties,
       },
     },

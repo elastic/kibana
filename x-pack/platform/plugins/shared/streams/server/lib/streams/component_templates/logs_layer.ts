@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  IndicesIndexSettings,
-  MappingObjectProperty,
-  MappingProperty,
-} from '@elastic/elasticsearch/lib/api/types';
+import { IndicesIndexSettings, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import {
   FieldDefinition,
   InheritedFieldDefinition,
@@ -134,80 +130,6 @@ export const baseMappings: Record<string, MappingProperty> = {
     type: 'alias',
   },
 };
-
-/* Goes through the top level record and if a field starts with any of the namespace prefixes,
-   moves it into the appropriate nested location (and cuts the prefix).
-
-   This is necessary because of an Elasticsearch issue that requires all fields to be in the properties,
-   as the merge later on doesn't work. See https://github.com/elastic/elasticsearch/issues/123372
-*/
-export function moveFieldsToNamespaces(mappings: Record<string, MappingProperty>) {
-  // Create a map to collect fields for each namespace
-  const namespaceFields: Record<string, Record<string, MappingProperty>> = {};
-
-  // Initialize the namespace fields collections
-  namespacePrefixes.forEach((prefix) => {
-    const namespacePath = prefix.slice(0, -1); // Remove trailing dot
-    namespaceFields[namespacePath] = {};
-  });
-
-  // Collect fields belonging to each namespace
-  for (const [field, props] of Object.entries(mappings)) {
-    let handled = false;
-    for (const prefix of namespacePrefixes) {
-      if (field.startsWith(prefix)) {
-        const namespacePath = prefix.slice(0, -1); // Remove trailing dot
-        const fieldWithoutPrefix = field.replace(prefix, '');
-        namespaceFields[namespacePath][fieldWithoutPrefix] = props;
-        delete mappings[field];
-        handled = true;
-        break;
-      }
-    }
-    if (!handled) {
-      // Field doesn't belong to any namespace, keep it as is
-    }
-  }
-
-  // Add collected fields to their proper namespace locations in the mappings object
-  for (const [namespacePath, fields] of Object.entries(namespaceFields)) {
-    if (!Object.keys(fields).length) {
-      continue;
-    }
-    // Split the namespace path into components to navigate the nested structure
-    const pathComponents = namespacePath.split('.');
-    let currentObj = mappings;
-
-    // Navigate to the deepest level of the path
-    for (let i = 0; i < pathComponents.length; i++) {
-      const component = pathComponents[i];
-
-      // Ensure the component exists
-      if (!currentObj[component]) {
-        throw new Error(`Namespace path ${namespacePath} is invalid`);
-      }
-
-      // If this isn't the last component, ensure it has properties
-      if (i < pathComponents.length - 1) {
-        if (!(currentObj[component] as MappingObjectProperty).properties) {
-          (currentObj[component] as MappingObjectProperty).properties = {};
-        }
-        currentObj = (currentObj[component] as MappingObjectProperty).properties!;
-      } else {
-        // We're at the last component, add the fields to its properties
-        if (!(currentObj[component] as MappingObjectProperty).properties) {
-          (currentObj[component] as MappingObjectProperty).properties = {};
-        }
-        (currentObj[component] as MappingObjectProperty).properties = {
-          ...(currentObj[component] as MappingObjectProperty).properties,
-          ...fields,
-        };
-      }
-    }
-  }
-
-  return mappings;
-}
 
 /**
  * Takes a map of fields and returns a sorted array of field names.
