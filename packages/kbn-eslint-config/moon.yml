@@ -26,5 +26,7 @@ tasks:
   lint_with_types:
     script: echo 'stubbed:noop'
     outputs: []
+    options:
+      mergeOutputs: replace
   jestCI:
     script: echo 'stubbed:noop'
