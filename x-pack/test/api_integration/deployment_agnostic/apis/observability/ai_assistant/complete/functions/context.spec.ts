@@ -113,6 +113,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await clearKnowledgeBase(es);
     });
 
+    afterEach(async () => {
+      llmProxy.clear();
+    });
+
     describe('calling the context function via /chat/complete', () => {
       let firstRequestBody: ChatCompletionStreamParams;
       let secondRequestBody: ChatCompletionStreamParams;
