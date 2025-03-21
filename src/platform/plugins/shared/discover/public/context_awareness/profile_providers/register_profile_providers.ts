@@ -29,8 +29,11 @@ import { createObservabilityRootProfileProvider } from './observability/observab
 import { createTracesDataSourceProfileProvider } from './observability/traces_data_source_profile';
 import { createDeprecationLogsDataSourceProfileProvider } from './common/deprecation_logs';
 import { createClassicNavRootProfileProvider } from './common/classic_nav_root_profile';
+<<<<<<< HEAD
 import { createObservabilityTracesSpanDocumentProfileProvider } from './observability/traces_document_profile/span_document_profile';
 import { createObservabilityTracesTransactionDocumentProfileProvider } from './observability/traces_document_profile/transaction_document_profile';
+=======
+>>>>>>> 05dce5419e7 (fix: types + remove unnecessary files)
 
 /**
  * Register profile providers for root, data source, and document contexts to the profile profile services

@@ -20,7 +20,7 @@ import { getRowAdditionalLeadingControls } from '../accessors/get_row_additional
 
 interface SecurityRootProfileContext {
   appWrapper?: FunctionComponent<PropsWithChildren<{}>>;
-  getCellRenderer?: (
+  getSecuritySolutionCellRenderer?: (
     fieldName: string
   ) => FunctionComponent<DataGridCellValueElementProps> | undefined;
 }
@@ -66,7 +66,8 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
             'destination.ip',
             'kibana.alert.workflow_status',
           ].forEach((fieldName) => {
-            entries[fieldName] = context.getCellRenderer?.(fieldName) ?? entries[fieldName];
+            entries[fieldName] =
+              context.getSecuritySolutionCellRenderer?.(fieldName) ?? entries[fieldName];
           });
           return entries;
         },
@@ -88,7 +89,7 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
         context: {
           solutionType: SolutionType.Security,
           appWrapper: getAppWrapper?.(),
-          getCellRenderer,
+          getSecuritySolutionCellRenderer: getCellRenderer,
         },
       };
     },
