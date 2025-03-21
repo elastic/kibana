@@ -4,7 +4,6 @@ $schema: https://moonrepo.dev/schemas/workspace.json
 projects:
   globs:
     - examples/**/moon.yml
-    - test/**/moon.yml
     - packages/**/moon.yml
     - plugins/**/moon.yml
     - src/**/moon.yml
