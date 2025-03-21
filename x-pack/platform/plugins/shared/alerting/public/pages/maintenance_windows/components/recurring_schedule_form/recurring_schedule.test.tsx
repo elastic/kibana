@@ -22,7 +22,6 @@ const initialValue: FormProps = {
   startDate: '2023-03-24',
   endDate: '2023-03-26',
   recurring: true,
-  categoryIds: [],
 };
 
 describe('RecurringSchedule', () => {
