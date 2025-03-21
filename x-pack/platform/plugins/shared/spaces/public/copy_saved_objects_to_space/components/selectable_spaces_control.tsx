@@ -81,9 +81,9 @@ export const SelectableSpacesControl = (props: Props) => {
         listProps={{
           bordered: true,
           rowHeight: 40,
-          css: css({
-            marginTop: euiTheme.size.xs,
-          }),
+          css: css`
+            margin-top: ${euiTheme.size.xs};
+          `,
           'data-test-subj': 'cts-form-space-selector',
         }}
         searchable={options.length > SPACE_SEARCH_COUNT_THRESHOLD}
