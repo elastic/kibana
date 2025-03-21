@@ -6,16 +6,38 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import {
+  RollupGetRollupIndexCapsResponse,
+  RollupGetJobsResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 
 export async function getRollupJobByIndexName(esClient: ElasticsearchClient, index: string) {
-  const rollupCaps = await esClient.rollup.getRollupIndexCaps({ index });
+  let rollupCaps: RollupGetRollupIndexCapsResponse;
+
+  try {
+    rollupCaps = await esClient.rollup.getRollupIndexCaps({ index });
+    // will catch if not found
+    // would be nice to handle the error better but little info is provided
+  } catch (e) {
+    return;
+  }
+
   const rollupIndices = Object.keys(rollupCaps);
   let rollupJob: string | undefined;
 
   // there should only be one job
   if (rollupIndices.length === 1) {
     rollupJob = rollupCaps[rollupIndices[0]].rollup_jobs[0].job_id;
-    const jobs = await esClient.rollup.getJobs({ id: rollupJob });
+    let jobs: RollupGetJobsResponse;
+
+    try {
+      jobs = await esClient.rollup.getJobs({ id: rollupJob }, {});
+      // will catch if not found
+      // would be nice to handle the error better but little info is provided
+    } catch (e) {
+      return;
+    }
+
     // there can only be one job. If its stopped then we don't need rollup handling
     if (
       // zero jobs shouldn't happen but we can handle it gracefully
