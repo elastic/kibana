@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../locator';
@@ -55,6 +55,7 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
     if (hasDFAs) {
       actions.push(
         <EuiButton
+          fill
           color="primary"
           onClick={navigateToResultsExplorer}
           isDisabled={!canGetDataFrameAnalytics}
@@ -69,19 +70,17 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
     }
     if (!disabled) {
       actions.push(
-        <EuiButtonEmpty
+        <EuiButton
           color="primary"
           onClick={navigateToDFAManagementPath}
           isDisabled={disabled}
           data-test-subj="mlAnalyticsManageDFAJobsButton"
-          iconType="popout"
-          iconSide="left"
         >
           <FormattedMessage
             id="xpack.ml.overview.dataFrameAnalytics.manageJobsButton"
             defaultMessage="Manage jobs"
           />
-        </EuiButtonEmpty>
+        </EuiButton>
       );
     }
     return actions;

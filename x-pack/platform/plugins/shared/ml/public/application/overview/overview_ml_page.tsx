@@ -21,6 +21,7 @@ import {
   EuiHorizontalRule,
   EuiImage,
   EuiLink,
+  EuiPageHeader,
   EuiPageBody,
   EuiSpacer,
   EuiText,
@@ -144,10 +145,12 @@ export const OverviewPage: FC = () => {
   return (
     <>
       <MlPageHeader>
-        <EuiFlexGroup alignItems="center" justifyContent="center">
-          <EuiFlexItem grow={false}>
+        <EuiPageHeader
+          alignItems="center"
+          restrictWidth={1200}
+          pageTitle={
             <EuiFlexGroup direction="column" gutterSize="s">
-              {Boolean(user) && (
+              {Boolean(user) ? (
                 <EuiFlexItem grow={false}>
                   <EuiText color="subdued">
                     <h4>
@@ -168,7 +171,7 @@ export const OverviewPage: FC = () => {
                     </h4>
                   </EuiText>
                 </EuiFlexItem>
-              )}
+              ) : null}
               <EuiFlexItem grow={false}>
                 <EuiTitle size="l">
                   <h1>
@@ -187,17 +190,17 @@ export const OverviewPage: FC = () => {
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          }
+          rightSideItems={[
             <EuiImage
               alt={i18n.translate('xpack.ml.overview.welcomeBanner.header.imageAlt', {
                 defaultMessage: 'Welcome to the Machine Learning Hub',
               })}
               src={isDarkTheme ? bannerImageDark : bannerImageLight}
               size="l"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            />,
+          ]}
+        />
       </MlPageHeader>
       <EuiPageBody restrictWidth={1200}>
         <UpgradeWarning />
@@ -276,8 +279,8 @@ export const OverviewPage: FC = () => {
                     </>
                   }
                   footer={
-                    <EuiButtonEmpty
-                      flush="left"
+                    <EuiButton
+                      color="primary"
                       target="_self"
                       onClick={() => navigateToPath('/aiops/log_rate_analysis_index_select')}
                       data-test-subj="mlOverviewCardLogRateAnalysisButton"
@@ -286,7 +289,7 @@ export const OverviewPage: FC = () => {
                         id="xpack.ml.overview.logRateAnalysis.startAnalysisButton"
                         defaultMessage="Start analysis"
                       />
-                    </EuiButtonEmpty>
+                    </EuiButton>
                   }
                   data-test-subj="mlOverviewCardLogRateAnalysis"
                 />
@@ -325,8 +328,8 @@ export const OverviewPage: FC = () => {
                     </>
                   }
                   footer={
-                    <EuiButtonEmpty
-                      flush="left"
+                    <EuiButton
+                      color="primary"
                       target="_self"
                       onClick={() => navigateToPath('/aiops/log_categorization_index_select')}
                       data-test-subj="mlOverviewCardLogPatternAnalysisButton"
@@ -335,7 +338,7 @@ export const OverviewPage: FC = () => {
                         id="xpack.ml.overview.logPatternAnalysis.startAnalysisButton"
                         defaultMessage="Start analysis"
                       />
-                    </EuiButtonEmpty>
+                    </EuiButton>
                   }
                   data-test-subj="mlOverviewCardLogPatternAnalysis"
                 />
@@ -373,8 +376,8 @@ export const OverviewPage: FC = () => {
                     </>
                   }
                   footer={
-                    <EuiButtonEmpty
-                      flush="left"
+                    <EuiButton
+                      color="primary"
                       target="_self"
                       onClick={() => navigateToPath('/aiops/change_point_detection_index_select')}
                       data-test-subj="mlOverviewCardChangePointDetectionButton"
@@ -389,7 +392,7 @@ export const OverviewPage: FC = () => {
                         id="xpack.ml.overview.changePointDetection.startDetectionButton"
                         defaultMessage="Start detection"
                       />
-                    </EuiButtonEmpty>
+                    </EuiButton>
                   }
                   data-test-subj="mlOverviewCardChangePointDetection"
                 />
@@ -405,7 +408,7 @@ export const OverviewPage: FC = () => {
                 })}
               </h2>
             </EuiTitle>
-            <DataVisualizerGrid buttonType="full" isEsqlEnabled={isEsqlEnabled} />
+            <DataVisualizerGrid isEsqlEnabled={isEsqlEnabled} />
           </EuiFlexGroup>
         </EuiFlexGroup>
         <HelpMenu docLink={helpLink} />

@@ -28,7 +28,7 @@ export const TrainedAnalysisTitle = () => (
   </EuiTitle>
 );
 
-export const AnalyticsEmptyPrompt: FC = () => {
+export const AnalyticsEmptyPrompt: FC<{ showDocsLink?: boolean }> = ({ showDocsLink = false }) => {
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -68,28 +68,36 @@ export const AnalyticsEmptyPrompt: FC = () => {
         />
       }
       actions={[
-        <EuiButton
-          onClick={navigateToSourceSelection}
-          isDisabled={disabled}
-          color="primary"
-          data-test-subj="mlAnalyticsCreateFirstButton"
-        >
-          {i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptButtonText', {
-            defaultMessage: 'Create data frame analytics job',
-          })}
-        </EuiButton>,
-        <EuiButtonEmpty
-          target="_blank"
-          href={docLinks.links.ml.dataFrameAnalytics}
-          data-test-subj="mlAnalyticsReadDocumentationButton"
-          iconType="popout"
-          iconSide="left"
-        >
-          <FormattedMessage
-            id="xpack.ml.common.readDocumentationLink"
-            defaultMessage="Read documentation"
-          />
-        </EuiButtonEmpty>,
+        ...[
+          <EuiButton
+            onClick={navigateToSourceSelection}
+            isDisabled={disabled}
+            fill
+            color="primary"
+            data-test-subj="mlAnalyticsCreateFirstButton"
+          >
+            <FormattedMessage
+              id="xpack.ml.dataFrame.analyticsList.emptyPromptButtonText"
+              defaultMessage="Create Data Frame Analytics job"
+            />
+          </EuiButton>,
+        ],
+        ...(showDocsLink
+          ? [
+              <EuiButtonEmpty
+                target="_blank"
+                href={docLinks.links.ml.dataFrameAnalytics}
+                data-test-subj="mlAnalyticsReadDocumentationButton"
+                iconType="popout"
+                iconSide="left"
+              >
+                <FormattedMessage
+                  id="xpack.ml.common.readDocumentationLink"
+                  defaultMessage="Read documentation"
+                />
+              </EuiButtonEmpty>,
+            ]
+          : []),
       ]}
       data-test-subj="mlNoDataFrameAnalyticsFound"
     />

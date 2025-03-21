@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MlSummaryJobs } from '../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../locator';
@@ -37,6 +37,7 @@ export const AnomalyDetectionOverviewCard: FC = () => {
       if (jobsResult?.length > 0) {
         setHasADJobs(true);
       }
+      setIsLoading(false);
     } catch (e) {
       setIsLoading(false);
     }
@@ -64,6 +65,7 @@ export const AnomalyDetectionOverviewCard: FC = () => {
       appId: `anomaly_detection`,
     });
   }, [mlManagementLocator]);
+
   const showEmptyState =
     !isLoading && !hasADJobs && canCreateJob && !disableCreateAnomalyDetectionJob;
 
@@ -73,6 +75,7 @@ export const AnomalyDetectionOverviewCard: FC = () => {
       actions.push(
         <EuiButton
           color="primary"
+          fill
           onClick={redirectToMultiMetricExplorer}
           isDisabled={!canGetJobs}
           data-test-subj="multiMetricExplorerButton"
@@ -86,19 +89,17 @@ export const AnomalyDetectionOverviewCard: FC = () => {
     }
     if (canGetJobs && canCreateJob) {
       actions.push(
-        <EuiButtonEmpty
+        <EuiButton
           color="primary"
           onClick={redirectToManageJobs}
           isDisabled={disableCreateAnomalyDetectionJob}
           data-test-subj="manageJobsButton"
-          iconType="popout"
-          iconSide="left"
         >
           <FormattedMessage
             id="xpack.ml.overview.anomalyDetection.manageJobsButton"
             defaultMessage="Manage jobs"
           />
-        </EuiButtonEmpty>
+        </EuiButton>
       );
     }
     return actions;

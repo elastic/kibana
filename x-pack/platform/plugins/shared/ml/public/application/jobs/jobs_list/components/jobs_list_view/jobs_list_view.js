@@ -452,7 +452,7 @@ export class JobsListViewUI extends Component {
 
         <>
           <SpaceManagementContextWrapper>
-            {noJobsFound ? <AnomalyDetectionEmptyState /> : null}
+            {noJobsFound ? <AnomalyDetectionEmptyState showDocsLink /> : null}
 
             {jobIds.length > 0 ? (
               <>

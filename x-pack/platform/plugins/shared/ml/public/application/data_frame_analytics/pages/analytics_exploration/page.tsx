@@ -111,7 +111,7 @@ export const Page: FC<{
     }
 
     if (jobsExist === false) {
-      return <AnalyticsEmptyPrompt />;
+      return <AnalyticsEmptyPrompt showDocsLink />;
     }
     return (
       <>

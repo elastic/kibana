@@ -17,7 +17,9 @@ import { usePermissionCheck } from '../../../../capabilities/check_capabilities'
 import { mlNodesAvailable } from '../../../../ml_nodes_check';
 import { MLEmptyPromptCard } from '../../../../components/overview/ml_empty_prompt_card';
 
-export const AnomalyDetectionEmptyState: FC = () => {
+export const AnomalyDetectionEmptyState: FC<{ showDocsLink?: boolean }> = ({
+  showDocsLink = false,
+}) => {
   const canCreateJob = usePermissionCheck('canCreateJob');
   const disableCreateAnomalyDetectionJob = !canCreateJob || !mlNodesAvailable();
 
@@ -49,35 +51,44 @@ export const AnomalyDetectionEmptyState: FC = () => {
         defaultMessage: 'Spot anomalies faster',
       })}
       body={
-        <FormattedMessage
-          id="xpack.ml.overview.anomalyDetection.emptyPromptText"
-          defaultMessage="Start automatically spotting anomalies hiding in your time series data and resolve issues faster."
-        />
+        <p>
+          <FormattedMessage
+            id="xpack.ml.overview.anomalyDetection.emptyPromptText"
+            defaultMessage="Start automatically spotting anomalies hiding in your time series data and resolve issues faster."
+          />
+        </p>
       }
       actions={[
-        <EuiButton
-          color="primary"
-          onClick={redirectToCreateJobSelectIndexPage}
-          isDisabled={disableCreateAnomalyDetectionJob}
-          data-test-subj="mlCreateNewJobButton"
-        >
-          <FormattedMessage
-            id="xpack.ml.overview.anomalyDetection.createJobButtonText"
-            defaultMessage="Create anomaly detection job"
-          />
-        </EuiButton>,
-        <EuiButtonEmpty
-          target="_blank"
-          href={docLinks.links.ml.anomalyDetection}
-          data-test-subj="mlAnalyticsReadDocumentationButton"
-          iconType="popout"
-          iconSide="left"
-        >
-          <FormattedMessage
-            id="xpack.ml.common.readDocumentationLink"
-            defaultMessage="Read documentation"
-          />
-        </EuiButtonEmpty>,
+        ...[
+          <EuiButton
+            fill
+            color="primary"
+            onClick={redirectToCreateJobSelectIndexPage}
+            isDisabled={disableCreateAnomalyDetectionJob}
+            data-test-subj="mlCreateNewJobButton"
+          >
+            <FormattedMessage
+              id="xpack.ml.overview.anomalyDetection.createJobButtonText"
+              defaultMessage="Create anomaly detection job"
+            />
+          </EuiButton>,
+        ],
+        ...(showDocsLink
+          ? [
+              <EuiButtonEmpty
+                target="_blank"
+                href={docLinks.links.ml.anomalyDetection}
+                data-test-subj="mlAnalyticsReadDocumentationButton"
+                iconType="popout"
+                iconSide="left"
+              >
+                <FormattedMessage
+                  id="xpack.ml.common.readDocumentationLink"
+                  defaultMessage="Read documentation"
+                />
+              </EuiButtonEmpty>,
+            ]
+          : []),
       ]}
       data-test-subj="mlAnomalyDetectionEmptyState"
     />

@@ -118,7 +118,7 @@ export function registerManagementSections(
             unmountAppCallback();
           };
         },
-        hideFromSidebar: false,
+        hideFromSidebar: sectionId === MANAGEMENT_SECTION_IDS.AD_SETTINGS,
       })
       .enable();
   });

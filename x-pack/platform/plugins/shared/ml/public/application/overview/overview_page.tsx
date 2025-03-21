@@ -146,35 +146,33 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
         ),
         content: (
           <>
-            {canViewMlNodes ? (
-              <>
-                <CollapsiblePanel
-                  dataTestSubj="mlMemoryUsagePanel"
-                  isOpen={panelsExtendedState.memoryUsage}
-                  onToggle={(update) => {
-                    setPanelsExtendedState({ ...panelsExtendedState, memoryUsage: update });
-                  }}
-                  header={
-                    <FormattedMessage
-                      id="xpack.ml.overview.memoryUsagePanel.header"
-                      defaultMessage="Memory Usage"
-                    />
-                  }
-                  headerItems={[
-                    <OverviewStatsBar
-                      inputStats={memoryUsageStats}
-                      dataTestSub={'mlOverviewMemoryUsageStatsBar'}
-                    />,
-                  ]}
-                  ariaLabel={i18n.translate('xpack.ml.overview.memoryUsagePanel.ariaLabel', {
-                    defaultMessage: 'Memory usage panel',
-                  })}
-                >
-                  <MemoryPage />
-                </CollapsiblePanel>
-                <EuiSpacer size="m" />
-              </>
-            ) : null}
+            <>
+              <CollapsiblePanel
+                dataTestSubj="mlMemoryUsagePanel"
+                isOpen={panelsExtendedState.memoryUsage}
+                onToggle={(update) => {
+                  setPanelsExtendedState({ ...panelsExtendedState, memoryUsage: update });
+                }}
+                header={
+                  <FormattedMessage
+                    id="xpack.ml.overview.memoryUsagePanel.header"
+                    defaultMessage="Memory Usage"
+                  />
+                }
+                headerItems={[
+                  <OverviewStatsBar
+                    inputStats={memoryUsageStats}
+                    dataTestSub={'mlOverviewMemoryUsageStatsBar'}
+                  />,
+                ]}
+                ariaLabel={i18n.translate('xpack.ml.overview.memoryUsagePanel.ariaLabel', {
+                  defaultMessage: 'Memory usage panel',
+                })}
+              >
+                <MemoryPage />
+              </CollapsiblePanel>
+              <EuiSpacer size="m" />
+            </>
 
             {canViewMlNodes ? (
               <>
