@@ -21,7 +21,7 @@ import {
   createOpenTelemetryAgentInstructions,
 } from './instructions';
 
-const DEFAULT_INSTRUCTION_TITLE = 'Set up application instrumentation';
+const DEFAULT_INSTRUCTION_TITLE = 'APM Agents';
 
 function convertApmServerUrlToOtlpServiceUrl(apmServerUrl: string) {
   if (!apmServerUrl) {

@@ -38,7 +38,7 @@ export const createOpenTelemetryAgentInstructions = (
   return [
     {
       title: i18n.translate('xpack.apm.onboarding.otel.download.title', {
-        defaultMessage: 'Instrument your app with EDOT SDK ',
+        defaultMessage: 'Instrument your app with Elastic Distribution of OpenTelemetry (EDOT) SDK',
       }),
       children: (
         <EuiText>
@@ -226,11 +226,9 @@ export function OpenTelemetryInstructions({
                 data-test-subj="apmOpenTelemetryInstructionsOtelExporterOtlpEndpointLink"
                 target="_blank"
                 href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/protocol/exporter.md"
+                // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
               >
-                {i18n.translate(
-                  'xpack.apm.openTelemetryInstructions.otelexporterotlpendpointLinkLabel',
-                  { defaultMessage: 'OTEL_EXPORTER_OTLP_ENDPOINT' }
-                )}
+                OTEL_EXPORTER_OTLP_ENDPOINT
               </EuiLink>
             ),
             otelExporterOtlpHeaders: (
@@ -238,11 +236,9 @@ export function OpenTelemetryInstructions({
                 data-test-subj="apmOpenTelemetryInstructionsOtelExporterOtlpHeadersLink"
                 target="_blank"
                 href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/protocol/exporter.md"
+                // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
               >
-                {i18n.translate(
-                  'xpack.apm.openTelemetryInstructions.otelexporterotlpheadersLinkLabel',
-                  { defaultMessage: 'OTEL_EXPORTER_OTLP_HEADERS' }
-                )}
+                OTEL_EXPORTER_OTLP_HEADERS
               </EuiLink>
             ),
             otelResourceAttributes: (
@@ -250,11 +246,9 @@ export function OpenTelemetryInstructions({
                 data-test-subj="apmOpenTelemetryInstructionsOtelResourceAttributesLink"
                 target="_blank"
                 href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/resource/sdk.md"
+                // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
               >
-                {i18n.translate(
-                  'xpack.apm.openTelemetryInstructions.otelresourceattributesLinkLabel',
-                  { defaultMessage: 'OTEL_RESOURCE_ATTRIBUTES' }
-                )}
+                OTEL_RESOURCE_ATTRIBUTES
               </EuiLink>
             ),
           }}
