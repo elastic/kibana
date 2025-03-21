@@ -12,7 +12,7 @@ import { intersection } from 'lodash';
 import { AlertStatusMetaData } from '../../../../common/runtime_types/alert_rules/common';
 import {
   FINAL_SUMMARY_FILTER,
-  getTimespanFilter,
+  getRangeFilter,
   SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
 import { OverviewPing } from '../../../../common/runtime_types';
@@ -75,7 +75,7 @@ export async function queryMonitorStatusAlert({
             bool: {
               filter: [
                 ...(includeRetests ? [SUMMARY_FILTER] : [FINAL_SUMMARY_FILTER]),
-                getTimespanFilter({ from: range.from, to: range.to }),
+                getRangeFilter({ from: range.from, to: range.to }),
                 {
                   terms: {
                     'monitor.id': idsToQuery,

@@ -28,7 +28,7 @@ import {
   addNewTimeline,
   addTimelineProviders,
   addTimelineToStore,
-  applyDeltaToTimelineColumnWidth,
+  applyDeltaToTableColumnWidth,
   removeTimelineColumn,
   removeTimelineProvider,
   updateTimelineColumns,
@@ -42,15 +42,19 @@ import {
   updateTimelineShowTimeline,
   updateTimelineSort,
   updateTimelineTitleAndDescription,
-  upsertTimelineColumn,
   updateTimelineGraphEventId,
   updateTimelineColumnWidth,
+  upsertTimelineColumn,
 } from './helpers';
 import type { TimelineModel } from './model';
 import { timelineDefaults } from './defaults';
 import type { TimelineById } from './types';
 import { Direction } from '../../../common/search_strategy';
 import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
+import {
+  type LocalStorageColumnSettings,
+  setStoredTimelineColumnsConfig,
+} from './middlewares/timeline_localstorage';
 
 jest.mock('../../common/utils/normalize_time_range');
 jest.mock('../../common/utils/default_date_settings', () => {
@@ -156,6 +160,10 @@ const columnsMock: ColumnHeaderOptions[] = [
 ];
 
 describe('Timeline', () => {
+  beforeEach(() => {
+    setStoredTimelineColumnsConfig(undefined);
+  });
+
   describe('#add saved object Timeline to store ', () => {
     test('should return a timelineModel with default value and not just a timelineResult ', () => {
       const update = addTimelineToStore({
@@ -171,6 +179,47 @@ describe('Timeline', () => {
           ...basicTimeline,
           show: true,
         },
+      });
+    });
+
+    test('should apply the locally stored column config', () => {
+      const initialWidth = 123456789;
+      const storedConfig: LocalStorageColumnSettings = {
+        '@timestamp': {
+          id: '@timestamp',
+          initialWidth,
+        },
+      };
+      setStoredTimelineColumnsConfig(storedConfig);
+      const update = addTimelineToStore({
+        id: 'foo',
+        timeline: {
+          ...basicTimeline,
+          columns: [{ id: '@timestamp', columnHeaderType: 'not-filtered' }],
+        },
+        timelineById: timelineByIdMock,
+      });
+
+      expect(update.foo.columns.find((col) => col.id === '@timestamp')).toEqual(
+        expect.objectContaining({
+          initialWidth,
+        })
+      );
+    });
+
+    test('should not apply changes to the columns when no previous config is stored in localStorage', () => {
+      const update = addTimelineToStore({
+        id: 'foo',
+        timeline: {
+          ...basicTimeline,
+          columns: [{ id: '@timestamp', columnHeaderType: 'not-filtered' }],
+        },
+        timelineById: timelineByIdMock,
+      });
+
+      expect(update.foo.columns.find((col) => col.id === '@timestamp')).toEqual({
+        id: '@timestamp',
+        columnHeaderType: 'not-filtered',
       });
     });
 
@@ -457,6 +506,49 @@ describe('Timeline', () => {
 
       expect(update.foo.columns).toEqual(expectedColumns);
     });
+
+    test('should apply the locally stored column config to new columns', () => {
+      const initialWidth = 123456789;
+      const storedConfig: LocalStorageColumnSettings = {
+        'event.action': {
+          id: 'event.action',
+          initialWidth,
+        },
+      };
+      setStoredTimelineColumnsConfig(storedConfig);
+      const expectedColumns = [{ ...columnToAdd, initialWidth }];
+      const update = upsertTimelineColumn({
+        column: columnToAdd,
+        id: 'foo',
+        index: 0,
+        timelineById,
+      });
+
+      expect(update.foo.columns).toEqual(expectedColumns);
+    });
+
+    test('should apply the locally stored column config to existing columns', () => {
+      const initialWidth = 123456789;
+      const storedConfig: LocalStorageColumnSettings = {
+        '@timestamp': {
+          id: '@timestamp',
+          initialWidth,
+        },
+      };
+      setStoredTimelineColumnsConfig(storedConfig);
+      const update = upsertTimelineColumn({
+        column: columns[0],
+        id: 'foo',
+        index: 0,
+        timelineById: mockWithExistingColumns,
+      });
+
+      expect(update.foo.columns.find((col) => col.id === '@timestamp')).toEqual(
+        expect.objectContaining({
+          initialWidth,
+        })
+      );
+    });
   });
 
   describe('#addTimelineProvider', () => {
@@ -611,7 +703,7 @@ describe('Timeline', () => {
     });
     test('should return a new reference and not the same reference', () => {
       const delta = 50;
-      const update = applyDeltaToTimelineColumnWidth({
+      const update = applyDeltaToTableColumnWidth({
         id: 'foo',
         columnId: columnsMock[0].id,
         delta,
@@ -630,7 +722,7 @@ describe('Timeline', () => {
       };
       const expectedColumns = [expectedToHaveNewWidth, columnsMock[1], columnsMock[2]];
 
-      const update = applyDeltaToTimelineColumnWidth({
+      const update = applyDeltaToTableColumnWidth({
         id: 'foo',
         columnId: aDateColumn.id,
         delta,
@@ -649,7 +741,7 @@ describe('Timeline', () => {
       };
       const expectedColumns = [expectedToHaveNewWidth, columnsMock[1], columnsMock[2]];
 
-      const update = applyDeltaToTimelineColumnWidth({
+      const update = applyDeltaToTableColumnWidth({
         id: 'foo',
         columnId: aDateColumn.id,
         delta,
@@ -668,7 +760,7 @@ describe('Timeline', () => {
       };
       const expectedColumns = [expectedToHaveNewWidth, columnsMock[1], columnsMock[2]];
 
-      const update = applyDeltaToTimelineColumnWidth({
+      const update = applyDeltaToTableColumnWidth({
         id: 'foo',
         columnId: aDateColumn.id,
         delta,
@@ -859,6 +951,28 @@ describe('Timeline', () => {
         timelineById: timelineByIdMock,
       });
       expect(update.foo.columns).toEqual([...columnsMock]);
+    });
+
+    test('should apply the locally stored column config', () => {
+      const initialWidth = 123456789;
+      const storedConfig: LocalStorageColumnSettings = {
+        '@timestamp': {
+          id: '@timestamp',
+          initialWidth,
+        },
+      };
+      setStoredTimelineColumnsConfig(storedConfig);
+      const update = updateTimelineColumns({
+        id: 'foo',
+        columns: columnsMock,
+        timelineById: timelineByIdMock,
+      });
+
+      expect(update.foo.columns.find((col) => col.id === '@timestamp')).toEqual(
+        expect.objectContaining({
+          initialWidth,
+        })
+      );
     });
   });
 

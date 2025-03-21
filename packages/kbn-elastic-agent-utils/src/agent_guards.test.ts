@@ -12,6 +12,7 @@ import {
   isAndroidAgentName,
   isAWSLambdaAgentName,
   isAzureFunctionsAgentName,
+  isElasticAgentName,
   isIosAgentName,
   isJavaAgentName,
   isJRubyAgentName,
@@ -41,6 +42,17 @@ describe('Agents guards', () => {
     expect(isOpenTelemetryAgentName('opentelemetry/nodejs')).toBe(true);
     expect(isOpenTelemetryAgentName('opentelemetry/nodejs/elastic')).toBe(true);
     expect(isOpenTelemetryAgentName('not-an-agent')).toBe(false);
+  });
+
+  it('isElasticAgentName should guard if the passed agent is an APM agent one.', () => {
+    expect(isElasticAgentName('nodejs')).toBe(true);
+    expect(isElasticAgentName('iOS/swift')).toBe(true);
+    expect(isElasticAgentName('java')).toBe(true);
+    expect(isElasticAgentName('rum-js')).toBe(true);
+    expect(isElasticAgentName('android/java')).toBe(true);
+    expect(isElasticAgentName('node-js')).toBe(false);
+    expect(isElasticAgentName('opentelemetry/nodejs/elastic')).toBe(false);
+    expect(isElasticAgentName('not-an-agent')).toBe(false);
   });
 
   it('isJavaAgentName should guard if the passed agent is an Java one.', () => {
