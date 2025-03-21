@@ -36,7 +36,7 @@ export async function selectConnector({
   }
 
   if (!connectors.length && setupEis) {
-    await ensureEisConnector({
+    const eisConnectorId = await ensureEisConnector({
       kibanaClient,
       log,
       signal,
@@ -48,7 +48,7 @@ export async function selectConnector({
       signal,
       prompt,
       setupEis: false,
-      preferredConnectorId,
+      preferredConnectorId: eisConnectorId,
     });
   }
 

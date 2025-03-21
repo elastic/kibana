@@ -17,7 +17,9 @@ async function getFiles(files: string[]): Promise<string[]> {
 
   // Initialize an empty repository and add remote
   await git.init();
-  await git.addRemote('origin', `git@github.com:elastic/serverless-gitops.git`);
+  await git.addRemote('origin', `git@github.com:elastic/serverless-gitops.git`).catch(async () => {
+    await git.addRemote('origin', `https://github.com/elastic/serverless-gitops.git`);
+  });
 
   // Enable sparse-checkout
   await git.raw(['config', 'core.sparseCheckout', 'true']);

@@ -30,7 +30,7 @@ export async function createInferenceClient({
   return new InferenceCliClient({
     log,
     kibanaClient,
-    connectorId: connector.connectorId,
+    connector,
     signal,
   });
 }
