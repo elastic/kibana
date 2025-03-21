@@ -52,7 +52,7 @@ export const sloKeys = {
   historicalSummary: (list: Array<{ sloId: string; instanceId: string }>) =>
     [...sloKeys.historicalSummaries(), list] as const,
   allDefinitions: () => [...sloKeys.all, 'definitions'],
-  definitions: (params?: {
+  definitions: (params: {
     search: string;
     page: number;
     perPage: number;

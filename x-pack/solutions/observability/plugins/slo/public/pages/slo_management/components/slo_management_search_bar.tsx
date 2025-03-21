@@ -40,7 +40,7 @@ export function SloManagementSearchBar({ onSearch, onRefresh, initialSearch = ''
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
         <EuiFieldSearch
-          data-test-subj="o11ySlosOutdatedDefinitionsFieldSearch"
+          data-test-subj="o11ySloDefinitionsFieldSearch"
           fullWidth
           value={tempSearch}
           onChange={handleClick}
@@ -50,24 +50,24 @@ export function SloManagementSearchBar({ onSearch, onRefresh, initialSearch = ''
       <EuiFlexItem grow={0}>
         {search === tempSearch && (
           <EuiButton
-            data-test-subj="o11ySlosOutdatedDefinitionsRefreshButton"
+            data-test-subj="o11ySloDefinitionsRefreshButton"
             iconType="refresh"
             onClick={refreshOrUpdateSearch}
           >
-            {i18n.translate('xpack.slo.slosOutdatedDefinitions.refreshButtonLabel', {
+            {i18n.translate('xpack.slo.sloDefinitions.refreshButtonLabel', {
               defaultMessage: 'Refresh',
             })}
           </EuiButton>
         )}
         {search !== tempSearch && (
           <EuiButton
-            data-test-subj="o11ySlosOutdatedDefinitionsUpdateButton"
+            data-test-subj="o11ySloDefinitionsUpdateButton"
             iconType="kqlFunction"
             color="success"
             fill
             onClick={refreshOrUpdateSearch}
           >
-            {i18n.translate('xpack.slo.slosOutdatedDefinitions.updateButtonLabel', {
+            {i18n.translate('xpack.slo.sloDefinitions.updateButtonLabel', {
               defaultMessage: 'Update',
             })}
           </EuiButton>

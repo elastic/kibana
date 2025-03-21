@@ -18,7 +18,7 @@ export interface UseFetchSloDefinitionsResponse {
   refetch: () => void;
 }
 
-export interface SLODefinitionParams {
+interface SLODefinitionParams {
   name?: string;
   includeOutdatedOnly?: boolean;
   page?: number;
