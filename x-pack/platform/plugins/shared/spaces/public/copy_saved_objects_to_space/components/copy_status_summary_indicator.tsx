@@ -6,7 +6,7 @@
  */
 
 import { EuiBadge, EuiIconTip, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
-import { css, type SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
 import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,11 +15,6 @@ import { ResolveAllConflicts } from './resolve_all_conflicts';
 import type { SpacesDataEntry } from '../../types';
 import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
-
-export type Styles = Record<
-  'missingReferencesIcon' | 'summaryCountBadge' | 'resolveAllConflictsLink',
-  SerializedStyles
->;
 
 interface Props {
   space: SpacesDataEntry;
