@@ -1539,11 +1539,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async assertFocusedField(name: string) {
       const input = await find.activeElement();
-      const fieldAncestor = await input.findByXpath('./../..');
-      const focusedElementText = await fieldAncestor.getVisibleText();
+      const fieldPopover = await input.findByXpath('./..');
+      const focusedElementText = await fieldPopover.getVisibleText();
       expect(focusedElementText).to.eql(name);
-      const dataAttrField = await fieldAncestor.getAttribute('data-attr-field');
-      expect(dataAttrField).to.eql(name);
+      const dataTestSubj = await fieldPopover.getAttribute('data-test-subj');
+      expect(dataTestSubj).to.eql('lnsFieldListPanelField');
     },
 
     /**
