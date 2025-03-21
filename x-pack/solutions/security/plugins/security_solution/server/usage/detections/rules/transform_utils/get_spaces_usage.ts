@@ -9,6 +9,15 @@ import type { SavedObjectsFindResult } from '@kbn/core/server';
 import type { RuleSearchResult } from '../../../types';
 import type { SpacesUsage } from '../types';
 
+/**
+ * Calculates the usage of spaces based on the provided rule results.
+ *
+ * @param {Array<SavedObjectsFindResult<RuleSearchResult>>} ruleResults - An array of saved object results containing rule search results.
+ *
+ * @returns {SpacesUsage}
+ * - `total`: The total number of unique spaces.
+ * - `rules_in_spaces`: An array where each value represents the number of rules in a specific space.
+ */
 export const getSpacesUsage = (
   ruleResults: Array<SavedObjectsFindResult<RuleSearchResult>>
 ): SpacesUsage => {
