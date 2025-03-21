@@ -261,7 +261,131 @@ describe('MetricVisComponent', function () {
       expect(visConfig).toMatchInlineSnapshot(`
         Object {
           "color": "#ffffff",
-          "extra": <span />,
+          "extra": <SecondaryMetric
+            columns={
+              Array [
+                Object {
+                  "id": "col-0-0",
+                  "meta": Object {
+                    "field": "day_of_week",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "terms",
+                      "params": Object {
+                        "id": "string",
+                        "missingBucketLabel": "(missing value)",
+                        "otherBucketLabel": "Other",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "0",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "day_of_week",
+                        "missingBucket": false,
+                        "missingBucketLabel": "(missing value)",
+                        "order": "desc",
+                        "orderBy": "1",
+                        "otherBucket": false,
+                        "otherBucketLabel": "Other",
+                        "size": 6,
+                      },
+                      "schema": "segment",
+                      "type": "terms",
+                    },
+                    "type": "string",
+                  },
+                  "name": "day_of_week: Descending",
+                },
+                Object {
+                  "id": "col-1-1",
+                  "meta": Object {
+                    "field": "products.base_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "1",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.base_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.base_price",
+                },
+                Object {
+                  "id": "col-2-2",
+                  "meta": Object {
+                    "field": "products.min_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "2",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.min_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.min_price",
+                },
+              ]
+            }
+            config={
+              Object {
+                "dimensions": Object {
+                  "metric": "col-1-1",
+                },
+                "metric": Object {
+                  "icon": "empty",
+                  "iconAlign": "left",
+                  "maxCols": 5,
+                  "progressDirection": "vertical",
+                  "secondaryTrend": Object {
+                    "baseline": undefined,
+                    "palette": undefined,
+                    "visuals": undefined,
+                  },
+                  "titlesTextAlign": "left",
+                  "valueFontSize": "default",
+                  "valuesTextAlign": "right",
+                },
+              }
+            }
+            getMetricFormatter={[Function]}
+            row={
+              Object {
+                "col-0-0": "Friday",
+                "col-1-1": 28.984375,
+                "col-2-2": 13.6328125,
+              }
+            }
+          />,
           "icon": [Function],
           "subtitle": undefined,
           "title": "Median products.base_price",
@@ -371,7 +495,132 @@ describe('MetricVisComponent', function () {
         Object {
           "color": "#ffffff",
           "domainMax": 28.984375,
-          "extra": <span />,
+          "extra": <SecondaryMetric
+            columns={
+              Array [
+                Object {
+                  "id": "col-0-0",
+                  "meta": Object {
+                    "field": "day_of_week",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "terms",
+                      "params": Object {
+                        "id": "string",
+                        "missingBucketLabel": "(missing value)",
+                        "otherBucketLabel": "Other",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "0",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "day_of_week",
+                        "missingBucket": false,
+                        "missingBucketLabel": "(missing value)",
+                        "order": "desc",
+                        "orderBy": "1",
+                        "otherBucket": false,
+                        "otherBucketLabel": "Other",
+                        "size": 6,
+                      },
+                      "schema": "segment",
+                      "type": "terms",
+                    },
+                    "type": "string",
+                  },
+                  "name": "day_of_week: Descending",
+                },
+                Object {
+                  "id": "col-1-1",
+                  "meta": Object {
+                    "field": "products.base_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "1",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.base_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.base_price",
+                },
+                Object {
+                  "id": "col-2-2",
+                  "meta": Object {
+                    "field": "products.min_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "2",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.min_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.min_price",
+                },
+              ]
+            }
+            config={
+              Object {
+                "dimensions": Object {
+                  "max": "col-1-1",
+                  "metric": "col-1-1",
+                },
+                "metric": Object {
+                  "icon": "empty",
+                  "iconAlign": "left",
+                  "maxCols": 5,
+                  "progressDirection": "vertical",
+                  "secondaryTrend": Object {
+                    "baseline": undefined,
+                    "palette": undefined,
+                    "visuals": undefined,
+                  },
+                  "titlesTextAlign": "left",
+                  "valueFontSize": "default",
+                  "valuesTextAlign": "right",
+                },
+              }
+            }
+            getMetricFormatter={[Function]}
+            row={
+              Object {
+                "col-0-0": "Friday",
+                "col-1-1": 28.984375,
+                "col-2-2": 13.6328125,
+              }
+            }
+          />,
           "icon": [Function],
           "progressBarDirection": "vertical",
           "subtitle": undefined,
@@ -509,7 +758,131 @@ describe('MetricVisComponent', function () {
         Array [
           Object {
             "color": "#ffffff",
-            "extra": <span />,
+            "extra": <SecondaryMetric
+              columns={
+                Array [
+                  Object {
+                    "id": "col-0-0",
+                    "meta": Object {
+                      "field": "day_of_week",
+                      "index": "kibana_sample_data_ecommerce",
+                      "params": Object {
+                        "id": "terms",
+                        "params": Object {
+                          "id": "string",
+                          "missingBucketLabel": "(missing value)",
+                          "otherBucketLabel": "Other",
+                        },
+                      },
+                      "source": "esaggs",
+                      "sourceParams": Object {
+                        "enabled": true,
+                        "hasPrecisionError": false,
+                        "id": "0",
+                        "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                        "params": Object {
+                          "field": "day_of_week",
+                          "missingBucket": false,
+                          "missingBucketLabel": "(missing value)",
+                          "order": "desc",
+                          "orderBy": "1",
+                          "otherBucket": false,
+                          "otherBucketLabel": "Other",
+                          "size": 6,
+                        },
+                        "schema": "segment",
+                        "type": "terms",
+                      },
+                      "type": "string",
+                    },
+                    "name": "day_of_week: Descending",
+                  },
+                  Object {
+                    "id": "col-1-1",
+                    "meta": Object {
+                      "field": "products.base_price",
+                      "index": "kibana_sample_data_ecommerce",
+                      "params": Object {
+                        "id": "number",
+                        "params": Object {
+                          "pattern": "$0,0.00",
+                        },
+                      },
+                      "source": "esaggs",
+                      "sourceParams": Object {
+                        "enabled": true,
+                        "hasPrecisionError": false,
+                        "id": "1",
+                        "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                        "params": Object {
+                          "field": "products.base_price",
+                        },
+                        "schema": "metric",
+                        "type": "median",
+                      },
+                      "type": "number",
+                    },
+                    "name": "Median products.base_price",
+                  },
+                  Object {
+                    "id": "col-2-2",
+                    "meta": Object {
+                      "field": "products.min_price",
+                      "index": "kibana_sample_data_ecommerce",
+                      "params": Object {
+                        "id": "number",
+                        "params": Object {
+                          "pattern": "$0,0.00",
+                        },
+                      },
+                      "source": "esaggs",
+                      "sourceParams": Object {
+                        "enabled": true,
+                        "hasPrecisionError": false,
+                        "id": "2",
+                        "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                        "params": Object {
+                          "field": "products.min_price",
+                        },
+                        "schema": "metric",
+                        "type": "median",
+                      },
+                      "type": "number",
+                    },
+                    "name": "Median products.min_price",
+                  },
+                ]
+              }
+              config={
+                Object {
+                  "dimensions": Object {
+                    "breakdownBy": "col-0-0",
+                    "metric": "col-1-1",
+                  },
+                  "metric": Object {
+                    "iconAlign": "left",
+                    "maxCols": 5,
+                    "progressDirection": "vertical",
+                    "secondaryTrend": Object {
+                      "baseline": undefined,
+                      "palette": undefined,
+                      "visuals": undefined,
+                    },
+                    "titlesTextAlign": "left",
+                    "valueFontSize": "default",
+                    "valuesTextAlign": "right",
+                  },
+                }
+              }
+              getMetricFormatter={[Function]}
+              row={
+                Object {
+                  "col-0-0": "Friday",
+                  "col-1-1": 28.984375,
+                  "col-2-2": 13.6328125,
+                }
+              }
+            />,
             "icon": undefined,
             "subtitle": "Median products.base_price",
             "title": "terms-Friday",
@@ -518,7 +891,131 @@ describe('MetricVisComponent', function () {
           },
           Object {
             "color": "#ffffff",
-            "extra": <span />,
+            "extra": <SecondaryMetric
+              columns={
+                Array [
+                  Object {
+                    "id": "col-0-0",
+                    "meta": Object {
+                      "field": "day_of_week",
+                      "index": "kibana_sample_data_ecommerce",
+                      "params": Object {
+                        "id": "terms",
+                        "params": Object {
+                          "id": "string",
+                          "missingBucketLabel": "(missing value)",
+                          "otherBucketLabel": "Other",
+                        },
+                      },
+                      "source": "esaggs",
+                      "sourceParams": Object {
+                        "enabled": true,
+                        "hasPrecisionError": false,
+                        "id": "0",
+                        "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                        "params": Object {
+                          "field": "day_of_week",
+                          "missingBucket": false,
+                          "missingBucketLabel": "(missing value)",
+                          "order": "desc",
+                          "orderBy": "1",
+                          "otherBucket": false,
+                          "otherBucketLabel": "Other",
+                          "size": 6,
+                        },
+                        "schema": "segment",
+                        "type": "terms",
+                      },
+                      "type": "string",
+                    },
+                    "name": "day_of_week: Descending",
+                  },
+                  Object {
+                    "id": "col-1-1",
+                    "meta": Object {
+                      "field": "products.base_price",
+                      "index": "kibana_sample_data_ecommerce",
+                      "params": Object {
+                        "id": "number",
+                        "params": Object {
+                          "pattern": "$0,0.00",
+                        },
+                      },
+                      "source": "esaggs",
+                      "sourceParams": Object {
+                        "enabled": true,
+                        "hasPrecisionError": false,
+                        "id": "1",
+                        "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                        "params": Object {
+                          "field": "products.base_price",
+                        },
+                        "schema": "metric",
+                        "type": "median",
+                      },
+                      "type": "number",
+                    },
+                    "name": "Median products.base_price",
+                  },
+                  Object {
+                    "id": "col-2-2",
+                    "meta": Object {
+                      "field": "products.min_price",
+                      "index": "kibana_sample_data_ecommerce",
+                      "params": Object {
+                        "id": "number",
+                        "params": Object {
+                          "pattern": "$0,0.00",
+                        },
+                      },
+                      "source": "esaggs",
+                      "sourceParams": Object {
+                        "enabled": true,
+                        "hasPrecisionError": false,
+                        "id": "2",
+                        "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                        "params": Object {
+                          "field": "products.min_price",
+                        },
+                        "schema": "metric",
+                        "type": "median",
+                      },
+                      "type": "number",
+                    },
+                    "name": "Median products.min_price",
+                  },
+                ]
+              }
+              config={
+                Object {
+                  "dimensions": Object {
+                    "breakdownBy": "col-0-0",
+                    "metric": "col-1-1",
+                  },
+                  "metric": Object {
+                    "iconAlign": "left",
+                    "maxCols": 5,
+                    "progressDirection": "vertical",
+                    "secondaryTrend": Object {
+                      "baseline": undefined,
+                      "palette": undefined,
+                      "visuals": undefined,
+                    },
+                    "titlesTextAlign": "left",
+                    "valueFontSize": "default",
+                    "valuesTextAlign": "right",
+                  },
+                }
+              }
+              getMetricFormatter={[Function]}
+              row={
+                Object {
+                  "col-0-0": "Wednesday",
+                  "col-1-1": 28.984375,
+                  "col-2-2": 13.639539930555555,
+                }
+              }
+            />,
             "icon": undefined,
             "subtitle": "Median products.base_price",
             "title": "terms-Wednesday",
@@ -527,7 +1024,131 @@ describe('MetricVisComponent', function () {
           },
           Object {
             "color": "#ffffff",
-            "extra": <span />,
+            "extra": <SecondaryMetric
+              columns={
+                Array [
+                  Object {
+                    "id": "col-0-0",
+                    "meta": Object {
+                      "field": "day_of_week",
+                      "index": "kibana_sample_data_ecommerce",
+                      "params": Object {
+                        "id": "terms",
+                        "params": Object {
+                          "id": "string",
+                          "missingBucketLabel": "(missing value)",
+                          "otherBucketLabel": "Other",
+                        },
+                      },
+                      "source": "esaggs",
+                      "sourceParams": Object {
+                        "enabled": true,
+                        "hasPrecisionError": false,
+                        "id": "0",
+                        "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                        "params": Object {
+                          "field": "day_of_week",
+                          "missingBucket": false,
+                          "missingBucketLabel": "(missing value)",
+                          "order": "desc",
+                          "orderBy": "1",
+                          "otherBucket": false,
+                          "otherBucketLabel": "Other",
+                          "size": 6,
+                        },
+                        "schema": "segment",
+                        "type": "terms",
+                      },
+                      "type": "string",
+                    },
+                    "name": "day_of_week: Descending",
+                  },
+                  Object {
+                    "id": "col-1-1",
+                    "meta": Object {
+                      "field": "products.base_price",
+                      "index": "kibana_sample_data_ecommerce",
+                      "params": Object {
+                        "id": "number",
+                        "params": Object {
+                          "pattern": "$0,0.00",
+                        },
+                      },
+                      "source": "esaggs",
+                      "sourceParams": Object {
+                        "enabled": true,
+                        "hasPrecisionError": false,
+                        "id": "1",
+                        "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                        "params": Object {
+                          "field": "products.base_price",
+                        },
+                        "schema": "metric",
+                        "type": "median",
+                      },
+                      "type": "number",
+                    },
+                    "name": "Median products.base_price",
+                  },
+                  Object {
+                    "id": "col-2-2",
+                    "meta": Object {
+                      "field": "products.min_price",
+                      "index": "kibana_sample_data_ecommerce",
+                      "params": Object {
+                        "id": "number",
+                        "params": Object {
+                          "pattern": "$0,0.00",
+                        },
+                      },
+                      "source": "esaggs",
+                      "sourceParams": Object {
+                        "enabled": true,
+                        "hasPrecisionError": false,
+                        "id": "2",
+                        "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                        "params": Object {
+                          "field": "products.min_price",
+                        },
+                        "schema": "metric",
+                        "type": "median",
+                      },
+                      "type": "number",
+                    },
+                    "name": "Median products.min_price",
+                  },
+                ]
+              }
+              config={
+                Object {
+                  "dimensions": Object {
+                    "breakdownBy": "col-0-0",
+                    "metric": "col-1-1",
+                  },
+                  "metric": Object {
+                    "iconAlign": "left",
+                    "maxCols": 5,
+                    "progressDirection": "vertical",
+                    "secondaryTrend": Object {
+                      "baseline": undefined,
+                      "palette": undefined,
+                      "visuals": undefined,
+                    },
+                    "titlesTextAlign": "left",
+                    "valueFontSize": "default",
+                    "valuesTextAlign": "right",
+                  },
+                }
+              }
+              getMetricFormatter={[Function]}
+              row={
+                Object {
+                  "col-0-0": "Saturday",
+                  "col-1-1": 25.984375,
+                  "col-2-2": 13.34375,
+                }
+              }
+            />,
             "icon": undefined,
             "subtitle": "Median products.base_price",
             "title": "terms-Saturday",
@@ -536,7 +1157,131 @@ describe('MetricVisComponent', function () {
           },
           Object {
             "color": "#ffffff",
-            "extra": <span />,
+            "extra": <SecondaryMetric
+              columns={
+                Array [
+                  Object {
+                    "id": "col-0-0",
+                    "meta": Object {
+                      "field": "day_of_week",
+                      "index": "kibana_sample_data_ecommerce",
+                      "params": Object {
+                        "id": "terms",
+                        "params": Object {
+                          "id": "string",
+                          "missingBucketLabel": "(missing value)",
+                          "otherBucketLabel": "Other",
+                        },
+                      },
+                      "source": "esaggs",
+                      "sourceParams": Object {
+                        "enabled": true,
+                        "hasPrecisionError": false,
+                        "id": "0",
+                        "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                        "params": Object {
+                          "field": "day_of_week",
+                          "missingBucket": false,
+                          "missingBucketLabel": "(missing value)",
+                          "order": "desc",
+                          "orderBy": "1",
+                          "otherBucket": false,
+                          "otherBucketLabel": "Other",
+                          "size": 6,
+                        },
+                        "schema": "segment",
+                        "type": "terms",
+                      },
+                      "type": "string",
+                    },
+                    "name": "day_of_week: Descending",
+                  },
+                  Object {
+                    "id": "col-1-1",
+                    "meta": Object {
+                      "field": "products.base_price",
+                      "index": "kibana_sample_data_ecommerce",
+                      "params": Object {
+                        "id": "number",
+                        "params": Object {
+                          "pattern": "$0,0.00",
+                        },
+                      },
+                      "source": "esaggs",
+                      "sourceParams": Object {
+                        "enabled": true,
+                        "hasPrecisionError": false,
+                        "id": "1",
+                        "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                        "params": Object {
+                          "field": "products.base_price",
+                        },
+                        "schema": "metric",
+                        "type": "median",
+                      },
+                      "type": "number",
+                    },
+                    "name": "Median products.base_price",
+                  },
+                  Object {
+                    "id": "col-2-2",
+                    "meta": Object {
+                      "field": "products.min_price",
+                      "index": "kibana_sample_data_ecommerce",
+                      "params": Object {
+                        "id": "number",
+                        "params": Object {
+                          "pattern": "$0,0.00",
+                        },
+                      },
+                      "source": "esaggs",
+                      "sourceParams": Object {
+                        "enabled": true,
+                        "hasPrecisionError": false,
+                        "id": "2",
+                        "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                        "params": Object {
+                          "field": "products.min_price",
+                        },
+                        "schema": "metric",
+                        "type": "median",
+                      },
+                      "type": "number",
+                    },
+                    "name": "Median products.min_price",
+                  },
+                ]
+              }
+              config={
+                Object {
+                  "dimensions": Object {
+                    "breakdownBy": "col-0-0",
+                    "metric": "col-1-1",
+                  },
+                  "metric": Object {
+                    "iconAlign": "left",
+                    "maxCols": 5,
+                    "progressDirection": "vertical",
+                    "secondaryTrend": Object {
+                      "baseline": undefined,
+                      "palette": undefined,
+                      "visuals": undefined,
+                    },
+                    "titlesTextAlign": "left",
+                    "valueFontSize": "default",
+                    "valuesTextAlign": "right",
+                  },
+                }
+              }
+              getMetricFormatter={[Function]}
+              row={
+                Object {
+                  "col-0-0": "Sunday",
+                  "col-1-1": 25.784375,
+                  "col-2-2": 13.4921875,
+                }
+              }
+            />,
             "icon": undefined,
             "subtitle": "Median products.base_price",
             "title": "terms-Sunday",
@@ -545,7 +1290,131 @@ describe('MetricVisComponent', function () {
           },
           Object {
             "color": "#ffffff",
-            "extra": <span />,
+            "extra": <SecondaryMetric
+              columns={
+                Array [
+                  Object {
+                    "id": "col-0-0",
+                    "meta": Object {
+                      "field": "day_of_week",
+                      "index": "kibana_sample_data_ecommerce",
+                      "params": Object {
+                        "id": "terms",
+                        "params": Object {
+                          "id": "string",
+                          "missingBucketLabel": "(missing value)",
+                          "otherBucketLabel": "Other",
+                        },
+                      },
+                      "source": "esaggs",
+                      "sourceParams": Object {
+                        "enabled": true,
+                        "hasPrecisionError": false,
+                        "id": "0",
+                        "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                        "params": Object {
+                          "field": "day_of_week",
+                          "missingBucket": false,
+                          "missingBucketLabel": "(missing value)",
+                          "order": "desc",
+                          "orderBy": "1",
+                          "otherBucket": false,
+                          "otherBucketLabel": "Other",
+                          "size": 6,
+                        },
+                        "schema": "segment",
+                        "type": "terms",
+                      },
+                      "type": "string",
+                    },
+                    "name": "day_of_week: Descending",
+                  },
+                  Object {
+                    "id": "col-1-1",
+                    "meta": Object {
+                      "field": "products.base_price",
+                      "index": "kibana_sample_data_ecommerce",
+                      "params": Object {
+                        "id": "number",
+                        "params": Object {
+                          "pattern": "$0,0.00",
+                        },
+                      },
+                      "source": "esaggs",
+                      "sourceParams": Object {
+                        "enabled": true,
+                        "hasPrecisionError": false,
+                        "id": "1",
+                        "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                        "params": Object {
+                          "field": "products.base_price",
+                        },
+                        "schema": "metric",
+                        "type": "median",
+                      },
+                      "type": "number",
+                    },
+                    "name": "Median products.base_price",
+                  },
+                  Object {
+                    "id": "col-2-2",
+                    "meta": Object {
+                      "field": "products.min_price",
+                      "index": "kibana_sample_data_ecommerce",
+                      "params": Object {
+                        "id": "number",
+                        "params": Object {
+                          "pattern": "$0,0.00",
+                        },
+                      },
+                      "source": "esaggs",
+                      "sourceParams": Object {
+                        "enabled": true,
+                        "hasPrecisionError": false,
+                        "id": "2",
+                        "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                        "params": Object {
+                          "field": "products.min_price",
+                        },
+                        "schema": "metric",
+                        "type": "median",
+                      },
+                      "type": "number",
+                    },
+                    "name": "Median products.min_price",
+                  },
+                ]
+              }
+              config={
+                Object {
+                  "dimensions": Object {
+                    "breakdownBy": "col-0-0",
+                    "metric": "col-1-1",
+                  },
+                  "metric": Object {
+                    "iconAlign": "left",
+                    "maxCols": 5,
+                    "progressDirection": "vertical",
+                    "secondaryTrend": Object {
+                      "baseline": undefined,
+                      "palette": undefined,
+                      "visuals": undefined,
+                    },
+                    "titlesTextAlign": "left",
+                    "valueFontSize": "default",
+                    "valuesTextAlign": "right",
+                  },
+                }
+              }
+              getMetricFormatter={[Function]}
+              row={
+                Object {
+                  "col-0-0": "Thursday",
+                  "col-1-1": 25.348011363636363,
+                  "col-2-2": 13.34375,
+                }
+              }
+            />,
             "icon": undefined,
             "subtitle": "Median products.base_price",
             "title": "terms-Thursday",
@@ -578,26 +1447,641 @@ describe('MetricVisComponent', function () {
           .data?.[0].map((datum) => datum?.extra)
       ).toMatchInlineSnapshot(`
         Array [
-          <span>
-            howdy
-             number-13.6328125
-          </span>,
-          <span>
-            howdy
-             number-13.639539930555555
-          </span>,
-          <span>
-            howdy
-             number-13.34375
-          </span>,
-          <span>
-            howdy
-             number-13.4921875
-          </span>,
-          <span>
-            howdy
-             number-13.34375
-          </span>,
+          <SecondaryMetric
+            columns={
+              Array [
+                Object {
+                  "id": "col-0-0",
+                  "meta": Object {
+                    "field": "day_of_week",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "terms",
+                      "params": Object {
+                        "id": "string",
+                        "missingBucketLabel": "(missing value)",
+                        "otherBucketLabel": "Other",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "0",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "day_of_week",
+                        "missingBucket": false,
+                        "missingBucketLabel": "(missing value)",
+                        "order": "desc",
+                        "orderBy": "1",
+                        "otherBucket": false,
+                        "otherBucketLabel": "Other",
+                        "size": 6,
+                      },
+                      "schema": "segment",
+                      "type": "terms",
+                    },
+                    "type": "string",
+                  },
+                  "name": "day_of_week: Descending",
+                },
+                Object {
+                  "id": "col-1-1",
+                  "meta": Object {
+                    "field": "products.base_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "1",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.base_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.base_price",
+                },
+                Object {
+                  "id": "col-2-2",
+                  "meta": Object {
+                    "field": "products.min_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "2",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.min_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.min_price",
+                },
+              ]
+            }
+            config={
+              Object {
+                "dimensions": Object {
+                  "breakdownBy": "col-0-0",
+                  "metric": "col-1-1",
+                  "secondaryMetric": "col-2-2",
+                },
+                "metric": Object {
+                  "iconAlign": "left",
+                  "maxCols": 5,
+                  "progressDirection": "vertical",
+                  "secondaryPrefix": "howdy",
+                  "secondaryTrend": Object {
+                    "baseline": undefined,
+                    "palette": undefined,
+                    "visuals": undefined,
+                  },
+                  "titlesTextAlign": "left",
+                  "valueFontSize": "default",
+                  "valuesTextAlign": "right",
+                },
+              }
+            }
+            getMetricFormatter={[Function]}
+            row={
+              Object {
+                "col-0-0": "Friday",
+                "col-1-1": 28.984375,
+                "col-2-2": 13.6328125,
+              }
+            }
+          />,
+          <SecondaryMetric
+            columns={
+              Array [
+                Object {
+                  "id": "col-0-0",
+                  "meta": Object {
+                    "field": "day_of_week",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "terms",
+                      "params": Object {
+                        "id": "string",
+                        "missingBucketLabel": "(missing value)",
+                        "otherBucketLabel": "Other",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "0",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "day_of_week",
+                        "missingBucket": false,
+                        "missingBucketLabel": "(missing value)",
+                        "order": "desc",
+                        "orderBy": "1",
+                        "otherBucket": false,
+                        "otherBucketLabel": "Other",
+                        "size": 6,
+                      },
+                      "schema": "segment",
+                      "type": "terms",
+                    },
+                    "type": "string",
+                  },
+                  "name": "day_of_week: Descending",
+                },
+                Object {
+                  "id": "col-1-1",
+                  "meta": Object {
+                    "field": "products.base_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "1",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.base_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.base_price",
+                },
+                Object {
+                  "id": "col-2-2",
+                  "meta": Object {
+                    "field": "products.min_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "2",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.min_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.min_price",
+                },
+              ]
+            }
+            config={
+              Object {
+                "dimensions": Object {
+                  "breakdownBy": "col-0-0",
+                  "metric": "col-1-1",
+                  "secondaryMetric": "col-2-2",
+                },
+                "metric": Object {
+                  "iconAlign": "left",
+                  "maxCols": 5,
+                  "progressDirection": "vertical",
+                  "secondaryPrefix": "howdy",
+                  "secondaryTrend": Object {
+                    "baseline": undefined,
+                    "palette": undefined,
+                    "visuals": undefined,
+                  },
+                  "titlesTextAlign": "left",
+                  "valueFontSize": "default",
+                  "valuesTextAlign": "right",
+                },
+              }
+            }
+            getMetricFormatter={[Function]}
+            row={
+              Object {
+                "col-0-0": "Wednesday",
+                "col-1-1": 28.984375,
+                "col-2-2": 13.639539930555555,
+              }
+            }
+          />,
+          <SecondaryMetric
+            columns={
+              Array [
+                Object {
+                  "id": "col-0-0",
+                  "meta": Object {
+                    "field": "day_of_week",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "terms",
+                      "params": Object {
+                        "id": "string",
+                        "missingBucketLabel": "(missing value)",
+                        "otherBucketLabel": "Other",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "0",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "day_of_week",
+                        "missingBucket": false,
+                        "missingBucketLabel": "(missing value)",
+                        "order": "desc",
+                        "orderBy": "1",
+                        "otherBucket": false,
+                        "otherBucketLabel": "Other",
+                        "size": 6,
+                      },
+                      "schema": "segment",
+                      "type": "terms",
+                    },
+                    "type": "string",
+                  },
+                  "name": "day_of_week: Descending",
+                },
+                Object {
+                  "id": "col-1-1",
+                  "meta": Object {
+                    "field": "products.base_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "1",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.base_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.base_price",
+                },
+                Object {
+                  "id": "col-2-2",
+                  "meta": Object {
+                    "field": "products.min_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "2",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.min_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.min_price",
+                },
+              ]
+            }
+            config={
+              Object {
+                "dimensions": Object {
+                  "breakdownBy": "col-0-0",
+                  "metric": "col-1-1",
+                  "secondaryMetric": "col-2-2",
+                },
+                "metric": Object {
+                  "iconAlign": "left",
+                  "maxCols": 5,
+                  "progressDirection": "vertical",
+                  "secondaryPrefix": "howdy",
+                  "secondaryTrend": Object {
+                    "baseline": undefined,
+                    "palette": undefined,
+                    "visuals": undefined,
+                  },
+                  "titlesTextAlign": "left",
+                  "valueFontSize": "default",
+                  "valuesTextAlign": "right",
+                },
+              }
+            }
+            getMetricFormatter={[Function]}
+            row={
+              Object {
+                "col-0-0": "Saturday",
+                "col-1-1": 25.984375,
+                "col-2-2": 13.34375,
+              }
+            }
+          />,
+          <SecondaryMetric
+            columns={
+              Array [
+                Object {
+                  "id": "col-0-0",
+                  "meta": Object {
+                    "field": "day_of_week",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "terms",
+                      "params": Object {
+                        "id": "string",
+                        "missingBucketLabel": "(missing value)",
+                        "otherBucketLabel": "Other",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "0",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "day_of_week",
+                        "missingBucket": false,
+                        "missingBucketLabel": "(missing value)",
+                        "order": "desc",
+                        "orderBy": "1",
+                        "otherBucket": false,
+                        "otherBucketLabel": "Other",
+                        "size": 6,
+                      },
+                      "schema": "segment",
+                      "type": "terms",
+                    },
+                    "type": "string",
+                  },
+                  "name": "day_of_week: Descending",
+                },
+                Object {
+                  "id": "col-1-1",
+                  "meta": Object {
+                    "field": "products.base_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "1",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.base_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.base_price",
+                },
+                Object {
+                  "id": "col-2-2",
+                  "meta": Object {
+                    "field": "products.min_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "2",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.min_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.min_price",
+                },
+              ]
+            }
+            config={
+              Object {
+                "dimensions": Object {
+                  "breakdownBy": "col-0-0",
+                  "metric": "col-1-1",
+                  "secondaryMetric": "col-2-2",
+                },
+                "metric": Object {
+                  "iconAlign": "left",
+                  "maxCols": 5,
+                  "progressDirection": "vertical",
+                  "secondaryPrefix": "howdy",
+                  "secondaryTrend": Object {
+                    "baseline": undefined,
+                    "palette": undefined,
+                    "visuals": undefined,
+                  },
+                  "titlesTextAlign": "left",
+                  "valueFontSize": "default",
+                  "valuesTextAlign": "right",
+                },
+              }
+            }
+            getMetricFormatter={[Function]}
+            row={
+              Object {
+                "col-0-0": "Sunday",
+                "col-1-1": 25.784375,
+                "col-2-2": 13.4921875,
+              }
+            }
+          />,
+          <SecondaryMetric
+            columns={
+              Array [
+                Object {
+                  "id": "col-0-0",
+                  "meta": Object {
+                    "field": "day_of_week",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "terms",
+                      "params": Object {
+                        "id": "string",
+                        "missingBucketLabel": "(missing value)",
+                        "otherBucketLabel": "Other",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "0",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "day_of_week",
+                        "missingBucket": false,
+                        "missingBucketLabel": "(missing value)",
+                        "order": "desc",
+                        "orderBy": "1",
+                        "otherBucket": false,
+                        "otherBucketLabel": "Other",
+                        "size": 6,
+                      },
+                      "schema": "segment",
+                      "type": "terms",
+                    },
+                    "type": "string",
+                  },
+                  "name": "day_of_week: Descending",
+                },
+                Object {
+                  "id": "col-1-1",
+                  "meta": Object {
+                    "field": "products.base_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "1",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.base_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.base_price",
+                },
+                Object {
+                  "id": "col-2-2",
+                  "meta": Object {
+                    "field": "products.min_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "2",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.min_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.min_price",
+                },
+              ]
+            }
+            config={
+              Object {
+                "dimensions": Object {
+                  "breakdownBy": "col-0-0",
+                  "metric": "col-1-1",
+                  "secondaryMetric": "col-2-2",
+                },
+                "metric": Object {
+                  "iconAlign": "left",
+                  "maxCols": 5,
+                  "progressDirection": "vertical",
+                  "secondaryPrefix": "howdy",
+                  "secondaryTrend": Object {
+                    "baseline": undefined,
+                    "palette": undefined,
+                    "visuals": undefined,
+                  },
+                  "titlesTextAlign": "left",
+                  "valueFontSize": "default",
+                  "valuesTextAlign": "right",
+                },
+              }
+            }
+            getMetricFormatter={[Function]}
+            row={
+              Object {
+                "col-0-0": "Thursday",
+                "col-1-1": 25.348011363636363,
+                "col-2-2": 13.34375,
+              }
+            }
+          />,
         ]
       `);
 
@@ -620,21 +2104,636 @@ describe('MetricVisComponent', function () {
           .data?.[0].map((datum) => datum?.extra)
       ).toMatchInlineSnapshot(`
         Array [
-          <span>
-            howdy
-          </span>,
-          <span>
-            howdy
-          </span>,
-          <span>
-            howdy
-          </span>,
-          <span>
-            howdy
-          </span>,
-          <span>
-            howdy
-          </span>,
+          <SecondaryMetric
+            columns={
+              Array [
+                Object {
+                  "id": "col-0-0",
+                  "meta": Object {
+                    "field": "day_of_week",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "terms",
+                      "params": Object {
+                        "id": "string",
+                        "missingBucketLabel": "(missing value)",
+                        "otherBucketLabel": "Other",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "0",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "day_of_week",
+                        "missingBucket": false,
+                        "missingBucketLabel": "(missing value)",
+                        "order": "desc",
+                        "orderBy": "1",
+                        "otherBucket": false,
+                        "otherBucketLabel": "Other",
+                        "size": 6,
+                      },
+                      "schema": "segment",
+                      "type": "terms",
+                    },
+                    "type": "string",
+                  },
+                  "name": "day_of_week: Descending",
+                },
+                Object {
+                  "id": "col-1-1",
+                  "meta": Object {
+                    "field": "products.base_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "1",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.base_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.base_price",
+                },
+                Object {
+                  "id": "col-2-2",
+                  "meta": Object {
+                    "field": "products.min_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "2",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.min_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.min_price",
+                },
+              ]
+            }
+            config={
+              Object {
+                "dimensions": Object {
+                  "breakdownBy": "col-0-0",
+                  "metric": "col-1-1",
+                },
+                "metric": Object {
+                  "iconAlign": "left",
+                  "maxCols": 5,
+                  "progressDirection": "vertical",
+                  "secondaryPrefix": "howdy",
+                  "secondaryTrend": Object {
+                    "baseline": undefined,
+                    "palette": undefined,
+                    "visuals": undefined,
+                  },
+                  "titlesTextAlign": "left",
+                  "valueFontSize": "default",
+                  "valuesTextAlign": "right",
+                },
+              }
+            }
+            getMetricFormatter={[Function]}
+            row={
+              Object {
+                "col-0-0": "Friday",
+                "col-1-1": 28.984375,
+                "col-2-2": 13.6328125,
+              }
+            }
+          />,
+          <SecondaryMetric
+            columns={
+              Array [
+                Object {
+                  "id": "col-0-0",
+                  "meta": Object {
+                    "field": "day_of_week",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "terms",
+                      "params": Object {
+                        "id": "string",
+                        "missingBucketLabel": "(missing value)",
+                        "otherBucketLabel": "Other",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "0",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "day_of_week",
+                        "missingBucket": false,
+                        "missingBucketLabel": "(missing value)",
+                        "order": "desc",
+                        "orderBy": "1",
+                        "otherBucket": false,
+                        "otherBucketLabel": "Other",
+                        "size": 6,
+                      },
+                      "schema": "segment",
+                      "type": "terms",
+                    },
+                    "type": "string",
+                  },
+                  "name": "day_of_week: Descending",
+                },
+                Object {
+                  "id": "col-1-1",
+                  "meta": Object {
+                    "field": "products.base_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "1",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.base_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.base_price",
+                },
+                Object {
+                  "id": "col-2-2",
+                  "meta": Object {
+                    "field": "products.min_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "2",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.min_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.min_price",
+                },
+              ]
+            }
+            config={
+              Object {
+                "dimensions": Object {
+                  "breakdownBy": "col-0-0",
+                  "metric": "col-1-1",
+                },
+                "metric": Object {
+                  "iconAlign": "left",
+                  "maxCols": 5,
+                  "progressDirection": "vertical",
+                  "secondaryPrefix": "howdy",
+                  "secondaryTrend": Object {
+                    "baseline": undefined,
+                    "palette": undefined,
+                    "visuals": undefined,
+                  },
+                  "titlesTextAlign": "left",
+                  "valueFontSize": "default",
+                  "valuesTextAlign": "right",
+                },
+              }
+            }
+            getMetricFormatter={[Function]}
+            row={
+              Object {
+                "col-0-0": "Wednesday",
+                "col-1-1": 28.984375,
+                "col-2-2": 13.639539930555555,
+              }
+            }
+          />,
+          <SecondaryMetric
+            columns={
+              Array [
+                Object {
+                  "id": "col-0-0",
+                  "meta": Object {
+                    "field": "day_of_week",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "terms",
+                      "params": Object {
+                        "id": "string",
+                        "missingBucketLabel": "(missing value)",
+                        "otherBucketLabel": "Other",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "0",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "day_of_week",
+                        "missingBucket": false,
+                        "missingBucketLabel": "(missing value)",
+                        "order": "desc",
+                        "orderBy": "1",
+                        "otherBucket": false,
+                        "otherBucketLabel": "Other",
+                        "size": 6,
+                      },
+                      "schema": "segment",
+                      "type": "terms",
+                    },
+                    "type": "string",
+                  },
+                  "name": "day_of_week: Descending",
+                },
+                Object {
+                  "id": "col-1-1",
+                  "meta": Object {
+                    "field": "products.base_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "1",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.base_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.base_price",
+                },
+                Object {
+                  "id": "col-2-2",
+                  "meta": Object {
+                    "field": "products.min_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "2",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.min_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.min_price",
+                },
+              ]
+            }
+            config={
+              Object {
+                "dimensions": Object {
+                  "breakdownBy": "col-0-0",
+                  "metric": "col-1-1",
+                },
+                "metric": Object {
+                  "iconAlign": "left",
+                  "maxCols": 5,
+                  "progressDirection": "vertical",
+                  "secondaryPrefix": "howdy",
+                  "secondaryTrend": Object {
+                    "baseline": undefined,
+                    "palette": undefined,
+                    "visuals": undefined,
+                  },
+                  "titlesTextAlign": "left",
+                  "valueFontSize": "default",
+                  "valuesTextAlign": "right",
+                },
+              }
+            }
+            getMetricFormatter={[Function]}
+            row={
+              Object {
+                "col-0-0": "Saturday",
+                "col-1-1": 25.984375,
+                "col-2-2": 13.34375,
+              }
+            }
+          />,
+          <SecondaryMetric
+            columns={
+              Array [
+                Object {
+                  "id": "col-0-0",
+                  "meta": Object {
+                    "field": "day_of_week",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "terms",
+                      "params": Object {
+                        "id": "string",
+                        "missingBucketLabel": "(missing value)",
+                        "otherBucketLabel": "Other",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "0",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "day_of_week",
+                        "missingBucket": false,
+                        "missingBucketLabel": "(missing value)",
+                        "order": "desc",
+                        "orderBy": "1",
+                        "otherBucket": false,
+                        "otherBucketLabel": "Other",
+                        "size": 6,
+                      },
+                      "schema": "segment",
+                      "type": "terms",
+                    },
+                    "type": "string",
+                  },
+                  "name": "day_of_week: Descending",
+                },
+                Object {
+                  "id": "col-1-1",
+                  "meta": Object {
+                    "field": "products.base_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "1",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.base_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.base_price",
+                },
+                Object {
+                  "id": "col-2-2",
+                  "meta": Object {
+                    "field": "products.min_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "2",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.min_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.min_price",
+                },
+              ]
+            }
+            config={
+              Object {
+                "dimensions": Object {
+                  "breakdownBy": "col-0-0",
+                  "metric": "col-1-1",
+                },
+                "metric": Object {
+                  "iconAlign": "left",
+                  "maxCols": 5,
+                  "progressDirection": "vertical",
+                  "secondaryPrefix": "howdy",
+                  "secondaryTrend": Object {
+                    "baseline": undefined,
+                    "palette": undefined,
+                    "visuals": undefined,
+                  },
+                  "titlesTextAlign": "left",
+                  "valueFontSize": "default",
+                  "valuesTextAlign": "right",
+                },
+              }
+            }
+            getMetricFormatter={[Function]}
+            row={
+              Object {
+                "col-0-0": "Sunday",
+                "col-1-1": 25.784375,
+                "col-2-2": 13.4921875,
+              }
+            }
+          />,
+          <SecondaryMetric
+            columns={
+              Array [
+                Object {
+                  "id": "col-0-0",
+                  "meta": Object {
+                    "field": "day_of_week",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "terms",
+                      "params": Object {
+                        "id": "string",
+                        "missingBucketLabel": "(missing value)",
+                        "otherBucketLabel": "Other",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "0",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "day_of_week",
+                        "missingBucket": false,
+                        "missingBucketLabel": "(missing value)",
+                        "order": "desc",
+                        "orderBy": "1",
+                        "otherBucket": false,
+                        "otherBucketLabel": "Other",
+                        "size": 6,
+                      },
+                      "schema": "segment",
+                      "type": "terms",
+                    },
+                    "type": "string",
+                  },
+                  "name": "day_of_week: Descending",
+                },
+                Object {
+                  "id": "col-1-1",
+                  "meta": Object {
+                    "field": "products.base_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "1",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.base_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.base_price",
+                },
+                Object {
+                  "id": "col-2-2",
+                  "meta": Object {
+                    "field": "products.min_price",
+                    "index": "kibana_sample_data_ecommerce",
+                    "params": Object {
+                      "id": "number",
+                      "params": Object {
+                        "pattern": "$0,0.00",
+                      },
+                    },
+                    "source": "esaggs",
+                    "sourceParams": Object {
+                      "enabled": true,
+                      "hasPrecisionError": false,
+                      "id": "2",
+                      "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                      "params": Object {
+                        "field": "products.min_price",
+                      },
+                      "schema": "metric",
+                      "type": "median",
+                    },
+                    "type": "number",
+                  },
+                  "name": "Median products.min_price",
+                },
+              ]
+            }
+            config={
+              Object {
+                "dimensions": Object {
+                  "breakdownBy": "col-0-0",
+                  "metric": "col-1-1",
+                },
+                "metric": Object {
+                  "iconAlign": "left",
+                  "maxCols": 5,
+                  "progressDirection": "vertical",
+                  "secondaryPrefix": "howdy",
+                  "secondaryTrend": Object {
+                    "baseline": undefined,
+                    "palette": undefined,
+                    "visuals": undefined,
+                  },
+                  "titlesTextAlign": "left",
+                  "valueFontSize": "default",
+                  "valuesTextAlign": "right",
+                },
+              }
+            }
+            getMetricFormatter={[Function]}
+            row={
+              Object {
+                "col-0-0": "Thursday",
+                "col-1-1": 25.348011363636363,
+                "col-2-2": 13.34375,
+              }
+            }
+          />,
         ]
       `);
     });
@@ -676,7 +2775,132 @@ describe('MetricVisComponent', function () {
           Array [
             Object {
               "color": "#ffffff",
-              "extra": <span />,
+              "extra": <SecondaryMetric
+                columns={
+                  Array [
+                    Object {
+                      "id": "col-0-0",
+                      "meta": Object {
+                        "field": "day_of_week",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "terms",
+                          "params": Object {
+                            "id": "string",
+                            "missingBucketLabel": "(missing value)",
+                            "otherBucketLabel": "Other",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "0",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "day_of_week",
+                            "missingBucket": false,
+                            "missingBucketLabel": "(missing value)",
+                            "order": "desc",
+                            "orderBy": "1",
+                            "otherBucket": false,
+                            "otherBucketLabel": "Other",
+                            "size": 6,
+                          },
+                          "schema": "segment",
+                          "type": "terms",
+                        },
+                        "type": "string",
+                      },
+                      "name": "day_of_week: Descending",
+                    },
+                    Object {
+                      "id": "col-1-1",
+                      "meta": Object {
+                        "field": "products.base_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "1",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.base_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.base_price",
+                    },
+                    Object {
+                      "id": "col-2-2",
+                      "meta": Object {
+                        "field": "products.min_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "2",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.min_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.min_price",
+                    },
+                  ]
+                }
+                config={
+                  Object {
+                    "dimensions": Object {
+                      "breakdownBy": "col-0-0",
+                      "metric": "col-1-1",
+                    },
+                    "metric": Object {
+                      "iconAlign": "left",
+                      "maxCols": 5,
+                      "minTiles": 10,
+                      "progressDirection": "vertical",
+                      "secondaryTrend": Object {
+                        "baseline": undefined,
+                        "palette": undefined,
+                        "visuals": undefined,
+                      },
+                      "titlesTextAlign": "left",
+                      "valueFontSize": "default",
+                      "valuesTextAlign": "right",
+                    },
+                  }
+                }
+                getMetricFormatter={[Function]}
+                row={
+                  Object {
+                    "col-0-0": "Friday",
+                    "col-1-1": 28.984375,
+                    "col-2-2": 13.6328125,
+                  }
+                }
+              />,
               "icon": undefined,
               "subtitle": "Median products.base_price",
               "title": "terms-Friday",
@@ -685,7 +2909,132 @@ describe('MetricVisComponent', function () {
             },
             Object {
               "color": "#ffffff",
-              "extra": <span />,
+              "extra": <SecondaryMetric
+                columns={
+                  Array [
+                    Object {
+                      "id": "col-0-0",
+                      "meta": Object {
+                        "field": "day_of_week",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "terms",
+                          "params": Object {
+                            "id": "string",
+                            "missingBucketLabel": "(missing value)",
+                            "otherBucketLabel": "Other",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "0",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "day_of_week",
+                            "missingBucket": false,
+                            "missingBucketLabel": "(missing value)",
+                            "order": "desc",
+                            "orderBy": "1",
+                            "otherBucket": false,
+                            "otherBucketLabel": "Other",
+                            "size": 6,
+                          },
+                          "schema": "segment",
+                          "type": "terms",
+                        },
+                        "type": "string",
+                      },
+                      "name": "day_of_week: Descending",
+                    },
+                    Object {
+                      "id": "col-1-1",
+                      "meta": Object {
+                        "field": "products.base_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "1",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.base_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.base_price",
+                    },
+                    Object {
+                      "id": "col-2-2",
+                      "meta": Object {
+                        "field": "products.min_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "2",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.min_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.min_price",
+                    },
+                  ]
+                }
+                config={
+                  Object {
+                    "dimensions": Object {
+                      "breakdownBy": "col-0-0",
+                      "metric": "col-1-1",
+                    },
+                    "metric": Object {
+                      "iconAlign": "left",
+                      "maxCols": 5,
+                      "minTiles": 10,
+                      "progressDirection": "vertical",
+                      "secondaryTrend": Object {
+                        "baseline": undefined,
+                        "palette": undefined,
+                        "visuals": undefined,
+                      },
+                      "titlesTextAlign": "left",
+                      "valueFontSize": "default",
+                      "valuesTextAlign": "right",
+                    },
+                  }
+                }
+                getMetricFormatter={[Function]}
+                row={
+                  Object {
+                    "col-0-0": "Wednesday",
+                    "col-1-1": 28.984375,
+                    "col-2-2": 13.639539930555555,
+                  }
+                }
+              />,
               "icon": undefined,
               "subtitle": "Median products.base_price",
               "title": "terms-Wednesday",
@@ -694,7 +3043,132 @@ describe('MetricVisComponent', function () {
             },
             Object {
               "color": "#ffffff",
-              "extra": <span />,
+              "extra": <SecondaryMetric
+                columns={
+                  Array [
+                    Object {
+                      "id": "col-0-0",
+                      "meta": Object {
+                        "field": "day_of_week",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "terms",
+                          "params": Object {
+                            "id": "string",
+                            "missingBucketLabel": "(missing value)",
+                            "otherBucketLabel": "Other",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "0",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "day_of_week",
+                            "missingBucket": false,
+                            "missingBucketLabel": "(missing value)",
+                            "order": "desc",
+                            "orderBy": "1",
+                            "otherBucket": false,
+                            "otherBucketLabel": "Other",
+                            "size": 6,
+                          },
+                          "schema": "segment",
+                          "type": "terms",
+                        },
+                        "type": "string",
+                      },
+                      "name": "day_of_week: Descending",
+                    },
+                    Object {
+                      "id": "col-1-1",
+                      "meta": Object {
+                        "field": "products.base_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "1",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.base_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.base_price",
+                    },
+                    Object {
+                      "id": "col-2-2",
+                      "meta": Object {
+                        "field": "products.min_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "2",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.min_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.min_price",
+                    },
+                  ]
+                }
+                config={
+                  Object {
+                    "dimensions": Object {
+                      "breakdownBy": "col-0-0",
+                      "metric": "col-1-1",
+                    },
+                    "metric": Object {
+                      "iconAlign": "left",
+                      "maxCols": 5,
+                      "minTiles": 10,
+                      "progressDirection": "vertical",
+                      "secondaryTrend": Object {
+                        "baseline": undefined,
+                        "palette": undefined,
+                        "visuals": undefined,
+                      },
+                      "titlesTextAlign": "left",
+                      "valueFontSize": "default",
+                      "valuesTextAlign": "right",
+                    },
+                  }
+                }
+                getMetricFormatter={[Function]}
+                row={
+                  Object {
+                    "col-0-0": "Saturday",
+                    "col-1-1": 25.984375,
+                    "col-2-2": 13.34375,
+                  }
+                }
+              />,
               "icon": undefined,
               "subtitle": "Median products.base_price",
               "title": "terms-Saturday",
@@ -703,7 +3177,132 @@ describe('MetricVisComponent', function () {
             },
             Object {
               "color": "#ffffff",
-              "extra": <span />,
+              "extra": <SecondaryMetric
+                columns={
+                  Array [
+                    Object {
+                      "id": "col-0-0",
+                      "meta": Object {
+                        "field": "day_of_week",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "terms",
+                          "params": Object {
+                            "id": "string",
+                            "missingBucketLabel": "(missing value)",
+                            "otherBucketLabel": "Other",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "0",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "day_of_week",
+                            "missingBucket": false,
+                            "missingBucketLabel": "(missing value)",
+                            "order": "desc",
+                            "orderBy": "1",
+                            "otherBucket": false,
+                            "otherBucketLabel": "Other",
+                            "size": 6,
+                          },
+                          "schema": "segment",
+                          "type": "terms",
+                        },
+                        "type": "string",
+                      },
+                      "name": "day_of_week: Descending",
+                    },
+                    Object {
+                      "id": "col-1-1",
+                      "meta": Object {
+                        "field": "products.base_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "1",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.base_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.base_price",
+                    },
+                    Object {
+                      "id": "col-2-2",
+                      "meta": Object {
+                        "field": "products.min_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "2",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.min_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.min_price",
+                    },
+                  ]
+                }
+                config={
+                  Object {
+                    "dimensions": Object {
+                      "breakdownBy": "col-0-0",
+                      "metric": "col-1-1",
+                    },
+                    "metric": Object {
+                      "iconAlign": "left",
+                      "maxCols": 5,
+                      "minTiles": 10,
+                      "progressDirection": "vertical",
+                      "secondaryTrend": Object {
+                        "baseline": undefined,
+                        "palette": undefined,
+                        "visuals": undefined,
+                      },
+                      "titlesTextAlign": "left",
+                      "valueFontSize": "default",
+                      "valuesTextAlign": "right",
+                    },
+                  }
+                }
+                getMetricFormatter={[Function]}
+                row={
+                  Object {
+                    "col-0-0": "Sunday",
+                    "col-1-1": 25.784375,
+                    "col-2-2": 13.4921875,
+                  }
+                }
+              />,
               "icon": undefined,
               "subtitle": "Median products.base_price",
               "title": "terms-Sunday",
@@ -712,7 +3311,132 @@ describe('MetricVisComponent', function () {
             },
             Object {
               "color": "#ffffff",
-              "extra": <span />,
+              "extra": <SecondaryMetric
+                columns={
+                  Array [
+                    Object {
+                      "id": "col-0-0",
+                      "meta": Object {
+                        "field": "day_of_week",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "terms",
+                          "params": Object {
+                            "id": "string",
+                            "missingBucketLabel": "(missing value)",
+                            "otherBucketLabel": "Other",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "0",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "day_of_week",
+                            "missingBucket": false,
+                            "missingBucketLabel": "(missing value)",
+                            "order": "desc",
+                            "orderBy": "1",
+                            "otherBucket": false,
+                            "otherBucketLabel": "Other",
+                            "size": 6,
+                          },
+                          "schema": "segment",
+                          "type": "terms",
+                        },
+                        "type": "string",
+                      },
+                      "name": "day_of_week: Descending",
+                    },
+                    Object {
+                      "id": "col-1-1",
+                      "meta": Object {
+                        "field": "products.base_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "1",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.base_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.base_price",
+                    },
+                    Object {
+                      "id": "col-2-2",
+                      "meta": Object {
+                        "field": "products.min_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "2",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.min_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.min_price",
+                    },
+                  ]
+                }
+                config={
+                  Object {
+                    "dimensions": Object {
+                      "breakdownBy": "col-0-0",
+                      "metric": "col-1-1",
+                    },
+                    "metric": Object {
+                      "iconAlign": "left",
+                      "maxCols": 5,
+                      "minTiles": 10,
+                      "progressDirection": "vertical",
+                      "secondaryTrend": Object {
+                        "baseline": undefined,
+                        "palette": undefined,
+                        "visuals": undefined,
+                      },
+                      "titlesTextAlign": "left",
+                      "valueFontSize": "default",
+                      "valuesTextAlign": "right",
+                    },
+                  }
+                }
+                getMetricFormatter={[Function]}
+                row={
+                  Object {
+                    "col-0-0": "Thursday",
+                    "col-1-1": 25.348011363636363,
+                    "col-2-2": 13.34375,
+                  }
+                }
+              />,
               "icon": undefined,
               "subtitle": "Median products.base_price",
               "title": "terms-Thursday",
@@ -723,7 +3447,132 @@ describe('MetricVisComponent', function () {
           Array [
             Object {
               "color": "#ffffff",
-              "extra": <span />,
+              "extra": <SecondaryMetric
+                columns={
+                  Array [
+                    Object {
+                      "id": "col-0-0",
+                      "meta": Object {
+                        "field": "day_of_week",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "terms",
+                          "params": Object {
+                            "id": "string",
+                            "missingBucketLabel": "(missing value)",
+                            "otherBucketLabel": "Other",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "0",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "day_of_week",
+                            "missingBucket": false,
+                            "missingBucketLabel": "(missing value)",
+                            "order": "desc",
+                            "orderBy": "1",
+                            "otherBucket": false,
+                            "otherBucketLabel": "Other",
+                            "size": 6,
+                          },
+                          "schema": "segment",
+                          "type": "terms",
+                        },
+                        "type": "string",
+                      },
+                      "name": "day_of_week: Descending",
+                    },
+                    Object {
+                      "id": "col-1-1",
+                      "meta": Object {
+                        "field": "products.base_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "1",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.base_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.base_price",
+                    },
+                    Object {
+                      "id": "col-2-2",
+                      "meta": Object {
+                        "field": "products.min_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "2",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.min_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.min_price",
+                    },
+                  ]
+                }
+                config={
+                  Object {
+                    "dimensions": Object {
+                      "breakdownBy": "col-0-0",
+                      "metric": "col-1-1",
+                    },
+                    "metric": Object {
+                      "iconAlign": "left",
+                      "maxCols": 5,
+                      "minTiles": 10,
+                      "progressDirection": "vertical",
+                      "secondaryTrend": Object {
+                        "baseline": undefined,
+                        "palette": undefined,
+                        "visuals": undefined,
+                      },
+                      "titlesTextAlign": "left",
+                      "valueFontSize": "default",
+                      "valuesTextAlign": "right",
+                    },
+                  }
+                }
+                getMetricFormatter={[Function]}
+                row={
+                  Object {
+                    "col-0-0": "__other__",
+                    "col-1-1": 24.984375,
+                    "col-2-2": 13.242513020833334,
+                  }
+                }
+              />,
               "icon": undefined,
               "subtitle": "Median products.base_price",
               "title": "terms-__other__",
@@ -765,7 +3614,132 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#ffffff",
               "domainMax": 28.984375,
-              "extra": <span />,
+              "extra": <SecondaryMetric
+                columns={
+                  Array [
+                    Object {
+                      "id": "col-0-0",
+                      "meta": Object {
+                        "field": "day_of_week",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "terms",
+                          "params": Object {
+                            "id": "string",
+                            "missingBucketLabel": "(missing value)",
+                            "otherBucketLabel": "Other",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "0",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "day_of_week",
+                            "missingBucket": false,
+                            "missingBucketLabel": "(missing value)",
+                            "order": "desc",
+                            "orderBy": "1",
+                            "otherBucket": false,
+                            "otherBucketLabel": "Other",
+                            "size": 6,
+                          },
+                          "schema": "segment",
+                          "type": "terms",
+                        },
+                        "type": "string",
+                      },
+                      "name": "day_of_week: Descending",
+                    },
+                    Object {
+                      "id": "col-1-1",
+                      "meta": Object {
+                        "field": "products.base_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "1",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.base_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.base_price",
+                    },
+                    Object {
+                      "id": "col-2-2",
+                      "meta": Object {
+                        "field": "products.min_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "2",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.min_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.min_price",
+                    },
+                  ]
+                }
+                config={
+                  Object {
+                    "dimensions": Object {
+                      "breakdownBy": "col-0-0",
+                      "max": "col-1-1",
+                      "metric": "col-1-1",
+                    },
+                    "metric": Object {
+                      "iconAlign": "left",
+                      "maxCols": 5,
+                      "progressDirection": "vertical",
+                      "secondaryTrend": Object {
+                        "baseline": undefined,
+                        "palette": undefined,
+                        "visuals": undefined,
+                      },
+                      "titlesTextAlign": "left",
+                      "valueFontSize": "default",
+                      "valuesTextAlign": "right",
+                    },
+                  }
+                }
+                getMetricFormatter={[Function]}
+                row={
+                  Object {
+                    "col-0-0": "Friday",
+                    "col-1-1": 28.984375,
+                    "col-2-2": 13.6328125,
+                  }
+                }
+              />,
               "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
@@ -776,7 +3750,132 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#ffffff",
               "domainMax": 28.984375,
-              "extra": <span />,
+              "extra": <SecondaryMetric
+                columns={
+                  Array [
+                    Object {
+                      "id": "col-0-0",
+                      "meta": Object {
+                        "field": "day_of_week",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "terms",
+                          "params": Object {
+                            "id": "string",
+                            "missingBucketLabel": "(missing value)",
+                            "otherBucketLabel": "Other",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "0",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "day_of_week",
+                            "missingBucket": false,
+                            "missingBucketLabel": "(missing value)",
+                            "order": "desc",
+                            "orderBy": "1",
+                            "otherBucket": false,
+                            "otherBucketLabel": "Other",
+                            "size": 6,
+                          },
+                          "schema": "segment",
+                          "type": "terms",
+                        },
+                        "type": "string",
+                      },
+                      "name": "day_of_week: Descending",
+                    },
+                    Object {
+                      "id": "col-1-1",
+                      "meta": Object {
+                        "field": "products.base_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "1",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.base_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.base_price",
+                    },
+                    Object {
+                      "id": "col-2-2",
+                      "meta": Object {
+                        "field": "products.min_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "2",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.min_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.min_price",
+                    },
+                  ]
+                }
+                config={
+                  Object {
+                    "dimensions": Object {
+                      "breakdownBy": "col-0-0",
+                      "max": "col-1-1",
+                      "metric": "col-1-1",
+                    },
+                    "metric": Object {
+                      "iconAlign": "left",
+                      "maxCols": 5,
+                      "progressDirection": "vertical",
+                      "secondaryTrend": Object {
+                        "baseline": undefined,
+                        "palette": undefined,
+                        "visuals": undefined,
+                      },
+                      "titlesTextAlign": "left",
+                      "valueFontSize": "default",
+                      "valuesTextAlign": "right",
+                    },
+                  }
+                }
+                getMetricFormatter={[Function]}
+                row={
+                  Object {
+                    "col-0-0": "Wednesday",
+                    "col-1-1": 28.984375,
+                    "col-2-2": 13.639539930555555,
+                  }
+                }
+              />,
               "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
@@ -787,7 +3886,132 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#ffffff",
               "domainMax": 25.984375,
-              "extra": <span />,
+              "extra": <SecondaryMetric
+                columns={
+                  Array [
+                    Object {
+                      "id": "col-0-0",
+                      "meta": Object {
+                        "field": "day_of_week",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "terms",
+                          "params": Object {
+                            "id": "string",
+                            "missingBucketLabel": "(missing value)",
+                            "otherBucketLabel": "Other",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "0",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "day_of_week",
+                            "missingBucket": false,
+                            "missingBucketLabel": "(missing value)",
+                            "order": "desc",
+                            "orderBy": "1",
+                            "otherBucket": false,
+                            "otherBucketLabel": "Other",
+                            "size": 6,
+                          },
+                          "schema": "segment",
+                          "type": "terms",
+                        },
+                        "type": "string",
+                      },
+                      "name": "day_of_week: Descending",
+                    },
+                    Object {
+                      "id": "col-1-1",
+                      "meta": Object {
+                        "field": "products.base_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "1",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.base_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.base_price",
+                    },
+                    Object {
+                      "id": "col-2-2",
+                      "meta": Object {
+                        "field": "products.min_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "2",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.min_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.min_price",
+                    },
+                  ]
+                }
+                config={
+                  Object {
+                    "dimensions": Object {
+                      "breakdownBy": "col-0-0",
+                      "max": "col-1-1",
+                      "metric": "col-1-1",
+                    },
+                    "metric": Object {
+                      "iconAlign": "left",
+                      "maxCols": 5,
+                      "progressDirection": "vertical",
+                      "secondaryTrend": Object {
+                        "baseline": undefined,
+                        "palette": undefined,
+                        "visuals": undefined,
+                      },
+                      "titlesTextAlign": "left",
+                      "valueFontSize": "default",
+                      "valuesTextAlign": "right",
+                    },
+                  }
+                }
+                getMetricFormatter={[Function]}
+                row={
+                  Object {
+                    "col-0-0": "Saturday",
+                    "col-1-1": 25.984375,
+                    "col-2-2": 13.34375,
+                  }
+                }
+              />,
               "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
@@ -798,7 +4022,132 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#ffffff",
               "domainMax": 25.784375,
-              "extra": <span />,
+              "extra": <SecondaryMetric
+                columns={
+                  Array [
+                    Object {
+                      "id": "col-0-0",
+                      "meta": Object {
+                        "field": "day_of_week",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "terms",
+                          "params": Object {
+                            "id": "string",
+                            "missingBucketLabel": "(missing value)",
+                            "otherBucketLabel": "Other",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "0",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "day_of_week",
+                            "missingBucket": false,
+                            "missingBucketLabel": "(missing value)",
+                            "order": "desc",
+                            "orderBy": "1",
+                            "otherBucket": false,
+                            "otherBucketLabel": "Other",
+                            "size": 6,
+                          },
+                          "schema": "segment",
+                          "type": "terms",
+                        },
+                        "type": "string",
+                      },
+                      "name": "day_of_week: Descending",
+                    },
+                    Object {
+                      "id": "col-1-1",
+                      "meta": Object {
+                        "field": "products.base_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "1",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.base_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.base_price",
+                    },
+                    Object {
+                      "id": "col-2-2",
+                      "meta": Object {
+                        "field": "products.min_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "2",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.min_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.min_price",
+                    },
+                  ]
+                }
+                config={
+                  Object {
+                    "dimensions": Object {
+                      "breakdownBy": "col-0-0",
+                      "max": "col-1-1",
+                      "metric": "col-1-1",
+                    },
+                    "metric": Object {
+                      "iconAlign": "left",
+                      "maxCols": 5,
+                      "progressDirection": "vertical",
+                      "secondaryTrend": Object {
+                        "baseline": undefined,
+                        "palette": undefined,
+                        "visuals": undefined,
+                      },
+                      "titlesTextAlign": "left",
+                      "valueFontSize": "default",
+                      "valuesTextAlign": "right",
+                    },
+                  }
+                }
+                getMetricFormatter={[Function]}
+                row={
+                  Object {
+                    "col-0-0": "Sunday",
+                    "col-1-1": 25.784375,
+                    "col-2-2": 13.4921875,
+                  }
+                }
+              />,
               "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
@@ -809,7 +4158,132 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#ffffff",
               "domainMax": 25.348011363636363,
-              "extra": <span />,
+              "extra": <SecondaryMetric
+                columns={
+                  Array [
+                    Object {
+                      "id": "col-0-0",
+                      "meta": Object {
+                        "field": "day_of_week",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "terms",
+                          "params": Object {
+                            "id": "string",
+                            "missingBucketLabel": "(missing value)",
+                            "otherBucketLabel": "Other",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "0",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "day_of_week",
+                            "missingBucket": false,
+                            "missingBucketLabel": "(missing value)",
+                            "order": "desc",
+                            "orderBy": "1",
+                            "otherBucket": false,
+                            "otherBucketLabel": "Other",
+                            "size": 6,
+                          },
+                          "schema": "segment",
+                          "type": "terms",
+                        },
+                        "type": "string",
+                      },
+                      "name": "day_of_week: Descending",
+                    },
+                    Object {
+                      "id": "col-1-1",
+                      "meta": Object {
+                        "field": "products.base_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "1",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.base_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.base_price",
+                    },
+                    Object {
+                      "id": "col-2-2",
+                      "meta": Object {
+                        "field": "products.min_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "2",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.min_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.min_price",
+                    },
+                  ]
+                }
+                config={
+                  Object {
+                    "dimensions": Object {
+                      "breakdownBy": "col-0-0",
+                      "max": "col-1-1",
+                      "metric": "col-1-1",
+                    },
+                    "metric": Object {
+                      "iconAlign": "left",
+                      "maxCols": 5,
+                      "progressDirection": "vertical",
+                      "secondaryTrend": Object {
+                        "baseline": undefined,
+                        "palette": undefined,
+                        "visuals": undefined,
+                      },
+                      "titlesTextAlign": "left",
+                      "valueFontSize": "default",
+                      "valuesTextAlign": "right",
+                    },
+                  }
+                }
+                getMetricFormatter={[Function]}
+                row={
+                  Object {
+                    "col-0-0": "Thursday",
+                    "col-1-1": 25.348011363636363,
+                    "col-2-2": 13.34375,
+                  }
+                }
+              />,
               "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
@@ -822,7 +4296,132 @@ describe('MetricVisComponent', function () {
             Object {
               "color": "#ffffff",
               "domainMax": 24.984375,
-              "extra": <span />,
+              "extra": <SecondaryMetric
+                columns={
+                  Array [
+                    Object {
+                      "id": "col-0-0",
+                      "meta": Object {
+                        "field": "day_of_week",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "terms",
+                          "params": Object {
+                            "id": "string",
+                            "missingBucketLabel": "(missing value)",
+                            "otherBucketLabel": "Other",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "0",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "day_of_week",
+                            "missingBucket": false,
+                            "missingBucketLabel": "(missing value)",
+                            "order": "desc",
+                            "orderBy": "1",
+                            "otherBucket": false,
+                            "otherBucketLabel": "Other",
+                            "size": 6,
+                          },
+                          "schema": "segment",
+                          "type": "terms",
+                        },
+                        "type": "string",
+                      },
+                      "name": "day_of_week: Descending",
+                    },
+                    Object {
+                      "id": "col-1-1",
+                      "meta": Object {
+                        "field": "products.base_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "1",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.base_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.base_price",
+                    },
+                    Object {
+                      "id": "col-2-2",
+                      "meta": Object {
+                        "field": "products.min_price",
+                        "index": "kibana_sample_data_ecommerce",
+                        "params": Object {
+                          "id": "number",
+                          "params": Object {
+                            "pattern": "$0,0.00",
+                          },
+                        },
+                        "source": "esaggs",
+                        "sourceParams": Object {
+                          "enabled": true,
+                          "hasPrecisionError": false,
+                          "id": "2",
+                          "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                          "params": Object {
+                            "field": "products.min_price",
+                          },
+                          "schema": "metric",
+                          "type": "median",
+                        },
+                        "type": "number",
+                      },
+                      "name": "Median products.min_price",
+                    },
+                  ]
+                }
+                config={
+                  Object {
+                    "dimensions": Object {
+                      "breakdownBy": "col-0-0",
+                      "max": "col-1-1",
+                      "metric": "col-1-1",
+                    },
+                    "metric": Object {
+                      "iconAlign": "left",
+                      "maxCols": 5,
+                      "progressDirection": "vertical",
+                      "secondaryTrend": Object {
+                        "baseline": undefined,
+                        "palette": undefined,
+                        "visuals": undefined,
+                      },
+                      "titlesTextAlign": "left",
+                      "valueFontSize": "default",
+                      "valuesTextAlign": "right",
+                    },
+                  }
+                }
+                getMetricFormatter={[Function]}
+                row={
+                  Object {
+                    "col-0-0": "__other__",
+                    "col-1-1": 24.984375,
+                    "col-2-2": 13.242513020833334,
+                  }
+                }
+              />,
               "icon": undefined,
               "progressBarDirection": "vertical",
               "subtitle": "Median products.base_price",
