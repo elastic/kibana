@@ -19,7 +19,6 @@
       "taskManager",
       "alerting",
       "inference",
-      "cloud",
     ],
     "optionalPlugins": [
       "cloud",

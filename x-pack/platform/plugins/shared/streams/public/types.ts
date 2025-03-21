@@ -20,11 +20,11 @@ export interface StreamsPluginStart {
 }
 
 export interface StreamsPluginSetupDependencies {
-  cloud: CloudSetup;
+  cloud?: CloudSetup;
 }
 
 export interface StreamsPluginStartDependencies {
-  cloud: CloudStart;
+  cloud?: CloudStart;
 }
 
 export type StreamsPluginClass = PluginClass<

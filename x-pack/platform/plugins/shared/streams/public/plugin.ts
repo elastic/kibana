@@ -54,7 +54,7 @@ const createStreamsStatusObservable = once(
     return from([
       {
         status:
-          deps.cloud.isServerlessEnabled && deps.cloud.serverless.projectType === 'observability'
+          deps.cloud?.isServerlessEnabled && deps.cloud?.serverless.projectType === 'observability'
             ? ('enabled' as const)
             : ('disabled' as const),
       },
