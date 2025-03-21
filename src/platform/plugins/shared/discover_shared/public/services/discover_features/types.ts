@@ -51,8 +51,7 @@ export interface ObservabilityCreateSLOFeature {
 export type DiscoverFeature =
   | StreamsFeature
   | ObservabilityLogsAIAssistantFeature
-  | ObservabilityCreateSLOFeature
-  | SecuritySolutionFeature;
+  | ObservabilityCreateSLOFeature;
 
 /**
  * Service types
