@@ -30,7 +30,9 @@ export const useBreadcrumb = (breadcrumbs: ChromeBreadcrumb[]) => {
   }, [appUrl]);
 
   useEffect(() => {
-    chrome.setBreadcrumbs([...baseCrumbs, ...breadcrumbs]);
+    chrome.setBreadcrumbs([...baseCrumbs, ...breadcrumbs], {
+      project: { value: breadcrumbs.length ? breadcrumbs : baseCrumbs, absolute: true },
+    });
     return () => {
       chrome.setBreadcrumbs([]);
     };

@@ -49,7 +49,7 @@ const pageSectionContentClassName = css`
   display: flex;
   flex-grow: 1;
   height: 100%;
-  max-block-size: calc(100vh - 96px);
+  max-block-size: calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)));
 `;
 
 export const ConversationList: React.FC<ConversationListProps> = ({

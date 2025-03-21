@@ -27,7 +27,7 @@ const pageSectionContentClassName = css`
   padding-top: 0;
   padding-bottom: 0;
   height: 100%;
-  max-block-size: calc(100vh - 96px);
+  max-block-size: calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)));
 `;
 
 interface WorkchatChatViewProps {

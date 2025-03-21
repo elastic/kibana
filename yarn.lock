@@ -5158,6 +5158,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/deeplinks-chat@link:src/platform/packages/shared/deeplinks/chat":
+  version "0.0.0"
+  uid ""
+
 "@kbn/deeplinks-devtools@link:src/platform/packages/shared/deeplinks/devtools":
   version "0.0.0"
   uid ""
