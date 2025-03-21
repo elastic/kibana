@@ -12,8 +12,8 @@ import moment from 'moment';
 import { EuiButton, EuiCallOut, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
+import { TopAlert } from '../../../typings/alerts';
 import { useKibana } from '../../../utils/kibana_react';
-import { AlertData } from '../../../hooks/use_fetch_alert_detail';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 
 function StaleAlert({
@@ -23,7 +23,7 @@ function StaleAlert({
   refetchRule,
   onUntrackAlert,
 }: {
-  alert: AlertData;
+  alert: TopAlert;
   alertStatus: string | undefined;
   rule: Rule | undefined;
   refetchRule: () => void;
@@ -36,7 +36,7 @@ function StaleAlert({
   const [ruleConditionsFlyoutOpen, setRuleConditionsFlyoutOpen] = useState<boolean>(false);
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
   const handleUntrackAlert = useCallback(async () => {
-    const alertUuid = alert?.formatted.fields[ALERT_UUID];
+    const alertUuid = alert?.fields[ALERT_UUID];
     if (alertUuid) {
       await untrackAlerts({
         indices: ['.internal.alerts-observability.*'],
@@ -44,14 +44,14 @@ function StaleAlert({
       });
       onUntrackAlert();
     }
-  }, [alert?.formatted.fields, untrackAlerts, onUntrackAlert]);
+  }, [alert?.fields, untrackAlerts, onUntrackAlert]);
   const handleEditRuleDetails = () => {
     setRuleConditionsFlyoutOpen(true);
   };
   const isAlertStale = useMemo(() => {
     if (alertStatus === ALERT_STATUS_ACTIVE) {
-      const numOfCases = alert?.formatted.fields[ALERT_CASE_IDS]?.length || 0;
-      const timestamp = alert?.formatted.start;
+      const numOfCases = alert?.fields[ALERT_CASE_IDS]?.length || 0;
+      const timestamp = alert?.start;
       const givenDate = moment(timestamp);
       const now = moment();
       const diffInDays = now.diff(givenDate, 'days');

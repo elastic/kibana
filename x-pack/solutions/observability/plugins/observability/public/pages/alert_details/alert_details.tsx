@@ -229,7 +229,7 @@ export function AlertDetails() {
       <>
         <EuiSpacer size="m" />
         <StaleAlert
-          alert={alertDetail}
+          alert={alertDetail?.formatted}
           alertStatus={alertStatus}
           rule={rule}
           onUntrackAlert={onUntrackAlert}
