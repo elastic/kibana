@@ -78,7 +78,7 @@ describe('ValueControlForm', () => {
       expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(`Static values`);
 
       // variable name input should be rendered and with the default value
-      expect(await findByTestId('esqlVariableName')).toHaveValue('interval');
+      expect(await findByTestId('esqlVariableName')).toHaveValue('?interval');
 
       // values dropdown should be rendered
       const valuesOptionsDropdown = await findByTestId('esqlValuesOptions');
@@ -174,7 +174,7 @@ describe('ValueControlForm', () => {
         />
       );
       // variable name input should be rendered and with the default value
-      expect(await findByTestId('esqlVariableName')).toHaveValue('myInterval');
+      expect(await findByTestId('esqlVariableName')).toHaveValue('?myInterval');
 
       // values dropdown should be rendered with column2 selected
       const valuesOptionsDropdown = await findByTestId('esqlValuesOptions');

@@ -181,6 +181,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         })
       ).pipe(
         switchMap(({ search, uiSettings }) => {
+          // this is for backward compatibility, if the query is of fields or functions type
+          // and the query is not set with ?? in the query, we should set it
+          // https://github.com/elastic/elasticsearch/pull/122459
           const fixedQuery = fixESQLQueryWithVariables(query, input?.esqlVariables ?? []);
           const params: ESQLSearchParams = {
             query: fixedQuery,
