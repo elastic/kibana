@@ -18,6 +18,10 @@ import { SpyRoute } from '../../utils/route/spy_routes';
 interface SecurityRoutePageWrapperProps {
   pageName: SecurityPageName;
   redirectOnMissing?: boolean;
+  /**
+   * Used primarily in the AI for SOC tier, to allow redirecting to the home page instead of showing the NoPrivileges page.
+   */
+  redirectIfUnauthorized?: boolean;
 }
 
 /**
@@ -40,13 +44,14 @@ interface SecurityRoutePageWrapperProps {
 export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWrapperProps>> = ({
   children,
   pageName,
+  redirectIfUnauthorized,
   redirectOnMissing,
 }) => {
   const link = useLinkInfo(pageName);
-  const UpsellingPage = useUpsellingPage(pageName);
 
-  // The upselling page is only returned when the license/product requirements are not met,
+  // The upselling page is only returned when the license/product requirements are not met.
   // When it is defined it must be rendered, no need to check anything else.
+  const UpsellingPage = useUpsellingPage(pageName);
   if (UpsellingPage) {
     return (
       <>
@@ -56,28 +61,38 @@ export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWra
     );
   }
 
+  // Allows a redirect to the home page.
+  if (redirectOnMissing && link == null) {
+    return <Redirect to="" />;
+  }
+
   const isAuthorized = link != null && !link.unauthorized;
-  if (isAuthorized) {
+
+  // Allows a redirect to the home page if the link is undefined or unauthorized.
+  // This is used in the AI for SOC tier (for the Alert Summary page for example), as it does not make sense to show the NoPrivilegesPage.
+  if (redirectIfUnauthorized && !isAuthorized) {
+    return <Redirect to="" />;
+  }
+
+  // Show the no privileges page if the link is undefined or unauthorized.
+  if (!isAuthorized) {
     return (
-      <TrackApplicationView viewId={pageName}>
-        {children}
+      <>
         <SpyRoute pageName={pageName} />
-      </TrackApplicationView>
+        <NoPrivilegesPage
+          pageName={pageName}
+          docLinkSelector={(docLinks) => docLinks.siem.privileges}
+        />
+      </>
     );
   }
 
-  if (redirectOnMissing && link == null) {
-    return <Redirect to="" />; // redirects to the home page
-  }
-
+  // Show the actual application page.
   return (
-    <>
+    <TrackApplicationView viewId={pageName}>
+      {children}
       <SpyRoute pageName={pageName} />
-      <NoPrivilegesPage
-        pageName={pageName}
-        docLinkSelector={(docLinks) => docLinks.siem.privileges}
-      />
-    </>
+    </TrackApplicationView>
   );
 };
 
