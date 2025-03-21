@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
-import { InheritedFieldDefinition, inheritedFieldDefinitionSchema } from './fields';
 import {
   StreamGetResponseBase,
   StreamUpsertRequestBase,
@@ -26,6 +25,7 @@ import {
   wiredStreamDefinitionSchemaBase,
 } from './base';
 import { ElasticsearchAsset, elasticsearchAssetSchema } from './common';
+import { InheritedFieldDefinition, inheritedFieldDefinitionSchema } from './fields';
 import {
   UnwiredIngestStreamEffectiveLifecycle,
   WiredIngestStreamEffectiveLifecycle,
@@ -96,12 +96,21 @@ type IngestStreamGetResponse = WiredStreamGetResponse | UnwiredStreamGetResponse
  * PUT /streams/{name}
  * Wired or Unwired (Ingest) Stream Upsert Request
  */
+
+interface UnwiredStreamUpsertRequestStream extends UnwiredIngestUpsertRequest {
+  description: string;
+}
+
 interface UnwiredStreamUpsertRequest extends StreamUpsertRequestBase {
-  stream: UnwiredIngestUpsertRequest & { description: string };
+  stream: UnwiredStreamUpsertRequestStream;
+}
+
+interface WiredStreamUpsertRequestStream extends WiredIngestUpsertRequest {
+  description: string;
 }
 
 interface WiredStreamUpsertRequest extends StreamUpsertRequestBase {
-  stream: WiredIngestUpsertRequest & { description: string };
+  stream: WiredStreamUpsertRequestStream;
 }
 
 type IngestStreamUpsertRequest = WiredStreamUpsertRequest | UnwiredStreamUpsertRequest;
@@ -150,19 +159,19 @@ const ingestStreamGetResponseSchema: z.Schema<IngestStreamGetResponse> = z.union
 ]);
 
 export {
+  ingestStreamGetResponseSchema,
   ingestStreamUpsertRequestSchema,
   ingestUpsertRequestSchema,
-  ingestStreamGetResponseSchema,
-  wiredStreamGetResponseSchema,
   unwiredStreamGetResponseSchema,
-  wiredStreamUpsertRequestSchema,
   unwiredStreamUpsertRequestSchema,
+  wiredStreamGetResponseSchema,
+  wiredStreamUpsertRequestSchema,
   type IngestGetResponse,
   type IngestStreamGetResponse,
   type IngestStreamUpsertRequest,
   type IngestUpsertRequest,
-  type UnwiredStreamGetResponse,
-  type WiredStreamGetResponse,
   type UnwiredIngestUpsertRequest,
+  type UnwiredStreamGetResponse,
   type WiredIngestUpsertRequest,
+  type WiredStreamGetResponse,
 };
