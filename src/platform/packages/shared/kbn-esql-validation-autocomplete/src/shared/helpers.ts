@@ -195,9 +195,6 @@ function buildCommandLookup(): Map<string, CommandDefinition<string>> {
   if (!commandLookups) {
     commandLookups = commandDefinitions.reduce((memo, def) => {
       memo.set(def.name, def);
-      if (def.alias) {
-        memo.set(def.alias, def);
-      }
       return memo;
     }, new Map<string, CommandDefinition<string>>());
   }

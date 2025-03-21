@@ -324,23 +324,6 @@ export interface CommandDefinition<CommandName extends string> {
    * This method is called to load suggestions when the cursor is within this command.
    */
   suggest: CommandSuggestFunction<CommandName>;
-
-  /** @deprecated this property will disappear in the future */
-  signature: {
-    multipleParams: boolean;
-    // innerTypes here is useful to drill down the type in case of "column"
-    // i.e. column of type string
-    params: Array<{
-      name: string;
-      type: string;
-      optional?: boolean;
-      innerTypes?: Array<SupportedDataType | 'any' | 'policy'>;
-      values?: string[];
-      valueDescriptions?: string[];
-      constantOnly?: boolean;
-      wildcards?: boolean;
-    }>;
-  };
 }
 
 export interface CommandTypeDefinition {
