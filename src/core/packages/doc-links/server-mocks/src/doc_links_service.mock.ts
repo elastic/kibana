@@ -15,7 +15,7 @@ import type { DocLinksService } from '@kbn/core-doc-links-server-internal';
 type DocLinksServiceContract = PublicMethodsOf<DocLinksService>;
 
 export class MockLinkContext {
-  path: string[] = [];
+  private readonly path: string[] = [];
   constructor(private readonly root: string) {}
 
   addKey(key: string) {
@@ -28,10 +28,6 @@ export class MockLinkContext {
       this.path.length ? '.' + this.path.join('.') : ''
     }`;
   };
-
-  getMockName = () => {
-    return this.toString();
-  };
 }
 
 function assertString(val: unknown): asserts val is string {
@@ -41,7 +37,7 @@ function assertString(val: unknown): asserts val is string {
 function createMockLinkGetter(rootKey: string) {
   const ctx = new MockLinkContext(rootKey);
   const proxy = new Proxy(ctx, {
-    get(target, key) {
+    get(_, key) {
       assertString(key);
       return ctx.addKey(key);
     },
@@ -56,7 +52,7 @@ const createSetupMock = (): DocLinksServiceSetup => {
   const links = new Proxy(
     {},
     {
-      get(_, rootKey) {
+      get: (_, rootKey) => {
         assertString(rootKey);
         return createMockLinkGetter(rootKey);
       },
