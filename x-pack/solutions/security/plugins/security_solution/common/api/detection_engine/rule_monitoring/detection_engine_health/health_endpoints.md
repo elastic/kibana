@@ -200,7 +200,12 @@ Response:
           "message": "day were not queried between this rule execution and the last execution so signals may have been missed Consider increasing your look behind time or adding more Kibana instances"
         }
       ],
-      "top_warnings": []
+      "top_warnings": [],
+      "gap_summary": {
+        "total_filled_duration_ms": 0,
+        "total_in_progress_duration_ms": 0,
+        "total_unfilled_duration_ms": 0,
+      }
     },
     "history_over_interval": {
       "buckets": [

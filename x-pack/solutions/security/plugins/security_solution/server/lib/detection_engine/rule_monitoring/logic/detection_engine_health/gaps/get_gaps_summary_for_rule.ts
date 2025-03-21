@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { IsoDateString } from '@kbn/securitysolution-io-ts-types';
 
 interface GetGapsSummaryForRuleParams {
-  rulesClient: RulesClient;
+  rulesClient: RulesClientApi;
   ruleId: string;
   interval: {
     from: IsoDateString;
