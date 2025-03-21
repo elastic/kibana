@@ -7,10 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  LinksByValueSerializedState,
-  LinksByReferenceSerializedState,
-  LinksSerializedState,
-} from './latest';
-
-export { LinksStorage } from './links_storage';
+export type { SavedObjectLinksAttributes } from './types';
+export { dashboardLinkSchema, externalLinkSchema, savedObjectLinksAttributesSchema } from './v1';

@@ -9,10 +9,12 @@
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { CONTENT_ID, LATEST_VERSION } from '../common';
-import { LinksAttributes } from '../common/content_management';
 import { LinksStorage } from './content_management';
 import { linksSavedObjectType } from './saved_objects';
+import { embeddableMigrationDefinition } from './content_management/cm_services';
+import { SavedObjectLinksAttributes } from './saved_objects/schema/v1';
 
 export class LinksServerPlugin implements Plugin<object, object> {
   private readonly logger: Logger;
@@ -25,6 +27,7 @@ export class LinksServerPlugin implements Plugin<object, object> {
     core: CoreSetup,
     plugins: {
       contentManagement: ContentManagementServerSetup;
+      embeddable: EmbeddableSetup;
     }
   ) {
     plugins.contentManagement.register({
@@ -38,7 +41,13 @@ export class LinksServerPlugin implements Plugin<object, object> {
       },
     });
 
-    core.savedObjects.registerType<LinksAttributes>(linksSavedObjectType);
+    plugins.embeddable.registerEmbeddableFactory({
+      id: CONTENT_ID,
+      version: LATEST_VERSION,
+      getEmbeddableMigrationDefinition: () => embeddableMigrationDefinition,
+    });
+
+    core.savedObjects.registerType<SavedObjectLinksAttributes>(linksSavedObjectType);
 
     return {};
   }
