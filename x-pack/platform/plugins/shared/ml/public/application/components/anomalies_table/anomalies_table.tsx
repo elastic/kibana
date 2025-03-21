@@ -10,7 +10,7 @@ import React, { useState, type FC, useEffect, useMemo, useCallback, useRef } fro
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import { get, isEqual } from 'lodash';
-import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
+import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
@@ -200,7 +200,7 @@ export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
     }, []);
 
     const onTableChange = useCallback(
-      (criteria: Criteria<any>) => {
+      (criteria: CriteriaWithPagination<MlAnomaliesTableRecordExtended>) => {
         const { page, sort } = criteria;
         const result = {
           pageIndex: page && page.index !== undefined ? page.index : tableState.pageIndex,
