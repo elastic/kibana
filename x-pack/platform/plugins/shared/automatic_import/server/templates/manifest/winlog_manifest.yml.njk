@@ -1,0 +1,89 @@
+- input: winlog
+  template_path: winlog.yml.hbs
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
+  vars:
+    - name: channel
+      type: text
+      title: Channel Name
+      description: >-
+        Name of Windows event log channel (eg. Microsoft-Windows-PowerShell/Operational).
+        It expects a single channel name. To collect multiple channels, add multiple integrations.
+      required: true
+      show_user: true
+    - name: preserve_original_event
+      required: true
+      show_user: true
+      title: Preserve original event
+      description: >-
+        Preserves a raw copy of the original XML event, added to the field `event.original`
+      type: bool
+      multi: false
+      default: false
+    - name: providers
+      type: text
+      title: Providers
+      description: A list of providers (source names) to include.
+      required: false
+      multi: true
+      show_user: false
+    - name: event_id
+      type: text
+      title: Event ID
+      description: >-
+        A list of included and excluded (blocked) event IDs. The value is a comma-separated list. The accepted values are single event IDs to include (e.g. 4624), a range of event IDs to include (e.g. 4700-4800), single event IDs to exclude (e.g. -4735), and a range of event IDs to exclude (e.g. -4701-4710). This option is only available on operating systems supporting the Windows Event Log API (Microsoft Windows Vista and newer).
+      required: false
+      show_user: false
+    - name: ignore_older
+      type: text
+      title: Ignore events older than
+      default: 72h
+      required: false
+      show_user: false
+      description: >-
+        If this option is specified, events that are older than the specified amount of time are ignored. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+    - name: language
+      type: text
+      title: Language ID
+      description: >-
+        The language ID the events will be rendered in. The language will be forced regardless of the system language. A complete list of language IDs can be found [here](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/a9eac961-e77d-41a6-90a5-ce1a8b0cdb9c). It defaults to `0`, which indicates to use the system language. E.g.: `0x0409` for `en-US`
+      required: false
+      show_user: false
+      default: 0
+    - name: level
+      type: text
+      title: Level
+      description: >-
+        A list of event levels to include. The value is a comma-separated list of levels.
+        Accepted levels are: `critical`, `error`, `warning`, `information`, and `verbose`.
+      required: false
+      show_user: false
+    - name: xml_query
+      type: text
+      title: XML Query
+      description: >-
+        Provide a custom XML query. This option is mutually exclusive with the `name`, `event_id`, `ignore_older`, `level`, and `providers` options. These options should be included in the XML query directly. Furthermore, an id must be provided. Custom XML queries provide more flexibility and advanced options than the simpler query options.
+      required: false
+      show_user: false
+    - name: tags
+      type: text
+      title: Tags
+      description: Tags to include in the published event
+      required: false
+      multi: true
+      show_user: false
+    - name: custom
+      type: yaml
+      title: Custom Configurations
+      description: >-
+        YAML configuration options for winlog input. Be careful, this may break the integration.
+      required: false
+      show_user: false
+      default: |-
+        # Winlog configuration example
+        #processors:
+        #  - drop_event.when.not.or:
+        #    - equals.winlog.event_id: '903'
+        #    - equals.winlog.event_id: '1024'

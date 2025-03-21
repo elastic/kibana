@@ -51,6 +51,7 @@ export const InputTypeOptions: Array<EuiComboBoxOptionOption<InputType>> = [
   { value: 'kafka', label: 'Kafka' },
   { value: 'tcp', label: 'TCP' },
   { value: 'udp', label: 'UDP' },
+  { value: 'winlog', label: 'Windows Events (Winlog input)' },
 ];
 
 const isValidName = (name: string) => NAME_REGEX_PATTERN.test(name);

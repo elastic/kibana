@@ -1,0 +1,42 @@
+condition: ${host.platform} == 'windows'
+name: {{channel}}
+{{#if xml_query}}
+xml_query: {{xml_query}}
+{{else}}
+{{#if providers}}
+provider:
+{{#each providers as |p|}}
+  - {{p}}
+{{/each}}
+{{/if}}
+{{#if event_id}}
+event_id: {{event_id}}
+{{/if}}
+{{#if ignore_older}}
+ignore_older: {{ignore_older}}
+{{/if}}
+{{#if level}}
+level: {{level}}
+{{/if}}
+{{/if}}
+{{#if language}}
+language: {{language}}
+{{/if}}
+{{#if tags.length}}
+tags:
+{{#each tags as |tag|}}
+  - {{tag}}
+{{/each}}
+{{#if preserve_original_event}}
+  - preserve_original_event
+{{/if}}
+{{else}}
+{{#if preserve_original_event}}
+tags:
+  - preserve_original_event
+{{/if}}
+{{/if}}
+{{#if preserve_original_event}}
+include_xml: true
+{{/if}}
+{{custom}}

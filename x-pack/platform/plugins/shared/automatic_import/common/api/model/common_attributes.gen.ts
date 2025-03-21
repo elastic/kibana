@@ -161,6 +161,7 @@ export const InputType = z.enum([
   'kafka',
   'tcp',
   'udp',
+  'winlog',
 ]);
 export type InputTypeEnum = typeof InputType.enum;
 export const InputTypeEnum = InputType.enum;
