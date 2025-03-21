@@ -78,6 +78,7 @@ export const MetadataForm: FC<React.PropsWithChildren<Props>> = ({
           }}
           fullWidth
           data-test-subj="nameInput"
+          readOnly={isReadonly}
         />
       </EuiFormRow>
 
