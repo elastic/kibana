@@ -482,6 +482,7 @@ export interface TelemetryConfiguration {
   };
   pagination_config?: PaginationConfiguration;
   indices_metadata_config?: IndicesMetadataConfiguration;
+  ingest_pipelines_stats_config?: IngestPipelinesStatsConfiguration;
 }
 
 export interface IndicesMetadataConfiguration {
@@ -496,6 +497,10 @@ export interface IndicesMetadataConfiguration {
   max_prefixes: number;
   max_group_size: number;
   min_group_size: number;
+}
+
+export interface IngestPipelinesStatsConfiguration {
+  enabled: boolean;
 }
 
 export interface PaginationConfiguration {

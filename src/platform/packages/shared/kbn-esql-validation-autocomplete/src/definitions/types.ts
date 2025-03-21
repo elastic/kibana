@@ -9,14 +9,13 @@
 import type {
   ESQLAstItem,
   ESQLCommand,
-  ESQLCommandOption,
   ESQLFunction,
   ESQLMessage,
   ESQLSource,
 } from '@kbn/esql-ast';
 import { ESQLControlVariable } from '@kbn/esql-types';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type { ESQLPolicy } from '../validation/types';
+import type { ESQLPolicy, ReferenceMaps } from '../validation/types';
 import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 
 /**
@@ -280,8 +279,15 @@ export type CommandSuggestFunction<CommandName extends string> = (
   params: CommandSuggestParams<CommandName>
 ) => Promise<SuggestionRawDefinition[]> | SuggestionRawDefinition[];
 
-export interface CommandBaseDefinition<CommandName extends string> {
+export interface CommandDefinition<CommandName extends string> {
   name: CommandName;
+
+  examples: string[];
+
+  /**
+   * The pattern for declaring this command statement.
+   */
+  declaration: string;
 
   /**
    * Command name prefix, such as "LEFT" or "RIGHT" for JOIN command.
@@ -290,15 +296,29 @@ export interface CommandBaseDefinition<CommandName extends string> {
 
   alias?: string;
   description: string;
+
   /**
    * Displays a Technical preview label in the autocomplete
    */
   preview?: boolean;
+
   /**
    * Whether to show or hide in autocomplete suggestion list
    */
   hidden?: boolean;
-  suggest?: CommandSuggestFunction<CommandName>;
+
+  /**
+   * This method is run when the command is being validated, but it does not
+   * prevent the default behavior. If you need a full override, we are currently
+   * doing those directly in the validateCommand function in the validation module.
+   */
+  validate?: (command: ESQLCommand<CommandName>, references: ReferenceMaps) => ESQLMessage[];
+
+  /**
+   * This method is called to load suggestions when the cursor is within this command.
+   */
+  suggest: CommandSuggestFunction<CommandName>;
+
   /** @deprecated this property will disappear in the future */
   signature: {
     multipleParams: boolean;
@@ -322,43 +342,9 @@ export interface CommandTypeDefinition {
   description?: string;
 }
 
-export interface CommandOptionsDefinition<CommandName extends string = string>
-  extends CommandBaseDefinition<CommandName> {
-  wrapped?: string[];
-  optional: boolean;
-  skipCommonValidation?: boolean;
-  validate?: (
-    option: ESQLCommandOption,
-    command: ESQLCommand,
-    references?: unknown
-  ) => ESQLMessage[];
-}
-
-export interface CommandModeDefinition {
-  name: string;
-  description: string;
-  values: Array<{ name: string; description: string }>;
-  prefix?: string;
-}
-
-export interface CommandDefinition<CommandName extends string>
-  extends CommandBaseDefinition<CommandName> {
-  examples: string[];
-  validate?: (option: ESQLCommand) => ESQLMessage[];
-  /** @deprecated this property will disappear in the future */
-  modes: CommandModeDefinition[];
-  /** @deprecated this property will disappear in the future */
-  options: CommandOptionsDefinition[];
-}
-
 export interface Literals {
   name: string;
   description: string;
 }
-
-export type SignatureType =
-  | FunctionDefinition['signatures'][number]
-  | CommandOptionsDefinition['signature'];
-export type SignatureArgType = SignatureType['params'][number];
 
 export type FunctionParameter = FunctionDefinition['signatures'][number]['params'][number];

@@ -13,6 +13,7 @@ import { getLogDocumentOverview } from '@kbn/discover-utils';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { ObservabilityLogsAIAssistantFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
 import { getStacktraceFields, LogDocument } from '@kbn/discover-utils/src';
+import { StreamsFeatureRenderDeps } from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { LogsOverviewHeader } from './logs_overview_header';
 import { LogsOverviewHighlights } from './logs_overview_highlights';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
@@ -22,6 +23,7 @@ import { LogsOverviewStacktraceSection } from './logs_overview_stacktrace_sectio
 
 export type LogsOverviewProps = DocViewRenderProps & {
   renderAIAssistant?: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
+  renderStreamsField?: (deps: StreamsFeatureRenderDeps) => JSX.Element;
 };
 
 export function LogsOverview({
@@ -32,6 +34,7 @@ export function LogsOverview({
   onAddColumn,
   onRemoveColumn,
   renderAIAssistant,
+  renderStreamsField,
 }: LogsOverviewProps) {
   const { fieldFormats } = getUnifiedDocViewerServices();
   const parsedDoc = getLogDocumentOverview(hit, { dataView, fieldFormats });
@@ -49,7 +52,11 @@ export function LogsOverview({
       <EuiSpacer size="m" />
       <LogsOverviewHeader doc={parsedDoc} />
       <EuiHorizontalRule margin="xs" />
-      <LogsOverviewHighlights formattedDoc={parsedDoc} flattenedDoc={hit.flattened} />
+      <LogsOverviewHighlights
+        formattedDoc={parsedDoc}
+        doc={hit}
+        renderStreamsField={renderStreamsField}
+      />
       <LogsOverviewDegradedFields rawDoc={hit.raw} />
       {isStacktraceAvailable && <LogsOverviewStacktraceSection hit={hit} dataView={dataView} />}
       {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}

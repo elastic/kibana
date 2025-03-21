@@ -8,6 +8,7 @@
 import os from 'os';
 import type {
   IndicesMetadataConfiguration,
+  IngestPipelinesStatsConfiguration,
   PaginationConfiguration,
   TelemetrySenderChannelConfiguration,
 } from './types';
@@ -38,6 +39,9 @@ class TelemetryConfigurationDTO {
     max_group_size: 100, // @deprecated
     min_group_size: 5, // @deprecated
   };
+  private readonly DEFAULT_INGEST_PIPELINES_STATS_CONFIG = {
+    enabled: true,
+  };
 
   private _telemetry_max_buffer_size = this.DEFAULT_TELEMETRY_MAX_BUFFER_SIZE;
   private _max_security_list_telemetry_batch = this.DEFAULT_MAX_SECURITY_LIST_TELEMETRY_BATCH;
@@ -51,6 +55,8 @@ class TelemetryConfigurationDTO {
   private _pagination_config: PaginationConfiguration = this.DEFAULT_PAGINATION_CONFIG;
   private _indices_metadata_config: IndicesMetadataConfiguration =
     this.DEFAULT_INDICES_METADATA_CONFIG;
+  private _ingest_pipelines_stats_config: IngestPipelinesStatsConfiguration =
+    this.DEFAULT_INGEST_PIPELINES_STATS_CONFIG;
 
   public get telemetry_max_buffer_size(): number {
     return this._telemetry_max_buffer_size;
@@ -116,12 +122,22 @@ class TelemetryConfigurationDTO {
     return this._pagination_config;
   }
 
-  public set indices_metadata_config(paginationConfiguration: IndicesMetadataConfiguration) {
-    this._indices_metadata_config = paginationConfiguration;
+  public set indices_metadata_config(indicesMetadataConfiguration: IndicesMetadataConfiguration) {
+    this._indices_metadata_config = indicesMetadataConfiguration;
   }
 
   public get indices_metadata_config(): IndicesMetadataConfiguration {
     return this._indices_metadata_config;
+  }
+
+  public set ingest_pipelines_stats_config(
+    ingestPipelinesStatsConfiguration: IngestPipelinesStatsConfiguration
+  ) {
+    this._ingest_pipelines_stats_config = ingestPipelinesStatsConfiguration;
+  }
+
+  public get ingest_pipelines_stats_config(): IngestPipelinesStatsConfiguration {
+    return this._ingest_pipelines_stats_config;
   }
 
   public resetAllToDefault() {
@@ -133,6 +149,7 @@ class TelemetryConfigurationDTO {
     this._sender_channels = this.DEFAULT_SENDER_CHANNELS;
     this._pagination_config = this.DEFAULT_PAGINATION_CONFIG;
     this._indices_metadata_config = this.DEFAULT_INDICES_METADATA_CONFIG;
+    this._ingest_pipelines_stats_config = this.DEFAULT_INGEST_PIPELINES_STATS_CONFIG;
   }
 }
 

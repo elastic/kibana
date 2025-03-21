@@ -31,7 +31,7 @@ export function createTokenLimitReachedError(
 export function createToolNotFoundError(name: string): ChatCompletionToolNotFoundError {
   return new InferenceTaskError(
     ChatCompletionErrorCode.ToolNotFoundError,
-    `Tool ${name} called but was not available`,
+    `Tool "${name}" called but was not available`,
     {
       name,
     }
