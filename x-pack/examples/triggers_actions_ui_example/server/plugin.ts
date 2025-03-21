@@ -44,9 +44,12 @@ export class TriggersActionsUiExamplePlugin
 
     const router = core.http.createRouter();
 
-    router.post(
+    router.get(
       {
         path: '/api/triggers_actions_ui_example/schedule_task_with_api_key/{id}',
+        options: {
+          access: 'public',
+        },
         validate: {
           params: schema.object({
             id: schema.string(),
@@ -75,7 +78,7 @@ export class TriggersActionsUiExamplePlugin
       }
     );
 
-    router.post(
+    router.get(
       {
         path: '/api/triggers_actions_ui_example/remove_task_with_api_key/{id}',
         validate: {
@@ -137,31 +140,6 @@ export class TriggersActionsUiExamplePlugin
             // Fake request from the API key
             const fakeRequest = kibanaRequestFactory(fakeRawRequest);
             services[0].http.basePath.set(fakeRequest, path);
-
-            // Getting access to scoped clients using the API key
-            // const savedObjectsClient = services[0].savedObjects.getScopedClient(fakeRequest, {
-            //   includedHiddenTypes: ['task'],
-            // });
-
-            // const savedObjectsRepositoryClient = services[0].savedObjects.createInternalRepository([
-            //   'task',
-            // ]);
-
-            // const task = await savedObjectsClient.get('task', taskInstance.id);
-            // const encryptedTask = await savedObjectsRepositoryClient.get('task', taskInstance.id);
-
-            // console.log(
-            //   'Fetched task with decrypted scoped API key',
-            //   JSON.stringify(taskInstance, null, 2)
-            // );
-            // console.log(
-            //   'Fetched task with missing scoped API key',
-            //   JSON.stringify(task.attributes, null, 2)
-            // );
-            // console.log(
-            //   'Fetched task with encrypted scoped API key',
-            //   JSON.stringify(encryptedTask.attributes, null, 2)
-            // );
 
             return {
               state: {},

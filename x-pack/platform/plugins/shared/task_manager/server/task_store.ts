@@ -227,8 +227,8 @@ export class TaskStore {
     return userScopeAndApiKey;
   }
 
-  private async bulkGetDecryptedTasks(ids: string[]) {
-    const result = new Map<string, ConcreteTaskInstance>();
+  private async bulkGetDecryptedTaskApiKeys(ids: string[]) {
+    const result = new Map<string, string | undefined>();
     if (!this.canEncryptSo() || !ids.length) {
       return result;
     }
@@ -249,7 +249,7 @@ export class TaskStore {
 
     for await (const response of finder.find()) {
       response.saved_objects.forEach((savedObject) => {
-        result.set(savedObject.id, savedObjectToConcreteTaskInstance(savedObject));
+        result.set(savedObject.id, savedObject.attributes.apiKey);
       });
     }
     await finder.close();
@@ -270,12 +270,12 @@ export class TaskStore {
       return tasks;
     }
 
-    const decryptedTaskMap = await this.bulkGetDecryptedTasks(ids);
+    const decryptedTaskApiKeysMap = await this.bulkGetDecryptedTaskApiKeys(ids);
 
     const tasksWithDecryptedApiKeys = tasks.map((task) => ({
       ...task,
-      ...(decryptedTaskMap.get(task.id)?.apiKey
-        ? { apiKey: decryptedTaskMap.get(task.id)!.apiKey }
+      ...(decryptedTaskApiKeysMap.get(task.id)
+        ? { apiKey: decryptedTaskApiKeysMap.get(task.id) }
         : {}),
     }));
 
@@ -586,10 +586,12 @@ export class TaskStore {
    */
   public async remove(id: string): Promise<void> {
     const taskInstance = await this.get(id);
+    const { apiKey, userScope } = taskInstance;
 
-    if (taskInstance?.apiKey && !taskInstance.userScope?.apiKeyCreatedByUser) {
-      const apiKeyId = Buffer.from(taskInstance.apiKey, 'base64').toString().split(':')[0];
-      await this.security.authc.apiKeys.invalidateAsInternalUser({ ids: [apiKeyId] });
+    if (apiKey && userScope) {
+      if (!userScope.apiKeyCreatedByUser) {
+        await this.security.authc.apiKeys.invalidateAsInternalUser({ ids: [userScope.apiKeyId] });
+      }
     }
 
     try {
@@ -612,10 +614,11 @@ export class TaskStore {
 
     taskInstances.forEach((taskInstance) => {
       const unwrappedTaskInstance = unwrap(taskInstance) as ConcreteTaskInstance;
-      if (unwrappedTaskInstance?.apiKey && !unwrappedTaskInstance.userScope?.apiKeyCreatedByUser) {
-        apiKeyIdsToRemove.push(
-          Buffer.from(unwrappedTaskInstance.apiKey, 'base64').toString().split(':')[0]
-        );
+      const { apiKey, userScope } = unwrappedTaskInstance;
+      if (apiKey && userScope) {
+        if (!userScope.apiKeyCreatedByUser) {
+          apiKeyIdsToRemove.push(userScope.apiKeyId);
+        }
       }
     });
 

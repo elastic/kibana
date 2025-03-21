@@ -68,20 +68,22 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     priority: {
       type: 'integer',
     },
-    apiKey: {
-      type: 'binary',
-    },
+    // NO NEED TO BE INDEXED
+    // apiKey: {
+    //   type: 'binary',
+    // },
     userScope: {
       properties: {
         apiKeyId: {
           type: 'keyword',
         },
-        apiKeyCreatedByUser: {
-          type: 'boolean',
-        },
-        spaceId: {
-          type: 'keyword',
-        },
+        // NO NEED TO BE INDEXED
+        // apiKeyCreatedByUser: {
+        //   type: 'boolean',
+        // },
+        // spaceId: {
+        //   type: 'keyword',
+        // },
       },
     },
   },

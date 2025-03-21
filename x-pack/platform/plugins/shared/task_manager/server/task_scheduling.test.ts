@@ -17,6 +17,7 @@ import { mockLogger } from './test_utils';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { taskManagerMock } from './mocks';
 import { omit } from 'lodash';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 let fakeTimer: sinon.SinonFakeTimers;
 jest.mock('uuid', () => ({
@@ -80,6 +81,33 @@ describe('TaskScheduling', () => {
         enabled: true,
       },
       undefined
+    );
+  });
+
+  test('should call task store with request if provided', async () => {
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const task = {
+      taskType: 'foo',
+      params: {},
+      state: {},
+    };
+
+    const mockRequest = httpServerMock.createKibanaRequest();
+
+    await taskScheduling.schedule(task, { request: mockRequest });
+
+    expect(mockTaskStore.schedule).toHaveBeenCalled();
+    expect(mockTaskStore.schedule).toHaveBeenCalledWith(
+      {
+        ...task,
+        id: undefined,
+        schedule: undefined,
+        traceparent: 'parent',
+        enabled: true,
+      },
+      {
+        request: mockRequest,
+      }
     );
   });
 

@@ -20,7 +20,7 @@ export const TaskWithApiKeySandbox = (props: TaskWithApiKeySandboxProps) => {
       <div>
         <EuiButton
           onClick={() => {
-            http.post('/api/triggers_actions_ui_example/schedule_task_with_api_key/task1');
+            http.get('/api/triggers_actions_ui_example/schedule_task_with_api_key/task1');
           }}
         >
           Schedule Task 1
@@ -29,7 +29,7 @@ export const TaskWithApiKeySandbox = (props: TaskWithApiKeySandboxProps) => {
       <div>
         <EuiButton
           onClick={() => {
-            http.post('/api/triggers_actions_ui_example/schedule_task_with_api_key/task2');
+            http.get('/api/triggers_actions_ui_example/schedule_task_with_api_key/task2');
           }}
         >
           Schedule Task 2
@@ -38,14 +38,14 @@ export const TaskWithApiKeySandbox = (props: TaskWithApiKeySandboxProps) => {
       <div>
         <EuiButton
           onClick={() => {
-            http.post('/api/triggers_actions_ui_example/remove_task_with_api_key/task1');
+            http.get('/api/triggers_actions_ui_example/remove_task_with_api_key/task1');
           }}
         >
           Remove Task 1
         </EuiButton>
         <EuiButton
           onClick={() => {
-            http.post('/api/triggers_actions_ui_example/remove_task_with_api_key/task2');
+            http.get('/api/triggers_actions_ui_example/remove_task_with_api_key/task2');
           }}
         >
           Remove Task 2

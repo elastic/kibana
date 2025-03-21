@@ -513,7 +513,45 @@ describe('TaskStore', () => {
       typeof elasticsearchServiceMock.createClusterClient
     >['asInternalUser'];
 
-    beforeAll(() => {
+    const mockTask = {
+      taskType: 'taskWithApiKey',
+      params: '{}',
+      state: '{}',
+      enabled: true,
+      schedule: {
+        interval: '30s',
+      },
+      traceparent: '',
+      attempts: 1,
+      scheduledAt: '2019-02-12T21:01:22.479Z',
+      startedAt: '2019-02-12T21:01:22.479Z',
+      retryAt: '2019-02-12T21:01:22.479Z',
+      runAt: '2019-02-12T21:01:22.479Z',
+      status: 'running',
+      partition: 237,
+      userScope: {
+        apiKeyId: 'EJYCtpUBGuyFd3FroZmZ',
+        spaceId: 'default',
+        apiKeyCreatedByUser: false,
+      },
+      ownerId: 'kibana:5b2de169-2785-441b-ae8c-186a1936b17d',
+      id: 'task1',
+      version: '123',
+    };
+
+    beforeEach(() => {
+      const mockSerializer = savedObjectsServiceMock.createSerializer();
+      mockSerializer.isRawSavedObject = jest.fn().mockReturnValue(true);
+      mockSerializer.rawToSavedObject = jest.fn().mockImplementation((doc) => ({
+        id: 'task1',
+        version: '123',
+        type: 'task',
+        references: [],
+        attributes: {
+          ...doc._source.task,
+        },
+      }));
+
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       esClient.child.mockReturnValue(childEsClient as unknown as Client);
@@ -521,7 +559,7 @@ describe('TaskStore', () => {
         logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
-        serializer,
+        serializer: mockSerializer,
         esClient,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
@@ -532,7 +570,27 @@ describe('TaskStore', () => {
         },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
+        canEncryptSavedObjects: true,
       });
+
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield {
+            saved_objects: [
+              {
+                id: 'task1',
+                attributes: {
+                  ...mockTask,
+                  apiKey: 'decryptedApiKey',
+                },
+              },
+            ],
+          };
+        },
+      });
+
+      store.registerEncryptedSavedObjectsClient(esoClient);
     });
 
     async function testMsearch(
@@ -617,7 +675,34 @@ describe('TaskStore', () => {
       });
     });
 
-    test('should return tasks with decrypted API keys', async () => {});
+    test('should return tasks with decrypted API keys', async () => {
+      const { result } = await testMsearch(
+        [{}],
+        [
+          {
+            hits: [
+              {
+                _index: '.kibana_task_manager_8.16.0_001',
+                _source: {
+                  task: { ...mockTask, apiKey: 'encryptedKey' },
+                },
+              },
+            ],
+          },
+        ]
+      );
+
+      expect(result.docs[0]).toEqual({
+        ...mockTask,
+        retryAt: new Date(mockTask.retryAt),
+        runAt: new Date(mockTask.runAt),
+        scheduledAt: new Date(mockTask.scheduledAt),
+        startedAt: new Date(mockTask.startedAt),
+        state: {},
+        params: {},
+        apiKey: 'decryptedApiKey',
+      });
+    });
 
     test('pushes error from call cluster to errors$', async () => {
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();

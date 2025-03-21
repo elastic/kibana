@@ -58,14 +58,9 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
       {
         type: 'mappings_addition',
         addedMappings: {
-          apiKey: {
-            type: 'binary',
-          },
           userScope: {
             properties: {
               apiKeyId: { type: 'keyword' },
-              apiKeyCreatedByUser: { type: 'boolean' },
-              spaceId: { type: 'keyword' },
             },
           },
         },

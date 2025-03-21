@@ -15,29 +15,18 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { AuthenticatedUser } from '@kbn/core/server';
 
 describe('api_key_utils', () => {
   describe('isRequestApiKeyType', () => {
     test('should return true if the request is made by a API key', () => {
-      const coreStart = coreMock.createStart();
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValueOnce({
-        authentication_type: 'api_key',
-      });
-
-      const request = httpServerMock.createKibanaRequest();
-      expect(isRequestApiKeyType(request, coreStart.security)).toBeTruthy();
-      expect(coreStart.security.authc.getCurrentUser).toHaveBeenCalledWith(request);
+      const mockUser = { authentication_type: 'api_key' } as AuthenticatedUser;
+      expect(isRequestApiKeyType(mockUser)).toBeTruthy();
     });
 
     test('should return false if the request is made by a user', () => {
-      const coreStart = coreMock.createStart();
-      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValueOnce({
-        authentication_type: 'basic',
-      });
-
-      const request = httpServerMock.createKibanaRequest();
-      expect(isRequestApiKeyType(request, coreStart.security)).toBeFalsy();
-      expect(coreStart.security.authc.getCurrentUser).toHaveBeenCalledWith(request);
+      const mockUser = { authentication_type: 'basic' } as AuthenticatedUser;
+      expect(isRequestApiKeyType(mockUser)).toBeFalsy();
     });
   });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityServiceStart } from '@kbn/core/server';
+import { AuthenticatedUser, SecurityServiceStart } from '@kbn/core/server';
 import { KibanaRequest } from '@kbn/core/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { truncate } from 'lodash';
@@ -26,8 +26,7 @@ const getCredentialsFromRequest = (request: KibanaRequest) => {
   return authorizationHeaderValue.substring(scheme.length + 1);
 };
 
-export const isRequestApiKeyType = (request: KibanaRequest, security: SecurityServiceStart) => {
-  const user = security.authc.getCurrentUser(request);
+export const isRequestApiKeyType = (user: AuthenticatedUser | null) => {
   return user?.authentication_type === 'api_key';
 };
 
@@ -68,7 +67,7 @@ export const createApiKey = async (
   let apiKeyCreateResult: GrantAPIKeyResult | null;
   const name = truncate(`TaskManager: ${user.username}`, { length: 256 });
 
-  if (isRequestApiKeyType(request, security)) {
+  if (isRequestApiKeyType(user)) {
     apiKeyCreateResult = getApiKeyFromRequest(request, name);
   } else {
     apiKeyCreateResult = await security.authc.apiKeys.grantAsInternalUser(request, {
@@ -103,6 +102,7 @@ export const getApiKeyAndUserScope = async (
 }> => {
   const { apiKey, apiKeyId } = await createApiKey(request, canEncryptSo, security);
   const space = await spaces?.spacesService.getActiveSpace(request);
+  const user = security.authc.getCurrentUser(request);
 
   return {
     apiKey,
@@ -111,7 +111,7 @@ export const getApiKeyAndUserScope = async (
       spaceId: space?.id || 'default',
       // Set apiKeyCreatedByUser to true if the user passed in their own API key, since we do
       // not want to invalidate a specific API key that was not created by the task manager
-      apiKeyCreatedByUser: isRequestApiKeyType(request, security),
+      apiKeyCreatedByUser: isRequestApiKeyType(user),
     },
   };
 };
