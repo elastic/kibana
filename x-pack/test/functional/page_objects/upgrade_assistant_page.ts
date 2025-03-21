@@ -7,7 +7,7 @@
 
 import { FtrService } from '../ftr_provider_context';
 
-export class UpgradeAssistantPageObject extends FtrService {
+export class UpgradeAssistantFlyoutObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly log = this.ctx.getService('log');
   private readonly browser = this.ctx.getService('browser');
@@ -30,18 +30,15 @@ export class UpgradeAssistantPageObject extends FtrService {
     });
   }
 
-  async navigateToEsDeprecationLogs() {
+  async clickVerifyLoggingButton() {
     return await this.retry.try(async () => {
-      await this.common.navigateToUrl('management', 'stack/upgrade_assistant/es_deprecation_logs', {
-        shouldUseHashForSubUrl: false,
-      });
-      await this.retry.waitFor(
-        'url to contain /upgrade_assistant/es_deprecation_logs',
-        async () => {
-          const url = await this.browser.getCurrentUrl();
-          return url.includes('/es_deprecation_logs');
-        }
-      );
+      await this.testSubjects.click('verifyChangesLink');
+    });
+  }
+
+  async clickEnableLoggingButton() {
+    return await this.retry.try(async () => {
+      await this.testSubjects.click('enableLogsLink');
     });
   }
 
