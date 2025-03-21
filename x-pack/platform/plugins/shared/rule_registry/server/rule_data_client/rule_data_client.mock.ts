@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRuleDataClient, IRuleDataReader, IRuleDataWriter } from './types';
+import type { IRuleDataClient, IRuleDataReader, IRuleDataWriter } from './types';
 
 type MockInstances<T extends Record<string, any>> = {
   [K in keyof T]: T[K] extends (...args: infer TArgs) => infer TReturn
