@@ -28,6 +28,6 @@ export const useDataView = (scopeName: DataViewManagerScopeName) => {
       };
     }
 
-    return { status, dataView: dataView?.toSpec() };
+    return { status, dataView: dataView?.toSpec?.() };
   }, [dataView, status]);
 };
