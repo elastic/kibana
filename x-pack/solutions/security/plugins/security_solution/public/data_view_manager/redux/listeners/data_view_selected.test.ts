@@ -147,7 +147,7 @@ describe('createDataViewSelectedListener', () => {
   it('should dispatch an error if both fetching and creation fail', async () => {
     jest
       .mocked(mockDataViewsService)
-      .get.mockRejectedValueOnce(new Error('some random get data view failure'));
+      .getDataViewLazy.mockRejectedValueOnce(new Error('some random get data view failure'));
 
     jest
       .mocked(mockDataViewsService)
