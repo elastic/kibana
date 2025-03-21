@@ -1,0 +1,28 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/sort-package-json'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-operations'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/sort-package-json'
+  description: Moon project for @kbn/sort-package-json
+  channel: ''
+  owner: '@elastic/kibana-operations'
+  metadata:
+    sourceRoot: packages/kbn-sort-package-json
+tags:
+  - common
+  - shared-common
+  - dev
+fileGroups:
+  src:
+    - '**/*.js'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

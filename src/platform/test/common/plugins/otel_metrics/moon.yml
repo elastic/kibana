@@ -1,0 +1,31 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/open-telemetry-instrumented-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/obs-ux-infra_services-team'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/open-telemetry-instrumented-plugin'
+  description: Moon project for @kbn/open-telemetry-instrumented-plugin
+  channel: ''
+  owner: '@elastic/obs-ux-infra_services-team'
+  metadata:
+    sourceRoot: src/platform/test/common/plugins/otel_metrics
+dependsOn:
+  - '@kbn/core'
+tags:
+  - platform
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

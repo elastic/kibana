@@ -1,0 +1,47 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/expression-reveal-image-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-presentation'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/expression-reveal-image-plugin'
+  description: Moon project for @kbn/expression-reveal-image-plugin
+  channel: ''
+  owner: '@elastic/kibana-presentation'
+  metadata:
+    sourceRoot: src/platform/plugins/shared/expression_reveal_image
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/presentation-util-plugin'
+  - '@kbn/expressions-plugin'
+  - '@kbn/i18n'
+  - '@kbn/react-kibana-context-theme'
+  - '@kbn/i18n-react'
+  - '@kbn/shared-ux-error-boundary'
+  - '@kbn/expression-utils'
+tags:
+  - platform
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - common/**/*
+    - public/**/*
+    - server/**/*
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

@@ -1,0 +1,36 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/eso-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-security'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/eso-plugin'
+  description: Moon project for @kbn/eso-plugin
+  channel: ''
+  owner: '@elastic/kibana-security'
+  metadata:
+    sourceRoot: >-
+      x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/config-schema'
+  - '@kbn/std'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/spaces-plugin'
+tags:
+  - common
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

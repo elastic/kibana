@@ -1,0 +1,69 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/streams-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/streams-program-team'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/streams-plugin'
+  description: Moon project for @kbn/streams-plugin
+  channel: ''
+  owner: '@elastic/streams-program-team'
+  metadata:
+    sourceRoot: x-pack/platform/plugins/shared/streams
+dependsOn:
+  - '@kbn/config-schema'
+  - '@kbn/core'
+  - '@kbn/logging'
+  - '@kbn/core-plugins-server'
+  - '@kbn/core-http-server'
+  - '@kbn/security-plugin'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/task-manager-plugin'
+  - '@kbn/server-route-repository'
+  - '@kbn/zod'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/licensing-plugin'
+  - '@kbn/server-route-repository-client'
+  - '@kbn/object-utils'
+  - '@kbn/alerting-plugin'
+  - '@kbn/std'
+  - '@kbn/safer-lodash-set'
+  - '@kbn/streams-schema'
+  - '@kbn/es-errors'
+  - '@kbn/server-route-repository-utils'
+  - '@kbn/inference-plugin'
+  - '@kbn/storage-adapter'
+  - '@kbn/traced-es-client'
+  - '@kbn/es-query'
+  - '@kbn/core-elasticsearch-client-server-internal'
+  - '@kbn/utils'
+  - '@kbn/core-saved-objects-server-internal'
+  - '@kbn/core-analytics-server'
+tags:
+  - platform
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - common/**/*
+    - server/**/*
+    - public/**/*
+    - types/**/*
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

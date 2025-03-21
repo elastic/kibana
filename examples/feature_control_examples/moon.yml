@@ -1,0 +1,39 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/feature-controls-examples-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-security'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/feature-controls-examples-plugin'
+  description: Moon project for @kbn/feature-controls-examples-plugin
+  channel: ''
+  owner: '@elastic/kibana-security'
+  metadata:
+    sourceRoot: examples/feature_control_examples
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/security-plugin'
+  - '@kbn/developer-examples-plugin'
+  - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/features-plugin'
+  - '@kbn/kibana-react-plugin'
+tags:
+  - common
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - index.ts
+    - common/**/*.ts
+    - public/**/*.ts
+    - public/**/*.tsx
+    - server/**/*.ts
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

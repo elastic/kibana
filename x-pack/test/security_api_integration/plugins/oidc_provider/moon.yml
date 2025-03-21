@@ -1,0 +1,33 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/oidc-provider-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-security'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/oidc-provider-plugin'
+  description: Moon project for @kbn/oidc-provider-plugin
+  channel: ''
+  owner: '@elastic/kibana-security'
+  metadata:
+    sourceRoot: x-pack/test/security_api_integration/plugins/oidc_provider
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/config-schema'
+  - '@kbn/security-api-integration-helpers'
+tags:
+  - common
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

@@ -1815,33 +1815,10 @@
   resolved "https://registry.yarnpkg.com/@base2/pretty-print-object/-/pretty-print-object-1.0.1.tgz#371ba8be66d556812dc7fb169ebc3c08378f69d4"
   integrity sha512-4iri8i1AqYHJE2DstZYkyEprg6Pq6sKx3xn5FpySk9sNhH7qN2LLlHJCfDTZRILNwQNPD7mATWM0TBui7uC1pA==
 
-"@bazel/ibazel@^0.16.2":
-  version "0.16.2"
-  resolved "https://registry.yarnpkg.com/@bazel/ibazel/-/ibazel-0.16.2.tgz#05dd7f06659759fda30f87b15534f1e42f1201bb"
-  integrity sha512-KgqAWMH0emL6f3xH6nqyTryoBMqlJ627LBIe9PT1PRRQPz2FtHib3FIHJPukp1slzF3hJYZvdiVwgPnHbaSOOA==
-
 "@bazel/runfiles@^6.3.1":
   version "6.3.1"
   resolved "https://registry.yarnpkg.com/@bazel/runfiles/-/runfiles-6.3.1.tgz#3f8824b2d82853377799d42354b4df78ab0ace0b"
   integrity sha512-1uLNT5NZsUVIGS4syuHwTzZ8HycMPyr6POA3FCE4GbMtc4rhoJk8aZKtNIRthJYfL+iioppi+rTfH3olMPr9nA==
-
-"@bazel/typescript@4.6.2":
-  version "4.6.2"
-  resolved "https://registry.yarnpkg.com/@bazel/typescript/-/typescript-4.6.2.tgz#9f07b6f8cfb6b0a0e228e5971de412911c910a90"
-  integrity sha512-AUF7kq82bP6DX9Brihr/eQqvNccxVfSXosFxt80h94og5cmMyoc/euXha6rxlOBP3yWXmSo+/qjzO7o8PWJduQ==
-  dependencies:
-    "@bazel/worker" "4.6.2"
-    protobufjs "6.8.8"
-    semver "5.6.0"
-    source-map-support "0.5.9"
-    tsutils "3.21.0"
-
-"@bazel/worker@4.6.2":
-  version "4.6.2"
-  resolved "https://registry.yarnpkg.com/@bazel/worker/-/worker-4.6.2.tgz#0bd105344533335327c2edfa3fc65b04c39cdea8"
-  integrity sha512-DLpN6iQAH6uiUraAs4CESyqs60u55fcKmYgOOVObGuLSQQuX49Lw7XRIN90NibRPwpbBDQichWE3zfra0yKTTw==
-  dependencies:
-    google-protobuf "^3.6.1"
 
 "@bcoe/v8-coverage@^0.2.3":
   version "0.2.3"
@@ -3915,10 +3892,6 @@
   uid ""
 
 "@kbn/banners-plugin@link:x-pack/platform/plugins/private/banners":
-  version "0.0.0"
-  uid ""
-
-"@kbn/bazel-runner@link:packages/kbn-bazel-runner":
   version "0.0.0"
   uid ""
 
@@ -6334,6 +6307,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/moon@link:packages/kbn-moon":
+  version "0.0.0"
+  uid ""
+
 "@kbn/navigation-plugin@link:src/platform/plugins/shared/navigation":
   version "0.0.0"
   uid ""
@@ -8419,6 +8396,56 @@
   integrity sha512-QjHtSaoameoalGnKDT3FoIl4+9RwyTmo9ZJGBdLOks/YOiWHoRDI3PUwEzOE7kEmGcV3AFcp9K6dYu9rEuKLAQ==
   dependencies:
     "@types/mdx" "^2.0.0"
+
+"@moonrepo/cli@^1.33.2":
+  version "1.33.2"
+  resolved "https://registry.yarnpkg.com/@moonrepo/cli/-/cli-1.33.2.tgz#da0391157de31fdb1b221e661422bbbe025b9102"
+  integrity sha512-5zrc3XVG7iSrx7gQowuREoc5X+XQm9GIZ6rI6DrXfgOHOtQO5KbPbnnW8UCMSZB81ep33x1B63wpYXmaPdZFCA==
+  dependencies:
+    detect-libc "^2.0.3"
+  optionalDependencies:
+    "@moonrepo/core-linux-arm64-gnu" "1.33.2"
+    "@moonrepo/core-linux-arm64-musl" "1.33.2"
+    "@moonrepo/core-linux-x64-gnu" "1.33.2"
+    "@moonrepo/core-linux-x64-musl" "1.33.2"
+    "@moonrepo/core-macos-arm64" "1.33.2"
+    "@moonrepo/core-macos-x64" "1.33.2"
+    "@moonrepo/core-windows-x64-msvc" "1.33.2"
+
+"@moonrepo/core-linux-arm64-gnu@1.33.2":
+  version "1.33.2"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-gnu/-/core-linux-arm64-gnu-1.33.2.tgz#0a7d53c4833b624b99fbc81a3e643f46ee421450"
+  integrity sha512-fcfn7rdS0Ssc44FfygM4xipn+5e96DBfup3YgxgrzEhSTP1dBlWiUH2/0naKk7Up8qc2r9H0JR02nqWQ4ODELg==
+
+"@moonrepo/core-linux-arm64-musl@1.33.2":
+  version "1.33.2"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-arm64-musl/-/core-linux-arm64-musl-1.33.2.tgz#363c55078fc889f8788e989587e760966b277de5"
+  integrity sha512-pKXKHIWvbAPMJ251W/9xGpc7Xxqli9PIPt40Xt7bq3UnF23BCC66KI5Bx4B2+XrXbGLdkkrM0KJvcg6VSjnTLQ==
+
+"@moonrepo/core-linux-x64-gnu@1.33.2":
+  version "1.33.2"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-gnu/-/core-linux-x64-gnu-1.33.2.tgz#28bc08c2b5e4dfb247a5c8db113c6f4159d527ce"
+  integrity sha512-zTogO0P0c2ELXprJ2XQ/b1qg8jz2khZRFd3IZ8PNiJBEuipIL0FxPFvtNC3fXBiPm79Goy4azdhmShrHoTE3qg==
+
+"@moonrepo/core-linux-x64-musl@1.33.2":
+  version "1.33.2"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-linux-x64-musl/-/core-linux-x64-musl-1.33.2.tgz#c1194778278012956087b9ec770df66887614cbf"
+  integrity sha512-e6lN9urrQvYTbyIJ66vsijWVFANlH3+1WTUFxknAgbyUVAlD7DJ5hve5CSJWY7JAOChknIUdNmkAXAvZGnS9lw==
+
+"@moonrepo/core-macos-arm64@1.33.2":
+  version "1.33.2"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-arm64/-/core-macos-arm64-1.33.2.tgz#3b571afca73f752cdf70a27fdbc6867bb6172827"
+  integrity sha512-d1NuUshwEgamSf5E2FHR8qneTnQULAZv8IVqzXXCytzSDhTTSNZ+LW7arho90uA2wQuzdoWeLH8skOOBWaoyTA==
+
+"@moonrepo/core-macos-x64@1.33.2":
+  version "1.33.2"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-macos-x64/-/core-macos-x64-1.33.2.tgz#e1c717f85ecf5bc91d220e0ef7263bde6e7465ae"
+  integrity sha512-GYSFYjdYJ6lVAPcnZItczSAIRP2NUCwOiIgX1z1Whwp0AP4uQwEsvpOHxfl+tKGZWV++3r/q+XmJgVa7j6OFPA==
+
+"@moonrepo/core-windows-x64-msvc@1.33.2":
+  version "1.33.2"
+  resolved "https://registry.yarnpkg.com/@moonrepo/core-windows-x64-msvc/-/core-windows-x64-msvc-1.33.2.tgz#96cb74f348c90f521d598002c370b9a321a789a5"
+  integrity sha512-UU5A/AcbpDAr8OVcnmHgqCpWcVrreU2dGkUI7IRmnmH5/il7DWHPikRKZ5ZHKNRel/977BxOlhdU6t+vHfNjLQ==
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
@@ -16569,10 +16596,10 @@ detect-indent@^6.0.0:
   resolved "https://registry.yarnpkg.com/detect-indent/-/detect-indent-6.1.0.tgz#592485ebbbf6b3b1ab2be175c8393d04ca0d57e6"
   integrity sha512-reYkTUJAZb9gUuZ2RvVCNhVHdg62RHnJ7WJl8ftMi4diZ6NWlciOzQN88pUhSELEwflJht4oQDv0F0BMlwaYtA==
 
-detect-libc@^2.0.0, detect-libc@^2.0.1, detect-libc@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-2.0.2.tgz#8ccf2ba9315350e1241b88d0ac3b0e1fbd99605d"
-  integrity sha512-UX6sGumvvqSaXgdKGUsgZWqcUyIXZ/vZTrlRT/iobiKhGL0zL4d3osHj3uqllWJK+i+sixDS/3COVEOFbupFyw==
+detect-libc@^2.0.0, detect-libc@^2.0.1, detect-libc@^2.0.2, detect-libc@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-2.0.3.tgz#f0cd503b40f9939b894697d19ad50895e30cf700"
+  integrity sha512-bwy0MGW55bG41VqxxypOsdSdGqLwXPI/focwgTYCFMbdUiBAxLg9CFzG08sz2aqzknwiX7Hkl0bQENjg8iLByw==
 
 detect-newline@3.1.0, detect-newline@^3.0.0:
   version "3.1.0"
@@ -19344,11 +19371,6 @@ google-p12-pem@^4.0.0:
   integrity sha512-WPkN4yGtz05WZ5EhtlxNDWPhC4JIic6G8ePitwUWy4l+XPVYec+a0j0Ts47PDtW59y3RwAhUd9/h9ZZ63px6RQ==
   dependencies:
     node-forge "^1.3.1"
-
-google-protobuf@^3.6.1:
-  version "3.19.4"
-  resolved "https://registry.yarnpkg.com/google-protobuf/-/google-protobuf-3.19.4.tgz#8d32c3e34be9250956f28c0fb90955d13f311888"
-  integrity sha512-OIPNCxsG2lkIvf+P5FNfJ/Km95CsXOBecS9ZcAU6m2Rq3svc0Apl9nB3GMDNKfQ9asNv4KjyAqGwPQFrVle3Yg==
 
 gopd@^1.0.1, gopd@^1.2.0:
   version "1.2.0"
@@ -25886,7 +25908,7 @@ property-information@^5.0.0, property-information@^5.0.1, property-information@^
   dependencies:
     xtend "^4.0.0"
 
-protobufjs@6.11.4, protobufjs@6.8.8:
+protobufjs@6.11.4:
   version "6.11.4"
   resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-6.11.4.tgz#29a412c38bf70d89e537b6d02d904a6f448173aa"
   integrity sha512-5kQWPaJHi1WoCpjTGszzQ32PG2F4+wRY6BmAT4Vfw56Q2FZ4YZzK20xUYQH4YkfehY1e6QSICrJquM6xXZNcrw==
@@ -27895,11 +27917,6 @@ semver-compare@^1.0.0:
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.7.2.tgz#48d55db737c3287cd4835e17fa13feace1c41ef8"
   integrity sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g==
 
-semver@5.6.0:
-  version "5.6.0"
-  resolved "https://registry.yarnpkg.com/semver/-/semver-5.6.0.tgz#7e74256fbaa49c75aa7c7a205cc22799cac80004"
-  integrity sha512-RS9R6R35NYgQn++fkDWaOmqGoj4Ek9gGs+DPxNUZKuwE183xjJroKvyo1IzVFeXvUrvmALy6FWD5xrdJT25gMg==
-
 semver@7.5.4:
   version "7.5.4"
   resolved "https://registry.yarnpkg.com/semver/-/semver-7.5.4.tgz#483986ec4ed38e1c6c48c34894a9182dbff68a6e"
@@ -28476,14 +28493,6 @@ source-map-support@0.5.13:
   version "0.5.13"
   resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.13.tgz#31b24a9c2e73c2de85066c0feb7d44767ed52932"
   integrity sha512-SHSKFHadjVA5oR4PPqhtAVdcBWwRYVd6g6cAXnIbRiIwc2EhPrTuKUBdSLvlEKyIP3GCf89fltvcZiP9MMFA1w==
-  dependencies:
-    buffer-from "^1.0.0"
-    source-map "^0.6.0"
-
-source-map-support@0.5.9:
-  version "0.5.9"
-  resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.9.tgz#41bc953b2534267ea2d605bccfa7bfa3111ced5f"
-  integrity sha512-gR6Rw4MvUlYy83vP0vxoVNzM6t8MUXqNuRsuBmBHQDu1Fh6X015FrLdgoDKcNdkwGubozq0P4N0Q37UyFVr1EA==
   dependencies:
     buffer-from "^1.0.0"
     source-map "^0.6.0"
@@ -30099,7 +30108,7 @@ tslib@~2.4.0:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.1.tgz#0d0bfbaac2880b91e22df0768e55be9753a5b17e"
   integrity sha512-tGyy4dAjRIEwI7BzsB0lynWgOpfqjUdq91XXAlIWD2OwKBH7oCl/GZG/HT4BOHrTlPMOASlMQ7veyTqpmRcrNA==
 
-tsutils@3.21.0, tsutils@^3.21.0:
+tsutils@^3.21.0:
   version "3.21.0"
   resolved "https://registry.yarnpkg.com/tsutils/-/tsutils-3.21.0.tgz#b48717d394cea6c1e096983eed58e9d61715b623"
   integrity sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==

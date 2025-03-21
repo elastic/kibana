@@ -1,0 +1,36 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/synthetics-e2e'
+type: unknown
+owners:
+  defaultOwner: '@elastic/obs-ux-management-team'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/synthetics-e2e'
+  description: Moon project for @kbn/synthetics-e2e
+  channel: ''
+  owner: '@elastic/obs-ux-management-team'
+  metadata:
+    sourceRoot: x-pack/solutions/observability/plugins/synthetics/e2e
+dependsOn:
+  - '@kbn/test'
+  - '@kbn/dev-utils'
+  - '@kbn/ftr-common-functional-services'
+  - '@kbn/synthetics-plugin'
+  - '@kbn/observability-synthetics-test-data'
+  - '@kbn/ftr-common-functional-ui-services'
+tags:
+  - observability
+  - test-helper
+  - dev
+fileGroups:
+  src:
+    - '**/*'
+    - '!tmp'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

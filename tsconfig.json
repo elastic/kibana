@@ -5,10 +5,10 @@
   },
   "include": [
     "kibana.d.ts",
-    "package.json",
+    "package.json"
   ],
   "kbn_references": [
-    "@kbn/core",
+    "@kbn/core"
   ],
   "exclude": [
     "target/**/*",

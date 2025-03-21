@@ -1,0 +1,42 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/inference-cli'
+type: unknown
+owners:
+  defaultOwner: '@elastic/appex-ai-infra'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/inference-cli'
+  description: Moon project for @kbn/inference-cli
+  channel: ''
+  owner: '@elastic/appex-ai-infra'
+  metadata:
+    sourceRoot: x-pack/platform/packages/shared/kbn-inference-cli
+dependsOn:
+  - '@kbn/inference-common'
+  - '@kbn/inference-plugin'
+  - '@kbn/sse-utils-client'
+  - '@kbn/tooling-log'
+  - '@kbn/kibana-api-cli'
+tags:
+  - platform
+  - shared-common
+  - dev
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

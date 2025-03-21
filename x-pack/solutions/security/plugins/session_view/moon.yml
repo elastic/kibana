@@ -1,0 +1,61 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/session-view-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-cloud-security-posture'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/session-view-plugin'
+  description: Moon project for @kbn/session-view-plugin
+  channel: ''
+  owner: '@elastic/kibana-cloud-security-posture'
+  metadata:
+    sourceRoot: x-pack/solutions/security/plugins/session_view
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/security-plugin'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/es-ui-shared-plugin'
+  - '@kbn/rule-registry-plugin'
+  - '@kbn/i18n'
+  - '@kbn/std'
+  - '@kbn/ui-theme'
+  - '@kbn/i18n-react'
+  - '@kbn/config-schema'
+  - '@kbn/alerting-plugin'
+  - '@kbn/rule-data-utils'
+  - '@kbn/securitysolution-es-utils'
+  - '@kbn/shared-ux-router'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/analytics'
+  - '@kbn/securitysolution-rules'
+tags:
+  - security
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - common/**/*
+    - public/**/*
+    - server/**/*
+    - server/**/*.json
+    - scripts/**/*
+    - package.json
+    - storybook/**/*
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  lint: {}

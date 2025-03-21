@@ -1,0 +1,36 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/functional-with-es-ssl-cases-test-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/response-ops'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/functional-with-es-ssl-cases-test-plugin'
+  description: Moon project for @kbn/functional-with-es-ssl-cases-test-plugin
+  channel: ''
+  owner: '@elastic/response-ops'
+  metadata:
+    sourceRoot: x-pack/test/functional_with_es_ssl/plugins/cases
+dependsOn:
+  - '@kbn/core'
+  - '@kbn/cases-plugin'
+  - '@kbn/lens-plugin'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/shared-ux-router'
+  - '@kbn/react-kibana-context-render'
+tags:
+  - common
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'
