@@ -27,12 +27,12 @@ export interface ValidationResult {
   errors: string[]; // Or Errors?
 }
 
-type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
+export type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
 
 export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = StreamDefinition> {
   protected _updated_definition: TDefinition;
   protected dependencies: StreamDependencies;
-  protected changeStatus: StreamChangeStatus = 'unchanged'; // I'd like this to be private so that the subclasses don't need to manage it but they still have changes where they don't auto change
+  private _changeStatus: StreamChangeStatus = 'unchanged';
 
   constructor(definition: TDefinition, dependencies: StreamDependencies) {
     this._updated_definition = definition;
@@ -43,14 +43,16 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     return this._updated_definition;
   }
 
+  protected get changeStatus(): StreamChangeStatus {
+    return this._changeStatus;
+  }
+
   // This needs a new return shape to bubble up status information
   async applyChange(
     change: StreamChange,
     desiredState: State,
     startingState: State
   ): Promise<StreamChange[]> {
-    // What if this stream is already in a changed state?
-
     try {
       if (change.type === 'delete') {
         return this.delete(change.target, desiredState, startingState);
@@ -65,7 +67,12 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
 
   async delete(target: string, desiredState: State, startingState: State): Promise<StreamChange[]> {
     try {
-      const cascadingChanges = await this.doDelete(target, desiredState, startingState);
+      const { cascadingChanges, changeStatus } = await this.doHandleDeleteChange(
+        target,
+        desiredState,
+        startingState
+      );
+      this._changeStatus = changeStatus;
       return cascadingChanges;
     } catch (error) {
       // Here we might return { changedSuccessfully: boolean; errors: Error[] }
@@ -79,7 +86,12 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     startingState: State
   ): Promise<StreamChange[]> {
     try {
-      const cascadingChanges = await this.doUpsert(definition, desiredState, startingState);
+      const { cascadingChanges, changeStatus } = await this.doHandleUpsertChange(
+        definition,
+        desiredState,
+        startingState
+      );
+      this._changeStatus = changeStatus;
       return cascadingChanges;
     } catch (error) {
       // Here we might return { changedSuccessfully: boolean; errors: Error[] }
@@ -89,13 +101,13 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
 
   // Used only when we try to rollback an existing stream or resync the stored State
   markAsCreated(): void {
-    this.changeStatus = 'upserted';
+    this._changeStatus = 'upserted';
   }
 
   // Used only when we failed to create a new stream and need to flip the stream to create deletion actions
   // from the same definition that we attempted to create
   markAsDeleted(): void {
-    this.changeStatus = 'deleted';
+    this._changeStatus = 'deleted';
   }
 
   async validate(desiredState: State, startingState: State): Promise<ValidationResult> {
@@ -134,17 +146,17 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
 
   abstract clone(): StreamActiveRecord;
 
-  protected abstract doUpsert(
+  protected abstract doHandleUpsertChange(
     definition: StreamDefinition,
     desiredState: State,
     startingState: State
-  ): Promise<StreamChange[]>;
+  ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }>;
 
-  protected abstract doDelete(
+  protected abstract doHandleDeleteChange(
     target: string,
     desiredState: State,
     startingState: State
-  ): Promise<StreamChange[]>;
+  ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }>;
 
   protected abstract doValidate(
     desiredState: State,

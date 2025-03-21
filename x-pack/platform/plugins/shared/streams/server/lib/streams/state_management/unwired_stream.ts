@@ -15,7 +15,12 @@ import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import { cloneDeep } from 'lodash';
 import _ from 'lodash';
 import { State, StreamChange } from './state';
-import { StreamActiveRecord, ValidationResult, StreamDependencies } from './stream_active_record';
+import {
+  StreamActiveRecord,
+  ValidationResult,
+  StreamDependencies,
+  StreamChangeStatus,
+} from './stream_active_record';
 import { ElasticsearchAction } from './execution_plan';
 import { generateIngestPipeline } from '../ingest_pipelines/generate_ingest_pipeline';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
@@ -34,14 +39,15 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
   private _processingChanged: boolean = false;
   private _lifeCycleChanged: boolean = false;
 
-  protected async doUpsert(
+  protected async doHandleUpsertChange(
     definition: StreamDefinition,
     desiredState: State,
     startingState: State
-  ): Promise<StreamChange[]> {
+  ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
     if (definition.name !== this.definition.name) {
-      return [];
+      return { cascadingChanges: [], changeStatus: this.changeStatus };
     }
+
     if (!isUnwiredStreamDefinition(definition)) {
       throw new Error('Cannot change stream types');
     }
@@ -71,19 +77,19 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
         startingStateStreamDefinition.ingest.lifecycle
       );
 
-    return [];
+    return { cascadingChanges: [], changeStatus: 'upserted' };
   }
 
-  protected async doDelete(
+  protected async doHandleDeleteChange(
     target: string,
     desiredState: State,
     startingState: State
-  ): Promise<StreamChange[]> {
+  ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
     if (target !== this.definition.name) {
-      return [];
+      return { cascadingChanges: [], changeStatus: this.changeStatus };
     }
-    this.changeStatus = 'deleted';
-    return [];
+
+    return { cascadingChanges: [], changeStatus: 'deleted' };
   }
 
   protected async doValidate(desiredState: State, startingState: State): Promise<ValidationResult> {

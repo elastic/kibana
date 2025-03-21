@@ -22,7 +22,12 @@ import { cloneDeep } from 'lodash';
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import _ from 'lodash';
 import { State, StreamChange } from './state';
-import { StreamActiveRecord, ValidationResult, StreamDependencies } from './stream_active_record';
+import {
+  StreamActiveRecord,
+  ValidationResult,
+  StreamDependencies,
+  StreamChangeStatus,
+} from './stream_active_record';
 import { ElasticsearchAction } from './execution_plan';
 import { generateIndexTemplate } from '../index_templates/generate_index_template';
 import { generateLayer } from '../component_templates/generate_layer';
@@ -51,29 +56,29 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
   private _processingChanged: boolean = false;
   private _lifeCycleChanged: boolean = false;
 
-  protected async doUpsert(
+  protected async doHandleUpsertChange(
     definition: StreamDefinition,
     desiredState: State,
     startingState: State
-  ): Promise<StreamChange[]> {
+  ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
     if (definition.name !== this.definition.name) {
-      if (
+      // if the an ancestor stream gets upserted, we might need to update the stream - mark as upserted
+      // so we check for updates during the Elasticsearch action planning phase.
+      const ancestorHasChanged =
         isWiredStreamDefinition(definition) &&
-        isDescendantOf(definition.name, this.definition.name)
-      ) {
-        // if the an ancestor stream gets upserted, we might need to update the stream - mark as upserted
-        // so we check for updates during the Elasticsearch action planning phase.
-        this.changeStatus = 'upserted';
-      }
+        isDescendantOf(definition.name, this.definition.name);
 
-      return [];
+      return {
+        changeStatus: ancestorHasChanged ? 'upserted' : this.changeStatus,
+        cascadingChanges: [],
+      };
     }
+
     if (!isWiredStreamDefinition(definition)) {
       throw new Error('Cannot change stream types');
     }
 
     this._updated_definition = definition;
-    this.changeStatus = 'upserted';
 
     const startingStateStreamDefinition = startingState.get(this.definition.name)?.definition;
 
@@ -136,6 +141,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
         },
       });
     }
+
     if (parentId && desiredState.has(parentId)) {
       const parentStream = desiredState.get(parentId) as WiredStream;
       // if the parent hasn't changed already, ensure it has the correct routing
@@ -173,18 +179,18 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
       }
     }
 
-    return cascadingChanges;
+    return { cascadingChanges, changeStatus: 'upserted' };
   }
 
-  protected async doDelete(
+  protected async doHandleDeleteChange(
     target: string,
     desiredState: State,
     startingState: State
-  ): Promise<StreamChange[]> {
+  ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
     if (target !== this.definition.name) {
-      return [];
+      return { cascadingChanges: [], changeStatus: this.changeStatus };
     }
-    this.changeStatus = 'deleted';
+
     const cascadingChanges: StreamChange[] = [];
     const parentId = getParentId(this._updated_definition.name);
     if (parentId) {
@@ -227,7 +233,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
       }))
     );
 
-    return cascadingChanges;
+    return { cascadingChanges, changeStatus: 'deleted' };
   }
 
   protected async doValidate(desiredState: State, startingState: State): Promise<ValidationResult> {
