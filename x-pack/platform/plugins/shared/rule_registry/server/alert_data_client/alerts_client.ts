@@ -44,8 +44,8 @@ import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
 import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import { TypeOf } from 'io-ts';
+import { alertAuditEvent, operationAlertAuditActionMap } from '@kbn/alerting-plugin/server/lib';
 import { BrowserFields } from '../../common';
-import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_CONSUMER,

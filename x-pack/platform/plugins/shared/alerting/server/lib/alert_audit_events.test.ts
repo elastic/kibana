@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertAuditAction, alertAuditEvent } from './audit_events';
+import { AlertAuditAction, alertAuditEvent, alertAuditSystemEvent } from './alert_audit_events';
 
 describe('#alertAuditEvent', () => {
   test('creates event with `unknown` outcome', () => {
@@ -53,6 +53,55 @@ describe('#alertAuditEvent', () => {
           ],
         },
         "message": "User has accessed alert [id=123]",
+      }
+    `);
+  });
+
+  test('creates system event with `success` outcome', () => {
+    expect(
+      alertAuditSystemEvent({
+        action: AlertAuditAction.DELETE,
+        id: '123',
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "alert_delete",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "deletion",
+          ],
+        },
+        "message": "System has deleted alert [id=123]",
+      }
+    `);
+  });
+
+  test('creates bulk event with `success` outcome', () => {
+    expect(
+      alertAuditEvent({
+        action: AlertAuditAction.SCHEDULE_DELETE,
+        bulk: true,
+        actor: 'elastic',
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "alert_schedule_delete",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "deletion",
+          ],
+        },
+        "message": "elastic has scheduled deletion task for alerts",
       }
     `);
   });

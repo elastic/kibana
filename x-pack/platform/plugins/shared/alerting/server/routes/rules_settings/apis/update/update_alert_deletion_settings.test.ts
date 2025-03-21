@@ -82,6 +82,7 @@ describe('updateAlertDeletionSettingsRoute', () => {
       Array [
         Object {
           "activeAlertsDeletionThreshold": 90,
+          "categoryIds": undefined,
           "inactiveAlertsDeletionThreshold": 60,
           "isActiveAlertsDeletionEnabled": true,
           "isInactiveAlertsDeletionEnabled": true,
