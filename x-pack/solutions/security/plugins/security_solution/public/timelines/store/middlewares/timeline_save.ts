@@ -20,6 +20,7 @@ import {
   isPhrasesFilter,
 } from '@kbn/es-query';
 
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { sourcererAdapterSelector } from '../../../data_view_manager/redux/selectors';
 import { sourcererSelectors } from '../../../sourcerer/store';
 import {
@@ -52,6 +53,9 @@ function isSaveTimelineAction(action: Action): action is ReturnType<typeof saveT
 }
 
 export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State> =
+  // WARN: this is disabled because we need to support experimental data view picker here.
+  // once it is stable, remove the override
+  // eslint-disable-next-line complexity
   (kibana: CoreStart) => (store) => (next) => async (action: Action) => {
     if (!isSaveTimelineAction(action)) {
       return next(action);
@@ -72,15 +76,29 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
       SourcererScopeName.timeline
     );
 
-    const { dataView: experimentalDataView } = sourcererAdapterSelector(
+    const { dataViewId: experimentalDataViewId } = sourcererAdapterSelector(
       SourcererScopeName.timeline
     )(storeState);
 
-    const experimentalDataViewId = experimentalDataView?.id;
-    const experimentalSelectedPatterns = experimentalDataView?.title?.split(',') ?? [];
-
     const experimentalIsDataViewEnabled =
       storeState.app.enableExperimental.newDataViewPickerEnabled;
+
+    let experimentalSelectedPatterns: string[] = [];
+
+    // NOTE: remove eslint override above after the experimental picker is stabilized
+    if (experimentalIsDataViewEnabled && experimentalDataViewId) {
+      const plugins = await kibana.plugins.onStart<{ dataViews: DataViewsPublicPluginStart }>(
+        'dataViews'
+      );
+
+      if (plugins.dataViews.found) {
+        experimentalSelectedPatterns = (
+          await plugins.dataViews.contract.get(experimentalDataViewId)
+        )
+          .getIndexPattern()
+          .split(',');
+      }
+    }
 
     const indexNames = experimentalIsDataViewEnabled
       ? experimentalSelectedPatterns
