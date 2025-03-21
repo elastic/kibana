@@ -18,5 +18,6 @@
     "@kbn/repo-info",
     "@kbn/repo-packages",
     "@kbn/tooling-log",
+    "@kbn/projects-solutions-groups",
   ]
 }
