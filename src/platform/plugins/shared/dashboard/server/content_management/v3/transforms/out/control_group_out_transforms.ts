@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaults, flow } from 'lodash';
+import { flow } from 'lodash';
 import {
   ControlGroupChainingSystem,
   ControlLabelPosition,
@@ -32,11 +32,12 @@ export const transformControlGroupOut: (
 function transformControlGroupSetDefaults(
   controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>
 ) {
-  return defaults(controlGroupInput, {
+  return {
     controlStyle: DEFAULT_CONTROL_LABEL_POSITION,
     chainingSystem: DEFAULT_CONTROL_CHAINING,
     showApplySelections: !DEFAULT_AUTO_APPLY_SELECTIONS,
-  });
+    ...controlGroupInput,
+  };
 }
 
 function transformControlGroupProperties({
@@ -67,7 +68,10 @@ function transformControlGroupProperties({
 function transformIgnoreParentSettingsSetDefaults(
   ignoreParentSettings: ParentIgnoreSettings
 ): ParentIgnoreSettings {
-  return defaults(ignoreParentSettings, DEFAULT_IGNORE_PARENT_SETTINGS);
+  return {
+    ...DEFAULT_IGNORE_PARENT_SETTINGS,
+    ...ignoreParentSettings,
+  };
 }
 
 /**

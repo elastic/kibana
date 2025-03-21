@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaults, flow } from 'lodash';
+import { flow } from 'lodash';
 import { SerializableRecord } from '@kbn/utility-types';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugin/common';
 import { ControlGroupAttributes } from '../../types';
@@ -44,9 +44,11 @@ export function transformControlsWidthAuto(controls: SerializableRecord[]) {
 
 // TODO We may want to remove setting defaults in the future
 export function transformControlsSetDefaults(controls: SerializableRecord[]) {
-  return controls.map((control) =>
-    defaults(control, { grow: DEFAULT_CONTROL_GROW, width: DEFAULT_CONTROL_WIDTH })
-  );
+  return controls.map((control) => ({
+    grow: DEFAULT_CONTROL_GROW,
+    width: DEFAULT_CONTROL_WIDTH,
+    ...control,
+  }));
 }
 
 export function transformControlProperties(controls: SerializableRecord[]): SerializableRecord[] {
