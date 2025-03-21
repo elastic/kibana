@@ -59,8 +59,9 @@ describe('useMarkdownSessionStorage', () => {
 
     await waitFor(() => {
       expect(field.setValue).not.toHaveBeenCalled();
-      expect(result.current.hasConflicts).toBe(false);
     });
+
+    expect(result.current.hasConflicts).toBe(false);
   });
 
   it('should update the session value with field value when it is first render', async () => {
@@ -101,8 +102,9 @@ describe('useMarkdownSessionStorage', () => {
 
     await waitFor(() => {
       expect(result.current.hasConflicts).toBe(false);
-      expect(sessionStorage.getItem(sessionKey)).toBe(specialCharsValue);
     });
+
+    expect(sessionStorage.getItem(sessionKey)).toBe(specialCharsValue);
   });
 
   it('should update session value ', async () => {
@@ -127,8 +129,9 @@ describe('useMarkdownSessionStorage', () => {
 
     await waitFor(() => {
       expect(result.current.hasConflicts).toBe(false);
-      expect(sessionStorage.getItem(sessionKey)).toBe('new value');
     });
+
+    expect(sessionStorage.getItem(sessionKey)).toBe('new value');
   });
 
   it('should return has conflict true', async () => {
@@ -175,8 +178,9 @@ describe('useMarkdownSessionStorage', () => {
 
       await waitFor(() => {
         expect(result.current.hasConflicts).toBe(false);
-        expect(field.value).toBe(sessionStorage.getItem(sessionKey));
       });
+
+      expect(field.value).toBe(sessionStorage.getItem(sessionKey));
     });
 
     it('should update existing session key if field value changed', async () => {
@@ -205,8 +209,9 @@ describe('useMarkdownSessionStorage', () => {
 
       await waitFor(() => {
         expect(result.current.hasConflicts).toBe(false);
-        expect(sessionStorage.getItem(sessionKey)).toBe('new value');
       });
+
+      expect(sessionStorage.getItem(sessionKey)).toBe('new value');
     });
   });
 });

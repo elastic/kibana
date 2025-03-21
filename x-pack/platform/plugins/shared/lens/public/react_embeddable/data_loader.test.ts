@@ -240,7 +240,14 @@ describe('Data Loader', () => {
         attributes: getLensAttributesMock(),
         enhancements: {
           dynamicActions: {
-            events: [],
+            events: [
+              // make sure there's at least one event
+              {
+                eventId: 'test',
+                triggers: [],
+                action: { factoryId: 'test', name: 'testAction', config: {} },
+              },
+            ],
           },
         },
       });
@@ -252,6 +259,24 @@ describe('Data Loader', () => {
   });
 
   it('should not re-render when dashboard view/edit mode changes if dynamic actions are not set', async () => {
+    await expectRerenderOnDataLoader(async ({ api, getState }) => {
+      getState.mockReturnValue({
+        attributes: getLensAttributesMock(),
+        enhancements: {
+          dynamicActions: {
+            // empty list should not trigger
+            events: [],
+          },
+        },
+      });
+      // trigger a change by changing the title in the attributes
+      (api.viewMode$ as BehaviorSubject<ViewMode | undefined>).next('view');
+
+      return false;
+    });
+  });
+
+  it('should not re-render when dashboard view/edit mode changes if dynamic actions are not available', async () => {
     await expectRerenderOnDataLoader(async ({ api }) => {
       // the default get state does not have dynamic actions
       // trigger a change by changing the title in the attributes

@@ -389,6 +389,8 @@ export interface DocLinks {
     readonly signalsMigrationApi: string;
     readonly legacyEndpointManagementApiDeprecations: string;
     readonly legacyRuleManagementBulkApiDeprecations: string;
+    readonly siemMigrations: string;
+    readonly llmPerformanceMatrix: string;
   };
   readonly query: {
     readonly eql: string;

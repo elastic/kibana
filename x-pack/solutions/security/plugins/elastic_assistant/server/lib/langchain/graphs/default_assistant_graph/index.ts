@@ -90,6 +90,9 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
       // failure could be due to bad connector, we should deliver that result to the client asap
       maxRetries: 0,
       convertSystemMessageToHumanContent: false,
+      telemetryMetadata: {
+        pluginId: 'security_ai_assistant',
+      },
     });
 
   const anonymizationFieldsRes =
