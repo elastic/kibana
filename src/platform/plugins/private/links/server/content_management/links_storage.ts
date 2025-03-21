@@ -25,7 +25,14 @@ export class LinksStorage extends SOContentStorage<LinksCrudTypes> {
       savedObjectType: CONTENT_ID,
       cmServicesDefinition,
       enableMSearch: true,
-      allowedSavedObjectAttributes: ['id', 'title', 'description', 'links', 'layout'],
+      allowedSavedObjectAttributes: [
+        'id',
+        'title',
+        'description',
+        'links',
+        'layout',
+        'textOverflow',
+      ],
       logger,
       throwOnResultValidationError,
     });

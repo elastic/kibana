@@ -19,6 +19,7 @@ export type {
   LinksItem,
   LinksCrudTypes,
   LinksAttributes,
+  LinksTextOverflowType,
 } from './latest';
 
 export {
@@ -26,6 +27,9 @@ export {
   DASHBOARD_LINK_TYPE,
   LINKS_VERTICAL_LAYOUT,
   LINKS_HORIZONTAL_LAYOUT,
+  LINK_TEXT_OVERFLOW_ELLIPSIS,
+  LINK_TEXT_OVERFLOW_WRAP,
+  LINK_TEST_OVERFLOW_SCROLL,
 } from './latest';
 
 export * as LinksV1 from './v1';

@@ -23,7 +23,10 @@ import {
 
 import {
   DASHBOARD_LINK_TYPE,
+  LinksTextOverflowType,
   LINKS_VERTICAL_LAYOUT,
+  LINK_TEXT_OVERFLOW_WRAP,
+  LINK_TEXT_OVERFLOW_ELLIPSIS,
   LinksLayoutType,
 } from '../../../common/content_management';
 import { trackUiMetric } from '../../services/kibana_services';
@@ -33,10 +36,16 @@ import { DashboardLinkStrings } from './dashboard_link_strings';
 export interface DashboardLinkProps {
   link: ResolvedLink;
   layout: LinksLayoutType;
+  textOverflow: LinksTextOverflowType;
   parentApi: LinksParentApi;
 }
 
-export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLinkProps) => {
+export const DashboardLinkComponent = ({
+  link,
+  layout,
+  parentApi,
+  textOverflow,
+}: DashboardLinkProps) => {
   const [
     parentDashboardId,
     parentDashboardTitle,
@@ -151,10 +160,11 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
   return (
     <EuiListGroupItem
       size="s"
+      wrapText={textOverflow === LINK_TEXT_OVERFLOW_WRAP}
       color="text"
       {...onClickProps}
       id={id}
-      css={styles}
+      css={styles(textOverflow)}
       showToolTip={true}
       toolTipProps={{
         title: tooltipTitle,
@@ -180,45 +190,52 @@ export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLin
   );
 };
 
-const styles = ({ euiTheme }: UseEuiTheme) =>
-  css({
-    // universal current dashboard link styles
-    '&.linkCurrent': {
-      borderRadius: 0,
-      cursor: 'default',
-      '& .euiListGroupItem__text': {
-        color: euiTheme.colors.textPrimary,
-      },
-    },
-
-    // vertical layout - current dashboard link styles
-    '.verticalLayoutWrapper &.linkCurrent::before': {
-      // add left border for current dashboard
-      content: "''",
-      position: 'absolute',
-      height: '75%',
-      width: `calc(.5 * ${euiTheme.size.xs})`,
-      backgroundColor: euiTheme.colors.primary,
-    },
-
-    // horizontal layout - current dashboard link styles
-    '.horizontalLayoutWrapper &.linkCurrent': {
-      padding: `0 ${euiTheme.size.s}`,
-      '& .euiListGroupItem__text': {
-        // add bottom border for current dashboard
-        boxShadow: `${euiTheme.colors.textPrimary} 0 calc(-.5 * ${euiTheme.size.xs}) inset`,
-        paddingInline: 0,
-      },
-    },
-
-    // dashboard not found error styles
-    '&.dashboardLinkError': {
-      '&.dashboardLinkError--noLabel .euiListGroupItem__text': {
-        fontStyle: 'italic',
+const styles =
+  (textOverflow: LinksTextOverflowType) =>
+  ({ euiTheme }: UseEuiTheme) =>
+    css({
+      // universal current dashboard link styles
+      '&.linkCurrent': {
+        borderRadius: 0,
+        cursor: 'default',
+        '& .euiListGroupItem__text': {
+          color: euiTheme.colors.textPrimary,
+        },
       },
 
-      '.dashboardLinkIcon': {
-        marginRight: euiTheme.size.s,
+      // vertical layout - current dashboard link styles
+      '.verticalLayoutWrapper &.linkCurrent::before': {
+        // add left border for current dashboard
+        content: "''",
+        position: 'absolute',
+        height: '75%',
+        width: `calc(.5 * ${euiTheme.size.xs})`,
+        backgroundColor: euiTheme.colors.primary,
       },
-    },
-  });
+
+      // horizontal layout - current dashboard link styles
+      '.horizontalLayoutWrapper &.linkCurrent': {
+        padding: `0 ${euiTheme.size.s}`,
+        '& .euiListGroupItem__text': {
+          // add bottom border for current dashboard
+          boxShadow: `${euiTheme.colors.textPrimary} 0 calc(-.5 * ${euiTheme.size.xs}) inset`,
+          paddingInline: 0,
+          ...(textOverflow === LINK_TEXT_OVERFLOW_ELLIPSIS && {
+            '& .euiListGroupItem__label': {
+              maxWidth: '250px',
+            },
+          }),
+        },
+      },
+
+      // dashboard not found error styles
+      '&.dashboardLinkError': {
+        '&.dashboardLinkError--noLabel .euiListGroupItem__text': {
+          fontStyle: 'italic',
+        },
+
+        '.dashboardLinkIcon': {
+          marginRight: euiTheme.size.s,
+        },
+      },
+    });

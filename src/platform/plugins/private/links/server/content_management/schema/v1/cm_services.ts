@@ -20,6 +20,9 @@ import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../../../common/cont
 import {
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
+  LINK_TEST_OVERFLOW_SCROLL,
+  LINK_TEXT_OVERFLOW_WRAP,
+  LINK_TEXT_OVERFLOW_ELLIPSIS,
 } from '../../../../common/content_management/v1/constants';
 
 const baseLinkSchema = {
@@ -66,6 +69,13 @@ const linksAttributesSchema = schema.object(
     links: schema.arrayOf(schema.oneOf([dashboardLinkSchema, externalLinkSchema])),
     layout: schema.maybe(
       schema.oneOf([schema.literal(LINKS_HORIZONTAL_LAYOUT), schema.literal(LINKS_VERTICAL_LAYOUT)])
+    ),
+    textOverflow: schema.maybe(
+      schema.oneOf([
+        schema.literal(LINK_TEXT_OVERFLOW_ELLIPSIS),
+        schema.literal(LINK_TEST_OVERFLOW_SCROLL),
+        schema.literal(LINK_TEXT_OVERFLOW_WRAP),
+      ])
     ),
   },
   { unknowns: 'forbid' }

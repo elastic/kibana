@@ -12,8 +12,7 @@ import React from 'react';
 import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
 import { createEvent, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-
-import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
+import { LINKS_VERTICAL_LAYOUT, LINK_TEXT_OVERFLOW_WRAP } from '../../../common/content_management';
 import { DashboardLinkComponent, DashboardLinkProps } from './dashboard_link_component';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { getMockLinksParentApi } from '../../mocks';
@@ -61,6 +60,7 @@ describe('Dashboard link component', () => {
           link={resolvedLink}
           layout={LINKS_VERTICAL_LAYOUT}
           parentApi={parentApi}
+          textOverflow={LINK_TEXT_OVERFLOW_WRAP}
           {...overrides}
         />
       </EuiThemeProvider>
@@ -74,6 +74,7 @@ describe('Dashboard link component', () => {
             <DashboardLinkComponent
               link={resolvedLink}
               layout={LINKS_VERTICAL_LAYOUT}
+              textOverflow={LINK_TEXT_OVERFLOW_WRAP}
               parentApi={parentApi}
               {...overrides}
               {...newOverrides}

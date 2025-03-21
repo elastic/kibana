@@ -25,7 +25,12 @@ import { DashboardLocatorParams, DASHBOARD_API_TYPE } from '@kbn/dashboard-plugi
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 
 import { CONTENT_ID } from '../common';
-import { Link, LinksAttributes, LinksLayoutType } from '../common/content_management';
+import {
+  Link,
+  LinksAttributes,
+  LinksLayoutType,
+  LinksTextOverflowType,
+} from '../common/content_management';
 
 export type LinksParentApi = PresentationContainer &
   HasType<typeof DASHBOARD_API_TYPE> &
@@ -60,6 +65,7 @@ export interface LinksRuntimeState
   error?: Error;
   links?: ResolvedLink[];
   layout?: LinksLayoutType;
+  textOverflow?: LinksTextOverflowType;
   defaultPanelTitle?: string;
   defaultPanelDescription?: string;
 }

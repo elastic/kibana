@@ -14,11 +14,15 @@ import {
   DEFAULT_URL_DRILLDOWN_OPTIONS,
   UrlDrilldownOptions,
 } from '@kbn/ui-actions-enhanced-plugin/public';
+import { css } from '@emotion/react';
 
 import {
   EXTERNAL_LINK_TYPE,
   LinksLayoutType,
   LINKS_VERTICAL_LAYOUT,
+  LINK_TEXT_OVERFLOW_WRAP,
+  LinksTextOverflowType,
+  LINK_TEXT_OVERFLOW_ELLIPSIS,
 } from '../../../common/content_management';
 import { coreServices, trackUiMetric } from '../../services/kibana_services';
 import { ResolvedLink } from '../../types';
@@ -26,9 +30,11 @@ import { ResolvedLink } from '../../types';
 export const ExternalLinkComponent = ({
   link,
   layout,
+  textOverflow,
 }: {
   link: ResolvedLink;
   layout: LinksLayoutType;
+  textOverflow: LinksTextOverflowType;
 }) => {
   const linkOptions = useMemo(() => {
     return {
@@ -47,8 +53,10 @@ export const ExternalLinkComponent = ({
 
   return (
     <EuiListGroupItem
+      css={styles(textOverflow)}
       size="s"
       external
+      wrapText={textOverflow === LINK_TEXT_OVERFLOW_WRAP}
       color="text"
       isDisabled={Boolean(link.error)}
       className={'linksPanelLink'}
@@ -84,3 +92,13 @@ export const ExternalLinkComponent = ({
     />
   );
 };
+
+const styles = (textOverflow: LinksTextOverflowType) =>
+  css({
+    ...(textOverflow === LINK_TEXT_OVERFLOW_ELLIPSIS && {
+      '&.linksPanelLink': {
+        maxWidth: '250px',
+        overflow: 'hidden',
+      },
+    }),
+  });

@@ -34,9 +34,13 @@ import {
 import { css, keyframes } from '@emotion/react';
 
 import {
+  LinksLayoutType,
+  LinksTextOverflowType,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
-  LinksLayoutType,
+  LINK_TEXT_OVERFLOW_WRAP,
+  LINK_TEXT_OVERFLOW_ELLIPSIS,
+  LINK_TEST_OVERFLOW_SCROLL,
 } from '../../../common/content_management';
 import { focusMainFlyout } from '../../editor/links_editor_tools';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
@@ -60,10 +64,65 @@ const layoutOptions: EuiButtonGroupOptionProps[] = [
     'data-test-subj': `links--panelEditor--${LINKS_HORIZONTAL_LAYOUT}LayoutBtn`,
   },
 ];
+const toggleTextOverflowOptions = (layout: LinksLayoutType): EuiButtonGroupOptionProps[] => {
+  const options = [
+    {
+      id: LINK_TEXT_OVERFLOW_ELLIPSIS,
+      label: LinksStrings.editor.linkEditor.getTextOverflowEllipsisLabel(),
+      'data-test-subj': `links--panelEditor--${LINK_TEXT_OVERFLOW_ELLIPSIS}`,
+    },
+  ];
+
+  if (layout === LINKS_VERTICAL_LAYOUT) {
+    options.push({
+      id: LINK_TEXT_OVERFLOW_WRAP,
+      label: LinksStrings.editor.linkEditor.getTextOverflowWrapLabel(),
+      'data-test-subj': `links--panelEditor--${LINK_TEXT_OVERFLOW_WRAP}`,
+    });
+  }
+
+  if (layout === LINKS_HORIZONTAL_LAYOUT) {
+    options.push({
+      id: LINK_TEST_OVERFLOW_SCROLL,
+      label: LinksStrings.editor.linkEditor.getTextOverflowScrollLabel(),
+      'data-test-subj': `links--panelEditor--${LINK_TEST_OVERFLOW_SCROLL}`,
+    });
+  }
+
+  return options;
+};
 
 export interface LinksEditorProps {
-  onSaveToLibrary: (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => Promise<void>;
-  onAddToDashboard: (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => void;
+  onSaveToLibrary: (
+    newLinks: ResolvedLink[],
+    newLayout: LinksLayoutType,
+    newTextOverflow: LinksTextOverflowType
+  ) => Promise<void>;
+  onAddToDashboard: (
+    newLinks: ResolvedLink[],
+    newLayout: LinksLayoutType,
+    newTextOverflow: LinksTextOverflowType
+  ) => void;
+  onClose: () => void;
+  initialLinks?: ResolvedLink[];
+  initialLayout?: LinksLayoutType;
+  initialTextOverflow?: LinksTextOverflowType;
+  parentDashboardId?: string;
+  isByReference: boolean;
+  flyoutId: string; // used to manage the focus of this flyout after individual link editor flyout is closed
+}
+
+export interface LinksEditorProps {
+  onSaveToLibrary: (
+    newLinks: ResolvedLink[],
+    newLayout: LinksLayoutType,
+    newTextOverflow: LinksTextOverflowType
+  ) => Promise<void>;
+  onAddToDashboard: (
+    newLinks: ResolvedLink[],
+    newLayout: LinksLayoutType,
+    newTextOverflow: LinksTextOverflowType
+  ) => void;
   onClose: () => void;
   initialLinks?: ResolvedLink[];
   initialLayout?: LinksLayoutType;
@@ -78,6 +137,7 @@ const LinksEditor = ({
   onClose,
   initialLinks,
   initialLayout,
+  initialTextOverflow,
   parentDashboardId,
   isByReference,
   flyoutId,
@@ -92,6 +152,9 @@ const LinksEditor = ({
   const [isSaving, setIsSaving] = useState(false);
   const [orderedLinks, setOrderedLinks] = useState<ResolvedLink[]>([]);
   const [saveByReference, setSaveByReference] = useState(isByReference);
+  const [currentTextOverflow, setCurrentTextOverflow] = useState<LinksTextOverflowType>(
+    initialTextOverflow ?? LINK_TEXT_OVERFLOW_WRAP
+  );
 
   const isEditingExisting = initialLinks || isByReference;
 
@@ -187,6 +250,7 @@ const LinksEditor = ({
               idSelected={currentLayout}
               onChange={(id) => {
                 setCurrentLayout(id as LinksLayoutType);
+                setCurrentTextOverflow(LINK_TEXT_OVERFLOW_ELLIPSIS);
               }}
               legend={LinksStrings.editor.panelEditor.getLayoutSettingsLegend()}
             />
@@ -240,6 +304,18 @@ const LinksEditor = ({
               )}
             </div>
           </EuiFormRow>
+          <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkTextOverflowLabel()}>
+            <EuiButtonGroup
+              legend={LinksStrings.editor.linkEditor.getLinkTextOverflowLabel()}
+              type="single"
+              options={toggleTextOverflowOptions(currentLayout)}
+              idSelected={currentTextOverflow}
+              buttonSize="compressed"
+              onChange={(id) => {
+                setCurrentTextOverflow(id as LinksTextOverflowType);
+              }}
+            />
+          </EuiFormRow>
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -287,7 +363,7 @@ const LinksEditor = ({
                     onClick={async () => {
                       if (saveByReference) {
                         setIsSaving(true);
-                        onSaveToLibrary(orderedLinks, currentLayout)
+                        onSaveToLibrary(orderedLinks, currentLayout, currentTextOverflow)
                           .catch((e) => {
                             toasts.addError(e, {
                               title: LinksStrings.editor.panelEditor.getErrorDuringSaveToastTitle(),
@@ -299,7 +375,7 @@ const LinksEditor = ({
                             }
                           });
                       } else {
-                        onAddToDashboard(orderedLinks, currentLayout);
+                        onAddToDashboard(orderedLinks, currentLayout, currentTextOverflow);
                       }
                     }}
                   >
