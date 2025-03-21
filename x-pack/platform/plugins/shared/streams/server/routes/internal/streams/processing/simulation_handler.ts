@@ -423,7 +423,9 @@ const computePipelineSimulationResult = (
       const procId = error.processor_id;
 
       processorsMap[procId].errors.push(error);
-      processorsMap[procId].failure_rate++;
+      if (error.type !== 'non_additive_processor_failure') {
+        processorsMap[procId].failure_rate++;
+      }
     });
 
     return {
