@@ -78,17 +78,14 @@ function StaleAlert({
     <>
       {isAlertStale?.isStale && (
         <EuiCallOut
-          title={i18n.translate(
-            'xpack.observability.alertDetails.euiCallOut.proceedWithCautionLabel',
-            {
-              defaultMessage: 'Stale alert',
-            }
-          )}
+          title={i18n.translate('xpack.observability.alertDetails.staleAlertCallout.title', {
+            defaultMessage: 'Stale alert',
+          })}
           color="warning"
           iconType="warning"
         >
           <p>
-            {i18n.translate('xpack.observability.alertDetails.p.hereBeDragonsDontLabel', {
+            {i18n.translate('xpack.observability.alertDetails.staleAlertCallout.message', {
               defaultMessage:
                 'This alert has been active for {numOfDays} days, remains unassigned to any cases, and its rule is snoozed with no notifications.',
               values: { numOfDays: isAlertStale?.days },
