@@ -14,7 +14,7 @@ import {
   getGroupingQuery,
   useGrouping,
 } from '@kbn/grouping';
-import { parseGroupingQuery, type GroupPanelRenderer, type GetGroupStats } from '@kbn/grouping/src';
+import { parseGroupingQuery } from '@kbn/grouping/src';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
 import {
   GROUP_BY_CLICK,
@@ -32,7 +32,7 @@ import {
   ASSET_FIELDS,
   LOCAL_STORAGE_ASSETS_GROUPING_KEY,
 } from '../../constants';
-
+import { groupPanelRenderer, groupStatsRenderer } from './utils/asset_inventory_group_renderer';
 import {
   type AssetsGroupingAggregation,
   type AssetsRootGroupingAggregation,
@@ -148,14 +148,10 @@ export const isAssetsRootGroupingAggregation = (
  */
 export const useAssetInventoryGrouping = ({
   state,
-  groupPanelRenderer,
-  getGroupStats,
   groupFilters = [],
   selectedGroup,
 }: {
   state: AssetInventoryDataTableResult;
-  groupPanelRenderer?: GroupPanelRenderer<AssetsGroupingAggregation>;
-  getGroupStats?: GetGroupStats<AssetsGroupingAggregation>;
   groupFilters?: Filter[];
   selectedGroup?: string;
 }) => {
@@ -166,7 +162,7 @@ export const useAssetInventoryGrouping = ({
     componentProps: {
       unit: assetsUnit,
       groupPanelRenderer,
-      getGroupStats,
+      getGroupStats: groupStatsRenderer,
       groupsUnit: assetGroupsUnit,
     },
     defaultGroupingOptions,

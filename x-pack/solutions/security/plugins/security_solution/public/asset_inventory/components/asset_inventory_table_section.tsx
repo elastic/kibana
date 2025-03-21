@@ -9,7 +9,6 @@ import type { Filter } from '@kbn/es-query';
 import { AssetInventoryDataTable } from './asset_inventory_data_table';
 import { AssetInventoryGrouping } from './grouping/asset_inventory_grouping';
 import { useAssetInventoryGrouping } from './grouping/use_asset_inventory_grouping';
-import { groupPanelRenderer, groupStatsRenderer } from './grouping/asset_inventory_group_renderer';
 import type { AssetInventoryDataTableResult } from '../hooks/use_asset_inventory_data_table';
 
 // TODO Move to constants?
@@ -36,8 +35,6 @@ const TopLevelGroup = ({
 }: TopLevelGroupProps) => {
   const { groupData, grouping, isFetching } = useAssetInventoryGrouping({
     state,
-    groupPanelRenderer,
-    getGroupStats: groupStatsRenderer,
     selectedGroup,
     groupFilters: [],
   });
@@ -83,8 +80,6 @@ const SubGroup = ({
 
   const { groupData, grouping, isFetching } = useAssetInventoryGrouping({
     state: subgroupState,
-    groupPanelRenderer,
-    getGroupStats: groupStatsRenderer,
     selectedGroup,
     groupFilters: parentGroupFilters ? JSON.parse(parentGroupFilters) : [],
   });
@@ -209,15 +204,7 @@ export interface AssetInventoryTableSectionProps {
 }
 
 export const AssetInventoryTableSection = ({ state }: AssetInventoryTableSectionProps) => {
-  const { grouping } = useAssetInventoryGrouping({
-    state,
-    groupPanelRenderer,
-    getGroupStats: groupStatsRenderer,
-  });
-
-  // if (isEmptyResults) {
-
-  // }
+  const { grouping } = useAssetInventoryGrouping({ state });
 
   return (
     <div>

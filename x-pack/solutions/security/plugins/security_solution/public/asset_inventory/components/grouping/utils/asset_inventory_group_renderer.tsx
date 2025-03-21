@@ -23,12 +23,12 @@ import type {
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
-import { ASSET_GROUPING_OPTIONS, TEST_SUBJ_GROUPING_COUNTER } from '../../constants';
-import { firstNonNullValue } from './utils/first_non_null_value';
-import { NullGroup } from './utils/null_group';
-import { LoadingGroup } from './utils/loading_group';
-import type { AssetsGroupingAggregation } from './use_fetch_grouped_data';
-import { NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT } from './translations';
+import { ASSET_GROUPING_OPTIONS, TEST_SUBJ_GROUPING_COUNTER } from '../../../constants';
+import { firstNonNullValue } from './first_non_null_value';
+import { NullGroup } from './null_group';
+import { LoadingGroup } from './loading_group';
+import type { AssetsGroupingAggregation } from '../use_fetch_grouped_data';
+import { NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT } from '../translations';
 
 export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> = (
   selectedGroup: string,
