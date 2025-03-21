@@ -58,7 +58,6 @@ describe('Secondary metric', () => {
 
         renderSecondaryMetric({ color });
 
-        screen.debug();
         const el = screen.getByTitle(formattedValue);
 
         expect(el).toBeInTheDocument();
