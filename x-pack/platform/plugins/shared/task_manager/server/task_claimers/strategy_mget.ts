@@ -30,6 +30,7 @@ import {
   ConcreteTaskInstanceVersion,
   TaskCost,
   PartialConcreteTaskInstance,
+  concreteTaskInstanceSchema,
 } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
@@ -152,6 +153,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   // apply capacity constraint to candidate tasks
   const tasksToRun: ConcreteTaskInstance[] = [];
   const leftOverTasks: ConcreteTaskInstance[] = [];
+  const tasksWithMalformedData: ConcreteTaskInstance[] = [];
 
   let capacityAccumulator = 0;
   for (const task of candidateTasks) {
@@ -169,6 +171,17 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const now = new Date();
   const taskUpdates: PartialConcreteTaskInstance[] = [];
   for (const task of tasksToRun) {
+    try {
+      concreteTaskInstanceSchema.validate(task);
+    } catch (error) {
+      logger.error(
+        `Error validating task schema ${task.id}:${task.taskType} during claim: ${JSON.stringify(
+          error
+        )}`
+      );
+      tasksWithMalformedData.push(task);
+      continue;
+    }
     taskUpdates.push({
       id: task.id,
       version: task.version,
@@ -237,7 +250,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       tasksConflicted: conflicts,
       tasksClaimed: fullTasksToRun.length,
       tasksLeftUnclaimed: leftOverTasks.length,
-      tasksErrors: bulkUpdateErrors + bulkGetErrors,
+      tasksErrors: bulkUpdateErrors + bulkGetErrors + tasksWithMalformedData.length,
       staleTasks: staleTasks.length,
     },
     docs: fullTasksToRun,
