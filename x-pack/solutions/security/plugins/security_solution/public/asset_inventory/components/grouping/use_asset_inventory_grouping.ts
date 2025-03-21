@@ -156,7 +156,7 @@ export const useAssetInventoryGrouping = ({
   selectedGroup?: string;
 }) => {
   const { query, setUrlQuery, pageSize, pageIndex } = state;
-  const { dataView } = useDataViewContext();
+  const { dataView, dataViewIsLoading } = useDataViewContext();
 
   const grouping = useGrouping({
     componentProps: {
@@ -166,7 +166,7 @@ export const useAssetInventoryGrouping = ({
       groupsUnit: assetGroupsUnit,
     },
     defaultGroupingOptions,
-    fields: dataView.fields,
+    fields: dataViewIsLoading ? [] : dataView.fields,
     groupingId: LOCAL_STORAGE_ASSETS_GROUPING_KEY,
     maxGroupingLevels: MAX_GROUPING_LEVELS,
     title: groupingTitle,
