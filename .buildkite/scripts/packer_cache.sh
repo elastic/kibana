@@ -17,3 +17,5 @@ done
 for version in $(cat versions.json | jq -r '.versions[].version'); do
   node x-pack/solutions/security/plugins/security_solution/scripts/endpoint/agent_downloader --version "$version"
 done
+
+docker pull "docker.elastic.co/elastic-agent/elastic-agent:$(cat versions.json | jq -r '.versions[] | select (.branch == "main") | .version')-SNAPSHOT"
