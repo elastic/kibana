@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   EuiComboBox,
   EuiSplitPanel,
@@ -34,7 +34,11 @@ export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
   const { featureFlags, dashboard: dashboardService } = plugins;
   const { formData } = useRuleFormState();
   const dispatch = useRuleFormDispatch();
-  const dashboardsFormData = formData.dashboards;
+  const dashboardsFormData = useMemo(
+    () => formData.attachments?.dashboards ?? [],
+    [formData.attachments]
+  );
+  // const dashboardsFormData = formData.dashboards;
   const isLinkedDashboardsEnabled =
     (featureFlags && featureFlags.getBooleanValue('rca.linkedDashboards', false)) || false;
 
@@ -63,14 +67,19 @@ export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
   }, [dashboardsFormData, dashboardService]);
 
   const onChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    const attachments = {
+      ...formData.attachments,
+      dashboards: selectedOptions.map((selectedOption) => ({
+        id: selectedOption.value,
+      })),
+    };
+
     setSelectedDashboards(selectedOptions);
     dispatch({
       type: 'setRuleProperty',
       payload: {
-        property: 'dashboards',
-        value: selectedOptions.map((selectedOption) => ({
-          id: selectedOption.value,
-        })),
+        property: 'attachments',
+        value: attachments,
       },
     });
   };

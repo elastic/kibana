@@ -23,7 +23,7 @@ export const UPDATE_FIELDS: Array<keyof UpdateRuleBody> = [
   'params',
   'alertDelay',
   'flapping',
-  'dashboards',
+  'attachments',
 ];
 
 export const UPDATE_FIELDS_WITH_ACTIONS: Array<keyof UpdateRuleBody> = [
@@ -34,7 +34,7 @@ export const UPDATE_FIELDS_WITH_ACTIONS: Array<keyof UpdateRuleBody> = [
   'alertDelay',
   'actions',
   'flapping',
-  'dashboards',
+  'attachments',
 ];
 
 export async function updateRule({

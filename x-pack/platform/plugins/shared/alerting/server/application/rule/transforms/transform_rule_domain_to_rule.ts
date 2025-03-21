@@ -54,7 +54,7 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     alertDelay: ruleDomain.alertDelay,
     legacyId: ruleDomain.legacyId,
     flapping: ruleDomain.flapping,
-    dashboards: ruleDomain.dashboards,
+    attachments: ruleDomain.attachments,
   };
 
   if (isPublic) {

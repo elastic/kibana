@@ -85,7 +85,7 @@ export interface Rule<Params extends RuleParams = never> {
   alertDelay?: RuleSchemaType['alertDelay'];
   legacyId?: RuleSchemaType['legacyId'];
   flapping?: RuleSchemaType['flapping'];
-  dashboards?: RuleSchemaType['dashboards'];
+  attachments?: RuleSchemaType['attachments'];
 }
 
 export interface RuleDomain<Params extends RuleParams = never> {
@@ -125,5 +125,5 @@ export interface RuleDomain<Params extends RuleParams = never> {
   alertDelay?: RuleSchemaType['alertDelay'];
   legacyId?: RuleSchemaType['legacyId'];
   flapping?: RuleSchemaType['flapping'];
-  dashboards?: RuleDomainSchemaType['dashboards'];
+  attachments?: RuleDomainSchemaType['attachments'];
 }

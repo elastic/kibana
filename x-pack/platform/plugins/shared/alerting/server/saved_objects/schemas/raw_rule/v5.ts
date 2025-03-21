@@ -9,7 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { rawRuleSchema as rawRuleSchemaV4 } from './v4';
 
 export const dashboardsSchema = schema.arrayOf(schema.object({ id: schema.string() }));
+export const attachmentsSchema = schema.object({
+  dashboards: schema.maybe(dashboardsSchema),
+});
 
 export const rawRuleSchema = rawRuleSchemaV4.extends({
-  dashboards: schema.maybe(dashboardsSchema),
+  attachments: schema.maybe(attachmentsSchema),
 });

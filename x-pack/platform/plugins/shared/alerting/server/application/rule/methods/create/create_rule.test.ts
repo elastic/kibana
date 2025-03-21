@@ -4496,7 +4496,9 @@ describe('create()', () => {
 
     const data = getMockData({
       name: 'my rule name',
-      dashboards,
+      attachments: {
+        dashboards,
+      },
     });
 
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
@@ -4515,7 +4517,7 @@ describe('create()', () => {
         createdAt: now,
         updatedAt: now,
         actions: [],
-        dashboards,
+        attachments: { dashboards },
       },
       references: [
         {
@@ -4531,7 +4533,7 @@ describe('create()', () => {
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
       expect.objectContaining({
-        dashboards,
+        attachments: { dashboards },
       }),
       {
         id: 'mock-saved-object-id',
@@ -4545,6 +4547,6 @@ describe('create()', () => {
       }
     );
 
-    expect(result.dashboards).toEqual(dashboards);
+    expect(result.attachments?.dashboards).toEqual(dashboards);
   });
 });

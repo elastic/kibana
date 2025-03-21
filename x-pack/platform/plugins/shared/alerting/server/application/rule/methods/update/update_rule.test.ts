@@ -4248,7 +4248,7 @@ describe('update()', () => {
         },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        dashboards,
+        attachments: { dashboards },
       },
       references: [],
     });
@@ -4266,7 +4266,7 @@ describe('update()', () => {
         notifyWhen: 'onActiveAlert',
         actions: [],
         systemActions: [],
-        dashboards,
+        attachments: { dashboards },
       },
     });
 
@@ -4274,7 +4274,7 @@ describe('update()', () => {
       1,
       RULE_SAVED_OBJECT_TYPE,
       expect.objectContaining({
-        dashboards,
+        attachments: { dashboards },
       }),
       {
         id: '1',
@@ -4284,6 +4284,6 @@ describe('update()', () => {
       }
     );
 
-    expect(result.dashboards).toEqual(dashboards);
+    expect(result.attachments?.dashboards).toEqual(dashboards);
   });
 });

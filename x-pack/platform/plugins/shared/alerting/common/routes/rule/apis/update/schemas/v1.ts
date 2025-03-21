@@ -9,7 +9,7 @@ import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import { ruleParamsSchemaWithDefaultValueV1 } from '@kbn/response-ops-rule-params';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
-import { notifyWhenSchemaV1, alertDelaySchemaV1, dashboardsSchemaV1 } from '../../../response';
+import { notifyWhenSchemaV1, alertDelaySchemaV1, attachmentsSchemaV1 } from '../../../response';
 import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
 import { flappingSchemaV1 } from '../../../common';
 
@@ -163,7 +163,7 @@ export const updateBodySchema = schema.object({
   notify_when: schema.maybe(schema.nullable(notifyWhenSchemaV1)),
   alert_delay: schema.maybe(alertDelaySchemaV1),
   flapping: schema.maybe(schema.nullable(flappingSchemaV1)),
-  dashboards: schema.maybe(dashboardsSchemaV1),
+  attachments: schema.maybe(attachmentsSchemaV1),
 });
 
 export const updateParamsSchema = schema.object({
