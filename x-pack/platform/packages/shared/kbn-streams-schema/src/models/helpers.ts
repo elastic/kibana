@@ -15,8 +15,10 @@ import {
 } from './group';
 import {
   ingestStreamDefinitionSchema,
+  ingestUpsertRequestSchema,
   unwiredStreamDefinitionSchema,
   unwiredStreamUpsertRequestSchema,
+  wiredIngestUpsertRequestSchema,
   wiredStreamDefinitionSchema,
   wiredStreamUpsertRequestSchema,
 } from './ingest';
@@ -64,6 +66,11 @@ export const isUnwiredStreamUpsertRequest = createIsNarrowSchema(
 export const isWiredStreamUpsertRequest = createIsNarrowSchema(
   streamUpsertRequestSchema,
   wiredStreamUpsertRequestSchema
+);
+
+export const isWiredIngestUpsertRequest = createIsNarrowSchema(
+  ingestUpsertRequestSchema,
+  wiredIngestUpsertRequestSchema
 );
 
 export const isGroupStreamDefinitionBase = createIsNarrowSchema(

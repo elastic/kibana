@@ -8,9 +8,10 @@
 import { badData, badRequest } from '@hapi/boom';
 import {
   IngestGetResponse,
-  StreamUpsertRequest,
+  IngestStreamUpsertRequest,
   ingestUpsertRequestSchema,
   isUnwiredStreamDefinition,
+  isWiredIngestUpsertRequest,
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
@@ -85,23 +86,18 @@ const upsertIngestRoute = createServerRoute({
       request,
     });
     const name = params.path.name;
-    const existingStream = await streamsClient.getStream(name).catch(() => undefined);
 
-    if (
-      isWiredStreamDefinition({
-        name,
-        description: existingStream?.description ?? '',
-        ...params.body,
-      }) &&
-      !(await streamsClient.isStreamsEnabled())
-    ) {
+    if (isWiredIngestUpsertRequest(params.body) && !(await streamsClient.isStreamsEnabled())) {
       throw badData('Streams are not enabled for Wired streams.');
     }
 
-    const assets = await assetClient.getAssets({
-      entityId: name,
-      entityType: 'stream',
-    });
+    const [existingStream, assets] = await Promise.all([
+      streamsClient.getStream(name).catch(() => undefined),
+      assetClient.getAssets({
+        entityId: name,
+        entityType: 'stream',
+      }),
+    ]);
 
     const ingestUpsertRequest = params.body;
 
@@ -112,7 +108,7 @@ const upsertIngestRoute = createServerRoute({
     const upsertRequest = {
       dashboards,
       stream: { ...ingestUpsertRequest, description: existingStream?.description ?? '' },
-    } as StreamUpsertRequest;
+    } as IngestStreamUpsertRequest;
 
     return await streamsClient.upsertStream({
       request: upsertRequest,
