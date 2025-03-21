@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext) => {
   const logger = getService('log');
   const es = getService('es');
 
-  describe('Indices metadata task telemetry', function () {
+  describe('Security Telemetry - Indices metadata task telemetry', function () {
     let dsName: string;
     let policyName: string;
     let defaultPipeline: string;
