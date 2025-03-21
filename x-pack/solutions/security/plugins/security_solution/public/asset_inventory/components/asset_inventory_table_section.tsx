@@ -6,13 +6,12 @@
  */
 import React, { useState, useEffect } from 'react';
 import type { Filter } from '@kbn/es-query';
-import { AssetInventoryDataTable } from './asset_inventory_data_table';
+import type { AssetInventoryDataTableResult } from '../hooks/use_asset_inventory_data_table';
+import { DEFAULT_TABLE_SECTION_HEIGHT } from '../constants';
 import { AssetInventoryGrouping } from './grouping/asset_inventory_grouping';
 import { useAssetInventoryGrouping } from './grouping/use_asset_inventory_grouping';
-import type { AssetInventoryDataTableResult } from '../hooks/use_asset_inventory_data_table';
+import { AssetInventoryDataTable } from './asset_inventory_data_table';
 
-// TODO Move to constants?
-const DEFAULT_GROUPING_TABLE_HEIGHT = 512; // px
 const noop = () => {};
 
 interface TopLevelGroupProps {
@@ -172,7 +171,7 @@ const renderChildComponent = ({
         onChangePage: noop,
       };
 
-      return <AssetInventoryDataTable state={newState} height={DEFAULT_GROUPING_TABLE_HEIGHT} />;
+      return <AssetInventoryDataTable state={newState} height={DEFAULT_TABLE_SECTION_HEIGHT} />;
     };
   }
 

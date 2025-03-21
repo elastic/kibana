@@ -37,6 +37,8 @@ export const TEST_SUBJ_GROUPING_COUNTER = 'asset-inventory-grouping-counter';
 
 export const DOCS_URL = 'https://ela.st/asset-inventory';
 
+export const DEFAULT_TABLE_SECTION_HEIGHT = 512; // px
+
 export const ASSET_FIELDS = {
   ASSET_TYPE: 'entity.type',
   ASSET_CATEGORY: 'entity.category',
