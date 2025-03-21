@@ -370,7 +370,7 @@ Management::
 [[release-notes-8.16.5]]
 == {kib} 8.16.5
 
-The 8.16.5 release includes the following bug fixes.
+The 8.16.5 release includes the following enhancements and bug fixes.
 
 [float]
 [[enhancement-v8.16.5]]
