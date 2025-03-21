@@ -29,6 +29,9 @@ import {
   type EuiDataGridStyle,
   EuiProgress,
   EuiButtonIcon,
+  EuiSkeletonText,
+  EuiSkeletonRectangle,
+  EuiSkeletonLoading,
 } from '@elastic/eui';
 import { type AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -52,6 +55,7 @@ import { useFetchGridData } from '../hooks/use_fetch_grid_data';
 import type { AssetInventoryDataTableResult } from '../hooks/use_asset_inventory_data_table';
 
 import {
+  DEFAULT_TABLE_SECTION_HEIGHT,
   DEFAULT_VISIBLE_ROWS_PER_PAGE,
   MAX_ASSETS_TO_LOAD,
   ASSET_INVENTORY_TABLE_ID,
@@ -239,7 +243,7 @@ export const AssetInventoryDataTable = ({
     };
   }, [persistedSettings]);
 
-  const { dataView } = useDataViewContext();
+  const { dataView, dataViewIsLoading } = useDataViewContext();
 
   const {
     uiActions,
@@ -370,7 +374,7 @@ export const AssetInventoryDataTable = ({
   ];
 
   const loadingState =
-    isLoadingGridData || !dataView ? DataLoadingState.loading : DataLoadingState.loaded;
+    isLoadingGridData || dataViewIsLoading ? DataLoadingState.loading : DataLoadingState.loaded;
 
   return (
     <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
@@ -382,43 +386,63 @@ export const AssetInventoryDataTable = ({
         }}
       >
         <EuiProgress size="xs" color="accent" style={{ opacity: isFetchingGridData ? 1 : 0 }} />
-        {!dataView ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (
-          <EmptyState onResetFilters={onResetFilters} />
-        ) : (
-          <UnifiedDataTable
-            key={computeDataTableRendering.mode}
-            className={styles.gridStyle}
-            ariaLabelledBy={title}
-            columns={currentColumns}
-            dataView={dataView}
-            loadingState={loadingState}
-            onFilter={onAddFilter as DocViewFilterFn}
-            onResize={onResize}
-            onSetColumns={onSetColumns}
-            onSort={onSort}
-            rows={rows}
-            sampleSizeState={MAX_ASSETS_TO_LOAD}
-            expandedDoc={expandedDoc}
-            setExpandedDoc={onExpandDocClick}
-            renderDocumentView={EmptyComponent}
-            sort={sort}
-            rowsPerPageState={pageSize}
-            totalHits={totalHits}
-            services={services}
-            onUpdateRowsPerPage={onChangeItemsPerPage}
-            rowHeightState={0}
-            showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
-            showTimeCol={false}
-            settings={settings}
-            onFetchMoreRecords={loadMore}
-            rowAdditionalLeadingControls={externalControlColumns}
-            externalCustomRenderers={externalCustomRenderers}
-            externalAdditionalControls={externalAdditionalControls}
-            gridStyleOverride={gridStyle}
-            rowLineHeightOverride="24px"
-            dataGridDensityState={DataGridDensity.EXPANDED}
-          />
-        )}
+        <EuiSkeletonLoading
+          isLoading={loadingState === DataLoadingState.loading}
+          contentAriaLabel={i18n.translate(
+            'xpack.securitySolution.assetInventory.dataGrid.loadingDescription',
+            { defaultMessage: 'Asset Inventory data grid is loading' }
+          )}
+          loadingContent={
+            <>
+              <EuiSkeletonText lines={1} />
+              <EuiSkeletonRectangle
+                width="100%"
+                height={DEFAULT_TABLE_SECTION_HEIGHT - 32 * 2} // Additional controls and pagination heights
+                borderRadius="s"
+              />
+              <EuiSkeletonText lines={1} />
+            </>
+          }
+          loadedContent={
+            totalHits === 0 ? (
+              <EmptyState onResetFilters={onResetFilters} />
+            ) : (
+              <UnifiedDataTable
+                key={computeDataTableRendering.mode}
+                className={styles.gridStyle}
+                ariaLabelledBy={title}
+                columns={currentColumns}
+                dataView={dataView}
+                loadingState={loadingState}
+                onFilter={onAddFilter as DocViewFilterFn}
+                onResize={onResize}
+                onSetColumns={onSetColumns}
+                onSort={onSort}
+                rows={rows}
+                sampleSizeState={MAX_ASSETS_TO_LOAD}
+                expandedDoc={expandedDoc}
+                setExpandedDoc={onExpandDocClick}
+                renderDocumentView={EmptyComponent}
+                sort={sort}
+                rowsPerPageState={pageSize}
+                totalHits={totalHits}
+                services={services}
+                onUpdateRowsPerPage={onChangeItemsPerPage}
+                rowHeightState={0}
+                showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
+                showTimeCol={false}
+                settings={settings}
+                onFetchMoreRecords={loadMore}
+                rowAdditionalLeadingControls={externalControlColumns}
+                externalCustomRenderers={externalCustomRenderers}
+                externalAdditionalControls={externalAdditionalControls}
+                gridStyleOverride={gridStyle}
+                rowLineHeightOverride="24px"
+                dataGridDensityState={DataGridDensity.EXPANDED}
+              />
+            )
+          }
+        />
       </div>
     </CellActionsProvider>
   );
