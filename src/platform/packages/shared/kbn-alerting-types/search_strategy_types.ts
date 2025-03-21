@@ -14,6 +14,7 @@ import type {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from './alerts_types';
 
 export type RuleRegistrySearchRequest = IEsSearchRequest & {
@@ -24,6 +25,7 @@ export type RuleRegistrySearchRequest = IEsSearchRequest & {
   sort?: SortCombinations[];
   pagination?: RuleRegistrySearchRequestPagination;
   runtimeMappings?: MappingRuntimeFields;
+  aggs?: Record<string, estypes.AggregationsAggregationContainer>;
 };
 
 export interface RuleRegistrySearchRequestPagination {

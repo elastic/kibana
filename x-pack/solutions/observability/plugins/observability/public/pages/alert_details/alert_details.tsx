@@ -19,6 +19,8 @@ import {
   EuiTabbedContentTab,
   useEuiTheme,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlexGrid,
 } from '@elastic/eui';
 import {
   AlertStatus,
@@ -54,6 +56,8 @@ import { AlertOverview } from '../../components/alert_overview/alert_overview';
 import { CustomThresholdRule } from '../../components/custom_threshold/components/types';
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 import { AlertHistoryChart } from './components/alert_history';
+import { AlertsTriggeredAroundSameTime } from './components/alerts_triggered_around_same_time';
+import AlertsActiveAtSameTime from './components/alerts_active_at_the_same_time';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -230,6 +234,20 @@ export function AlertDetails() {
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="column" gutterSize="m">
           <SourceBar alert={alertDetail.formatted} sources={sources} />
+          <EuiFlexGrid columns={3} gutterSize="m">
+            <EuiFlexItem>
+              <AlertsTriggeredAroundSameTime
+                alert={alertDetail?.formatted}
+                onViewRelatedAlertsClick={() => handleSetTabId(RELATED_ALERTS_TAB_ID)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <AlertsActiveAtSameTime
+                alert={alertDetail?.formatted}
+                onViewRelatedAlertsClick={() => handleSetTabId(RELATED_ALERTS_TAB_ID)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGrid>
           <AlertDetailContextualInsights alert={alertDetail} />
           {rule && alertDetail.formatted && (
             <>

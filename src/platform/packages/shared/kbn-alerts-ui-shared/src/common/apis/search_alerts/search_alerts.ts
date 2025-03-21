@@ -23,6 +23,7 @@ import type {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 export interface SearchAlertsParams {
   // Dependencies
@@ -68,6 +69,14 @@ export interface SearchAlertsParams {
    * The page size to fetch
    */
   pageSize: number;
+  /**
+   * Aggregate alerts
+   */
+  aggs?: Record<string, estypes.AggregationsAggregationContainer>;
+  /**
+   * Force using the default context, otherwise use the AlertQueryContext
+   */
+  useDefaultContext?: boolean;
 }
 
 export interface SearchAlertsResult {
@@ -92,6 +101,7 @@ export const searchAlerts = ({
   runtimeMappings,
   pageIndex,
   pageSize,
+  aggs,
 }: SearchAlertsParams): Promise<SearchAlertsResult> =>
   lastValueFrom(
     data.search
@@ -104,6 +114,7 @@ export const searchAlerts = ({
           pagination: { pageIndex, pageSize },
           sort,
           runtimeMappings,
+          aggs,
         },
         {
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
