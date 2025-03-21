@@ -248,6 +248,11 @@ export const gridDataSchema = schema.object({
       meta: { description: 'The unique identifier of the panel' },
     })
   ),
+  sectionId: schema.maybe(
+    schema.string({
+      meta: { description: 'The unique ID of the section' },
+    })
+  ),
 });
 
 export const panelSchema = schema.object({
@@ -301,6 +306,15 @@ export const panelSchema = schema.object({
     })
   ),
 });
+
+export const sectionSchema = schema.arrayOf(
+  schema.object({
+    id: schema.string(),
+    order: schema.number({ min: 1 }), // order 0 is reserved for main dashboard content
+    title: schema.string(),
+    collapsed: schema.boolean(),
+  })
+);
 
 export const optionsSchema = schema.object({
   hidePanelTitles: schema.boolean({
@@ -398,6 +412,7 @@ export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
   // Dashboard Content
   controlGroupInput: schema.maybe(controlGroupInputSchema),
   panels: schema.arrayOf(panelSchema, { defaultValue: [] }),
+  sections: schema.maybe(sectionSchema),
   options: optionsSchema,
   version: schema.maybe(schema.number({ meta: { deprecated: true } })),
 });

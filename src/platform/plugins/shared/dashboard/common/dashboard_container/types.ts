@@ -11,6 +11,14 @@ import type { Reference } from '@kbn/content-management-utils';
 
 import type { GridData } from '../../server/content_management';
 
+// TODO: Only serialize this as an array; store as object
+export type DashboardSectionMap = Array<{
+  title: string;
+  collapsed: boolean;
+  order: number;
+  id?: string;
+}>;
+
 export interface DashboardPanelMap {
   [key: string]: DashboardPanelState;
 }

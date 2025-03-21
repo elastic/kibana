@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Observable, Subject } from 'rxjs';
+
 import type { Reference } from '@kbn/content-management-utils';
 import {
   ControlGroupApi,
@@ -19,6 +21,7 @@ import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesESQLVariables } from '@kbn/esql-types';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
+  CanAddNewSection,
   CanExpandPanels,
   HasRuntimeChildState,
   HasSaveNotification,
@@ -29,7 +32,6 @@ import {
   TracksOverlays,
 } from '@kbn/presentation-containers';
 import {
-  SerializedPanelState,
   EmbeddableAppContext,
   HasAppContext,
   HasExecutionContext,
@@ -38,22 +40,27 @@ import {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDescription,
-  PublishesTitle,
   PublishesSavedObjectId,
+  PublishesTitle,
   PublishesUnifiedSearch,
   PublishesViewMode,
   PublishesWritableViewMode,
   PublishingSubject,
+  SerializedPanelState,
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
-import { Observable, Subject } from 'rxjs';
+
 import { DashboardPanelMap, DashboardPanelState } from '../../common';
-import type { DashboardAttributes, DashboardOptions } from '../../server/content_management';
-import type { DashboardPanel } from '../../server/content_management';
+import { DashboardSectionMap } from '../../common/dashboard_container/types';
+import type {
+  DashboardAttributes,
+  DashboardOptions,
+  DashboardPanel,
+} from '../../server/content_management';
 import {
   LoadDashboardReturn,
   SaveDashboardReturn,
@@ -102,6 +109,7 @@ export interface DashboardState extends DashboardSettings {
   refreshInterval?: RefreshInterval;
   viewMode: ViewMode;
   panels: DashboardPanelMap;
+  sections?: DashboardSectionMap;
 
   /**
    * Temporary. Currently Dashboards are in charge of providing references to all of their children.
@@ -167,6 +175,7 @@ export interface UnsavedPanelState {
 }
 
 export type DashboardApi = CanExpandPanels &
+  CanAddNewSection &
   HasAppContext &
   HasExecutionContext &
   HasRuntimeChildState &
@@ -209,6 +218,7 @@ export type DashboardApi = CanExpandPanels &
     isManaged: boolean;
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
     panels$: PublishingSubject<DashboardPanelMap>;
+    sections$: PublishingSubject<DashboardSectionMap>;
     runInteractiveSave: () => Promise<SaveDashboardReturn | undefined>;
     runQuickSave: () => Promise<void>;
     scrollToPanel: (panelRef: HTMLDivElement) => void;
@@ -218,6 +228,7 @@ export type DashboardApi = CanExpandPanels &
     setFullScreenMode: (fullScreenMode: boolean) => void;
     setHighlightPanelId: (id: string | undefined) => void;
     setPanels: (panels: DashboardPanelMap) => void;
+    setSections: (sections: DashboardSectionMap) => void;
     setQuery: (query?: Query | undefined) => void;
     setScrollToPanelId: (id: string | undefined) => void;
     setSettings: (settings: DashboardSettings) => void;

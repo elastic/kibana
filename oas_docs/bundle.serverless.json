@@ -7268,6 +7268,10 @@
                                       "i": {
                                         "type": "string"
                                       },
+                                      "sectionId": {
+                                        "description": "The unique ID of the section",
+                                        "type": "string"
+                                      },
                                       "w": {
                                         "default": 24,
                                         "description": "The width of the panel in grid units",
@@ -7383,6 +7387,34 @@
                                 "value"
                               ],
                               "type": "object"
+                            },
+                            "sections": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "collapsed": {
+                                    "type": "boolean"
+                                  },
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "order": {
+                                    "minimum": 1,
+                                    "type": "number"
+                                  },
+                                  "title": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "order",
+                                  "title",
+                                  "collapsed"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
                             },
                             "timeFrom": {
                               "description": "An ISO string indicating when to restore time from",
@@ -7923,6 +7955,10 @@
                                   "description": "The unique identifier of the panel",
                                   "type": "string"
                                 },
+                                "sectionId": {
+                                  "description": "The unique ID of the section",
+                                  "type": "string"
+                                },
                                 "w": {
                                   "default": 24,
                                   "description": "The width of the panel in grid units",
@@ -8037,6 +8073,34 @@
                           "value"
                         ],
                         "type": "object"
+                      },
+                      "sections": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "collapsed": {
+                              "type": "boolean"
+                            },
+                            "id": {
+                              "type": "string"
+                            },
+                            "order": {
+                              "minimum": 1,
+                              "type": "number"
+                            },
+                            "title": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "order",
+                            "title",
+                            "collapsed"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
                       },
                       "timeFrom": {
                         "description": "An ISO string indicating when to restore time from",
@@ -8460,6 +8524,10 @@
                                       "i": {
                                         "type": "string"
                                       },
+                                      "sectionId": {
+                                        "description": "The unique ID of the section",
+                                        "type": "string"
+                                      },
                                       "w": {
                                         "default": 24,
                                         "description": "The width of the panel in grid units",
@@ -8575,6 +8643,34 @@
                                 "value"
                               ],
                               "type": "object"
+                            },
+                            "sections": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "collapsed": {
+                                    "type": "boolean"
+                                  },
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "order": {
+                                    "minimum": 1,
+                                    "type": "number"
+                                  },
+                                  "title": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "order",
+                                  "title",
+                                  "collapsed"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
                             },
                             "timeFrom": {
                               "description": "An ISO string indicating when to restore time from",
@@ -9087,6 +9183,10 @@
                                   "description": "The unique identifier of the panel",
                                   "type": "string"
                                 },
+                                "sectionId": {
+                                  "description": "The unique ID of the section",
+                                  "type": "string"
+                                },
                                 "w": {
                                   "default": 24,
                                   "description": "The width of the panel in grid units",
@@ -9201,6 +9301,34 @@
                           "value"
                         ],
                         "type": "object"
+                      },
+                      "sections": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "collapsed": {
+                              "type": "boolean"
+                            },
+                            "id": {
+                              "type": "string"
+                            },
+                            "order": {
+                              "minimum": 1,
+                              "type": "number"
+                            },
+                            "title": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "order",
+                            "title",
+                            "collapsed"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
                       },
                       "timeFrom": {
                         "description": "An ISO string indicating when to restore time from",
@@ -9618,6 +9746,10 @@
                                       "i": {
                                         "type": "string"
                                       },
+                                      "sectionId": {
+                                        "description": "The unique ID of the section",
+                                        "type": "string"
+                                      },
                                       "w": {
                                         "default": 24,
                                         "description": "The width of the panel in grid units",
@@ -9733,6 +9865,34 @@
                                 "value"
                               ],
                               "type": "object"
+                            },
+                            "sections": {
+                              "items": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "collapsed": {
+                                    "type": "boolean"
+                                  },
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "order": {
+                                    "minimum": 1,
+                                    "type": "number"
+                                  },
+                                  "title": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "order",
+                                  "title",
+                                  "collapsed"
+                                ],
+                                "type": "object"
+                              },
+                              "type": "array"
                             },
                             "timeFrom": {
                               "description": "An ISO string indicating when to restore time from",

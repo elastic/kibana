@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, debounceTime, distinctUntilChanged, map, of, switchMap } from 'rxjs';
-import deepEqual from 'fast-deep-equal';
+import { combineLatest, debounceTime, map, of, switchMap } from 'rxjs';
 import { apiPublishesUnsavedChanges, PublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import { PresentationContainer } from '../presentation_container';
 
@@ -20,7 +19,6 @@ export const DEBOUNCE_TIME = 100;
 export function childrenUnsavedChanges$(children$: PresentationContainer['children$']) {
   return children$.pipe(
     map((children) => Object.keys(children)),
-    distinctUntilChanged(deepEqual),
 
     // children may change, so make sure we subscribe/unsubscribe with switchMap
     switchMap((newChildIds: string[]) => {

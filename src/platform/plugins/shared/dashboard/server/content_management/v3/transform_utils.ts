@@ -156,6 +156,7 @@ export function dashboardAttributesOut(
     kibanaSavedObjectMeta,
     optionsJSON,
     panelsJSON,
+    sections,
     refreshInterval,
     timeFrom,
     timeRestore,
@@ -172,6 +173,7 @@ export function dashboardAttributesOut(
     }),
     ...(optionsJSON && { options: optionsOut(optionsJSON) }),
     ...(panelsJSON && { panels: panelsOut(panelsJSON) }),
+    sections,
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
