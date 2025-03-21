@@ -830,7 +830,7 @@ export function defineRoutes(
           const currentSpaceId = spaces ? spaces.spacesService.getSpaceId(req) : 'default';
           spaceIds = [currentSpaceId];
         }
-        const result = await alerting.scheduleAlertDeletion(spaceIds);
+        const result = await alerting.scheduleAlertDeletion(req, spaceIds);
         return res.ok({
           body: { result },
         });

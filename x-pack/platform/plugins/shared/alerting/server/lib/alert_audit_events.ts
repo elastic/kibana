@@ -15,6 +15,7 @@ export enum AlertAuditAction {
   UPDATE = 'alert_update',
   FIND = 'alert_find',
   DELETE = 'alert_delete',
+  SCHEDULE_DELETE = 'alert_schedule_delete',
 }
 
 export const operationAlertAuditActionMap = {
@@ -31,6 +32,11 @@ const eventVerbs: Record<AlertAuditAction, VerbsTuple> = {
   alert_update: ['update', 'updating', 'updated'],
   alert_find: ['access', 'accessing', 'accessed'],
   alert_delete: ['delete', 'deleting', 'deleted'],
+  alert_schedule_delete: [
+    'schedule deletion task for',
+    'scheduling deletion task for',
+    'scheduled deletion task for',
+  ],
 };
 
 const eventTypes: Record<AlertAuditAction, ArrayElement<EcsEvent['type']>> = {
@@ -38,6 +44,7 @@ const eventTypes: Record<AlertAuditAction, ArrayElement<EcsEvent['type']>> = {
   alert_update: 'change',
   alert_find: 'access',
   alert_delete: 'deletion',
+  alert_schedule_delete: 'deletion',
 };
 
 export interface AlertAuditEventParams {
@@ -46,6 +53,7 @@ export interface AlertAuditEventParams {
   outcome?: EcsEvent['outcome'];
   id?: string;
   error?: Error;
+  bulk?: boolean;
 }
 
 export function alertAuditEvent({
@@ -54,8 +62,14 @@ export function alertAuditEvent({
   outcome,
   error,
   actor = 'User',
+  bulk = false,
 }: AlertAuditEventParams): AuditEvent {
-  const doc = id ? `alert [id=${id}]` : 'an alert';
+  let doc: string = '';
+  if (id) {
+    doc = `alert [id=${id}]`;
+  } else {
+    doc = bulk ? 'alerts' : 'an alert';
+  }
   const [present, progressive, past] = eventVerbs[action];
   const message = error
     ? `Failed attempt to ${present} ${doc}`

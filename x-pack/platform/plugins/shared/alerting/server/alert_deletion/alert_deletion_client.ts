@@ -6,10 +6,11 @@
  */
 
 import type {
-  AuditLogger,
   ElasticsearchClient,
   ISavedObjectsRepository,
+  KibanaRequest,
   Logger,
+  SecurityServiceStart,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES, SavedObjectsUtils } from '@kbn/core/server';
 import type {
@@ -28,8 +29,14 @@ import type {
   SortResults,
 } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { GetAlertIndicesAlias } from '../lib';
-import { AlertAuditAction, alertAuditSystemEvent, spaceIdToNamespace } from '../lib';
+import {
+  AlertAuditAction,
+  alertAuditEvent,
+  alertAuditSystemEvent,
+  spaceIdToNamespace,
+} from '../lib';
 import type {
   RuleTypeRegistry,
   RulesSettings,
@@ -53,13 +60,14 @@ const allowedAppCategories = [
   DEFAULT_APP_CATEGORIES.observability.id,
 ];
 interface ConstructorOpts {
-  auditLogger?: AuditLogger;
+  auditService?: AuditServiceSetup;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   eventLogger: IEventLogger;
   getAlertIndicesAlias: GetAlertIndicesAlias;
   internalSavedObjectsRepositoryPromise: Promise<ISavedObjectsRepository>;
   logger: Logger;
   ruleTypeRegistry: RuleTypeRegistry;
+  securityService: Promise<SecurityServiceStart>;
   spacesStartPromise: Promise<SpacesPluginStart | undefined>;
   taskManagerSetup: TaskManagerSetupContract;
   taskManagerStartPromise: Promise<TaskManagerStartContract>;
@@ -72,24 +80,26 @@ interface AlertFilteredSource {
 }
 
 export class AlertDeletionClient {
-  private auditLogger?: AuditLogger;
   private logger: Logger;
   private eventLogger: IEventLogger;
   private elasticsearchClientPromise: Promise<ElasticsearchClient>;
+  private readonly auditService?: AuditServiceSetup;
   private readonly getAlertIndicesAlias: GetAlertIndicesAlias;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private readonly internalSavedObjectsRepositoryPromise: Promise<ISavedObjectsRepository>;
+  private readonly securityService: Promise<SecurityServiceStart>;
   private readonly spacesPluginStartPromise: Promise<SpacesPluginStart | undefined>;
   private readonly taskManagerStartPromise: Promise<TaskManagerStartContract>;
 
   constructor(opts: ConstructorOpts) {
-    this.auditLogger = opts.auditLogger;
+    this.auditService = opts.auditService;
     this.elasticsearchClientPromise = opts.elasticsearchClientPromise;
     this.eventLogger = opts.eventLogger;
     this.getAlertIndicesAlias = opts.getAlertIndicesAlias;
     this.ruleTypeRegistry = opts.ruleTypeRegistry;
     this.internalSavedObjectsRepositoryPromise = opts.internalSavedObjectsRepositoryPromise;
     this.logger = opts.logger.get(ALERT_DELETION_TASK_TYPE);
+    this.securityService = opts.securityService;
     this.spacesPluginStartPromise = opts.spacesStartPromise;
     this.taskManagerStartPromise = opts.taskManagerStartPromise;
 
@@ -114,7 +124,7 @@ export class AlertDeletionClient {
     });
   }
 
-  public async scheduleTask(spaceIds: string[]) {
+  public async scheduleTask(request: KibanaRequest, spaceIds: string[]) {
     try {
       const taskManager = await this.taskManagerStartPromise;
       await taskManager.ensureScheduled({
@@ -124,8 +134,27 @@ export class AlertDeletionClient {
         state: {},
         params: { spaceIds },
       });
+
+      const securityService = await this.securityService;
+      const user = securityService.authc.getCurrentUser(request);
+      this.auditService?.asScoped(request)?.log(
+        alertAuditEvent({
+          action: AlertAuditAction.SCHEDULE_DELETE,
+          outcome: 'success',
+          actor: user?.username,
+          bulk: true,
+        })
+      );
     } catch (err) {
       this.logger.error(`Error scheduling alert deletion task: ${err.message}`);
+      this.auditService?.asScoped(request)?.log(
+        alertAuditEvent({
+          action: AlertAuditAction.SCHEDULE_DELETE,
+          outcome: 'failure',
+          bulk: true,
+          error: err,
+        })
+      );
       throw err;
     }
   }
@@ -410,7 +439,7 @@ export class AlertDeletionClient {
 
               alertUuidsToClear.push(alertUuid!);
 
-              this.auditLogger?.log(
+              this.auditService?.withoutRequest.log(
                 alertAuditSystemEvent({
                   action: AlertAuditAction.DELETE,
                   id: alertUuid,
@@ -418,7 +447,7 @@ export class AlertDeletionClient {
                 })
               );
             } else {
-              this.auditLogger?.log(
+              this.auditService?.withoutRequest.log(
                 alertAuditSystemEvent({
                   action: AlertAuditAction.DELETE,
                   id: alertUuid,

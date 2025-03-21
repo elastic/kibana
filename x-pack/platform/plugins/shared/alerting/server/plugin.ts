@@ -181,7 +181,7 @@ export interface AlertingServerStart {
     request: KibanaRequest
   ): Promise<PublicMethodsOf<AlertingAuthorization>>;
   getFrameworkHealth: () => Promise<AlertsHealth>;
-  scheduleAlertDeletion(spaceIds: string[]): Promise<void>;
+  scheduleAlertDeletion(req: KibanaRequest, spaceIds: string[]): Promise<void>;
   previewAlertDeletion(
     settings: RulesSettingsAlertDeletionProperties,
     spaceId: string
@@ -353,7 +353,7 @@ export class AlertingPlugin {
     this.ruleTypeRegistry = ruleTypeRegistry;
 
     this.alertDeletionClient = new AlertDeletionClient({
-      auditLogger: plugins.security?.audit.withoutRequest,
+      auditService: plugins.security?.audit,
       elasticsearchClientPromise: core
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
@@ -366,6 +366,7 @@ export class AlertingPlugin {
         ),
       logger: this.logger,
       ruleTypeRegistry: this.ruleTypeRegistry!,
+      securityService: core.getStartServices().then(([{ security }]) => security),
       spacesStartPromise: core
         .getStartServices()
         .then(([_, alertingStart]) => alertingStart.spaces),
@@ -683,8 +684,8 @@ export class AlertingPlugin {
         await getHealth(core.savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])),
 
       // remove when we have real routes
-      scheduleAlertDeletion: async (spaceIds: string[]) =>
-        await this.alertDeletionClient!.scheduleTask(spaceIds),
+      scheduleAlertDeletion: async (req: KibanaRequest, spaceIds: string[]) =>
+        await this.alertDeletionClient!.scheduleTask(req, spaceIds),
       previewAlertDeletion: async (
         settings: RulesSettingsAlertDeletionProperties,
         spaceId: string

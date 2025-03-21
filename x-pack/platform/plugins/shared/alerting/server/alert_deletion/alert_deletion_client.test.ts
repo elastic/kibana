@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { AlertDeletionClient } from './alert_deletion_client';
@@ -15,21 +15,33 @@ import { elasticsearchServiceMock, savedObjectsRepositoryMock } from '@kbn/core/
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../types';
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, SPACE_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
-import type { AuditLogger } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
-const auditLogger: AuditLogger = {
-  enabled: true,
-  log: jest.fn(),
-  includeSavedObjectNames: false,
-};
+const fakeRequest = {
+  headers: {},
+  getBasePath: () => '',
+  path: '/',
+  route: { settings: {} },
+  url: {
+    href: '/',
+  },
+  raw: {
+    req: {
+      url: '/',
+    },
+  },
+  getSavedObjectsClient: jest.fn(),
+} as unknown as KibanaRequest;
 
+const auditService = securityServiceMock.createStart().audit;
 const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const eventLogger = eventLoggerMock.create();
 const getAlertIndicesAliasMock = jest.fn();
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
+const securityServiceStart = securityServiceMock.createStart();
 const spacesStart = spacesMock.createStart();
 const taskManagerSetup = taskManagerMock.createSetup();
 const taskManagerStart = taskManagerMock.createStart();
@@ -214,14 +226,17 @@ describe('AlertDeletionClient', () => {
     jest.resetAllMocks();
     logger.get.mockImplementation(() => logger);
     getAlertIndicesAliasMock.mockReturnValue(['index1', 'index2']);
+    // @ts-ignore - incomplete return type
+    securityServiceStart.authc.getCurrentUser.mockReturnValue({ username: 'test_user' });
     alertDeletionClient = new AlertDeletionClient({
-      auditLogger,
+      auditService,
       elasticsearchClientPromise: Promise.resolve(esClient),
       eventLogger,
       getAlertIndicesAlias: getAlertIndicesAliasMock,
       internalSavedObjectsRepositoryPromise: Promise.resolve(internalSavedObjectsRepository),
       logger,
       ruleTypeRegistry,
+      securityService: Promise.resolve(securityServiceStart),
       spacesStartPromise: Promise.resolve(spacesStart),
       taskManagerSetup,
       taskManagerStartPromise: Promise.resolve(taskManagerStart),
@@ -288,7 +303,10 @@ describe('AlertDeletionClient', () => {
 
   describe('scheduleTask', () => {
     test('should schedule ad hoc task with given space ID', async () => {
-      await alertDeletionClient.scheduleTask(['space-1', 'default']);
+      const auditLog = auditService.withoutRequest;
+      auditService.asScoped = jest.fn(() => auditLog);
+
+      await alertDeletionClient.scheduleTask(fakeRequest, ['space-1', 'default']);
       expect(taskManagerStart.ensureScheduled).toHaveBeenCalledWith({
         id: `Alerting-alert-deletion`,
         taskType: 'alert-deletion',
@@ -296,16 +314,40 @@ describe('AlertDeletionClient', () => {
         state: {},
         scope: ['alerting'],
       });
+      expect(auditLog.log).toHaveBeenCalledWith({
+        message: `test_user has scheduled deletion task for alerts`,
+        event: {
+          action: 'alert_schedule_delete',
+          category: ['database'],
+          outcome: 'success',
+          type: ['deletion'],
+        },
+      });
     });
 
     test('should log and re-throw error if error scheduling task', async () => {
+      const auditLog = auditService.withoutRequest;
+      auditService.asScoped = jest.fn(() => auditLog);
       taskManagerStart.ensureScheduled.mockRejectedValueOnce(new Error('Failed to schedule task'));
       await expect(
-        alertDeletionClient.scheduleTask(['space-1'])
+        alertDeletionClient.scheduleTask(fakeRequest, ['space-1'])
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failed to schedule task"`);
       expect(logger.error).toHaveBeenCalledWith(
         'Error scheduling alert deletion task: Failed to schedule task'
       );
+      expect(auditLog.log).toHaveBeenCalledWith({
+        message: `Failed attempt to schedule deletion task for alerts`,
+        event: {
+          action: 'alert_schedule_delete',
+          category: ['database'],
+          outcome: 'failure',
+          type: ['deletion'],
+        },
+        error: {
+          code: 'Error',
+          message: 'Failed to schedule task',
+        },
+      });
     });
   });
 
@@ -664,9 +706,9 @@ describe('AlertDeletionClient', () => {
         { signal: expect.any(AbortSignal) }
       );
 
-      expect(auditLogger.log).toHaveBeenCalledTimes(8);
+      expect(auditService.withoutRequest.log).toHaveBeenCalledTimes(8);
       ['abc', 'def', 'xyz', 'rst', 'mno', 'pqr', 'ghi', 'jkl'].forEach((id) => {
-        expect(auditLogger.log).toHaveBeenCalledWith({
+        expect(auditService.withoutRequest.log).toHaveBeenCalledWith({
           message: `System has deleted alert [id=${id}]`,
           event: {
             action: 'alert_delete',
@@ -906,9 +948,9 @@ describe('AlertDeletionClient', () => {
         { signal: expect.any(AbortSignal) }
       );
 
-      expect(auditLogger.log).toHaveBeenCalledTimes(5);
+      expect(auditService.withoutRequest.log).toHaveBeenCalledTimes(5);
       ['abc', 'def', 'ghi', 'jkl', 'mno'].forEach((id) => {
-        expect(auditLogger.log).toHaveBeenCalledWith({
+        expect(auditService.withoutRequest.log).toHaveBeenCalledWith({
           message: `System has deleted alert [id=${id}]`,
           event: {
             action: 'alert_delete',
@@ -1196,9 +1238,9 @@ describe('AlertDeletionClient', () => {
         expect(taskManagerStart.bulkUpdateState).not.toHaveBeenCalled();
         expect(esClient.closePointInTime).toHaveBeenCalledTimes(2);
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(2);
+        expect(auditService.withoutRequest.log).toHaveBeenCalledTimes(2);
         ['ghi', 'jkl'].forEach((id) => {
-          expect(auditLogger.log).toHaveBeenCalledWith({
+          expect(auditService.withoutRequest.log).toHaveBeenCalledWith({
             message: `System has deleted alert [id=${id}]`,
             event: {
               action: 'alert_delete',
@@ -1311,8 +1353,8 @@ describe('AlertDeletionClient', () => {
           { signal: expect.any(AbortSignal) }
         );
 
-        expect(auditLogger.log).toHaveBeenCalledTimes(2);
-        expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        expect(auditService.withoutRequest.log).toHaveBeenCalledTimes(2);
+        expect(auditService.withoutRequest.log).toHaveBeenNthCalledWith(1, {
           message: `System has deleted alert [id=abc]`,
           event: {
             action: 'alert_delete',
@@ -1321,7 +1363,7 @@ describe('AlertDeletionClient', () => {
             type: ['deletion'],
           },
         });
-        expect(auditLogger.log).toHaveBeenNthCalledWith(2, {
+        expect(auditService.withoutRequest.log).toHaveBeenNthCalledWith(2, {
           message: `Failed attempt to delete alert [id=def]`,
           event: {
             action: 'alert_delete',
