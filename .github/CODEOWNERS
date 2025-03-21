@@ -2230,6 +2230,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 
 # AI4DSOC in Security Solution
 /x-pack/test/security_solution_cypress/cypress/e2e/ai4dsoc @elastic/security-engineering-productivity
+/x-pack/test/security_solution_api_integration/test_suites/ai4dsoc @elastic/security-engineering-productivity
 
 # Security Solution cross teams ownership
 /x-pack/test/security_solution_cypress/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting
@@ -2299,6 +2300,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 
 /x-pack/solutions/security/plugins/security_solution/common/timelines @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/alerts_viewer @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/detections/components/alert_summary @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/timeline_action @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/event_details @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/events_viewer @elastic/security-threat-hunting-investigations
@@ -2318,6 +2320,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/solutions/security/plugins/security_solution/public/flyout/rule_details @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/investigations @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/configurations/security_solution_detections @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/detections/pages/detections/alert_summary @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/pages/detection_engine/detection_engine.tsx @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_resolve_conflict.tsx @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop @elastic/security-threat-hunting-investigations
