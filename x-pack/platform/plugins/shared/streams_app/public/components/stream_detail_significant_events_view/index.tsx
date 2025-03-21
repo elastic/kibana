@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
@@ -65,6 +66,16 @@ export function StreamDetailSignificantEventsView({
       name: 'Occurrences',
       render: (_, record: SignificantEventsResponse) => (
         <SignificantEventsHistogramChart occurrences={record.occurrences} />
+      ),
+    },
+    {
+      field: 'change_points',
+      name: 'Change points',
+      render: (_, record: SignificantEventsResponse) => (
+        <EuiBadge>
+          {Object.keys(record.change_points.type)[0]} -{' '}
+          {Object.values(record.change_points.type)[0]?.p_value ?? 0}
+        </EuiBadge>
       ),
     },
   ];

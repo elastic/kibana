@@ -86,6 +86,11 @@ export const readSignificantEventsRoute = createServerRoute({
                 },
               },
             },
+            change_points: {
+              change_point: {
+                buckets_path: 'occurrences>_count',
+              },
+            },
           },
         },
       ];
@@ -93,7 +98,7 @@ export const readSignificantEventsRoute = createServerRoute({
 
     const response = await scopedClusterClient.asCurrentUser.msearch<
       unknown,
-      { occurrences: AggregationsDateHistogramAggregate }
+      { occurrences: AggregationsDateHistogramAggregate; change_points: unknown }
     >({ searches: searchRequests });
 
     const significantEvents = response.responses.map((queryResponse, queryIndex) => {
@@ -117,9 +122,11 @@ export const readSignificantEventsRoute = createServerRoute({
             date: bucket.key_as_string,
             count: bucket.doc_count,
           })),
+        change_points: queryResponse?.aggregations?.change_points,
       };
     });
 
+    // @ts-ignore
     return significantEvents;
   },
 });

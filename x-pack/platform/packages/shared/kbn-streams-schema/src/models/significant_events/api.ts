@@ -10,9 +10,20 @@ import { StreamQueryKql } from '../base/api';
 /**
  * SignificantEvents Get Response
  */
+type ChangePointsType =
+  | 'dip'
+  | 'distribution_change'
+  | 'non_stationary'
+  | 'spike'
+  | 'stationary'
+  | 'step_change'
+  | 'trend_change';
 
 type SignificantEventsResponse = StreamQueryKql & {
   occurrences: Array<{ date: string; count: number }>;
+  change_points: {
+    type: Record<ChangePointsType, { p_value: number; change_point: number }>;
+  };
 };
 
 type SignificantEventsGetResponse = SignificantEventsResponse[];
