@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.16.6>>
 * <<release-notes-8.16.5>>
 * <<release-notes-8.16.4>>
 * <<release-notes-8.16.3>>
@@ -85,10 +86,40 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+[[release-notes-8.16.6]]
+== {kib} 8.16.6
+
+The 8.16.6 release includes the following enhancements and fixes.
+
+[float]
+[[enhancement-v8.16.6]]
+=== Enhancements
+Elastic Observability Solution::
+* Splits up the top dependencies API for improved speed and response size ({kibana-pull}211441[#211441]).
+
+[float]
+[[fixes-v8.16.6]]
+=== Fixes
+Alerting::
+* Fixes a bug with ServiceNow where users could not create the connector from the UI form using OAuth ({kibana-pull}213658[#213658]).
+Data ingestion and Fleet::
+* Fixes an issue with the Agent binary download field being blank when a policy uses the default download source ({kibana-pull}214360[#214360]).
+Elastic Observability Solution::
+* Passes telemetry.sdk* data when loading a dashboard ({kibana-pull}214356[#214356]).
+* Fixes missing summary data in error sample ({kibana-pull}213430[#213430]).
+* Fixes service maps not building paths when the trace's root transaction has a `parent.id` ({kibana-pull}212998[#212998]).
+* Fixes span links with OTel data ({kibana-pull}212806[#212806]).
+Elastic Security solution::
+For the Elastic Security 8.16.6 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana security::
+* Fixes structured log flow to handle multiple types of structured logs ({kibana-pull}212611[#212611]).
+Management::
+* Fixes error when opening a rollup data view in Discover ({kibana-pull}214656[#214656]).
+
 [[release-notes-8.16.5]]
 == {kib} 8.16.5
 
-The 8.16.5 release includes the following bug fixes.
+The 8.16.5 release includes the following enhancements and bug fixes.
 
 [float]
 [[enhancement-v8.16.5]]
