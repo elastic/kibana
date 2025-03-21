@@ -15,7 +15,7 @@ import type { SpacesUsage } from '../types';
  * @param {Array<SavedObjectsFindResult<RuleSearchResult>>} ruleResults - An array of saved object results containing rule search results.
  *
  * @returns {SpacesUsage}
- * - `total`: The total number of unique spaces.
+ * - `total`: The total number spaces rules belong to.
  * - `rules_in_spaces`: An array where each value represents the number of rules in a specific space.
  */
 export const getSpacesUsage = (
