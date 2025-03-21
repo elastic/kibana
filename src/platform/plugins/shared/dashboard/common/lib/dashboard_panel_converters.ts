@@ -22,13 +22,11 @@ import {
 export const convertPanelsArrayToPanelMap = (panels?: DashboardPanel[]): DashboardPanelMap => {
   const panelsMap: DashboardPanelMap = {};
   panels?.forEach((panel, idx) => {
-    const panelIndex = panel.panelIndex ?? String(idx);
     panelsMap![panel.panelIndex ?? String(idx)] = {
       type: panel.type,
       gridData: panel.gridData,
       panelRefName: panel.panelRefName,
       explicitInput: {
-        id: panelIndex,
         ...(panel.id !== undefined && { savedObjectId: panel.id }),
         ...(panel.title !== undefined && { title: panel.title }),
         ...panel.panelConfig,
