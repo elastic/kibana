@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import type { EuiButtonEmptyProps, EuiFieldSearchProps } from '@elastic/eui';
+import type { EuiFieldSearchProps } from '@elastic/eui';
 import {
   EuiSelectable,
   type EuiSelectableProps,
@@ -430,8 +430,8 @@ export const PolicySelector = memo<PolicySelectorProps>(
       setView((prevState) => (prevState === 'selected-list' ? 'full-list' : 'selected-list'));
     }, []);
 
-    const onSelectUnselectAllClickHandler: Required<EuiButtonEmptyProps>['onClick'] = useCallback(
-      (ev) => {
+    const onSelectUnselectAllClickHandler = useCallback(
+      (ev: React.MouseEvent<HTMLButtonElement>) => {
         // TODO:PT should we also apply this action to the custom item (additionalItems)?
 
         const isSelectAll = ev.currentTarget.value === 'selectAll';
