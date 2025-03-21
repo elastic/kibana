@@ -35,7 +35,7 @@ export function getDockerComposeYaml({
               'CMD',
               'python',
               '-c',
-              "import socket; s=socket.socket(); s.connect(('localhost',8000)); s.close()",
+              "import socket; s=socket.socket(); s.connect(('localhost',${config.eisModelServer.port})); s.close()",
             ]
           interval: 1s
           timeout: 2s
@@ -68,7 +68,7 @@ export function getDockerComposeYaml({
         healthcheck:
           test: [
             'CMD-SHELL',
-            'echo ''package main; import ("net/http";"os");func main(){resp,err:=http.Get("http://localhost:8051/health");if err!=nil||resp.StatusCode!=200{os.Exit(1)}}'' > /tmp/health.go; go run /tmp/health.go',
+            'echo ''package main; import ("net/http";"os");func main(){resp,err:=http.Get("http://localhost:${config.eisGateway.ports[1]}/health");if err!=nil||resp.StatusCode!=200{os.Exit(1)}}'' > /tmp/health.go; go run /tmp/health.go',
           ]
           interval: 1s
           timeout: 2s
@@ -77,7 +77,7 @@ export function getDockerComposeYaml({
       gateway-proxy:
         image: nginx:alpine
         ports:
-          - "${config.eisGateway.ports[0]}:80"  # Elasticsearch will hit this port via HTTP
+          - "${config.eisGateway.ports[0]}:80"
         volumes:
           - ${config.nginx.file}:/etc/nginx/nginx.conf:ro
         depends_on:
