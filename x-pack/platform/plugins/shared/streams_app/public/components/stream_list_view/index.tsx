@@ -53,7 +53,7 @@ export function StreamListView() {
           }
         />
       </EuiFlexItem>
-      <StreamsAppPageBody>
+      <StreamsAppPageBody background>
         <EuiFlexGroup direction="column">
           <EuiFlexItem grow={false}>
             <EuiSearchBar

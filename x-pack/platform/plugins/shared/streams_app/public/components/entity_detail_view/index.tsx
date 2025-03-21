@@ -31,6 +31,7 @@ export interface EntityViewTab {
   name: string;
   label: string;
   content: React.ReactElement;
+  background: boolean;
 }
 
 export function EntityDetailViewWithoutParams({
@@ -76,6 +77,7 @@ export function EntityDetailViewWithoutParams({
           }),
           label: tab.label,
           content: tab.content,
+          background: tab.background,
         },
       ];
     })
@@ -127,7 +129,9 @@ export function EntityDetailViewWithoutParams({
           />
         </StreamsAppPageHeader>
       </EuiFlexItem>
-      <StreamsAppPageBody>{selectedTabObject.content}</StreamsAppPageBody>
+      <StreamsAppPageBody background={selectedTabObject.background}>
+        {selectedTabObject.content}
+      </StreamsAppPageBody>
     </EuiFlexGroup>
   );
 }
