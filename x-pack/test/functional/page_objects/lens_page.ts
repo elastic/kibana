@@ -397,8 +397,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       reverse = false,
       metaKey?: 'shift' | 'alt' | 'ctrl'
     ) {
-      const field = await find.byCssSelector(
-        `[data-test-subj="lnsFieldListPanelField-${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
+      const field = await find.byCssSelector( 
+        `[data-attr-field="${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
       );
       await field.focus();
       await retry.try(async () => {
@@ -433,7 +433,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       metaKey?: 'shift' | 'alt' | 'ctrl'
     ) {
       const elements = await find.allByCssSelector(
-        `[data-test-subj="${group}"]  [data-test-subj="lnsDragDrop-keyboardHandler"]`
+        `[data-test-subj="${group}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
       );
       const el = elements[index];
       await el.focus();
