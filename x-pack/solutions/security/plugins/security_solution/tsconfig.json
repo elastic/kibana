@@ -8,6 +8,7 @@
     "public/**/*",
     "server/**/*",
     "scripts/**/*",
+    "ui_tests/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
@@ -243,5 +244,6 @@
     "@kbn/inference-common",
     "@kbn/esql-ast",
     "@kbn/inference-langchain"
+    "@kbn/scout-security",
   ]
 }
