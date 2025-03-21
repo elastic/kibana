@@ -5314,6 +5314,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/embeddable-alerts-table-plugin@link:x-pack/platform/plugins/shared/embeddable_alerts_table":
+  version "0.0.0"
+  uid ""
+
 "@kbn/embeddable-enhanced-plugin@link:x-pack/platform/plugins/shared/embeddable_enhanced":
   version "0.0.0"
   uid ""
@@ -24487,12 +24491,18 @@ onetime@^7.0.0:
   dependencies:
     mimic-function "^5.0.0"
 
-oniguruma-to-es@^3.1.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/oniguruma-to-es/-/oniguruma-to-es-3.1.1.tgz#480e4bac4d3bc9439ac0d2124f0725e7a0d76d17"
-  integrity sha512-bUH8SDvPkH3ho3dvwJwfonjlQ4R80vjyvrU8YpxuROddv55vAEJrTuCuCVUhhsHbtlD9tGGbaNApGQckXhS8iQ==
+oniguruma-parser@^0.5.4:
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/oniguruma-parser/-/oniguruma-parser-0.5.4.tgz#c87fd162441db32405c4706b8ff72764a6617448"
+  integrity sha512-yNxcQ8sKvURiTwP0mV6bLQCYE7NKfKRRWunhbZnXgxSmB1OXa1lHrN3o4DZd+0Si0kU5blidK7BcROO8qv5TZA==
+
+oniguruma-to-es@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/oniguruma-to-es/-/oniguruma-to-es-4.1.0.tgz#6436d7a91f41c51f94b5543daa0e025be4c32aca"
+  integrity sha512-SNwG909cSLo4vPyyPbU/VJkEc9WOXqu2ycBlfd1UCXLqk1IijcQktSBb2yRQ2UFPsDhpkaf+C1dtT3PkLK/yWA==
   dependencies:
     emoji-regex-xs "^1.0.0"
+    oniguruma-parser "^0.5.4"
     regex "^6.0.1"
     regex-recursion "^6.0.2"
 
