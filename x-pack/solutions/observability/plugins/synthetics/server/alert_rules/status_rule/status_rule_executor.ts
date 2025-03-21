@@ -36,7 +36,7 @@ import {
   getUngroupedReasonMessage,
 } from './message_utils';
 import { queryMonitorStatusAlert } from './queries/query_monitor_status_alert';
-import { parseArrayFilters } from '../../routes/common';
+import { parseArrayFilters, parseLocationFilter } from '../../routes/common';
 import { SyntheticsServerSetup } from '../../types';
 import { SyntheticsEsClient } from '../../lib';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
@@ -118,14 +118,23 @@ export class StatusRuleExecutor {
       return processMonitors([]);
     }
 
+    const locationFilter = await parseLocationFilter(
+      {
+        savedObjectsClient: this.soClient,
+        server: this.server,
+        syntheticsMonitorClient: this.syntheticsMonitorClient,
+      },
+      this.params.locations
+    );
+
     const { filtersStr } = parseArrayFilters({
       configIds,
       filter: baseFilter,
-      tags: this.params?.tags,
-      locations: this.params?.locations,
-      monitorTypes: this.params?.monitorTypes,
-      monitorQueryIds: this.params?.monitorIds,
-      projects: this.params?.projects,
+      tags: this.params.tags,
+      locationFilter,
+      monitorTypes: this.params.monitorTypes,
+      monitorQueryIds: this.params.monitorIds,
+      projects: this.params.projects,
     });
 
     this.monitors = await this.monitorConfigRepository.getAll({
