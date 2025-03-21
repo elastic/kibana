@@ -70,12 +70,7 @@ export const AllAssets = () => {
 
   return (
     <I18nProvider>
-      <AssetInventorySearchBar
-        query={urlQuery}
-        setQuery={setUrlQuery}
-        // loading={loadingState === DataLoadingState.loading}
-        loading={isLoadingChartData}
-      />
+      <AssetInventorySearchBar query={urlQuery} setQuery={setUrlQuery} />
       <EuiPageTemplate.Section>
         <EuiTitle size="l" data-test-subj={TEST_SUBJ_PAGE_TITLE}>
           <h1>
