@@ -54,25 +54,15 @@ describe('spanDocumentProfileProvider', () => {
     const spanDocumentProfileProvider =
       createObservabilityTracesSpanDocumentProfileProvider(mockServices);
 
-    it('matches records with the correct data stream type and the correct processor event', () => {
+    it('matches records with the correct index pattern, data stream type and the correct processor event', () => {
       expect(
         spanDocumentProfileProvider.resolve({
           rootContext: ROOT_CONTEXT({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildMockRecord('another-index', {
+          record: buildMockRecord(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS[0], {
             'data_stream.type': ['traces'],
             'processor.event': ['span'],
           }),
-        })
-      ).toEqual(RESOLUTION_MATCH);
-    });
-
-    it('matches records with the correct index pattern', () => {
-      expect(
-        spanDocumentProfileProvider.resolve({
-          rootContext: ROOT_CONTEXT({ profileId }),
-          dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildMockRecord(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS[0]),
         })
       ).toEqual(RESOLUTION_MATCH);
     });
@@ -103,7 +93,7 @@ describe('spanDocumentProfileProvider', () => {
         spanDocumentProfileProvider.resolve({
           rootContext: ROOT_CONTEXT({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildMockRecord('another-index', {
+          record: buildMockRecord(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS[0], {
             'data_stream.type': ['traces'],
             'processor.event': ['span'],
           }),

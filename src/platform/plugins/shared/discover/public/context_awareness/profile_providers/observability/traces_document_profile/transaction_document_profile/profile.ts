@@ -60,7 +60,7 @@ const getIsTransactionRecord = ({
   isTracesIndexPattern: ProfileProviderServices['tracesContextService']['isTracesIndexPattern'];
 }) => {
   const recordIndex = castArray(record.flattened._index);
-  return isTransactionDocument(record) || isTracesIndexPattern(recordIndex);
+  return isTransactionDocument(record) && isTracesIndexPattern(recordIndex);
 };
 
 const isTransactionDocument = (record: DataTableRecord) => {

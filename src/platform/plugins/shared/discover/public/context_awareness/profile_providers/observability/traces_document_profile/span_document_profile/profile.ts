@@ -59,7 +59,7 @@ const getIsSpanRecord = ({
   isTracesIndexPattern: ProfileProviderServices['tracesContextService']['isTracesIndexPattern'];
 }) => {
   const recordIndex = castArray(record.flattened._index);
-  return isSpanDocument(record) || isTracesIndexPattern(recordIndex);
+  return isSpanDocument(record) && isTracesIndexPattern(recordIndex);
 };
 
 const isSpanDocument = (record: DataTableRecord) => {

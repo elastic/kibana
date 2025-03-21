@@ -53,25 +53,15 @@ describe('transactionDocumentProfileProvider', () => {
     const transactionDocumentProfileProvider =
       createObservabilityTracesTransactionDocumentProfileProvider(mockServices);
 
-    it('matches records with the correct data stream type and the correct processor event', () => {
+    it('matches records with the correct index pattern, data stream type and the correct processor event', () => {
       expect(
         transactionDocumentProfileProvider.resolve({
           rootContext: ROOT_CONTEXT({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildMockRecord('another-index', {
+          record: buildMockRecord(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS[0], {
             'data_stream.type': ['traces'],
             'processor.event': ['transaction'],
           }),
-        })
-      ).toEqual(RESOLUTION_MATCH);
-    });
-
-    it('matches records with the correct index pattern', () => {
-      expect(
-        transactionDocumentProfileProvider.resolve({
-          rootContext: ROOT_CONTEXT({ profileId }),
-          dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildMockRecord(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS[0]),
         })
       ).toEqual(RESOLUTION_MATCH);
     });
@@ -102,7 +92,7 @@ describe('transactionDocumentProfileProvider', () => {
         transactionDocumentProfileProvider.resolve({
           rootContext: ROOT_CONTEXT({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildMockRecord('another-index', {
+          record: buildMockRecord(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS[0], {
             'data_stream.type': ['traces'],
             'processor.event': ['transaction'],
           }),
