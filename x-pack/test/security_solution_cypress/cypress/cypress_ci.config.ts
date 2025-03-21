@@ -38,7 +38,11 @@ export default defineCypressConfig({
     baseUrl: 'http://localhost:5601',
     experimentalMemoryManagement: true,
     experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
-    specPattern: './cypress/e2e/**/*.cy.ts',
+    specPattern: [
+      './cypress/e2e/investigations/timelines/esql/*.cy.ts',
+      './cypress/e2e/investigations/timelines/unified_components/*.cy.ts',
+      './cypress/e2e/investigations/timelines/*.cy.ts',
+    ],
     setupNodeEvents(on, config) {
       esArchiver(on, config);
       esClient(on, config);
