@@ -154,7 +154,7 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
 export const getESQLQueryVariables = (esql: string): string[] => {
   const { root } = parse(esql);
   const usedVariablesInQuery = Walker.params(root);
-  return usedVariablesInQuery.map((v) => v.text.replace('?', ''));
+  return usedVariablesInQuery.map((v) => v.text.replace(/^\?+/, ''));
 };
 
 /**
@@ -233,6 +233,7 @@ export const fixESQLQueryWithVariables = (
   if (!currentVariables.length) {
     return queryString;
   }
+
   // filter out the variables that are not used in the query
   // and that they are not of type FIELDS or FUNCTIONS
   const identifierTypeVariables = esqlVariables?.filter(
@@ -242,10 +243,11 @@ export const fixESQLQueryWithVariables = (
   );
 
   // check if they are set with ?? or ? in the query
+  // replace only if there is only one ? in front of the variable
   if (identifierTypeVariables?.length) {
     identifierTypeVariables.forEach((variable) => {
-      const pattern = new RegExp(`\\?${variable.key}\\b`, 'g');
-      queryString = queryString.replace(pattern, `??${variable.key}`);
+      const regex = new RegExp(`(?<!\\?)\\?${variable.key}`);
+      queryString = queryString.replace(regex, `??${variable.key}`);
     });
     return queryString;
   }

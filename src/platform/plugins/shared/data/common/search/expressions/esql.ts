@@ -363,10 +363,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               isNull: hasEmptyColumns ? !lookup.has(name) : false,
             })) ?? [];
 
-          // Pass this when parsing works correctly
-          // const fixedQuery = fixESQLQueryWithVariables(query, input?.esqlVariables ?? []);
+          const fixedQuery = fixESQLQueryWithVariables(query, input?.esqlVariables ?? []);
           const updatedWithVariablesColumns = mapVariableToColumn(
-            query,
+            fixedQuery,
             input?.esqlVariables ?? [],
             allColumns as DatatableColumn[]
           );
