@@ -109,7 +109,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     healthCheckError,
     connectors,
     connectorTypes,
-    aadTemplateFields,
+    alertFields,
     flappingSettings,
   } = useLoadDependencies({
     http,
@@ -170,6 +170,8 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
 
   const RuleFormUIComponent = isFlyout ? RuleFlyout : RulePage;
 
+  console.log('CreateRuleForm: ', { alertFields });
+
   return (
     <RuleFormStateProvider
       initialRuleFormState={{
@@ -194,7 +196,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
         plugins,
         connectors,
         connectorTypes,
-        aadTemplateFields,
+        alertFields,
         minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
         selectedRuleTypeModel: ruleTypeModel,
         selectedRuleType: ruleType,

@@ -14,10 +14,10 @@ import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
 
-export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerContext>) => {
+export const getAlertFieldsByRuleTypeId = (router: IRouter<RacRequestHandlerContext>) => {
   router.get(
     {
-      path: `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
+      path: `${BASE_RAC_ALERTS_API_PATH}/alert_fields`,
       validate: {
         query: buildRouteValidation(
           t.exact(
@@ -60,11 +60,21 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
           });
         }
 
-        const fields = await alertsClient.getBrowserFields({
+        const indexFilter = {
+          range: {
+            '@timestamp': {
+              gte: 'now-90d',
+            },
+          },
+        };
+
+        const fields = await alertsClient.getAlertFields({
           indices: o11yIndices,
           ruleTypeIds: onlyO11yRuleTypeIds,
           metaFields: ['_id', '_index'],
           allowNoIndex: true,
+          includeEmptyFields: false,
+          indexFilter,
         });
 
         return response.ok({

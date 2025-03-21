@@ -12,13 +12,10 @@ import { useRef } from 'react';
 import { isEmpty } from 'lodash';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
-import {
-  fetchRuleTypeAadTemplateFields,
-  getDescription,
-} from '@kbn/alerts-ui-shared/src/common/apis';
+import { fetchRuleTypeAlertFields, getDescription } from '@kbn/alerts-ui-shared/src/common/apis';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
-export interface UseLoadRuleTypeAadTemplateFieldProps {
+export interface UseLoadRuleTypeAlertFieldsProps {
   http: HttpStart;
   ruleTypeId?: string;
   enabled: boolean;
@@ -26,7 +23,7 @@ export interface UseLoadRuleTypeAadTemplateFieldProps {
   fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
-export const useLoadRuleTypeAadTemplateField = (props: UseLoadRuleTypeAadTemplateFieldProps) => {
+export const useLoadRuleTypeAlertFields = (props: UseLoadRuleTypeAlertFieldsProps) => {
   const ecsFlat = useRef<Record<string, any>>({});
   const { http, ruleTypeId, enabled, cacheTime, fieldsMetadata } = props;
 
@@ -43,7 +40,7 @@ export const useLoadRuleTypeAadTemplateField = (props: UseLoadRuleTypeAadTemplat
       }
     }
 
-    return fetchRuleTypeAadTemplateFields({ http, ruleTypeId });
+    return fetchRuleTypeAlertFields({ http, ruleTypeId });
   };
 
   const {
@@ -52,7 +49,7 @@ export const useLoadRuleTypeAadTemplateField = (props: UseLoadRuleTypeAadTemplat
     isFetching,
     isInitialLoading,
   } = useQuery({
-    queryKey: ['useLoadRuleTypeAadTemplateField', ruleTypeId],
+    queryKey: ['useLoadRuleTypeAlertFields', ruleTypeId],
     queryFn,
     select: (dataViewFields) => {
       return dataViewFields?.map<ActionVariable>((d) => ({

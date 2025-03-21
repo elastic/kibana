@@ -12,11 +12,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { EcsFlat } from '@elastic/ecs';
 
 import {
-  fetchRuleTypeAadTemplateFields,
+  fetchRuleTypeAlertFields,
   getDescription,
-} from '@kbn/alerts-ui-shared/src/common/apis/fetch_rule_type_aad_template_fields';
+} from '@kbn/alerts-ui-shared/src/common/apis/fetch_rule_type_alert_fields';
 
-export function useRuleTypeAadTemplateFields(
+export function useRuleTypeAlertFields(
   http: HttpStart,
   ruleTypeId: string | undefined,
   enabled: boolean
@@ -28,7 +28,7 @@ export function useRuleTypeAadTemplateFields(
   useEffect(() => {
     if (enabled && data.length === 0 && ruleTypeId) {
       setIsLoading(true);
-      fetchRuleTypeAadTemplateFields({ http, ruleTypeId }).then((res) => {
+      fetchRuleTypeAlertFields({ http, ruleTypeId }).then((res) => {
         setData(res);
         setIsLoading(false);
       });

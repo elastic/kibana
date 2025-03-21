@@ -60,7 +60,7 @@ interface SystemActionAccordionContentProps extends RuleActionsSystemActionsItem
 
 const SystemActionAccordionContent: React.FC<SystemActionAccordionContentProps> = React.memo(
   ({ connector, checkEnabledResult, action, index, producerId, warning, onParamsChange }) => {
-    const { aadTemplateFields } = useRuleFormState();
+    const { alertFields } = useRuleFormState();
     const { euiTheme } = useEuiTheme();
     const plain = useEuiBackgroundColor('plain');
 
@@ -100,7 +100,7 @@ const SystemActionAccordionContent: React.FC<SystemActionAccordionContentProps> 
             connector={connector}
             producerId={producerId}
             warning={warning}
-            templateFields={aadTemplateFields}
+            templateFields={alertFields}
             onParamsChange={onParamsChange}
           />
         </EuiFlexItem>

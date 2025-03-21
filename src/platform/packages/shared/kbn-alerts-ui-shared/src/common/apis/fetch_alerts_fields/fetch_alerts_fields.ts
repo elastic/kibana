@@ -14,7 +14,7 @@ import { BASE_RAC_ALERTS_API_PATH } from '../../constants';
 
 export const fetchAlertsFields = ({ http, ruleTypeIds }: FetchAlertsFieldsParams) => {
   return http.get<{ browserFields: BrowserFields; fields: FieldDescriptor[] }>(
-    `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
+    `${BASE_RAC_ALERTS_API_PATH}/alert_fields`,
     {
       query: { ruleTypeIds },
     }

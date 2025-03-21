@@ -21,7 +21,7 @@ export const getDescription = (fieldName: string, ecsFlat: Record<string, EcsMet
   return ecsField?.description ?? '';
 };
 
-export const fetchRuleTypeAadTemplateFields = async ({
+export const fetchRuleTypeAlertFields = async ({
   http,
   ruleTypeId,
 }: {
@@ -29,8 +29,8 @@ export const fetchRuleTypeAadTemplateFields = async ({
   ruleTypeId?: string;
 }): Promise<DataViewField[]> => {
   if (!ruleTypeId) return EMPTY_AAD_FIELDS;
-  const fields = await http.get<DataViewField[]>(`${BASE_RAC_ALERTS_API_PATH}/aad_fields`, {
-    query: { ruleTypeId },
+  const fields = await http.get<DataViewField[]>(`${BASE_RAC_ALERTS_API_PATH}/alert_fields`, {
+    query: { ruleTypeIds: [ruleTypeId] },
   });
 
   return fields;

@@ -69,7 +69,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorsSelection } from './connectors_selection';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
 import { validateActionFilterQuery } from '../../lib/value_validators';
-import { useRuleTypeAadTemplateFields } from '../../hooks/use_rule_aad_template_fields';
+import { useRuleTypeAlertFields } from '../../hooks/use_rule_alert_fields';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -195,15 +195,11 @@ export const ActionTypeForm = ({
     Record<string, SavedObjectAttribute>
   >({});
 
-  const { fields: aadTemplateFields } = useRuleTypeAadTemplateFields(
-    http,
-    ruleTypeId,
-    useAadTemplateFields
-  );
+  const { fields: alertFields } = useRuleTypeAlertFields(http, ruleTypeId, useAadTemplateFields);
 
   const templateFields = useMemo(
-    () => (useAadTemplateFields ? aadTemplateFields : availableActionVariables),
-    [aadTemplateFields, availableActionVariables, useAadTemplateFields]
+    () => (useAadTemplateFields ? alertFields : availableActionVariables),
+    [alertFields, availableActionVariables, useAadTemplateFields]
   );
 
   let showMustacheAutocompleteSwitch;

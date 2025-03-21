@@ -1199,57 +1199,37 @@ export class AlertsClient {
     }
   }
 
-  public async getBrowserFields({
+  public async getAlertFields({
     ruleTypeIds,
     indices,
     metaFields,
     allowNoIndex,
+    includeEmptyFields,
+    indexFilter,
   }: {
     ruleTypeIds: string[];
     indices: string[];
     metaFields: string[];
     allowNoIndex: boolean;
+    includeEmptyFields: boolean;
+    indexFilter?: estypes.QueryDslQueryContainer;
   }): Promise<{ browserFields: BrowserFields; fields: FieldDescriptor[] }> {
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
-    const ruleTypeList = this.getRuleList();
-    const fieldsForAAD = new Set<string>();
-
-    for (const rule of ruleTypeList.values()) {
-      if (ruleTypeIds.includes(rule.id) && rule.hasFieldsForAAD) {
-        (rule.fieldsForAAD ?? []).forEach((f) => {
-          fieldsForAAD.add(f);
-        });
-      }
-    }
 
     const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
-      pattern: indices,
+      pattern: indices?.length ? indices : '.alerts-*',
       metaFields,
       fieldCapsOptions: { allow_no_indices: allowNoIndex },
-      fields: [...fieldsForAAD, 'kibana.*'],
+      includeEmptyFields,
+      indexFilter,
     });
 
-    return {
+    const x = {
       browserFields: fieldDescriptorToBrowserFieldMapper(fields),
       fields,
     };
-  }
 
-  public async getAADFields({ ruleTypeId }: { ruleTypeId: string }) {
-    const { fieldsForAAD = [] } = this.getRuleType(ruleTypeId);
-    if (isSiemRuleType(ruleTypeId)) {
-      throw Boom.badRequest(`Security solution rule type is not supported`);
-    }
-
-    const indices = await this.getAuthorizedAlertsIndices([ruleTypeId]);
-    const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
-    const { fields = [] } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
-      pattern: indices ?? [],
-      metaFields: ['_id', '_index'],
-      fieldCapsOptions: { allow_no_indices: true },
-      fields: [...fieldsForAAD, 'kibana.*'],
-    });
-
-    return fields;
+    console.log('alerting_client getAlertsFields', { fieldsLength: fields.length });
+    return x;
   }
 }

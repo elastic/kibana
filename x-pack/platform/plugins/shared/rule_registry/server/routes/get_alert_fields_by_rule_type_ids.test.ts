@@ -6,12 +6,12 @@
  */
 
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
-import { getBrowserFieldsByFeatureId } from './get_browser_fields_by_rule_type_ids';
+import { getAlertFieldsByRuleTypeId } from './get_alert_fields_by_rule_type_ids';
 import { requestContextMock } from './__mocks__/request_context';
 import { getO11yBrowserFields } from './__mocks__/request_responses';
 import { requestMock, serverMock } from './__mocks__/server';
 
-describe('getBrowserFieldsByFeatureId', () => {
+describe('getAlertFieldsByRuleTypeId', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   const path = `${BASE_RAC_ALERTS_API_PATH}/browser_fields`;
@@ -24,9 +24,9 @@ describe('getBrowserFieldsByFeatureId', () => {
       '.alerts-observability.logs.alerts-default',
     ]);
 
-    clients.rac.getBrowserFields.mockResolvedValue({ browserFields: {}, fields: [] });
+    clients.rac.getAlertFields.mockResolvedValue({ browserFields: {}, fields: [] });
 
-    getBrowserFieldsByFeatureId(server.router);
+    getAlertFieldsByRuleTypeId(server.router);
   });
 
   test('route registered', async () => {

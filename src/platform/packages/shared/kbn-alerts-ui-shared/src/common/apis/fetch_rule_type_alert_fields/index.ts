@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './fetch_rule_type_aad_template_fields';
+export * from './fetch_rule_type_alert_fields';

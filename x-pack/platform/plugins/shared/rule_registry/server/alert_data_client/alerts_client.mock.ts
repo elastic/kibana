@@ -20,12 +20,11 @@ const createAlertsClientMock = () => {
     bulkUpdateCases: jest.fn(),
     find: jest.fn(),
     getGroupAggregations: jest.fn(),
-    getBrowserFields: jest.fn(),
+    getAlertFields: jest.fn(),
     getAlertSummary: jest.fn(),
     ensureAllAlertsAuthorizedRead: jest.fn(),
     removeCaseIdFromAlerts: jest.fn(),
     removeCaseIdsFromAllAlerts: jest.fn(),
-    getAADFields: jest.fn(),
   };
   return mocked;
 };
