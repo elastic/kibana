@@ -24,7 +24,7 @@ import { alertProducersData } from '@kbn/response-ops-alerts-table/constants';
 import { alertsTableQueryClient } from '@kbn/response-ops-alerts-table/query_client';
 import { defaultAlertsTableSort } from '@kbn/response-ops-alerts-table/configuration';
 import { AlertsTableSupportedConsumers } from '@kbn/response-ops-alerts-table/types';
-import { AlertActionsCell } from './alert_actions_cell';
+import { AlertActionsCell } from '@kbn/response-ops-alerts-table/components/alert_actions_cell';
 import { ALERTS_PAGE_ID } from '../../../../common/constants';
 import { QuickFiltersMenuItem } from '../../alerts_search_bar/quick_filters';
 import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';

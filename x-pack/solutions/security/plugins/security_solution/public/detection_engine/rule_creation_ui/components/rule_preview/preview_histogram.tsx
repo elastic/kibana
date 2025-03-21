@@ -38,8 +38,6 @@ import { INSPECT_ACTION } from '../../../../common/components/visualization_acti
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
-  flex: 1 1 auto;
-  display: flex;
   width: 100%;
 `;
 

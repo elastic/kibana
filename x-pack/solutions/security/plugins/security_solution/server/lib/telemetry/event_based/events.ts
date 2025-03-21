@@ -12,6 +12,8 @@ import type {
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
 import type { DataStreams, IlmPolicies, IlmsStats, IndicesStats } from '../indices.metadata.types';
+import type { NodeIngestPipelinesStats } from '../ingest_pipelines_stats.types';
+import { SiemMigrationsEventTypes } from './types';
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
@@ -528,11 +530,130 @@ export const TELEMETRY_ILM_STATS_EVENT: EventTypeOpts<IlmsStats> = {
   },
 };
 
+export const TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT: EventTypeOpts<NodeIngestPipelinesStats> =
+  {
+    eventType: 'telemetry_node_ingest_pipelines_stats_event',
+    schema: {
+      name: {
+        type: 'keyword',
+        _meta: { description: 'The name of the node' },
+      },
+      pipelines: {
+        type: 'array',
+        items: {
+          properties: {
+            name: {
+              type: 'keyword',
+              _meta: { description: 'The name of the pipeline.' },
+            },
+            totals: {
+              properties: {
+                count: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'Total number of documents ingested during the lifetime of this node.',
+                  },
+                },
+                time_in_millis: {
+                  type: 'long',
+                  _meta: {
+                    description: 'Ingestion elapsed time during the lifetime of this node.',
+                  },
+                },
+                current: {
+                  type: 'long',
+                  _meta: { description: 'Total number of documents currently being ingested.' },
+                },
+                failed: {
+                  type: 'long',
+                  _meta: {
+                    description:
+                      'Total number of failed ingest operations during the lifetime of this node.',
+                  },
+                },
+              },
+            },
+            processors: {
+              type: 'array',
+              items: {
+                properties: {
+                  name: {
+                    type: 'keyword',
+                    _meta: { description: 'The name of the pipeline.' },
+                  },
+                  totals: {
+                    properties: {
+                      count: {
+                        type: 'long',
+                        _meta: {
+                          description:
+                            'Total number of documents ingested during the lifetime of this node.',
+                        },
+                      },
+                      time_in_millis: {
+                        type: 'long',
+                        _meta: {
+                          description: 'Ingestion elapsed time during the lifetime of this node.',
+                        },
+                      },
+                      current: {
+                        type: 'long',
+                        _meta: {
+                          description: 'Total number of documents currently being ingested.',
+                        },
+                      },
+                      failed: {
+                        type: 'long',
+                        _meta: {
+                          description:
+                            'Total number of failed ingest operations during the lifetime of this node.',
+                        },
+                      },
+                    },
+                  },
+                },
+                _meta: { description: 'Datastreams' },
+              },
+            },
+          },
+          _meta: { description: 'Datastreams' },
+        },
+      },
+      totals: {
+        properties: {
+          count: {
+            type: 'long',
+            _meta: {
+              description: 'Total number of documents ingested during the lifetime of this node.',
+            },
+          },
+          time_in_millis: {
+            type: 'long',
+            _meta: { description: 'Ingestion elapsed time during the lifetime of this node.' },
+          },
+          current: {
+            type: 'long',
+            _meta: { description: 'Total number of documents currently being ingested.' },
+          },
+          failed: {
+            type: 'long',
+            _meta: {
+              description:
+                'Total number of failed ingest operations during the lifetime of this node.',
+            },
+          },
+        },
+      },
+    },
+  };
+
 interface CreateAssetCriticalityProcessedFileEvent {
   result?: BulkUpsertAssetCriticalityRecordsResponse['stats'];
   startTime: Date;
   endTime: Date;
 }
+
 export const createAssetCriticalityProcessedFileEvent = ({
   result,
   startTime,
@@ -708,9 +829,17 @@ export const SIEM_MIGRATIONS_MIGRATION_SUCCESS: EventTypeOpts<{
   completed: number;
   failed: number;
   total: number;
+  eventName: string;
 }> = {
-  eventType: 'siem_migrations_migration_success',
+  eventType: SiemMigrationsEventTypes.MigrationSuccess,
   schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
     model: {
       type: 'keyword',
       _meta: {
@@ -756,9 +885,17 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS: EventTypeOpts<{
   duration: number;
   translationResult: string;
   prebuiltMatch: boolean;
+  eventName: string;
 }> = {
-  eventType: 'siem_migrations_rule_translation_success',
+  eventType: SiemMigrationsEventTypes.TranslationSucess,
   schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
     translationResult: {
       type: 'keyword',
       _meta: {
@@ -799,9 +936,17 @@ export const SIEM_MIGRATIONS_PREBUILT_RULES_MATCH: EventTypeOpts<{
   preFilterRuleCount: number;
   postFilterRuleName: string;
   postFilterRuleCount: number;
+  eventName: string;
 }> = {
-  eventType: 'siem_migrations_prebuilt_rules_match',
+  eventType: SiemMigrationsEventTypes.PrebuiltRulesMatch,
   schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
     model: {
       type: 'keyword',
       _meta: {
@@ -851,9 +996,17 @@ export const SIEM_MIGRATIONS_INTEGRATIONS_MATCH: EventTypeOpts<{
   preFilterIntegrationCount: number;
   postFilterIntegrationName: string;
   postFilterIntegrationCount: number;
+  eventName: string;
 }> = {
-  eventType: 'siem_migrations_integration_match',
+  eventType: SiemMigrationsEventTypes.IntegrationsMatch,
   schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
     model: {
       type: 'keyword',
       _meta: {
@@ -904,9 +1057,17 @@ export const SIEM_MIGRATIONS_MIGRATION_FAILURE: EventTypeOpts<{
   completed: number;
   failed: number;
   total: number;
+  eventName: string;
 }> = {
-  eventType: 'siem_migrations_migration_failure',
+  eventType: SiemMigrationsEventTypes.MigrationFailure,
   schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
     error: {
       type: 'keyword',
       _meta: {
@@ -956,9 +1117,17 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE: EventTypeOpts<{
   model: string;
   error: string;
   migrationId: string;
+  eventName: string;
 }> = {
-  eventType: 'siem_migrations_rule_translation_failure',
+  eventType: SiemMigrationsEventTypes.TranslationFailure,
   schema: {
+    eventName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The event name/description',
+        optional: false,
+      },
+    },
     error: {
       type: 'keyword',
       _meta: {
@@ -997,6 +1166,7 @@ export const events = [
   TELEMETRY_DATA_STREAM_EVENT,
   TELEMETRY_ILM_POLICY_EVENT,
   TELEMETRY_ILM_STATS_EVENT,
+  TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT,
   TELEMETRY_INDEX_STATS_EVENT,
   SIEM_MIGRATIONS_MIGRATION_SUCCESS,
   SIEM_MIGRATIONS_MIGRATION_FAILURE,
