@@ -439,11 +439,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await el.focus();
       await browser.pressKeys(browser.keys.ENTER);
       for (let i = 0; i < steps; i++) {
+        // This needs to be slowed down to avoid flakiness
+        await common.sleep(200);
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
       }
       if (metaKey) {
         await this.pressMetaKey(metaKey);
       }
+
+      await common.sleep(200);
       await browser.pressKeys(browser.keys.ENTER);
 
       await this.waitForLensDragDropToFinish();
