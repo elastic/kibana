@@ -19,6 +19,7 @@ import {
   EuiTabbedContentTab,
   useEuiTheme,
   EuiFlexGroup,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import {
   AlertStatus,
@@ -55,6 +56,7 @@ import { CustomThresholdRule } from '../../components/custom_threshold/component
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 import { AlertHistoryChart } from './components/alert_history';
 import StaleAlert from './components/stale_alert';
+import { RelatedDashboards } from './components/related_dashboards';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -73,6 +75,7 @@ const OVERVIEW_TAB_ID = 'overview';
 const METADATA_TAB_ID = 'metadata';
 const RELATED_ALERTS_TAB_ID = 'related_alerts';
 const ALERT_DETAILS_TAB_URL_STORAGE_KEY = 'tabId';
+const RELATED_DASHBOARDS_TAB_ID = 'related_dashboards';
 type TabId = typeof OVERVIEW_TAB_ID | typeof METADATA_TAB_ID | typeof RELATED_ALERTS_TAB_ID;
 
 export const getPageTitle = (ruleCategory: string) => {
@@ -219,6 +222,8 @@ export function AlertDetails() {
   const AlertDetailsAppSection = ruleTypeModel ? ruleTypeModel.alertDetailsAppSection : null;
   const timeZone = getTimeZone(uiSettings);
 
+  const linkedDashboards: any = rule?.artifacts?.dashboards ?? [];
+
   const overviewTab = alertDetail ? (
     AlertDetailsAppSection &&
     /*
@@ -275,6 +280,12 @@ export function AlertDetails() {
     </EuiPanel>
   );
 
+  const relatedDashboardsTab = alertDetail ? (
+    <RelatedDashboards relatedDashboards={linkedDashboards || []} alert={alertDetail.formatted} />
+  ) : (
+    <EuiLoadingSpinner />
+  );
+
   const tabs: EuiTabbedContentTab[] = [
     {
       id: OVERVIEW_TAB_ID,
@@ -307,6 +318,26 @@ export function AlertDetails() {
       'data-test-subj': 'relatedAlertsTab',
       content: <RelatedAlerts alertData={alertDetail} />,
     },
+    ...(linkedDashboards?.length
+      ? [
+          {
+            id: RELATED_DASHBOARDS_TAB_ID,
+            name: (
+              <>
+                <FormattedMessage
+                  id="xpack.observability.alertDetails.tab.relatedDashboardsLabel"
+                  defaultMessage="Related dashboards"
+                />{' '}
+                <EuiNotificationBadge color="success">
+                  {linkedDashboards?.length}
+                </EuiNotificationBadge>
+              </>
+            ),
+            'data-test-subj': 'relatedDashboardsTab',
+            content: relatedDashboardsTab,
+          },
+        ]
+      : []),
   ];
 
   return (
