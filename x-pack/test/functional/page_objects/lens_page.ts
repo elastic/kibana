@@ -1553,7 +1553,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async assertFocusedDimension(name: string) {
       const input = await find.activeElement();
-      const fieldAncestor = await input.findByXpath('./../../..');
+      const fieldAncestor = await input.findByXpath('./../..');
       const focusedElementText = await fieldAncestor.getVisibleText();
       expect(focusedElementText).to.eql(name);
     },
