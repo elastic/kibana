@@ -34,7 +34,7 @@ export function SloManagementPage() {
 
   useEffect(() => {
     if (
-      !hasAtLeast('platinum') ||
+      hasAtLeast('platinum') === false ||
       permissions?.hasAllReadRequested === false ||
       (!isLoading && total === 0) ||
       isError
