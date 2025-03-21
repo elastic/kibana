@@ -74,7 +74,7 @@ describe(
       inputQueryInFlyout('select * from uptime;');
       submitQuery();
       checkResults();
-      cy.contains('Add to timeline investigation');
+      cy.contains('Add to Timeline investigation');
       cy.contains('Save for later').click();
       cy.contains('Save query');
       cy.get('[data-test-subj="osquery-save-query-flyout"]').within(() => {
