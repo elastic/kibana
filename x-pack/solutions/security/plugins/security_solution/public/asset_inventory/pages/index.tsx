@@ -7,16 +7,9 @@
 
 import React from 'react';
 // import { AssetInventoryOnboarding } from '../components/onboarding/asset_inventory_onboarding';
-import { useDataViewContext } from '../hooks/data_view_context';
 import { AllAssets } from './all_assets';
 
 const AssetInventoryPage = () => {
-  const { dataView } = useDataViewContext();
-
-  if (!dataView) {
-    return null;
-  }
-
   return <AllAssets />;
   // return (
   //   <AssetInventoryOnboarding>
