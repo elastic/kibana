@@ -7336,8 +7336,35 @@
                                     "type": "string"
                                   },
                                   "type": {
+                                    "anyOf": [
+                                      {
+                                        "items": {},
+                                        "type": "array"
+                                      },
+                                      {
+                                        "type": "boolean"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "object"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ],
                                     "description": "The embeddable type",
-                                    "type": "string"
+                                    "nullable": true,
+                                    "oneOf": [
+                                      {
+                                        "type": "string",
+                                        "x-oas-optional": true
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
                                   },
                                   "version": {
                                     "deprecated": true,
@@ -7991,8 +8018,35 @@
                               "type": "string"
                             },
                             "type": {
+                              "anyOf": [
+                                {
+                                  "items": {},
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "boolean"
+                                },
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "object"
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ],
                               "description": "The embeddable type",
-                              "type": "string"
+                              "nullable": true,
+                              "oneOf": [
+                                {
+                                  "type": "string",
+                                  "x-oas-optional": true
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
                             },
                             "version": {
                               "deprecated": true,
@@ -8528,8 +8582,35 @@
                                     "type": "string"
                                   },
                                   "type": {
+                                    "anyOf": [
+                                      {
+                                        "items": {},
+                                        "type": "array"
+                                      },
+                                      {
+                                        "type": "boolean"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "object"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ],
                                     "description": "The embeddable type",
-                                    "type": "string"
+                                    "nullable": true,
+                                    "oneOf": [
+                                      {
+                                        "type": "string",
+                                        "x-oas-optional": true
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
                                   },
                                   "version": {
                                     "deprecated": true,
@@ -9155,8 +9236,35 @@
                               "type": "string"
                             },
                             "type": {
+                              "anyOf": [
+                                {
+                                  "items": {},
+                                  "type": "array"
+                                },
+                                {
+                                  "type": "boolean"
+                                },
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "object"
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ],
                               "description": "The embeddable type",
-                              "type": "string"
+                              "nullable": true,
+                              "oneOf": [
+                                {
+                                  "type": "string",
+                                  "x-oas-optional": true
+                                },
+                                {
+                                  "type": "string"
+                                }
+                              ]
                             },
                             "version": {
                               "deprecated": true,
@@ -9686,8 +9794,35 @@
                                     "type": "string"
                                   },
                                   "type": {
+                                    "anyOf": [
+                                      {
+                                        "items": {},
+                                        "type": "array"
+                                      },
+                                      {
+                                        "type": "boolean"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "object"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ],
                                     "description": "The embeddable type",
-                                    "type": "string"
+                                    "nullable": true,
+                                    "oneOf": [
+                                      {
+                                        "type": "string",
+                                        "x-oas-optional": true
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
                                   },
                                   "version": {
                                     "deprecated": true,
