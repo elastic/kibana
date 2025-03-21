@@ -372,6 +372,7 @@ src/platform/packages/shared/kbn-data-view-utils @elastic/kibana-data-discovery
 src/platform/plugins/shared/data_views @elastic/kibana-data-discovery
 x-pack/platform/plugins/private/data_visualizer @elastic/ml-ui
 x-pack/platform/plugins/shared/dataset_quality @elastic/obs-ux-logs-team
+x-pack/platform/plugins/shared/embeddable_alerts_table @elastic/response-ops
 src/platform/packages/shared/kbn-datemath @elastic/kibana-data-discovery
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
