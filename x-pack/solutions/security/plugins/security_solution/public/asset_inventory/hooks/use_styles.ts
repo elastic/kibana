@@ -15,18 +15,18 @@ export const useStyles = () => {
     min-height: 400px;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
   `;
 
   const gridProgressBar = css`
-    flex-shrink: 0;
     width: 100%;
+    position: absolute;
+    top: 0;
   `;
 
   const gridStyle = css`
-    & .euiDataGrid__loading {
-      margin-top: auto;
-      margin-bottom: auto;
-    }
     & .euiDataGridHeaderCell__icon {
       display: none;
     }
