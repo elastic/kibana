@@ -6,13 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
 import { ASSET_GROUPING_OPTIONS } from '../../constants';
-
-// TODO Remove? This was copy-pasted but is unused atm
-// export const assetsTitle = i18n.translate('xpack.securitySolution.assetInventory.assets', {
-//   defaultMessage: 'Assets',
-// });
 
 export const assetsUnit = (totalCount: number) =>
   i18n.translate('xpack.securitySolution.assetInventory.unit', {

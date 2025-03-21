@@ -16,40 +16,6 @@ import { ASSET_INVENTORY_INDEX_PATTERN, QUERY_KEY_GROUPING_DATA } from '../../co
 
 type NumberOrNull = number | null;
 
-// export interface AssetsGroupingAggregation {
-//   unitsCount?: {
-//     value?: NumberOrNull;
-//   };
-//   groupsCount?: {
-//     value?: NumberOrNull;
-//   };
-//   groupByFields?: {
-//     buckets?: GenericBuckets[];
-//   };
-//   description?: {
-//     buckets?: GenericBuckets[];
-//   };
-//   resourceId?: {
-//     buckets?: GenericBuckets[];
-//   };
-//   isLoading?: boolean;
-//   critical?: {
-//     doc_count?: NumberOrNull;
-//   };
-//   high?: {
-//     doc_count?: NumberOrNull;
-//   };
-//   medium?: {
-//     doc_count?: NumberOrNull;
-//   };
-//   low?: {
-//     doc_count?: NumberOrNull;
-//   };
-//   cloudProvider?: {
-//     buckets?: GenericBuckets[];
-//   };
-// }
-
 export interface AssetsGroupingAggregation {
   unitsCount?: {
     value?: NumberOrNull;

@@ -33,7 +33,6 @@ import {
   LOCAL_STORAGE_ASSETS_GROUPING_KEY,
 } from '../../constants';
 
-// TODO Copy-pasted from '@kbn/cloud-security-posture-plugin/public/components/use_cloud_security_grouping';
 import {
   type AssetsGroupingAggregation,
   type AssetsRootGroupingAggregation,
@@ -75,12 +74,8 @@ export const getDefaultQuery = ({
 } => ({
   query,
   filters,
-  sort: [[]],
   // TODO how to sort asset fields?
-  // sort: [
-  //   [ASSET_FIELDS.SEVERITY, 'asc'],
-  //   [ASSET_FIELDS.SCORE_BASE, 'desc'],
-  // ],
+  sort: [[]],
 });
 
 const getTermAggregation = (key: keyof AssetsGroupingAggregation, field: string) => ({
@@ -100,32 +95,6 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
           field,
         },
       },
-      // critical: {
-      //   filter: {
-      //     term: {
-      //       'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.CRITICAL },
-      //     },
-      //   },
-      // },
-      // high: {
-      //   filter: {
-      //     term: {
-      //       'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.HIGH },
-      //     },
-      //   },
-      // },
-      // medium: {
-      //   filter: {
-      //     term: {
-      //       'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.MEDIUM },
-      //     },
-      //   },
-      // },
-      // low: {
-      //   filter: {
-      //     term: { 'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.LOW } },
-      //   },
-      // },
     },
   ];
 
@@ -138,12 +107,6 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
       return [...aggMetrics, getTermAggregation('risk', ASSET_FIELDS.RISK)];
     case ASSET_GROUPING_OPTIONS.CRITICALITY:
       return [...aggMetrics, getTermAggregation('criticality', ASSET_FIELDS.CRITICALITY)];
-    // case ASSET_GROUPING_OPTIONS.RESOURCE_NAME:
-    //   return [...aggMetrics, getTermAggregation('resourceId', ASSET_FIELDS.RESOURCE_ID)];
-    // case ASSET_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
-    //   return [...aggMetrics, getTermAggregation('cloudProvider', ASSET_FIELDS.CLOUD_PROVIDER)];
-    // case ASSET_GROUPING_OPTIONS.CVE:
-    //   return [...aggMetrics, getTermAggregation('description', ASSET_FIELDS.DESCRIPTION)];
   }
   return aggMetrics;
 };
@@ -187,14 +150,12 @@ export const useAssetInventoryGrouping = ({
   state,
   groupPanelRenderer,
   getGroupStats,
-  // groupingLevel = 0,
   groupFilters = [],
   selectedGroup,
 }: {
   state: AssetInventoryDataTableResult;
   groupPanelRenderer?: GroupPanelRenderer<AssetsGroupingAggregation>;
   getGroupStats?: GetGroupStats<AssetsGroupingAggregation>;
-  // groupingLevel?: number;
   groupFilters?: Filter[];
   selectedGroup?: string;
 }) => {
@@ -217,14 +178,9 @@ export const useAssetInventoryGrouping = ({
       setUrlQuery({
         groupBy: groupByFields,
       });
-      // TODO Keep line below?
       uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, GROUP_BY_CLICK);
     },
   });
-
-  // const selectedGroup = groupingLevel
-  //   ? grouping.selectedGroups[groupingLevel]
-  //   : grouping.selectedGroups[0];
 
   const additionalFilters = buildEsQuery(dataView, [], groupFilters);
   const currentSelectedGroup = selectedGroup || grouping.selectedGroups[0];
@@ -274,19 +230,8 @@ export const useAssetInventoryGrouping = ({
     groupData,
     grouping,
     isFetching,
-    // activePageIndex,
-    // setActivePageIndex,
-    // pageSize,
     selectedGroup,
-    // onChangeGroupsItemsPerPage,
-    // onChangeGroupsPage,
-    // urlQuery,
-    // setUrlQuery,
     isGroupSelected: !isNoneSelected,
-    isGroupLoading: !data,
-    // onResetFilters,
-    // filters,
-    // error,
     isEmptyResults,
   };
 };
