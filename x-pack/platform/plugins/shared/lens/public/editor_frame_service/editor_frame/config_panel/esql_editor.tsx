@@ -322,10 +322,12 @@ function InnerESQLEditor({
         isDisabled={false}
         allowQueryCancellation
         isLoading={isVisualizationLoading}
-        supportsControls={parentApi !== undefined}
+        controlsContext={{
+          supportsControls: parentApi !== undefined,
+          onSaveControl,
+          onCancelControl,
+        }}
         esqlVariables={esqlVariables}
-        onCancelControl={onCancelControl}
-        onSaveControl={onSaveControl}
       />
     </EuiFlexItem>
   );
