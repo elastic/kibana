@@ -114,25 +114,29 @@ export function initAPIAuthorization(
       // Operator privileges check should be only performed if the `operator_privileges` are enabled in config.
       const requiredPrivileges = await normalizeRequiredPrivileges(authz.requiredPrivileges);
 
-      const unwindPrivileges = (
+      const unwindNestedPrivileges = (
         privileges: AllRequiredCondition | AnyRequiredCondition
-      ): string[] => {
-        return privileges.reduce<string[]>((acc, privilege) => {
-          if (typeof privilege === 'object') {
-            return [...acc, ...(privilege.allOf ?? []), ...(privilege.anyOf ?? [])];
-          }
+      ): string[] =>
+        privileges.reduce<string[]>(
+          (acc: string[], privilege: string | { anyOf?: string[]; allOf?: string[] }) => {
+            if (typeof privilege === 'object') {
+              acc.push(...(privilege.allOf ?? []), ...(privilege.anyOf ?? []));
+            } else if (typeof privilege === 'string') {
+              acc.push(privilege);
+            }
 
-          return [...acc, privilege];
-        }, []);
-      };
+            return acc;
+          },
+          []
+        );
 
       const { requestedPrivileges, requestedReservedPrivileges } = requiredPrivileges.reduce(
         (acc, privilegeEntry) => {
           const privileges =
             typeof privilegeEntry === 'object'
               ? [
-                  ...unwindPrivileges(privilegeEntry.allRequired ?? []),
-                  ...unwindPrivileges(privilegeEntry.anyRequired ?? []),
+                  ...unwindNestedPrivileges(privilegeEntry.allRequired ?? []),
+                  ...unwindNestedPrivileges(privilegeEntry.anyRequired ?? []),
                 ]
               : [privilegeEntry];
 
@@ -190,7 +194,7 @@ export function initAPIAuthorization(
           const anyRequired = kbPrivilege.anyRequired ?? [];
 
           return (
-            allRequired.every<AllRequiredCondition>((privilege) =>
+            allRequired.every((privilege) =>
               typeof privilege === 'string'
                 ? kibanaPrivileges[privilege]
                 : // checking composite privileges
@@ -199,7 +203,7 @@ export function initAPIAuthorization(
                   )
             ) &&
             (!anyRequired.length ||
-              anyRequired.some<AnyRequiredCondition>((privilege) =>
+              anyRequired.some((privilege) =>
                 typeof privilege === 'string'
                   ? kibanaPrivileges[privilege]
                   : // checking composite privileges
