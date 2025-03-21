@@ -9,6 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import moment from 'moment';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { ObservabilityAIAssistantConfig } from '../config';
 
 export const AI_ASSISTANT_KB_INFERENCE_ID = 'obs_ai_assistant_kb_inference';
@@ -17,20 +18,26 @@ export async function createInferenceEndpoint({
   esClient,
   logger,
   modelId,
+  taskType,
 }: {
   esClient: {
     asCurrentUser: ElasticsearchClient;
   };
   logger: Logger;
   modelId: string;
+  taskType: InferenceTaskType;
 }) {
   try {
-    logger.debug(`Creating inference endpoint "${AI_ASSISTANT_KB_INFERENCE_ID}"`);
+    logger.debug(
+      `Creating inference endpoint "${AI_ASSISTANT_KB_INFERENCE_ID}" with model "${modelId}", task type "${taskType}"`
+    );
 
     return await esClient.asCurrentUser.inference.put(
       {
         inference_id: AI_ASSISTANT_KB_INFERENCE_ID,
-        task_type: 'sparse_embedding',
+        // task_type: 'sparse_embedding',
+        // task_type: 'text_embedding',
+        task_type: taskType,
         inference_config: {
           service: 'elasticsearch',
           service_settings: {

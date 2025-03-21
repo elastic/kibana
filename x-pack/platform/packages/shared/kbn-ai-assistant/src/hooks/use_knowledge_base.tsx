@@ -11,14 +11,16 @@ import {
   useAbortableAsync,
   APIReturnType,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import pRetry from 'p-retry';
 import { useKibana } from './use_kibana';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';
+import type { KbModel } from '../knowledge_base/select_knowledge_base_model';
 
 export interface UseKnowledgeBaseResult {
   status: AbortableAsyncState<APIReturnType<'GET /internal/observability_ai_assistant/kb/status'>>;
   isInstalling: boolean;
   installError?: Error;
-  install: () => Promise<void>;
+  install: (kbModel: KbModel | undefined) => Promise<void>;
 }
 
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
@@ -37,57 +39,63 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   const [installError, setInstallError] = useState<Error>();
   const [isPollingForDeployment, setIsPollingForDeployment] = useState(false);
 
-  const install = useCallback(async () => {
-    setIsInstalling(true);
-    setIsPollingForDeployment(false);
-    setInstallError(undefined);
+  const install = useCallback(
+    async (kbModel: KbModel | undefined) => {
+      setIsInstalling(true);
+      setIsPollingForDeployment(false);
+      setInstallError(undefined);
 
-    let attempts = 0;
-    const MAX_ATTEMPTS = 5;
+      try {
+        await installKnowledgeBase();
 
-    try {
-      // install
-      await retrySetupIfError();
-
-      if (ml.mlApi?.savedObjects.syncSavedObjects) {
-        await ml.mlApi.savedObjects.syncSavedObjects();
-      }
-
-      // do one refresh to get an initial status
-      await statusRequest.refresh();
-
-      // start polling for readiness
-      setIsPollingForDeployment(true);
-    } catch (e) {
-      setInstallError(e);
-      notifications!.toasts.addError(e, {
-        title: i18n.translate('xpack.aiAssistant.errorSettingUpInferenceEndpoint', {
-          defaultMessage: 'Could not create inference endpoint',
-        }),
-      });
-      setIsInstalling(false);
-    }
-
-    async function retrySetupIfError() {
-      while (true) {
-        try {
-          await service.callApi('POST /internal/observability_ai_assistant/kb/setup', {
-            signal: null,
-          });
-          break;
-        } catch (error) {
-          if (
-            (error.body?.statusCode === 503 || error.body?.statusCode === 504) &&
-            attempts < MAX_ATTEMPTS
-          ) {
-            attempts++;
-            continue;
-          }
-          throw error;
+        if (ml.mlApi?.savedObjects.syncSavedObjects) {
+          await ml.mlApi.savedObjects.syncSavedObjects();
         }
+
+        // do one refresh to get an initial status
+        statusRequest.refresh();
+
+        // start polling for readiness
+        setIsPollingForDeployment(true);
+      } catch (e) {
+        setInstallError(e);
+        notifications!.toasts.addError(e, {
+          title: i18n.translate('xpack.aiAssistant.errorSettingUpInferenceEndpoint', {
+            defaultMessage: 'Could not create inference endpoint',
+          }),
+        });
+        setIsInstalling(false);
       }
-    }
-  }, [ml, service, notifications, statusRequest]);
+
+      async function installKnowledgeBase() {
+        await pRetry(
+          async () => {
+            try {
+              await service.callApi('POST /internal/observability_ai_assistant/kb/setup', {
+                signal: null,
+                params: {
+                  query: {
+                    model_id: kbModel?.modelId,
+                    task_type: kbModel?.taskType,
+                  },
+                },
+              });
+            } catch (error) {
+              // retry on 503 and 504
+              if (error.body?.statusCode === 503 || error.body?.statusCode === 504) {
+                throw error;
+              }
+
+              // Abort retrying
+              throw new pRetry.AbortError(error);
+            }
+          },
+          { retries: 5 }
+        );
+      }
+    },
+    [ml, service, notifications, statusRequest]
+  );
 
   // poll the status if isPollingForDeployment === true
   // stop when ready === true or some error
@@ -98,7 +106,8 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
 
     const interval = setInterval(async () => {
       // re-fetch /status
-      await statusRequest.refresh();
+      statusRequest.refresh();
+
       const { value: currentStatus } = statusRequest;
 
       // check if the model is now ready

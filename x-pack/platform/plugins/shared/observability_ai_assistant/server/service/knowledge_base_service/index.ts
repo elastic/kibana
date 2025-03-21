@@ -10,6 +10,7 @@ import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/cor
 import type { Logger } from '@kbn/logging';
 import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { resourceNames } from '..';
 import {
   Instruction,
@@ -65,10 +66,16 @@ export class KnowledgeBaseService {
       asCurrentUser: ElasticsearchClient;
       asInternalUser: ElasticsearchClient;
     },
-    modelId: string
+    modelId: string,
+    taskType: InferenceTaskType
   ) {
     await deleteInferenceEndpoint({ esClient }).catch((e) => {}); // ensure existing inference endpoint is deleted
-    return createInferenceEndpoint({ esClient, logger: this.dependencies.logger, modelId });
+    return createInferenceEndpoint({
+      esClient,
+      logger: this.dependencies.logger,
+      modelId,
+      taskType,
+    });
   }
 
   async reset(esClient: { asCurrentUser: ElasticsearchClient }) {

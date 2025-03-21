@@ -75,7 +75,7 @@ describe('useKnowledgeBase', () => {
 
     // Trigger install
     act(() => {
-      result.current.install();
+      result.current.install({ modelId: '.elser_model_2', taskType: 'sparse_embedding' });
     });
 
     // Wait for error state

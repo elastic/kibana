@@ -55,6 +55,12 @@ const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
   params: t.partial({
     query: t.partial({
       model_id: t.string,
+      task_type: t.union([
+        t.literal('text_embedding'),
+        t.literal('sparse_embedding'),
+        t.literal('rerank'),
+        t.literal('completion'),
+      ]),
     }),
   }),
   options: {
@@ -74,14 +80,14 @@ const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    const { model_id: modelId } = resources.params?.query ?? {};
+    const { model_id: modelId, task_type: taskType } = resources.params?.query ?? {};
 
-    return await client.setupKnowledgeBase(modelId);
+    return await client.setupKnowledgeBase(modelId, taskType);
   },
 });
 
 const resetKnowledgeBase = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/kb/reset',
+  endpoint: 'POST /internal/observability_ai_assistant/kb/uninstall',
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],

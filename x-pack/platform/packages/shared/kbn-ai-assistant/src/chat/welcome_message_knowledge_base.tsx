@@ -21,6 +21,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 
 import { WelcomeMessageKnowledgeBaseSetupErrorPanel } from './welcome_message_knowledge_base_setup_error_panel';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
+import { KbModel, SelectKnowledgeBaseModel } from '../knowledge_base/select_knowledge_base_model';
 
 export function WelcomeMessageKnowledgeBase({
   knowledgeBase,
@@ -32,6 +33,8 @@ export function WelcomeMessageKnowledgeBase({
   // track whether the "inspect issues" popover is open
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
+  const [selectedKbModel, setSelectedKbModel] = useState<KbModel | undefined>();
+
   useEffect(() => {
     if (
       prevIsInstalling === true &&
@@ -42,9 +45,9 @@ export function WelcomeMessageKnowledgeBase({
     }
   }, [knowledgeBase.isInstalling, knowledgeBase.installError, prevIsInstalling]);
 
-  const handleInstall = async () => {
+  const handleInstall = async (kbModel: KbModel | undefined) => {
     setIsPopoverOpen(false);
-    await knowledgeBase.install();
+    await knowledgeBase.install(kbModel);
   };
 
   // If we are installing at any step (POST /setup + model deployment)
@@ -86,6 +89,8 @@ export function WelcomeMessageKnowledgeBase({
           )}
         </EuiText>
 
+        <SelectKnowledgeBaseModel onSelectKbModel={setSelectedKbModel} kbModel={selectedKbModel} />
+
         <EuiSpacer size="m" />
 
         <EuiFlexGroup justifyContent="center">
@@ -97,7 +102,7 @@ export function WelcomeMessageKnowledgeBase({
                 fill
                 isLoading={false}
                 iconType="importAction"
-                onClick={handleInstall}
+                onClick={() => handleInstall(selectedKbModel)}
               >
                 {i18n.translate('xpack.aiAssistant.welcomeMessage.retryButtonLabel', {
                   defaultMessage: 'Install Knowledge base',
@@ -132,7 +137,7 @@ export function WelcomeMessageKnowledgeBase({
                 >
                   <WelcomeMessageKnowledgeBaseSetupErrorPanel
                     knowledgeBase={knowledgeBase}
-                    onRetryInstall={handleInstall}
+                    onRetryInstall={() => handleInstall(selectedKbModel)}
                   />
                 </EuiPopover>
               </EuiFlexItem>

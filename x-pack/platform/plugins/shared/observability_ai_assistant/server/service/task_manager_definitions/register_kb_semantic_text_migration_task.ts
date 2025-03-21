@@ -15,7 +15,7 @@ import { resourceNames } from '..';
 import { getElserModelStatus } from '../inference_endpoint';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
-import { reIndexKnowledgeBase } from '../knowledge_base_service/reindex_knowledge_base';
+import { reIndexKnowledgeBaseIfSemanticTextIsUnsupported } from '../knowledge_base_service/reindex_knowledge_base';
 
 const TASK_ID = 'obs-ai-assistant:knowledge-base-migration-task-id';
 const TASK_TYPE = 'obs-ai-assistant:knowledge-base-migration';
@@ -136,13 +136,12 @@ export async function reIndexKnowledgeBaseAndPopulateSemanticTextField({
   logger.debug('Starting migration...');
 
   try {
-    await reIndexKnowledgeBase({ logger, esClient });
+    await reIndexKnowledgeBaseIfSemanticTextIsUnsupported({ logger, esClient });
     await populateSemanticTextFieldRecursively({ esClient, logger, config });
+    logger.debug('Migration succeeded');
   } catch (e) {
     logger.error(`Migration failed: ${e.message}`);
   }
-
-  logger.debug('Migration succeeded');
 }
 
 async function populateSemanticTextFieldRecursively({
@@ -184,7 +183,7 @@ async function populateSemanticTextFieldRecursively({
   await waitForModel({ esClient, logger, config });
 
   // Limit the number of concurrent requests to avoid overloading the cluster
-  const limiter = pLimit(10);
+  const limiter = pLimit(20);
   const promises = response.hits.hits.map((hit) => {
     return limiter(() => {
       if (!hit._source || !hit._id) {
@@ -197,7 +196,7 @@ async function populateSemanticTextFieldRecursively({
         id: hit._id,
         doc: {
           ...hit._source,
-          semantic_text: hit._source.text,
+          semantic_text: hit._source.text ?? 'No text',
         },
       });
     });
@@ -205,6 +204,7 @@ async function populateSemanticTextFieldRecursively({
 
   await Promise.all(promises);
 
+  await sleep(100);
   logger.debug(`Populated ${promises.length} entries`);
   await populateSemanticTextFieldRecursively({ esClient, logger, config });
 }
@@ -228,4 +228,8 @@ async function waitForModel({
     },
     { retries: 30, factor: 2, maxTimeout: 30_000 }
   );
+}
+
+async function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
