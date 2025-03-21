@@ -30,6 +30,7 @@ import { FrameType, normalizeFrameType } from '@kbn/profiling-utils';
  */
 const RED = 0xfd8484;
 const ORANGE = 0xffaa00;
+const DARKORANGE = 0xff7700;
 const YELLOW = 0xe1e100;
 
 export const FRAME_TYPE_COLOR_MAP = {
@@ -49,6 +50,7 @@ export const FRAME_TYPE_COLOR_MAP = {
   [FrameType.Root]: [RED, RED, RED, RED],
   [FrameType.ProcessName]: [ORANGE, ORANGE, ORANGE, ORANGE],
   [FrameType.ThreadName]: [YELLOW, YELLOW, YELLOW, YELLOW],
+  [FrameType.ExecutableName]: [DARKORANGE, DARKORANGE, DARKORANGE, DARKORANGE],
 };
 
 export function frameTypeToRGB(frameType: FrameType, x: number): number {
