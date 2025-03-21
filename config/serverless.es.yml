@@ -136,4 +136,4 @@ xpack.observabilityAiAssistantManagement.visibilityEnabled: false
 xpack.searchSynonyms.enabled: true
 
 # Query Rules UI
-xpack.searchQueryRules.enabled: true
+xpack.searchQueryRules.enabled: false

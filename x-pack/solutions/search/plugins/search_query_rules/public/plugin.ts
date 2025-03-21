@@ -33,14 +33,6 @@ export class QueryRulesPlugin
       id: PLUGIN_ID,
       appRoute: PLUGIN_ROUTE_ROOT,
       title: PLUGIN_TITLE,
-      deepLinks: [
-        {
-          id: PLUGIN_ID,
-          path: '/',
-          title: PLUGIN_TITLE,
-          visibleIn: ['globalSearch'],
-        },
-      ],
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
@@ -56,7 +48,7 @@ export class QueryRulesPlugin
 
         return renderApp(coreStart, startDeps, element);
       },
-      visibleIn: [],
+      visibleIn: ['globalSearch'],
     });
 
     return {};
