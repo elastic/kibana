@@ -11,9 +11,12 @@ import type {
   CoreSetup,
   CoreStart,
   Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
+import { isSupportedConnector } from '@kbn/inference-common';
+import { getDefaultAIConnectorSetting } from '@kbn/security-solution-plugin/server/ui_settings';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -84,6 +87,30 @@ export class SecuritySolutionServerlessPlugin
     // Setup project uiSettings whitelisting
     pluginsSetup.serverless.setupProjectSettings(SECURITY_PROJECT_SETTINGS);
 
+    // Serverless Advanced Settings setup
+    coreSetup
+      .getStartServices()
+      .then(async ([coreStart, depsStart]) => {
+        await new Promise<void>(async (resolve) => {
+          try {
+            const fakeRequest = { headers: {} } as KibanaRequest;
+            const actionsClient = await depsStart.actions.getActionsClientWithRequest(fakeRequest);
+            const aiConnectors = actionsClient.context.inMemoryConnectors.filter((connector) =>
+              isSupportedConnector(connector)
+            );
+            console.log('aiConnectors ==>', aiConnectors);
+            const defaultAIConnectorSetting = getDefaultAIConnectorSetting(aiConnectors);
+            if (defaultAIConnectorSetting !== null) {
+              const didReg = await coreSetup.uiSettings.register(defaultAIConnectorSetting);
+            }
+            resolve();
+          } catch (error) {
+            this.logger.error(`Error registering default AI connector: ${error}`);
+            resolve();
+          }
+        });
+      })
+      .catch(() => {}); // it shouldn't reject, but just in case
     // Tasks
     this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({
       core: coreSetup,
