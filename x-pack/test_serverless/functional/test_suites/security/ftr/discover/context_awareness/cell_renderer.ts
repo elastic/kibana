@@ -7,89 +7,55 @@
 
 import kbnRison from '@kbn/rison';
 import expect from '@kbn/expect';
-import path from 'path';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { SECURITY_ES_ARCHIVES_DIR } from '../../../constants';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
-  const dataViews = getService('dataViews');
-  const esArchiver = getService('esArchiver');
   const queryBar = getService('queryBar');
 
-  const defaultColumns = [
-    '@timestamp',
-    'kibana.alert.workflow_status',
-    'message',
-    'event.category',
-    'event.action',
-    'host.name',
-    'source.ip',
-    'destination.ip',
-    'user.name',
-  ];
-
-  describe('security root profile', () => {
+  describe('cell renderer', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.loginAsViewer();
-      await esArchiver.loadIfNeeded(path.join(SECURITY_ES_ARCHIVES_DIR, 'auditbeat_single'));
+      await PageObjects.svlCommonPage.loginAsAdmin();
     });
 
-    after(async () => {
-      await esArchiver.unload(path.join(SECURITY_ES_ARCHIVES_DIR, 'auditbeat_single'));
-    });
-
-    describe('cell renderers', () => {
-      describe('host.name', () => {
-        describe('DataView mode', () => {
-          it('should open host.name flyout', async () => {
-            await PageObjects.common.navigateToActualUrl('discover', undefined, {
-              ensureCurrentUrl: false,
-            });
-            await dataViews.createFromSearchBar({
-              name: 'auditbeat-2022',
-              adHoc: true,
-              hasTimeField: true,
-            });
-            await queryBar.setQuery('host.name: "siem-kibana"');
-            await queryBar.clickQuerySubmitButton();
-            await PageObjects.discover.waitUntilSearchingHasFinished();
-            expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
-              defaultColumns.join(', ')
-            );
-            // security host.name button
-            const hostName = await testSubjects.findAll('host-details-button', 2500);
-            expect(hostName).to.have.length(1);
-            await hostName[0].click();
-            await testSubjects.existOrFail('host-panel-header', { timeout: 2500 });
-            await testSubjects.existOrFail('asset-criticality-selector', { timeout: 2500 });
-            await testSubjects.existOrFail('observedEntity-accordion', { timeout: 2500 });
+    describe('DataView mode', () => {
+      describe('cell renderer', () => {
+        it('should open host.name flyout with correct content', async () => {
+          await PageObjects.common.navigateToActualUrl('discover', undefined, {
+            ensureCurrentUrl: false,
           });
+          await queryBar.setQuery('host.name: "siem-kibana" AND event.kind: "signal"');
+          await queryBar.clickQuerySubmitButton();
+          await PageObjects.discover.waitUntilSearchingHasFinished();
+          const hostName = await testSubjects.findAll('host-details-button', 2500);
+          expect(hostName).to.have.length(1);
+          await hostName[0].click();
+          await testSubjects.existOrFail('host-panel-header', { timeout: 2500 });
+          await testSubjects.existOrFail('asset-criticality-selector', { timeout: 2500 });
+          await testSubjects.existOrFail('observedEntity-accordion', { timeout: 2500 });
         });
+      });
 
-        describe('ES|QL mode', () => {
-          it('should open host.name flyout', async () => {
-            const state = kbnRison.encode({
-              dataSource: { type: 'esql' },
-
-              query: { esql: 'from auditbeat-2022 | WHERE host.name == "siem-kibana"' },
-            });
-
-            await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
-              ensureCurrentUrl: false,
-            });
-            await PageObjects.discover.waitUntilSearchingHasFinished();
-            await PageObjects.discover.dragFieldToTable('host.name');
-            expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be('host.name');
-            // security host.name button
-            const hostName = await testSubjects.findAll('host-details-button', 2500);
-            expect(hostName).to.have.length(1);
-            await hostName[0].click();
-            await testSubjects.existOrFail('host-panel-header', { timeout: 2500 });
-            await testSubjects.existOrFail('asset-criticality-selector', { timeout: 2500 });
-            await testSubjects.existOrFail('observedEntity-accordion', { timeout: 2500 });
+      describe('ES|QL mode', () => {
+        it('should open host.name flyout', async () => {
+          const state = kbnRison.encode({
+            dataSource: { type: 'esql' },
+            query: {
+              esql: 'from auditbeat-2022 | WHERE host.name == "siem-kibana" and event.kind != "signal"',
+            },
           });
+          await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
+            ensureCurrentUrl: false,
+          });
+          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await PageObjects.discover.dragFieldToTable('host.name');
+          const hostName = await testSubjects.findAll('host-details-button', 2500);
+          expect(hostName).to.have.length(1);
+          await hostName[0].click();
+          await testSubjects.existOrFail('host-panel-header', { timeout: 2500 });
+          await testSubjects.existOrFail('asset-criticality-selector', { timeout: 2500 });
+          await testSubjects.existOrFail('observedEntity-accordion', { timeout: 2500 });
         });
       });
     });

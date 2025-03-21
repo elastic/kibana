@@ -8,21 +8,11 @@
 import kbnRison from '@kbn/rison';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-
-const defaultEventColumns = [
-  '@timestamp',
-  'kibana.alert.workflow_status',
-  'message',
-  'event.category',
-  'event.action',
-  'host.name',
-  'source.ip',
-  'destination.ip',
-  'user.name',
-];
+import { SECURITY_SOLUTION_DATA_VIEW } from '../../../constants';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'svlCommonPage']);
+  const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
 
   describe('row leading controls', () => {
@@ -31,31 +21,51 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('DataView mode', () => {
-      it('should have correct list of columns', async () => {
+      it('should have explore event and alert in security leading action', async () => {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
         await queryBar.setQuery('host.name: "siem-kibana"');
         await queryBar.clickQuerySubmitButton();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
-          defaultEventColumns.join(', ')
+        const exploreInSecurityAction = await testSubjects.findAll(
+          'unifiedDataTable_rowControl_additionalRowControl_exploreInSecurity',
+          2500
+        );
+        expect(exploreInSecurityAction).to.have.length(2);
+
+        expect(await exploreInSecurityAction[0].getAttribute('aria-label')).to.eql(
+          'Explore alert in Security'
+        );
+        expect(await exploreInSecurityAction[1].getAttribute('aria-label')).to.eql(
+          'Explore event in Security'
         );
       });
     });
 
     describe('ES|QL mode', () => {
-      it('should have correct list of columns', async () => {
+      it('should have explore event in security leading action', async () => {
+        const query = `FROM ${SECURITY_SOLUTION_DATA_VIEW}`;
         const state = kbnRison.encode({
           dataSource: { type: 'esql' },
+          query: { esql: query },
         });
 
         await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
-          defaultEventColumns.join(', ')
+        const exploreInSecurityAction = await testSubjects.findAll(
+          'unifiedDataTable_rowControl_additionalRowControl_exploreInSecurity',
+          2500
+        );
+        expect(exploreInSecurityAction).to.have.length(2);
+
+        expect(await exploreInSecurityAction[0].getAttribute('aria-label')).to.eql(
+          'Explore alert in Security'
+        );
+        expect(await exploreInSecurityAction[1].getAttribute('aria-label')).to.eql(
+          'Explore event in Security'
         );
       });
     });
