@@ -50,6 +50,8 @@ import type {
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
 
 import { Logger } from '@kbn/logging';
+import { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import { WorkspaceService } from './workspace';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
@@ -85,6 +87,7 @@ export interface StartDeps {
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
   uiSettings: IUiSettingsClient;
+  featureFlags: FeatureFlagsStart;
 }
 
 /** @internal */
@@ -97,6 +100,7 @@ export class ChromeService {
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
   private readonly projectNavigation: ProjectNavigationService;
+  private readonly workspaceService = new WorkspaceService();
   private mutationObserver: MutationObserver | undefined;
   private readonly isSideNavCollapsed$ = new BehaviorSubject(
     localStorage.getItem(IS_SIDENAV_COLLAPSED_KEY) === 'true'
@@ -251,6 +255,7 @@ export class ChromeService {
     theme,
     userProfile,
     uiSettings,
+    featureFlags,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
     this.handleEuiFullScreenChanges();
@@ -530,12 +535,24 @@ export class ChromeService {
       return <HeaderComponent />;
     };
 
+    const workspace = this.workspaceService.start({
+      featureFlags,
+      application,
+      projectNavigation,
+      isVisible$: this.isVisible$,
+      recentlyAccessed,
+      http: { basePath: http.basePath, getLoadingCount$: http.getLoadingCount$ },
+      customBranding: { customBranding$ },
+    });
+
     return {
       navControls,
       navLinks,
       recentlyAccessed,
       docTitle,
       getHeaderComponent,
+      projectNavigation,
+      workspace,
 
       getIsVisible$: () => this.isVisible$,
 

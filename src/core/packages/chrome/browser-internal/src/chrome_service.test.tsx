@@ -28,6 +28,7 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { getAppInfo } from '@kbn/core-application-browser-internal';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { findTestSubject } from '@kbn/test-jest-helpers';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import { ChromeService } from './chrome_service';
 
 const mockhandleSystemColorModeChange = jest.fn();
@@ -72,6 +73,7 @@ function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
     notifications: notificationServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
+    featureFlags: coreFeatureFlagsMock.createStart(),
   };
 
   if (availableApps) {
@@ -112,6 +114,7 @@ async function start({
   }
 
   service.setup({ analytics: analyticsServiceMock.createAnalyticsServiceSetup() });
+  // @ts-expect-error
   const chromeStart = await service.start(startDeps);
 
   return {

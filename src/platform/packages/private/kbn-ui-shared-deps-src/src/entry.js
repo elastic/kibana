@@ -29,6 +29,7 @@ export const EmotionCache = require('@emotion/cache');
 export const EmotionReact = require('@emotion/react');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
+export const KbnWorkspaceState = require('@kbn/core-workspace-state');
 
 export const IoTs = require('io-ts');
 export const KbnMonaco = require('@kbn/monaco');
