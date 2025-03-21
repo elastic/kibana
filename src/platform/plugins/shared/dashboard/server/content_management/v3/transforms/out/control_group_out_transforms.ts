@@ -70,6 +70,10 @@ function transformIgnoreParentSettingsSetDefaults(
   return defaults(ignoreParentSettings, DEFAULT_IGNORE_PARENT_SETTINGS);
 }
 
+/**
+ * Explicitly extract and provide the expected properties ignoring any unsupported
+ * properties that may be in the saved object.
+ */
 function transformIgnoreParentSettingsProperties({
   ignoreFilters,
   ignoreQuery,
