@@ -44484,7 +44484,7 @@
                                                 {
                                                   "additionalProperties": false,
                                                   "properties": {
-                                                    "grok": {
+                                                    "date": {
                                                       "allOf": [
                                                         {
                                                           "properties": {
@@ -44631,27 +44631,33 @@
                                                               "minLength": 1,
                                                               "type": "string"
                                                             },
-                                                            "ignore_missing": {
-                                                              "type": "boolean"
-                                                            },
-                                                            "pattern_definitions": {
-                                                              "additionalProperties": {
-                                                                "type": "string"
-                                                              },
-                                                              "type": "object"
-                                                            },
-                                                            "patterns": {
+                                                            "formats": {
                                                               "items": {
                                                                 "minLength": 1,
                                                                 "type": "string"
                                                               },
-                                                              "minItems": 1,
                                                               "type": "array"
+                                                            },
+                                                            "locale": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "output_format": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "target_field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                              "minLength": 1,
+                                                              "type": "string"
                                                             }
                                                           },
                                                           "required": [
                                                             "field",
-                                                            "patterns"
+                                                            "formats"
                                                           ],
                                                           "type": "object"
                                                         }
@@ -44659,7 +44665,7 @@
                                                     }
                                                   },
                                                   "required": [
-                                                    "grok"
+                                                    "date"
                                                   ],
                                                   "type": "object"
                                                 },
@@ -44836,6 +44842,188 @@
                                                   },
                                                   "required": [
                                                     "dissect"
+                                                  ],
+                                                  "type": "object"
+                                                },
+                                                {
+                                                  "additionalProperties": false,
+                                                  "properties": {
+                                                    "grok": {
+                                                      "allOf": [
+                                                        {
+                                                          "properties": {
+                                                            "description": {
+                                                              "type": "string"
+                                                            },
+                                                            "if": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "field": {
+                                                                          "minLength": 1,
+                                                                          "type": "string"
+                                                                        },
+                                                                        "operator": {
+                                                                          "enum": [
+                                                                            "exists",
+                                                                            "notExists"
+                                                                          ],
+                                                                          "type": "string"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "field",
+                                                                        "operator"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "field": {
+                                                                          "minLength": 1,
+                                                                          "type": "string"
+                                                                        },
+                                                                        "operator": {
+                                                                          "enum": [
+                                                                            "eq",
+                                                                            "neq",
+                                                                            "lt",
+                                                                            "lte",
+                                                                            "gt",
+                                                                            "gte",
+                                                                            "contains",
+                                                                            "startsWith",
+                                                                            "endsWith"
+                                                                          ],
+                                                                          "type": "string"
+                                                                        },
+                                                                        "value": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "field",
+                                                                        "operator",
+                                                                        "value"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "and": {
+                                                                      "items": {},
+                                                                      "type": "array"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "and"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "or": {
+                                                                      "items": {},
+                                                                      "type": "array"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "or"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "never": {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {},
+                                                                      "type": "object"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "never"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "always": {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {},
+                                                                      "type": "object"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "always"
+                                                                  ],
+                                                                  "type": "object"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "ignore_failure": {
+                                                              "type": "boolean"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "if"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "properties": {
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "ignore_missing": {
+                                                              "type": "boolean"
+                                                            },
+                                                            "pattern_definitions": {
+                                                              "additionalProperties": {
+                                                                "type": "string"
+                                                              },
+                                                              "type": "object"
+                                                            },
+                                                            "patterns": {
+                                                              "items": {
+                                                                "minLength": 1,
+                                                                "type": "string"
+                                                              },
+                                                              "minItems": 1,
+                                                              "type": "array"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field",
+                                                            "patterns"
+                                                          ],
+                                                          "type": "object"
+                                                        }
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "grok"
                                                   ],
                                                   "type": "object"
                                                 }
@@ -45223,7 +45411,7 @@
                                                 {
                                                   "additionalProperties": false,
                                                   "properties": {
-                                                    "grok": {
+                                                    "date": {
                                                       "allOf": [
                                                         {
                                                           "properties": {
@@ -45370,27 +45558,33 @@
                                                               "minLength": 1,
                                                               "type": "string"
                                                             },
-                                                            "ignore_missing": {
-                                                              "type": "boolean"
-                                                            },
-                                                            "pattern_definitions": {
-                                                              "additionalProperties": {
-                                                                "type": "string"
-                                                              },
-                                                              "type": "object"
-                                                            },
-                                                            "patterns": {
+                                                            "formats": {
                                                               "items": {
                                                                 "minLength": 1,
                                                                 "type": "string"
                                                               },
-                                                              "minItems": 1,
                                                               "type": "array"
+                                                            },
+                                                            "locale": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "output_format": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "target_field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                              "minLength": 1,
+                                                              "type": "string"
                                                             }
                                                           },
                                                           "required": [
                                                             "field",
-                                                            "patterns"
+                                                            "formats"
                                                           ],
                                                           "type": "object"
                                                         }
@@ -45398,7 +45592,7 @@
                                                     }
                                                   },
                                                   "required": [
-                                                    "grok"
+                                                    "date"
                                                   ],
                                                   "type": "object"
                                                 },
@@ -45575,6 +45769,188 @@
                                                   },
                                                   "required": [
                                                     "dissect"
+                                                  ],
+                                                  "type": "object"
+                                                },
+                                                {
+                                                  "additionalProperties": false,
+                                                  "properties": {
+                                                    "grok": {
+                                                      "allOf": [
+                                                        {
+                                                          "properties": {
+                                                            "description": {
+                                                              "type": "string"
+                                                            },
+                                                            "if": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "field": {
+                                                                          "minLength": 1,
+                                                                          "type": "string"
+                                                                        },
+                                                                        "operator": {
+                                                                          "enum": [
+                                                                            "exists",
+                                                                            "notExists"
+                                                                          ],
+                                                                          "type": "string"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "field",
+                                                                        "operator"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "field": {
+                                                                          "minLength": 1,
+                                                                          "type": "string"
+                                                                        },
+                                                                        "operator": {
+                                                                          "enum": [
+                                                                            "eq",
+                                                                            "neq",
+                                                                            "lt",
+                                                                            "lte",
+                                                                            "gt",
+                                                                            "gte",
+                                                                            "contains",
+                                                                            "startsWith",
+                                                                            "endsWith"
+                                                                          ],
+                                                                          "type": "string"
+                                                                        },
+                                                                        "value": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "field",
+                                                                        "operator",
+                                                                        "value"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "and": {
+                                                                      "items": {},
+                                                                      "type": "array"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "and"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "or": {
+                                                                      "items": {},
+                                                                      "type": "array"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "or"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "never": {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {},
+                                                                      "type": "object"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "never"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "always": {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {},
+                                                                      "type": "object"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "always"
+                                                                  ],
+                                                                  "type": "object"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "ignore_failure": {
+                                                              "type": "boolean"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "if"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "properties": {
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "ignore_missing": {
+                                                              "type": "boolean"
+                                                            },
+                                                            "pattern_definitions": {
+                                                              "additionalProperties": {
+                                                                "type": "string"
+                                                              },
+                                                              "type": "object"
+                                                            },
+                                                            "patterns": {
+                                                              "items": {
+                                                                "minLength": 1,
+                                                                "type": "string"
+                                                              },
+                                                              "minItems": 1,
+                                                              "type": "array"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field",
+                                                            "patterns"
+                                                          ],
+                                                          "type": "object"
+                                                        }
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "grok"
                                                   ],
                                                   "type": "object"
                                                 }
@@ -46128,7 +46504,7 @@
                                     {
                                       "additionalProperties": false,
                                       "properties": {
-                                        "grok": {
+                                        "date": {
                                           "allOf": [
                                             {
                                               "properties": {
@@ -46275,27 +46651,33 @@
                                                   "minLength": 1,
                                                   "type": "string"
                                                 },
-                                                "ignore_missing": {
-                                                  "type": "boolean"
-                                                },
-                                                "pattern_definitions": {
-                                                  "additionalProperties": {
-                                                    "type": "string"
-                                                  },
-                                                  "type": "object"
-                                                },
-                                                "patterns": {
+                                                "formats": {
                                                   "items": {
                                                     "minLength": 1,
                                                     "type": "string"
                                                   },
-                                                  "minItems": 1,
                                                   "type": "array"
+                                                },
+                                                "locale": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "output_format": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "target_field": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "timezone": {
+                                                  "minLength": 1,
+                                                  "type": "string"
                                                 }
                                               },
                                               "required": [
                                                 "field",
-                                                "patterns"
+                                                "formats"
                                               ],
                                               "type": "object"
                                             }
@@ -46303,7 +46685,7 @@
                                         }
                                       },
                                       "required": [
-                                        "grok"
+                                        "date"
                                       ],
                                       "type": "object"
                                     },
@@ -46480,6 +46862,188 @@
                                       },
                                       "required": [
                                         "dissect"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "grok": {
+                                          "allOf": [
+                                            {
+                                              "properties": {
+                                                "description": {
+                                                  "type": "string"
+                                                },
+                                                "if": {
+                                                  "anyOf": [
+                                                    {
+                                                      "anyOf": [
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "operator": {
+                                                              "enum": [
+                                                                "exists",
+                                                                "notExists"
+                                                              ],
+                                                              "type": "string"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field",
+                                                            "operator"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "operator": {
+                                                              "enum": [
+                                                                "eq",
+                                                                "neq",
+                                                                "lt",
+                                                                "lte",
+                                                                "gt",
+                                                                "gte",
+                                                                "contains",
+                                                                "startsWith",
+                                                                "endsWith"
+                                                              ],
+                                                              "type": "string"
+                                                            },
+                                                            "value": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field",
+                                                            "operator",
+                                                            "value"
+                                                          ],
+                                                          "type": "object"
+                                                        }
+                                                      ]
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "and": {
+                                                          "items": {},
+                                                          "type": "array"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "and"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "or": {
+                                                          "items": {},
+                                                          "type": "array"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "or"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "never": {
+                                                          "additionalProperties": false,
+                                                          "properties": {},
+                                                          "type": "object"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "never"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "always": {
+                                                          "additionalProperties": false,
+                                                          "properties": {},
+                                                          "type": "object"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "always"
+                                                      ],
+                                                      "type": "object"
+                                                    }
+                                                  ]
+                                                },
+                                                "ignore_failure": {
+                                                  "type": "boolean"
+                                                }
+                                              },
+                                              "required": [
+                                                "if"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            {
+                                              "properties": {
+                                                "field": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "ignore_missing": {
+                                                  "type": "boolean"
+                                                },
+                                                "pattern_definitions": {
+                                                  "additionalProperties": {
+                                                    "type": "string"
+                                                  },
+                                                  "type": "object"
+                                                },
+                                                "patterns": {
+                                                  "items": {
+                                                    "minLength": 1,
+                                                    "type": "string"
+                                                  },
+                                                  "minItems": 1,
+                                                  "type": "array"
+                                                }
+                                              },
+                                              "required": [
+                                                "field",
+                                                "patterns"
+                                              ],
+                                              "type": "object"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "grok"
                                       ],
                                       "type": "object"
                                     }
@@ -46840,7 +47404,7 @@
                                     {
                                       "additionalProperties": false,
                                       "properties": {
-                                        "grok": {
+                                        "date": {
                                           "allOf": [
                                             {
                                               "properties": {
@@ -46987,27 +47551,33 @@
                                                   "minLength": 1,
                                                   "type": "string"
                                                 },
-                                                "ignore_missing": {
-                                                  "type": "boolean"
-                                                },
-                                                "pattern_definitions": {
-                                                  "additionalProperties": {
-                                                    "type": "string"
-                                                  },
-                                                  "type": "object"
-                                                },
-                                                "patterns": {
+                                                "formats": {
                                                   "items": {
                                                     "minLength": 1,
                                                     "type": "string"
                                                   },
-                                                  "minItems": 1,
                                                   "type": "array"
+                                                },
+                                                "locale": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "output_format": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "target_field": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "timezone": {
+                                                  "minLength": 1,
+                                                  "type": "string"
                                                 }
                                               },
                                               "required": [
                                                 "field",
-                                                "patterns"
+                                                "formats"
                                               ],
                                               "type": "object"
                                             }
@@ -47015,7 +47585,7 @@
                                         }
                                       },
                                       "required": [
-                                        "grok"
+                                        "date"
                                       ],
                                       "type": "object"
                                     },
@@ -47192,6 +47762,188 @@
                                       },
                                       "required": [
                                         "dissect"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "grok": {
+                                          "allOf": [
+                                            {
+                                              "properties": {
+                                                "description": {
+                                                  "type": "string"
+                                                },
+                                                "if": {
+                                                  "anyOf": [
+                                                    {
+                                                      "anyOf": [
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "operator": {
+                                                              "enum": [
+                                                                "exists",
+                                                                "notExists"
+                                                              ],
+                                                              "type": "string"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field",
+                                                            "operator"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "operator": {
+                                                              "enum": [
+                                                                "eq",
+                                                                "neq",
+                                                                "lt",
+                                                                "lte",
+                                                                "gt",
+                                                                "gte",
+                                                                "contains",
+                                                                "startsWith",
+                                                                "endsWith"
+                                                              ],
+                                                              "type": "string"
+                                                            },
+                                                            "value": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field",
+                                                            "operator",
+                                                            "value"
+                                                          ],
+                                                          "type": "object"
+                                                        }
+                                                      ]
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "and": {
+                                                          "items": {},
+                                                          "type": "array"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "and"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "or": {
+                                                          "items": {},
+                                                          "type": "array"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "or"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "never": {
+                                                          "additionalProperties": false,
+                                                          "properties": {},
+                                                          "type": "object"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "never"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "always": {
+                                                          "additionalProperties": false,
+                                                          "properties": {},
+                                                          "type": "object"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "always"
+                                                      ],
+                                                      "type": "object"
+                                                    }
+                                                  ]
+                                                },
+                                                "ignore_failure": {
+                                                  "type": "boolean"
+                                                }
+                                              },
+                                              "required": [
+                                                "if"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            {
+                                              "properties": {
+                                                "field": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "ignore_missing": {
+                                                  "type": "boolean"
+                                                },
+                                                "pattern_definitions": {
+                                                  "additionalProperties": {
+                                                    "type": "string"
+                                                  },
+                                                  "type": "object"
+                                                },
+                                                "patterns": {
+                                                  "items": {
+                                                    "minLength": 1,
+                                                    "type": "string"
+                                                  },
+                                                  "minItems": 1,
+                                                  "type": "array"
+                                                }
+                                              },
+                                              "required": [
+                                                "field",
+                                                "patterns"
+                                              ],
+                                              "type": "object"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "grok"
                                       ],
                                       "type": "object"
                                     }
