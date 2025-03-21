@@ -54,6 +54,7 @@
     "@kbn/deeplinks-search",
     "@kbn/logging-mocks",
     "@kbn/inference-plugin",
+    "@kbn/code-editor",
   ],
   "exclude": [
     "target/**/*",

@@ -19,7 +19,6 @@ import {
   type ESQLTimeInterval,
 } from '@kbn/esql-ast';
 import {
-  ESQLCommandMode,
   ESQLIdentifier,
   ESQLInlineCast,
   ESQLParamLiteral,
@@ -34,16 +33,7 @@ import { getTestFunctions } from './test_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';
 import {
-  byOption,
-  metadataOption,
-  asOption,
-  onOption,
-  withOption,
-  appendSeparatorOption,
-} from '../definitions/options';
-import {
   CommandDefinition,
-  CommandOptionsDefinition,
   FunctionParameter,
   FunctionDefinition,
   FunctionParameterType,
@@ -66,10 +56,6 @@ export function isSingleItem(arg: ESQLAstItem): arg is ESQLSingleAstItem {
   return arg && !Array.isArray(arg);
 }
 
-/** @deprecated — a "setting" is a concept we will be getting rid of soon */
-export function isSettingItem(arg: ESQLAstItem): arg is ESQLCommandMode {
-  return isSingleItem(arg) && arg.type === 'mode';
-}
 export function isFunctionItem(arg: ESQLAstItem): arg is ESQLFunction {
   return isSingleItem(arg) && arg.type === 'function';
 }
@@ -224,12 +210,6 @@ export function getCommandDefinition(name: string): CommandDefinition<string> {
 
 export function getAllCommands() {
   return Array.from(buildCommandLookup().values());
-}
-
-export function getCommandOption(optionName: CommandOptionsDefinition<string>['name']) {
-  return [byOption, metadataOption, asOption, onOption, withOption, appendSeparatorOption].find(
-    ({ name }) => name === optionName
-  );
 }
 
 function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {
