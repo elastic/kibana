@@ -56,6 +56,7 @@ import { getAuthorizedConsumers } from '../utils';
 import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
 import { RuleSchedule } from './rule_schedule';
+import InvestigationManager from './rule_investigation_guide';
 
 export const RuleDefinition = () => {
   const {
@@ -215,6 +216,7 @@ export const RuleDefinition = () => {
     [dispatch]
   );
 
+  console.log('params', params);
   return (
     <EuiSplitPanel.Outer
       hasBorder
@@ -285,6 +287,15 @@ export const RuleDefinition = () => {
                 </EuiErrorBoundary>
               </EuiFlexItem>
             </EuiFlexGroup>
+            <Suspense fallback={null}>
+              <EuiFlexItem>
+                <EuiSpacer size="l" />
+                <InvestigationManager
+                  setRuleParams={onSetRuleParams}
+                  value={params?.investigationGuide ?? ''}
+                />
+              </EuiFlexItem>
+            </Suspense>
           </Suspense>
         )}
       </EuiSplitPanel.Inner>
