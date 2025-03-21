@@ -74,23 +74,23 @@ describe('RiskScoreConfigurationSection', () => {
   });
 
   it('saves changes', () => {
-    const wrapper = mount(
-      <RiskScoreConfigurationSection {...defaultProps} includeClosedAlerts={true} />
-    );
+    const wrapper = mount(<RiskScoreConfigurationSection {...defaultProps} />);
 
-    // Simulate clicking the switch
+    // Simulate clicking the toggle switch
     const closedAlertsToggle = wrapper.find('button[data-test-subj="includeClosedAlertsSwitch"]');
     expect(closedAlertsToggle.exists()).toBe(true);
     closedAlertsToggle.simulate('click');
 
     wrapper.update();
 
+    // Simulate clicking the save button in the bottom bar
     const saveChangesButton = wrapper.find('button[data-test-subj="riskScoreSaveButton"]');
     expect(saveChangesButton.exists()).toBe(true);
     saveChangesButton.simulate('click');
+    wrapper.update();
     const callArgs = mockMutate.mock.calls[0][0];
     expect(callArgs).toEqual({
-      includeClosedAlerts: false,
+      includeClosedAlerts: true,
       range: { start: 'now-30d', end: 'now' },
     });
   });

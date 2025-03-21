@@ -88,8 +88,8 @@ export const RiskScoreConfigurationSection = ({
           <EuiSwitch
             label={i18n.INCLUDE_CLOSED_ALERTS_LABEL}
             checked={checked}
-            data-test-subj="includeClosedAlertsSwitch"
             onChange={onChange}
+            data-test-subj="includeClosedAlertsSwitch"
           />
         </div>
         <styles.VerticalSeparator />
