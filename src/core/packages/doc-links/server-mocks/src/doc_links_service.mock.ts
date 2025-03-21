@@ -16,9 +16,7 @@ type DocLinksServiceContract = PublicMethodsOf<DocLinksService>;
 
 export class MockLinkContext {
   path: string[] = [];
-  constructor(
-    private readonly root: string
-  ) {}
+  constructor(private readonly root: string) {}
 
   addKey(key: string) {
     this.path.push(key);
@@ -26,8 +24,10 @@ export class MockLinkContext {
   }
 
   toString = () => {
-    return `https://docs.elastic.test/#${this.root}${this.path.length ? '.' + this.path.join('.') : ''}`
-  }
+    return `https://docs.elastic.test/#${this.root}${
+      this.path.length ? '.' + this.path.join('.') : ''
+    }`;
+  };
 
   getMockName = () => {
     return this.toString();
@@ -44,8 +44,8 @@ function createMockLinkGetter(rootKey: string) {
     get(target, key) {
       assertString(key);
       return ctx.addKey(key);
-    }
-  })
+    },
+  });
   return proxy;
 }
 
@@ -53,12 +53,15 @@ const createSetupMock = (): DocLinksServiceSetup => {
   const branch = 'test-branch';
   const buildFlavor = 'traditional';
 
-  const links = new Proxy({}, {
-    get(_, rootKey) {
-      assertString(rootKey);
-      return createMockLinkGetter(rootKey);
+  const links = new Proxy(
+    {},
+    {
+      get(_, rootKey) {
+        assertString(rootKey);
+        return createMockLinkGetter(rootKey);
+      },
     }
-  });
+  );
 
   return {
     ...getDocLinksMeta({ kibanaBranch: branch, buildFlavor }),

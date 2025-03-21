@@ -31,14 +31,22 @@ describe('docLinksServiceMock', () => {
       expect(contract.links.alerting.emailExchangeClientSecretConfig).toMatchSnapshot();
     });
     it('toEqual', () => {
-      expect(String(contract.links.alerting.emailExchangeClientSecretConfig)).toEqual('https://docs.elastic.test/#alerting.emailExchangeClientSecretConfig');
+      expect(String(contract.links.alerting.emailExchangeClientSecretConfig)).toEqual(
+        'https://docs.elastic.test/#alerting.emailExchangeClientSecretConfig'
+      );
     });
     it('toBe', () => {
-      expect(String(contract.links.alerting.emailExchangeClientSecretConfig)).toBe('https://docs.elastic.test/#alerting.emailExchangeClientSecretConfig');
+      expect(String(contract.links.alerting.emailExchangeClientSecretConfig)).toBe(
+        'https://docs.elastic.test/#alerting.emailExchangeClientSecretConfig'
+      );
     });
     it('can be called multiple times', () => {
-      expect(String(contract.links.alerting.emailExchangeClientSecretConfig)).toBe('https://docs.elastic.test/#alerting.emailExchangeClientSecretConfig');
-      expect(String(contract.links.aggs.cardinality)).toBe('https://docs.elastic.test/#aggs.cardinality');
+      expect(String(contract.links.alerting.emailExchangeClientSecretConfig)).toBe(
+        'https://docs.elastic.test/#alerting.emailExchangeClientSecretConfig'
+      );
+      expect(String(contract.links.aggs.cardinality)).toBe(
+        'https://docs.elastic.test/#aggs.cardinality'
+      );
     });
   });
 });
