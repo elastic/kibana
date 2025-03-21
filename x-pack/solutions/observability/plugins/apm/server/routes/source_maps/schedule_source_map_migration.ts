@@ -125,8 +125,7 @@ export async function runFleetSourcemapArtifactsMigration({
       internalESClient,
     });
   } catch (e) {
-    logger.error('Failed to migrate APM fleet source map artifacts');
-    logger.error(e);
+    logger.error('Failed to migrate APM fleet source map artifacts', { error: e });
   }
 }
 
