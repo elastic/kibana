@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { keyBy } from 'lodash';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
@@ -15,17 +16,19 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
-import { SO_SEARCH_LIMIT, outputType } from '../../common/constants';
-import type { NewRemoteElasticsearchOutput } from '../../common/types';
+import { SO_SEARCH_LIMIT, outputType } from '../../../common/constants';
+import type { NewRemoteElasticsearchOutput } from '../../../common/types';
 
-import { appContextService, outputService } from '../services';
-import { getInstalledPackageSavedObjects } from '../services/epm/packages/get';
-import { FLEET_SYNCED_INTEGRATIONS_INDEX_NAME } from '../services/setup/fleet_synced_integrations';
+import { appContextService, outputService } from '../../services';
+import { getInstalledPackageSavedObjects } from '../../services/epm/packages/get';
+import { FLEET_SYNCED_INTEGRATIONS_INDEX_NAME } from '../../services/setup/fleet_synced_integrations';
 
 import { syncIntegrationsOnRemote } from './sync_integrations_on_remote';
+import { getCustomAssets } from './custom_assets';
+import type { SyncIntegrationsData } from './model';
 
 export const TYPE = 'fleet:sync-integrations-task';
-export const VERSION = '1.0.1';
+export const VERSION = '1.0.2';
 const TITLE = 'Fleet Sync Integrations Task';
 const SCOPE = ['fleet'];
 const INTERVAL = '5m';
@@ -39,19 +42,6 @@ interface SyncIntegrationsTaskSetupContract {
 
 interface SyncIntegrationsTaskStartContract {
   taskManager: TaskManagerStartContract;
-}
-
-export interface SyncIntegrationsData {
-  remote_es_hosts: Array<{
-    name: string;
-    hosts: string[];
-    sync_integrations: boolean;
-  }>;
-  integrations: Array<{
-    package_name: string;
-    package_version: string;
-    updated_at: string;
-  }>;
 }
 
 export class SyncIntegrationsTask {
@@ -173,22 +163,27 @@ export class SyncIntegrationsTask {
     );
   };
 
-  private hadAnyRemoteESSyncEnabled = async (esClient: ElasticsearchClient): Promise<boolean> => {
+  private getSyncedIntegrationDoc = async (
+    esClient: ElasticsearchClient
+  ): Promise<SyncIntegrationsData | undefined> => {
     try {
       const res = await esClient.get({
         id: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
         index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
       });
-      if (!(res._source as any)?.remote_es_hosts.some((host: any) => host.sync_integrations)) {
-        return false;
-      }
+      return res._source as SyncIntegrationsData;
     } catch (error) {
       if (error.statusCode === 404) {
-        return false;
+        return undefined;
       }
       throw error;
     }
-    return true;
+  };
+
+  private hadAnyRemoteESSyncEnabled = (
+    remoteEsHosts: SyncIntegrationsData['remote_es_hosts']
+  ): boolean => {
+    return remoteEsHosts.some((host) => host.sync_integrations);
   };
 
   private updateSyncedIntegrationsData = async (
@@ -212,8 +207,12 @@ export class SyncIntegrationsTask {
       (output) => (output as NewRemoteElasticsearchOutput).sync_integrations
     );
 
+    const previousSyncIntegrationsData = await this.getSyncedIntegrationDoc(esClient);
+
     if (!isSyncEnabled) {
-      const hadAnyRemoteESSyncEnabled = await this.hadAnyRemoteESSyncEnabled(esClient);
+      const hadAnyRemoteESSyncEnabled =
+        previousSyncIntegrationsData &&
+        this.hadAnyRemoteESSyncEnabled(previousSyncIntegrationsData.remote_es_hosts);
       if (!hadAnyRemoteESSyncEnabled) {
         return;
       }
@@ -229,6 +228,7 @@ export class SyncIntegrationsTask {
         };
       }),
       integrations: [],
+      custom_assets: {},
     };
 
     const packageSavedObjects = await getInstalledPackageSavedObjects(soClient, {
@@ -243,12 +243,27 @@ export class SyncIntegrationsTask {
       };
     });
 
-    await esClient.update(
+    try {
+      const customAssets = await getCustomAssets(
+        esClient,
+        newDoc.integrations,
+        this.abortController,
+        previousSyncIntegrationsData
+      );
+      newDoc.custom_assets = keyBy(customAssets, (asset) => `${asset.type}:${asset.name}`);
+    } catch (error) {
+      this.logger.warn(`[SyncIntegrationsTask] error getting custom assets: ${error}`);
+      newDoc.custom_assets_error = {
+        timestamp: new Date().toISOString(),
+        error: error.message,
+      };
+    }
+
+    await esClient.index(
       {
         id: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
         index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
-        doc: newDoc,
-        doc_as_upsert: true,
+        body: newDoc,
       },
       { signal: this.abortController.signal }
     );
