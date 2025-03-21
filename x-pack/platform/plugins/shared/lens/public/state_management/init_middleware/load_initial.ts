@@ -286,7 +286,13 @@ async function loadFromSavedObject(
           : !inlineEditing
           ? data.search.session.start()
           : undefined,
-      persistedDoc: doc,
+      persistedDoc: {
+        ...doc,
+        state: {
+          ...doc.state,
+          visualization: visualizationState,
+        },
+      },
       activeDatasourceId: getInitialDatasourceId(loaderSharedArgs.datasourceMap, doc),
       visualization: {
         activeId: doc.visualizationType,

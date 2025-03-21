@@ -446,6 +446,15 @@ exports[`XYChart component it renders area 1`] = `
               "formattedColumns": Object {
                 "c": true,
               },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
+              },
               "table": Object {
                 "columns": Array [
                   Object {
@@ -1549,6 +1558,15 @@ exports[`XYChart component it renders area 1`] = `
               "first": Object {
                 "formattedColumns": Object {
                   "c": true,
+                },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -2002,6 +2020,15 @@ exports[`XYChart component it renders bar 1`] = `
               "formattedColumns": Object {
                 "c": true,
               },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
+              },
               "table": Object {
                 "columns": Array [
                   Object {
@@ -3105,6 +3132,15 @@ exports[`XYChart component it renders bar 1`] = `
               "first": Object {
                 "formattedColumns": Object {
                   "c": true,
+                },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -3558,6 +3594,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "formattedColumns": Object {
                 "c": true,
               },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
+              },
               "table": Object {
                 "columns": Array [
                   Object {
@@ -4661,6 +4706,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "first": Object {
                 "formattedColumns": Object {
                   "c": true,
+                },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -5114,6 +5168,15 @@ exports[`XYChart component it renders line 1`] = `
               "formattedColumns": Object {
                 "c": true,
               },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
+              },
               "table": Object {
                 "columns": Array [
                   Object {
@@ -6217,6 +6280,15 @@ exports[`XYChart component it renders line 1`] = `
               "first": Object {
                 "formattedColumns": Object {
                   "c": true,
+                },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -6670,6 +6742,15 @@ exports[`XYChart component it renders stacked area 1`] = `
               "formattedColumns": Object {
                 "c": true,
               },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
+              },
               "table": Object {
                 "columns": Array [
                   Object {
@@ -7774,6 +7855,15 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "formattedColumns": Object {
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -8225,6 +8315,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
             "first": Object {
               "formattedColumns": Object {
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -9330,6 +9429,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "formattedColumns": Object {
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -9781,6 +9889,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             "first": Object {
               "formattedColumns": Object {
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -10885,6 +11002,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "first": Object {
                 "formattedColumns": Object {
                   "c": true,
+                },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -11363,6 +11489,18 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "formattedColumns": Object {
                 "b": true,
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {
+                  2 => 2,
+                  5 => 5,
+                },
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -12668,6 +12806,18 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "b": true,
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {
+                    2 => 2,
+                    5 => 5,
+                  },
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -13159,6 +13309,18 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "formattedColumns": Object {
                 "b": true,
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {
+                  2 => 2,
+                  5 => 5,
+                },
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -14457,6 +14619,18 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "b": true,
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {
+                    2 => 2,
+                    5 => 5,
+                  },
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -14946,6 +15120,18 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "formattedColumns": Object {
                 "b": true,
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {
+                  2 => 2,
+                  5 => 5,
+                },
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -16243,6 +16429,18 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "formattedColumns": Object {
                   "b": true,
                   "c": true,
+                },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {
+                    2 => 2,
+                    5 => 5,
+                  },
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [

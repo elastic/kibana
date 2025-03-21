@@ -33,6 +33,7 @@ import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/sugg
 import { useApplicationUserMessages } from '../../get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { useCurrentAttributes } from './use_current_attributes';
+import { FormBasedPersistedState } from '../../../datasources/form_based/types';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -104,8 +105,10 @@ export function LensEditConfigurationFlyout({
             return customIsEqual(
               previousAttrs.state.visualization,
               previousAttrs.references,
+              previousAttrs.state.datasourceStates.formBased,
               visualizationState,
               attributes.references,
+              datasourceStates?.formBased?.state as FormBasedPersistedState,
               annotationGroups
             );
           } catch (err) {
@@ -116,13 +119,13 @@ export function LensEditConfigurationFlyout({
 
     return !visualizationStateIsEqual || !datasourceStatesAreSame;
   }, [
-    attributes.references,
+    datasourceStates,
     datasourceId,
     datasourceMap,
-    datasourceStates,
+    attributes.references,
+    visualization.state,
     visualizationMap,
     annotationGroups,
-    visualization.state,
   ]);
 
   const onCancel = useCallback(() => {

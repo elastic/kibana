@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import deepEqual from 'fast-deep-equal';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -19,9 +21,10 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { AccessorConfig } from '@kbn/visualization-ui-components';
+import type { AccessorConfig, FormatFactory } from '@kbn/visualization-ui-components';
 import useObservable from 'react-use/lib/useObservable';
 import { getKbnPalettes } from '@kbn/palettes';
+
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   Visualization,
@@ -54,12 +57,12 @@ import { checkTableForContainsSmallValues } from './render_helpers';
 import { DatasourcePublicAPI } from '../..';
 import { nonNullable, getColorMappingDefaults } from '../../utils';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
-import { PersistedPieVisualizationState, convertToRuntime } from './persistence';
 import {
   PIE_RENDER_ARRAY_VALUES,
   PIE_TOO_MANY_DIMENSIONS,
   WAFFLE_SMALL_VALUES,
 } from '../../user_messages_ids';
+import { convertToRuntimeState } from './runtime_state';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
@@ -127,10 +130,12 @@ export const getDefaultColorForMultiMetricDimension = ({
 export const getPieVisualization = ({
   paletteService,
   kibanaTheme,
+  formatFactory,
 }: {
   paletteService: PaletteRegistry;
   kibanaTheme: ThemeServiceStart;
-}): Visualization<PieVisualizationState, PersistedPieVisualizationState> => ({
+  formatFactory: FormatFactory;
+}): Visualization<PieVisualizationState> => ({
   id: 'lnsPie',
   visualizationTypes,
   getVisualizationTypeId(state) {
@@ -161,10 +166,9 @@ export const getPieVisualization = ({
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
-  initialize(addNewLayer, state, mainPalette) {
-    if (state) {
-      return convertToRuntime(state);
-    }
+  initialize(addNewLayer, state, mainPalette, datasourceState) {
+    if (state) return convertToRuntimeState(state, datasourceState);
+
     return {
       shape: PieChartTypes.DONUT,
       layers: [
@@ -508,6 +512,7 @@ export const getPieVisualization = ({
         paletteService={paletteService}
         palettes={palettes}
         isDarkMode={theme.darkMode}
+        formatFactory={formatFactory}
       />
     );
   },
@@ -681,6 +686,12 @@ export const getPieVisualization = ({
     }
 
     return [...errors, ...warningMessages];
+  },
+
+  isEqual(state1, references1, datasourceState1, state2, references2, datasourceState2) {
+    const convertedState1 = convertToRuntimeState(state1, datasourceState1);
+    const convertedState2 = convertToRuntimeState(state2, datasourceState2);
+    return deepEqual(convertedState1, convertedState2);
   },
 
   getVisualizationInfo(state, frame) {

@@ -14,7 +14,7 @@ import {
   ColorMapping,
   SPECIAL_TOKENS_STRING_CONVERSION,
 } from '@kbn/coloring';
-import { ColorPicker } from '@kbn/visualization-ui-components';
+import { ColorPicker, FormatFactory } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiText, EuiBadge } from '@elastic/eui';
 import { useState, useCallback } from 'react';
@@ -34,8 +34,10 @@ import {
   isCollapsed,
 } from './visualization';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
+import { getDatatableColumn } from '../../../common/expressions/datatable/utils';
 
 type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
+  formatFactory: FormatFactory;
   paletteService: PaletteRegistry;
   palettes: KbnPalettes;
   isDarkMode: boolean;
@@ -49,9 +51,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     });
 
   const currentLayer = localState.layers.find((layer) => layer.layerId === props.layerId);
-
-  const canUseColorMapping = currentLayer && currentLayer.colorMapping ? true : false;
-  const [useNewColorMapping, setUseNewColorMapping] = useState(canUseColorMapping);
+  const [useNewColorMapping, setUseNewColorMapping] = useState(Boolean(currentLayer?.colorMapping));
 
   const setConfig = useCallback(
     ({ color }: { color?: string }) => {
@@ -128,8 +128,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
     props.state.palette,
     currentLayer.colorMapping
   );
-  const table = props.frame.activeData?.[currentLayer.layerId];
-  const splitCategories = getColorCategories(table?.rows, props.accessor);
+  const currentData = props.frame.activeData?.[currentLayer.layerId];
+  const columnMeta = getDatatableColumn(currentData, props.accessor)?.meta;
+  const formatter = props.formatFactory(columnMeta?.params);
 
   return (
     <>
@@ -187,7 +188,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  {canUseColorMapping || useNewColorMapping ? (
+                  {useNewColorMapping ? (
                     <CategoricalColorMapping
                       isDarkMode={props.isDarkMode}
                       model={currentLayer.colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
@@ -195,9 +196,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       palettes={props.palettes}
                       data={{
                         type: 'categories',
-                        categories: splitCategories,
+                        categories: getColorCategories(currentData?.rows, props.accessor),
                       }}
                       specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
+                      formatter={formatter}
                     />
                   ) : (
                     <PalettePicker
