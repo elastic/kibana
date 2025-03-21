@@ -9,7 +9,7 @@ import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import React, { useState, type FC, useEffect, useMemo, useCallback, useRef } from 'react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
-import { get } from 'lodash';
+import { get, isEqual } from 'lodash';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -329,5 +329,8 @@ export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
         />
       </>
     );
+  },
+  (prevProps, nextProps) => {
+    return isEqual(prevProps, nextProps);
   }
 );
