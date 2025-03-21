@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { expect as expectExpect } from 'expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { UsageCountersSavedObjectAttributes } from '@kbn/usage-collection-plugin/server';
-import _ from 'lodash';
 import type {
   ApiDeprecationDetails,
   DomainDeprecationDetails,
