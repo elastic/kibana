@@ -38,7 +38,10 @@ export const useFullDataView = (
         return setRetrievedDataView(undefined);
       }
 
-      setRetrievedDataView(await dataViews.get(dataViewId));
+      // TODO: remove conditional call when new data view picker is stabilized
+      // this is due to the fact that many of our tests mock kibana hook and do not provide proper
+      // double for dataViews service
+      setRetrievedDataView(await dataViews?.get(dataViewId));
     })();
   }, [dataViews, dataViewId, internalStatus]);
 
