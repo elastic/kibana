@@ -1,0 +1,10 @@
+- name: stat /usr/share/kibana/node_modules/@kbn/serverless-chat
+  become: yes
+  register: chat_plugin_directory
+  stat:
+    path: /usr/share/kibana/node_modules/@kbn/serverless-chat
+
+- name: /usr/share/kibana/node_modules/@kbn/serverless-chat
+  assert:
+    that:
+      - not chat_plugin_directory.stat.exists

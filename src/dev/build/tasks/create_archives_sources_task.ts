@@ -58,7 +58,10 @@ export const CreateArchivesSources: Task = {
             }
           );
           log.debug(`Adjustments made in serverless specific build directory`);
-        } else {
+
+          // Remove chat solution from release artifacts
+          // For now, snapshot builds support all solutions to faciliate functional testing
+        } else if (config.isRelease) {
           const chatPlugins = config.getSolutionPluginsFromRepo('chat');
           const chatPluginNames = chatPlugins.map((p) => p.name);
           const chatPluginsPaths = chatPluginNames.map((name) =>
