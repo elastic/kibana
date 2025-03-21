@@ -847,6 +847,7 @@ x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hun
 x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-explore
 x-pack/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 x-pack/platform/packages/private/security/ui_components @elastic/kibana-security
+x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 x-pack/solutions/security/packages/data-table @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
