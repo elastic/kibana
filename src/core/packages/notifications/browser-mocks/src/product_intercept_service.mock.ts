@@ -7,4 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ToastsTelemetry } from './event_reporter';
+import { IProductInterceptPublicApi } from '@kbn/core-notifications-browser';
+
+const createProductInterceptDialogServiceMock = () => {
+  const api: jest.Mocked<IProductInterceptPublicApi> = {
+    add: jest.fn(),
+  };
+
+  return api;
+};
+
+const createStartContractMock = createProductInterceptDialogServiceMock;
+
+export const productInterceptServiceMock = {
+  createSetupContract: jest.fn(() => ({})),
+  createStartContract: createStartContractMock,
+};

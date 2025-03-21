@@ -7,20 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ComponentProps } from 'react';
-import { EuiToast } from '@elastic/eui';
 import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import { EventMetric, FieldType, eventTypes } from './event_types';
+import { EventMetric, EventFieldType, eventTypes } from './event_definitions';
 
-type ToastMessageType = Exclude<ComponentProps<typeof EuiToast>['color'], 'success'>;
-
-interface EventPayload {
-  [FieldType.RECURRENCE_COUNT]: number;
-  [FieldType.TOAST_MESSAGE]: string;
-  [FieldType.TOAST_MESSAGE_TYPE]: ToastMessageType;
-}
-
-export class ToastsTelemetry {
+export class InterceptTelemetry {
   private reportEvent?: AnalyticsServiceStart['reportEvent'];
 
   public setup({ analytics }: { analytics: AnalyticsServiceSetup }) {
@@ -35,23 +25,20 @@ export class ToastsTelemetry {
     this.reportEvent = analytics.reportEvent;
 
     return {
-      onDismissToast: this.onDismissToast.bind(this),
+      reportInterceptInteraction: this.reportInterceptInteraction.bind(this),
     };
   }
 
-  private onDismissToast({
-    recurrenceCount,
-    toastMessage,
-    toastMessageType,
+  private reportInterceptInteraction({
+    interactionType,
+    interceptTitle,
   }: {
-    toastMessage: string;
-    recurrenceCount: number;
-    toastMessageType: ToastMessageType;
+    interactionType: string;
+    interceptTitle: string;
   }) {
-    this.reportEvent<EventPayload>?.(EventMetric.TOAST_DISMISSED, {
-      [FieldType.RECURRENCE_COUNT]: recurrenceCount,
-      [FieldType.TOAST_MESSAGE]: toastMessage,
-      [FieldType.TOAST_MESSAGE_TYPE]: toastMessageType,
+    this.reportEvent?.(EventMetric.INTERCEPT_INTERACTION, {
+      [EventFieldType.INTERACTION_TYPE]: interactionType,
+      [EventFieldType.INTERCEPT_TITLE]: interceptTitle,
     });
   }
 }

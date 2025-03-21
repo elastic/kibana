@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ToastsTelemetry } from './event_reporter';
+export { InterceptDialogService } from './intercept_dialog_service';
+export type { InterceptDialogApi } from './intercept_dialog_api';

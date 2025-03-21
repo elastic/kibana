@@ -6558,6 +6558,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/product-intercept-plugin@link:x-pack/platform/plugins/private/product_intercept":
+  version "0.0.0"
+  uid ""
+
 "@kbn/profiling-data-access-plugin@link:x-pack/solutions/observability/plugins/profiling_data_access":
   version "0.0.0"
   uid ""
