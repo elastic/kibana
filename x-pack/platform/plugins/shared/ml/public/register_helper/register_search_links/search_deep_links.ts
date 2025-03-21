@@ -122,6 +122,8 @@ function createDeepLinks(
 
     getMemoryUsageDeepLink: (): AppDeepLink<LinkId> | null => {
       if (!isFullLicense) return null;
+      // Not supported on es serverless
+      if (isServerless && !mlCapabilities.isADEnabled && !mlCapabilities.isDFAEnabled) return null;
 
       return {
         id: 'memoryUsage',
@@ -170,6 +172,8 @@ function createDeepLinks(
 
     getNotificationsDeepLink: (): AppDeepLink<LinkId> | null => {
       if (!isFullLicense) return null;
+      // Not supported on es serverless
+      if (isServerless && !mlCapabilities.isADEnabled && !mlCapabilities.isDFAEnabled) return null;
 
       return {
         id: 'notifications',

@@ -277,7 +277,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                 this.isServerless,
                 this.enabledFeatures,
                 this.nlpSettings,
-                this.experimentalFeatures
+                this.experimentalFeatures,
+                mlCapabilities
               );
             }
 

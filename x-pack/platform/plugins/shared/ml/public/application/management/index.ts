@@ -11,6 +11,7 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { MlCapabilities } from '../../../common/types/capabilities';
 import type { MlFeatures, NLPSettings, ExperimentalFeatures } from '../../../common/constants/app';
 import type { MlStartDependencies } from '../../plugin';
 import type { ITelemetryClient } from '../services/telemetry/types';
@@ -23,6 +24,61 @@ export enum MANAGEMENT_SECTION_IDS {
   AD_SETTINGS = 'ad_settings',
 }
 export type ManagementSectionId = `${MANAGEMENT_SECTION_IDS}`;
+
+const MANAGED_SECTIONS_SERVERLESS_CHECK: Record<
+  ManagementSectionId,
+  (mlFeatures: MlFeatures, isServerless: boolean, mlCapabilities: MlCapabilities) => boolean
+> = {
+  [MANAGEMENT_SECTION_IDS.OVERVIEW]: (
+    mlFeatures: MlFeatures,
+    isServerless: boolean,
+    mlCapabilities: MlCapabilities
+  ) => {
+    const isEsProject = !mlFeatures.ad && !mlFeatures.dfa && mlFeatures.nlp;
+    if (isServerless && isEsProject) return false;
+    return (
+      (mlFeatures.nlp && mlCapabilities.canGetTrainedModels) ||
+      (mlFeatures.dfa && mlCapabilities.canGetDataFrameAnalytics) ||
+      (mlFeatures.ad && mlCapabilities.canGetJobs)
+    );
+  },
+  [MANAGEMENT_SECTION_IDS.ANOMALY_DETECTION]: (
+    mlFeatures: MlFeatures,
+    isServerless: boolean,
+    mlCapabilities: MlCapabilities
+  ) => {
+    const isEsProject = !mlFeatures.ad && !mlFeatures.dfa && mlFeatures.nlp;
+    if (isServerless && isEsProject) return false;
+    return mlFeatures.ad && mlCapabilities.isADEnabled && mlCapabilities.canGetJobs;
+  },
+  [MANAGEMENT_SECTION_IDS.ANALYTICS]: (
+    mlFeatures: MlFeatures,
+    isServerless: boolean,
+    mlCapabilities: MlCapabilities
+  ) => {
+    const isEsProject = !mlFeatures.ad && !mlFeatures.dfa && mlFeatures.nlp;
+    if (isServerless && isEsProject) return false;
+    return mlFeatures.dfa && mlCapabilities.isDFAEnabled && mlCapabilities.canGetDataFrameAnalytics;
+  },
+  [MANAGEMENT_SECTION_IDS.TRAINED_MODELS]: (
+    mlFeatures: MlFeatures,
+    isServerless: boolean,
+    mlCapabilities: MlCapabilities
+  ) => {
+    const isEsProject = !mlFeatures.ad && !mlFeatures.dfa && mlFeatures.nlp;
+    if (isServerless && isEsProject) return false;
+    return mlFeatures.nlp && mlCapabilities.canGetTrainedModels;
+  },
+  [MANAGEMENT_SECTION_IDS.AD_SETTINGS]: (
+    mlFeatures: MlFeatures,
+    isServerless: boolean,
+    mlCapabilities: MlCapabilities
+  ) => {
+    const isEsProject = !mlFeatures.ad && !mlFeatures.dfa && mlFeatures.nlp;
+    if (isServerless && isEsProject) return false;
+    return mlFeatures.ad && mlCapabilities.canGetJobs;
+  },
+};
 
 export const MANAGEMENT_SECTIONS: Record<ManagementSectionId, string> = {
   [MANAGEMENT_SECTION_IDS.OVERVIEW]: i18n.translate('xpack.ml.management.overviewTitle', {
@@ -47,7 +103,7 @@ export const MANAGEMENT_SECTIONS: Record<ManagementSectionId, string> = {
     }
   ),
   [MANAGEMENT_SECTION_IDS.AD_SETTINGS]: i18n.translate('xpack.ml.management.settingsTitle', {
-    defaultMessage: 'Settings',
+    defaultMessage: 'Anomaly Detection Settings',
   }),
 };
 
@@ -58,9 +114,18 @@ export function registerManagementSections(
   isServerless: boolean,
   mlFeatures: MlFeatures,
   nlpSettings: NLPSettings,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  mlCapabilities: MlCapabilities
 ) {
   Object.keys(MANAGEMENT_SECTIONS).forEach((id) => {
+    const checkPermissionFn = MANAGED_SECTIONS_SERVERLESS_CHECK[id as ManagementSectionId];
+
+    if (!checkPermissionFn) {
+      throw new Error(`Unable to check permission for ML management section ${id}`);
+    }
+    const shouldShowSection = checkPermissionFn(mlFeatures, isServerless, mlCapabilities);
+    if (!shouldShowSection) return;
+
     const sectionId = id as ManagementSectionId;
     const sectionTitle = MANAGEMENT_SECTIONS[sectionId];
     management.sections.section.machineLearning
