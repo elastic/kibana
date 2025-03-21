@@ -26,6 +26,7 @@ import {
   apiPublishesUnsavedChanges,
   apiHasSerializableState,
   getTitle,
+  SerializedPanelState,
 } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
@@ -41,6 +42,7 @@ import { arePanelLayoutsEqual } from './are_panel_layouts_equal';
 import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboard_actions_strings';
 import { placeClonePanel } from '../panel_placement/place_clone_panel_strategy';
 import { PanelPlacementStrategy } from '../plugin_constants';
+import { getDashboardBackupService } from '../services/dashboard_backup_service';
 
 export function initializePanelsManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
@@ -48,7 +50,8 @@ export function initializePanelsManager(
   initialPanelsRuntimeState: UnsavedPanelState,
   trackPanel: ReturnType<typeof initializeTrackPanel>,
   getReferencesForPanelId: (id: string) => Reference[],
-  pushReferences: (references: Reference[]) => void
+  pushReferences: (references: Reference[]) => void,
+  dashboardId?: string
 ) {
   const children$ = new BehaviorSubject<{
     [key: string]: unknown;
@@ -382,11 +385,28 @@ export function initializePanelsManager(
       } => {
         const references: Reference[] = [];
 
+        const getApiMissingFallback = (id: string): SerializedPanelState<object> => {
+          // If the Dashboard has been saved with this panel before, we should be able to grab it from the current value of panels$
+          if (Object.keys(panels$.value[id].explicitInput ?? {}).length > 0) {
+            return {
+              rawState: panels$.value[id].explicitInput,
+              references: getReferencesForPanelId(id),
+            };
+          } else {
+            // otherwise, this panel may be new, and therefore will have its unsaved changes backed up in the dashboard backup service
+            return (
+              getDashboardBackupService().getSerializedPanelBackup(id, dashboardId) ?? {
+                rawState: {},
+              }
+            );
+          }
+        };
+
         const panels = Object.keys(panels$.value).reduce((acc, id) => {
           const childApi = children$.value[id];
           const serializeResult = apiHasSerializableState(childApi)
             ? childApi.serializeState()
-            : { rawState: {} };
+            : getApiMissingFallback(id);
           acc[id] = { ...panels$.value[id], explicitInput: { ...serializeResult.rawState, id } };
 
           references.push(...prefixReferencesFromPanel(id, serializeResult.references ?? []));
