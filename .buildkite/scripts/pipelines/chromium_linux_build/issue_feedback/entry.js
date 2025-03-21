@@ -142,9 +142,11 @@ const getSha256Hash = async (filePath) => {
     (v) => v.version === chromiumVersion && v.revision === chromiumRevision
   );
 
-  if (!matchedChromeConfig?.downloads?.['chrome-headless-shell']?.length) {
-    throw new Error(`Failed to find a known good version for chromium ${chromiumVersion}`);
-  }
+  assert.notStrictEqual(
+    matchedChromeConfig?.downloads?.['chrome-headless-shell']?.length,
+    0,
+    `Failed to find a known good version for chromium ${chromiumVersion}`
+  );
 
   /**
    * @type {import('./transform_path_file').ChromiumUpdateConfigMap}
@@ -217,9 +219,7 @@ const getSha256Hash = async (filePath) => {
         RegExp(String.raw`${arch}\.zip`).test(artifact)
       );
 
-      if (!match) {
-        throw new Error(`No linux build artifacts found for ${arch}`);
-      }
+      assert.ok(match, `No linux build artifacts found for ${arch}`);
 
       const archiveChecksum = await getSha256Hash(match);
 
@@ -311,9 +311,15 @@ const getSha256Hash = async (filePath) => {
   console.log('---Providing feedback to issue \n');
 
   await $('ts-node', [
-    `${resolve(buildRoot, '.buildkite/scripts/lifecycle/comment_on_issue.ts')}`,
+    `${resolve(buildRoot, '.buildkite/scripts/lifecycle/comment_on_pr.ts')}`,
     '--message',
     `Linux headless chromium build completed at: ${process.env.BUILDKITE_BUILD_URL} ✨💅🏾 \n\n See the PR linked to this issue`,
+    '--issue-number',
+    process.env.GITHUB_ISSUE_NUMBER,
+    '--repository',
+    process.env.GITHUB_ISSUE_BASE_REPO,
+    '--repository-owner',
+    process.env.GITHUB_ISSUE_BASE_OWNER,
     '--context',
     'chromium-linux-build-diff',
     '--clear-previous',

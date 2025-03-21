@@ -3,9 +3,12 @@ env:
 
 steps:
   - command: |
-      ts-node .buildkite/scripts/lifecycle/comment_on_issue.ts \
+      ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
         --message "Linux headless chromium build started at: $BUILDKITE_BUILD_URL" \
         --context "chromium-linux-build-job-start" \
+        --issue-number $GITHUB_ISSUE_NUMBER \
+        --repository $GITHUB_ISSUE_BASE_REPO \
+        --repository-owner $GITHUB_ISSUE_BASE_OWNER \
         --clear-previous
     label: Comment with job URL on issue
     agents:
