@@ -8,10 +8,10 @@
   assert:
     that:
       - chat_plugin_directory.stat.exists
-  when: "{{ lookup('ansible.builtin.env', 'RELEASE_BUILD') }} != 'true'"
+  when: lookup('ansible.builtin.env', 'RELEASE_BUILD') != 'true'"
 
 - name: /usr/share/kibana/node_modules/@kbn/serverless-chat does not exist for releases
   assert:
     that:
       - not chat_plugin_directory.stat.exists
-  when: "{{ lookup('ansible.builtin.env', 'RELEASE_BUILD') }} == 'true'"
+  when: lookup('ansible.builtin.env', 'RELEASE_BUILD') == 'true'
