@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { typesRulesSchema } from '../../list_types/schemas/v1';
+import { typesRulesSchema } from '../../external/schemas/v1';
 
 export const getRuleTypesInternalResponseBodySchema = schema.arrayOf(
   typesRulesSchema.extends({

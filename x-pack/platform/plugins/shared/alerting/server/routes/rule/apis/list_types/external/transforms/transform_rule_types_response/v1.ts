@@ -6,12 +6,12 @@
  */
 
 import { isBoolean } from 'lodash/fp';
-import type { RegistryAlertTypeWithAuth } from '../../../../../../authorization';
-import type { GetRuleTypesInternalResponseBodyV1 } from '../../../../../../../common/routes/rule/apis/internal_list_types';
+import type { RegistryAlertTypeWithAuth } from '../../../../../../../authorization';
+import type { TypesRulesResponseBodyV1 } from '../../../../../../../../common/routes/rule/apis/list_types/external';
 
-export const transformRuleTypesInternalResponse = (
+export const transformRuleTypesResponse = (
   ruleTypes: RegistryAlertTypeWithAuth[]
-): GetRuleTypesInternalResponseBodyV1 => {
+): TypesRulesResponseBodyV1 => {
   return ruleTypes.map((ruleType: RegistryAlertTypeWithAuth) => {
     return {
       ...(ruleType.actionGroups ? { action_groups: ruleType.actionGroups } : {}),
@@ -35,7 +35,6 @@ export const transformRuleTypesInternalResponse = (
       minimum_license_required: ruleType.minimumLicenseRequired,
       name: ruleType.name,
       producer: ruleType.producer,
-      solution: ruleType.solution,
       recovery_action_group: ruleType.recoveryActionGroup,
       ...(ruleType.ruleTaskTimeout ? { rule_task_timeout: ruleType.ruleTaskTimeout } : {}),
     };

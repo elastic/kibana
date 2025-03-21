@@ -7,17 +7,17 @@
 
 import { getRuleTypesInternalRoute } from './get_rule_types_internal_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { verifyApiAccess } from '../../../../lib/license_api_access';
-import { mockHandlerArguments } from '../../../_mock_handler_arguments';
-import { rulesClientMock } from '../../../../rules_client.mock';
-import { RecoveredActionGroup } from '../../../../../common';
-import type { RegistryAlertTypeWithAuth } from '../../../../authorization';
-import type { AsApiContract } from '../../../lib';
+import { licenseStateMock } from '../../../../../lib/license_state.mock';
+import { verifyApiAccess } from '../../../../../lib/license_api_access';
+import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../../rules_client.mock';
+import { RecoveredActionGroup } from '../../../../../../common';
+import type { RegistryAlertTypeWithAuth } from '../../../../../authorization';
+import type { AsApiContract } from '../../../../lib';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../../../../lib/license_api_access', () => ({
+jest.mock('../../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 

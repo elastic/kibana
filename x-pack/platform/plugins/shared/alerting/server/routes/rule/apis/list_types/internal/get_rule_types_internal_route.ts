@@ -6,14 +6,14 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { GetRuleTypesInternalResponseBodyV1 } from '../../../../../common/routes/rule/apis/internal_list_types';
-import { getRuleTypesInternalResponseSchemaV1 } from '../../../../../common/routes/rule/apis/internal_list_types';
-import type { ILicenseState } from '../../../../lib';
-import { verifyAccessAndContext } from '../../../lib';
-import type { AlertingRequestHandlerContext } from '../../../../types';
-import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
+import type { GetRuleTypesInternalResponseBodyV1 } from '../../../../../../common/routes/rule/apis/list_types/internal';
+import { getRuleTypesInternalResponseSchemaV1 } from '../../../../../../common/routes/rule/apis/list_types/internal';
+import type { ILicenseState } from '../../../../../lib';
+import { verifyAccessAndContext } from '../../../../lib';
+import type { AlertingRequestHandlerContext } from '../../../../../types';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../../types';
 import { transformRuleTypesInternalResponseV1 } from './transforms';
-import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 
 export const getRuleTypesInternalRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
