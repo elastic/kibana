@@ -311,7 +311,7 @@ const getSha256Hash = async (filePath) => {
   console.log('---Providing feedback to issue \n');
 
   await $('ts-node', [
-    `${resolve(buildRoot, '.buildkite/scripts/lifecycle/comment_on_pr.ts')}`,
+    `${resolve(buildRoot, '.buildkite/scripts/lifecycle/comment_on_issue.ts')}`,
     '--message',
     `Linux headless chromium build completed at: ${process.env.BUILDKITE_BUILD_URL} ✨💅🏾 \n\n See the PR linked to this issue`,
     '--context',

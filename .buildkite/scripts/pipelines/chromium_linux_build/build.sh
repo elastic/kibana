@@ -70,6 +70,4 @@ else
     buildkite-agent artifact upload "$BUILD_ROOT_DIR/chromium/src/out/headless/chromium-*"
 fi
 
-"$KIBANA_CHECKOUT_DIR/.buildkite/scripts/common/activate_service_account.sh" --unset-impersonation
-
 echo "---Build completed"
