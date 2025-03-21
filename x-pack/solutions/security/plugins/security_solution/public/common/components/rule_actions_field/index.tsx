@@ -10,7 +10,7 @@ import { EuiSpacer, EuiCallOut, EuiText } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import deepMerge from 'deepmerge';
 import ReactMarkdown from 'react-markdown';
-// eslint-disable-next-line @kbn/eslint/module_migration
+
 import styled from 'styled-components';
 
 import type {
