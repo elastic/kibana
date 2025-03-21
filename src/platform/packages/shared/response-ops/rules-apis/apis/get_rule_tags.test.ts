@@ -44,7 +44,9 @@ describe('getRuleTags', () => {
           "query": Object {
             "page": 2,
             "per_page": 30,
-            "rule_type_ids": "[\\"test-rule-type\\"]",
+            "rule_type_ids": Array [
+              "test-rule-type",
+            ],
             "search": "test",
           },
         },
