@@ -25,20 +25,17 @@ interface Props {
 export const SpaceCard = (props: Props) => {
   const { serverBasePath, space } = props;
   const { euiTheme } = useEuiTheme();
-  const styles = {
-    spaceCard: css`
-      width: calc(${euiTheme.size.l} * 10) !important;
-      min-height: calc(${euiTheme.size.base} * 12.5); /* 200px */
-
-      .euiCard__content {
-        overflow: hidden;
-      }
-    `,
-  };
 
   return (
     <EuiCard
-      css={styles.spaceCard}
+      css={css`
+        width: calc(${euiTheme.size.l} * 10) !important;
+        min-height: calc(${euiTheme.size.base} * 12.5); /* 200px */
+
+        .euiCard__content {
+          overflow: hidden;
+        }
+      `}
       data-test-subj={`space-card-${space.id}`}
       icon={renderSpaceAvatar(space)}
       title={space.name}
