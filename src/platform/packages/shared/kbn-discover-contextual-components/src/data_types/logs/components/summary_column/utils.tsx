@@ -29,7 +29,6 @@ import {
   getFieldValue,
   FILTER_OUT_EXACT_FIELDS_FOR_CONTENT,
 } from '@kbn/discover-utils';
-import { DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { LogDocument, ResourceFields, getAvailableResourceFields } from '@kbn/discover-utils/src';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
 import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
