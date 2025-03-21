@@ -8,11 +8,16 @@
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { WiredStreamUpsertRequest, UnwiredStreamUpsertRequest } from '@kbn/streams-schema';
 import { StreamsStorageClient } from '../service';
-import { StreamActiveRecord, ValidationResult } from './stream_active_record';
+import { StreamActiveRecord } from './stream_active_record';
 import { streamFromDefinition } from './stream_from_definition';
 import { AssetClient } from '../assets/asset_client';
-import { ExecutionPlan } from './execution_plan';
+import { ActionsByType, ExecutionPlan } from './execution_plan';
 import type { StreamsClient } from '../client';
+import { InvalidStateError } from './errors/invalid_state_error';
+import { FailedToApplyRequestedChangesError } from './errors/failed_to_apply_requested_changes_error';
+import { FailedToLoadCurrentStateError } from './errors/failed_to_load_current_state_error';
+import { FailedToDetermineElasticsearchActionsError } from './errors/failed_to_determine_elasticsearch_actions_error';
+import { FailedToRollbackError } from './errors/failed_to_rollback_error';
 
 interface StateDependencies {
   scopedClusterClient: IScopedClusterClient;
@@ -50,6 +55,17 @@ interface StreamDeleteChange {
 
 export type StreamChange = UnwiredStreamUpsertChange | WiredStreamUpsertChange | StreamDeleteChange;
 
+interface ValidDryRun {
+  result: 'valid_dry_run';
+  changedStreams: StreamActiveRecord[];
+  elasticsearchActions: ActionsByType;
+}
+
+type AttemptChangesResult =
+  | ValidDryRun
+  | { result: 'success' }
+  | { result: 'failed_with_rollback' };
+
 export class State {
   private streamsByName: Map<string, StreamActiveRecord>;
   private dependencies: StateDependencies;
@@ -74,35 +90,30 @@ export class State {
     await currentState.commitChanges(emptyState);
   }
 
-  // What should this function return?
   static async attemptChanges(
     requestedChanges: StreamChange[],
     dependencies: StateDependencies,
     dryRun: boolean = false
-  ) {
+  ): Promise<AttemptChangesResult> {
     const startingState = await State.currentState(dependencies);
-
     const desiredState = await startingState.applyChanges(requestedChanges);
-
-    const validationResult = await desiredState.validate(startingState);
-
-    if (!validationResult.isValid) {
-      // How do these translate to HTTP errors?
-      throw new Error(validationResult.errors.join(', '));
-    }
+    await desiredState.validate(startingState);
 
     if (dryRun) {
       const changedStreams = desiredState.changedStreams();
       const elasticsearchActions = await desiredState.plannedActions(startingState);
       return {
+        result: 'valid_dry_run',
         changedStreams,
         elasticsearchActions,
       };
     } else {
       try {
         await desiredState.commitChanges(startingState);
+        return { result: 'success' };
       } catch (error) {
         await desiredState.attemptRollback(startingState);
+        return { result: 'failed_with_rollback' };
       }
     }
   }
@@ -121,21 +132,28 @@ export class State {
 
       return new State(streams, dependencies);
     } catch (error) {
-      throw new Error(`Failed to load current Streams state due to: ${error.message}`);
+      throw new FailedToLoadCurrentStateError(
+        `Failed to load current Streams state: ${error.message}`
+      );
     }
   }
 
   async applyChanges(requestedChanges: StreamChange[]): Promise<State> {
-    const startingState = this;
-    const desiredState = startingState.clone();
+    try {
+      const desiredState = this.clone();
 
-    for (const requestedChange of requestedChanges) {
-      // Apply one change and any cascading changes from that change
-      await this.applyRequestedChange(requestedChange, desiredState, startingState);
+      for (const requestedChange of requestedChanges) {
+        // Apply one change and any cascading changes from that change
+        await this.applyRequestedChange(requestedChange, desiredState, this);
+      }
+
+      return desiredState;
+    } catch (error) {
+      throw new FailedToApplyRequestedChangesError(
+        `Failed to apply requested changes to Stream state: ${[error.message]}`,
+        error.statusCode
+      );
     }
-
-    // Here we might return { changedSuccessfully: boolean; errors: Error[] }
-    return desiredState;
   }
 
   async applyRequestedChange(
@@ -144,7 +162,6 @@ export class State {
     startingState: State
   ) {
     const cascadingChanges = await this.applyChange(requestedChange, desiredState, startingState);
-
     await this.applyCascadingChanges(cascadingChanges, desiredState, startingState);
   }
 
@@ -164,7 +181,7 @@ export class State {
       }
       currentCascadingChanges = newCascadingChanges;
       if (++iterationCounter > 100) {
-        throw new Error('Excessive cascading changes'); // Include the last round of changes to highlight what lead to the excess?
+        throw new Error('Excessive cascading changes');
       }
     }
   }
@@ -177,7 +194,7 @@ export class State {
     if (!desiredState.has(change.target)) {
       if (change.type === 'delete') {
         // Not sure if throwing or ignoring is better here, the desired state is without this stream which is correct...
-        throw new Error('Cannot delete non-existing stream');
+        return [];
       }
 
       const newStream = streamFromDefinition(change.request.stream, this.dependencies);
@@ -192,19 +209,17 @@ export class State {
     return cascadingChanges.flat();
   }
 
-  async validate(startingState: State): Promise<ValidationResult> {
-    const desiredState = this;
+  async validate(startingState: State): Promise<void> {
     const validationResults = await Promise.all(
-      this.all().map((stream) => stream.validate(desiredState, startingState))
+      this.all().map((stream) => stream.validate(this, startingState))
     );
 
     const isValid = validationResults.every((validationResult) => validationResult.isValid);
     const errors = validationResults.flatMap((validationResult) => validationResult.errors);
 
-    return {
-      isValid,
-      errors,
-    };
+    if (!isValid) {
+      throw new InvalidStateError(`Desired stream state is invalid: ${errors.join(', ')}`);
+    }
   }
 
   changedStreams() {
@@ -228,23 +243,27 @@ export class State {
   }
 
   async attemptRollback(startingState: State) {
-    const rollbackTargets = this.changedStreams().map((stream) => {
-      if (startingState.has(stream.definition.name)) {
-        const changedStreamToRevert = stream.clone();
-        changedStreamToRevert.markAsCreated();
-        return changedStreamToRevert;
-      } else {
-        const createdStreamToCleanUp = stream.clone();
-        createdStreamToCleanUp.markAsDeleted();
-        return createdStreamToCleanUp;
-      }
-    });
+    try {
+      const rollbackTargets = this.changedStreams().map((stream) => {
+        if (startingState.has(stream.definition.name)) {
+          const changedStreamToRevert = stream.clone();
+          changedStreamToRevert.markAsCreated();
+          return changedStreamToRevert;
+        } else {
+          const createdStreamToCleanUp = stream.clone();
+          createdStreamToCleanUp.markAsDeleted();
+          return createdStreamToCleanUp;
+        }
+      });
 
-    const executionPlan = new ExecutionPlan(this.dependencies);
-    await executionPlan.plan(
-      await this.determineElasticsearchActions(rollbackTargets, startingState, this)
-    );
-    await executionPlan.execute();
+      const executionPlan = new ExecutionPlan(this.dependencies);
+      await executionPlan.plan(
+        await this.determineElasticsearchActions(rollbackTargets, startingState, this)
+      );
+      await executionPlan.execute();
+    } catch (error) {
+      throw new FailedToRollbackError(`Failed to rollback attempted changes: ${error.message}`);
+    }
   }
 
   async determineElasticsearchActions(
@@ -252,16 +271,22 @@ export class State {
     desiredState: State,
     startingState: State
   ) {
-    const actions = await Promise.all(
-      changedStreams.map((stream) =>
-        stream.determineElasticsearchActions(
-          desiredState,
-          startingState,
-          startingState.get(stream.definition.name)
+    try {
+      const actions = await Promise.all(
+        changedStreams.map((stream) =>
+          stream.determineElasticsearchActions(
+            desiredState,
+            startingState,
+            startingState.get(stream.definition.name)
+          )
         )
-      )
-    );
-    return actions.flat();
+      );
+      return actions.flat();
+    } catch (error) {
+      throw new FailedToDetermineElasticsearchActionsError(
+        `Failed to determine Elasticsearch actions: ${error.message}`
+      );
+    }
   }
 
   get(name: string) {

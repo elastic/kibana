@@ -40,6 +40,7 @@ import { NameTakenError } from '../errors/name_taken_error';
 import { isDefinitionNotFoundError } from '../errors/definition_not_found_error';
 import { validateAncestorFields, validateDescendantFields } from '../helpers/validate_fields';
 import { validateRootStreamChanges } from '../helpers/validate_stream';
+import { StatusError } from '../errors/status_error';
 
 export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
   constructor(definition: WiredStreamDefinition, dependencies: StreamDependencies) {
@@ -75,7 +76,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     }
 
     if (!isWiredStreamDefinition(definition)) {
-      throw new Error('Cannot change stream types');
+      throw new StatusError('Cannot change stream types', 400);
     }
 
     this._updated_definition = definition;
@@ -83,7 +84,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     const startingStateStreamDefinition = startingState.get(this.definition.name)?.definition;
 
     if (startingStateStreamDefinition && !isWiredStreamDefinition(startingStateStreamDefinition)) {
-      throw new Error('Unexpected starting state stream type');
+      throw new StatusError('Unexpected starting state stream type', 400);
     }
 
     this._ownFieldsChanged =

@@ -24,7 +24,7 @@ export interface StreamDependencies {
 
 export interface ValidationResult {
   isValid: boolean;
-  errors: string[]; // Or Errors?
+  errors: string[];
 }
 
 export type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
@@ -47,37 +47,26 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     return this._changeStatus;
   }
 
-  // This needs a new return shape to bubble up status information
   async applyChange(
     change: StreamChange,
     desiredState: State,
     startingState: State
   ): Promise<StreamChange[]> {
-    try {
-      if (change.type === 'delete') {
-        return this.delete(change.target, desiredState, startingState);
-      } else {
-        return this.upsert(change.request.stream, desiredState, startingState);
-      }
-    } catch (error) {
-      // Here we might return { changedSuccessfully: boolean; errors: Error[] }
-      return [];
+    if (change.type === 'delete') {
+      return this.delete(change.target, desiredState, startingState);
+    } else {
+      return this.upsert(change.request.stream, desiredState, startingState);
     }
   }
 
   async delete(target: string, desiredState: State, startingState: State): Promise<StreamChange[]> {
-    try {
-      const { cascadingChanges, changeStatus } = await this.doHandleDeleteChange(
-        target,
-        desiredState,
-        startingState
-      );
-      this._changeStatus = changeStatus;
-      return cascadingChanges;
-    } catch (error) {
-      // Here we might return { changedSuccessfully: boolean; errors: Error[] }
-      return [];
-    }
+    const { cascadingChanges, changeStatus } = await this.doHandleDeleteChange(
+      target,
+      desiredState,
+      startingState
+    );
+    this._changeStatus = changeStatus;
+    return cascadingChanges;
   }
 
   async upsert(
@@ -85,18 +74,13 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     desiredState: State,
     startingState: State
   ): Promise<StreamChange[]> {
-    try {
-      const { cascadingChanges, changeStatus } = await this.doHandleUpsertChange(
-        definition,
-        desiredState,
-        startingState
-      );
-      this._changeStatus = changeStatus;
-      return cascadingChanges;
-    } catch (error) {
-      // Here we might return { changedSuccessfully: boolean; errors: Error[] }
-      return [];
-    }
+    const { cascadingChanges, changeStatus } = await this.doHandleUpsertChange(
+      definition,
+      desiredState,
+      startingState
+    );
+    this._changeStatus = changeStatus;
+    return cascadingChanges;
   }
 
   // Used only when we try to rollback an existing stream or resync the stored State

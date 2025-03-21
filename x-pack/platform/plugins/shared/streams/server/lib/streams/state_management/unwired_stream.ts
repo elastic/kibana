@@ -25,6 +25,7 @@ import { ElasticsearchAction } from './execution_plan';
 import { generateIngestPipeline } from '../ingest_pipelines/generate_ingest_pipeline';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
 import { getUnmanagedElasticsearchAssets } from '../stream_crud';
+import { StatusError } from '../errors/status_error';
 
 export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
   constructor(definition: UnwiredStreamDefinition, dependencies: StreamDependencies) {
@@ -49,7 +50,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
     }
 
     if (!isUnwiredStreamDefinition(definition)) {
-      throw new Error('Cannot change stream types');
+      throw new StatusError('Cannot change stream types', 400);
     }
 
     this._updated_definition = definition;
@@ -60,7 +61,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
       startingStateStreamDefinition &&
       !isUnwiredStreamDefinition(startingStateStreamDefinition)
     ) {
-      throw new Error('Unexpected starting state stream type');
+      throw new StatusError('Unexpected starting state stream type', 400);
     }
 
     this._processingChanged =

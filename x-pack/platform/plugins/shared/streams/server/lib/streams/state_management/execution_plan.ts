@@ -33,6 +33,8 @@ import {
   upsertIngestPipeline,
 } from '../ingest_pipelines/manage_ingest_pipelines';
 import { translateUnwiredStreamPipelineActions } from './translate_unwired_stream_pipeline_actions';
+import { FailedToPlanElasticsearchActionsError } from './errors/failed_to_plan_elasticsearch_actions_error';
+import { FailedToExecuteElasticsearchActionsError } from './errors/failed_to_execute_elasticsearch_actions_error';
 
 interface UpsertComponentTemplateAction {
   type: 'upsert_component_template';
@@ -207,15 +209,21 @@ export class ExecutionPlan {
   }
 
   async plan(elasticsearchActions: ElasticsearchAction[]) {
-    this.actionsByType = Object.assign(this.actionsByType, groupBy(elasticsearchActions, 'type'));
+    try {
+      this.actionsByType = Object.assign(this.actionsByType, groupBy(elasticsearchActions, 'type'));
 
-    // UnwiredStreams sometimes share index templates and ingest pipelines (user managed or Streams managed)
-    // In order to modify this pipelines in an atomic way and be able to clean up any Streams managed pipeline when no longer needed
-    // We need to translate some actions
-    await translateUnwiredStreamPipelineActions(
-      this.actionsByType,
-      this.dependencies.scopedClusterClient
-    );
+      // UnwiredStreams sometimes share index templates and ingest pipelines (user managed or Streams managed)
+      // In order to modify this pipelines in an atomic way and be able to clean up any Streams managed pipeline when no longer needed
+      // We need to translate some actions
+      await translateUnwiredStreamPipelineActions(
+        this.actionsByType,
+        this.dependencies.scopedClusterClient
+      );
+    } catch (error) {
+      throw new FailedToPlanElasticsearchActionsError(
+        `Failed to plan Elasticsearch action execution: ${error.message}`
+      );
+    }
   }
 
   plannedActions() {
@@ -223,63 +231,69 @@ export class ExecutionPlan {
   }
 
   async execute() {
-    const {
-      upsert_component_template,
-      upsert_index_template,
-      update_lifecycle,
-      upsert_datastream,
-      upsert_dot_streams_document,
-      upsert_ingest_pipeline,
-      upsert_write_index_or_rollover,
-      sync_asset_list,
-      delete_datastream,
-      delete_dot_streams_document,
-      delete_index_template,
-      delete_ingest_pipeline,
-      delete_component_template,
-      append_processor_to_ingest_pipeline,
-      delete_processor_from_ingest_pipeline,
-      ...rest
-    } = this.actionsByType;
-    assertEmptyObject(rest);
+    try {
+      const {
+        upsert_component_template,
+        upsert_index_template,
+        update_lifecycle,
+        upsert_datastream,
+        upsert_dot_streams_document,
+        upsert_ingest_pipeline,
+        upsert_write_index_or_rollover,
+        sync_asset_list,
+        delete_datastream,
+        delete_dot_streams_document,
+        delete_index_template,
+        delete_ingest_pipeline,
+        delete_component_template,
+        append_processor_to_ingest_pipeline,
+        delete_processor_from_ingest_pipeline,
+        ...rest
+      } = this.actionsByType;
+      assertEmptyObject(rest);
 
-    if (append_processor_to_ingest_pipeline.length !== 0) {
-      throw new Error('append_processor_to_ingest_pipeline actions have not been merged');
+      if (append_processor_to_ingest_pipeline.length !== 0) {
+        throw new Error('append_processor_to_ingest_pipeline actions have not been merged');
+      }
+      if (delete_processor_from_ingest_pipeline.length !== 0) {
+        throw new Error('delete_processor_from_ingest_pipeline actions have not been merged');
+      }
+
+      // This graph is parallelizing as much as possible
+      // It's important we don't make changes too early, otherwise things can break halfway through
+      // such as leading to data loss if routing changes too early
+
+      await Promise.all([
+        this.upsertComponentTemplates(upsert_component_template),
+        this.upsertIndexTemplates(upsert_index_template),
+      ]);
+      await Promise.all([
+        this.upsertWriteIndexOrRollover(upsert_write_index_or_rollover),
+        this.updateLifecycle(update_lifecycle),
+        this.upsertDatastreams(upsert_datastream),
+      ]);
+
+      await this.upsertIngestPipelines(upsert_ingest_pipeline);
+
+      await this.deleteDatastreams(delete_datastream);
+
+      await this.deleteIndexTemplates(delete_index_template);
+
+      await Promise.all([
+        this.deleteComponentTemplates(delete_component_template),
+        this.deleteIngestPipelines(delete_ingest_pipeline),
+      ]);
+
+      await Promise.all([
+        this.syncAssetList(sync_asset_list),
+        this.upsertDotStreamsDocuments(upsert_dot_streams_document),
+        this.deleteDotStreamsDocuments(delete_dot_streams_document),
+      ]);
+    } catch (error) {
+      throw new FailedToExecuteElasticsearchActionsError(
+        `Failed to execute Elasticsearch actions: ${error.message}`
+      );
     }
-    if (delete_processor_from_ingest_pipeline.length !== 0) {
-      throw new Error('delete_processor_from_ingest_pipeline actions have not been merged');
-    }
-
-    // This graph is parallelizing as much as possible
-    // It's important we don't make changes too early, otherwise things can break halfway through
-    // such as leading to data loss if routing changes too early
-
-    await Promise.all([
-      this.upsertComponentTemplates(upsert_component_template),
-      this.upsertIndexTemplates(upsert_index_template),
-    ]);
-    await Promise.all([
-      this.upsertWriteIndexOrRollover(upsert_write_index_or_rollover),
-      this.updateLifecycle(update_lifecycle),
-      this.upsertDatastreams(upsert_datastream),
-    ]);
-
-    await this.upsertIngestPipelines(upsert_ingest_pipeline);
-
-    await this.deleteDatastreams(delete_datastream);
-
-    await this.deleteIndexTemplates(delete_index_template);
-
-    await Promise.all([
-      this.deleteComponentTemplates(delete_component_template),
-      this.deleteIngestPipelines(delete_ingest_pipeline),
-    ]);
-
-    await Promise.all([
-      this.syncAssetList(sync_asset_list),
-      this.upsertDotStreamsDocuments(upsert_dot_streams_document),
-      this.deleteDotStreamsDocuments(delete_dot_streams_document),
-    ]);
   }
 
   private async upsertComponentTemplates(actions: UpsertComponentTemplateAction[]) {
