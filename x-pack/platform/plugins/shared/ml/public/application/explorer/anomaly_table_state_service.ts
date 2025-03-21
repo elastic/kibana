@@ -13,12 +13,13 @@ import {
   distinctUntilChanged,
   switchMap,
   BehaviorSubject,
-  from,
   of,
   map,
   catchError,
   Subscription,
   startWith,
+  skipWhile,
+  tap,
 } from 'rxjs';
 import { get, isEqual } from 'lodash';
 import type { InfluencersFilterQuery, MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
@@ -105,6 +106,14 @@ export class AnomalyTableStateService extends StateService {
       ])
         .pipe(
           distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
+          skipWhile(
+            ([selectedCells, selectedJobs, viewBySwimlaneFieldName]) =>
+              selectedCells === undefined ||
+              !selectedJobs ||
+              selectedJobs.length === 0 ||
+              viewBySwimlaneFieldName === undefined
+          ),
+          tap(() => this._tableDataLoading$.next(true)),
           switchMap(
             ([
               selectedCells,
@@ -114,35 +123,21 @@ export class AnomalyTableStateService extends StateService {
               tableSeverity,
               influencersFilterQuery,
             ]) => {
-              if (
-                !selectedJobs ||
-                selectedJobs.length === 0 ||
-                !viewBySwimlaneFieldName ||
-                // Prevent unnecessary fetch on initial load when selectedCells is undefined
-                selectedCells === undefined
-              ) {
-                return of({ tableData: null, tableDataLoading: false });
-              }
-
-              // Set loading state
-              this._tableDataLoading$.next(true);
-
-              return from(
-                this.loadAnomaliesTableData(
-                  selectedCells,
-                  selectedJobs,
-                  viewBySwimlaneFieldName,
-                  tableInterval.val,
-                  tableSeverity.val,
-                  influencersFilterQuery
-                )
+              return this.loadAnomaliesTableData(
+                selectedCells,
+                selectedJobs,
+                // viewBySwimlaneFieldName is guaranteed to be defined by the skipWhile
+                viewBySwimlaneFieldName!,
+                tableInterval.val,
+                tableSeverity.val,
+                influencersFilterQuery
               ).pipe(
                 map((tableData) => ({
                   tableData,
                   tableDataLoading: false,
                 })),
                 catchError((error) => {
-                  return of({ tableData: null, tableDataLoading: false });
+                  return of({ tableData: null });
                 })
               );
             }
@@ -151,46 +146,43 @@ export class AnomalyTableStateService extends StateService {
         .subscribe((result) => {
           // Update the BehaviorSubject with new data
           this._tableData$.next(result.tableData);
-          this._tableDataLoading$.next(result.tableDataLoading);
+          this._tableDataLoading$.next(false);
         })
     );
 
     return subscriptions;
   }
 
-  private async loadAnomaliesTableData(
+  private loadAnomaliesTableData(
     selectedCells: AppStateSelectedCells | undefined | null,
     selectedJobs: ExplorerJob[],
     fieldName: string,
     tableInterval: string,
     tableSeverity: number,
     influencersFilterQuery?: InfluencersFilterQuery
-  ): Promise<AnomaliesTableData> {
+  ): Observable<AnomaliesTableData | null> {
     const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
     const influencers = getSelectionInfluencers(selectedCells, fieldName);
     const bounds = this.timefilter.getBounds();
     const timeRange = getSelectionTimeRange(selectedCells, bounds);
     const dateFormatTz = getDateFormatTz(this.uiSettings);
 
-    return new Promise((resolve, reject) => {
-      this.mlApi.results
-        .getAnomaliesTableData(
-          jobIds,
-          [],
-          influencers,
-          tableInterval,
-          tableSeverity,
-          timeRange.earliestMs,
-          timeRange.latestMs,
-          dateFormatTz,
-          ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
-          MAX_CATEGORY_EXAMPLES,
-          influencersFilterQuery
-        )
-        .toPromise()
-        .then((resp) => {
-          if (!resp) return null;
-
+    return this.mlApi.results
+      .getAnomaliesTableData(
+        jobIds,
+        [],
+        influencers,
+        tableInterval,
+        tableSeverity,
+        timeRange.earliestMs,
+        timeRange.latestMs,
+        dateFormatTz,
+        ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
+        MAX_CATEGORY_EXAMPLES,
+        influencersFilterQuery
+      )
+      .pipe(
+        map((resp) => {
           const detectorsByJob = this.mlJobService.detectorsByJob;
 
           const anomalies = resp.anomalies.map((anomaly) => {
@@ -231,17 +223,17 @@ export class AnomalyTableStateService extends StateService {
             return extendedAnomaly;
           });
 
-          resolve({
+          return {
             anomalies,
             interval: resp.interval,
             examplesByJobId: resp.examplesByJobId ?? {},
             showViewSeriesLink: true,
             jobIds,
-          });
+          };
+        }),
+        catchError((error) => {
+          return of(null);
         })
-        .catch((resp) => {
-          reject(resp);
-        });
-    });
+      );
   }
 }
