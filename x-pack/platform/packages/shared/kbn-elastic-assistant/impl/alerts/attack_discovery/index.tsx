@@ -28,7 +28,7 @@ interface Props {
 export const AttackDiscoveryWidget: React.FC<Props> = ({ id }) => {
   const { http, toasts, navigateToApp } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
-  // TODO get connector id from configured LLM
+  // TODO fetch by alert id, not connector id. Waiting for Andrew's API updates
   const connectorId = 'my-gpt4o-ai';
   const { isFetching, data } = useFetchAttackDiscovery({ connectorId, http, toasts });
   const [attackDiscovery, setAttackDiscovery] = useState<AttackDiscovery | null>(null);

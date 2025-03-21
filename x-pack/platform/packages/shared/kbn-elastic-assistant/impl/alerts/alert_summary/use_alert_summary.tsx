@@ -108,7 +108,7 @@ export const useAlertSummary = ({
 
       if (!rawResponse.isError) {
         if (fetchedAlertSummary.data.length > 0) {
-          const bulkResponse = await bulkUpdate({
+          await bulkUpdate({
             alertSummary: {
               update: [
                 {
@@ -120,7 +120,7 @@ export const useAlertSummary = ({
             },
           });
         } else {
-          const bulkResponse = await bulkUpdate({
+          await bulkUpdate({
             alertSummary: {
               create: [
                 {
