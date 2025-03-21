@@ -140,7 +140,7 @@ Change the settings for the Options list and Range slider controls.
 
 preview:[]
 
-You can bind controls to your ES|QL visualizations in dashboards. When creating an {esql} visualization, the autocomplete suggestions prompts control insertion for field values, field names, function configuration, and function names (function names are currently available for Elastic Cloud Serverless only). This enables controls that only apply to a specific panel, and exposes visualization configuration such as date histogram interval controls to dashboard users.
+You can bind controls to your ES|QL visualizations in dashboards. When creating an {esql} visualization, the autocomplete suggestions prompt control insertion for field values, field names, function configuration, and function names (function names are currently available for Elastic Cloud Serverless only). This enables controls that only apply to a specific panel, and exposes visualization configuration such as date histogram interval controls to dashboard users.
 
 NOTE: Currently, only **Options lists** with static values are supported for {esql}-based controls.
 
