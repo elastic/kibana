@@ -190,6 +190,8 @@ export const PolicySelector = memo<PolicySelectorProps>(
     const [searchKuery, setSearchKuery] = useState('');
     const [view, setView] = useState<'full-list' | 'selected-list'>('full-list');
 
+    // FIXME:PT see if there is away to scroll the selectable list back up to the top after displaying a new page of data
+
     // Delays setting the `searchKuery` value thus allowing the user to pause typing - so
     // that we don't call the API on every character change.
     useDebounce(
