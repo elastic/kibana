@@ -18,6 +18,9 @@ import {
   EuiSelectableTemplateSitewideOption,
   euiSelectableTemplateSitewideRenderOptions,
   useEuiTheme,
+  useEuiBreakpoint,
+  mathWithUnits,
+  useEuiMinBreakpoint,
 } from '@elastic/eui';
 import { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { css } from '@emotion/react';
@@ -36,7 +39,6 @@ import { i18nStrings } from '../strings';
 import { getSuggestions, SearchSuggestion } from '../suggestions';
 import { PopoverFooter } from './popover_footer';
 import { PopoverPlaceholder } from './popover_placeholder';
-import './search_bar.scss';
 import { SearchBarProps } from './types';
 
 const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
@@ -77,6 +79,8 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   const isMounted = useMountedState();
   const { euiTheme } = useEuiTheme();
+  const breakpointMandL = useEuiBreakpoint(['m', 'l']);
+  const breakpointXL = useEuiMinBreakpoint('xl');
   const chromeStyle = useObservable(chromeStyle$);
 
   // These hooks are used when on chromeStyle set to 'project'
@@ -360,7 +364,14 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       isPreFiltered
       onChange={onChange}
       options={options}
-      className="kbnSearchBar"
+      css={css({
+        [breakpointMandL]: {
+          width: mathWithUnits(euiTheme.size.xxl, (x) => x * 10),
+        },
+        [breakpointXL]: {
+          width: mathWithUnits(euiTheme.size.xxl, (x) => x * 15),
+        },
+      })}
       popoverButtonBreakpoints={['xs', 's']}
       singleSelection={true}
       renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchValue)}
