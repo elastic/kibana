@@ -64,10 +64,7 @@ const defaultInlineButtonLabels = {
       values: { groupLabel: l },
     }),
   label: (
-    <FormattedMessage
-      id="xpack.lens.configure.emptyConfig.inline"
-      defaultMessage="Add a field"
-    />
+    <FormattedMessage id="xpack.lens.configure.emptyConfig.inline" defaultMessage="Add a field" />
   ),
 };
 
@@ -114,7 +111,7 @@ export function EmptyDimensionButton({
   activeVisualization,
   order,
   target,
-  isInlineEditing
+  isInlineEditing,
 }: {
   order: [2, number, number, number];
   group: VisualizationDimensionGroupConfig;
@@ -195,7 +192,7 @@ export function EmptyDimensionButton({
     columnId: value.columnId,
     onClick,
     group,
-    isInlineEditing
+    isInlineEditing,
   };
 
   return (
