@@ -14,6 +14,7 @@ import type {
 import {
   createBodySchemaV1,
   createParamsSchemaV1,
+  createRuleParamsExamplesV1,
 } from '../../../../../common/routes/rule/apis/create';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
@@ -39,6 +40,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
         access: 'public',
         summary: `Create a rule`,
         tags: ['oas-tag:alerting'],
+        oasOperationObject: createRuleParamsExamplesV1,
       },
       validate: {
         request: {

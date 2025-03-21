@@ -31,6 +31,7 @@ import {
   IndexPatternContext,
   InlinestatsCommandContext,
   JoinCommandContext,
+  type ChangePointCommandContext,
 } from '../antlr/esql_parser';
 import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
 import {
@@ -50,7 +51,6 @@ import {
   visitByOption,
   collectAllColumnIdentifiers,
   visitRenameClauses,
-  collectBooleanExpression,
   visitOrderExpressions,
   getPolicyName,
   getMatchField,
@@ -61,6 +61,8 @@ import { createJoinCommand } from './factories/join';
 import { createDissectCommand } from './factories/dissect';
 import { createGrokCommand } from './factories/grok';
 import { createStatsCommand } from './factories/stats';
+import { createChangePointCommand } from './factories/change_point';
+import { createWhereCommand } from './factories/where';
 
 export class ESQLAstBuilderListener implements ESQLParserListener {
   private ast: ESQLAst = [];
@@ -100,9 +102,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitWhereCommand(ctx: WhereCommandContext) {
-    const command = createCommand('where', ctx);
+    const command = createWhereCommand(ctx);
+
     this.ast.push(command);
-    command.args.push(...collectBooleanExpression(ctx.booleanExpression()));
   }
 
   /**
@@ -313,6 +315,21 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    */
   exitJoinCommand(ctx: JoinCommandContext): void {
     const command = createJoinCommand(ctx);
+
+    this.ast.push(command);
+  }
+
+  /**
+   * Exit a parse tree produced by `esql_parser.changePointCommand`.
+   *
+   * Parse the CHANGE_POINT command:
+   *
+   * CHANGE_POINT <value> [ ON <key> ] [ AS <target-type>, <target-pvalue> ]
+   *
+   * @param ctx the parse tree
+   */
+  exitChangePointCommand(ctx: ChangePointCommandContext): void {
+    const command = createChangePointCommand(ctx);
 
     this.ast.push(command);
   }

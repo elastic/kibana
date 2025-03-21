@@ -329,7 +329,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       licensing: plugins.licensing,
       scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
         endpointAppContextService: this.endpointAppContextService,
-        osqueryCreateActionService: plugins.osquery.createActionService,
+        osqueryCreateActionService: plugins.osquery?.createActionService,
       }),
     };
 
