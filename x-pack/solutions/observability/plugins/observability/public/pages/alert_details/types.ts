@@ -8,7 +8,6 @@
 import { ReactNode } from 'react';
 import { TopAlert } from '../..';
 
-export const NUM_OF_BUCKETS = 1000;
 export const NUM_OF_ALERTS = 10000;
 
 export interface AlertDetailsSource {

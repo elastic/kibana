@@ -233,7 +233,6 @@ export function AlertDetails() {
       <>
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="column" gutterSize="m">
-          <SourceBar alert={alertDetail.formatted} sources={sources} />
           <EuiFlexGrid columns={3} gutterSize="m">
             <EuiFlexItem>
               <AlertsTriggeredAroundSameTime
@@ -246,6 +245,9 @@ export function AlertDetails() {
                 alert={alertDetail?.formatted}
                 onViewRelatedAlertsClick={() => handleSetTabId(RELATED_ALERTS_TAB_ID)}
               />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SourceBar alert={alertDetail.formatted} sources={sources} />
             </EuiFlexItem>
           </EuiFlexGrid>
           <AlertDetailContextualInsights alert={alertDetail} />
