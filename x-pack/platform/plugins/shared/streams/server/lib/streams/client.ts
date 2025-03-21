@@ -12,7 +12,7 @@ import {
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { isResponseError } from '@kbn/es-errors';
+import { isNotFoundError } from '@kbn/es-errors';
 import {
   Condition,
   GroupStreamDefinition,
@@ -66,7 +66,10 @@ import {
   getDataStreamLifecycle,
 } from './stream_crud';
 import { updateDataStreamsLifecycle } from './data_streams/manage_data_streams';
-import { DefinitionNotFoundError } from './errors/definition_not_found_error';
+import {
+  DefinitionNotFoundError,
+  isDefinitionNotFoundError,
+} from './errors/definition_not_found_error';
 import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
 import { NameTakenError } from './errors/name_taken_error';
@@ -84,14 +87,6 @@ export type SyncStreamResponse = AcknowledgeResponse<'updated' | 'created'>;
 export type ForkStreamResponse = AcknowledgeResponse<'created'>;
 export type ResyncStreamsResponse = AcknowledgeResponse<'updated'>;
 export type UpsertStreamResponse = AcknowledgeResponse<'updated' | 'created'>;
-
-function isElasticsearch404(error: unknown): error is errors.ResponseError & { statusCode: 404 } {
-  return isResponseError(error) && error.statusCode === 404;
-}
-
-function isDefinitionNotFoundError(error: unknown): error is DefinitionNotFoundError {
-  return error instanceof DefinitionNotFoundError;
-}
 
 export class StreamsClient {
   constructor(
@@ -415,7 +410,7 @@ export class StreamsClient {
 
       return true;
     } catch (error) {
-      if (isElasticsearch404(error)) {
+      if (isNotFoundError(error)) {
         return false;
       }
 
@@ -600,7 +595,7 @@ export class StreamsClient {
   async ensureStream(name: string): Promise<void> {
     const [streamDefinition, dataStream] = await Promise.all([
       this.getStoredStreamDefinition(name).catch((error) => {
-        if (isElasticsearch404(error)) {
+        if (isNotFoundError(error)) {
           return undefined;
         }
         throw error;
@@ -642,13 +637,13 @@ export class StreamsClient {
       return streamDefinition;
     } catch (error) {
       try {
-        if (isElasticsearch404(error)) {
+        if (isNotFoundError(error)) {
           const dataStream = await this.getDataStream(name);
           return this.getDataStreamAsIngestStream(dataStream);
         }
         throw error;
       } catch (e) {
-        if (isElasticsearch404(e)) {
+        if (isNotFoundError(e)) {
           throw new DefinitionNotFoundError(`Cannot find stream ${name}`);
         }
         throw e;
