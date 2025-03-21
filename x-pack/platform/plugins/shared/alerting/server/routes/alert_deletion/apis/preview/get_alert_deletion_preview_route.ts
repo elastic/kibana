@@ -24,7 +24,7 @@ export const getAlertDeletionPreviewRoute = (
 ) => {
   router.get(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/alert_deletion/preview`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/settings/_alert_deletion_preview`,
       validate: {
         query: alertDeletionPreviewQuerySchemaV1,
       },
