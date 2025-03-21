@@ -48,7 +48,7 @@ const defaultDissectProcessorFormState: DissectFormState = {
 
 const defaultGrokProcessorFormState: GrokFormState = {
   type: 'grok',
-  field: 'message',
+  field: 'body.text',
   patterns: [{ value: '' }],
   pattern_definitions: {},
   ignore_failure: true,

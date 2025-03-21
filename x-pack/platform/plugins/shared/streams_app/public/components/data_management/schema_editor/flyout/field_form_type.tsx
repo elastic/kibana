@@ -24,13 +24,15 @@ export const FieldFormType = ({
 }) => {
   const { useFieldsMetadata } = useKibana().dependencies.start.fieldsMetadata;
 
+  const ecsFieldName = getRegularEcsField(field.name);
+
   const { fieldsMetadata, loading } = useFieldsMetadata(
-    { attributes: ['type'], fieldNames: [field.name] },
+    { attributes: ['type'], fieldNames: [ecsFieldName] },
     [field]
   );
 
   // Propagate recommendation to state if a type is not already set
-  const recommendation = fieldsMetadata?.[getRegularEcsField(field.name)]?.type;
+  const recommendation = fieldsMetadata?.[ecsFieldName]?.type;
 
   useEffect(() => {
     if (

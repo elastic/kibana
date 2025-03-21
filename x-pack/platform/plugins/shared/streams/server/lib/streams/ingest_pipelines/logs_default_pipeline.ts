@@ -27,6 +27,7 @@ export const logsDefaultPipelineProcessors = [
     },
   },
   {
+    // This is a placeholder for the ECS migration processor - once it exists on the Elasticsearch side, it can be removed here
     script: {
       lang: 'painless',
       source: `
