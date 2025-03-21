@@ -12,6 +12,13 @@ import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import type { DocLinksService } from '@kbn/core-doc-links-server-internal';
 
+expect.addSnapshotSerializer({
+  test: (val) => val instanceof MockLinkContext,
+  serialize: (val: MockLinkContext) => {
+    return val.toString();
+  },
+});
+
 type DocLinksServiceContract = PublicMethodsOf<DocLinksService>;
 
 export class MockLinkContext {

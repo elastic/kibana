@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { docLinksServiceMock, MockLinkContext } from './doc_links_service.mock';
-
-expect.addSnapshotSerializer({
-  test: (val) => val instanceof MockLinkContext,
-  serialize: (val: MockLinkContext) => {
-    return val.toString();
-  },
-});
+import { docLinksServiceMock } from './doc_links_service.mock';
 
 describe('docLinksServiceMock', () => {
   describe('createSetupContract links', () => {
