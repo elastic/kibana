@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { createRouter, Outlet, RouteMap } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
-import { StreamDetailView } from '../components/stream_detail_view';
+import { StreamDetailView, StreamDetailViewContent } from '../components/stream_detail_view';
 import { StreamsAppPageTemplate } from '../components/streams_app_page_template';
 import { StreamsAppRouterBreadcrumb } from '../components/streams_app_router_breadcrumb';
 import { RedirectTo } from '../components/redirect_to';
@@ -44,22 +44,6 @@ const streamsAppRoutes = {
           '/{key}': {
             element: <RedirectTo path="/{key}/{tab}" params={{ path: { tab: 'overview' } }} />,
           },
-          '/{key}/management': {
-            element: (
-              <RedirectTo
-                path="/{key}/management/{subtab}"
-                params={{ path: { subtab: 'overview' } }}
-              />
-            ),
-          },
-          '/{key}/management/{subtab}': {
-            element: <StreamDetailView />,
-            params: t.type({
-              path: t.type({
-                subtab: t.string,
-              }),
-            }),
-          },
           '/{key}/{tab}': {
             element: <StreamDetailView />,
             params: t.type({
@@ -67,15 +51,25 @@ const streamsAppRoutes = {
                 tab: t.string,
               }),
             }),
-          },
-          '/{key}/{tab}/{subtab}': {
-            element: <StreamDetailView />,
-            params: t.type({
-              path: t.type({
-                tab: t.string,
-                subtab: t.string,
-              }),
-            }),
+            children: {
+              '/{key}/{tab}/{subtab}': {
+                element: <StreamDetailViewContent />,
+                params: t.type({
+                  path: t.type({
+                    subtab: t.string,
+                    tab: t.string,
+                  }),
+                }),
+              },
+              '/{key}/{tab}': {
+                element: <StreamDetailViewContent />,
+                params: t.type({
+                  path: t.type({
+                    tab: t.string,
+                  }),
+                }),
+              },
+            },
           },
         },
       },
