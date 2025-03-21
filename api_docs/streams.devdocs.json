@@ -747,7 +747,25 @@
               "section": "def-common.RecursiveRecord",
               "text": "RecursiveRecord"
             },
-            "[]; }, undefined>; \"GET /internal/streams/{name}/_details\": ",
+            "[]; }, undefined>; \"GET /internal/streams/_resolve_index\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /internal/streams/_resolve_index\", Zod.ZodObject<{ query: Zod.ZodObject<{ index: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { index: string; }, { index: string; }>; }, \"strip\", Zod.ZodTypeAny, { query: { index: string; }; }, { query: { index: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", { stream?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.StreamDefinition",
+              "text": "StreamDefinition"
+            },
+            " | undefined; }, undefined>; \"GET /internal/streams/{name}/_details\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -1518,7 +1536,25 @@
             "section": "def-common.RecursiveRecord",
             "text": "RecursiveRecord"
           },
-          "[]; }, undefined>; \"GET /internal/streams/{name}/_details\": ",
+          "[]; }, undefined>; \"GET /internal/streams/_resolve_index\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/streams/_resolve_index\", Zod.ZodObject<{ query: Zod.ZodObject<{ index: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { index: string; }, { index: string; }>; }, \"strip\", Zod.ZodTypeAny, { query: { index: string; }; }, { query: { index: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", { stream?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamDefinition",
+            "text": "StreamDefinition"
+          },
+          " | undefined; }, undefined>; \"GET /internal/streams/{name}/_details\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",

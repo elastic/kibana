@@ -68,7 +68,7 @@ export function StreamListView() {
           }
         />
       </EuiFlexItem>
-      <StreamsAppPageBody>
+      <StreamsAppPageBody background>
         {!streamsListFetch.loading && !streamsListFetch.value?.length ? (
           <StreamsEmptyPrompt />
         ) : (
