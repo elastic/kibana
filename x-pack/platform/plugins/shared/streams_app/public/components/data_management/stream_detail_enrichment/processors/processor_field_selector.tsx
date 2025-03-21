@@ -11,7 +11,7 @@ import React from 'react';
 import { useController } from 'react-hook-form';
 import { ProcessorFormState } from '../types';
 
-export const ProcessorFieldSelector = () => {
+export const ProcessorFieldSelector = ({ helpText }: { helpText?: string }) => {
   const { field, fieldState } = useController<ProcessorFormState, 'field'>({
     name: 'field',
     rules: {
@@ -31,10 +31,13 @@ export const ProcessorFieldSelector = () => {
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorLabel',
         { defaultMessage: 'Field' }
       )}
-      helpText={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorHelpText',
-        { defaultMessage: 'Field to search for matches.' }
-      )}
+      helpText={
+        helpText ??
+        i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorHelpText',
+          { defaultMessage: 'Field to search for matches.' }
+        )
+      }
       isInvalid={invalid}
       error={error?.message}
     >

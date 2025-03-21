@@ -24,6 +24,16 @@ import {
   DateFormState,
 } from './types';
 import { ALWAYS_CONDITION } from '../../../util/condition';
+import { configDrivenProcessors } from './processors/config_driven';
+import {
+  ConfigDrivenProcessorFormState,
+  ConfigDrivenProcessorType,
+} from './processors/config_driven/types';
+
+/**
+ * These are processor types with specialised UI. Other processor types are handled by a generic config-driven UI.
+ */
+export const SPECIALISED_TYPES = ['date', 'dissect', 'grok'];
 
 const defaultDateProcessorFormState: DateFormState = {
   type: 'date',
@@ -56,10 +66,18 @@ const defaultGrokProcessorFormState: GrokFormState = {
   if: ALWAYS_CONDITION,
 };
 
+const configDrivenDefaultFormStates = Object.fromEntries(
+  Object.entries(configDrivenProcessors).map(([key, { defaultFormState }]) => [
+    key,
+    defaultFormState,
+  ])
+) as Record<ConfigDrivenProcessorType, ConfigDrivenProcessorFormState>;
+
 const defaultProcessorFormStateByType: Record<ProcessorType, ProcessorFormState> = {
   date: defaultDateProcessorFormState,
   dissect: defaultDissectProcessorFormState,
   grok: defaultGrokProcessorFormState,
+  ...configDrivenDefaultFormStates,
 };
 
 export const getDefaultFormStateByType = (type: ProcessorType) =>
@@ -96,6 +114,12 @@ export const getFormStateFrom = (
       ...date,
       type: 'date',
     });
+  }
+
+  if (processor.type in configDrivenProcessors) {
+    return configDrivenProcessors[
+      processor.type as ConfigDrivenProcessorType
+    ].convertProcessorToFormState(processor as any);
   }
 
   throw new Error(`Form state for processor type "${processor.type}" is not implemented.`);
@@ -148,6 +172,10 @@ export const convertFormStateToProcessor = (formState: ProcessorFormState): Proc
         output_format: isEmpty(output_format) ? undefined : output_format,
       },
     };
+  }
+
+  if (configDrivenProcessors[formState.type]) {
+    return configDrivenProcessors[formState.type].convertFormStateToConfig(formState as any);
   }
 
   throw new Error('Cannot convert form state to processing: unknown type.');

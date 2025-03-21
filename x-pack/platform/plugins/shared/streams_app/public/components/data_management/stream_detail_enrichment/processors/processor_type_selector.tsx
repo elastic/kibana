@@ -14,6 +14,7 @@ import { ProcessorType } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getDefaultFormStateByType } from '../utils';
 import { ProcessorFormState } from '../types';
+import { configDrivenProcessors } from './config_driven';
 
 interface TAvailableProcessor {
   value: ProcessorType;
@@ -126,6 +127,7 @@ const availableProcessors: TAvailableProcessors = {
       />
     ),
   },
+  ...configDrivenProcessors,
 };
 
 const getProcessorDescription = (esDocUrl: string) => (type: ProcessorType) =>

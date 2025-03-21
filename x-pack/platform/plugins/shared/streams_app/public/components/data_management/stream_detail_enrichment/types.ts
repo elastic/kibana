@@ -14,6 +14,8 @@ import {
   ProcessorTypeOf,
 } from '@kbn/streams-schema';
 
+import { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
+
 export type WithUIAttributes<T extends ProcessorDefinition> = T & {
   id: string;
   type: ProcessorTypeOf<T>;
@@ -35,4 +37,6 @@ export type DissectFormState = DissectProcessorConfig & { type: 'dissect' };
 
 export type DateFormState = DateProcessorConfig & { type: 'date' };
 
-export type ProcessorFormState = GrokFormState | DissectFormState | DateFormState;
+export type SpecialisedFormState = GrokFormState | DissectFormState | DateFormState;
+
+export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
