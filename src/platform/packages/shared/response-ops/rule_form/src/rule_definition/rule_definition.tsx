@@ -191,7 +191,6 @@ export const RuleDefinition = () => {
     [dispatch]
   );
 
-  console.log('params', params);
   return (
     <EuiSplitPanel.Outer hasBorder hasShadow={false} data-test-subj="ruleDefinition">
       <EuiSplitPanel.Inner color="subdued">

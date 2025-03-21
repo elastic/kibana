@@ -73,9 +73,9 @@ export function InvestigationManager<T extends RuleTypeParams>({
   setRuleParams: RuleTypeParamsExpressionProps<T>['setRuleParams'];
   value: string;
 }) {
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<string[] | undefined>(undefined);
   const onParse = useCallback((error: any, { messages: msg, astVal }: any) => {
-    setMessages(error ? [error] : [msg]);
+    setMessages(error ? [error] : undefined);
   }, []);
   return (
     <div>
