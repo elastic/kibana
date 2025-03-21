@@ -10,6 +10,7 @@ import type { EuiFieldSearchProps } from '@elastic/eui';
 import {
   EuiSelectable,
   useEuiTheme,
+  EuiButtonEmpty,
   type EuiSelectableProps,
   type EuiSelectableOption,
   EuiCheckbox,
@@ -31,10 +32,10 @@ import type { EuiPaginationProps } from '@elastic/eui/src/components/pagination/
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
 import { css } from '@emotion/react';
+import { useFetchPolicyData } from './hooks/use_fetch_policy_data';
 import { APP_UI_ID } from '../../../../common';
 import { useAppUrl, useToasts } from '../../../common/lib/kibana';
 import { LinkToApp } from '../../../common/components/endpoint';
-import { useFetchIntegrationPolicyList } from '../../hooks/policy/use_fetch_integration_policy_list';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { getPolicyDetailPath } from '../../common/routing';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -151,7 +152,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
       kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
       sortField = 'name',
       sortOrder = 'asc',
-      withAgentCount = true,
+      withAgentCount = false,
       perPage = 20,
     } = {},
     selectedPolicyIds,
@@ -176,8 +177,9 @@ export const PolicySelector = memo<PolicySelectorProps>(
     const [page, setPage] = useState(1);
     const [userSearchValue, setUserSearchValue] = useState('');
     const [searchKuery, setSearchKuery] = useState('');
+    const [view, setView] = useState<'full-list' | 'selected-list'>('full-list');
 
-    // Delays setting the `searchKuery` for a few seconds - allowing the user to pause typing - so
+    // Delays setting the `searchKuery` value thus allowing the user to pause typing - so
     // that we don't call the API on every character change.
     useDebounce(
       () => {
@@ -208,7 +210,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
       isFetching,
       isLoading,
       error,
-    } = useFetchIntegrationPolicyList(
+    } = useFetchPolicyData(
       {
         kuery: searchKuery,
         sortOrder,
@@ -217,7 +219,8 @@ export const PolicySelector = memo<PolicySelectorProps>(
         withAgentCount,
         page,
       },
-      { keepPreviousData: true }
+      selectedPolicyIds,
+      view
     );
 
     const selectedCount = useMemo(() => {
@@ -382,6 +385,10 @@ export const PolicySelector = memo<PolicySelectorProps>(
       []
     );
 
+    const viewSelectedOnClickHandler = useCallback(() => {
+      setView((prevState) => (prevState === 'selected-list' ? 'full-list' : 'selected-list'));
+    }, []);
+
     useEffect(() => {
       if (error) {
         toasts.addError(error, {
@@ -393,22 +400,47 @@ export const PolicySelector = memo<PolicySelectorProps>(
       }
     }, [toasts, error]);
 
+    useEffect(() => {
+      if (view === 'selected-list' && selectedCount === 0) {
+        setView('full-list');
+      }
+    }, [selectedCount, view]);
+
     return (
       <PolicySelectorContainer data-test-subj={dataTestSubj} height={height}>
         <EuiPanel paddingSize="s" hasShadow={false} hasBorder className="header-container">
-          <EuiFieldSearch
-            placeholder={i18n.translate(
-              'xpack.securitySolution.policySelector.searchbarPlaceholder',
-              { defaultMessage: 'Search policies' }
-            )}
-            value={userSearchValue}
-            onSearch={onSearchHandler}
-            onChange={onSearchInputChangeHandler}
-            incremental={false}
-            isClearable
-            fullWidth
-            compressed
-          />
+          <EuiFlexGroup gutterSize="m" alignItems="center">
+            <EuiFlexItem>
+              <EuiFieldSearch
+                placeholder={i18n.translate(
+                  'xpack.securitySolution.policySelector.searchbarPlaceholder',
+                  { defaultMessage: 'Search policies' }
+                )}
+                value={userSearchValue}
+                onSearch={onSearchHandler}
+                onChange={onSearchInputChangeHandler}
+                incremental={false}
+                disabled={view === 'selected-list'}
+                isClearable
+                fullWidth
+                compressed
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="filter"
+                size="s"
+                onClick={viewSelectedOnClickHandler}
+                disabled={selectedCount === 0}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.policySelector.selectedCount"
+                  defaultMessage="{count} selected"
+                  values={{ count: selectedCount }}
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPanel>
 
         <EuiPanel paddingSize="s" hasShadow={false} hasBorder className="body-container">
@@ -422,7 +454,6 @@ export const PolicySelector = memo<PolicySelectorProps>(
             singleSelection={singleSelection}
             isLoading={isLoading}
             height="full"
-            // searchProps={SEARCH_PROPS}
             data-test-subj={getTestId('list')}
           >
             {listBuilderCallback}
@@ -432,22 +463,6 @@ export const PolicySelector = memo<PolicySelectorProps>(
         <EuiPanel paddingSize="s" hasShadow={false} hasBorder className="footer-container">
           <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
             <EuiFlexItem
-              grow
-              css={css`
-                border-right: ${euiTheme.border.thin};
-                padding-right: ${euiTheme.size.s};
-              `}
-            >
-              <EuiText size="s">
-                <FormattedMessage
-                  id="xpack.securitySolution.policySelector.selectedCount"
-                  defaultMessage="{count} selected"
-                  values={{ count: selectedCount }}
-                />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
               css={css`
                 border-right: ${euiTheme.border.thin};
                 padding-right: ${euiTheme.size.s};
@@ -456,8 +471,11 @@ export const PolicySelector = memo<PolicySelectorProps>(
               <EuiText size="s">
                 <FormattedMessage
                   id="xpack.securitySolution.policySelector.totalPoliciesFound"
-                  defaultMessage="{count} {count, plural, =1 {policy} other {policies}} found"
-                  values={{ count: policyListResponse?.total ?? 0 }}
+                  defaultMessage="{count} {count, plural, =1 {policy} other {policies}} {isSelectedList, select, true {selected} other {found}}"
+                  values={{
+                    count: policyListResponse?.total ?? 0,
+                    isSelectedList: view === 'selected-list',
+                  }}
                 />
               </EuiText>
             </EuiFlexItem>
