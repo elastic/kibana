@@ -16,8 +16,10 @@ import {
   type ESQLCommand,
   type ESQLFunction,
   type ESQLMessage,
+  Walker,
 } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
+import { ESQLAstRenameExpression } from '@kbn/esql-ast/src/types';
 import {
   hasWildcard,
   isAssignment,
@@ -316,6 +318,35 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [{ name: 'renameClause', type: 'column' }],
     },
     suggest: suggestForRename,
+    validate: (command: ESQLCommand<'rename'>) => {
+      const messages: ESQLMessage[] = [];
+
+      const renameExpressions = Walker.findAll(command, (node) => {
+        return node.type === 'option' && node.name === 'as';
+      }) as ESQLAstRenameExpression[];
+
+      for (const expression of renameExpressions) {
+        const [column] = expression.args;
+        if (!isColumnItem(column)) {
+          continue;
+        }
+
+        if (hasWildcard(column.name)) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'wildcardNotSupportedForCommand',
+              values: {
+                command: 'RENAME',
+                value: column.name,
+              },
+              locations: column.location,
+            })
+          );
+        }
+      }
+
+      return messages;
+    },
   },
   {
     name: 'limit',

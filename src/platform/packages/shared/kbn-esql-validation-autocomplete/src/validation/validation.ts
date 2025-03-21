@@ -23,17 +23,13 @@ import type { ESQLAstJoinCommand, ESQLIdentifier } from '@kbn/esql-ast/src/types
 import {
   areFieldAndVariableTypesCompatible,
   getColumnExists,
-  getColumnForASTNode,
   getCommandDefinition,
-  getQuotedColumnName,
-  hasWildcard,
   isColumnItem,
   isFunctionItem,
   isOptionItem,
   isParametrized,
   isSourceItem,
   isTimeIntervalItem,
-  isVariable,
   sourceExists,
 } from '../shared/helpers';
 import type { ESQLCallbacks } from '../shared/types';
@@ -397,34 +393,9 @@ export function validateColumnForCommand(
     if (!references.variables.has(column.name) && !isParametrized(column)) {
       messages.push(errors.unknownColumn(column));
     }
-  } else {
-    const columnName = getQuotedColumnName(column);
-    if (getColumnExists(column, references)) {
-      const commandDef = getCommandDefinition(commandName);
-      // this should be guaranteed by the columnCheck above
-      const columnRef = getColumnForASTNode(column, references)!;
-
-      if (
-        hasWildcard(columnName) &&
-        !isVariable(columnRef) &&
-        !commandDef.signature.params.some(({ type, wildcards }) => type === 'column' && wildcards)
-      ) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'wildcardNotSupportedForCommand',
-            values: {
-              command: commandName.toUpperCase(),
-              value: columnName,
-            },
-            locations: column.location,
-          })
-        );
-      }
-    } else {
-      if (column.name) {
-        messages.push(errors.unknownColumn(column));
-      }
-    }
+  } else if (!getColumnExists(column, references)) {
+    messages.push(errors.unknownColumn(column));
   }
+
   return messages;
 }

@@ -681,6 +681,7 @@ describe('validation logic', () => {
         'Unknown column [keywords]',
       ]);
       testErrorsAndWarnings('from a_index | rename s* as strings', [
+        'Using wildcards (*) in RENAME is not allowed [s*]',
         'Unknown column [s*]',
         'Unknown column [strings]',
       ]);
