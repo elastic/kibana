@@ -61,27 +61,6 @@ export const SpaceCopyResultDetails = (props: Props) => {
   const { objects } = summarizedCopyResult;
   const { euiTheme } = useEuiTheme();
 
-  const styles = {
-    selectControlChildWrapper: css`
-      visibility: hidden;
-      opacity: 0;
-      height: 0;
-      overflow: hidden;
-      transform: translateZ(0);
-      transition: height ${euiTheme.animation.normal} ${euiTheme.animation.resistance},
-        ${euiTheme.animation.normal} ${euiTheme.animation.resistance};
-    `,
-    selectControlChildWrapperIsOpen: css`
-      visibility: visible;
-      opacity: 1;
-      height: auto;
-      overflow: hidden;
-      transform: translateZ(0);
-      transition: height ${euiTheme.animation.normal} ${euiTheme.animation.resistance},
-        ${euiTheme.animation.normal} ${euiTheme.animation.resistance};
-    `,
-  };
-
   return (
     <div
       css={css`
@@ -152,8 +131,16 @@ export const SpaceCopyResultDetails = (props: Props) => {
           },
         };
 
-        const childWrapperStyles = (isOpen: boolean) =>
-          isOpen ? styles.selectControlChildWrapperIsOpen : styles.selectControlChildWrapper;
+        const childWrapperStyles = (isOpen: boolean) => css`
+          overflow: hidden;
+          transform: translateZ(0);
+          transition: height ${euiTheme.animation.normal} ${euiTheme.animation.resistance},
+            ${euiTheme.animation.normal} ${euiTheme.animation.resistance};
+
+          visibility: ${isOpen ? 'visible' : 'hidden'};
+          opacity: ${isOpen ? 1 : 0};
+          height: ${isOpen ? 'auto' : 0};
+        `;
 
         return (
           <Fragment key={index}>

@@ -149,7 +149,7 @@ export const CopyStatusSummaryIndicator = (props: Props) => {
       <CopyStatusIcon {...props} />
       <EuiBadge
         css={css`
-          marginleft: ${euiTheme.size.xs};
+          margin-left: ${euiTheme.size.xs};
         `}
       >
         {summarizedCopyResult.objects.length}
