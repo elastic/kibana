@@ -82,7 +82,7 @@ export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
       services: { mlServices },
     } = useMlKibana();
 
-    const mouseOverRecordRef = useRef<any>();
+    const mouseOverRecordRef = useRef<MlAnomaliesTableRecordExtended>();
 
     const handleSetShowFunction = useCallback(
       (showFunction: (anomaly: MlAnomaliesTableRecordExtended) => void) => {
