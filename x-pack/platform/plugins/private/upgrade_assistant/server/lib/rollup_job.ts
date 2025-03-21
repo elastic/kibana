@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   RollupGetRollupIndexCapsResponse,
   RollupGetJobsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
-export async function getRollupJobByIndexName(esClient: ElasticsearchClient, index: string) {
+export async function getRollupJobByIndexName(
+  esClient: ElasticsearchClient,
+  log: Logger,
+  index: string
+) {
   let rollupCaps: RollupGetRollupIndexCapsResponse;
 
   try {
-    rollupCaps = await esClient.rollup.getRollupIndexCaps({ index });
+    rollupCaps = await esClient.rollup.getRollupIndexCaps({ index }, { ignore: [404] });
     // will catch if not found
     // would be nice to handle the error better but little info is provided
   } catch (e) {
+    log.warn(`Get rollup index capabilities failed: ${e}`);
     return;
   }
 
@@ -31,10 +36,11 @@ export async function getRollupJobByIndexName(esClient: ElasticsearchClient, ind
     let jobs: RollupGetJobsResponse;
 
     try {
-      jobs = await esClient.rollup.getJobs({ id: rollupJob }, {});
+      jobs = await esClient.rollup.getJobs({ id: rollupJob }, { ignore: [404] });
       // will catch if not found
       // would be nice to handle the error better but little info is provided
     } catch (e) {
+      log.warn(`Get rollup job failed: ${e}`);
       return;
     }
 
