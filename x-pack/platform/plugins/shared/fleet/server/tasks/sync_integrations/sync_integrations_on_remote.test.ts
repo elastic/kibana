@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { PackageNotFoundError } from '../errors';
-import { outputService } from '../services';
+import { PackageNotFoundError } from '../../errors';
+import { outputService } from '../../services';
 
 import { syncIntegrationsOnRemote } from './sync_integrations_on_remote';
 
-jest.mock('../services');
+jest.mock('../../services');
 
 const outputServiceMock = outputService as jest.Mocked<typeof outputService>;
 
