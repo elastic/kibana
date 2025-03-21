@@ -45,12 +45,7 @@ export function useEnableSlo() {
         queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
         queryClient.invalidateQueries({ queryKey: sloKeys.details(), exact: false });
         queryClient.invalidateQueries({
-          queryKey: sloKeys.definitions({
-            search: name,
-            page: 1,
-            perPage: 10,
-            includeOutdatedOnly: false,
-          }),
+          queryKey: sloKeys.allDefinitions(),
           exact: false,
         });
 

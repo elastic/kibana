@@ -13,16 +13,18 @@ import {
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiSpacer,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { ALL_VALUE, SLODefinitionResponse } from '@kbn/slo-schema';
 import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
 import { useKibana } from '../../../hooks/use_kibana';
-// import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { usePermissions } from '../../../hooks/use_permissions';
 import { useResetSlo } from '../../../hooks/use_reset_slo';
 import { useEnableSlo } from '../../../hooks/use_enable_slo';
@@ -34,6 +36,7 @@ import { SloDeleteModal } from '../../../components/slo/delete_confirmation_moda
 import { SloResetConfirmationModal } from '../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { SloEnableConfirmationModal } from '../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
 import { SloDisableConfirmationModal } from '../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
+import { SLO_MODEL_VERSION } from '../../../../common/constants';
 
 export function SloManagementTable() {
   const [pageIndex, setPageIndex] = useState(0);
@@ -53,8 +56,6 @@ export function SloManagementTable() {
   });
 
   const { data: permissions } = usePermissions();
-
-  // const navigateToClone = useCloneSlo();
 
   const [sloToDelete, setSloToDelete] = useState<SLODefinitionResponse | undefined>(undefined);
   const [sloToReset, setSloToReset] = useState<SLODefinitionResponse | undefined>(undefined);
@@ -110,7 +111,6 @@ export function SloManagementTable() {
     {
       type: 'icon',
       icon: 'pencil',
-      // todo: remote case?
       name: i18n.translate('xpack.slo.item.actions.edit', {
         defaultMessage: 'Edit',
       }),
@@ -118,7 +118,6 @@ export function SloManagementTable() {
         defaultMessage: 'Edit',
       }),
       'data-test-subj': 'sloActionsEdit',
-      // remote not included, see compact view
       enabled: (slo) => !!permissions?.hasAllWriteRequested,
       onClick: (slo: SLODefinitionResponse) => {
         navigateToUrl(http.basePath.prepend(paths.sloEdit(slo.id)));
@@ -153,22 +152,6 @@ export function SloManagementTable() {
         } else {
           setSloToEnable(slo);
         }
-      },
-    },
-    {
-      type: 'icon',
-      icon: 'copy',
-      name: i18n.translate('xpack.slo.item.actions.clone', {
-        defaultMessage: 'Clone',
-      }),
-      description: i18n.translate('xpack.slo.item.actions.clone', {
-        defaultMessage: 'Clone',
-      }),
-      'data-test-subj': 'sloActionsClone',
-      enabled: () => !!permissions?.hasAllWriteRequested,
-      onClick: (slo: SLODefinitionResponse) => {
-        // todo
-        // navigateToClone(slo);
       },
     },
     {
@@ -222,21 +205,40 @@ export function SloManagementTable() {
       },
     },
     {
-      field: 'enabled',
-      width: '10%',
-      name: i18n.translate('xpack.slo.sloManagementTable.columns.enabledLabel', {
-        defaultMessage: 'Active Status',
-      }),
-      render: (item: SLODefinitionResponse['enabled']) => {
-        return item ? 'Enabled' : 'Disabled';
-      },
-    },
-    {
       field: 'version',
       width: '10%',
       name: i18n.translate('xpack.slo.sloManagementTable.columns.versionLabel', {
         defaultMessage: 'Version',
       }),
+      render: (item: SLODefinitionResponse['version']) => {
+        return item < SLO_MODEL_VERSION ? (
+          <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs">
+            <EuiFlexItem grow={0}>
+              <EuiText size="s">{item}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={0}>
+              <EuiToolTip
+                title={
+                  <EuiText>
+                    {i18n.translate('xpack.slo.sloManagementTable.columns.outdatedTooltip', {
+                      defaultMessage:
+                        'This SLO is from a previous version and needs to either be reset to upgrade to the latest version OR deleted and removed from the system. When you reset the SLO, the transform will be updated to the latest version and the historical data will be regenerated from the source data.',
+                    })}
+                  </EuiText>
+                }
+              >
+                <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs">
+                  <EuiFlexItem grow={0}>
+                    <EuiIcon type="warning" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <EuiText size="s">{item}</EuiText>
+        );
+      },
     },
     {
       field: 'tags',
