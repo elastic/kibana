@@ -175,6 +175,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
     const { canReadPolicyManagement, canWriteIntegrationPolicies } =
       useUserPrivileges().endpointPrivileges;
     const [page, setPage] = useState(1);
+    const [selectedListPage, setSelectedListPage] = useState(1);
     const [userSearchValue, setUserSearchValue] = useState('');
     const [searchKuery, setSearchKuery] = useState('');
     const [view, setView] = useState<'full-list' | 'selected-list'>('full-list');
@@ -217,7 +218,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
         sortField,
         perPage,
         withAgentCount,
-        page,
+        page: view === 'full-list' ? page : selectedListPage,
       },
       selectedPolicyIds,
       view
@@ -301,23 +302,27 @@ export const PolicySelector = memo<PolicySelectorProps>(
           };
         })
         .concat(
-          ...additionalListItems.map((additionalItem) => {
-            return {
-              ...additionalItem,
-              'data-type': 'customItem',
-              prepend: useCheckbox ? (
-                <EuiCheckbox
-                  id={htmlIdGenerator()()}
-                  onChange={NOOP}
-                  checked={additionalItem.checked === 'on'}
-                  disabled={additionalItem.disabled ?? false}
-                  data-test-subj={getTestId(
-                    `${additionalItem['data-test-subj'] ?? getTestId('additionalItem')}-checkbox`
-                  )}
-                />
-              ) : null,
-            } as unknown as EuiSelectableOption<OptionPolicyData>;
-          })
+          ...additionalListItems
+            .filter(
+              (additionalItem) => !(view === 'selected-list' && additionalItem.checked !== 'on')
+            )
+            .map((additionalItem) => {
+              return {
+                ...additionalItem,
+                'data-type': 'customItem',
+                prepend: useCheckbox ? (
+                  <EuiCheckbox
+                    id={htmlIdGenerator()()}
+                    onChange={NOOP}
+                    checked={additionalItem.checked === 'on'}
+                    disabled={additionalItem.disabled ?? false}
+                    data-test-subj={getTestId(
+                      `${additionalItem['data-test-subj'] ?? getTestId('additionalItem')}-checkbox`
+                    )}
+                  />
+                ) : null,
+              } as unknown as EuiSelectableOption<OptionPolicyData>;
+            })
         );
     }, [
       additionalListItems,
@@ -330,6 +335,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
       selectedPolicyIds,
       showPolicyLink,
       useCheckbox,
+      view,
     ]);
 
     const listBuilderCallback = useCallback<NonNullable<EuiSelectableProps['children']>>(
@@ -352,11 +358,16 @@ export const PolicySelector = memo<PolicySelectorProps>(
           : selectedPolicyIds;
 
         const updatedAdditionalItems: AdditionalListItemProps[] = isChangedOptionCustom
-          ? updatedOptions
-              // @ts-expect-error
-              .filter((option) => option['data-type'] === 'customItem')
-              // @ts-expect-error
-              .map(({ prepend, 'data-type': dataType, ...option }) => option)
+          ? additionalListItems.map((additionalItem) => {
+              if (additionalItem.label === changedOption.label) {
+                return {
+                  ...additionalItem,
+                  checked: changedOption.checked,
+                };
+              }
+
+              return additionalItem;
+            })
           : additionalListItems;
 
         return onChange(updatedPolicyIds, updatedAdditionalItems);
@@ -366,9 +377,13 @@ export const PolicySelector = memo<PolicySelectorProps>(
 
     const onPageClickHandler: Required<EuiPaginationProps>['onPageClick'] = useCallback(
       (activePage) => {
-        setPage(activePage + 1);
+        if (view === 'selected-list') {
+          setSelectedListPage(activePage + 1);
+        } else {
+          setPage(activePage + 1);
+        }
       },
-      []
+      [view]
     );
 
     const onSearchHandler: Required<EuiFieldSearchProps>['onSearch'] = useCallback(
