@@ -25,7 +25,7 @@ const { REPO_ROOT } = require('@kbn/repo-info');
       `${REPO_ROOT}/x-pack/platform/plugins/shared/security/docs/openapi/user_session_apis.yaml`,
       `${REPO_ROOT}/src/platform/plugins/shared/share/docs/openapi/short_url_apis.yaml`,
       `${REPO_ROOT}/x-pack/platform/plugins/private/logstash/docs/openapi/logstash_apis.yaml`,
-      `${REPO_ROOT}/x-pack/platform/plugins/shared/task_manager/docs/openapi/health_apis.yaml`,
+      `${REPO_ROOT}/x-pack/platform/plugins/shared/task_manager/docs/openapi/bundled.yaml`,
 
       // Observability Solution
       `${REPO_ROOT}/x-pack/solutions/observability/plugins/apm/docs/openapi/apm/bundled.yaml`,
