@@ -60,89 +60,92 @@ export async function createMcpServer({
   const statusEnum = z.enum(statusValues.length ? (statusValues as [string, ...string[]]) : ['']);
 
   server.tool(
-    'retrieve_cases',
-    `Retrieves Salesforce support cases with flexible filtering options`,
+    "think",
+    "Use the tool to think about something. It will not obtain new information or change the database, but just append the thought to the log. Use it when complex reasoning or some cache memory is needed.",
     {
-      caseNumber: z
-        .array(z.string())
-        .optional()
-        .describe('Salesforce case number identifiers (preferred lookup method)'),
-      id: z
-        .array(z.string())
-        .optional()
-        .describe(
-          'Salesforce internal IDs of the support cases (use only when specifically requested)'
-        ),
-      size: z.number().int().positive().default(10).describe('Maximum number of cases to return'),
-      ownerEmail: z
-        .array(z.string())
-        .optional()
-        .describe('Emails of case owners/assignees to filter results'),
-      priority: z
-        .array(priorityEnum)
-        .optional()
-        .describe(
-          `Case priority levels${
-            priorityValues.length ? ` (values from: ${priorityValues.join(', ')})` : ''
-          }`
-        ),
-      status: z
-        .array(statusEnum)
-        .optional()
-        .describe(
-          `Current statuses of the cases${
-            statusValues.length ? ` (values from: ${statusValues.join(', ')})` : ''
-          }`
-        ),
-      closed: z.boolean().optional().describe('Filter by case closure status (true/false)'),
-      createdAfter: z
-        .string()
-        .optional()
-        .describe('Return cases created after this date (format: YYYY-MM-DD)'),
-      createdBefore: z
-        .string()
-        .optional()
-        .describe('Return cases created before this date (format: YYYY-MM-DD)'),
-      semanticQuery: z
-        .string()
-        .optional()
-        .describe('Natural language query to search case content semantically'),
-      updatedAfter: z
-        .string()
-        .optional()
-        .describe('Return cases updated after this date (format: YYYY-MM-DD)'),
-      updatedBefore: z
-        .string()
-        .optional()
-        .describe('Return cases updated before this date (format: YYYY-MM-DD)'),
+      thought: z
+      .string()
+      .describe(
+        "A thought to think about"
+      )
     },
     async ({
-      id,
-      size = 10,
-      priority,
-      closed,
-      caseNumber,
-      createdAfter,
-      createdBefore,
-      semanticQuery,
-      status,
-      updatedAfter,
-      updatedBefore,
+      thought
     }) => {
-      const caseContent = await retrieveCases(elasticsearchClient, logger, index, {
-        id,
-        size,
-        priority,
-        closed,
-        caseNumber,
-        createdAfter,
-        createdBefore,
-        semanticQuery,
-        status,
-        updatedAfter,
-        updatedBefore,
-      });
+    
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: "",
+          },
+        ],
+      };
+  });
+  
+  
+  
+  server.tool(
+    "get_mappings",
+    "Get field mappings. There are no arguements",
+    async () => {
+      try {
+        const mappingResponse = await elasticsearchClient.indices.getMapping({
+          index,
+        });
 
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: `Mappings for index: ${index}`,
+            },
+            {
+              type: "text" as const,
+              text: `Mappings for index ${index}: ${JSON.stringify(
+                mappingResponse[index]?.mappings || {},
+                null,
+                2
+              )}`,
+            },
+          ],
+        };
+      } catch (error) {
+        console.error(
+          `Failed to get mappings: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: `Error: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
+            },
+          ],
+        };
+      }
+    }
+  );
+  
+  server.tool(
+    'retrieve_cases',
+    `search through index using an ESQL query to get Salesforce cases`,
+    {
+      queryBody: z
+      .string()
+      .describe(
+        "Complete ESQL query"
+      )
+    },
+    async ({
+      queryBody
+    }) => {
+
+      const caseContent = await retrieveCases(elasticsearchClient, logger, queryBody)
+      
       logger.info(`Retrieved ${caseContent.length} support cases`);
 
       logger.info(`Retrieved ${JSON.stringify(caseContent)}`);
@@ -152,7 +155,6 @@ export async function createMcpServer({
       };
     }
   );
-
   return server;
 }
 
