@@ -243,7 +243,7 @@
     "@kbn/security-ai-prompts",
     "@kbn/inference-common",
     "@kbn/esql-ast",
-    "@kbn/inference-langchain"
+    "@kbn/inference-langchain",
     "@kbn/scout-security",
   ]
 }
