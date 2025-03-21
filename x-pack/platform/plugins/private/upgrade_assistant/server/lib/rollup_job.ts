@@ -20,7 +20,7 @@ export async function getRollupJobByIndexName(
 
   try {
     rollupCaps = await esClient.rollup.getRollupIndexCaps({ index }, { ignore: [404] });
-    // will catch if not found
+    // may catch if not found in some circumstances, such as a closed index, etc
     // would be nice to handle the error better but little info is provided
   } catch (e) {
     log.warn(`Get rollup index capabilities failed: ${e}`);
@@ -37,7 +37,7 @@ export async function getRollupJobByIndexName(
 
     try {
       jobs = await esClient.rollup.getJobs({ id: rollupJob }, { ignore: [404] });
-      // will catch if not found
+      // may catch if not found in some circumstances, such as a closed index, etc
       // would be nice to handle the error better but little info is provided
     } catch (e) {
       log.warn(`Get rollup job failed: ${e}`);
