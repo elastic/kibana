@@ -265,7 +265,7 @@ describe('SyncIntegrationsTask', () => {
       );
     });
 
-    it('Should not update fleet-synced-integrations doc if no outputs with sync enabled', async () => {
+    it('Should not index fleet-synced-integrations doc if no outputs with sync enabled', async () => {
       mockOutputService.list.mockResolvedValue({
         items: [
           {
@@ -278,10 +278,10 @@ describe('SyncIntegrationsTask', () => {
       } as any);
       await runTask();
 
-      expect(esClient.update).not.toHaveBeenCalled();
+      expect(esClient.index).not.toHaveBeenCalled();
     });
 
-    it('Should update fleet-synced-integrations doc if sync flag changed from true to false', async () => {
+    it('Should index fleet-synced-integrations doc if sync flag changed from true to false', async () => {
       mockOutputService.list.mockResolvedValue({
         items: [
           {
@@ -301,10 +301,10 @@ describe('SyncIntegrationsTask', () => {
       } as any);
       await runTask();
 
-      expect(esClient.update).toHaveBeenCalled();
+      expect(esClient.index).toHaveBeenCalled();
     });
 
-    it('Should not update fleet-synced-integrations doc if sync flag already false', async () => {
+    it('Should not index fleet-synced-integrations doc if sync flag already false', async () => {
       mockOutputService.list.mockResolvedValue({
         items: [
           {
@@ -327,10 +327,10 @@ describe('SyncIntegrationsTask', () => {
       } as any);
       await runTask();
 
-      expect(esClient.update).not.toHaveBeenCalled();
+      expect(esClient.index).not.toHaveBeenCalled();
     });
 
-    it('Should not update fleet-synced-integrations doc if sync doc does not exist', async () => {
+    it('Should not index fleet-synced-integrations doc if sync doc does not exist', async () => {
       mockOutputService.list.mockResolvedValue({
         items: [
           {
@@ -344,7 +344,7 @@ describe('SyncIntegrationsTask', () => {
       esClient.get.mockRejectedValue({ statusCode: 404 });
       await runTask();
 
-      expect(esClient.update).not.toHaveBeenCalled();
+      expect(esClient.index).not.toHaveBeenCalled();
     });
   });
 });
