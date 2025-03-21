@@ -29,10 +29,7 @@ import {
 import { generateReroutePipeline } from '../ingest_pipelines/generate_reroute_pipeline';
 import { upsertTemplate } from '../index_templates/manage_index_templates';
 import { generateIndexTemplate } from '../index_templates/generate_index_template';
-import {
-  rolloverDataStreamIfNecessary,
-  upsertDataStream,
-} from '../data_streams/manage_data_streams';
+import { updateOrRolloverDataStream, upsertDataStream } from '../data_streams/manage_data_streams';
 import { getUnmanagedElasticsearchAssets } from '../stream_crud';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
 
@@ -84,11 +81,10 @@ export async function syncWiredStreamDefinitionObjects({
     name: definition.name,
   });
 
-  await rolloverDataStreamIfNecessary({
+  await updateOrRolloverDataStream({
     esClient: scopedClusterClient.asCurrentUser,
     name: definition.name,
     logger,
-    mappings: componentTemplate.template.mappings?.properties,
   });
 }
 

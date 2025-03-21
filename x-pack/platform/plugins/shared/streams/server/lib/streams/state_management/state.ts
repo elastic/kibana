@@ -5,55 +5,16 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { WiredStreamUpsertRequest, UnwiredStreamUpsertRequest } from '@kbn/streams-schema';
-import { StreamsStorageClient } from '../service';
-import { StreamActiveRecord } from './stream_active_record';
-import { streamFromDefinition } from './stream_from_definition';
-import { AssetClient } from '../assets/asset_client';
-import { ActionsByType, ExecutionPlan } from './execution_plan';
-import type { StreamsClient } from '../client';
-import { InvalidStateError } from './errors/invalid_state_error';
 import { FailedToApplyRequestedChangesError } from './errors/failed_to_apply_requested_changes_error';
-import { FailedToLoadCurrentStateError } from './errors/failed_to_load_current_state_error';
 import { FailedToDetermineElasticsearchActionsError } from './errors/failed_to_determine_elasticsearch_actions_error';
+import { FailedToLoadCurrentStateError } from './errors/failed_to_load_current_state_error';
 import { FailedToRollbackError } from './errors/failed_to_rollback_error';
-
-interface StateDependencies {
-  scopedClusterClient: IScopedClusterClient;
-  assetClient: AssetClient;
-  storageClient: StreamsStorageClient;
-  logger: Logger;
-  isServerless: boolean;
-  streamsClient: StreamsClient;
-}
-
-interface WiredStreamUpsertChange {
-  target: string;
-  type: 'wired_upsert';
-  request: WiredStreamUpsertRequest & {
-    stream: {
-      name: string;
-    };
-  };
-}
-
-interface UnwiredStreamUpsertChange {
-  target: string;
-  type: 'unwired_upsert';
-  request: UnwiredStreamUpsertRequest & {
-    stream: {
-      name: string;
-    };
-  };
-}
-
-interface StreamDeleteChange {
-  target: string;
-  type: 'delete';
-}
-
-export type StreamChange = UnwiredStreamUpsertChange | WiredStreamUpsertChange | StreamDeleteChange;
+import { InvalidStateError } from './errors/invalid_state_error';
+import { ExecutionPlan } from './execution_plan/execution_plan';
+import type { ActionsByType } from './execution_plan/types';
+import type { StreamActiveRecord } from './streams/stream_active_record';
+import { streamFromDefinition } from './streams/stream_from_definition';
+import type { StateDependencies, StreamChange } from './types';
 
 interface ValidDryRun {
   result: 'valid_dry_run';

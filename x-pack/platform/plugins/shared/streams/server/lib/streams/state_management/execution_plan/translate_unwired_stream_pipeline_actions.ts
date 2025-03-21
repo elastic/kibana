@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import { castArray, groupBy, uniq } from 'lodash';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { ASSET_VERSION } from '../../../../common/constants';
-import {
+import { ASSET_VERSION } from '../../../../../common/constants';
+import type {
   ActionsByType,
   AppendProcessorToIngestPipelineAction,
   DeleteProcessorFromIngestPipelineAction,
   ElasticsearchAction,
   UpsertWriteIndexOrRolloverAction,
-} from './execution_plan';
+} from './types';
 
 const MANAGED_BY_STREAMS = 'streams';
 

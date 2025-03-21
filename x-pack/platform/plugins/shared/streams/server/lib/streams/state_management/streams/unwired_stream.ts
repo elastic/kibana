@@ -5,30 +5,26 @@
  * 2.0.
  */
 
-import {
+import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
   IngestStreamLifecycle,
   StreamDefinition,
   UnwiredStreamDefinition,
-  isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
-import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import { cloneDeep } from 'lodash';
-import _ from 'lodash';
-import { State, StreamChange } from './state';
-import {
-  StreamActiveRecord,
-  ValidationResult,
-  StreamDependencies,
-  StreamChangeStatus,
-} from './stream_active_record';
-import { ElasticsearchAction } from './execution_plan';
-import { generateIngestPipeline } from '../ingest_pipelines/generate_ingest_pipeline';
-import { getProcessingPipelineName } from '../ingest_pipelines/name';
-import { getUnmanagedElasticsearchAssets } from '../stream_crud';
-import { StatusError } from '../errors/status_error';
+import { isUnwiredStreamDefinition } from '@kbn/streams-schema';
+import _, { cloneDeep } from 'lodash';
+import { StatusError } from '../../errors/status_error';
+import { generateIngestPipeline } from '../../ingest_pipelines/generate_ingest_pipeline';
+import { getProcessingPipelineName } from '../../ingest_pipelines/name';
+import { getUnmanagedElasticsearchAssets } from '../../stream_crud';
+import type { ElasticsearchAction } from '../execution_plan/types';
+import type { State } from '../state';
+import type { StateDependencies, StreamChange } from '../types';
+import type { StreamChangeStatus, ValidationResult } from './stream_active_record';
+import { StreamActiveRecord } from './stream_active_record';
 
 export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
-  constructor(definition: UnwiredStreamDefinition, dependencies: StreamDependencies) {
+  constructor(definition: UnwiredStreamDefinition, dependencies: StateDependencies) {
     super(definition, dependencies);
     // What about the assets?
   }

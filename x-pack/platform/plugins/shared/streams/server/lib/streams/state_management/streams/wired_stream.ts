@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import {
+import { isNotFoundError, isResponseError } from '@kbn/es-errors';
+import type {
   IngestStreamLifecycle,
   StreamDefinition,
   WiredStreamDefinition,
+} from '@kbn/streams-schema';
+import {
   getAncestors,
   getAncestorsAndSelf,
   getParentId,
@@ -18,32 +21,27 @@ import {
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
-import { cloneDeep } from 'lodash';
-import { isNotFoundError, isResponseError } from '@kbn/es-errors';
-import _ from 'lodash';
-import { State, StreamChange } from './state';
-import {
-  StreamActiveRecord,
-  ValidationResult,
-  StreamDependencies,
-  StreamChangeStatus,
-} from './stream_active_record';
-import { ElasticsearchAction } from './execution_plan';
-import { generateIndexTemplate } from '../index_templates/generate_index_template';
-import { generateLayer } from '../component_templates/generate_layer';
-import { generateIngestPipeline } from '../ingest_pipelines/generate_ingest_pipeline';
-import { generateReroutePipeline } from '../ingest_pipelines/generate_reroute_pipeline';
-import { getProcessingPipelineName, getReroutePipelineName } from '../ingest_pipelines/name';
-import { getComponentTemplateName } from '../component_templates/name';
-import { getIndexTemplateName } from '../index_templates/name';
-import { NameTakenError } from '../errors/name_taken_error';
-import { isDefinitionNotFoundError } from '../errors/definition_not_found_error';
-import { validateAncestorFields, validateDescendantFields } from '../helpers/validate_fields';
-import { validateRootStreamChanges } from '../helpers/validate_stream';
-import { StatusError } from '../errors/status_error';
+import _, { cloneDeep } from 'lodash';
+import { generateLayer } from '../../component_templates/generate_layer';
+import { getComponentTemplateName } from '../../component_templates/name';
+import { isDefinitionNotFoundError } from '../../errors/definition_not_found_error';
+import { NameTakenError } from '../../errors/name_taken_error';
+import { StatusError } from '../../errors/status_error';
+import { validateAncestorFields, validateDescendantFields } from '../../helpers/validate_fields';
+import { validateRootStreamChanges } from '../../helpers/validate_stream';
+import { generateIndexTemplate } from '../../index_templates/generate_index_template';
+import { getIndexTemplateName } from '../../index_templates/name';
+import { generateIngestPipeline } from '../../ingest_pipelines/generate_ingest_pipeline';
+import { generateReroutePipeline } from '../../ingest_pipelines/generate_reroute_pipeline';
+import { getProcessingPipelineName, getReroutePipelineName } from '../../ingest_pipelines/name';
+import type { ElasticsearchAction } from '../execution_plan/types';
+import type { State } from '../state';
+import type { StateDependencies, StreamChange } from '../types';
+import type { StreamChangeStatus, ValidationResult } from './stream_active_record';
+import { StreamActiveRecord } from './stream_active_record';
 
 export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
-  constructor(definition: WiredStreamDefinition, dependencies: StreamDependencies) {
+  constructor(definition: WiredStreamDefinition, dependencies: StateDependencies) {
     super(definition, dependencies);
     // What about the assets?
   }

@@ -6,173 +6,45 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { groupBy, orderBy } from 'lodash';
-import {
-  ClusterPutComponentTemplateRequest,
-  IndicesPutIndexTemplateRequest,
-  IngestProcessorContainer,
-  IngestPutPipelineRequest,
-} from '@elastic/elasticsearch/lib/api/types';
-import { IngestStreamLifecycle, StreamDefinition } from '@kbn/streams-schema';
-import { AssetClient } from '../assets/asset_client';
-import { StreamsStorageClient } from '../service';
+import type { AssetClient } from '../../assets/asset_client';
 import {
   deleteComponent,
   upsertComponent,
-} from '../component_templates/manage_component_templates';
-import { deleteTemplate, upsertTemplate } from '../index_templates/manage_index_templates';
+} from '../../component_templates/manage_component_templates';
 import {
   deleteDataStream,
   updateDataStreamsLifecycle,
   updateOrRolloverDataStream,
   upsertDataStream,
-} from '../data_streams/manage_data_streams';
+} from '../../data_streams/manage_data_streams';
+import { deleteTemplate, upsertTemplate } from '../../index_templates/manage_index_templates';
 import {
   deleteIngestPipeline,
   upsertIngestPipeline,
-} from '../ingest_pipelines/manage_ingest_pipelines';
+} from '../../ingest_pipelines/manage_ingest_pipelines';
+import type { StreamsStorageClient } from '../../service';
+import { FailedToExecuteElasticsearchActionsError } from '../errors/failed_to_execute_elasticsearch_actions_error';
+import { FailedToPlanElasticsearchActionsError } from '../errors/failed_to_plan_elasticsearch_actions_error';
 import { translateUnwiredStreamPipelineActions } from './translate_unwired_stream_pipeline_actions';
-import { FailedToPlanElasticsearchActionsError } from './errors/failed_to_plan_elasticsearch_actions_error';
-import { FailedToExecuteElasticsearchActionsError } from './errors/failed_to_execute_elasticsearch_actions_error';
-
-interface UpsertComponentTemplateAction {
-  type: 'upsert_component_template';
-  request: ClusterPutComponentTemplateRequest;
-}
-
-interface UpsertIndexTemplateAction {
-  type: 'upsert_index_template';
-  request: IndicesPutIndexTemplateRequest;
-}
-
-interface UpsertIngestPipelineAction {
-  type: 'upsert_ingest_pipeline';
-  stream: string;
-  request: IngestPutPipelineRequest;
-}
-
-export interface AppendProcessorToIngestPipelineAction {
-  type: 'append_processor_to_ingest_pipeline';
-  pipeline: string;
-  template: string;
-  dataStream: string;
-  processor: IngestProcessorContainer;
-  referencePipeline: string;
-}
-
-interface UpsertDatastreamAction {
-  type: 'upsert_datastream';
-  request: {
-    name: string;
-  };
-}
-
-export interface UpsertWriteIndexOrRolloverAction {
-  type: 'upsert_write_index_or_rollover';
-  request: {
-    name: string;
-  };
-}
-
-interface UpdateLifecycleAction {
-  type: 'update_lifecycle';
-  request: {
-    name: string;
-    lifecycle: IngestStreamLifecycle;
-  };
-}
-
-interface DeleteComponentTemplateAction {
-  type: 'delete_component_template';
-  request: {
-    name: string;
-  };
-}
-
-interface DeleteIndexTemplateAction {
-  type: 'delete_index_template';
-  request: {
-    name: string;
-  };
-}
-
-interface DeleteIngestPipelineAction {
-  type: 'delete_ingest_pipeline';
-  request: {
-    name: string;
-  };
-}
-
-export interface DeleteProcessorFromIngestPipelineAction {
-  type: 'delete_processor_from_ingest_pipeline';
-  pipeline: string;
-  template: string;
-  dataStream: string;
-  referencePipeline: string;
-}
-
-interface DeleteDatastreamAction {
-  type: 'delete_datastream';
-  request: {
-    name: string;
-  };
-}
-
-interface UpsertDotStreamsDocumentAction {
-  type: 'upsert_dot_streams_document';
-  request: StreamDefinition;
-}
-
-interface DeleteDotStreamsDocumentAction {
-  type: 'delete_dot_streams_document';
-  request: {
-    name: string;
-  };
-}
-
-interface SyncAssetListAction {
-  type: 'sync_asset_list';
-  request: {
-    name: string;
-    assetIds: string[];
-  };
-}
-
-export type ElasticsearchAction =
-  | UpsertComponentTemplateAction
-  | UpsertIndexTemplateAction
-  | UpsertIngestPipelineAction
-  | AppendProcessorToIngestPipelineAction
-  | UpsertDatastreamAction
-  | UpsertWriteIndexOrRolloverAction
-  | UpdateLifecycleAction
-  | UpsertDotStreamsDocumentAction
-  | DeleteDotStreamsDocumentAction
-  | DeleteComponentTemplateAction
-  | DeleteIndexTemplateAction
-  | DeleteIngestPipelineAction
-  | DeleteProcessorFromIngestPipelineAction
-  | DeleteDatastreamAction
-  | SyncAssetListAction;
-
-export interface ActionsByType {
-  upsert_component_template: UpsertComponentTemplateAction[];
-  upsert_index_template: UpsertIndexTemplateAction[];
-  update_lifecycle: UpdateLifecycleAction[];
-  upsert_datastream: UpsertDatastreamAction[];
-  upsert_dot_streams_document: UpsertDotStreamsDocumentAction[];
-  upsert_ingest_pipeline: UpsertIngestPipelineAction[];
-  upsert_write_index_or_rollover: UpsertWriteIndexOrRolloverAction[];
-  sync_asset_list: SyncAssetListAction[];
-  delete_datastream: DeleteDatastreamAction[];
-  delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
-  delete_index_template: DeleteIndexTemplateAction[];
-  delete_ingest_pipeline: DeleteIngestPipelineAction[];
-  delete_component_template: DeleteComponentTemplateAction[];
-  append_processor_to_ingest_pipeline: AppendProcessorToIngestPipelineAction[];
-  delete_processor_from_ingest_pipeline: DeleteProcessorFromIngestPipelineAction[];
-}
+import type {
+  ActionsByType,
+  DeleteComponentTemplateAction,
+  DeleteDatastreamAction,
+  DeleteDotStreamsDocumentAction,
+  DeleteIndexTemplateAction,
+  DeleteIngestPipelineAction,
+  ElasticsearchAction,
+  SyncAssetListAction,
+  UpdateLifecycleAction,
+  UpsertComponentTemplateAction,
+  UpsertDatastreamAction,
+  UpsertDotStreamsDocumentAction,
+  UpsertIndexTemplateAction,
+  UpsertIngestPipelineAction,
+  UpsertWriteIndexOrRolloverAction,
+} from './types';
 
 interface ExecutionPlanDependencies {
   scopedClusterClient: IScopedClusterClient;
@@ -298,7 +170,7 @@ export class ExecutionPlan {
 
   private async upsertComponentTemplates(actions: UpsertComponentTemplateAction[]) {
     return Promise.all(
-      actions.map((action: UpsertComponentTemplateAction) =>
+      actions.map((action) =>
         upsertComponent({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
@@ -310,7 +182,7 @@ export class ExecutionPlan {
 
   private async upsertIndexTemplates(actions: UpsertIndexTemplateAction[]) {
     return Promise.all(
-      actions.map((action: UpsertIndexTemplateAction) =>
+      actions.map((action) =>
         upsertTemplate({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
@@ -322,7 +194,7 @@ export class ExecutionPlan {
 
   private async updateLifecycle(actions: UpdateLifecycleAction[]) {
     return Promise.all(
-      actions.map((action: UpdateLifecycleAction) =>
+      actions.map((action) =>
         updateDataStreamsLifecycle({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
@@ -336,7 +208,7 @@ export class ExecutionPlan {
 
   private async upsertDatastreams(actions: UpsertDatastreamAction[]) {
     return Promise.all(
-      actions.map((action: UpsertDatastreamAction) =>
+      actions.map((action) =>
         upsertDataStream({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
@@ -363,7 +235,7 @@ export class ExecutionPlan {
       depth: action.stream.match(/\./g)?.length ?? 0,
     }));
     return Promise.all(
-      orderBy(actionWithStreamsDepth, 'depth', 'desc').map((action: UpsertIngestPipelineAction) =>
+      orderBy(actionWithStreamsDepth, 'depth', 'desc').map((action) =>
         upsertIngestPipeline({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
@@ -375,7 +247,7 @@ export class ExecutionPlan {
 
   private async upsertWriteIndexOrRollover(actions: UpsertWriteIndexOrRolloverAction[]) {
     return Promise.all(
-      actions.map((action: UpsertWriteIndexOrRolloverAction) =>
+      actions.map((action) =>
         updateOrRolloverDataStream({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
@@ -387,7 +259,7 @@ export class ExecutionPlan {
 
   private async syncAssetList(actions: SyncAssetListAction[]) {
     return Promise.all(
-      actions.map((action: SyncAssetListAction) =>
+      actions.map((action) =>
         this.dependencies.assetClient.syncAssetList({
           entityId: action.request.name,
           entityType: 'stream',
@@ -400,7 +272,7 @@ export class ExecutionPlan {
 
   private async deleteDatastreams(actions: DeleteDatastreamAction[]) {
     return Promise.all(
-      actions.map((action: DeleteDatastreamAction) =>
+      actions.map((action) =>
         deleteDataStream({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
@@ -422,7 +294,7 @@ export class ExecutionPlan {
 
   private async deleteIndexTemplates(actions: DeleteIndexTemplateAction[]) {
     return Promise.all(
-      actions.map((action: DeleteIndexTemplateAction) =>
+      actions.map((action) =>
         deleteTemplate({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
@@ -434,7 +306,7 @@ export class ExecutionPlan {
 
   private async deleteIngestPipelines(actions: DeleteIngestPipelineAction[]) {
     return Promise.all(
-      actions.map((action: DeleteIngestPipelineAction) =>
+      actions.map((action) =>
         deleteIngestPipeline({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
@@ -446,7 +318,7 @@ export class ExecutionPlan {
 
   private async deleteComponentTemplates(actions: DeleteComponentTemplateAction[]) {
     return Promise.all(
-      actions.map((action: DeleteComponentTemplateAction) =>
+      actions.map((action) =>
         deleteComponent({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,

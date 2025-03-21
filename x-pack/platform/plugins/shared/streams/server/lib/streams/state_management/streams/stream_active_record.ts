@@ -5,22 +5,10 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { StreamDefinition } from '@kbn/streams-schema';
-import { State, StreamChange } from './state'; // Does this create a circular dependency?
-import { StreamsStorageClient } from '../service';
-import { AssetClient } from '../assets/asset_client';
-import { ElasticsearchAction } from './execution_plan';
-import { StreamsClient } from '../client';
-
-export interface StreamDependencies {
-  scopedClusterClient: IScopedClusterClient;
-  assetClient: AssetClient;
-  storageClient: StreamsStorageClient;
-  logger: Logger;
-  isServerless: boolean;
-  streamsClient: StreamsClient;
-}
+import type { StreamDefinition } from '@kbn/streams-schema';
+import type { ElasticsearchAction } from '../execution_plan/types';
+import type { StateDependencies, StreamChange } from '../types';
+import type { State } from '../state';
 
 export interface ValidationResult {
   isValid: boolean;
@@ -31,10 +19,10 @@ export type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
 
 export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = StreamDefinition> {
   protected _updated_definition: TDefinition;
-  protected dependencies: StreamDependencies;
+  protected dependencies: StateDependencies;
   private _changeStatus: StreamChangeStatus = 'unchanged';
 
-  constructor(definition: TDefinition, dependencies: StreamDependencies) {
+  constructor(definition: TDefinition, dependencies: StateDependencies) {
     this._updated_definition = definition;
     this.dependencies = dependencies;
   }
