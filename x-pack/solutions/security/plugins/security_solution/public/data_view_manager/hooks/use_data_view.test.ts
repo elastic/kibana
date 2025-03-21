@@ -6,27 +6,44 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { TestProviders } from '../../common/mock';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../constants';
+import { type DataView } from '@kbn/data-views-plugin/public';
+
+import { DataViewManagerScopeName } from '../constants';
 import { useDataView } from './use_data_view';
+import { useFullDataView } from './use_full_data_view';
+
+jest.mock('./use_full_data_view');
 
 describe('useDataView', () => {
+  beforeEach(() => {
+    jest.mocked(useFullDataView).mockReturnValue({
+      dataView: {
+        id: 'test',
+        title: 'test',
+        toSpec: jest.fn().mockReturnValue({ id: 'test', title: 'test' }),
+      } as unknown as DataView,
+      status: 'ready',
+    });
+  });
+
   it('should return correct dataView from the store, based on the provided scope', () => {
     const wrapper = renderHook((scope) => useDataView(scope), {
-      wrapper: TestProviders,
       initialProps: DataViewManagerScopeName.default,
     });
 
-    expect(wrapper.result.current.status).toEqual('ready');
-    expect(wrapper.result.current.dataView).toMatchObject({
-      id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+    expect(jest.mocked(useFullDataView)).toHaveBeenCalledWith(DataViewManagerScopeName.default);
+
+    expect(wrapper.result.current).toMatchObject({
+      status: expect.any(String),
+      dataView: expect.objectContaining({ id: expect.any(String) }),
     });
 
     wrapper.rerender(DataViewManagerScopeName.timeline);
+    expect(jest.mocked(useFullDataView)).toHaveBeenCalledWith(DataViewManagerScopeName.timeline);
 
-    expect(wrapper.result.current.status).toEqual('ready');
-    expect(wrapper.result.current.dataView).toMatchObject({
-      id: 'mock-timeline-data-view',
+    expect(wrapper.result.current).toMatchObject({
+      status: expect.any(String),
+      dataView: expect.objectContaining({ id: expect.any(String) }),
     });
   });
 });
