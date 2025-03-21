@@ -18,19 +18,23 @@ export function setFlapping<
   RecoveryActionGroupIds extends string
 >(
   flappingSettings: RulesSettingsFlappingProperties,
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>> = {}
+  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds> | undefined> = {},
+  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds> | undefined> = {}
 ) {
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
-    const flapping = isAlertFlapping(flappingSettings, alert);
-    alert.setFlapping(flapping);
+    if (alert) {
+      const flapping = isAlertFlapping(flappingSettings, alert);
+      alert.setFlapping(flapping);
+    }
   }
 
   for (const id of keys(recoveredAlerts)) {
     const alert = recoveredAlerts[id];
-    const flapping = isAlertFlapping(flappingSettings, alert);
-    alert.setFlapping(flapping);
+    if (alert) {
+      const flapping = isAlertFlapping(flappingSettings, alert);
+      alert.setFlapping(flapping);
+    }
   }
 }
 

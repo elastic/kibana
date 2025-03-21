@@ -20,9 +20,9 @@ interface DetermineFlappingAlertsOpts<
   RecoveryActionGroupId extends string
 > {
   logger: Logger;
-  newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+  newAlerts: Record<string, Alert<State, Context, ActionGroupIds> | undefined>;
+  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds> | undefined>;
+  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId> | undefined>;
   flappingSettings: RulesSettingsFlappingProperties;
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>>;
   actionGroupId: string;

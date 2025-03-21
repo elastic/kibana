@@ -21,47 +21,54 @@ export function delayRecoveredFlappingAlerts<
   flappingSettings: RulesSettingsFlappingProperties,
   actionGroupId: string,
   maxAlerts: number,
-  newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
-  trackedActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {},
-  trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {}
+  newAlerts: Record<string, Alert<State, Context, ActionGroupIds> | undefined> = {},
+  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds> | undefined> = {},
+  trackedActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds> | undefined> = {},
+  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId> | undefined> = {},
+  trackedRecoveredAlerts: Record<
+    string,
+    Alert<State, Context, RecoveryActionGroupId> | undefined
+  > = {}
 ) {
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
-    alert.resetPendingRecoveredCount();
+    if (alert) {
+      alert.resetPendingRecoveredCount();
+    }
   }
 
   for (const id of keys(recoveredAlerts)) {
     const alert = recoveredAlerts[id];
-    const flapping = alert.getFlapping();
-    if (flapping) {
-      alert.incrementPendingRecoveredCount();
+    if (alert) {
+      const flapping = alert.getFlapping();
+      if (flapping) {
+        alert.incrementPendingRecoveredCount();
 
-      if (alert.getPendingRecoveredCount() < flappingSettings.statusChangeThreshold) {
-        // keep the context and previous actionGroupId if available
-        const context = alert.getContext();
-        const lastActionGroupId = alert.getLastScheduledActions()?.group;
+        if (alert.getPendingRecoveredCount() < flappingSettings.statusChangeThreshold) {
+          // keep the context and previous actionGroupId if available
+          const context = alert.getContext();
+          const lastActionGroupId = alert.getLastScheduledActions()?.group;
 
-        const newAlert = new Alert<State, Context, ActionGroupIds>(id, alert.toRaw());
-        // unset the end time in the alert state
-        const state = newAlert.getState();
-        delete state.end;
-        newAlert.replaceState(state);
+          const newAlert = new Alert<State, Context, ActionGroupIds>(id, alert.toRaw());
+          // unset the end time in the alert state
+          const state = newAlert.getState();
+          delete state.end;
+          newAlert.replaceState(state);
 
-        // schedule actions for the new active alert
-        newAlert.scheduleActions(
-          (lastActionGroupId ? lastActionGroupId : actionGroupId) as ActionGroupIds,
-          context
-        );
-        activeAlerts[id] = newAlert;
-        trackedActiveAlerts[id] = newAlert;
+          // schedule actions for the new active alert
+          newAlert.scheduleActions(
+            (lastActionGroupId ? lastActionGroupId : actionGroupId) as ActionGroupIds,
+            context
+          );
+          activeAlerts[id] = newAlert;
+          trackedActiveAlerts[id] = newAlert;
 
-        // remove from recovered alerts
-        delete recoveredAlerts[id];
-        delete trackedRecoveredAlerts[id];
-      } else {
-        alert.resetPendingRecoveredCount();
+          // remove from recovered alerts
+          delete recoveredAlerts[id];
+          delete trackedRecoveredAlerts[id];
+        } else {
+          alert.resetPendingRecoveredCount();
+        }
       }
     }
   }
@@ -73,10 +80,12 @@ export function delayRecoveredFlappingAlerts<
   );
   for (const id of earlyRecoveredAlertIds) {
     const alert = trackedRecoveredAlerts[id];
-    alert.setFlapping(false);
-    recoveredAlerts[id] = alert;
+    if (alert) {
+      alert.setFlapping(false);
+      recoveredAlerts[id] = alert;
 
-    delete trackedRecoveredAlerts[id];
+      delete trackedRecoveredAlerts[id];
+    }
   }
 
   return {
@@ -94,13 +103,13 @@ export function getEarlyRecoveredAlertIds<
   RecoveryActionGroupId extends string
 >(
   logger: Logger,
-  trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>>,
+  trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId> | undefined>,
   maxAlerts: number
 ) {
   const alerts = map(trackedRecoveredAlerts, (alert, id) => {
     return {
       id,
-      flappingHistory: alert.getFlappingHistory() || [],
+      flappingHistory: alert?.getFlappingHistory() || [],
     };
   });
 

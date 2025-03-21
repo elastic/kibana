@@ -18,16 +18,16 @@ export function setFlappingHistoryAndTrackedAlerts<
   RecoveryActionGroupIds extends string
 >(
   flappingSettings: RulesSettingsFlappingProperties,
-  newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>> = {},
+  newAlerts: Record<string, Alert<State, Context, ActionGroupIds> | undefined> = {},
+  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds> | undefined> = {},
+  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds> | undefined> = {},
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>> = {}
 ): {
-  newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  trackedActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>>;
-  trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>>;
+  newAlerts: Record<string, Alert<State, Context, ActionGroupIds> | undefined>;
+  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds> | undefined>;
+  trackedActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds> | undefined>;
+  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds> | undefined>;
+  trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds> | undefined>;
 } {
   const trackedActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
   const trackedRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupIds>> = {};
@@ -35,27 +35,32 @@ export function setFlappingHistoryAndTrackedAlerts<
 
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
-    trackedActiveAlerts[id] = alert;
-    // this alert was not active in the previous run
-    if (newAlerts[id]) {
-      if (previouslyRecoveredAlertIds.has(id)) {
-        // this alert has flapped from recovered to active
-        const previousFlappingHistory = previouslyRecoveredAlerts[id].getFlappingHistory();
-        alert.setFlappingHistory(previousFlappingHistory);
-        previouslyRecoveredAlertIds.delete(id);
+    if (alert) {
+      trackedActiveAlerts[id] = alert;
+      // this alert was not active in the previous run
+      const newAlert = newAlerts[id];
+      if (newAlert) {
+        if (previouslyRecoveredAlertIds.has(id)) {
+          // this alert has flapped from recovered to active
+          const previousFlappingHistory = previouslyRecoveredAlerts[id].getFlappingHistory();
+          alert.setFlappingHistory(previousFlappingHistory);
+          previouslyRecoveredAlertIds.delete(id);
+        }
+        updateAlertFlappingHistory(flappingSettings, newAlert, true);
+      } else {
+        // this alert is still active
+        updateAlertFlappingHistory(flappingSettings, alert, false);
       }
-      updateAlertFlappingHistory(flappingSettings, newAlerts[id], true);
-    } else {
-      // this alert is still active
-      updateAlertFlappingHistory(flappingSettings, alert, false);
     }
   }
 
   for (const id of keys(recoveredAlerts)) {
     const alert = recoveredAlerts[id];
-    trackedRecoveredAlerts[id] = alert;
-    // this alert has flapped from active to recovered
-    updateAlertFlappingHistory(flappingSettings, alert, true);
+    if (alert) {
+      trackedRecoveredAlerts[id] = alert;
+      // this alert has flapped from active to recovered
+      updateAlertFlappingHistory(flappingSettings, alert, true);
+    }
   }
 
   for (const id of previouslyRecoveredAlertIds) {

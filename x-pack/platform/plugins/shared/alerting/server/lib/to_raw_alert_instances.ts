@@ -15,8 +15,8 @@ export function toRawAlertInstances<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 >(
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {}
+  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds> | undefined> = {},
+  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId> | undefined> = {}
 ): {
   rawActiveAlerts: Record<string, RawAlertInstance>;
   rawRecoveredAlerts: Record<string, RawAlertInstance>;
@@ -25,12 +25,17 @@ export function toRawAlertInstances<
   const rawRecoveredAlerts: Record<string, RawAlertInstance> = {};
 
   for (const id of keys(activeAlerts)) {
-    rawActiveAlerts[id] = activeAlerts[id].toRaw();
+    const alert = activeAlerts[id];
+    if (alert) {
+      rawActiveAlerts[id] = alert.toRaw();
+    }
   }
 
   for (const id of keys(recoveredAlerts)) {
     const alert = recoveredAlerts[id];
-    rawRecoveredAlerts[id] = alert.toRaw(true);
+    if (alert) {
+      rawRecoveredAlerts[id] = alert.toRaw(true);
+    }
   }
   return { rawActiveAlerts, rawRecoveredAlerts };
 }

@@ -157,7 +157,7 @@ describe('delayRecoveredFlappingAlerts', () => {
         },
       }
     `);
-    expect(Object.values(trackedActiveAlerts).map((a) => a.getScheduledActionOptions()))
+    expect(Object.values(trackedActiveAlerts).map((a) => a?.getScheduledActionOptions()))
       .toMatchInlineSnapshot(`
       Array [
         Object {
@@ -181,7 +181,7 @@ describe('delayRecoveredFlappingAlerts', () => {
         },
       }
     `);
-    expect(Object.values(activeAlerts).map((a) => a.getScheduledActionOptions()))
+    expect(Object.values(activeAlerts).map((a) => a?.getScheduledActionOptions()))
       .toMatchInlineSnapshot(`
       Array [
         Object {
@@ -267,7 +267,7 @@ describe('delayRecoveredFlappingAlerts', () => {
         }
       );
       expect(Object.keys(recoveredAlerts).length).toBe(3);
-      expect(recoveredAlerts['2'].getFlapping()).toBe(false);
+      expect(recoveredAlerts['2']?.getFlapping()).toBe(false);
       expect(Object.keys(trackedRecoveredAlerts).length).toBe(2);
     });
 
@@ -294,7 +294,7 @@ describe('delayRecoveredFlappingAlerts', () => {
         }
       );
       expect(Object.keys(recoveredAlerts).length).toBe(3);
-      expect(recoveredAlerts['2'].getFlapping()).toBe(false);
+      expect(recoveredAlerts['2']?.getFlapping()).toBe(false);
       expect(Object.keys(trackedRecoveredAlerts).length).toBe(3);
     });
 
