@@ -26,7 +26,7 @@ export class MockLinkContext {
   }
 
   toString = () => {
-    return `https://docs.elastic.test/#${this.root}.${this.path.join('.')}`
+    return `https://docs.elastic.test/#${this.root}${this.path.length ? '.' + this.path.join('.') : ''}`
   }
 
   getMockName = () => {
