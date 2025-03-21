@@ -100,7 +100,11 @@ export const HoverActionPopover = ({
         {(title as string) && (
           <EuiPopoverTitle
             className="eui-textBreakWord"
-            css={{ maxWidth: '300px', display: 'flex', flexDirection: 'column' }}
+            css={{
+              maxWidth: isExpanded ? '350px' : '300px',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
           >
             {displayTitle}
             {shouldTruncate && (
