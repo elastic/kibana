@@ -10,7 +10,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiI18nNumber,
-  EuiSkeletonText,
   EuiSkeletonRectangle,
   EuiDelayRender,
 } from '@elastic/eui';
@@ -28,19 +27,18 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
+import { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 
 export function DocCountColumn({
+  timefilter,
   indexPattern,
-  start,
-  end,
   numDataPoints,
 }: {
+  timefilter: TimefilterHook; // Workaround to keep state in sync
   indexPattern: string;
-  start: number;
-  end: number;
   numDataPoints: number;
 }) {
   const {
@@ -50,6 +48,8 @@ export function DocCountColumn({
       },
     },
   } = useKibana();
+
+  const { start, end } = timefilter.absoluteTimeRange;
 
   const histogramQueryFetch = useStreamsAppFetch(
     async ({ signal }) => {
@@ -93,41 +93,42 @@ export function DocCountColumn({
         white-space: nowrap;
       `}
     >
-      <EuiFlexItem
-        className={css`
-          text-align: right;
-        `}
-      >
-        {histogramQueryFetch.loading ? (
-          <EuiDelayRender delay={300}>
-            <EuiSkeletonText isLoading lines={1} size="relative" />
-          </EuiDelayRender>
-        ) : (
-          <EuiI18nNumber value={docCount} />
-        )}
-      </EuiFlexItem>
-      <EuiFlexItem>
-        {histogramQueryFetch.loading ? (
-          <EuiDelayRender delay={300}>
+      {histogramQueryFetch.loading ? (
+        <EuiDelayRender delay={300}>
+          <EuiFlexItem>
+            <EuiSkeletonRectangle isLoading width="100%" height={euiThemeVars.euiFontSizeS} />
+          </EuiFlexItem>
+          <EuiFlexItem>
             <EuiSkeletonRectangle isLoading width="100%" height={euiThemeVars.euiSizeXL} />
-          </EuiDelayRender>
-        ) : (
-          <Chart size={{ width: '100%', height: euiThemeVars.euiSizeXL }}>
-            <SettingsWithTheme xDomain={{ min: start, max: end }} noResults={<div />} />
-            {allTimeseries.map((serie) => (
-              <BarSeries
-                key={serie.id}
-                id={serie.id}
-                xScaleType={ScaleType.Time}
-                yScaleType={ScaleType.Linear}
-                xAccessor="x"
-                yAccessors={['doc_count']}
-                data={serie.data}
-              />
-            ))}
-          </Chart>
-        )}
-      </EuiFlexItem>
+          </EuiFlexItem>
+        </EuiDelayRender>
+      ) : (
+        <>
+          <EuiFlexItem
+            className={css`
+              text-align: right;
+            `}
+          >
+            <EuiI18nNumber value={docCount} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <Chart size={{ width: '100%', height: euiThemeVars.euiSizeXL }}>
+              <SettingsWithTheme xDomain={{ min: start, max: end }} noResults={<div />} />
+              {allTimeseries.map((serie) => (
+                <BarSeries
+                  key={serie.id}
+                  id={serie.id}
+                  xScaleType={ScaleType.Time}
+                  yScaleType={ScaleType.Linear}
+                  xAccessor="x"
+                  yAccessors={['doc_count']}
+                  data={serie.data}
+                />
+              ))}
+            </Chart>
+          </EuiFlexItem>
+        </>
+      )}
     </EuiFlexGroup>
   );
 }

@@ -13,6 +13,7 @@ import {
   EuiIcon,
   EuiInMemoryTable,
   EuiText,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import {
   StreamDefinition,
@@ -23,30 +24,24 @@ import {
 } from '@kbn/streams-schema';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
+import { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { asTrees, type StreamTree } from '../streams_list';
 import { DocCountColumn } from './doc_count_column';
-import { useKibana } from '../../hooks/use_kibana';
-import { StreamsAppSearchBar, type StreamsAppSearchBarProps } from '../streams_app_search_bar';
+import { StreamsAppSearchBar } from '../streams_app_search_bar';
 
 export function StreamsTreeTable({
+  timefilter,
   loading,
   streams,
   onRefresh,
 }: {
-  loading?: boolean;
+  timefilter: TimefilterHook; // Workaround to keep state in sync
   streams: StreamDefinition[] | undefined;
-  onRefresh?: StreamsAppSearchBarProps['onRefresh'];
+  loading?: boolean;
+  onRefresh?(): void;
 }) {
   const router = useStreamsAppRouter();
-  const {
-    dependencies: {
-      start: { data },
-    },
-  } = useKibana();
-  const { timeRange, absoluteTimeRange, setTimeRange } =
-    data.query.timefilter.timefilter.useTimefilter();
-
   const items = React.useMemo(() => flattenTrees(asTrees(streams ?? [])), [streams]);
 
   return (
@@ -93,12 +88,7 @@ export function StreamsTreeTable({
           }),
           width: '25%',
           render: (_, item) => (
-            <DocCountColumn
-              indexPattern={item.name}
-              start={absoluteTimeRange.start}
-              end={absoluteTimeRange.end}
-              numDataPoints={25}
-            />
+            <DocCountColumn timefilter={timefilter} indexPattern={item.name} numDataPoints={25} />
           ),
         },
         {
@@ -132,23 +122,28 @@ export function StreamsTreeTable({
         box: {
           incremental: true,
         },
-        toolsRight: (
+        toolsRight: [
           <StreamsAppSearchBar
+            key="timeRangePicker"
             onQuerySubmit={({ dateRange }, isUpdate) => {
-              if (dateRange) {
-                if (onRefresh && !isUpdate) {
-                  onRefresh({ dateRange });
-                } else {
-                  setTimeRange(dateRange);
-                }
+              if (dateRange && isUpdate) {
+                timefilter.setTimeRange(dateRange);
               }
+              timefilter.refreshAbsoluteTimeRange(); // Always update absolute time even if relative time did not change since the current time ("now") _will_ have changed between user interactions
             }}
-            onRefresh={onRefresh}
-            dateRangeFrom={timeRange.from}
-            dateRangeTo={timeRange.to}
-            showSubmitButton={false}
-          />
-        ),
+            onRefresh={timefilter.refreshAbsoluteTimeRange}
+            dateRangeFrom={timefilter.timeRange.from}
+            dateRangeTo={timefilter.timeRange.to}
+            showSubmitButton={false} // Render own refresh button since there's no way of distinguishing between an actual refresh click event and a time range change in StreamsAppSearchBar component
+          />,
+          <EuiButtonIcon
+            key="refreshButton"
+            iconType="refresh"
+            display="base"
+            size="m"
+            onClick={onRefresh}
+          />,
+        ],
       }}
     />
   );
