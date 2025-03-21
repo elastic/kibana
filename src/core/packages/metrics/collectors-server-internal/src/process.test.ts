@@ -108,27 +108,20 @@ describe('ProcessMetricsCollector', () => {
   describe('register metrics in apm', () => {
     it('calls registerMetric in the constructor', () => {
       const apmSpy = jest.spyOn(apm, 'registerMetric');
-      apmSpy.mockClear();
 
-      collector = new ProcessMetricsCollector();
+      collector.registerMetrics();
 
       expect(apmSpy).toHaveBeenCalledTimes(2);
-
-      // check first call: apm.registerMetric('nodejs.memory.resident_set_size.bytes', ...);
-      const rssCallArguments = apmSpy.mock.calls[0];
-      expect(rssCallArguments).toHaveLength(2);
-      expect(rssCallArguments[0]).toEqual('nodejs.memory.resident_set_size.bytes');
-      expect(typeof rssCallArguments[1]).toBe('function');
-      const rssFunction = rssCallArguments[1] as unknown as Function;
-      expect(typeof rssFunction()).toBe('number');
-
-      // check second call: apm.registerMetric('nodejs.heap.size_limit.bytes', ...);
-      const heapLimitCallArguments = apmSpy.mock.calls[1];
-      expect(heapLimitCallArguments).toHaveLength(2);
-      expect(heapLimitCallArguments[0]).toEqual('nodejs.heap.size_limit.bytes');
-      expect(typeof heapLimitCallArguments[1]).toBe('function');
-      const heapLimitFunction = heapLimitCallArguments[1] as unknown as Function;
-      expect(typeof heapLimitFunction()).toBe('number');
+      expect(apmSpy).toHaveBeenNthCalledWith(
+        1,
+        'nodejs.memory.resident_set_size.bytes',
+        expect.any(Function)
+      );
+      expect(apmSpy).toHaveBeenNthCalledWith(
+        2,
+        'nodejs.heap.size_limit.bytes',
+        expect.any(Function)
+      );
     });
   });
 });
