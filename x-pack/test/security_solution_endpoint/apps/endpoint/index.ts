@@ -40,10 +40,10 @@ export default function (providerContext: FtrProviderContext) {
         await pageObjects.svlCommonPage.loginWithRole('endpoint_operations_analyst');
       }
     });
-    // loadTestFile(require.resolve('./endpoint_list'));
-    // loadTestFile(require.resolve('./endpoint_telemetry'));
+    loadTestFile(require.resolve('./endpoint_list'));
+    loadTestFile(require.resolve('./endpoint_telemetry'));
     loadTestFile(require.resolve('./endpoint_permissions'));
-    // loadTestFile(require.resolve('./endpoint_solution_integrations'));
-    // loadTestFile(require.resolve('./endpoint_transform'));
+    loadTestFile(require.resolve('./endpoint_solution_integrations'));
+    loadTestFile(require.resolve('./endpoint_transform'));
   });
 }
