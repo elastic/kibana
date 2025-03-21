@@ -92,11 +92,14 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
       );
 
       if (plugins.dataViews.found) {
-        experimentalSelectedPatterns = (
-          await plugins.dataViews.contract.get(experimentalDataViewId)
-        )
-          .getIndexPattern()
-          .split(',');
+        const experimentalDataView = await plugins.dataViews.contract.get(experimentalDataViewId);
+
+        if (!experimentalDataView.isPersisted()) {
+          // TODO: better wording here and a lock on the ui side?
+          throw new Error('Persting timelines with adhoc data views is not allowed');
+        }
+
+        experimentalSelectedPatterns = experimentalDataView.getIndexPattern().split(',');
       }
     }
 
