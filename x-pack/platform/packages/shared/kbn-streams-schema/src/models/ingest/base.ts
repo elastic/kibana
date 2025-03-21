@@ -9,9 +9,9 @@ import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
 import { StreamDefinitionBase } from '../base';
 import { FieldDefinition, fieldDefinitionSchema } from './fields';
+import { IngestStreamLifecycle, ingestStreamLifecycleSchema } from './lifecycle';
 import { ProcessorDefinition, processorDefinitionSchema } from './processors';
 import { RoutingDefinition, routingDefinitionSchema } from './routing';
-import { IngestStreamLifecycle, ingestStreamLifecycleSchema } from './lifecycle';
 
 interface IngestBase {
   lifecycle: IngestStreamLifecycle;
@@ -106,17 +106,17 @@ const ingestStreamDefinitionSchemaBase: z.Schema<Omit<IngestStreamDefinition, 'n
 ]);
 
 export {
-  type WiredStreamDefinition,
-  wiredStreamDefinitionSchema,
-  wiredStreamDefinitionSchemaBase,
-  type UnwiredStreamDefinition,
-  unwiredStreamDefinitionSchema,
-  unwiredStreamDefinitionSchemaBase,
-  type IngestStreamDefinition,
   ingestStreamDefinitionSchema,
   ingestStreamDefinitionSchemaBase,
-  type WiredIngest,
-  wiredIngestSchema,
-  type UnwiredIngest,
   unwiredIngestSchema,
+  unwiredStreamDefinitionSchema,
+  unwiredStreamDefinitionSchemaBase,
+  wiredIngestSchema,
+  wiredStreamDefinitionSchema,
+  wiredStreamDefinitionSchemaBase,
+  type IngestStreamDefinition,
+  type UnwiredIngest,
+  type UnwiredStreamDefinition,
+  type WiredIngest,
+  type WiredStreamDefinition,
 };
