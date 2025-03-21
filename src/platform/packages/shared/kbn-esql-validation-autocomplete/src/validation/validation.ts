@@ -520,7 +520,7 @@ export function validateColumnForCommand(
         );
       }
     } else {
-      if (column.name) {
+      if (column.name && !isParametrized(column)) {
         messages.push(errors.unknownColumn(column));
       }
     }
