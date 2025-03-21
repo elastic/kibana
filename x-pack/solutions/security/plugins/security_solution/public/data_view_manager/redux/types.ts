@@ -8,7 +8,7 @@
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 
 export interface ScopedDataViewSelectionState {
-  dataView: DataViewSpec | null;
+  dataViewId: string | null;
   /**
    * There are several states the picker can be in internally:
    * - pristine - not initialized yet

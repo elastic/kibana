@@ -31,9 +31,9 @@ export const TimelinesPage = React.memo(() => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   let { indicesExist } = useSourcererDataView();
 
-  const fullDataView = useFullDataView(DataViewManagerScopeName.default);
+  const { dataView } = useFullDataView(DataViewManagerScopeName.default);
   // NOTE: there should be a Suspense / some kind of loader here as this value is not settled immediately
-  const experimentalIndicesExist = !!fullDataView?.matchedIndices.length;
+  const experimentalIndicesExist = !!dataView?.matchedIndices?.length;
 
   if (newDataViewPickerEnabled) {
     indicesExist = experimentalIndicesExist;

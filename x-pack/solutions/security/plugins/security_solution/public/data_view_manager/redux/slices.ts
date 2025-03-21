@@ -14,7 +14,7 @@ import type { ScopedDataViewSelectionState, SharedDataViewSelectionState } from 
 import { selectDataViewAsync } from './actions';
 
 export const initialScopeState: ScopedDataViewSelectionState = {
-  dataView: null,
+  dataViewId: null,
   status: 'pristine',
 };
 
@@ -74,11 +74,10 @@ export const createDataViewSelectionSlice = <T extends DataViewManagerScopeName>
     name: `${SLICE_PREFIX}/${scopeName}`,
     initialState: initialScopeState,
     reducers: {
-      setSelectedDataView: (state, action: PayloadAction<DataViewSpec>) => {
-        state.dataView = action.payload;
-        state.status = 'ready';
+      setSelectedDataView: (state, action: PayloadAction<string>) => {
+        state.dataViewId = action.payload ?? null;
       },
-      dataViewSelectionError: (state, action: PayloadAction<string>) => {
+      dataViewSelectionError: (state, _: PayloadAction<string>) => {
         state.status = 'error';
       },
     },
@@ -92,10 +91,8 @@ export const createDataViewSelectionSlice = <T extends DataViewManagerScopeName>
       });
 
       builder.addCase(sharedDataViewManagerSlice.actions.updateDataView, (state, action) => {
-        if (action.payload.isPersisted() && action.payload.id === state.dataView?.id) {
-          state.dataView = action.payload.toSpec();
-        } else if (action.payload.title === state.dataView?.title) {
-          state.dataView = action.payload.toSpec();
+        if (action.payload.isPersisted() && action.payload.id === state.dataViewId) {
+          state.dataViewId = action.payload.id ?? null;
         }
       });
     },

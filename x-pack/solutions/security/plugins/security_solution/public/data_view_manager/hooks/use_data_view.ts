@@ -5,13 +5,29 @@
  * 2.0.
  */
 
-import { useSelector } from 'react-redux';
+import { useMemo } from 'react';
 import type { DataViewManagerScopeName } from '../constants';
-import { sourcererAdapterSelector } from '../redux/selectors';
+import { useFullDataView } from './use_full_data_view';
 
 /**
  * Returns data view selection for given scopeName
  */
 export const useDataView = (scopeName: DataViewManagerScopeName) => {
-  return useSelector(sourcererAdapterSelector(scopeName));
+  const { dataView, status } = useFullDataView(scopeName);
+
+  return useMemo(() => {
+    // NOTE: remove this after we are ready for undefined (lazy) data view everywhere in the app
+    // https://github.com/elastic/security-team/issues/11959
+    if (!dataView) {
+      return {
+        dataView: {
+          id: '',
+          title: '',
+        },
+        status,
+      };
+    }
+
+    return { status, dataView: dataView?.toSpec() };
+  }, [dataView, status]);
 };

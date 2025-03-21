@@ -16,7 +16,6 @@ export const sourcererAdapterSelector = (scope: DataViewManagerScopeName) =>
 
     return {
       ...scopedState,
-      dataView: scopedState.dataView ? scopedState.dataView : { title: '', id: '' },
     };
   });
 

@@ -6,40 +6,14 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import {
-  type DataView,
-  type DataViewsServicePublic,
-  type DataViewSpec,
-} from '@kbn/data-views-plugin/public';
-import memoize from 'lodash/memoize';
+import { type DataView } from '@kbn/data-views-plugin/public';
 
+import { useSelector } from 'react-redux';
 import { useKibana } from '../../common/lib/kibana';
 import { type DataViewManagerScopeName } from '../constants';
-import { useDataView } from './use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-
-/**
- * Creates a DataView from the provided DataViewSpec.
- *
- * This is a memoized function that will return the same DataView instance across useFullDataView occurences in the project,
- * for the same dataViewSpec version or title.
- */
-const dataViewFromSpec: (
-  dataViewsService: DataViewsServicePublic,
-  dataViewSpec: DataViewSpec
-) => Promise<DataView | undefined> = memoize(
-  (dataViewsService: DataViewsServicePublic, dataViewSpec: DataViewSpec) => {
-    // NOTE: this should never happen for data views managed by the Data View Manager and is considered an error
-    if (!dataViewSpec.id) {
-      return Promise.resolve(undefined);
-    }
-
-    return dataViewsService.get(dataViewSpec.id);
-  },
-  (...args) => {
-    return args[1]?.version ?? args[1]?.title;
-  }
-);
+import { sourcererAdapterSelector } from '../redux/selectors';
+import type { SharedDataViewSelectionState } from '../redux/types';
 
 /*
  * This hook should be used whenever we need the actual DataView and not just the spec for the
@@ -47,26 +21,32 @@ const dataViewFromSpec: (
  */
 export const useFullDataView = (
   dataViewManagerScope: DataViewManagerScopeName
-): DataView | undefined => {
+): { dataView: DataView | undefined; status: SharedDataViewSelectionState['status'] } => {
   const {
     services: { dataViews },
   } = useKibana();
-  const { dataView: dataViewSpec } = useDataView(dataViewManagerScope);
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
+  const { dataViewId, status: internalStatus } = useSelector(
+    sourcererAdapterSelector(dataViewManagerScope)
+  );
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const [retrievedDataView, setRetrievedDataView] = useState<DataView | undefined>();
 
   useEffect(() => {
     (async () => {
-      setRetrievedDataView(await dataViewFromSpec(dataViews, dataViewSpec));
+      if (!dataViewId) {
+        return setRetrievedDataView(undefined);
+      }
+
+      setRetrievedDataView(await dataViews.get(dataViewId));
     })();
-  }, [dataViews, dataViewSpec]);
+  }, [dataViews, dataViewId]);
 
   return useMemo(() => {
     if (!newDataViewPickerEnabled) {
-      return undefined;
+      return { dataView: undefined, status: internalStatus };
     }
 
-    return retrievedDataView;
-  }, [newDataViewPickerEnabled, retrievedDataView]);
+    return { dataView: retrievedDataView, status: internalStatus };
+  }, [newDataViewPickerEnabled, retrievedDataView, internalStatus]);
 };

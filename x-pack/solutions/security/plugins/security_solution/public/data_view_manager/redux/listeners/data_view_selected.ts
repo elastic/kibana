@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataView, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewLazy, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import isEmpty from 'lodash/isEmpty';
 import type { RootState } from '../reducer';
@@ -24,7 +24,7 @@ export const createDataViewSelectedListener = (dependencies: {
     ) => {
       let dataViewByIdError: unknown;
       let adhocDataViewCreationError: unknown;
-      let dataViewById: DataView | null = null;
+      let dataViewById: DataViewLazy | null = null;
       let adHocDataView: DataView | null = null;
 
       const state = listenerApi.getState();
@@ -61,7 +61,7 @@ export const createDataViewSelectedListener = (dependencies: {
       if (!cachedDataViewSpec) {
         try {
           if (action.payload.id) {
-            dataViewById = await dependencies.dataViews.get(action.payload.id);
+            dataViewById = await dependencies.dataViews.getDataViewLazy(action.payload.id);
           }
         } catch (error: unknown) {
           dataViewByIdError = error;
@@ -88,12 +88,12 @@ export const createDataViewSelectedListener = (dependencies: {
       }
 
       const resolvedSpecToUse =
-        cachedDataViewSpec || dataViewById?.toSpec() || adHocDataView?.toSpec();
+        cachedDataViewSpec || (await dataViewById?.toSpec()) || adHocDataView?.toSpec();
 
       action.payload.scope.forEach((scope) => {
         const currentScopeActions = scopes[scope].actions;
-        if (resolvedSpecToUse) {
-          listenerApi.dispatch(currentScopeActions.setSelectedDataView(resolvedSpecToUse));
+        if (resolvedSpecToUse && resolvedSpecToUse.id) {
+          listenerApi.dispatch(currentScopeActions.setSelectedDataView(resolvedSpecToUse.id));
         } else if (dataViewByIdError || adhocDataViewCreationError) {
           const err = dataViewByIdError || adhocDataViewCreationError;
           listenerApi.dispatch(

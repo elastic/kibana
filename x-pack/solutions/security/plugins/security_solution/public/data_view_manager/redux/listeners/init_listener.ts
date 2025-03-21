@@ -20,6 +20,7 @@ export const createInitListener = (dependencies: { dataViews: DataViewsServicePu
       listenerApi: ListenerEffectAPI<RootState, Dispatch<AnyAction>>
     ) => {
       try {
+        // NOTE: This is later used in the data view manager drop-down selector
         const dataViews = await dependencies.dataViews.getAllDataViewLazy();
         const dataViewSpecs = await Promise.all(dataViews.map((dataView) => dataView.toSpec()));
 
