@@ -117,14 +117,14 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
 
   let isServerlessSamlSupported = false;
   if (opts.dev) {
-    // if (opts.serverless) {
-    //   setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
-    //   isServerlessSamlSupported = tryConfigureServerlessSamlProvider(
-    //     rawConfig,
-    //     opts,
-    //     extraCliOptions
-    //   );
-    // }
+    if (opts.serverless) {
+      setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
+      isServerlessSamlSupported = tryConfigureServerlessSamlProvider(
+        rawConfig,
+        opts,
+        extraCliOptions
+      );
+    }
 
     set('server.prototypeHardening', true);
 
