@@ -6,15 +6,17 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { AlertSummaryPage, LOADING_INTEGRATIONS_TEST_ID } from './alert_summary';
 import { useFetchIntegrations } from '../../hooks/alert_summary/use_fetch_integrations';
 import { LANDING_PAGE_PROMPT_TEST_ID } from '../../components/alert_summary/landing_page/landing_page';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
 import { DATA_VIEW_LOADING_PROMPT_TEST_ID } from '../../components/alert_summary/wrapper';
+import { useKibana } from '../../../common/lib/kibana';
 
 jest.mock('../../hooks/alert_summary/use_fetch_integrations');
 jest.mock('../../../common/hooks/use_add_integrations_url');
+jest.mock('../../../common/lib/kibana');
 
 describe('<AlertSummaryPage />', () => {
   it('should render loading logo', () => {
@@ -41,16 +43,27 @@ describe('<AlertSummaryPage />', () => {
     expect(getByTestId(LANDING_PAGE_PROMPT_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render wrapper if packages are installed', () => {
+  it('should render wrapper if packages are installed', async () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        data: {
+          dataViews: {
+            create: jest.fn(),
+          },
+        },
+      },
+    });
     (useFetchIntegrations as jest.Mock).mockReturnValue({
       availablePackages: [],
       installedPackages: [{ id: 'id' }],
       isLoading: false,
     });
 
-    const { getByTestId, queryByTestId } = render(<AlertSummaryPage />);
-    expect(queryByTestId(LOADING_INTEGRATIONS_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(LANDING_PAGE_PROMPT_TEST_ID)).not.toBeInTheDocument();
-    expect(getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
+    await act(async () => {
+      const { getByTestId, queryByTestId } = render(<AlertSummaryPage />);
+      expect(queryByTestId(LOADING_INTEGRATIONS_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(LANDING_PAGE_PROMPT_TEST_ID)).not.toBeInTheDocument();
+      expect(getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
+    });
   });
 });
