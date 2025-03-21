@@ -28,8 +28,6 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
-import { IUiSettingsClient } from '@kbn/core/public';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
@@ -46,7 +44,6 @@ export function DocCountColumn({
   numDataPoints: number;
 }) {
   const {
-    core: { uiSettings },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
@@ -102,7 +99,7 @@ export function DocCountColumn({
         `}
       >
         {histogramQueryFetch.loading ? (
-          <EuiDelayRender>
+          <EuiDelayRender delay={300}>
             <EuiSkeletonText isLoading lines={1} size="relative" />
           </EuiDelayRender>
         ) : (
@@ -111,7 +108,7 @@ export function DocCountColumn({
       </EuiFlexItem>
       <EuiFlexItem>
         {histogramQueryFetch.loading ? (
-          <EuiDelayRender>
+          <EuiDelayRender delay={300}>
             <EuiSkeletonRectangle isLoading width="100%" height={euiThemeVars.euiSizeXL} />
           </EuiDelayRender>
         ) : (
@@ -119,7 +116,6 @@ export function DocCountColumn({
             <SettingsWithTheme xDomain={{ min: start, max: end }} noResults={<div />} />
             {allTimeseries.map((serie) => (
               <BarSeries
-                timeZone={getTimeZone(uiSettings)}
                 key={serie.id}
                 id={serie.id}
                 xScaleType={ScaleType.Time}
@@ -146,12 +142,4 @@ function SettingsWithTheme(props: SettingsProps) {
       {...props}
     />
   );
-}
-
-function getTimeZone(uiSettings: IUiSettingsClient) {
-  const kibanaTimeZone = uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
-  if (!kibanaTimeZone || kibanaTimeZone === 'Browser') {
-    return 'local';
-  }
-  return kibanaTimeZone;
 }

@@ -72,7 +72,11 @@ export function StreamListView() {
         {!streamsListFetch.loading && !streamsListFetch.value?.length ? (
           <StreamsEmptyPrompt />
         ) : (
-          <StreamsTreeTable loading={streamsListFetch.loading} streams={streamsListFetch.value} />
+          <StreamsTreeTable
+            loading={streamsListFetch.loading}
+            streams={streamsListFetch.value}
+            onRefresh={streamsListFetch.refresh}
+          />
         )}
       </StreamsAppPageBody>
     </EuiFlexGroup>

@@ -12,7 +12,6 @@ import {
   EuiLink,
   EuiIcon,
   EuiInMemoryTable,
-  EuiBadge,
   EuiText,
 } from '@elastic/eui';
 import {
@@ -28,13 +27,16 @@ import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { asTrees, type StreamTree } from '../streams_list';
 import { DocCountColumn } from './doc_count_column';
 import { useKibana } from '../../hooks/use_kibana';
+import { StreamsAppSearchBar, type StreamsAppSearchBarProps } from '../streams_app_search_bar';
 
 export function StreamsTreeTable({
   loading,
   streams,
+  onRefresh,
 }: {
   loading?: boolean;
   streams: StreamDefinition[] | undefined;
+  onRefresh?: StreamsAppSearchBarProps['onRefresh'];
 }) {
   const router = useStreamsAppRouter();
   const {
@@ -42,9 +44,8 @@ export function StreamsTreeTable({
       start: { data },
     },
   } = useKibana();
-  const {
-    absoluteTimeRange: { start, end },
-  } = data.query.timefilter.timefilter.useTimefilter();
+  const { timeRange, absoluteTimeRange, setTimeRange } =
+    data.query.timefilter.timefilter.useTimefilter();
 
   const items = React.useMemo(() => flattenTrees(asTrees(streams ?? [])), [streams]);
 
@@ -82,15 +83,6 @@ export function StreamsTreeTable({
                   {name}
                 </EuiLink>
               </EuiFlexItem>
-              {item.type === 'classic' ? (
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">
-                    {i18n.translate('xpack.streams.streamsTreeTableClassicBadge', {
-                      defaultMessage: 'Classic',
-                    })}
-                  </EuiBadge>
-                </EuiFlexItem>
-              ) : null}
             </EuiFlexGroup>
           ),
         },
@@ -99,12 +91,14 @@ export function StreamsTreeTable({
           name: i18n.translate('xpack.streams.streamsTreeTableDocumentsColumnName', {
             defaultMessage: 'Documents',
           }),
-          nameTooltip: {
-            content: `Number of documents from ${start} to ${end}`,
-          },
           width: '25%',
           render: (_, item) => (
-            <DocCountColumn indexPattern={item.name} start={start} end={end} numDataPoints={20} />
+            <DocCountColumn
+              indexPattern={item.name}
+              start={absoluteTimeRange.start}
+              end={absoluteTimeRange.end}
+              numDataPoints={25}
+            />
           ),
         },
         {
@@ -133,15 +127,28 @@ export function StreamsTreeTable({
       ]}
       itemId="name"
       items={items}
-      pagination={{
-        initialPageSize: 30,
-        pageSizeOptions: [3, 30],
-      }}
-      searchFormat="text"
+      pagination={true}
       search={{
         box: {
           incremental: true,
         },
+        toolsRight: (
+          <StreamsAppSearchBar
+            onQuerySubmit={({ dateRange }, isUpdate) => {
+              if (dateRange) {
+                if (onRefresh && !isUpdate) {
+                  onRefresh({ dateRange });
+                } else {
+                  setTimeRange(dateRange);
+                }
+              }
+            }}
+            onRefresh={onRefresh}
+            dateRangeFrom={timeRange.from}
+            dateRangeTo={timeRange.to}
+            showSubmitButton={false}
+          />
+        ),
       }}
     />
   );

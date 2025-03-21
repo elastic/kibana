@@ -47,6 +47,7 @@ export function createUseTimefilterHook(timefilter: Timefilter) {
             : nextOrCallback;
 
         timefilter.setTime(val);
+        setAbsoluteTimeRange(() => timefilter.getAbsoluteTime()); // `setTime` does not emit an update event when the relative time range remains the same so we need to manually update the absolute time value here to ensure `now` reflects the current time
       },
       []
     );
