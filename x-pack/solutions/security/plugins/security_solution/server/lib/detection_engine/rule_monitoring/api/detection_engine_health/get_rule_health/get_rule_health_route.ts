@@ -19,7 +19,6 @@ import { buildRouteValidation } from '../../../../../../utils/build_validation/r
 import { buildSiemResponse } from '../../../../routes/utils';
 import { calculateHealthTimings } from '../health_timings';
 import { validateGetRuleHealthRequest } from './get_rule_health_request';
-import { getGapsSummaryForRule } from '../../../logic/detection_engine_health/gaps/get_gaps_summary_for_rule';
 
 /**
  * Get health overview of a rule. Scope: a given detection rule in the current Kibana space.
@@ -61,12 +60,6 @@ export const getRuleHealthRoute = (router: SecuritySolutionPluginRouter) => {
           const ruleHealthParameters = { interval: params.interval, rule_id: params.ruleId };
           const ruleHealth = await healthClient.calculateRuleHealth(ruleHealthParameters);
 
-          const gapsSummary = await getGapsSummaryForRule({
-            rulesClient: await ctx.alerting.getRulesClient(),
-            ruleId: params.ruleId,
-            interval: params.interval,
-          });
-
           const responseBody: GetRuleHealthResponse = {
             timings: calculateHealthTimings(params.requestReceivedAt),
             parameters: ruleHealthParameters,
@@ -74,7 +67,6 @@ export const getRuleHealthRoute = (router: SecuritySolutionPluginRouter) => {
               ...ruleHealth,
               debug: params.debug ? ruleHealth.debug : undefined,
             },
-            gap_summary: gapsSummary,
           };
 
           return response.ok({ body: responseBody });

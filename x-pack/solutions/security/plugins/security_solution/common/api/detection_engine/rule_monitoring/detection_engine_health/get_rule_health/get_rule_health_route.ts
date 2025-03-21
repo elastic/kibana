@@ -16,7 +16,6 @@ import type {
   RuleHealthSnapshot,
 } from '../model';
 import { HealthIntervalParameters } from '../model';
-import type { GapSummary } from '../model/gap_summary';
 
 /**
  * Schema for the request body of the endpoint.
@@ -78,9 +77,4 @@ export interface GetRuleHealthResponse {
    * Result of the health stats calculation.
    */
   health: RuleHealthSnapshot;
-
-  /**
-   * Summary of the gaps in the rule execution.
-   */
-  gap_summary: GapSummary;
 }
