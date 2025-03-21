@@ -23,6 +23,17 @@ import type {
   SearchRequest,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  Duration,
+  IlmGetLifecycleRequest,
+  IndicesGetDataStreamRequest,
+  IndicesGetRequest,
+  IndicesStatsRequest,
+  NodesStatsRequest,
+  SearchHit,
+  SearchRequest as ESSearchRequest,
+  SortResults,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
   EQL_RULE_TYPE_ID,
@@ -35,15 +46,6 @@ import {
   THRESHOLD_RULE_TYPE_ID,
   ESQL_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-import type {
-  SearchHit,
-  SearchRequest as ESSearchRequest,
-  SortResults,
-  IndicesGetDataStreamRequest,
-  IndicesStatsRequest,
-  IlmGetLifecycleRequest,
-  IndicesGetRequest,
-} from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { AgentPolicy, Installation } from '@kbn/fleet-plugin/common';
 import type {
@@ -102,6 +104,12 @@ import type {
   IndexStats,
 } from './indices.metadata.types';
 import { chunkStringsByMaxLength } from './collections_helpers';
+import type {
+  NodeIngestPipelinesStats,
+  Pipeline,
+  Processor,
+  Totals,
+} from './ingest_pipelines_stats.types';
 
 export interface ITelemetryReceiver {
   start(
@@ -259,6 +267,8 @@ export interface ITelemetryReceiver {
   getIndicesStats(indices: string[]): AsyncGenerator<IndexStats, void, unknown>;
   getIlmsStats(indices: string[]): AsyncGenerator<IlmStats, void, unknown>;
   getIlmsPolicies(ilms: string[]): AsyncGenerator<IlmPolicy, void, unknown>;
+
+  getIngestPipelinesStats(timeout: Duration): Promise<NodeIngestPipelinesStats[]>;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -1533,5 +1543,77 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         throw error;
       }
     }
+  }
+
+  public async getIngestPipelinesStats(timeout: Duration): Promise<NodeIngestPipelinesStats[]> {
+    const es = this.esClient();
+
+    this.logger.l('Fetching ingest pipelines stats');
+
+    const request: NodesStatsRequest = {
+      metric: 'ingest',
+      filter_path: [
+        'nodes.*.ingest.total',
+        'nodes.*.ingest.pipelines.*.count',
+        'nodes.*.ingest.pipelines.*.time_in_millis',
+        'nodes.*.ingest.pipelines.*.failed',
+        'nodes.*.ingest.pipelines.*.current',
+        'nodes.*.ingest.pipelines.*.processors.*.stats.count',
+        'nodes.*.ingest.pipelines.*.processors.*.stats.time_in_millis',
+        'nodes.*.ingest.pipelines.*.processors.*.stats.failed',
+        'nodes.*.ingest.pipelines.*.processors.*.stats.current',
+      ],
+      timeout,
+    };
+
+    return es.nodes
+      .stats(request)
+      .then((response) => {
+        return Object.entries(response.nodes).map(([nodeName, node]) => {
+          return {
+            name: nodeName,
+            totals: {
+              count: node.ingest?.total?.count ?? 0,
+              time_in_millis: node.ingest?.total?.time_in_millis ?? 0,
+              current: node.ingest?.total?.current ?? 0,
+              failed: node.ingest?.total?.failed ?? 0,
+            } as Totals,
+            pipelines: Object.entries(node.ingest?.pipelines ?? []).map(
+              ([pipelineName, pipeline]) => {
+                return {
+                  name: pipelineName,
+                  totals: {
+                    count: pipeline.count,
+                    time_in_millis: pipeline.time_in_millis,
+                    current: pipeline.current,
+                    failed: pipeline.failed,
+                  } as Totals,
+                  processors: (pipeline.processors ?? [])
+                    .map((processors) => {
+                      return Object.entries(processors).map(([processorName, processor]) => {
+                        return {
+                          name: processorName,
+                          totals: {
+                            count: processor.stats?.count ?? 0,
+                            time_in_millis: processor.stats?.time_in_millis ?? 0,
+                            current: processor.stats?.current ?? 0,
+                            failed: processor.stats?.failed ?? 0,
+                          } as Totals,
+                        } as Processor;
+                      });
+                    })
+                    .flat(),
+                } as Pipeline;
+              }
+            ),
+          } as NodeIngestPipelinesStats;
+        });
+      })
+      .catch((error) => {
+        this.logger.warn('Error fetching ingest pipelines stats', {
+          error_message: error,
+        } as LogMeta);
+        throw error;
+      });
   }
 }
