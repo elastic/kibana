@@ -59,7 +59,6 @@ describe('RiskScoreConfigurationSection', () => {
   it('calls onDateChange on date change', () => {
     const wrapper = mount(<RiskScoreConfigurationSection {...defaultProps} />);
     wrapper.find(EuiSuperDatePicker).props().onTimeChange({ start: 'now-30d', end: 'now' });
-    // expect(defaultProps.onDateChange).toHaveBeenCalledWith({ start: 'now-30d', end: 'now' });
   });
 
   it('shows bottom bar when changes are made', async () => {
