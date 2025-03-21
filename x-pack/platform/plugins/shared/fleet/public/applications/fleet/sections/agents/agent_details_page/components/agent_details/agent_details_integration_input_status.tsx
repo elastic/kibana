@@ -8,7 +8,14 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 
-import { EuiCallOut, EuiText } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiText,
+} from '@elastic/eui';
 
 import type { InputStatusFormatter } from './input_status_utils';
 
@@ -20,18 +27,29 @@ const StyledEuiText = styled(EuiText)`
 export const AgentDetailsIntegrationInputStatus: React.FunctionComponent<{
   inputStatusFormatter: InputStatusFormatter;
 }> = memo(({ inputStatusFormatter }) => {
-  return inputStatusFormatter.hasError ? (
-    <EuiCallOut
-      title={inputStatusFormatter.getErrorTitleFromStatus()}
-      color="danger"
-      iconType="error"
-      data-test-subj="integrationInputErrorCallOut"
-    >
-      <StyledEuiText size="s" data-test-subj="integrationInputErrorDescription">
-        {inputStatusFormatter.description}
-      </StyledEuiText>
-    </EuiCallOut>
-  ) : (
-    <EuiText size="s">{inputStatusFormatter.description}</EuiText>
+  return (
+    <EuiFlexGroup gutterSize="none" alignItems="center">
+      <EuiFlexItem>
+        {inputStatusFormatter.hasError ? (
+          <EuiCallOut
+            title={inputStatusFormatter.getErrorTitleFromStatus()}
+            color="danger"
+            iconType="error"
+            data-test-subj="integrationInputErrorCallOut"
+          >
+            <StyledEuiText size="s" data-test-subj="integrationInputErrorDescription">
+              {inputStatusFormatter.description}
+            </StyledEuiText>
+          </EuiCallOut>
+        ) : (
+          <EuiText size="s">{inputStatusFormatter.description}</EuiText>
+        )}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiCopy textToCopy={inputStatusFormatter.description ?? ''}>
+          {(copy) => <EuiButtonIcon iconType="copyClipboard" onClick={copy} />}
+        </EuiCopy>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 });
