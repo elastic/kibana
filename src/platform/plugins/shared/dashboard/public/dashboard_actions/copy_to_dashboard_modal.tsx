@@ -18,7 +18,7 @@ import {
   EuiRadio,
   EuiSpacer,
 } from '@elastic/eui';
-import { EmbeddablePackageState, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
+import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { omit } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
