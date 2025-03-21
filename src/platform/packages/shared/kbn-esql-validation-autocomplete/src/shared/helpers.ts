@@ -19,7 +19,6 @@ import {
   type ESQLTimeInterval,
 } from '@kbn/esql-ast';
 import {
-  ESQLCommandMode,
   ESQLIdentifier,
   ESQLInlineCast,
   ESQLParamLiteral,
@@ -66,10 +65,6 @@ export function isSingleItem(arg: ESQLAstItem): arg is ESQLSingleAstItem {
   return arg && !Array.isArray(arg);
 }
 
-/** @deprecated — a "setting" is a concept we will be getting rid of soon */
-export function isSettingItem(arg: ESQLAstItem): arg is ESQLCommandMode {
-  return isSingleItem(arg) && arg.type === 'mode';
-}
 export function isFunctionItem(arg: ESQLAstItem): arg is ESQLFunction {
   return isSingleItem(arg) && arg.type === 'function';
 }
