@@ -50,8 +50,8 @@ function StaleAlert({
   };
   const isAlertStale = useMemo(() => {
     if (alertStatus === ALERT_STATUS_ACTIVE) {
-      const numOfCases = alert?.fields[ALERT_CASE_IDS]?.length || 0;
-      const timestamp = alert?.start;
+      const numOfCases = alert.fields[ALERT_CASE_IDS]?.length || 0;
+      const timestamp = alert.start;
       const givenDate = moment(timestamp);
       const now = moment();
       const diffInDays = now.diff(givenDate, 'days');
