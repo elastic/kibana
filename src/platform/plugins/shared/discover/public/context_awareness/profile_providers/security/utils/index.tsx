@@ -8,8 +8,7 @@
  */
 
 import { encode } from '@kbn/rison';
-import { EcsFlat } from '@elastic/ecs';
-import * as i18n from '../translations';
+import type { EcsFlat } from '@elastic/ecs';
 
 export interface CustomQuery {
   kind: 'kuery' | 'lucene';
@@ -73,17 +72,4 @@ export const getSecurityTimelineRedirectUrl = ({
   const encodedTimelineFlyoutParam = encode(timelineFlyoutSearchParam);
 
   return `${baseURL}?timeline=${encodedTimelineParam}&timerange=${encodedTimelineTimerangeParam}&timelineFlyout=${encodedTimelineFlyoutParam}`;
-};
-
-/**
- * Helper function to return the description of an allowed value of the specified field
- * @param fieldName
- * @param value
- * @returns ecs description of the value
- */
-export const getEcsAllowedValueDescription = (value: string): string => {
-  const allowedValues: EcsAllowedValue[] = EcsFlat['event.category']?.allowed_values ?? [];
-  const result =
-    allowedValues?.find((item) => item.name === value)?.description ?? i18n.noEcsDescriptionReason;
-  return result;
 };

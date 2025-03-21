@@ -8,9 +8,11 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { RowControlComponent, RowControlRowProps, getFieldValue } from '@kbn/discover-utils';
-import { ProfileProviderServices } from '../../../profile_provider_services';
+import type { RowControlComponent, RowControlRowProps } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
+import type { ProfileProviderServices } from '../../../profile_provider_services';
 import { getSecurityTimelineRedirectUrl } from '../../utils';
+import { exploreRowActionLabel } from '../../translations';
 
 export interface ExploreInSecurityProps {
   Control: RowControlComponent;
@@ -50,7 +52,7 @@ export function ExploreInSecurity({ Control, rowProps, services }: ExploreInSecu
     window.open(url, '_blank');
   }, [url]);
 
-  const label = useMemo(() => `Explore ${isAlert ? 'alert' : 'event'} in Security`, [isAlert]);
+  const label = useMemo(() => exploreRowActionLabel(isAlert), [isAlert]);
   return (
     <Control
       iconType="logoSecurity"

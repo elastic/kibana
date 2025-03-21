@@ -9,21 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const overviewTabTitle = (isAlert: boolean) =>
-  i18n.translate('discover.profile.security.flyout.overviewTabTitle', {
-    values: { isAlert },
-    defaultMessage: '{isAlert, select, true {Alerts Overview} other {Event Overview}}',
-  });
-
-export const overviewExploreButtonLabel = (isAlert: boolean) =>
-  i18n.translate('discover.profile.security.flyout.overviewExploreButtonLabel', {
+export const exploreRowActionLabel = (isAlert: boolean) =>
+  i18n.translate('discover.profile.security.rowAction.exploreButtonLabel', {
     values: { isAlert },
     defaultMessage: 'Explore {isAlert, select, true {Alert} other {Event}} in Security',
   });
-
-export const noEcsDescriptionReason = i18n.translate(
-  'discover.profile.security.flyout.noEventKindDescriptionMessage',
-  {
-    defaultMessage: "This field doesn't have a description because it's not part of ECS.",
-  }
-);
