@@ -13,7 +13,6 @@ import { operatorsDefinitions } from '../definitions/all_operators';
 import { getOperatorSuggestion, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { CommandDefinition, CommandTypeDefinition } from '../definitions/types';
 import { getCommandDefinition } from '../shared/helpers';
-import { getCommandSignature } from '../definitions/helpers';
 import { buildDocumentation } from './documentation_util';
 
 const techPreviewLabel = i18n.translate(
@@ -55,7 +54,6 @@ export const getCommandAutocompleteDefinitions = (
       if (commandDefinition.preview) {
         detail = `[${techPreviewLabel}] ${detail}`;
       }
-      const commandSignature = getCommandSignature(commandDefinition, type.name);
       const suggestion: SuggestionRawDefinition = {
         label: type.name ? `${type.name.toLocaleUpperCase()} ${label}` : label,
         text: type.name ? `${type.name.toLocaleUpperCase()} ${text}` : text,
@@ -63,7 +61,7 @@ export const getCommandAutocompleteDefinitions = (
         kind: 'Method',
         detail,
         documentation: {
-          value: buildDocumentation(commandSignature.declaration, commandSignature.examples),
+          value: buildDocumentation(commandDefinition.declaration, commandDefinition.examples),
         },
         sortText: 'A-' + label + '-' + type.name,
         command: TRIGGER_SUGGESTION_COMMAND,
