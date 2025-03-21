@@ -216,7 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
       const resp = await supertest.get(`/api/upgrade_assistant/reindex/reindexed-v8-6.0-data`); // reusing the index previously migrated in v8->v9 UA tests
       // By default, all reindexing operations will replace an index with an alias (with the same name)
       // pointing to a newly created "reindexed" index.
-      expect(resp.body.warnings.length).to.be(1);
+      expect(resp.body.warnings?.length).to.be(1);
       expect(resp.body.warnings[0].warningType).to.be('replaceIndexWithAlias');
     });
 
