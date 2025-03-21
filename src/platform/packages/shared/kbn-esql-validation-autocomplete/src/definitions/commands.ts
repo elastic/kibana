@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import {
-  type ESQLColumn,
-  type ESQLCommand,
-  type ESQLMessage,
-  type ESQLFunction,
-  isFunctionExpression,
-  isWhereExpression,
   ESQLCommandMode,
   ESQLCommandOption,
+  isFunctionExpression,
+  isWhereExpression,
+  type ESQLColumn,
+  type ESQLCommand,
+  type ESQLFunction,
+  type ESQLMessage,
 } from '@kbn/esql-ast';
+import { i18n } from '@kbn/i18n';
 import {
   hasWildcard,
   isAssignment,
@@ -31,8 +31,13 @@ import {
   noCaseCompare,
 } from '../shared/helpers';
 
+import {
+  ENRICH_MODES,
+  checkAggExistence,
+  checkFunctionContent,
+  validateColumnForGrokDissect,
+} from './commands_helpers';
 import { type CommandDefinition } from './types';
-import { ENRICH_MODES, checkAggExistence, checkFunctionContent } from './commands_helpers';
 
 import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
 import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
@@ -51,8 +56,8 @@ import { suggest as suggestForSort } from '../autocomplete/commands/sort';
 import { suggest as suggestForStats } from '../autocomplete/commands/stats';
 import { suggest as suggestForWhere } from '../autocomplete/commands/where';
 
-import { getMessageFromId } from '../validation/errors';
 import { METADATA_FIELDS } from '../shared/constants';
+import { getMessageFromId } from '../validation/errors';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -440,26 +445,28 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       ],
     },
     suggest: suggestForDissect,
-    validate: (command: ESQLCommand) => {
+    validate: (command: ESQLCommand, references) => {
+      const messages: ESQLMessage[] = validateColumnForGrokDissect(command, references);
+
       const appendSeparatorClause = command.args.find((arg) => isOptionItem(arg)) as
         | ESQLCommandOption
         | undefined;
 
       if (!appendSeparatorClause) {
-        return [];
+        return messages;
       }
 
       if (appendSeparatorClause.name !== 'append_separator') {
-        return [
+        messages.push(
           getMessageFromId({
             messageId: 'unknownDissectKeyword',
             values: { keyword: appendSeparatorClause.name },
             locations: appendSeparatorClause.location,
-          }),
-        ];
+          })
+        );
+        return messages;
       }
 
-      const messages: ESQLMessage[] = [];
       const [firstArg] = appendSeparatorClause.args;
       if (
         !Array.isArray(firstArg) &&
@@ -494,6 +501,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       ],
     },
     suggest: suggestForGrok,
+    validate: validateColumnForGrokDissect,
   },
   {
     name: 'mv_expand',

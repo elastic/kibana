@@ -20,7 +20,6 @@ import {
   walk,
 } from '@kbn/esql-ast';
 import type { ESQLAstJoinCommand, ESQLIdentifier } from '@kbn/esql-ast/src/types';
-import { compareTypesWithLiterals } from '../shared/esql_types';
 import {
   areFieldAndVariableTypesCompatible,
   getColumnExists,
@@ -402,40 +401,9 @@ export function validateColumnForCommand(
     const columnName = getQuotedColumnName(column);
     if (getColumnExists(column, references)) {
       const commandDef = getCommandDefinition(commandName);
-      const columnParamsWithInnerTypes = commandDef.signature.params.filter(
-        ({ type, innerTypes }) => type === 'column' && innerTypes
-      );
       // this should be guaranteed by the columnCheck above
       const columnRef = getColumnForASTNode(column, references)!;
 
-      if (columnParamsWithInnerTypes.length) {
-        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(
-          ({ innerTypes }) =>
-            innerTypes &&
-            !innerTypes.includes('any') &&
-            !innerTypes.some((type) => compareTypesWithLiterals(type, columnRef.type))
-        );
-        if (hasSomeWrongInnerTypes) {
-          const supportedTypes: string[] = columnParamsWithInnerTypes
-            .map(({ innerTypes }) => innerTypes)
-            .flat()
-            .filter((type) => type !== undefined) as string[];
-
-          messages.push(
-            getMessageFromId({
-              messageId: 'unsupportedColumnTypeForCommand',
-              values: {
-                command: commandName.toUpperCase(),
-                type: supportedTypes.join(', '),
-                typeCount: supportedTypes.length,
-                givenType: columnRef.type,
-                column: columnName,
-              },
-              locations: column.location,
-            })
-          );
-        }
-      }
       if (
         hasWildcard(columnName) &&
         !isVariable(columnRef) &&
