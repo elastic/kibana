@@ -15,8 +15,8 @@ describe('hidden commands', () => {
   it('does not suggest hidden commands', async () => {
     const { suggest } = await setup();
     const suggestedCommands = (await suggest('FROM index | /')).map((s) => s.text);
-    expect(suggestedCommands).not.toContain('HIDDEN_COMMAND $0');
-    expect(suggestedCommands).toContain('EVAL $0');
+    expect(suggestedCommands).not.toContain('HIDDEN_COMMAND ');
+    expect(suggestedCommands).toContain('EVAL ');
     expect(suggestedCommands.every((s) => !s.toLowerCase().includes('HIDDEN_COMMAND'))).toBe(true);
   });
 });
