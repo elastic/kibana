@@ -31,7 +31,7 @@ export async function getRollupJobByIndexName(esClient: ElasticsearchClient, ind
     let jobs: RollupGetJobsResponse;
 
     try {
-      jobs = await esClient.rollup.getJobs({ id: rollupJob }, {});
+      jobs = await esClient.rollup.getJobs({ id: rollupJob });
       // will catch if not found
       // would be nice to handle the error better but little info is provided
     } catch (e) {
