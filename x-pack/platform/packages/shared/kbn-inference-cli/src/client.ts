@@ -70,7 +70,7 @@ function createChatComplete({ connectorId, kibanaClient, signal }: InferenceCliC
           kibanaClient
             .fetch(`/internal/inference/chat_complete/stream`, {
               method: 'POST',
-              body: JSON.stringify(body),
+              body,
               asRawResponse: true,
               signal: combineSignal(signal, abortSignal),
             })
@@ -83,7 +83,7 @@ function createChatComplete({ connectorId, kibanaClient, signal }: InferenceCliC
       `/internal/inference/chat_complete`,
       {
         method: 'POST',
-        body: JSON.stringify(body),
+        body,
         signal: combineSignal(signal, abortSignal),
       }
     );

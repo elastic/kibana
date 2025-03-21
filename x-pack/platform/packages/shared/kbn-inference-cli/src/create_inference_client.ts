@@ -15,15 +15,17 @@ export async function createInferenceClient({
   prompt,
   signal,
   kibanaClient,
+  setupEis,
 }: {
   log: ToolingLog;
   prompt?: boolean;
   signal: AbortSignal;
   kibanaClient?: KibanaClient;
+  setupEis?: boolean;
 }): Promise<InferenceCliClient> {
   kibanaClient = kibanaClient || (await createKibanaClient({ log, signal }));
 
-  const connector = await selectConnector({ log, kibanaClient, prompt });
+  const connector = await selectConnector({ log, kibanaClient, prompt, setupEis, signal });
 
   return new InferenceCliClient({
     log,

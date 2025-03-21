@@ -10,24 +10,46 @@ import inquirer from 'inquirer';
 import { InferenceConnector } from '@kbn/inference-common';
 import { KibanaClient } from '@kbn/kibana-api-cli';
 import { getConnectors } from './get_connector';
+import { ensureEisConnector } from './eis/ensure_eis_connector';
 
 export async function selectConnector({
   log,
   kibanaClient,
   prompt = true,
   preferredConnectorId,
+  setupEis,
+  signal,
 }: {
   log: ToolingLog;
   kibanaClient: KibanaClient;
   prompt?: boolean;
   preferredConnectorId?: string;
+  setupEis?: boolean;
+  signal: AbortSignal;
 }): Promise<InferenceConnector> {
   const connectors = await getConnectors(kibanaClient);
 
-  if (!connectors.length) {
+  if (!connectors.length && !setupEis) {
     throw new Error(
-      `No connectors available for inference. See https://www.elastic.co/guide/en/kibana/current/action-types.html`
+      `No connectors available. Re-run with --setup-eis to set up a connector to EIS`
     );
+  }
+
+  if (!connectors.length && setupEis) {
+    await ensureEisConnector({
+      kibanaClient,
+      log,
+      signal,
+    });
+
+    return await selectConnector({
+      log,
+      kibanaClient,
+      signal,
+      prompt,
+      setupEis: false,
+      preferredConnectorId,
+    });
   }
 
   const connector = connectors.find((item) => item.connectorId === preferredConnectorId);

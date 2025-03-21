@@ -14,7 +14,7 @@ import { createProxyTransport } from './proxy_transport';
 import { getInternalKibanaHeaders } from './get_internal_kibana_headers';
 
 type FetchInputOptions = string | URL;
-type FetchInitOptions = globalThis.RequestInit;
+type FetchInitOptions = Omit<globalThis.RequestInit, 'body'> & { body: unknown };
 
 interface KibanaClientOptions {
   baseUrl: string;
@@ -107,6 +107,7 @@ export class KibanaClient {
         ...init?.headers,
       },
       signal: combineSignal(this.options.signal, init?.signal),
+      body: init?.body ? JSON.stringify(init?.body) : undefined,
     });
 
     if (init?.asRawResponse) {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FetchResponseError } from '@kbn/kibana-api-cli';
 import { runRecipe } from '../utils/run_recipe';
 
 /**
@@ -12,19 +13,25 @@ import { runRecipe } from '../utils/run_recipe';
  */
 
 runRecipe(async ({ inferenceClient, kibanaClient, log, signal }) => {
-  const response = await inferenceClient.output({
-    id: 'extract_personal_details',
-    input: `Sarah is a 29-year-old software developer living in San Francisco.`,
-    schema: {
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-        age: { type: 'number' },
-        city: { type: 'string' },
-      },
-      required: ['name'],
-    } as const,
-  });
+  const response = await inferenceClient
+    .output({
+      id: 'extract_personal_details',
+      input: `Sarah is a 29-year-old software developer living in San Francisco.`,
+      schema: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          age: { type: 'number' },
+          city: { type: 'string' },
+        },
+        required: ['name'],
+      } as const,
+    })
+    .catch(async (error) => {
+      if (error instanceof FetchResponseError) {
+        console.log(await error.response.json());
+      }
+    });
 
   log.info(response);
 });
