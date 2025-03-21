@@ -61,7 +61,7 @@ export { pagePathGetters, EPM_API_ROUTES } from './constants';
 export { pkgKeyFromPackageInfo } from './services';
 export type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
 export { CustomAssetsAccordion } from './components/custom_assets_accordion';
-export { PackageIcon } from './components/package_icon';
+export { CardIcon, PackageIcon } from './components/package_icon';
 // Export Package editor components for custom editors
 export { PackagePolicyEditorDatastreamPipelines } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines';
 export type { PackagePolicyEditorDatastreamPipelinesProps } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/datastream_pipelines';
@@ -93,3 +93,4 @@ export const AvailablePackagesHook = () => {
 
 export { useGetPackagesQuery } from './hooks/use_request/epm';
 export { useGetSettingsQuery } from './hooks/use_request/settings';
+export { useLink } from './hooks/use_link';

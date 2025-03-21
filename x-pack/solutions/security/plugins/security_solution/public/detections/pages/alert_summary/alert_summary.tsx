@@ -23,7 +23,7 @@ const LOADING_INTEGRATIONS = i18n.translate('xpack.securitySolution.alertSummary
  * This page should be only rendered for the AI for SOC product line.
  */
 export const AlertSummaryPage = memo(() => {
-  const { availablePackage, installedPackages, isLoading } = useFetchIntegrations();
+  const { availablePackages, installedPackages, isLoading } = useFetchIntegrations();
 
   if (isLoading) {
     return (
@@ -36,7 +36,7 @@ export const AlertSummaryPage = memo(() => {
   }
 
   if (installedPackages.length === 0) {
-    return <LandingPage packages={availablePackage} />;
+    return <LandingPage packages={availablePackages} />;
   }
 
   return <Wrapper packages={installedPackages} />;

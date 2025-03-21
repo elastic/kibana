@@ -28,6 +28,7 @@ describe('<AlertSummaryPage />', () => {
 
   it('should render landing page if no packages are installed', () => {
     (useFetchIntegrations as jest.Mock).mockReturnValue({
+      availablePackages: [{ id: 'id' }],
       installedPackages: [],
       isLoading: false,
     });
@@ -42,7 +43,7 @@ describe('<AlertSummaryPage />', () => {
 
   it('should render wrapper if packages are installed', () => {
     (useFetchIntegrations as jest.Mock).mockReturnValue({
-      availablePackage: [],
+      availablePackages: [],
       installedPackages: [{ id: 'id' }],
       isLoading: false,
     });
