@@ -8,7 +8,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod';
-import { retrieveCases } from './tools';
+import { retrieveCases, retrieveSimiliarCases } from './tools';
 
 // Define enum field structure upfront
 interface Field {
@@ -143,8 +143,6 @@ export async function createMcpServer({
         updatedBefore,
       });
 
-      logger.info(`Retrieved ${caseContent.length} support cases`);
-
       logger.info(`Retrieved ${JSON.stringify(caseContent)}`);
 
       return {
@@ -152,6 +150,36 @@ export async function createMcpServer({
       };
     }
   );
+
+  server.tool(
+    'retrieve_similiar_cases',
+    `Retrieves Salesforce support cases that are semantically similiar to the one the user is refrencing`,
+    {
+      caseNumber: z
+        .string()
+        .optional()
+        .describe('Salesforce case number identifier (preferred lookup method)'),
+      id: z
+        .string()
+        .optional()
+        .describe(
+          'Salesforce internal ID of the support case (use only when specifically requested)'
+        ),
+      size: z.number().int().positive().default(10).describe('Maximum number of cases to return'),
+    },
+    async ({
+      id,
+      size,
+      caseNumber,
+    }) => {
+  
+        const similiarCases = await retrieveSimiliarCases(elasticsearchClient, logger, index, {id, size, caseNumber})
+  
+        return {
+          content: similiarCases,
+        };
+      }
+    );
 
   return server;
 }
