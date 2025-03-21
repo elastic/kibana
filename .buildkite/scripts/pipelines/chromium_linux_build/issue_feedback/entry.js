@@ -142,9 +142,11 @@ const getSha256Hash = async (filePath) => {
     (v) => v.version === chromiumVersion && v.revision === chromiumRevision
   );
 
-  if (!matchedChromeConfig?.downloads?.['chrome-headless-shell']?.length) {
-    throw new Error(`Failed to find a known good version for chromium ${chromiumVersion}`);
-  }
+  assert.notStrictEqual(
+    matchedChromeConfig?.downloads?.['chrome-headless-shell']?.length,
+    0,
+    `Failed to find a known good version for chromium ${chromiumVersion}`
+  );
 
   /**
    * @type {import('./transform_path_file').ChromiumUpdateConfigMap}
@@ -217,9 +219,7 @@ const getSha256Hash = async (filePath) => {
         RegExp(String.raw`${arch}\.zip`).test(artifact)
       );
 
-      if (!match) {
-        throw new Error(`No linux build artifacts found for ${arch}`);
-      }
+      assert.ok(match, `No linux build artifacts found for ${arch}`);
 
       const archiveChecksum = await getSha256Hash(match);
 
