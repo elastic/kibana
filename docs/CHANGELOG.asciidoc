@@ -11,6 +11,7 @@
 Review important information about the {kib} 8.x releases.
 
 * <<release-notes-8.18.0>>
+* <<release-notes-8.17.4>>
 * <<release-notes-8.17.3>>
 * <<release-notes-8.17.2>>
 * <<release-notes-8.17.1>>
@@ -90,6 +91,7 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
 
 [[release-notes-8.18.0]]
 == {kib} 8.18.0
@@ -363,6 +365,26 @@ Machine Learning::
 * Anomaly Explorer: Fixes handling of job group IDs when opening from dashboard panels ({kibana-pull}203224[#203224]).
 * AiOps: Fixes Log Rate Analysis embeddable error on the Alerts page ({kibana-pull}203093[#203093]).
 * Initializes saved objects on trained model page load ({kibana-pull}201426[#201426]).
+
+[[release-notes-8.17.4]]
+== {kib} 8.17.4
+
+The 8.17.4 release includes the following fixes.
+
+[float]
+[[fixes-v8.17.4]]
+=== Fixes
+Dashboards and Visualizations::
+* Prevents unnecessary re-render when switching between View and Edit modes ({kibana-pull}213902[#213902]).
+* Fixes an issue with the handling of the `viewMode` check in *Lens* ({kibana-pull}213887[#213887]).
+* Adds `event-annotation-group` to saved object privileges for dashboards ({kibana-pull}212926[#212926]).
+Elastic Observability Solution::
+* Makes {kib} retrieval namespace-specific ({kibana-pull}213505[#213505]).
+* Fixes an error with the `retrieve-elastic-doc` function being unavailable ({kibana-pull}212676[#212676]).
+Elastic Security solution::
+For the Elastic Security 8.17.4 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Management::
+* Adds support for rollup data views that reference aliases ({kibana-pull}212592[#212592]).
 
 [[release-notes-8.17.3]]
 == {kib} 8.17.3
