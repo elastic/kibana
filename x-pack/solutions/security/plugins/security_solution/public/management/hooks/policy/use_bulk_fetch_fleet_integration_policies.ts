@@ -22,7 +22,7 @@ import { useHttp } from '../../../common/lib/kibana';
 export const useBulkFetchFleetIntegrationPolicies = (
   { ids, ignoreMissing = true }: BulkGetPackagePoliciesRequestBody,
   options: UseQueryOptions<BulkGetPackagePoliciesResponse, IHttpFetchError> = {}
-): QueryObserverResult<BulkGetPackagePoliciesResponse> => {
+): QueryObserverResult<BulkGetPackagePoliciesResponse, IHttpFetchError> => {
   const http = useHttp();
 
   return useQuery<BulkGetPackagePoliciesResponse, IHttpFetchError>({
