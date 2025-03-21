@@ -225,7 +225,7 @@ export function OpenTelemetryInstructions({
               <EuiLink
                 data-test-subj="apmOpenTelemetryInstructionsOtelExporterOtlpEndpointLink"
                 target="_blank"
-                href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/protocol/exporter.md"
+                href="https://ela.st/otel-spec-exporter-doc"
                 // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
               >
                 OTEL_EXPORTER_OTLP_ENDPOINT
@@ -235,7 +235,7 @@ export function OpenTelemetryInstructions({
               <EuiLink
                 data-test-subj="apmOpenTelemetryInstructionsOtelExporterOtlpHeadersLink"
                 target="_blank"
-                href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/protocol/exporter.md"
+                href="https://ela.st/otel-spec-exporter-doc"
                 // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
               >
                 OTEL_EXPORTER_OTLP_HEADERS
@@ -245,7 +245,7 @@ export function OpenTelemetryInstructions({
               <EuiLink
                 data-test-subj="apmOpenTelemetryInstructionsOtelResourceAttributesLink"
                 target="_blank"
-                href="https://github.com/open-telemetry/opentelemetry-specification/blob/v1.10.0/specification/resource/sdk.md"
+                href="https://ela.st/otel-spec-sdk"
                 // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n
               >
                 OTEL_RESOURCE_ATTRIBUTES
