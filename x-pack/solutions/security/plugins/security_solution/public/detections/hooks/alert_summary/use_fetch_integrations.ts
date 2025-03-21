@@ -44,7 +44,7 @@ export interface UseFetchIntegrationsResult {
  */
 export const useFetchIntegrations = (): UseFetchIntegrationsResult => {
   // TODO this might need to be revisited once the integration make it out of prerelease
-  //  The issue could be that we see both the prerelease and the release versions
+  //  The issue will be that users will see prerelease versions and not the GA ones
   const { data: allPackages, isLoading } = useGetPackagesQuery({
     prerelease: true,
   });
