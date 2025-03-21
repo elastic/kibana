@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -20,7 +20,6 @@ import {
 import usePrevious from 'react-use/lib/usePrevious';
 
 import { WelcomeMessageKnowledgeBaseSetupErrorPanel } from './welcome_message_knowledge_base_setup_error_panel';
-import { useKibana } from '../hooks/use_kibana';
 import { UseKnowledgeBaseResult } from '../hooks';
 
 export function WelcomeMessageKnowledgeBase({
@@ -28,65 +27,12 @@ export function WelcomeMessageKnowledgeBase({
 }: {
   knowledgeBase: UseKnowledgeBaseResult;
 }) {
-  const { notifications, ml } = useKibana().services;
+  const isPolling = !!knowledgeBase.status.value?.endpoint && !knowledgeBase.status.value?.ready;
 
-  const isInstalling = !!knowledgeBase.status.value?.endpoint && !knowledgeBase.status.value?.ready;
-
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (isLoading && !!knowledgeBase.status.value?.endpoint) {
-      setIsLoading(false);
-    }
-  }, [isLoading, knowledgeBase]);
-
-  const install = useCallback(async () => {
-    setIsLoading(true);
-
-    let attempts = 0;
-    const MAX_ATTEMPTS = 5;
-
-    try {
-      // install
-      await retrySetupIfError();
-
-      if (ml.mlApi?.savedObjects.syncSavedObjects) {
-        await ml.mlApi.savedObjects.syncSavedObjects();
-      }
-    } catch (e) {
-      notifications!.toasts.addError(e, {
-        title: i18n.translate('xpack.aiAssistant.errorSettingUpInferenceEndpoint', {
-          defaultMessage: 'Could not create inference endpoint',
-        }),
-      });
-      setIsLoading(false);
-    } finally {
-      // do one refresh to get an initial status
-      await knowledgeBase.status.refresh();
-    }
-    async function retrySetupIfError() {
-      while (true) {
-        try {
-          await knowledgeBase.setupKb();
-          break;
-        } catch (error) {
-          if (
-            (error.body?.statusCode === 503 || error.body?.statusCode === 504) &&
-            attempts < MAX_ATTEMPTS
-          ) {
-            attempts++;
-            continue;
-          }
-          throw error;
-        }
-      }
-    }
-  }, [ml, notifications, knowledgeBase]);
-
-  // poll the status if isInstalling
+  // poll the status if isPolling (inference endpoint is created but deployment is not ready)
   // stop when ready === true or some error
   useEffect(() => {
-    if (!isInstalling) {
+    if (!isPolling) {
       return;
     }
 
@@ -107,26 +53,27 @@ export function WelcomeMessageKnowledgeBase({
     return () => {
       clearInterval(interval);
     };
-  }, [knowledgeBase, isInstalling]);
+  }, [knowledgeBase, isPolling]);
 
-  const prevIsInstalling = usePrevious(isInstalling || isLoading);
+  const isLoading = knowledgeBase.isInstalling || isPolling;
+  const prevIsInstalling = usePrevious(isLoading);
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
   // track whether the "inspect issues" popover is open
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   useEffect(() => {
-    if (prevIsInstalling === true && isInstalling === false) {
+    if (prevIsInstalling && isLoading) {
       setShowSuccessBanner(true);
     }
-  }, [isInstalling, prevIsInstalling]);
+  }, [isLoading, prevIsInstalling]);
 
   const handleInstall = async () => {
     setIsPopoverOpen(false);
-    await install();
+    await knowledgeBase.setupKb();
   };
 
   // If we are installing at any step (POST /setup + model deployment)
-  if (isInstalling || isLoading) {
+  if (isLoading) {
     return (
       <>
         <EuiText color="subdued" size="s">
