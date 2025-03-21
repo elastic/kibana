@@ -14,5 +14,4 @@
     - assert_kibana_available
     - assert_kibana_log
     - assert_kibana_data
-    - role: assert_rm_chat_plugin
-      when: "{{ lookup('ansible.builtin.env', 'RELEASE_BUILD') }} == 'true'"
+    - assert_chat_plugin
