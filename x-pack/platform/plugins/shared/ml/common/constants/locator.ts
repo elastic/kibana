@@ -7,6 +7,9 @@
 
 export const ML_APP_LOCATOR = 'ML_APP_LOCATOR';
 
+/**
+ * @deprecated since 9.1, kept here to redirect old bookmarks
+ */
 export const DEPRECATED_ML_ROUTE_TO_NEW_ROUTE = {
   jobs: 'anomaly_detection',
   data_frame_analytics: 'analytics',
@@ -22,6 +25,7 @@ export const DEPRECATED_ML_ROUTE_TO_NEW_ROUTE = {
   'settings/filter_lists': 'ad_settings/filter_lists',
   'settings/filter_lists/new_filter_list': 'ad_settings/filter_lists/new_filter_list',
   nodes: 'overview',
+  'jobs/new_job/step/index_or_search': 'anomaly_detection/jobs/new_job/step/select_source',
 };
 
 export const ML_PAGES = {
