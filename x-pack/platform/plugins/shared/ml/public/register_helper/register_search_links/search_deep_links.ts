@@ -54,6 +54,16 @@ function createDeepLinks(
             }),
             path: `/${ML_PAGES.SINGLE_METRIC_VIEWER}`,
           },
+          {
+            id: 'suppliedConfigurations',
+            title: i18n.translate('xpack.ml.deepLink.suppliedConfigurations', {
+              defaultMessage: 'Supplied configurations',
+            }),
+            // @deprecated since 9.1, kept here to redirect to new management page location
+            // Until we can register custom deep links in Management
+            // https://github.com/elastic/kibana/issues/213152
+            path: `/supplied_configurations`,
+          },
         ],
       };
     },
