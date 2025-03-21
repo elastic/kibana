@@ -10,7 +10,7 @@ import { startCase } from 'lodash/fp';
 
 export const INVALID_MUSTACHE_TEMPLATE = (paramKey: string) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.invalidMustacheTemplateErrorMessage',
+    'xpack.securitySolution.ruleActions.validation.invalidMustacheTemplateErrorMessage',
     {
       defaultMessage: '{key} is not valid mustache template',
       values: {

@@ -17,9 +17,8 @@ import type {
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { validateActionFilterQuery } from '@kbn/triggers-actions-ui-plugin/public';
-import type { RuleActionsFormData } from '../../../../../detection_engine/rule_management_ui/components/rules_table/bulk_actions/forms/rule_actions_form';
-import type { ActionsStepRule } from '../../../../pages/detection_engine/rules/types';
-import type { ValidationFunc, ERROR_CODE } from '../../../../../shared_imports';
+
+import type { FormData, ValidationFunc, ERROR_CODE } from '../../../../shared_imports';
 import { getActionTypeName, validateMustache, validateActionParams } from './utils';
 
 export const DEFAULT_VALIDATION_TIMEOUT = 100;
@@ -37,8 +36,10 @@ export const validateSingleAction = async (
 
 export const validateRuleActionsField =
   (actionTypeRegistry: ActionTypeRegistryContract) =>
-  async (...data: Parameters<ValidationFunc>): ValidationResponsePromise<ERROR_CODE> => {
-    const [{ value, path }] = data as [{ value: RuleAction[]; path: string }];
+  async (
+    ...data: Parameters<ValidationFunc<FormData, string, RuleAction[]>>
+  ): ValidationResponsePromise<ERROR_CODE> => {
+    const [{ value, path }] = data;
 
     const errors = [];
     for (const actionItem of value) {
@@ -79,7 +80,7 @@ export const debouncedValidateRuleActionsField =
     actionTypeRegistry: ActionTypeRegistryContract,
     defaultValidationTimeout = DEFAULT_VALIDATION_TIMEOUT
   ) =>
-  (data: ValidationFuncArg<ActionsStepRule | RuleActionsFormData>): ValidationResponsePromise => {
+  (data: ValidationFuncArg<FormData, RuleAction[]>): ValidationResponsePromise => {
     let isCanceled = false;
     const promise: ValidationCancelablePromise = new Promise((resolve) => {
       setTimeout(() => {
