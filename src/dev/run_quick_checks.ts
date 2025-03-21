@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execFile } from 'child_process';
+import { execFile, execSync } from 'child_process';
 import { availableParallelism } from 'os';
 import { isAbsolute, join } from 'path';
 import { existsSync, readdirSync, readFileSync } from 'fs';
@@ -34,11 +34,13 @@ const scriptOptions: RunOptions = {
       - arguments (--file, --dir, --checks) are exclusive - only one can be used at a time.
   `,
   flags: {
+    boolean: ['run-dirty'],
     string: ['dir', 'checks', 'file'],
     help: `
         --file             Run all checks from a given file. (default='${quickChecksList}')
         --dir              Run all checks in a given directory.
         --checks           Runs all scripts given in this parameter. (comma or newline delimited)
+        --run-dirty        Run checks even if the repository is not clean.
       `,
   },
   log: {
@@ -50,6 +52,25 @@ const scriptOptions: RunOptions = {
 let logger: ToolingLog;
 void run(async ({ log, flagsReader }) => {
   logger = log;
+
+  const runDirty = flagsReader.boolean('run-dirty');
+
+  try {
+    const chanedFiles = execSync('git status --porcelain').toString();
+    if (chanedFiles.length > 0) {
+      throw new Error('Repository is not clean.');
+    }
+  } catch (_) {
+    if (runDirty) {
+      logger.warning('Repository is not clean, but running checks anyway.');
+    } else {
+      logger.error(
+        'Repository is not clean, quick checks could fail because of this.\n' +
+          'Please commit or stash your changes. (or use --run-dirty)'
+      );
+      process.exit(1);
+    }
+  }
 
   const scriptsToRun = collectScriptsToRun({
     targetFile: flagsReader.string('file'),

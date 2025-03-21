@@ -3,7 +3,7 @@ steps:
     label: Build serverless container images
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-16
     timeout_in_minutes: 60
