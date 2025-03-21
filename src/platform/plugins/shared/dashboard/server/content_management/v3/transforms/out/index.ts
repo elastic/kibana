@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { transformControlGroupOut } from './control_group';
-export { transformSearchSourceOut } from './search_source';
-export { transformOptionsOut } from './options';
-export { transformPanelsOut } from './panels';
+export { transformControlGroupOut } from './control_group_out_transforms';
+export { transformSearchSourceOut } from './search_source_out_transforms';
+export { transformOptionsOut } from './options_out_transforms';
+export { transformPanelsOut } from './panels_out_transforms';

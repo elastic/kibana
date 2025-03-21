@@ -14,7 +14,7 @@ import {
   transformControlProperties,
   transformControlsSetDefaults,
   transformControlsState,
-} from './control_state';
+} from './control_state_out_transforms';
 
 describe('control_state', () => {
   const mockControls = {
