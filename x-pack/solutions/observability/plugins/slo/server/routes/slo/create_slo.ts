@@ -6,13 +6,13 @@
  */
 
 import { createSLOParamsSchema } from '@kbn/slo-schema';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 import { getSpaceId } from './utils/get_space_id';
 import { createTransformGenerators } from '../../services/transform_generators';
 import { DefaultSummaryTransformGenerator } from '../../services/summary_transform_generator/summary_transform_generator';
 import { executeWithErrorHandler } from '../../errors';
-import { SavedObjectsClient } from '@kbn/core/server';
 import {
   CreateSLO,
   DefaultSummaryTransformManager,

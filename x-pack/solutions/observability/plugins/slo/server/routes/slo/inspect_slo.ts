@@ -6,8 +6,8 @@
  */
 
 import { createSLOParamsSchema } from '@kbn/slo-schema';
-import { executeWithErrorHandler } from '../../errors';
 import { SavedObjectsClient } from '@kbn/core/server';
+import { executeWithErrorHandler } from '../../errors';
 import {
   CreateSLO,
   DefaultSummaryTransformManager,
