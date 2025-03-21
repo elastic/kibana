@@ -5,5 +5,12 @@
  * 2.0.
  */
 
-export { getConnectorList } from './get_connector_list';
-export { createBuilder } from './so_filters';
+export class WorkchatError extends Error {
+  constructor(message: string, public readonly statusCode = 500) {
+    super(message);
+  }
+}
+
+export const isWorkChatError = (err: unknown): err is WorkchatError => {
+  return err instanceof WorkchatError;
+};

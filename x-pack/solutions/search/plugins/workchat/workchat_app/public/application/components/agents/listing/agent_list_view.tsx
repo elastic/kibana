@@ -21,6 +21,8 @@ export const AgentListView: React.FC<AgentListViewProps> = ({ agents }) => {
   const columns: Array<EuiBasicTableColumn<Agent>> = [
     { field: 'name', name: 'Name' },
     { field: 'description', name: 'Description' },
+    { field: 'user.name', name: 'Created by' },
+    { field: 'public', name: 'Public' },
     {
       name: 'Actions',
       actions: [

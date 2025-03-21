@@ -41,6 +41,7 @@ export const HomeAgentSection: React.FC<{}> = () => {
       },
     },
     { field: 'description', name: 'Description' },
+    { field: 'user.name', name: 'Created by' },
   ];
 
   return (

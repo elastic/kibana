@@ -160,7 +160,7 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
       path: '/internal/workchat/integrations/{integrationId}',
       security: {
         authz: {
-          requiredPrivileges: [apiCapabilities.useWorkchat],
+          requiredPrivileges: [apiCapabilities.manageWorkchat],
         },
       },
       validate: {

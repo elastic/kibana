@@ -12,6 +12,8 @@ import {
   conversationTypeName,
   type ConversationAttributes,
 } from '../../saved_objects/conversations';
+import { createBuilder } from '../../utils/so_filters';
+import { WorkchatError } from '../../errors';
 import type { ClientUser } from './types';
 import { savedObjectToModel, createRequestToRaw, updateToAttributes } from './convert_model';
 
@@ -34,8 +36,6 @@ export interface ConversationClient {
   update(conversationId: string, fields: ConversationUpdatableFields): Promise<Conversation>;
 }
 
-const attributesPath = `${conversationTypeName}.attributes`;
-
 export class ConversationClientImpl implements ConversationClient {
   private readonly client: SavedObjectsClientContract;
   private readonly user: ClientUser;
@@ -49,11 +49,13 @@ export class ConversationClientImpl implements ConversationClient {
   }
 
   async list(options: ConversationListOptions = {}): Promise<Conversation[]> {
-    let filter = `${attributesPath}.user_id: ${this.user.id}`;
-    if (options.agentId) {
-      filter += ` AND ${attributesPath}.agent_id: ${options.agentId}`;
-    }
-
+    const builder = createBuilder(conversationTypeName);
+    const filter = builder
+      .and(
+        builder.equals('user_id', this.user.id),
+        ...(options.agentId ? [builder.equals('agent_id', options.agentId)] : [])
+      )
+      .toKQL();
     const { saved_objects: results } = await this.client.find<ConversationAttributes>({
       type: conversationTypeName,
       filter,
@@ -112,13 +114,21 @@ export class ConversationClientImpl implements ConversationClient {
   }: {
     conversationId: string;
   }): Promise<SavedObject<ConversationAttributes>> {
+    const builder = createBuilder(conversationTypeName);
+    const filter = builder
+      .and(
+        builder.equals('user_id', this.user.id),
+        builder.equals('conversation_id', conversationId)
+      )
+      .toKQL();
+
     const { saved_objects: results } = await this.client.find<ConversationAttributes>({
       type: conversationTypeName,
-      filter: `${conversationTypeName}.attributes.user_id: ${this.user.id} AND ${conversationTypeName}.attributes.conversation_id: ${conversationId}`,
+      filter,
     });
     if (results.length > 0) {
       return results[0];
     }
-    throw new Error(`Conversation ${conversationId} not found`);
+    throw new WorkchatError(`Conversation ${conversationId} not found`, 404);
   }
 }
