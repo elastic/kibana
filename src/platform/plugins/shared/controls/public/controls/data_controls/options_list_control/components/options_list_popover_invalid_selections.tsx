@@ -12,7 +12,6 @@ import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiScreenReaderOnly,
   EuiSelectable,
   EuiSelectableOption,
@@ -68,14 +67,6 @@ export const OptionsListPopoverInvalidSelections = () => {
         data-test-subj="optionList__invalidSelectionLabel"
       >
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon
-              type="warning"
-              color="warning"
-              title={OptionsListStrings.popover.getInvalidSelectionScreenReaderText()}
-              size="s"
-            />
-          </EuiFlexItem>
           <EuiFlexItem>
             <label>
               {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(invalidSelections.size)}
