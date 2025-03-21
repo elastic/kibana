@@ -168,9 +168,10 @@ function getStateFromParams(params: LensAppLocatorParams): MainHistoryLocationSt
       Object.entries(params.datasourceStates).map(([id, { state }]) => [id, state])
     ) as Record<string, { state: unknown }> & SerializableRecord,
     references: params.references,
-    dataViewSpecs: params.dataViewSpecs,
   };
-
+  if (params.dataViewSpecs) {
+    outputState.dataViewSpecs = params.dataViewSpecs;
+  }
   return outputState;
 }
 
