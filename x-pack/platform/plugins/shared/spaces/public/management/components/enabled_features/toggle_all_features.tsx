@@ -49,13 +49,14 @@ const options: ToggleOption[] = [
 
 const ToggleButton = ({ onClick }: { onClick: () => void }) => {
   const { euiTheme } = useEuiTheme();
-  const styles = {
-    changeAllLink: css({
-      marginLeft: euiTheme.size.s,
-    }),
-  };
+
   return (
-    <EuiLink onClick={onClick} css={styles.changeAllLink}>
+    <EuiLink
+      onClick={onClick}
+      css={css`
+        margin-left: ${euiTheme.size.s};
+      `}
+    >
       <FormattedMessage
         id="xpack.spaces.management.toggleAllFeaturesLink"
         defaultMessage="(change all)"
