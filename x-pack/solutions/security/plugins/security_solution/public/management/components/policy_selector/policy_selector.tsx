@@ -6,12 +6,14 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import type { EuiFieldSearchProps } from '@elastic/eui';
 import {
-  EuiSelectable,
   type EuiSelectableProps,
   type EuiSelectableOption,
+  type EuiFieldSearchProps,
+  EuiSelectable,
+  EuiEmptyPrompt,
   EuiCheckbox,
+  EuiSpacer,
   htmlIdGenerator,
   EuiPanel,
   EuiPagination,
@@ -160,7 +162,6 @@ export interface PolicySelectorProps {
 export const PolicySelector = memo<PolicySelectorProps>(
   ({
     queryOptions: {
-      // TODO:PT define central `const` for this and refactor other areas that currently use it
       kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
       sortField = 'name',
       sortOrder = 'asc',
@@ -178,8 +179,6 @@ export const PolicySelector = memo<PolicySelectorProps>(
     additionalListItems = [],
     'data-test-subj': dataTestSubj,
   }) => {
-    // TODO:PT customise the no options panel
-
     const toasts = useToasts();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { getAppUrl } = useAppUrl();
@@ -349,6 +348,25 @@ export const PolicySelector = memo<PolicySelectorProps>(
       view,
     ]);
 
+    const noPoliciesFoundEmptyState = useMemo(() => {
+      return (
+        <>
+          <EuiSpacer size="m" />
+          <EuiEmptyPrompt
+            title={<h3>{'No policies found'}</h3>}
+            titleSize="s"
+            paddingSize="m"
+            color="subdued"
+            body={
+              userSearchValue ? (
+                <EuiText size="s">{'Your search criteria did not match any policy'}</EuiText>
+              ) : null
+            }
+          />
+        </>
+      );
+    }, [userSearchValue]);
+
     const isCustomOption = useCallback((option: EuiSelectableOption) => {
       // @ts-expect-error
       return option['data-type'] === 'customItem';
@@ -432,25 +450,36 @@ export const PolicySelector = memo<PolicySelectorProps>(
 
     const onSelectUnselectAllClickHandler = useCallback(
       (ev: React.MouseEvent<HTMLButtonElement>) => {
-        // TODO:PT should we also apply this action to the custom item (additionalItems)?
-
         const isSelectAll = ev.currentTarget.value === 'selectAll';
         const policiesToSelect: string[] = [];
         const policiesToUnSelect: string[] = [];
+        const updatedAdditionalItems: AdditionalListItemProps[] = [];
 
         for (const option of selectableOptions) {
-          if (!isCustomOption(option)) {
-            if (isSelectAll) {
+          if (isSelectAll) {
+            if (!isCustomOption(option)) {
               policiesToSelect.push(option.policy.id);
             } else {
+              updatedAdditionalItems.push({
+                ...(additionalListItems.find((item) => item.label === option.label) ?? option),
+                checked: 'on',
+              });
+            }
+          } else {
+            if (!isCustomOption(option)) {
               policiesToUnSelect.push(option.policy.id);
+            } else {
+              updatedAdditionalItems.push({
+                ...(additionalListItems.find((item) => item.label === option.label) ?? option),
+                checked: 'off',
+              });
             }
           }
         }
 
         onChange(
           getUpdatedSelectedPolicyIds(policiesToSelect, policiesToUnSelect),
-          additionalListItems
+          updatedAdditionalItems
         );
       },
       [
@@ -580,6 +609,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
               isLoading={isLoading}
               height="full"
               data-test-subj={getTestId('list')}
+              emptyMessage={noPoliciesFoundEmptyState}
             >
               {listBuilderCallback}
             </EuiSelectable>
