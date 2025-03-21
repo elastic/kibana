@@ -6,11 +6,9 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import type { EuiFieldSearchProps } from '@elastic/eui';
+import type { EuiButtonEmptyProps, EuiFieldSearchProps } from '@elastic/eui';
 import {
   EuiSelectable,
-  useEuiTheme,
-  EuiButtonEmpty,
   type EuiSelectableProps,
   type EuiSelectableOption,
   EuiCheckbox,
@@ -20,6 +18,9 @@ import {
   EuiProgress,
   EuiFieldSearch,
   EuiFlexGroup,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiToolTip,
   EuiFlexItem,
   EuiText,
 } from '@elastic/eui';
@@ -49,7 +50,6 @@ const PolicySelectorContainer = styled.div<{ height?: string }>`
   }
 
   .body-container {
-    height: ${(props) => props.height ?? '225px'};
     position: relative;
     border-top: none;
     border-bottom: none;
@@ -61,18 +61,30 @@ const PolicySelectorContainer = styled.div<{ height?: string }>`
     border-top-right-radius: 0;
   }
 
+  .list-container {
+    height: ${(props) => props.height ?? '225px'};
+    position: relative;
+  }
+
   .searchbar {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
   }
+
   .policy-name .euiSelectableListItem__text {
     text-decoration: none !important;
     color: ${({ theme }) => theme.euiTheme.colors.textParagraph} !important;
   }
+
   .euiSelectableList {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
     border-top-width: 0;
+  }
+
+  .border-right {
+    border-right: ${({ theme }) => theme.euiTheme.border.thin};
+    padding-right: ${({ theme }) => theme.euiTheme.size.s};
   }
 `;
 
@@ -168,7 +180,6 @@ export const PolicySelector = memo<PolicySelectorProps>(
   }) => {
     // TODO:PT customise the no options panel
 
-    const { euiTheme } = useEuiTheme();
     const toasts = useToasts();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { getAppUrl } = useAppUrl();
@@ -338,6 +349,11 @@ export const PolicySelector = memo<PolicySelectorProps>(
       view,
     ]);
 
+    const isCustomOption = useCallback((option: EuiSelectableOption) => {
+      // @ts-expect-error
+      return option['data-type'] === 'customItem';
+    }, []);
+
     const listBuilderCallback = useCallback<NonNullable<EuiSelectableProps['children']>>(
       (list, _search) => {
         return <>{list}</>;
@@ -345,12 +361,22 @@ export const PolicySelector = memo<PolicySelectorProps>(
       []
     );
 
+    const getUpdatedSelectedPolicyIds = useCallback(
+      (addToList: string[], removeFromList: string[]) => {
+        return Array.from(
+          new Set(
+            selectedPolicyIds.filter((id) => !removeFromList.includes(id)).concat(...addToList)
+          )
+        );
+      },
+      [selectedPolicyIds]
+    );
+
     const handleOnPolicySelectChange = useCallback<
       Required<EuiSelectableProps<OptionPolicyData>>['onChange']
     >(
-      (updatedOptions, _ev, changedOption) => {
-        // @ts-expect-error
-        const isChangedOptionCustom = changedOption['data-type'] === 'customItem';
+      (_updatedOptions, _ev, changedOption) => {
+        const isChangedOptionCustom = isCustomOption(changedOption);
         const updatedPolicyIds = !isChangedOptionCustom
           ? changedOption.checked === 'on'
             ? selectedPolicyIds.concat(changedOption.policy.id)
@@ -372,7 +398,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
 
         return onChange(updatedPolicyIds, updatedAdditionalItems);
       },
-      [additionalListItems, onChange, selectedPolicyIds]
+      [additionalListItems, isCustomOption, onChange, selectedPolicyIds]
     );
 
     const onPageClickHandler: Required<EuiPaginationProps>['onPageClick'] = useCallback(
@@ -404,6 +430,38 @@ export const PolicySelector = memo<PolicySelectorProps>(
       setView((prevState) => (prevState === 'selected-list' ? 'full-list' : 'selected-list'));
     }, []);
 
+    const onSelectUnselectAllClickHandler: Required<EuiButtonEmptyProps>['onClick'] = useCallback(
+      (ev) => {
+        // TODO:PT should we also apply this action to the custom item (additionalItems)?
+
+        const isSelectAll = ev.currentTarget.value === 'selectAll';
+        const policiesToSelect: string[] = [];
+        const policiesToUnSelect: string[] = [];
+
+        for (const option of selectableOptions) {
+          if (!isCustomOption(option)) {
+            if (isSelectAll) {
+              policiesToSelect.push(option.policy.id);
+            } else {
+              policiesToUnSelect.push(option.policy.id);
+            }
+          }
+        }
+
+        onChange(
+          getUpdatedSelectedPolicyIds(policiesToSelect, policiesToUnSelect),
+          additionalListItems
+        );
+      },
+      [
+        additionalListItems,
+        getUpdatedSelectedPolicyIds,
+        isCustomOption,
+        onChange,
+        selectableOptions,
+      ]
+    );
+
     useEffect(() => {
       if (error) {
         toasts.addError(error, {
@@ -426,34 +484,47 @@ export const PolicySelector = memo<PolicySelectorProps>(
         <EuiPanel paddingSize="s" hasShadow={false} hasBorder className="header-container">
           <EuiFlexGroup gutterSize="m" alignItems="center">
             <EuiFlexItem>
-              <EuiFieldSearch
-                placeholder={i18n.translate(
-                  'xpack.securitySolution.policySelector.searchbarPlaceholder',
-                  { defaultMessage: 'Search policies' }
-                )}
-                value={userSearchValue}
-                onSearch={onSearchHandler}
-                onChange={onSearchInputChangeHandler}
-                incremental={false}
-                disabled={view === 'selected-list'}
-                isClearable
-                fullWidth
-                compressed
-              />
+              <EuiToolTip
+                content={
+                  view === 'selected-list' ? (
+                    <FormattedMessage
+                      id="xpack.securitySolution.policySelector.searchbarTooltipMessage"
+                      defaultMessage="Search is not available when viewing selected policies"
+                    />
+                  ) : null
+                }
+              >
+                <EuiFieldSearch
+                  placeholder={i18n.translate(
+                    'xpack.securitySolution.policySelector.searchbarPlaceholder',
+                    { defaultMessage: 'Search policies' }
+                  )}
+                  value={userSearchValue}
+                  onSearch={onSearchHandler}
+                  onChange={onSearchInputChangeHandler}
+                  incremental={false}
+                  disabled={view === 'selected-list'}
+                  isClearable
+                  fullWidth
+                  compressed
+                />
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
+              <EuiButton
                 iconType="filter"
                 size="s"
                 onClick={viewSelectedOnClickHandler}
                 disabled={selectedCount === 0}
+                color="text"
+                fill={view === 'selected-list'}
               >
                 <FormattedMessage
                   id="xpack.securitySolution.policySelector.selectedCount"
                   defaultMessage="{count} selected"
                   values={{ count: selectedCount }}
                 />
-              </EuiButtonEmpty>
+              </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
@@ -461,28 +532,63 @@ export const PolicySelector = memo<PolicySelectorProps>(
         <EuiPanel paddingSize="s" hasShadow={false} hasBorder className="body-container">
           {isFetching && <EuiProgress size="xs" color="accent" position="absolute" />}
 
-          <EuiSelectable<OptionPolicyData>
-            options={selectableOptions}
-            listProps={listProps}
-            onChange={handleOnPolicySelectChange}
-            searchable={false}
-            singleSelection={singleSelection}
-            isLoading={isLoading}
-            height="full"
-            data-test-subj={getTestId('list')}
-          >
-            {listBuilderCallback}
-          </EuiSelectable>
+          {selectableOptions.length > 0 && (
+            <EuiPanel
+              paddingSize="xs"
+              hasShadow={false}
+              hasBorder={false}
+              css={css`
+                padding-top: 0 !important;
+              `}
+            >
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false} className="border-right">
+                  <EuiButtonEmpty
+                    size="xs"
+                    value="selectAll"
+                    onClick={onSelectUnselectAllClickHandler}
+                  >
+                    <FormattedMessage
+                      id="xpack.securitySolution.policySelector.selectAll"
+                      defaultMessage="Select all"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="xs"
+                    value="unSelectAll"
+                    onClick={onSelectUnselectAllClickHandler}
+                  >
+                    <FormattedMessage
+                      id="xpack.securitySolution.policySelector.unSelectAll"
+                      defaultMessage="Un-select all"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          )}
+
+          <div className="list-container">
+            <EuiSelectable<OptionPolicyData>
+              options={selectableOptions}
+              listProps={listProps}
+              onChange={handleOnPolicySelectChange}
+              searchable={false}
+              singleSelection={singleSelection}
+              isLoading={isLoading}
+              height="full"
+              data-test-subj={getTestId('list')}
+            >
+              {listBuilderCallback}
+            </EuiSelectable>
+          </div>
         </EuiPanel>
 
         <EuiPanel paddingSize="s" hasShadow={false} hasBorder className="footer-container">
           <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
-            <EuiFlexItem
-              css={css`
-                border-right: ${euiTheme.border.thin};
-                padding-right: ${euiTheme.size.s};
-              `}
-            >
+            <EuiFlexItem className="border-right">
               <EuiText size="s">
                 <FormattedMessage
                   id="xpack.securitySolution.policySelector.totalPoliciesFound"
