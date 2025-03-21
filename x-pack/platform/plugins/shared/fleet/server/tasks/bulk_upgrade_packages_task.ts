@@ -122,7 +122,7 @@ async function runTask({
       if (abortController.signal.aborted) {
         throw new Error('Task was aborted');
       }
-      await installPackage({
+      const installResult = await installPackage({
         spaceId,
         authorizationHeader,
         installSource: 'registry', // Upgrade can only happens from the registry,
@@ -132,6 +132,10 @@ async function runTask({
         force,
         prerelease,
       });
+
+      if (installResult.error) {
+        throw installResult.error;
+      }
 
       if (upgradePackagePolicies) {
         await bulkUpgradePackagePolicies({
@@ -173,6 +177,7 @@ async function bulkUpgradePackagePolicies({
 
   if (policyIdsToUpgrade.items.length) {
     await packagePolicyService.bulkUpgrade(savedObjectsClient, esClient, policyIdsToUpgrade.items);
+    //  Todo error handling
   }
 }
 

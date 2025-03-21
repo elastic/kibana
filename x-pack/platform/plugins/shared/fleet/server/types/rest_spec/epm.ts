@@ -371,7 +371,18 @@ export const BulkInstallPackagesFromRegistryResponseSchema = schema.object({
 
 export const BulkUpgradePackagesResponseSchema = schema.object({ taskId: schema.string() });
 
-export const GetOneBulkUpgradePackagesResponseSchema = schema.object({ status: schema.string() });
+export const GetOneBulkUpgradePackagesResponseSchema = schema.object({
+  status: schema.string(),
+  error: schema.maybe(schema.object({ message: schema.string() })),
+  results: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        success: schema.boolean(),
+        error: schema.maybe(schema.object({ message: schema.string() })),
+      })
+    )
+  ),
+});
 
 export const DeletePackageResponseSchema = schema.object({
   items: schema.arrayOf(AssetReferenceSchema),

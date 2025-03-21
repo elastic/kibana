@@ -49,7 +49,7 @@ export const postBulkUpgradePackagesHandler: FleetRequestHandler<
   );
   if (nonInstalledPackages.length) {
     throw new FleetError(
-      `Cannot upgrade non installed packages ${nonInstalledPackages.join(', ')}`
+      `Cannot upgrade non installed packages: ${nonInstalledPackages.join(', ')}`
     );
   }
 
@@ -77,9 +77,10 @@ export const getOneBulkUpgradePackagesHandler: FleetRequestHandler<
   }
 
   const results = await getBulkUpgradeTaskResults(taskManagerStart, request.params.taskId);
-
   const body: GetOneBulkUpgradePackagesResponse = {
     status: results.status,
+    error: results.error,
+    results: results.results,
   };
   return response.ok({ body });
 };
