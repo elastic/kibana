@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { ESQLControlVariable } from '@kbn/esql-types';
+import { monaco } from '@kbn/monaco';
 import {
   getIndexPatternFromESQLQuery,
   getESQLResults,
@@ -60,6 +61,7 @@ interface ValueControlFormProps {
   onEditControl: (state: ESQLControlState) => void;
   onCancelControl?: () => void;
   initialState?: ESQLControlState;
+  cursorPosition?: monaco.Position;
 }
 
 const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
@@ -74,14 +76,15 @@ export function ValueControlForm({
   closeFlyout,
   onCreateControl,
   onEditControl,
+  cursorPosition,
 }: ValueControlFormProps) {
   const isMounted = useMountedState();
   const valuesField = useMemo(() => {
     if (variableType === ESQLVariableType.VALUES) {
-      return getValuesFromQueryField(queryString);
+      return getValuesFromQueryField(queryString, cursorPosition);
     }
     return null;
-  }, [variableType, queryString]);
+  }, [variableType, queryString, cursorPosition]);
   const suggestedVariableName = useMemo(() => {
     const existingVariables = new Set(
       esqlVariables
