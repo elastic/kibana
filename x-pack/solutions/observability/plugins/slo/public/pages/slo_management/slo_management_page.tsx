@@ -66,7 +66,7 @@ export function SloManagementPage() {
       data-test-subj="managementPage"
       pageHeader={{
         pageTitle: i18n.translate('xpack.slo.managementPage.pageTitle', {
-          defaultMessage: 'SLOs Management',
+          defaultMessage: 'SLO Management',
         }),
       }}
     >
