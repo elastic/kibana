@@ -97,7 +97,10 @@ export const withRiskEnginePrivilegeCheck = <P, Q, B>(
   ) => {
     const [_, { security }] = await getStartServices();
     const privileges = await getUserRiskEnginePrivileges(request, security);
-    if (!privileges.has_all_required) {
+    if (
+      !privileges.has_all_required &&
+      !privileges.privileges.elasticsearch.cluster?.manage_transform
+    ) {
       const siemResponse = buildSiemResponse(response);
       return siemResponse.error({
         statusCode: 403,

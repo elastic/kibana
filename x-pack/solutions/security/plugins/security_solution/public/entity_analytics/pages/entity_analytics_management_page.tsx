@@ -51,7 +51,6 @@ export const EntityAnalyticsManagementPage = () => {
   const { addSuccess, addError } = useAppToasts();
   const userCanRunEngine =
     riskEnginePrivileges?.privileges?.elasticsearch?.cluster?.manage_transform || false;
-  const runEngineBtnIsDisabled = !currentRiskEngineStatus || isLoading || !userCanRunEngine;
 
   const handleRunEngineClick = async () => {
     setIsLoading(true);
@@ -86,6 +85,9 @@ export const EntityAnalyticsManagementPage = () => {
   const { status, runAt } = riskEngineStatus?.risk_engine_task_status || {};
 
   const isRunning = status === 'running' || (!!runAt && new Date(runAt) < new Date());
+
+  const runEngineBtnIsDisabled =
+    !currentRiskEngineStatus || isLoading || !userCanRunEngine || isRunning;
 
   const formatTimeFromNow = (time: string | undefined): string => {
     if (!time) {
