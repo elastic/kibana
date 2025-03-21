@@ -121,6 +121,8 @@ export class SyntheticsServices {
     stepIndex = 1,
     locationName,
     configId,
+    tlsNotBefore,
+    tlsNotAfter,
   }: {
     monitorId?: string;
     docType?: 'summaryUp' | 'summaryDown' | 'journeyStart' | 'journeyEnd' | 'stepEnd';
@@ -130,6 +132,8 @@ export class SyntheticsServices {
     stepIndex?: number;
     locationName?: string;
     configId?: string;
+    tlsNotBefore?: string;
+    tlsNotAfter?: string;
   } = {}) {
     const getService = this.params.getService;
     const es: Client = getService('es');
@@ -150,6 +154,8 @@ export class SyntheticsServices {
       },
       configId,
       monitorId: monitorId ?? configId,
+      tlsNotAfter,
+      tlsNotBefore,
     };
 
     switch (docType) {

@@ -6,6 +6,7 @@
  */
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
+import { RetryService } from '@kbn/ftr-common-functional-services';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
 import { SyntheticsServices } from '../services/synthetics_services';
 
@@ -13,8 +14,7 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
 
   const services = new SyntheticsServices(params);
-
-  const firstCheckTime = new Date().toISOString();
+  const retry: RetryService = params.getService('retry');
 
   const tlsRuleName = 'synthetics-e2e-monitor-tls-rule';
 
@@ -43,7 +43,14 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
       configId,
       { tls: { enabled: true } }
     );
-    await services.addTestSummaryDocument({ timestamp: firstCheckTime, configId });
+    const tomorrowDate = new Date();
+    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+    // Mocking a test summary document for the created monitor with a TLS certificate that expires tomorrow
+    await services.addTestSummaryDocument({
+      configId,
+      tlsNotAfter: tomorrowDate.toISOString(),
+      tlsNotBefore: new Date().toISOString(),
+    });
   });
 
   step('Should open the create TLS rule flyout', async () => {
@@ -53,6 +60,19 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
     await page.getByTestId('createNewTLSRule').click();
 
     await expect(page.getByTestId('addRuleFlyoutTitle')).toBeVisible();
+  });
+
+  step('Should filter monitors using the KQL filter bar', async () => {
+    // Using the KQL filter to search for a monitor type of "tcp", 0 existing monitors should be found because the type of the test monitor is 'http'
+    await page.fill('[data-test-subj="queryInput"]', `monitor.type: "tcp" `);
+    await page.keyboard.press('Enter');
+    await expect(page.getByTestId('syntheticsRuleVizMonitorQueryIDsButton')).toHaveText(
+      '0 existing monitors'
+    );
+
+    // Set it back to empty string
+    await page.fill('[data-test-subj="queryInput"]', '');
+    await page.keyboard.press('Enter');
   });
 
   step('Should filter monitors by type', async () => {
@@ -65,15 +85,6 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
     );
   });
 
-  step('Should filter monitors using the KQL filter bar', async () => {
-    // Using the KQL filter to search for a monitor type of "tcp", 0 existing monitors should be found because the type of the test monitor is 'http'
-    await page.fill('[data-test-subj="queryInput"]', `monitor.type: "tcp" `);
-    await page.keyboard.press('Enter');
-    await expect(page.getByTestId('syntheticsRuleVizMonitorQueryIDsButton')).toHaveText(
-      '0 existing monitors'
-    );
-  });
-
   step('Should create TLS rule', async () => {
     // This is to check that when the user clicks on the "Create new TLS rule" button, a POST request is made to the API
     let requestMade = false;
@@ -83,6 +94,8 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
       }
     });
 
+    // Setting the rule schedule to 1 second so that the alert will be created quickly
+    await page.getByTestId('ruleScheduleUnitInput').selectOption('second');
     await page.getByTestId('ruleFormStep-details').click();
     await page.waitForSelector('[data-test-subj="ruleFlyoutFooterSaveButton"]');
     await page.fill('[data-test-subj="ruleDetailsNameInput"]', tlsRuleName);
@@ -95,5 +108,14 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
   step('Verify rule creation', async () => {
     await syntheticsApp.goToRulesPage();
     await page.waitForSelector(`text='${tlsRuleName}'`);
+  });
+
+  step('Verify alert creation', async () => {
+    await page.getByTestId('observability-nav-observability-overview-alerts').click();
+
+    await retry.tryForTime(5 * 1000, async () => {
+      await page.getByTestId('querySubmitButton').click();
+      await expect(page.getByText(tlsRuleName)).toBeVisible();
+    });
   });
 });
