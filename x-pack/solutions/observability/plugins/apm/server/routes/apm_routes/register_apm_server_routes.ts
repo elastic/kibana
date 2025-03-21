@@ -211,7 +211,7 @@ export function registerRoutes({
           opts.body.attributes.data = error?.data;
         }
 
-        if (opts.statusCode === 500) {
+        if (opts.statusCode >= 500) {
           logger.error(error);
         }
 
