@@ -6,10 +6,10 @@
  */
 
 import { keys } from 'lodash';
-import { Alert } from '../../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../../types';
+import type { Alert } from '../../alert';
+import type { AlertInstanceState, AlertInstanceContext } from '../../types';
 import { updateFlappingHistory } from './flapping_utils';
-import { RulesSettingsFlappingProperties } from '../../../common/rules_settings';
+import type { RulesSettingsFlappingProperties } from '../../../common/rules_settings';
 
 export function setFlappingHistoryAndTrackedAlerts<
   State extends AlertInstanceState,
