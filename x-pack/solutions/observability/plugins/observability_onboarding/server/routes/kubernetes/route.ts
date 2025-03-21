@@ -16,12 +16,15 @@ import { createObservabilityOnboardingServerRoute } from '../create_observabilit
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
+import { createManagedOtlpServiceApiKey } from '../../lib/api_key/create_managed_otlp_service_api_key';
+import { getManagedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
 
 export interface CreateKubernetesOnboardingFlowRouteResponse {
   apiKeyEncoded: string;
   onboardingId: string;
   elasticsearchUrl: string;
   elasticAgentVersionInfo: ElasticAgentVersionInfo;
+  managedOtlpServiceUrl: string;
 }
 
 export interface HasKubernetesDataRouteResponse {
@@ -40,14 +43,8 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
         'Authorization is checked by custom logic using Elasticsearch client and by the Package Service client',
     },
   },
-  async handler({
-    context,
-    request,
-    params,
-    plugins,
-    services,
-    kibanaVersion,
-  }): Promise<CreateKubernetesOnboardingFlowRouteResponse> {
+  async handler(resources): Promise<CreateKubernetesOnboardingFlowRouteResponse> {
+    const { context, request, params, plugins, services, kibanaVersion, config } = resources;
     const {
       elasticsearch: { client },
     } = await context.core;
@@ -62,9 +59,16 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
 
     const fleetPluginStart = await plugins.fleet.start();
     const packageClient = fleetPluginStart.packageService.asScoped(request);
+    const apiKeyPromise =
+      config.serverless.enabled && params.body.pkgName === 'kubernetes_otel'
+        ? createManagedOtlpServiceApiKey(
+            client.asCurrentUser,
+            `ingest-otel-k8s-${new Date().toISOString()}`
+          )
+        : createShipperApiKey(client.asCurrentUser, `${params.body.pkgName}_onboarding`, true);
 
     const [{ encoded: apiKeyEncoded }, elasticAgentVersionInfo] = await Promise.all([
-      createShipperApiKey(client.asCurrentUser, `${params.body.pkgName}_onboarding`, true),
+      apiKeyPromise,
       getAgentVersionInfo(fleetPluginStart, kibanaVersion),
       // System package is always required
       packageClient.ensureInstalledPackage({ pkgName: 'system' }),
@@ -85,6 +89,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
       apiKeyEncoded,
       elasticsearchUrl: elasticsearchUrlList.length > 0 ? elasticsearchUrlList[0] : '',
       elasticAgentVersionInfo,
+      managedOtlpServiceUrl: await getManagedOtlpServiceUrl(resources),
     };
   },
 });

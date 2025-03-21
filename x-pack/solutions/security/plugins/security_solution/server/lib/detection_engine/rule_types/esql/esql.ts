@@ -71,11 +71,6 @@ export const esqlExecutor = async ({
     exceptionFilter,
     unprocessedExceptions,
     ruleExecutionLogger,
-    spaceId,
-    mergeStrategy,
-    alertTimestampOverride,
-    publicBaseUrl,
-    intendedTimestamp,
     bulkCreate,
   } = sharedParams;
   const loggedRequests: RulePreviewLoggedRequest[] = [];
@@ -168,21 +163,6 @@ export const esqlExecutor = async ({
           completeRule.ruleParams.query
         );
 
-        const wrapHits = (events: Array<estypes.SearchHit<SignalSource>>) =>
-          wrapEsqlAlerts({
-            events,
-            spaceId,
-            completeRule,
-            mergeStrategy,
-            isRuleAggregating,
-            alertTimestampOverride,
-            ruleExecutionLogger,
-            publicBaseUrl,
-            tuple,
-            intendedTimestamp,
-            expandedFields,
-          });
-
         const syntheticHits: Array<estypes.SearchHit<SignalSource>> = results.map((document) => {
           const { _id, _version, _index, ...esqlResult } = document;
 
@@ -202,18 +182,9 @@ export const esqlExecutor = async ({
         if (isAlertSuppressionActive) {
           const wrapSuppressedHits = (events: Array<estypes.SearchHit<SignalSource>>) =>
             wrapSuppressedEsqlAlerts({
+              sharedParams,
               events,
-              spaceId,
-              completeRule,
-              mergeStrategy,
               isRuleAggregating,
-              alertTimestampOverride,
-              ruleExecutionLogger,
-              publicBaseUrl,
-              primaryTimestamp,
-              secondaryTimestamp,
-              tuple,
-              intendedTimestamp,
               expandedFields,
             });
 
@@ -240,7 +211,12 @@ export const esqlExecutor = async ({
             break;
           }
         } else {
-          const wrappedAlerts = wrapHits(syntheticHits);
+          const wrappedAlerts = wrapEsqlAlerts({
+            sharedParams,
+            events: syntheticHits,
+            isRuleAggregating,
+            expandedFields,
+          });
 
           const enrichAlerts = createEnrichEventsFunction({
             services,
