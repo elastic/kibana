@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { PromptContext } from '@kbn/elastic-assistant';
 import {
   AlertSummary,
@@ -15,7 +15,6 @@ import {
   Conversations,
   SuggestedPrompts,
 } from '@kbn/elastic-assistant';
-import { css } from '@emotion/react';
 import { DocumentDetailsProvider } from '../document_details/shared/context';
 import { HighlightedFields } from '../document_details/right/components/highlighted_fields';
 import { useKibana } from '../../common/lib/kibana';
@@ -30,6 +29,7 @@ import { FLYOUT_BODY_TEST_ID } from './test_ids';
 import { FlyoutHeader } from '../shared/components/flyout_header';
 import { DEFAULT_AI_CONNECTOR } from '../../../common/constants';
 import { UserAssetTableType } from '../../explore/users/store/model';
+import { AlertHeaderTitle } from '../document_details/right/components/alert_header_title';
 
 /**
  * Panel to be displayed in the document details expandable flyout right section
@@ -56,68 +56,51 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
     [getFieldsData]
   );
   const { uiSettings } = useKibana().services;
-  const { euiTheme } = useEuiTheme();
   // TODO will this be in non-serverless? because this value will not work if so
   const defaultConnectorId = uiSettings.get<string>(DEFAULT_AI_CONNECTOR);
   const timestamp = useMemo(() => getField(getFieldsData('@timestamp')) || '', [getFieldsData]);
 
   return (
     <>
-      <FlyoutNavigation flyoutIsExpandable={false} />
-      <FlyoutHeader>
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiIcon
-              color={'text'}
-              type={'warning'}
-              css={css`
-                margin: ${euiTheme.size.xs} 0;
-              `}
-              data-test-subj={`aiForSocTitleIcon`}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s" data-test-subj={`aiForSocTitleText`}>
-              <h3>{ruleName}</h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </FlyoutHeader>
-      <FlyoutBody data-test-subj={FLYOUT_BODY_TEST_ID}>
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem>
-            <AlertSummary
-              alertId={eventId}
-              defaultConnectorId={defaultConnectorId}
-              isContextReady={(dataFormattedForFieldBrowser ?? []).length > 0}
-              promptContext={promptContext}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <DocumentDetailsProvider
-              id={eventId}
-              indexName={indexName}
-              scopeId={UserAssetTableType.assetOkta}
-            >
+      <DocumentDetailsProvider
+        id={eventId}
+        indexName={indexName}
+        scopeId={UserAssetTableType.assetOkta}
+      >
+        <FlyoutNavigation flyoutIsExpandable={false} />
+        <FlyoutHeader>
+          <AlertHeaderTitle />
+        </FlyoutHeader>
+        <FlyoutBody data-test-subj={FLYOUT_BODY_TEST_ID}>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem>
+              <AlertSummary
+                alertId={eventId}
+                defaultConnectorId={defaultConnectorId}
+                isContextReady={(dataFormattedForFieldBrowser ?? []).length > 0}
+                promptContext={promptContext}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
               <HighlightedFields />
-            </DocumentDetailsProvider>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <AttackDiscoveryWidget id={eventId} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <Conversations id={eventId} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <SuggestedPrompts
-              getPromptContext={getPromptContext}
-              ruleName={ruleName}
-              timestamp={timestamp}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </FlyoutBody>
-      <PanelFooter />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <AttackDiscoveryWidget id={eventId} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <Conversations id={eventId} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SuggestedPrompts
+                getPromptContext={getPromptContext}
+                ruleName={ruleName}
+                timestamp={timestamp}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </FlyoutBody>
+        <PanelFooter />
+      </DocumentDetailsProvider>
     </>
   );
 });
