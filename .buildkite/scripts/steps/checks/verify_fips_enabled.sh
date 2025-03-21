@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source .buildkite/scripts/common/util.sh
+
 # shellcheck disable=SC2317
 function build_ready() {
   build_state=$(buildkite-agent step get "state" --step "build")
