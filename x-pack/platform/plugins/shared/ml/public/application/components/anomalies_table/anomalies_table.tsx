@@ -95,16 +95,19 @@ export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
       setShowRuleEditorFlyout(null);
     }, []);
 
-    useEffect(() => {
-      const expandedRowIds = Object.keys(itemIdToExpandedRowMap);
-      const expandedNotInData = expandedRowIds.find((rowId) => {
-        return !tableData.anomalies.some((anomaly) => anomaly.rowId === rowId);
-      });
+    useEffect(
+      function resetExpandedRowMap() {
+        const expandedRowIds = Object.keys(itemIdToExpandedRowMap);
+        const expandedNotInData = expandedRowIds.find((rowId) => {
+          return !tableData.anomalies.some((anomaly) => anomaly.rowId === rowId);
+        });
 
-      if (expandedNotInData !== undefined) {
-        setItemIdToExpandedRowMap({});
-      }
-    }, [itemIdToExpandedRowMap, tableData.anomalies]);
+        if (expandedNotInData !== undefined) {
+          setItemIdToExpandedRowMap({});
+        }
+      },
+      [itemIdToExpandedRowMap, tableData.anomalies]
+    );
 
     const isShowingAggregatedData = useMemo(() => {
       return tableData.interval !== 'second';
