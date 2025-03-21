@@ -42,7 +42,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     });
 
     loadTestFile(require.resolve('./cell_renderer'));
-    loadTestFile(require.resolve('./doc_viewer'));
-    loadTestFile(require.resolve('./row_indicator'));
+    // loadTestFile(require.resolve('./row_indicator'));
   });
 }

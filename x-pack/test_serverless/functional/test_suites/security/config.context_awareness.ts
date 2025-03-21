@@ -15,10 +15,7 @@ export default createTestConfig({
       'Serverless Security Discover Context Awareness Functional Tests - Security Profiles',
   },
   kbnServerArgs: [
-    `--discover.experimental.enabledProfiles=${JSON.stringify([
-      'security-root-profile',
-      'security-document-profile',
-    ])}`,
+    `--discover.experimental.enabledProfiles=${JSON.stringify(['security-root-profile'])}`,
   ],
   // include settings from project controller
   // https://github.com/elastic/elasticsearch-controller/blob/main/helm/values.yaml

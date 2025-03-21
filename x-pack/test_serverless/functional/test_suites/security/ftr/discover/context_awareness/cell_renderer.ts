@@ -18,6 +18,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const queryBar = getService('queryBar');
 
+  const defaultColumns = [
+    '@timestamp',
+    'kibana.alert.workflow_status',
+    'message',
+    'event.category',
+    'event.action',
+    'host.name',
+    'source.ip',
+    'destination.ip',
+    'user.name',
+  ];
+
   describe('security root profile', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsViewer();
@@ -43,9 +55,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await queryBar.setQuery('host.name: "siem-kibana"');
             await queryBar.clickQuerySubmitButton();
             await PageObjects.discover.waitUntilSearchingHasFinished();
-            await PageObjects.discover.dragFieldToTable('host.name');
             expect((await PageObjects.discover.getColumnHeaders()).join(', ')).to.be(
-              '@timestamp, host.name'
+              defaultColumns.join(', ')
             );
             // security host.name button
             const hostName = await testSubjects.findAll('host-details-button', 2500);
