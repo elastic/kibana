@@ -24,9 +24,7 @@ export const createObservabilityTracesSpanDocumentProfileProvider = ({
   isExperimental: true,
   profileId: OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID,
   profile: {
-    getDocViewer: createGetDocViewer('traces-*'),
-    // TODO add APM configured indexes instead of traces-*, currently blocked by https://github.com/elastic/kibana/issues/211414
-    // this will be handled in https://github.com/elastic/kibana/issues/213112
+    getDocViewer: createGetDocViewer(tracesContextService.getAllTracesIndexPattern() || ''),
   },
   resolve: ({ record, rootContext }) => {
     const isObservabilitySolutionView = rootContext.profileId === OBSERVABILITY_ROOT_PROFILE_ID;
