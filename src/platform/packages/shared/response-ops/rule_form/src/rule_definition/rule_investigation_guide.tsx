@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -64,7 +66,6 @@ import React, { useCallback, useState } from 'react';
 //     }),
 //   };
 // }
-
 export function InvestigationManager<T extends RuleTypeParams>({
   setRuleParams,
   value,
@@ -81,12 +82,12 @@ export function InvestigationManager<T extends RuleTypeParams>({
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiText>
-            <h3>
+            <strong>
               <FormattedMessage
                 id="xpack.observability.investigationManager.title"
                 defaultMessage="Investigation Guide"
               />
-            </h3>
+            </strong>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
