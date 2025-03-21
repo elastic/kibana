@@ -40,7 +40,6 @@ export function getSearchParamsFromRequest(
   // @ts-expect-error elasticsearch@9.0.0 `query` types don't match (it seems like it's been wrong here for a while)
   return {
     ...searchRequest,
-    ...(typeof trackTotalHits !== 'undefined' && { track_total_hits: trackTotalHits }),
     track_total_hits: trackTotalHits,
     index,
     ...(dataView?.getAllowHidden() && { expand_wildcards: 'all' }),
