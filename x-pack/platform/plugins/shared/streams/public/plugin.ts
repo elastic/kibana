@@ -12,7 +12,13 @@ import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { from, shareReplay, startWith } from 'rxjs';
 import { once } from 'lodash';
 import type { StreamsPublicConfig } from '../common/config';
-import { StreamsPluginClass, StreamsPluginSetup, StreamsPluginStart } from './types';
+import {
+  StreamsPluginClass,
+  StreamsPluginSetup,
+  StreamsPluginSetupDependencies,
+  StreamsPluginStart,
+  StreamsPluginStartDependencies,
+} from './types';
 import { StreamsRepositoryClient } from './api';
 
 export class Plugin implements StreamsPluginClass {
@@ -26,37 +32,32 @@ export class Plugin implements StreamsPluginClass {
     this.logger = context.logger.get();
   }
 
-  setup(core: CoreSetup<{}>, pluginSetup: {}): StreamsPluginSetup {
+  setup(core: CoreSetup, pluginSetup: StreamsPluginSetupDependencies): StreamsPluginSetup {
     this.repositoryClient = createRepositoryClient(core);
     return {
-      status$: createStatusObservable(this.logger, this.repositoryClient),
+      status$: createStreamsStatusObservable(pluginSetup),
     };
   }
 
-  start(core: CoreStart, pluginsStart: {}): StreamsPluginStart {
+  start(core: CoreStart, pluginsStart: StreamsPluginStartDependencies): StreamsPluginStart {
     return {
       streamsRepositoryClient: this.repositoryClient,
-      status$: createStatusObservable(this.logger, this.repositoryClient),
+      status$: createStreamsStatusObservable(pluginsStart),
     };
   }
 
   stop() {}
 }
 
-const createStatusObservable = once((logger: Logger, repositoryClient: StreamsRepositoryClient) => {
-  return from(
-    repositoryClient
-      .fetch('GET /api/streams/_status', {
-        signal: new AbortController().signal,
-      })
-      .then(
-        (response) => ({
-          status: response.enabled ? ('enabled' as const) : ('disabled' as const),
-        }),
-        (error) => {
-          logger.error(error);
-          return { status: 'unknown' as const };
-        }
-      )
-  ).pipe(startWith({ status: 'unknown' as const }), shareReplay(1));
-});
+const createStreamsStatusObservable = once(
+  (deps: StreamsPluginSetupDependencies | StreamsPluginStartDependencies) => {
+    return from([
+      {
+        status:
+          deps.cloud.isServerlessEnabled && deps.cloud.serverless.projectType === 'observability'
+            ? ('enabled' as const)
+            : ('disabled' as const),
+      },
+    ]).pipe(startWith({ status: 'disabled' as const }), shareReplay(1));
+  }
+);

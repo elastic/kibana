@@ -83,11 +83,11 @@ export const getStreamsStatusRoute = createServerRoute({
         'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
-  handler: async ({ request, getScopedClients }): Promise<{ enabled: boolean }> => {
+  handler: async ({ request, getScopedClients }): Promise<{ wiredStreamsEnabled: boolean }> => {
     const { streamsClient } = await getScopedClients({ request });
 
     return {
-      enabled: await streamsClient.isStreamsEnabled(),
+      wiredStreamsEnabled: await streamsClient.isStreamsEnabled(),
     };
   },
 });
