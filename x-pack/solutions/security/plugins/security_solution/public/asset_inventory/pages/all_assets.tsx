@@ -45,7 +45,6 @@ export const AllAssets = () => {
 
   const {
     data: chartData,
-    // error: fetchChartDataError,
     isFetching: isFetchingChartData,
     isLoading: isLoadingChartData,
   } = useFetchChartData({
@@ -53,20 +52,6 @@ export const AllAssets = () => {
     sort,
     enabled: !queryError,
   });
-
-  // if (error) {
-  //   return (
-  //     <>
-  //       {error && <ErrorCallout error={error} />}
-  //       {isEmptyResults && <EmptyState onResetFilters={onResetFilters} />}
-  //     </>
-  //   );
-  //   return <div>{error.toString()}</div>;
-  // }
-
-  // if (isEmptyResults) {
-  //   return <div>{'No data'}</div>;
-  // }
 
   return (
     <I18nProvider>
