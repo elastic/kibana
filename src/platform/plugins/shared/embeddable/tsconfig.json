@@ -23,6 +23,7 @@
     "@kbn/presentation-containers",
     "@kbn/react-kibana-mount",
     "@kbn/analytics",
+    "@kbn/ui-theme",
   ],
   "exclude": ["target/**/*"]
 }
