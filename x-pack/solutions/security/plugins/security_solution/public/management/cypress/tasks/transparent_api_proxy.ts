@@ -7,14 +7,7 @@
 
 import type { UsageRecord } from '@kbn/security-solution-serverless/server/types';
 
-export interface StartTransparentApiProxyOptions {
-  port?: number;
-  useCert?: boolean;
-}
-
-export const startTransparentApiProxy = (
-  options: StartTransparentApiProxyOptions
-): Cypress.Chainable<null> => {
+export const startTransparentApiProxy = (options: { port?: number }): Cypress.Chainable<null> => {
   return cy.task('startTransparentApiProxy', options);
 };
 

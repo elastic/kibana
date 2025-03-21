@@ -13,7 +13,6 @@ import DebugProxy from '@cypress/debugging-proxy';
 import { ES_CERT_PATH, ES_KEY_PATH } from '@kbn/dev-utils';
 import type { UsageRecord } from '@kbn/security-solution-serverless/server/types';
 import { setupStackServicesUsingCypressConfig } from './common';
-import { type StartTransparentApiProxyOptions } from '../tasks/transparent_api_proxy';
 
 export const transparentApiProxy = (
   on: Cypress.PluginEvents,
@@ -23,7 +22,7 @@ export const transparentApiProxy = (
   const interceptedRequestBody: UsageRecord[][] = [];
 
   on('task', {
-    startTransparentApiProxy: async (options: StartTransparentApiProxyOptions) => {
+    startTransparentApiProxy: async (options) => {
       const { log } = await setupStackServicesUsingCypressConfig(config);
 
       const port = options?.port || 3623;
@@ -31,18 +30,12 @@ export const transparentApiProxy = (
       log.debug(`[Transparent API] Starting transparent API proxy on port ${port}`);
 
       try {
-        const httpsOptions = options?.useCert
-          ? {
-              https: {
-                key: fs.readFileSync(ES_KEY_PATH),
-                cert: fs.readFileSync(ES_CERT_PATH),
-              },
-            }
-          : {};
-
         proxy = new DebugProxy({
           keepRequests: true,
-          ...httpsOptions,
+          https: {
+            key: fs.readFileSync(ES_KEY_PATH),
+            cert: fs.readFileSync(ES_CERT_PATH),
+          },
           onRequest: (_: string, req: IncomingMessage, res: ServerResponse) => {
             let body = '';
 
