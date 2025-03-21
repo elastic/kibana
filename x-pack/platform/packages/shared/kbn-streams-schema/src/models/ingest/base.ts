@@ -100,7 +100,9 @@ const ingestStreamDefinitionSchema: z.Schema<IngestStreamDefinition> = z.union([
   unwiredStreamDefinitionSchema,
 ]);
 
-const ingestStreamDefinitionSchemaBase: z.Schema<Omit<IngestStreamDefinition, 'name'>> = z.union([
+type IngestStreamDefinitionBase = WiredStreamDefinitionBase | UnwiredStreamDefinitionBase;
+
+const ingestStreamDefinitionSchemaBase: z.Schema<IngestStreamDefinitionBase> = z.union([
   wiredStreamDefinitionSchemaBase,
   unwiredStreamDefinitionSchemaBase,
 ]);
@@ -115,6 +117,7 @@ export {
   wiredStreamDefinitionSchema,
   wiredStreamDefinitionSchemaBase,
   type IngestStreamDefinition,
+  type IngestStreamDefinitionBase,
   type UnwiredIngest,
   type UnwiredStreamDefinition,
   type WiredIngest,
