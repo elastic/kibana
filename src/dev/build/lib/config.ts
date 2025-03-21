@@ -277,7 +277,9 @@ export class Config {
     return getPackages(this.repoRoot).filter((p) => !p.isDevOnly() && this.pluginFilter(p));
   }
 
-  getSolutionPluginsFromRepo(project: KibanaProject) {
-    return getPackages(this.repoRoot).filter((p) => p.group === project && this.pluginFilter(p));
+  getPrivateSolutionPackagesFromRepo(project: KibanaProject) {
+    return getPackages(this.repoRoot).filter(
+      (p) => p.group === project && p.visibility === 'private'
+    );
   }
 }
