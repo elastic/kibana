@@ -6,3 +6,4 @@
  */
 
 export * from './policy_selector';
+export * from './policy_selector_menu_button';
