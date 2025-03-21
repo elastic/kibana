@@ -465,6 +465,11 @@ export class AlertsClient<
             })
           );
         } else {
+          // skip writing the alert document if the number of consecutive
+          // active alerts is less than the rule alertDelay threshold
+          if (alert.getActiveCount() < this.options.rule.alertDelay) {
+            continue;
+          }
           activeAlertsToIndex.push(
             buildNewAlert<
               AlertData,
