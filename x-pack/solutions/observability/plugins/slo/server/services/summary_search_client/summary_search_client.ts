@@ -112,7 +112,11 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
       const finalTotal = total - (tempSummaryDocuments.length - tempSummaryDocumentsDeduped.length);
 
       const paginationResults = isCursorPagination(pagination)
-        ? { searchAfter: finalResults[finalResults.length - 1].sort, size: pagination.size }
+        ? {
+            // `sort` has unknown as types
+            searchAfter: finalResults[finalResults.length - 1].sort as Array<string | number>,
+            size: pagination.size,
+          }
         : pagination;
 
       return {

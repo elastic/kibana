@@ -314,7 +314,9 @@ describe('ES search strategy', () => {
         expect(mockRollupSearchCaller).toHaveBeenCalledWith(
           {
             index: 'foo-程',
-            ignore_unavailable: true,
+            querystring: {
+              ignore_unavailable: true,
+            },
             max_concurrent_shard_requests: undefined,
             timeout: '100ms',
             track_total_hits: true,
