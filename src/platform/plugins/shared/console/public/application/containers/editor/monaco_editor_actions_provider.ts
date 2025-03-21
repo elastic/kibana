@@ -661,7 +661,11 @@ export class MonacoEditorActionsProvider {
   /**
    * This function applies indentations to the request in the selected text.
    */
-  public async autoIndent() {
+  public async autoIndent(context: ContextValue) {
+    const {
+      services: { notifications },
+    } = context;
+    const { toasts } = notifications;
     const parsedRequests = await this.getSelectedParsedRequests();
     const selectionStartLineNumber = parsedRequests[0].startLineNumber;
     const selectionEndLineNumber = parsedRequests[parsedRequests.length - 1].endLineNumber;
@@ -679,7 +683,12 @@ export class MonacoEditorActionsProvider {
     const selectedText = this.getTextInRange(selectedRange);
     const allText = this.getTextInRange();
 
-    const autoIndentedText = getAutoIndentedRequests(parsedRequests, selectedText, allText);
+    const autoIndentedText = getAutoIndentedRequests(
+      parsedRequests,
+      selectedText,
+      allText,
+      (text) => toasts.addWarning(text)
+    );
 
     this.editor.executeEdits(AUTO_INDENTATION_ACTION_LABEL, [
       {

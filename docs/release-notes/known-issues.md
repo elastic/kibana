@@ -1,5 +1,5 @@
 ---
-navigation_title: "Kibana"
+navigation_title: "Known issues"
 ---
 
 # Kibana known issues
@@ -11,14 +11,13 @@ navigation_title: "Kibana"
 
 **Details**<br> Starting from version 9.0.0, HTTP/2 is the default protocol when TLS is enabled. This ensures improved performance and security. However, if HTTP/2 is not enabled or TLS is not configured, a deprecation warning will be added.
 
-For more information, refer to [#204384](https://github.com/elastic/kibana/pull/204384).
-
 **Impact**<br> Systems that have TLS enabled but don’t specify a protocol will start using HTTP/2 in 9.0.0. Systems that use HTTP/1 or don’t have TLS configured will get a deprecation warning.
 
 **Action**<br> Verify that TLS is properly configured by enabling it and providing valid certificates in the settings. Test your system to ensure that connections are established securely over HTTP/2.
 
 If your Kibana server is hosted behind a load balancer or reverse proxy we recommend testing your deployment configuration before upgrading to 9.0.
 
+View [#204384](https://github.com/elastic/kibana/pull/204384).
 ::::
 
 

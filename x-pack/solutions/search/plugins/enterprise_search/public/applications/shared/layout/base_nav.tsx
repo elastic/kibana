@@ -48,7 +48,7 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
       {
         'data-test-subj': 'searchSideNav-Indices',
         deepLink: {
-          link: 'management:index_management',
+          link: 'elasticsearchIndexManagement',
         },
         id: 'search_indices',
       },
@@ -119,6 +119,14 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
           shouldShowActiveForSubroutes: true,
         },
         id: 'synonyms',
+      },
+      {
+        'data-test-subj': 'searchSideNav-QueryRules',
+        deepLink: {
+          link: 'searchQueryRules',
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'searchQueryRules',
       },
     ],
     name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {
