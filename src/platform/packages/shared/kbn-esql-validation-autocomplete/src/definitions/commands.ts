@@ -19,6 +19,7 @@ import {
   ESQLCommandOption,
 } from '@kbn/esql-ast';
 import {
+  hasWildcard,
   isAssignment,
   isColumnItem,
   isFunctionItem,
@@ -26,6 +27,7 @@ import {
   isLiteralItem,
   isOptionItem,
   isSingleItem,
+  isSourceItem,
   noCaseCompare,
 } from '../shared/helpers';
 
@@ -525,31 +527,54 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [{ name: 'policyName', type: 'source', innerTypes: ['policy'] }],
     },
     suggest: suggestForEnrich,
-    validate: (command: ESQLCommand) => {
+    validate: (command: ESQLCommand, { policies }) => {
+      const messages: ESQLMessage[] = [];
+
+      const sources = command.args.filter(isSourceItem);
+      sources.forEach((source) => {
+        if (hasWildcard(source.name)) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'wildcardNotSupportedForCommand',
+              values: { command: 'ENRICH', value: source.name },
+              locations: source.location,
+            })
+          );
+        } else if (!policies.has(source.name)) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'unknownPolicy',
+              values: { name: source.name },
+              locations: source.location,
+            })
+          );
+        }
+      });
+
       const modeArg = command.args.find((arg) => isSingleItem(arg) && arg.type === 'mode') as
         | ESQLCommandMode
         | undefined;
 
       if (!modeArg) {
-        return [];
+        return messages;
       }
 
       const acceptedValues = ENRICH_MODES.map(({ name }) => '_' + name);
-      if (acceptedValues.some((value) => noCaseCompare(modeArg.text, value))) {
-        return [];
+      if (!acceptedValues.some((value) => noCaseCompare(modeArg.text, value))) {
+        messages.push(
+          getMessageFromId({
+            messageId: 'unsupportedMode',
+            values: {
+              command: 'ENRICH',
+              value: modeArg.text,
+              expected: acceptedValues.join(', '),
+            },
+            locations: modeArg.location,
+          })
+        );
       }
 
-      return [
-        getMessageFromId({
-          messageId: 'unsupportedMode',
-          values: {
-            command: 'ENRICH',
-            value: modeArg.text,
-            expected: acceptedValues.join(', '),
-          },
-          locations: modeArg.location,
-        }),
-      ];
+      return messages;
     },
   },
   {
