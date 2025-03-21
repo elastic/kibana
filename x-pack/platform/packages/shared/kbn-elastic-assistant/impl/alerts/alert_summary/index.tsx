@@ -27,6 +27,7 @@ interface Props {
   defaultConnectorId: string;
   isContextReady: boolean;
   promptContext: PromptContext;
+  showAnonymizedValues: boolean;
 }
 
 export const AlertSummary: FunctionComponent<Props> = ({
@@ -34,9 +35,16 @@ export const AlertSummary: FunctionComponent<Props> = ({
   defaultConnectorId,
   isContextReady,
   promptContext,
+  showAnonymizedValues,
 }) => {
   const { alertSummary, hasAlertSummary, fetchAISummary, isLoading, messageAndReplacements } =
-    useAlertSummary({ alertId, defaultConnectorId, isContextReady, promptContext });
+    useAlertSummary({
+      alertId,
+      defaultConnectorId,
+      isContextReady,
+      promptContext,
+      showAnonymizedValues,
+    });
   return (
     <>
       <EuiTitle size={'s'}>

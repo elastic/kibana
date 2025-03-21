@@ -21,6 +21,7 @@ import {
 import { css } from '@emotion/css';
 import React, { memo, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { Panel } from '../types';
 import { changePushVsOverlayAction, resetAllUserChangedWidthsAction } from '../store/actions';
 import {
   SETTINGS_MENU_BUTTON_TEST_ID,
@@ -133,6 +134,10 @@ export interface SettingsMenuProps {
   /**
    * Custom props to populate the content of the settings meny
    */
+  extraSettings?: Panel['contextSettingsMenuItems'];
+  /**
+   * Custom props to populate the content of the settings meny
+   */
   flyoutCustomProps?: FlyoutCustomProps;
 }
 
@@ -142,7 +147,7 @@ export interface SettingsMenuProps {
  * - Flyout type: overlay or push
  */
 export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
-  ({ flyoutCustomProps }: SettingsMenuProps) => {
+  ({ flyoutCustomProps, extraSettings }: SettingsMenuProps) => {
     const dispatch = useDispatch();
 
     // for flyout where the push vs overlay option is disable in the UI we fall back to overlay mode
@@ -235,6 +240,12 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
             >
               {FLYOUT_RESIZE_BUTTON}
             </EuiButtonEmpty>
+            {extraSettings?.map((setting, index) => (
+              <React.Fragment key={index}>
+                <EuiSpacer size="s" />
+                {setting}
+              </React.Fragment>
+            ))}
           </EuiPanel>
         ),
       },
