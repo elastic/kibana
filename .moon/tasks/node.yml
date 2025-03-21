@@ -50,6 +50,8 @@ tasks:
       # Root configs, any format
       - '/.eslintignore'
       - '/.eslintrc.*'
+    outputs:
+      - "lint.log"
 
   lint-fix:
     command: node
@@ -71,6 +73,8 @@ tasks:
       # Root configs, any format
       - '/.eslintignore'
       - '/.eslintrc.*'
+    outputs:
+      - "lint.log"
 
   lint_with_types:
     command: node
@@ -78,6 +82,8 @@ tasks:
       - scripts/eslint_with_types.js
       - '--project'
       - '$projectSource/tsconfig.json'
+    outputs:
+      - "lint_with_types.log"
     env:
       NODE_OPTIONS: '--max-old-space-size=8192'
     options:

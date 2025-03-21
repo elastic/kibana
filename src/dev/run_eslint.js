@@ -8,6 +8,8 @@
  */
 
 import yargs from 'yargs';
+import fs from 'fs';
+import path from 'path';
 
 import { eslintBinPath } from './eslint';
 
@@ -42,6 +44,17 @@ if (quiet) {
   process.on('exit', (code) => {
     if (!code) {
       console.log('✅ no eslint errors found');
+      fs.writeFileSync(
+        path.join(process.env.MOON_PROJECT_ROOT, 'lint.log'),
+        JSON.stringify(
+          {
+            argv: process.argv,
+            target: process.env.MOON_TARGET,
+          },
+          null,
+          2
+        )
+      );
     }
   });
 }

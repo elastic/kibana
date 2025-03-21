@@ -145,6 +145,20 @@ export function runEslintWithTypes() {
 `);
         }
 
+        if (projects.length === 1) {
+          const statusFilePath = projectFilter!.replace(/tsconfig.*json$/i, 'lint_with_types.log');
+          Fs.writeFileSync(
+            statusFilePath,
+            JSON.stringify({
+              status: 'success',
+              config: projects,
+              project: projects[0],
+            }),
+            'utf8'
+          );
+          log.info(`Status file written to ${statusFilePath}`);
+        }
+
         return;
       }
 
