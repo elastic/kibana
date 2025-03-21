@@ -797,6 +797,7 @@ src/platform/packages/shared/kbn-scout @elastic/appex-qa
 src/platform/packages/private/kbn-scout-info @elastic/appex-qa
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 src/platform/packages/private/kbn-scout-reporting @elastic/appex-qa
+x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa
 examples/screenshot_mode_example @elastic/appex-sharedux
 src/platform/plugins/shared/screenshot_mode @elastic/appex-sharedux
 x-pack/examples/screenshotting_example @elastic/appex-sharedux
@@ -847,7 +848,6 @@ x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hun
 x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-explore
 x-pack/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 x-pack/platform/packages/private/security/ui_components @elastic/kibana-security
-x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 x-pack/solutions/security/packages/data-table @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
@@ -2742,6 +2742,13 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 ## These rules are always last so they take ultimate priority over everything else
 ####
 
+####
+## These rules are always last so they take ultimate priority over everything else
+####
+
+# See https://github.com/elastic/kibana/pull/199404
+# Prevent backport assignments
+* @kibanamachine
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
