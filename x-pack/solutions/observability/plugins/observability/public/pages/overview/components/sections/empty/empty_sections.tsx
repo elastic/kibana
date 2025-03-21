@@ -30,7 +30,7 @@ export function EmptySections() {
       }
       return false;
     })
-    .filter(({ showInServerless }) => !(Boolean(isServerless) && !showInServerless));
+    .filter(({ showInServerless }) => !Boolean(isServerless) || showInServerless);
   return (
     <EuiFlexItem>
       <EuiSpacer size="s" />
@@ -44,6 +44,7 @@ export function EmptySections() {
         {appEmptySections.map((app) => {
           return (
             <EuiFlexItem
+              data-test-subj="empty-section"
               key={app.id}
               style={{
                 border: `${theme.eui.euiBorderEditable}`,

@@ -23,7 +23,7 @@ export function ObservabilityStatus() {
   const content = getContent(http, docLinks, url);
 
   const boxes = content
-    .filter(({ showInServerless }) => !(Boolean(isServerless) && !showInServerless))
+    .filter(({ showInServerless }) => !Boolean(isServerless) || showInServerless)
     .map((app) => {
       return {
         ...app,
