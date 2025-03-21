@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { LIST_ITEMS_URL } from '@kbn/securitysolution-list-constants';
 import {
   VALUE_LISTS_MODAL_ACTIVATOR,
   VALUE_LIST_CLOSE_BUTTON,
@@ -222,7 +222,7 @@ export const uploadValueListsItemsFile = () => {
 };
 
 export const mockFetchListItemsError = () => {
-  cy.intercept('GET', `${LIST_ITEM_URL}/_find*`, {
+  cy.intercept('GET', `${LIST_ITEMS_URL}/_find*`, {
     statusCode: 400,
     body: {
       message: 'search_phase_execution_exception: all shards failed',
@@ -232,7 +232,7 @@ export const mockFetchListItemsError = () => {
 };
 
 export const mockCreateListItemError = () => {
-  cy.intercept('POST', `${LIST_ITEM_URL}`, {
+  cy.intercept('POST', `${LIST_ITEMS_URL}`, {
     statusCode: 400,
     body: {
       message: 'error to create list item',
@@ -242,7 +242,7 @@ export const mockCreateListItemError = () => {
 };
 
 export const mockUpdateListItemError = () => {
-  cy.intercept('PATCH', `${LIST_ITEM_URL}`, {
+  cy.intercept('PATCH', `${LIST_ITEMS_URL}`, {
     statusCode: 400,
     body: {
       message: 'error to update list item',
@@ -252,7 +252,7 @@ export const mockUpdateListItemError = () => {
 };
 
 export const mockDeleteListItemError = () => {
-  cy.intercept('DELETE', `${LIST_ITEM_URL}*`, {
+  cy.intercept('DELETE', `${LIST_ITEMS_URL}*`, {
     statusCode: 400,
     body: {
       message: 'error to delete list item',

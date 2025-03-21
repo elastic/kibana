@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
-  LIST_ITEM_URL,
+  LIST_ITEMS_URL,
   LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 
@@ -254,7 +254,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // basic check
           await supertest
-            .get(`${LIST_ITEM_URL}/_find?list_id=${LIST_ID}`)
+            .get(`${LIST_ITEMS_URL}/_find?list_id=${LIST_ID}`)
             .set('kbn-xsrf', 'true')
             .send()
             .expect(200);
@@ -270,7 +270,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           await supertest
-            .get(`${LIST_ITEM_URL}/_find?list_id=${LIST_ID}`)
+            .get(`${LIST_ITEMS_URL}/_find?list_id=${LIST_ID}`)
             .set('kbn-xsrf', 'true')
             .send()
             .expect(404);

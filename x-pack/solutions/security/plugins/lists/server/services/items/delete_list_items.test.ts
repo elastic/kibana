@@ -8,12 +8,12 @@
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
 import { LIST_ITEM_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
 
-import { getListItem } from './get_list_item';
-import { deleteListItem } from './delete_list_item';
+import { getListItems } from './get_list_items';
+import { deleteListItems } from './delete_list_items';
 import { getDeleteListItemOptionsMock } from './delete_list_item.mock';
 
-jest.mock('./get_list_item', () => ({
-  getListItem: jest.fn(),
+jest.mock('./get_list_items', () => ({
+  getListItems: jest.fn(),
 }));
 
 describe('delete_list_item', () => {
@@ -26,35 +26,35 @@ describe('delete_list_item', () => {
   });
 
   test('Delete returns a null if "getListItem" returns a null', async () => {
-    (getListItem as unknown as jest.Mock).mockResolvedValueOnce(null);
+    (getListItems as unknown as jest.Mock).mockResolvedValueOnce(null);
     const options = getDeleteListItemOptionsMock();
-    const deletedListItem = await deleteListItem(options);
+    const deletedListItem = await deleteListItems(options);
     expect(deletedListItem).toEqual(null);
   });
 
   test('Delete returns the same list item if a list item is returned from "getListItem"', async () => {
     const listItem = getListItemResponseMock();
-    (getListItem as unknown as jest.Mock)
+    (getListItems as unknown as jest.Mock)
       .mockResolvedValueOnce(listItem)
       .mockResolvedValueOnce(null);
     const options = getDeleteListItemOptionsMock();
     (options.esClient.deleteByQuery as unknown as jest.Mock).mockResolvedValueOnce({
       deleted: true,
     });
-    const deletedListItem = await deleteListItem(options);
+    const deletedListItem = await deleteListItems(options);
     expect(deletedListItem).toEqual(listItem);
   });
 
   test('Delete calls "deleteByQuery" if a list item is returned from "getListItem"', async () => {
     const listItem = getListItemResponseMock();
-    (getListItem as unknown as jest.Mock)
+    (getListItems as unknown as jest.Mock)
       .mockResolvedValueOnce(listItem)
       .mockResolvedValueOnce(null);
     const options = getDeleteListItemOptionsMock();
     (options.esClient.deleteByQuery as unknown as jest.Mock).mockResolvedValueOnce({
       deleted: true,
     });
-    await deleteListItem(options);
+    await deleteListItems(options);
     const deleteByQuery = {
       index: LIST_ITEM_INDEX,
       query: {

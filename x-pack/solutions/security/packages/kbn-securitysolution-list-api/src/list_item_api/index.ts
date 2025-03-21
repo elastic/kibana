@@ -24,7 +24,7 @@ import { flow } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { validateEither } from '@kbn/securitysolution-io-ts-utils';
 
-import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { LIST_ITEMS_URL } from '@kbn/securitysolution-list-constants';
 import {
   ApiParams,
   FindListItemsParams,
@@ -54,7 +54,7 @@ const findListItems = async ({
   sort_order,
   filter,
 }: ApiParams & FindListItemSchema): Promise<FoundListItemSchema> => {
-  return http.fetch(`${LIST_ITEM_URL}/_find`, {
+  return http.fetch(`${LIST_ITEMS_URL}/_find`, {
     method: 'GET',
     query: {
       cursor,
@@ -105,7 +105,7 @@ const deleteListItem = async ({
   signal,
   refresh,
 }: ApiParams & DeleteListItemSchema): Promise<ListItemSchema> =>
-  http.fetch<ListItemSchema>(LIST_ITEM_URL, {
+  http.fetch<ListItemSchema>(LIST_ITEMS_URL, {
     method: 'DELETE',
     query: { id, refresh },
     signal,
@@ -147,7 +147,7 @@ const patchListItem = async ({
   value,
   _version,
 }: ApiParams & PatchListItemSchema): Promise<ListItemSchema> =>
-  http.fetch<ListItemSchema>(LIST_ITEM_URL, {
+  http.fetch<ListItemSchema>(LIST_ITEMS_URL, {
     method: 'PATCH',
     body: JSON.stringify({ id, value, _version }),
     signal,
@@ -190,7 +190,7 @@ const createListItem = async ({
   list_id,
   refresh,
 }: ApiParams & CreateListItemSchema): Promise<ListItemSchema> =>
-  http.fetch<ListItemSchema>(LIST_ITEM_URL, {
+  http.fetch<ListItemSchema>(LIST_ITEMS_URL, {
     method: 'POST',
     body: JSON.stringify({ value, list_id, refresh }),
     signal,

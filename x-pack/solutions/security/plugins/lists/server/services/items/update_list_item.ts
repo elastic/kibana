@@ -19,7 +19,7 @@ import {
   waitUntilDocumentIndexed,
 } from '../utils';
 
-import { getListItem } from './get_list_item';
+import { getListItems } from './get_list_items';
 
 export interface UpdateListItemOptions {
   _version: _VersionOrUndefined;
@@ -47,7 +47,7 @@ export const updateListItem = async ({
   refresh = false,
 }: UpdateListItemOptions): Promise<ListItemSchema | null> => {
   const updatedAt = dateNow ?? new Date().toISOString();
-  const listItem = await getListItem({ esClient, id, listItemIndex });
+  const listItem = (await getListItems({ esClient, ids: [id], listItemIndex }))?.[0];
   if (listItem == null) {
     return null;
   } else {
@@ -108,7 +108,7 @@ export const updateListItem = async ({
       let updatedOCCVersion: string | undefined;
       if (response.updated) {
         const checkIfListUpdated = async (): Promise<void> => {
-          const updatedListItem = await getListItem({ esClient, id, listItemIndex });
+          const updatedListItem = (await getListItems({ esClient, ids: [id], listItemIndex }))?.[0];
           if (updatedListItem?._version === listItem._version) {
             throw Error('List item has not been re-indexed in time');
           }

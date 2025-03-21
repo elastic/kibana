@@ -35,7 +35,7 @@ import {
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   LIST_INDEX,
-  LIST_ITEM_URL,
+  LIST_ITEMS_URL,
   LIST_PRIVILEGES_URL,
   LIST_URL,
   INTERNAL_FIND_LISTS_BY_SIZE,
@@ -167,7 +167,7 @@ const importList = async ({
   const formData = new FormData();
   formData.append('file', file as Blob);
 
-  return http.fetch<ListSchema>(`${LIST_ITEM_URL}/_import`, {
+  return http.fetch<ListSchema>(`${LIST_ITEMS_URL}/_import`, {
     body: formData,
     headers: { 'Content-Type': undefined },
     method: 'POST',
@@ -242,7 +242,7 @@ const exportList = async ({
   list_id,
   signal,
 }: ApiParams & ExportListItemQuerySchemaEncoded): Promise<Blob> =>
-  http.fetch<Blob>(`${LIST_ITEM_URL}/_export`, {
+  http.fetch<Blob>(`${LIST_ITEMS_URL}/_export`, {
     method: 'POST',
     query: { list_id },
     signal,

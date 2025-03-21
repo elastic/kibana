@@ -10,5 +10,7 @@ import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 export const id = NonEmptyString;
 export type Id = t.TypeOf<typeof id>;
+export const ids = t.array(NonEmptyString);
+export type Ids = t.TypeOf<typeof ids>;
 export const idOrUndefined = t.union([id, t.undefined]);
 export type IdOrUndefined = t.TypeOf<typeof idOrUndefined>;

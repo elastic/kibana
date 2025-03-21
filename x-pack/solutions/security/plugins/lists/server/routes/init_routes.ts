@@ -21,6 +21,7 @@ import {
   deleteExceptionListRoute,
   deleteListIndexRoute,
   deleteListItemRoute,
+  deleteListItemsRoute,
   deleteListRoute,
   duplicateExceptionsRoute,
   exportExceptionsRoute,
@@ -68,6 +69,7 @@ export const initRoutes = (router: ListsPluginRouter, config: ConfigType): void 
   readListItemRoute(router);
   updateListItemRoute(router);
   deleteListItemRoute(router);
+  deleteListItemsRoute(router);
   patchListItemRoute(router);
   exportListItemRoute(router);
   importListItemRoute(router, config);

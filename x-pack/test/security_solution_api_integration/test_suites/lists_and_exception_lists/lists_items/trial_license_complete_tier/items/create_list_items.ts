@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { LIST_URL, LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { LIST_URL, LIST_ITEMS_URL } from '@kbn/securitysolution-list-constants';
 
 import { getCreateMinimalListSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_list_schema.mock';
 
@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('validation errors', () => {
       it('should give a 404 error that the list must exist first before being able to add a list item', async () => {
         const { body } = await supertest
-          .post(LIST_ITEM_URL)
+          .post(LIST_ITEMS_URL)
           .set('kbn-xsrf', 'true')
           .send(getCreateMinimalListItemSchemaMock())
           .expect(404);
@@ -68,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const { body } = await supertest
-          .post(LIST_ITEM_URL)
+          .post(LIST_ITEMS_URL)
           .set('kbn-xsrf', 'true')
           .send(getCreateMinimalListItemSchemaMock())
           .expect(200);
@@ -88,7 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const { body } = await supertest
-          .post(LIST_ITEM_URL)
+          .post(LIST_ITEMS_URL)
           .set('kbn-xsrf', 'true')
           .send(getCreateMinimalListItemSchemaMockWithoutId())
           .expect(200);
@@ -107,13 +107,13 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         await supertest
-          .post(LIST_ITEM_URL)
+          .post(LIST_ITEMS_URL)
           .set('kbn-xsrf', 'true')
           .send(getCreateMinimalListItemSchemaMock())
           .expect(200);
 
         const { body } = await supertest
-          .post(LIST_ITEM_URL)
+          .post(LIST_ITEMS_URL)
           .set('kbn-xsrf', 'true')
           .send(getCreateMinimalListItemSchemaMock())
           .expect(409);
