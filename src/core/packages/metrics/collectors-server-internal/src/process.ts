@@ -9,10 +9,19 @@
 
 import v8 from 'v8';
 import type { OpsProcessMetrics, MetricsCollector } from '@kbn/core-metrics-server';
+import apm from 'elastic-apm-node';
 import { EventLoopDelaysMonitor } from './event_loop_delays_monitor';
 import { EventLoopUtilizationMonitor } from './event_loop_utilization_monitor';
 
 export class ProcessMetricsCollector implements MetricsCollector<OpsProcessMetrics[]> {
+  constructor() {
+    apm.registerMetric('nodejs.memory.resident_set_size.bytes', () => process.memoryUsage().rss);
+    apm.registerMetric(
+      'nodejs.heap.size_limit.bytes',
+      () => v8.getHeapStatistics().heap_size_limit
+    );
+  }
+
   static getMainThreadMetrics(processes: OpsProcessMetrics[]): undefined | OpsProcessMetrics {
     /**
      * Currently Kibana does not support multi-processes.

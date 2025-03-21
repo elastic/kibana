@@ -10,6 +10,7 @@
 import v8, { HeapInfo } from 'v8';
 import { mockEventLoopDelayMonitor, mockEventLoopUtilizationMonitor } from './process.test.mocks';
 import { ProcessMetricsCollector } from './process';
+import apm from 'elastic-apm-node';
 
 describe('ProcessMetricsCollector', () => {
   let collector: ProcessMetricsCollector;
@@ -101,6 +102,33 @@ describe('ProcessMetricsCollector', () => {
     it('resets event loop utilization', () => {
       collector.reset();
       expect(mockEventLoopUtilizationMonitor.reset).toBeCalledTimes(1);
+    });
+  });
+
+  describe('register metrics in apm', () => {
+    it('calls registerMetric in the constructor', () => {
+      const apmSpy = jest.spyOn(apm, 'registerMetric');
+      apmSpy.mockClear();
+
+      collector = new ProcessMetricsCollector();
+
+      expect(apmSpy).toHaveBeenCalledTimes(2);
+
+      // check first call: apm.registerMetric('nodejs.memory.resident_set_size.bytes', ...);
+      const rssCallArguments = apmSpy.mock.calls[0];
+      expect(rssCallArguments).toHaveLength(2);
+      expect(rssCallArguments[0]).toEqual('nodejs.memory.resident_set_size.bytes');
+      expect(typeof rssCallArguments[1]).toBe('function');
+      const rssFunction = rssCallArguments[1] as unknown as Function;
+      expect(typeof rssFunction()).toBe('number');
+
+      // check second call: apm.registerMetric('nodejs.heap.size_limit.bytes', ...);
+      const heapLimitCallArguments = apmSpy.mock.calls[1];
+      expect(heapLimitCallArguments).toHaveLength(2);
+      expect(heapLimitCallArguments[0]).toEqual('nodejs.heap.size_limit.bytes');
+      expect(typeof heapLimitCallArguments[1]).toBe('function');
+      const heapLimitFunction = heapLimitCallArguments[1] as unknown as Function;
+      expect(typeof heapLimitFunction()).toBe('number');
     });
   });
 });
