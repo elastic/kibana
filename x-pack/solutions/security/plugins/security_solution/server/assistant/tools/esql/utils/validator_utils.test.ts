@@ -20,14 +20,18 @@ describe('esql self healing validator utils', () => {
     const validateEsqlResult: ValidateEsqlResult = {
       query,
       isValid: false,
-      parsingErrors: [{ message: 'Syntax error', startLineNumber: 1, startColumn:10 } as EditorError],
+      parsingErrors: [
+        { message: 'Syntax error', startLineNumber: 1, startColumn: 10 } as EditorError,
+      ],
       executionError: new Error('Unknown index .logs'),
     };
 
     const result = lastMessageWithErrorReport(message, [validateEsqlResult]);
 
     expect(result.content).toContain(message);
-    expect(result.content).toContain('The above query has the following errors that still need to be fixed');
+    expect(result.content).toContain(
+      'The above query has the following errors that still need to be fixed'
+    );
     expect(result.content).toContain('1:10 Syntax error');
     expect(result.content).toContain('Unknown index .logs');
   });

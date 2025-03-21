@@ -53,6 +53,7 @@ import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
 import { agentRunableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
+import { PrepareIndicesForAssistantGraphEvalusations } from './prepare_indices_for_evaluations/graph_type/assistant';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
@@ -184,7 +185,16 @@ export const postEvaluateRoute = (
           // Fetch any tools registered to the security assistant
           const assistantTools = assistantContext.getRegisteredTools(DEFAULT_PLUGIN_NAME);
 
-          const { attackDiscoveryGraphs, defendInsightsGraphs } = getGraphsFromNames(graphNames);
+          const { attackDiscoveryGraphs, defendInsightsGraphs, assistantGraphs } = getGraphsFromNames(graphNames);
+
+          const prepareIndicesForAssistantGraph = new PrepareIndicesForAssistantGraphEvalusations({
+            esClient,
+            logger
+          })
+
+          if (assistantGraphs.length > 0) {
+            await prepareIndicesForAssistantGraph.setup()
+          }
 
           if (defendInsightsGraphs.length > 0) {
             const connectorsWithPrompts = await Promise.all(
@@ -478,6 +488,8 @@ export const postEvaluateRoute = (
               })
               .catch((err) => {
                 logger.error(`evaluation error:\n ${JSON.stringify(err, null, 2)}`);
+              }).finally(async () => {
+                await prepareIndicesForAssistantGraph.cleanup()
               });
           });
 
