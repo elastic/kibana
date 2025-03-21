@@ -13,6 +13,7 @@ import * as i18n from '../translations';
 import type { MaintenanceWindowFrequency } from '../constants';
 import { EndsOptions } from '../constants';
 import type { ScopedQueryAttributes } from '../../../../common';
+import { VALID_CATEGORIES } from '../constants';
 
 const { emptyField } = fieldValidators;
 
@@ -23,7 +24,7 @@ export interface FormProps {
   timezone?: string[];
   recurring: boolean;
   recurringSchedule?: RecurringScheduleFormProps;
-  categoryIds?: string[];
+  solutionId?: string;
   scopedQuery?: ScopedQueryAttributes | null;
 }
 
@@ -48,12 +49,24 @@ export const schema: FormSchema<FormProps> = {
       },
     ],
   },
-  categoryIds: {
+  solutionId: {
+    type: FIELD_TYPES.SELECT,
     validations: [
       {
-        validator: emptyField(i18n.CREATE_FORM_CATEGORY_IDS_REQUIRED),
+        validator: ({ value }: { value: string }) => {
+          if (value === undefined) {
+            return;
+          }
+          if (!VALID_CATEGORIES.includes(value)) {
+            return {
+              message: `Value must be one of: ${VALID_CATEGORIES.join(', ')}`,
+            };
+          }
+        },
       },
     ],
+    // The empty string appears by default because of how form libraries typically handle form inputs
+    deserializer: (value) => (value === '' ? undefined : value),
   },
   scopedQuery: {
     defaultValue: {
