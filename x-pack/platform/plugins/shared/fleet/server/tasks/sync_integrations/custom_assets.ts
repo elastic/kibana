@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+
+import { isEqual } from 'lodash';
+import type {
+  ClusterGetComponentTemplateResponse,
+  IngestGetPipelineResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import type { CustomAssetsData, IntegrationsData, SyncIntegrationsData } from './model';
 
@@ -25,21 +31,45 @@ export const findIntegration = (assetName: string, integrations: IntegrationsDat
   });
 };
 
-export const getCustomAssets = async (
+function getComponentTemplate(
   esClient: ElasticsearchClient,
-  integrations: IntegrationsData[],
-  abortController: AbortController,
-  previousSyncIntegrationsData: SyncIntegrationsData | undefined
-): Promise<CustomAssetsData[]> => {
-  const customTemplates = await esClient.cluster.getComponentTemplate(
+  name: string,
+  abortController: AbortController
+): Promise<ClusterGetComponentTemplateResponse> {
+  return esClient.cluster.getComponentTemplate(
     {
-      name: '*@custom',
+      name,
     },
     {
       ignore: [404],
       signal: abortController.signal,
     }
   );
+}
+
+function getPipeline(
+  esClient: ElasticsearchClient,
+  name: string,
+  abortController: AbortController
+): Promise<IngestGetPipelineResponse> {
+  return esClient.ingest.getPipeline(
+    {
+      id: name,
+    },
+    {
+      ignore: [404],
+      signal: abortController.signal,
+    }
+  );
+}
+
+export const getCustomAssets = async (
+  esClient: ElasticsearchClient,
+  integrations: IntegrationsData[],
+  abortController: AbortController,
+  previousSyncIntegrationsData: SyncIntegrationsData | undefined
+): Promise<CustomAssetsData[]> => {
+  const customTemplates = await getComponentTemplate(esClient, '*@custom', abortController);
 
   const customAssetsComponentTemplates = customTemplates.component_templates.reduce(
     (acc: CustomAssetsData[], template) => {
@@ -58,15 +88,7 @@ export const getCustomAssets = async (
     []
   );
 
-  const ingestPipelines = await esClient.ingest.getPipeline(
-    {
-      id: '*@custom',
-    },
-    {
-      ignore: [404],
-      signal: abortController.signal,
-    }
-  );
+  const ingestPipelines = await getPipeline(esClient, '*@custom', abortController);
 
   const customAssetsIngestPipelines = Object.keys(ingestPipelines).reduce(
     (acc: CustomAssetsData[], pipeline) => {
@@ -123,4 +145,96 @@ function updateDeletedAssets(
   );
 
   return deletedAssets;
+}
+
+export async function installCustomAsset(
+  customAsset: CustomAssetsData,
+  esClient: ElasticsearchClient,
+  abortController: AbortController,
+  logger: Logger
+) {
+  if (customAsset.type === 'component_template') {
+    const customTemplates = await getComponentTemplate(esClient, customAsset.name, abortController);
+    const existingTemplate = customTemplates.component_templates?.find(
+      (template) => template.name === customAsset.name
+    );
+    if (customAsset.is_deleted) {
+      if (existingTemplate) {
+        logger.debug(`Deleting component template: ${customAsset.name}`);
+        return esClient.cluster.deleteComponentTemplate(
+          {
+            name: customAsset.name,
+          },
+          {
+            signal: abortController.signal,
+          }
+        );
+      } else {
+        return;
+      }
+    }
+    let shouldUpdateTemplate = false;
+    if (existingTemplate) {
+      shouldUpdateTemplate = !isEqual(
+        existingTemplate.component_template.template,
+        customAsset.template
+      );
+    } else {
+      shouldUpdateTemplate = true;
+    }
+
+    if (shouldUpdateTemplate) {
+      logger.debug(`Updating component template: ${customAsset.name}`);
+      return esClient.cluster.putComponentTemplate(
+        {
+          name: customAsset.name,
+          template: customAsset.template,
+        },
+        {
+          signal: abortController.signal,
+        }
+      );
+    }
+  } else if (customAsset.type === 'ingest_pipeline') {
+    const ingestPipelines = await getPipeline(esClient, customAsset.name, abortController);
+    const existingPipeline = ingestPipelines[customAsset.name];
+
+    if (customAsset.is_deleted) {
+      if (existingPipeline) {
+        logger.debug(`Deleting ingest pipeline: ${customAsset.name}`);
+        return esClient.ingest.deletePipeline(
+          {
+            id: customAsset.name,
+          },
+          {
+            signal: abortController.signal,
+          }
+        );
+      } else {
+        return;
+      }
+    }
+
+    let shouldUpdatePipeline = false;
+    if (existingPipeline) {
+      shouldUpdatePipeline =
+        (existingPipeline.version && existingPipeline.version < customAsset.pipeline.version) ||
+        (!existingPipeline.version && !isEqual(existingPipeline, customAsset.pipeline));
+    } else {
+      shouldUpdatePipeline = true;
+    }
+
+    if (shouldUpdatePipeline) {
+      logger.debug(`Updating ingest pipeline: ${customAsset.name}`);
+      return esClient.ingest.putPipeline(
+        {
+          id: customAsset.name,
+          ...customAsset.pipeline,
+        },
+        {
+          signal: abortController.signal,
+        }
+      );
+    }
+  }
 }
