@@ -335,6 +335,6 @@ export function SloManagementTable() {
   );
 }
 
-const TABLE_CAPTION = i18n.translate('xpack.slo.sloHealthPanel.tableCaption', {
-  defaultMessage: 'SLOs Health',
+const TABLE_CAPTION = i18n.translate('xpack.slo.sloManagement.tableCaption', {
+  defaultMessage: 'SLO Management',
 });

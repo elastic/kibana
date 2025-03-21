@@ -10,12 +10,12 @@ import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
-import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SloManagementContent } from './components/slo_management_content';
+import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 
 export function SloManagementPage() {
   const {
@@ -26,17 +26,19 @@ export function SloManagementPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const { data: permissions } = usePermissions();
   const { hasAtLeast } = useLicense();
-  const { isLoading, isError, data: { total } = { total: 0 } } = useFetchSloList({ perPage: 0 });
+  const {
+    isLoading,
+    isError,
+    data: { total } = { total: 0 },
+  } = useFetchSloDefinitions({ perPage: 0 });
 
   useEffect(() => {
-    if (hasAtLeast('platinum') === false) {
-      navigateToUrl(basePath.prepend(paths.slosWelcome));
-    }
-    if (permissions?.hasAllReadRequested === false) {
-      navigateToUrl(basePath.prepend(paths.slosWelcome));
-    }
-
-    if ((!isLoading && total === 0) || isError) {
+    if (
+      !hasAtLeast('platinum') ||
+      permissions?.hasAllReadRequested === false ||
+      (!isLoading && total === 0) ||
+      isError
+    ) {
       navigateToUrl(basePath.prepend(paths.slosWelcome));
     }
   }, [basePath, hasAtLeast, isError, isLoading, navigateToUrl, total, permissions]);
