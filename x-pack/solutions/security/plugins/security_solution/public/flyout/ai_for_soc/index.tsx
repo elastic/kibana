@@ -71,7 +71,7 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
       >
         <FlyoutNavigation flyoutIsExpandable={false} />
         <FlyoutHeader>
-          <AlertHeaderTitle />
+          <AlertHeaderTitle hideAlertSummaryPanel />
         </FlyoutHeader>
         <FlyoutBody data-test-subj={FLYOUT_BODY_TEST_ID}>
           <EuiFlexGroup direction="column">
