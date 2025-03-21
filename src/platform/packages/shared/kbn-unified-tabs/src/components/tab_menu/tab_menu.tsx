@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -22,10 +22,16 @@ import type { TabItem, GetTabMenuItems } from '../../types';
 export interface TabMenuProps {
   item: TabItem;
   getTabMenuItems: GetTabMenuItems;
+  isPopoverOpen: boolean;
+  setPopover: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const TabMenu: React.FC<TabMenuProps> = ({ item, getTabMenuItems }) => {
-  const [isPopoverOpen, setPopover] = useState<boolean>(false);
+export const TabMenu: React.FC<TabMenuProps> = ({
+  item,
+  getTabMenuItems,
+  isPopoverOpen,
+  setPopover,
+}) => {
   const contextMenuPopoverId = useGeneratedHtmlId();
 
   const menuButtonLabel = i18n.translate('unifiedTabs.tabMenuButton', {

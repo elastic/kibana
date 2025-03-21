@@ -13,6 +13,7 @@ import {
   IOS_AGENT_NAMES,
   JAVA_AGENT_NAMES,
   OPEN_TELEMETRY_AGENT_NAMES,
+  EDOT_AGENT_NAMES,
   RUM_AGENT_NAMES,
 } from './agent_names';
 
@@ -63,6 +64,10 @@ export function isOpenTelemetryAgentName(agentName: string): agentName is OpenTe
 
 export const isElasticAgentName = (agentName: string): agentName is ElasticAgentName =>
   ElasticAgentNamesSet.has(agentName as ElasticAgentName);
+
+export function isEDOTAgentName(agentName: string): agentName is OpenTelemetryAgentName {
+  return EDOT_AGENT_NAMES.includes(agentName as OpenTelemetryAgentName);
+}
 
 export function isJavaAgentName(agentName?: string): agentName is JavaAgentName {
   return (

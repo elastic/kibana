@@ -70,7 +70,8 @@ export const setFindRequestFilterScopeToActiveSpace = async (
         : ` OR ${allEndpointPolicyIds
             .map((policyId) => `"${buildPerPolicyTag(policyId)}"`)
             .join(' OR ')}
-          )
+          )`
+    }
         )
         OR
         (
@@ -78,8 +79,7 @@ export const setFindRequestFilterScopeToActiveSpace = async (
           AND
           exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag(spaceId)}"
         )
-      )`
-    }`;
+      )`;
 
     if (isSingleListFindOptions(findOptions)) {
       findOptions.filter = `${spaceVisibleDataFilter}${
