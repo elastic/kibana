@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { rawRulesSettingsSchema as rawRulesSettingsSchemaV1 } from './v1';
-export { rawRulesSettingsSchema as rawRulesSettingsSchemaV2 } from './v2';
+export * from './v1';

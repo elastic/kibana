@@ -6,6 +6,7 @@
  */
 
 import type {
+  RulesSettingsAlertDeletionProperties,
   RulesSettingsFlappingProperties,
   RulesSettingsQueryDelayProperties,
 } from '@kbn/alerting-types';
@@ -21,9 +22,11 @@ export type {
   RulesSettingsModificationMetadata,
   RulesSettingsFlappingProperties,
   RulesSettingsQueryDelayProperties,
+  RulesSettingsAlertDeletionProperties,
   RuleSpecificFlappingProperties,
   RulesSettingsFlapping,
   RulesSettingsQueryDelay,
+  RulesSettingsAlertDeletion,
   RulesSettingsProperties,
   RulesSettings,
 } from '@kbn/alerting-types';
@@ -36,17 +39,22 @@ export const ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID = 'allFlappingSettings';
 export const READ_FLAPPING_SETTINGS_SUB_FEATURE_ID = 'readFlappingSettings';
 export const ALL_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID = 'allQueryDelaySettings';
 export const READ_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID = 'readQueryDelaySettings';
+export const ALL_ALERT_DELETION_SETTINGS_SUB_FEATURE_ID = 'allAlertDeletionSettings';
+export const READ_ALERT_DELETION_SETTINGS_SUB_FEATURE_ID = 'readAlertDeletionSettings';
 
 export const API_PRIVILEGES = {
   READ_FLAPPING_SETTINGS: 'read-flapping-settings',
   WRITE_FLAPPING_SETTINGS: 'write-flapping-settings',
   READ_QUERY_DELAY_SETTINGS: 'read-query-delay-settings',
   WRITE_QUERY_DELAY_SETTINGS: 'write-query-delay-settings',
+  READ_ALERT_DELETION_SETTINGS: 'read-alert-deletion-settings',
+  WRITE_ALERT_DELETION_SETTINGS: 'write-alert-deletion-settings',
 };
 
 export const RULES_SETTINGS_SAVED_OBJECT_TYPE = 'rules-settings';
 export const RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID = 'rules-settings';
 export const RULES_SETTINGS_QUERY_DELAY_SAVED_OBJECT_ID = 'query-delay-settings';
+export const RULES_SETTINGS_ALERT_DELETION_SAVED_OBJECT_ID = 'alert-deletion-settings';
 
 export const DEFAULT_LOOK_BACK_WINDOW = 20;
 export const DEFAULT_STATUS_CHANGE_THRESHOLD = 4;
@@ -69,4 +77,11 @@ export const DEFAULT_QUERY_DELAY_SETTINGS: RulesSettingsQueryDelayProperties = {
 };
 export const DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS: RulesSettingsQueryDelayProperties = {
   delay: DEFAULT_SERVERLESS_QUERY_DELAY,
+};
+
+export const DEFAULT_ALERT_DELETION_SETTINGS: RulesSettingsAlertDeletionProperties = {
+  isActiveAlertsDeletionEnabled: false,
+  isInactiveAlertsDeletionEnabled: false,
+  activeAlertsDeletionThreshold: 90,
+  inactiveAlertsDeletionThreshold: 90,
 };

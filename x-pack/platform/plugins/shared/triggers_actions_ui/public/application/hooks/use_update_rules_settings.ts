@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useMutation } from '@tanstack/react-query';
 import type { RulesSettingsProperties } from '@kbn/alerting-plugin/common';
+import { updateAlertDeletionSettings } from '@kbn/alerts-ui-shared/src/common/apis/alert_deletion_settings';
 import { useKibana } from '../../common/lib/kibana';
 import { updateFlappingSettings } from '../lib/rule_api/update_flapping_settings';
 import { updateQueryDelaySettings } from '../lib/rule_api/update_query_delay_settings';
@@ -34,6 +35,12 @@ export const useUpdateRuleSettings = (props: UseUpdateRuleSettingsProps) => {
 
     if (settings.queryDelay) {
       updates.push(updateQueryDelaySettings({ http, queryDelaySettings: settings.queryDelay }));
+    }
+
+    if (settings.alertDeletion) {
+      updates.push(
+        updateAlertDeletionSettings({ http, alertDeletionSettings: settings.alertDeletion })
+      );
     }
 
     return await Promise.all(updates);

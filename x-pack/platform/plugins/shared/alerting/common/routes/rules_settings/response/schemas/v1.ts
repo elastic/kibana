@@ -18,3 +18,18 @@ export const queryDelaySettingsResponseBodySchema = schema.object({
 export const queryDelaySettingsResponseSchema = schema.object({
   body: queryDelaySettingsResponseBodySchema,
 });
+
+export const alertDeletionSettingsResponseBodySchema = schema.object({
+  active_alerts_deletion_threshold: schema.number({ min: 1, max: 1000 }),
+  is_active_alerts_deletion_enabled: schema.boolean(),
+  inactive_alerts_deletion_threshold: schema.number({ min: 1, max: 1000 }),
+  is_inactive_alerts_deletion_enabled: schema.boolean(),
+  created_at: schema.string(),
+  created_by: schema.nullable(schema.string()),
+  updated_at: schema.string(),
+  updated_by: schema.nullable(schema.string()),
+});
+
+export const alertDeletionSettingsResponseSchema = schema.object({
+  body: alertDeletionSettingsResponseBodySchema,
+});

@@ -7,3 +7,4 @@
 
 export { flappingSchema } from './flapping_schema';
 export { queryDelaySchema } from './query_delay_schema';
+export { alertDeletionSchema } from './alert_deletion_schema';

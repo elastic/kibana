@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { queryDelaySettingsResponseSchemaV1 } from '..';
+import type { alertDeletionSettingsResponseSchemaV1, queryDelaySettingsResponseSchemaV1 } from '..';
 
 export type QueryDelaySettingsResponse = TypeOf<typeof queryDelaySettingsResponseSchemaV1>;
+export type AlertDeletionSettingsResponse = TypeOf<typeof alertDeletionSettingsResponseSchemaV1>;

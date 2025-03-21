@@ -7,6 +7,10 @@
 
 export { queryDelaySettingsResponseSchema } from './schemas/latest';
 export type { QueryDelaySettingsResponse } from './types/latest';
+export { alertDeletionSettingsResponseSchema } from './schemas/latest';
+export type { AlertDeletionSettingsResponse } from './types/latest';
 
 export { queryDelaySettingsResponseSchema as queryDelaySettingsResponseSchemaV1 } from './schemas/v1';
 export type { QueryDelaySettingsResponse as QueryDelaySettingsResponseV1 } from './types/v1';
+export { alertDeletionSettingsResponseSchema as alertDeletionSettingsResponseSchemaV1 } from './schemas/v1';
+export type { AlertDeletionSettingsResponse as AlertDeletionSettingsResponseV1 } from './types/v1';

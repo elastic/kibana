@@ -32,6 +32,7 @@ import type { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_regis
 import type { AlertingServerSetup, AlertingServerStart } from './plugin';
 import type { RulesClient } from './rules_client';
 import type {
+  RulesSettingsAlertDeletionClient,
   RulesSettingsClient,
   RulesSettingsFlappingClient,
   RulesSettingsQueryDelayClient,
@@ -394,6 +395,7 @@ export type RulesClientApi = PublicMethodsOf<RulesClient>;
 export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
 export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
 export type RulesSettingsQueryDelayClientApi = PublicMethodsOf<RulesSettingsQueryDelayClient>;
+export type RulesSettingsAlertDeletionClientApi = PublicMethodsOf<RulesSettingsAlertDeletionClient>;
 
 export type MaintenanceWindowClientApi = PublicMethodsOf<MaintenanceWindowClient>;
 
