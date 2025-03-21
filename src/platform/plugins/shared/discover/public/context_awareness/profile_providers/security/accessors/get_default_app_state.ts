@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DefaultAppStateExtension } from '../../../types';
+import type { DefaultAppStateExtension } from '../../../types';
 
 export const getDefaultSecuritySolutionAppState: () => DefaultAppStateExtension = () => ({
   breakdownField: 'kibana.alert.workflow_status',

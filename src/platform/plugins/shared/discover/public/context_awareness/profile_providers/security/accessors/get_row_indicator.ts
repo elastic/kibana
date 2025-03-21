@@ -8,7 +8,7 @@
  */
 
 import { getFieldValue } from '@kbn/discover-utils';
-import { UnifiedDataTableProps } from '@kbn/unified-data-table';
+import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 
 export const getAlertEventRowIndicator: NonNullable<UnifiedDataTableProps['getRowIndicator']> = (
   row,

@@ -9,11 +9,11 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { RowControlComponent } from '@kbn/discover-utils';
-import { RowControlRowProps } from '@kbn/discover-utils';
+import type { RowControlComponent } from '@kbn/discover-utils';
+import type { RowControlRowProps } from '@kbn/discover-utils';
 import { ExploreInSecurity } from './explore_in_security';
 import { EuiButton } from '@elastic/eui';
-import { ProfileProviderServices } from '../../../profile_provider_services';
+import type { ProfileProviderServices } from '../../../profile_provider_services';
 
 const TEST_TIMELINE_URL = 'test-timeline-url';
 

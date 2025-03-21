@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import { RowControlColumn } from '@kbn/discover-utils';
-import { ProfileProviderServices } from '../../profile_provider_services';
+import type { RowControlColumn } from '@kbn/discover-utils';
+import type { ProfileProviderServices } from '../../profile_provider_services';
 import { ExploreInSecurity } from '../components/row_leading_controls/explore_in_security';
 
 export function getRowAdditionalLeadingControls({
