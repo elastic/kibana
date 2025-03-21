@@ -26,17 +26,12 @@ interface Props {
 
 export const SpacesDescription: FC<Props> = (props: Props) => {
   const { euiTheme } = useEuiTheme();
-  const styles = {
-    spcDescription: css({
-      maxWidth: `calc(${euiTheme.size.l} * 10)`,
-    }),
-    textAndWrapper: css({
-      padding: euiTheme.size.m,
-    }),
-  };
+
   const panelProps = {
     id: props.id,
-    css: styles.spcDescription,
+    css: css`
+      max-width: calc(${euiTheme.size.l} * 10);
+    `,
     title: 'Spaces',
   };
 
@@ -46,10 +41,19 @@ export const SpacesDescription: FC<Props> = (props: Props) => {
 
   return (
     <EuiContextMenuPanel {...panelProps}>
-      <EuiText css={styles.textAndWrapper}>
+      <EuiText
+        css={css`
+          padding: ${euiTheme.size.m};
+        `}
+      >
         <p>{props.isLoading ? spacesLoadingMessage : getSpacesFeatureDescription()}</p>
       </EuiText>
-      <div key="manageSpacesButton" css={styles.textAndWrapper}>
+      <div
+        key="manageSpacesButton"
+        css={css`
+          padding: ${euiTheme.size.m};
+        `}
+      >
         <ManageSpacesButton
           size="s"
           style={{ width: `100%` }}
