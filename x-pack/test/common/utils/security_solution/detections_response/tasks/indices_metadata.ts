@@ -10,7 +10,6 @@ import { Client } from '@elastic/elasticsearch';
 const INGEST_PIPELINE_PREFIX = 'testing-ingest-pipeline';
 const DS_PREFIX = 'testing-datastream';
 const ILM_PREFIX = 'testing-ilm';
-const INGEST_PIPELINE_PREFIX = 'testing-pipeline';
 
 export const indexRandomData = async (es: Client, dsName: string, ingestPipeline: string) => {
   await es.index({
