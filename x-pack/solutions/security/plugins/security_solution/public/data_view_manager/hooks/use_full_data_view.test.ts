@@ -7,40 +7,21 @@
 
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../constants';
+import { DataViewManagerScopeName } from '../constants';
 
 import { useFullDataView } from './use_full_data_view';
-import { useDataView } from './use_data_view';
-import { type FieldSpec, DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 jest.mock('../../common/hooks/use_experimental_features');
 
-jest.mock('./use_data_view', () => ({
-  useDataView: jest.fn(),
-}));
-
-// FIXME:
-describe.skip('useFullDataView', () => {
+describe('useFullDataView', () => {
   beforeEach(() => {
     jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
   });
 
   describe('when data view is available', () => {
-    beforeAll(() => {
-      jest.mocked(useDataView).mockReturnValue({
-        dataView: {
-          id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-          fields: {
-            '@timestamp': {
-              type: 'date',
-              name: '@timestamp',
-            } as FieldSpec,
-          },
-        },
-        status: 'ready',
-      });
-    });
+    beforeAll(() => {});
 
     it('should return DataView instance', () => {
       const wrapper = renderHook(() => useFullDataView(DataViewManagerScopeName.default), {
@@ -52,15 +33,7 @@ describe.skip('useFullDataView', () => {
   });
 
   describe('when data view fields are not available', () => {
-    beforeEach(() => {
-      jest.mocked(useDataView).mockReturnValue({
-        dataView: {
-          id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-          title: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        },
-        status: 'pristine',
-      });
-    });
+    beforeEach(() => {});
 
     it('should return undefined', () => {
       const wrapper = renderHook(() => useFullDataView(DataViewManagerScopeName.default), {

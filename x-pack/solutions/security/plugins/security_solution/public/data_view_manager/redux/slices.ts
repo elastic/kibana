@@ -76,6 +76,7 @@ export const createDataViewSelectionSlice = <T extends DataViewManagerScopeName>
     reducers: {
       setSelectedDataView: (state, action: PayloadAction<string>) => {
         state.dataViewId = action.payload ?? null;
+        state.status = 'ready';
       },
       dataViewSelectionError: (state, _: PayloadAction<string>) => {
         state.status = 'error';

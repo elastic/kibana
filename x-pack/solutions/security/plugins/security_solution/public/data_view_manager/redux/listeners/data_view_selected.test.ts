@@ -13,7 +13,7 @@ import type { RootState } from '../reducer';
 import { DataViewManagerScopeName } from '../../constants';
 
 const mockDataViewsService = {
-  get: jest.fn(),
+  getDataViewLazy: jest.fn(),
   create: jest.fn().mockResolvedValue({
     id: 'adhoc_test-*',
     isPersisted: () => false,
@@ -24,19 +24,19 @@ const mockDataViewsService = {
 const mockedState: RootState = {
   dataViewManager: {
     analyzer: {
-      dataView: null,
+      dataViewId: null,
       status: 'pristine',
     },
     timeline: {
-      dataView: null,
+      dataViewId: null,
       status: 'pristine',
     },
     default: {
-      dataView: null,
+      dataViewId: null,
       status: 'pristine',
     },
     detections: {
-      dataView: null,
+      dataViewId: null,
       status: 'pristine',
     },
     shared: {
@@ -91,7 +91,7 @@ describe('createDataViewSelectedListener', () => {
       mockListenerApi
     );
 
-    expect(mockDataViewsService.get).not.toHaveBeenCalled();
+    expect(mockDataViewsService.getDataViewLazy).not.toHaveBeenCalled();
   });
 
   it('should try to create data view if not cached', async () => {
@@ -105,7 +105,7 @@ describe('createDataViewSelectedListener', () => {
     );
 
     // NOTE: we should check if the data view existence is checked
-    expect(mockDataViewsService.get).toHaveBeenCalledWith('fetched-id');
+    expect(mockDataViewsService.getDataViewLazy).toHaveBeenCalledWith('fetched-id');
 
     expect(mockDataViewsService.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -116,7 +116,7 @@ describe('createDataViewSelectedListener', () => {
 
     expect(mockDispatch).toHaveBeenCalledWith(
       expect.objectContaining({
-        payload: expect.objectContaining({ id: 'adhoc_test-*' }),
+        payload: 'adhoc_test-*',
         type: 'x-pack/security_solution/dataViewManager/default/setSelectedDataView',
       })
     );
@@ -139,7 +139,7 @@ describe('createDataViewSelectedListener', () => {
     );
     expect(mockDispatch).toHaveBeenCalledWith(
       expect.objectContaining({
-        payload: expect.objectContaining({ id: 'adhoc_test-*' }),
+        payload: 'adhoc_test-*',
       })
     );
   });
