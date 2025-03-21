@@ -58,9 +58,6 @@
     "@kbn/datemath",
     "@kbn/xstate-utils",
     "@kbn/visualization-utils",
-    "@kbn/utility-types",
-    "@kbn/discover-utils",
-    "@kbn/discover-shared-plugin",
     "@kbn/core-analytics-browser",
   ]
 }
