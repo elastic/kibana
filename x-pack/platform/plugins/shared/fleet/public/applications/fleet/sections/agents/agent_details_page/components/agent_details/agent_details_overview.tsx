@@ -8,8 +8,6 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import {
-  EuiButtonIcon,
-  EuiCopy,
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
@@ -33,6 +31,7 @@ import { formatAgentCPU, formatAgentMemory } from '../../../services/agent_metri
 import { AgentDashboardLink } from '../agent_dashboard_link';
 import { AgentUpgradeStatus } from '../../../agent_list_page/components/agent_upgrade_status';
 import { AgentPolicyOutputsSummary } from '../../../agent_list_page/components/agent_policy_outputs_summary';
+import { formattedTime } from '../../../agent_list_page/components/agent_activity_flyout/helpers';
 
 // Allows child text to be truncated
 const FlexItemWithMinWidth = styled(EuiFlexItem)`
@@ -143,19 +142,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               title: i18n.translate('xpack.fleet.agentDetails.lastActivityLabel', {
                 defaultMessage: 'Last activity',
               }),
-              description: agent.last_checkin ? (
-                <EuiCopy textToCopy={agent.last_checkin}>
-                  {(copy) => (
-                    <span>
-                      {agent.last_checkin}
-                      &nbsp;
-                      <EuiButtonIcon iconType="copyClipboard" onClick={copy} />
-                    </span>
-                  )}
-                </EuiCopy>
-              ) : (
-                '-'
-              ),
+              description: agent.last_checkin ? formattedTime(agent.last_checkin) : '-',
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.lastCheckinMessageLabel', {
