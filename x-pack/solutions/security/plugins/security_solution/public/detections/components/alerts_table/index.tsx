@@ -156,8 +156,17 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   ...tablePropsOverrides
 }) => {
   const { id } = tablePropsOverrides;
-  const { data, http, notifications, fieldFormats, application, licensing, uiSettings, settings } =
-    useKibana().services;
+  const {
+    data,
+    http,
+    notifications,
+    fieldFormats,
+    application,
+    licensing,
+    uiSettings,
+    settings,
+    cases,
+  } = useKibana().services;
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
     ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
   );
@@ -419,8 +428,9 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
       application,
       licensing,
       settings,
+      cases,
     }),
-    [application, data, fieldFormats, http, licensing, notifications, settings]
+    [application, data, fieldFormats, http, licensing, notifications, settings, cases]
   );
 
   /**

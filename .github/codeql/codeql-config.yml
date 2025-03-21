@@ -22,8 +22,12 @@ paths-ignore:
   - '**/mocks/**'
   - '**/stub/**'
   - '**/scripts/**'
+  - '**/setup_tests.*'
   - '**/storybook/**'
+  - '**/*_test_utils/**'
+  - '**/*-test-data/**'
   - '**/test_helpers/**'
+  - '**/test-helpers/**'
   - '**/test_utils/**'
   - api_docs
   - dev_docs
@@ -60,7 +64,6 @@ paths-ignore:
   - packages/kbn-web-worker-stub
   - packages/kbn-yarn-lock-validator
   - scripts
-  - src/core/test-helpers/kbn-server
   - src/platform/packages/*/kbn-ambient-*-types
   - src/platform/packages/*/kbn-babel-*
   - src/platform/packages/*/kbn-ci-*
@@ -69,6 +72,7 @@ paths-ignore:
   - src/platform/packages/*/kbn-jest-*
   - src/platform/packages/*/kbn-optimizer-*
   - src/platform/packages/*/kbn-test-*
+  - src/platform/packages/private/kbn-gen-ai-functional-testing
   - src/platform/packages/private/kbn-get-repo-files
   - src/platform/packages/private/kbn-import-resolver
   - src/platform/packages/private/kbn-journeys
@@ -93,6 +97,7 @@ paths-ignore:
   - src/platform/test
   - typings
   - x-pack/examples
+  - x-pack/packages/ai-infra/product-doc-artifact-builder
   - x-pack/performance
   - x-pack/scripts
   - x-pack/test
