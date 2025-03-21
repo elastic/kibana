@@ -18,9 +18,23 @@ export interface UpsertComponentTemplateAction {
   request: ClusterPutComponentTemplateRequest;
 }
 
+export interface DeleteComponentTemplateAction {
+  type: 'delete_component_template';
+  request: {
+    name: string;
+  };
+}
+
 export interface UpsertIndexTemplateAction {
   type: 'upsert_index_template';
   request: IndicesPutIndexTemplateRequest;
+}
+
+export interface DeleteIndexTemplateAction {
+  type: 'delete_index_template';
+  request: {
+    name: string;
+  };
 }
 
 export interface UpsertIngestPipelineAction {
@@ -29,12 +43,27 @@ export interface UpsertIngestPipelineAction {
   request: IngestPutPipelineRequest;
 }
 
+export interface DeleteIngestPipelineAction {
+  type: 'delete_ingest_pipeline';
+  request: {
+    name: string;
+  };
+}
+
 export interface AppendProcessorToIngestPipelineAction {
   type: 'append_processor_to_ingest_pipeline';
   pipeline: string;
   template: string;
   dataStream: string;
   processor: IngestProcessorContainer;
+  referencePipeline: string;
+}
+
+export interface DeleteProcessorFromIngestPipelineAction {
+  type: 'delete_processor_from_ingest_pipeline';
+  pipeline: string;
+  template: string;
+  dataStream: string;
   referencePipeline: string;
 }
 
@@ -60,35 +89,6 @@ export interface UpdateLifecycleAction {
   };
 }
 
-export interface DeleteComponentTemplateAction {
-  type: 'delete_component_template';
-  request: {
-    name: string;
-  };
-}
-
-export interface DeleteIndexTemplateAction {
-  type: 'delete_index_template';
-  request: {
-    name: string;
-  };
-}
-
-export interface DeleteIngestPipelineAction {
-  type: 'delete_ingest_pipeline';
-  request: {
-    name: string;
-  };
-}
-
-export interface DeleteProcessorFromIngestPipelineAction {
-  type: 'delete_processor_from_ingest_pipeline';
-  pipeline: string;
-  template: string;
-  dataStream: string;
-  referencePipeline: string;
-}
-
 export interface DeleteDatastreamAction {
   type: 'delete_datastream';
   request: {
@@ -108,45 +108,35 @@ export interface DeleteDotStreamsDocumentAction {
   };
 }
 
-export interface SyncAssetListAction {
-  type: 'sync_asset_list';
-  request: {
-    name: string;
-    assetIds: string[];
-  };
-}
-
 export type ElasticsearchAction =
   | UpsertComponentTemplateAction
+  | DeleteComponentTemplateAction
   | UpsertIndexTemplateAction
+  | DeleteIndexTemplateAction
   | UpsertIngestPipelineAction
+  | DeleteIngestPipelineAction
   | AppendProcessorToIngestPipelineAction
+  | DeleteProcessorFromIngestPipelineAction
   | UpsertDatastreamAction
   | UpsertWriteIndexOrRolloverAction
   | UpdateLifecycleAction
-  | UpsertDotStreamsDocumentAction
-  | DeleteDotStreamsDocumentAction
-  | DeleteComponentTemplateAction
-  | DeleteIndexTemplateAction
-  | DeleteIngestPipelineAction
-  | DeleteProcessorFromIngestPipelineAction
   | DeleteDatastreamAction
-  | SyncAssetListAction;
+  | UpsertDotStreamsDocumentAction
+  | DeleteDotStreamsDocumentAction;
 
 export interface ActionsByType {
   upsert_component_template: UpsertComponentTemplateAction[];
-  upsert_index_template: UpsertIndexTemplateAction[];
-  update_lifecycle: UpdateLifecycleAction[];
-  upsert_datastream: UpsertDatastreamAction[];
-  upsert_dot_streams_document: UpsertDotStreamsDocumentAction[];
-  upsert_ingest_pipeline: UpsertIngestPipelineAction[];
-  upsert_write_index_or_rollover: UpsertWriteIndexOrRolloverAction[];
-  sync_asset_list: SyncAssetListAction[];
-  delete_datastream: DeleteDatastreamAction[];
-  delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
-  delete_index_template: DeleteIndexTemplateAction[];
-  delete_ingest_pipeline: DeleteIngestPipelineAction[];
   delete_component_template: DeleteComponentTemplateAction[];
+  upsert_index_template: UpsertIndexTemplateAction[];
+  delete_index_template: DeleteIndexTemplateAction[];
+  upsert_ingest_pipeline: UpsertIngestPipelineAction[];
+  delete_ingest_pipeline: DeleteIngestPipelineAction[];
   append_processor_to_ingest_pipeline: AppendProcessorToIngestPipelineAction[];
   delete_processor_from_ingest_pipeline: DeleteProcessorFromIngestPipelineAction[];
+  upsert_datastream: UpsertDatastreamAction[];
+  upsert_write_index_or_rollover: UpsertWriteIndexOrRolloverAction[];
+  update_lifecycle: UpdateLifecycleAction[];
+  delete_datastream: DeleteDatastreamAction[];
+  upsert_dot_streams_document: UpsertDotStreamsDocumentAction[];
+  delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
 }

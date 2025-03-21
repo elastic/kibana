@@ -547,13 +547,6 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
           name: this._updated_definition.name,
         },
       },
-      {
-        type: 'sync_asset_list',
-        request: {
-          name: this._updated_definition.name,
-          assetIds: [],
-        },
-      },
     ];
   }
 }

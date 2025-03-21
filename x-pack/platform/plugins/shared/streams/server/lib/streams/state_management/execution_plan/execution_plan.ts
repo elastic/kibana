@@ -6,9 +6,7 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { groupBy, orderBy } from 'lodash';
-import type { AssetClient } from '../../assets/asset_client';
 import {
   deleteComponent,
   upsertComponent,
@@ -24,9 +22,9 @@ import {
   deleteIngestPipeline,
   upsertIngestPipeline,
 } from '../../ingest_pipelines/manage_ingest_pipelines';
-import type { StreamsStorageClient } from '../../service';
 import { FailedToExecuteElasticsearchActionsError } from '../errors/failed_to_execute_elasticsearch_actions_error';
 import { FailedToPlanElasticsearchActionsError } from '../errors/failed_to_plan_elasticsearch_actions_error';
+import type { StateDependencies } from '../types';
 import { translateUnwiredStreamPipelineActions } from './translate_unwired_stream_pipeline_actions';
 import type {
   ActionsByType,
@@ -36,7 +34,6 @@ import type {
   DeleteIndexTemplateAction,
   DeleteIngestPipelineAction,
   ElasticsearchAction,
-  SyncAssetListAction,
   UpdateLifecycleAction,
   UpsertComponentTemplateAction,
   UpsertDatastreamAction,
@@ -46,37 +43,28 @@ import type {
   UpsertWriteIndexOrRolloverAction,
 } from './types';
 
-interface ExecutionPlanDependencies {
-  scopedClusterClient: IScopedClusterClient;
-  assetClient: AssetClient;
-  storageClient: StreamsStorageClient;
-  logger: Logger;
-  isServerless: boolean;
-}
-
 export class ExecutionPlan {
-  private dependencies: ExecutionPlanDependencies;
+  private dependencies: StateDependencies;
   private actionsByType: ActionsByType;
 
-  constructor(dependencies: ExecutionPlanDependencies) {
+  constructor(dependencies: StateDependencies) {
     this.dependencies = dependencies;
 
     this.actionsByType = {
       upsert_component_template: [],
-      upsert_index_template: [],
-      update_lifecycle: [],
-      upsert_datastream: [],
-      upsert_dot_streams_document: [],
-      upsert_ingest_pipeline: [],
-      upsert_write_index_or_rollover: [],
-      sync_asset_list: [],
-      delete_datastream: [],
-      delete_dot_streams_document: [],
-      delete_index_template: [],
-      delete_ingest_pipeline: [],
       delete_component_template: [],
+      upsert_index_template: [],
+      delete_index_template: [],
+      upsert_ingest_pipeline: [],
+      delete_ingest_pipeline: [],
       append_processor_to_ingest_pipeline: [],
       delete_processor_from_ingest_pipeline: [],
+      upsert_datastream: [],
+      update_lifecycle: [],
+      upsert_write_index_or_rollover: [],
+      delete_datastream: [],
+      upsert_dot_streams_document: [],
+      delete_dot_streams_document: [],
     };
   }
 
@@ -106,20 +94,19 @@ export class ExecutionPlan {
     try {
       const {
         upsert_component_template,
-        upsert_index_template,
-        update_lifecycle,
-        upsert_datastream,
-        upsert_dot_streams_document,
-        upsert_ingest_pipeline,
-        upsert_write_index_or_rollover,
-        sync_asset_list,
-        delete_datastream,
-        delete_dot_streams_document,
-        delete_index_template,
-        delete_ingest_pipeline,
         delete_component_template,
+        upsert_index_template,
+        delete_index_template,
+        upsert_ingest_pipeline,
+        delete_ingest_pipeline,
         append_processor_to_ingest_pipeline,
         delete_processor_from_ingest_pipeline,
+        upsert_datastream,
+        update_lifecycle,
+        upsert_write_index_or_rollover,
+        delete_datastream,
+        upsert_dot_streams_document,
+        delete_dot_streams_document,
         ...rest
       } = this.actionsByType;
       assertEmptyObject(rest);
@@ -157,7 +144,6 @@ export class ExecutionPlan {
       ]);
 
       await Promise.all([
-        this.syncAssetList(sync_asset_list),
         this.upsertDotStreamsDocuments(upsert_dot_streams_document),
         this.deleteDotStreamsDocuments(delete_dot_streams_document),
       ]);
@@ -192,6 +178,18 @@ export class ExecutionPlan {
     );
   }
 
+  private async upsertWriteIndexOrRollover(actions: UpsertWriteIndexOrRolloverAction[]) {
+    return Promise.all(
+      actions.map((action) =>
+        updateOrRolloverDataStream({
+          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          logger: this.dependencies.logger,
+          name: action.request.name,
+        })
+      )
+    );
+  }
+
   private async updateLifecycle(actions: UpdateLifecycleAction[]) {
     return Promise.all(
       actions.map((action) =>
@@ -218,17 +216,6 @@ export class ExecutionPlan {
     );
   }
 
-  private async upsertDotStreamsDocuments(actions: UpsertDotStreamsDocumentAction[]) {
-    return this.dependencies.storageClient.bulk({
-      operations: actions.map((action) => ({
-        index: {
-          document: action.request,
-          _id: action.request.name,
-        },
-      })),
-    });
-  }
-
   private async upsertIngestPipelines(actions: UpsertIngestPipelineAction[]) {
     const actionWithStreamsDepth = actions.map((action) => ({
       ...action,
@@ -245,30 +232,6 @@ export class ExecutionPlan {
     );
   }
 
-  private async upsertWriteIndexOrRollover(actions: UpsertWriteIndexOrRolloverAction[]) {
-    return Promise.all(
-      actions.map((action) =>
-        updateOrRolloverDataStream({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
-          logger: this.dependencies.logger,
-          name: action.request.name,
-        })
-      )
-    );
-  }
-
-  private async syncAssetList(actions: SyncAssetListAction[]) {
-    return Promise.all(
-      actions.map((action) =>
-        this.dependencies.assetClient.syncAssetList({
-          entityId: action.request.name,
-          entityType: 'stream',
-          assetIds: action.request.assetIds,
-          assetType: 'dashboard',
-        })
-      )
-    );
-  }
 
   private async deleteDatastreams(actions: DeleteDatastreamAction[]) {
     return Promise.all(
@@ -280,16 +243,6 @@ export class ExecutionPlan {
         })
       )
     );
-  }
-
-  private async deleteDotStreamsDocuments(actions: DeleteDotStreamsDocumentAction[]) {
-    return this.dependencies.storageClient.bulk({
-      operations: actions.map((action) => ({
-        delete: {
-          _id: action.request.name,
-        },
-      })),
-    });
   }
 
   private async deleteIndexTemplates(actions: DeleteIndexTemplateAction[]) {
@@ -326,6 +279,27 @@ export class ExecutionPlan {
         })
       )
     );
+  }
+
+  private async upsertDotStreamsDocuments(actions: UpsertDotStreamsDocumentAction[]) {
+    return this.dependencies.storageClient.bulk({
+      operations: actions.map((action) => ({
+        index: {
+          document: action.request,
+          _id: action.request.name,
+        },
+      })),
+    });
+  }
+
+  private async deleteDotStreamsDocuments(actions: DeleteDotStreamsDocumentAction[]) {
+    return this.dependencies.storageClient.bulk({
+      operations: actions.map((action) => ({
+        delete: {
+          _id: action.request.name,
+        },
+      })),
+    });
   }
 }
 

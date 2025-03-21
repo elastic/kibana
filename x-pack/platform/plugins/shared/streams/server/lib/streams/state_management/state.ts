@@ -38,19 +38,6 @@ export class State {
     this.dependencies = dependencies;
   }
 
-  clone(): State {
-    const newStreams = this.all().map((stream) => stream.clone());
-    return new State(newStreams, this.dependencies);
-  }
-
-  static async resync(dependencies: StateDependencies) {
-    const currentState = await State.currentState(dependencies);
-    currentState.all().map((stream) => stream.markAsCreated());
-    // This way all current streams will look like they have been added
-    const emptyState = new State([], dependencies);
-    await currentState.commitChanges(emptyState);
-  }
-
   static async attemptChanges(
     requestedChanges: StreamChange[],
     dependencies: StateDependencies,
@@ -77,6 +64,14 @@ export class State {
         return { result: 'failed_with_rollback' };
       }
     }
+  }
+
+  static async resync(dependencies: StateDependencies) {
+    const currentState = await State.currentState(dependencies);
+    currentState.all().map((stream) => stream.markAsCreated());
+    // This way all current streams will look like they have been added
+    const emptyState = new State([], dependencies);
+    await currentState.commitChanges(emptyState);
   }
 
   static async currentState(dependencies: StateDependencies): Promise<State> {
@@ -115,6 +110,11 @@ export class State {
         error.statusCode
       );
     }
+  }
+
+  clone(): State {
+    const newStreams = this.all().map((stream) => stream.clone());
+    return new State(newStreams, this.dependencies);
   }
 
   async applyRequestedChange(

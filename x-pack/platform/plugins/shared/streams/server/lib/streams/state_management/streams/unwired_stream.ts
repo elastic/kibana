@@ -216,13 +216,6 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
           name: this._updated_definition.name,
         },
       },
-      {
-        type: 'sync_asset_list',
-        request: {
-          name: this._updated_definition.name,
-          assetIds: [],
-        },
-      },
     ];
 
     if (this._updated_definition.ingest.processing.length > 0) {

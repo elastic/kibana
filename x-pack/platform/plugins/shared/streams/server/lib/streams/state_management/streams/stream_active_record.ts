@@ -35,6 +35,25 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     return this._changeStatus;
   }
 
+  // Used only when we try to rollback an existing stream or resync the stored State
+  markAsCreated(): void {
+    this._changeStatus = 'upserted';
+  }
+
+  // Used only when we failed to create a new stream and need to flip the stream to create deletion actions
+  // from the same definition that we attempted to create
+  markAsDeleted(): void {
+    this._changeStatus = 'deleted';
+  }
+
+  hasChanged(): boolean {
+    return this.changeStatus !== 'unchanged';
+  }
+
+  isDeleted(): boolean {
+    return this.changeStatus === 'deleted';
+  }
+
   async applyChange(
     change: StreamChange,
     desiredState: State,
@@ -71,17 +90,6 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     return cascadingChanges;
   }
 
-  // Used only when we try to rollback an existing stream or resync the stored State
-  markAsCreated(): void {
-    this._changeStatus = 'upserted';
-  }
-
-  // Used only when we failed to create a new stream and need to flip the stream to create deletion actions
-  // from the same definition that we attempted to create
-  markAsDeleted(): void {
-    this._changeStatus = 'deleted';
-  }
-
   async validate(desiredState: State, startingState: State): Promise<ValidationResult> {
     try {
       return this.doValidate(desiredState, startingState);
@@ -106,14 +114,6 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     }
 
     throw new Error('Cannot determine Elasticsearch actions for an unchanged stream');
-  }
-
-  hasChanged(): boolean {
-    return this.changeStatus !== 'unchanged';
-  }
-
-  isDeleted(): boolean {
-    return this.changeStatus === 'deleted';
   }
 
   abstract clone(): StreamActiveRecord;
