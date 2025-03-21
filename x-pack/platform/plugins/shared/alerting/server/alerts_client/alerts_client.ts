@@ -14,7 +14,7 @@ import {
   ALERT_UUID,
   ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
-import { chunk, flatMap, get, isEmpty, keys } from 'lodash';
+import { chunk, flatMap, get, isEmpty, keys, difference } from 'lodash';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
@@ -465,11 +465,6 @@ export class AlertsClient<
             })
           );
         } else {
-          // skip writing the alert document if the number of consecutive
-          // active alerts is less than the rule alertDelay threshold
-          if (alert.getActiveCount() < this.options.rule.alertDelay) {
-            continue;
-          }
           activeAlertsToIndex.push(
             buildNewAlert<
               AlertData,
@@ -496,12 +491,11 @@ export class AlertsClient<
     }
 
     const recoveredAlertsToIndex: Array<Alert & AlertData> = [];
+    const legacyRecoveredAlertIds = difference(keys(rawRecoveredAlerts), keys(recoveredAlerts));
+
     for (const id of keys(recoveredAlerts)) {
-      // See if there's an existing alert document
-      // If there is not, log an error because there should be
       if (Object.hasOwn(this.fetchedAlerts.data, id)) {
         const alert = recoveredAlerts[id];
-        const legacyRawAlert = rawRecoveredAlerts[id];
         if (alert) {
           recoveredAlertsToIndex.push(
             buildRecoveredAlert<
@@ -521,7 +515,14 @@ export class AlertsClient<
               kibanaVersion: this.options.kibanaVersion,
             })
           );
-        } else if (legacyRawAlert) {
+        }
+      }
+    }
+
+    for (const id of legacyRecoveredAlertIds) {
+      if (Object.hasOwn(this.fetchedAlerts.data, id)) {
+        const legacyRawAlert = rawRecoveredAlerts[id];
+        if (legacyRawAlert) {
           recoveredAlertsToIndex.push(
             buildUpdatedRecoveredAlert<AlertData>({
               alert: this.fetchedAlerts.data[id],
