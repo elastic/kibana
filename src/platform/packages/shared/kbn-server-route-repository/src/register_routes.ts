@@ -192,8 +192,12 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
             ...options,
             access,
           },
-          // @ts-expect-error
-          security,
+          security: security ?? {
+            authz: {
+              enabled: false,
+              reason: 'Delegates authorization to the es client',
+            },
+          },
           validate: validationObject,
         },
         wrappedHandler
@@ -205,8 +209,12 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         summary: options.summary,
         description: options.description,
         options: omit(options, 'access', 'description', 'summary', 'deprecated', 'discontinued'),
-        // @ts-expect-error
-        security,
+        security: security ?? {
+          authz: {
+            enabled: false,
+            reason: 'Delegates authorization to the es client',
+          },
+        },
       }).addVersion(
         {
           version,
