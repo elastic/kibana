@@ -141,8 +141,7 @@ export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
                 definition.terms = `${definition.regex.substring(0, MAX_CHARS)}...`;
               }
             } catch (error) {
-              // eslint-disable-next-line no-console
-              console.log('Error fetching category definition for row item.', error);
+              // Do nothing
             }
           }
 
