@@ -29,6 +29,7 @@ tasks:
     outputs: []
   lint_with_types:
     script: echo 'stubbed:noop'
+    outputs: []
   jestCI:
     args:
       - '--config'
