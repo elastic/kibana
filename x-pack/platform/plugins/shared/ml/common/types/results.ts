@@ -19,9 +19,7 @@ import type { Datafeed, JobId, ModelSnapshot } from './anomaly_detection_jobs';
 export interface GetAnomaliesTableDataResult {
   anomalies: MlAnomaliesTableRecord[];
   interval: string;
-  examplesByJobId?: {
-    [key: string]: any;
-  };
+  examplesByJobId?: Record<string, Record<string, string[]>>;
 }
 export interface GetStoppedPartitionResult {
   jobs: string[] | Record<string, string[]>;
