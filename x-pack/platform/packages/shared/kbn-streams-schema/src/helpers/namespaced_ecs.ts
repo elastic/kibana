@@ -22,12 +22,33 @@ export const keepFields: string[] = [
   'resource.dropped_attributes_count',
 ];
 
+export const aliases: Record<string, string> = {
+  trace_id: 'trace.id',
+  span_id: 'span.id',
+  severity_text: 'log.level',
+  'body.text': 'message',
+};
+
 export const namespacePrefixes = [
   'body.structured.',
   'attributes.',
   'scope.attributes.',
   'resource.attributes.',
 ];
+
+export function getRegularEcsField(field: string): string {
+  // check whether it starts with a namespace prefix
+  for (const prefix of namespacePrefixes) {
+    if (field.startsWith(prefix)) {
+      return field.slice(prefix.length);
+    }
+  }
+  // check aliases
+  if (aliases[field]) {
+    return aliases[field];
+  }
+  return field;
+}
 
 export function isNamespacedEcsField(field: string): boolean {
   return namespacePrefixes.some((prefix) => field.startsWith(prefix)) || keepFields.includes(field);

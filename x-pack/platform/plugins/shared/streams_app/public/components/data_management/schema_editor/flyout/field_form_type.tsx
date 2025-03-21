@@ -6,6 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import React, { useEffect } from 'react';
+import { getRegularEcsField } from '@kbn/streams-schema';
 import { EcsRecommendation } from './ecs_recommendation';
 import { FieldType } from '../field_type';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -29,7 +30,7 @@ export const FieldFormType = ({
   );
 
   // Propagate recommendation to state if a type is not already set
-  const recommendation = fieldsMetadata?.[field.name]?.type;
+  const recommendation = fieldsMetadata?.[getRegularEcsField(field.name)]?.type;
 
   useEffect(() => {
     if (
