@@ -10,6 +10,7 @@ import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/s
 import { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject } from 'rxjs';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
+import { RunContext } from '@kbn/task-manager-plugin/server';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
   AssistantTool,
@@ -26,6 +27,7 @@ import { PLUGIN_ID } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
 import { CallbackIds, appContextService } from './services/app_context';
 import { createGetElserId, removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
+import { getAttackDiscoveryAlertingRule } from './lib/attack_discovery/schedules/alerting_rule';
 
 export class ElasticAssistantPlugin
   implements
@@ -88,6 +90,35 @@ export class ElasticAssistantPlugin
     this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
 
     registerRoutes(router, this.logger, this.getElserId);
+
+    // Register Attack Discovery schedule rule type
+    plugins.alerting.registerType(
+      getAttackDiscoveryAlertingRule({
+        logger: this.logger,
+        telemetry: core.analytics,
+        kibanaVersion: this.kibanaVersion,
+      })
+    );
+
+    plugins.taskManager.registerTaskDefinitions({
+      attack_discovery_scheduling: {
+        title: 'rule_id_1',
+        description: 'Scheduled attack discovery generation',
+
+        /**
+         * Creates an object that has a run function which performs the task's work,
+         * and an optional cancel function which cancels the task.
+         */
+        createTaskRunner: (context: RunContext) => {
+          return {
+            async run() {
+              const params = context.taskInstance.params;
+              return undefined;
+            },
+          };
+        },
+      },
+    });
 
     return {
       actions: plugins.actions,

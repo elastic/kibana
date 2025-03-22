@@ -78,6 +78,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     };
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+    const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
 
     return {
       core: coreContext,
@@ -138,6 +139,17 @@ export class RequestContextFactory implements IRequestContextFactory {
           licensing: context.licensing,
           logger: this.logger,
           currentUser,
+        });
+      }),
+
+      getAttackDiscoverySchedulingDataClient: memoize(async () => {
+        const currentUser = await getCurrentUser();
+        return this.assistantService.createAttackDiscoverySchedulingDataClient({
+          spaceId: getSpaceId(),
+          licensing: context.licensing,
+          logger: this.logger,
+          currentUser,
+          rulesClient,
         });
       }),
 

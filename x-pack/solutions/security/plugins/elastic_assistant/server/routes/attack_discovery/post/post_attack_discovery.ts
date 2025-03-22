@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import {
   AttackDiscoveryPostRequestBody,
@@ -16,6 +17,19 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import moment from 'moment/moment';
+import { ALERT_UUID } from '@kbn/rule-data-utils';
+import {
+  ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT,
+  ALERT_ATTACK_DISCOVERY_ALERT_IDS,
+  ALERT_ATTACK_DISCOVERY_API_CONFIG,
+  ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN,
+  ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN,
+  ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS,
+  ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
+  ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN,
+  ALERT_ATTACK_DISCOVERY_TITLE,
+  ALERT_ATTACK_DISCOVERY_USERS,
+} from '../../../lib/attack_discovery/schedules/field_names';
 import { ATTACK_DISCOVERY } from '../../../../common/constants';
 import { handleGraphError } from './helpers/handle_graph_error';
 import { updateAttackDiscoveries, updateAttackDiscoveryStatusToRunning } from '../helpers/helpers';
@@ -149,8 +163,50 @@ export const postAttackDiscoveryRoute = (
             size,
             start,
           })
-            .then(({ anonymizedAlerts, attackDiscoveries }) =>
-              updateAttackDiscoveries({
+            .then(({ anonymizedAlerts, attackDiscoveries }) => {
+              const now = new Date().toISOString();
+              const alerts = attackDiscoveries?.map((attack) => {
+                return {
+                  '@timestamp': now,
+                  [ALERT_UUID]: uuidv4(),
+                  [ALERT_ATTACK_DISCOVERY_USERS]: [
+                    {
+                      id: authenticatedUser.profile_uid,
+                      name: authenticatedUser.username,
+                    },
+                  ],
+                  [ALERT_ATTACK_DISCOVERY_TITLE]: attack.title,
+                  [ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN]: attack.detailsMarkdown,
+                  [ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN]: attack.entitySummaryMarkdown,
+                  [ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN]: attack.summaryMarkdown,
+                  [ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS]: attack.mitreAttackTactics,
+                  [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: attack.alertIds,
+                  [ALERT_ATTACK_DISCOVERY_REPLACEMENTS]: replacements,
+                  [ALERT_ATTACK_DISCOVERY_API_CONFIG]: apiConfig,
+                  [ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT]: anonymizedAlerts.length,
+                };
+              });
+              const bulkOperations = alerts?.flatMap((alert) => [
+                {
+                  create: {
+                    _id: alert[ALERT_UUID],
+                    _index: '.internal.alerts-security.attack.discovery.alerts-default-000001',
+                  },
+                },
+                alert,
+              ]);
+              if (bulkOperations) {
+                esClient
+                  .bulk({
+                    // index: '.internal.alerts-security.attack.discovery.alerts-default-000001',
+                    body: bulkOperations,
+                    refresh: true,
+                  })
+                  .then((results) => {
+                    logger.info(`[AD] Ad-hoc attack discoveries: ${JSON.stringify(results)}`);
+                  });
+              }
+              return updateAttackDiscoveries({
                 anonymizedAlerts,
                 apiConfig,
                 attackDiscoveries,
@@ -165,8 +221,8 @@ export const postAttackDiscoveryRoute = (
                 start,
                 startTime,
                 telemetry,
-              })
-            )
+              });
+            })
             .catch((err) =>
               handleGraphError({
                 apiConfig,

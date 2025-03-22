@@ -16,10 +16,16 @@ export const POST_ACTIONS_CONNECTOR_EXECUTE = `${BASE_PATH}/actions/connector/{c
 export const ATTACK_DISCOVERY = `${BASE_PATH}/attack_discovery`;
 export const ATTACK_DISCOVERY_BY_CONNECTOR_ID = `${ATTACK_DISCOVERY}/{connectorId}`;
 export const ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID = `${ATTACK_DISCOVERY}/cancel/{connectorId}`;
+export const ATTACK_DISCOVERY_SCHEDULES = `${ATTACK_DISCOVERY}/schedules`;
+export const ATTACK_DISCOVERY_SCHEDULES_BY_ID = `${ATTACK_DISCOVERY_SCHEDULES}/{id}`;
+export const ATTACK_DISCOVERY_SCHEDULES_FIND = `${ATTACK_DISCOVERY_SCHEDULES}/_find`;
 
 export const CONVERSATIONS_TABLE_MAX_PAGE_SIZE = 100;
 export const ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE = 100;
 export const PROMPTS_TABLE_MAX_PAGE_SIZE = 100;
+
+export const ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID =
+  'assistant.attack_discovery_schedule' as const;
 
 // Knowledge Base
 export const KNOWLEDGE_BASE_ENTRIES_TABLE_MAX_PAGE_SIZE = 100;
