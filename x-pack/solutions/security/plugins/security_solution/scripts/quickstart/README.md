@@ -84,15 +84,19 @@ import { buildCreateRuleExceptionListItemsProps } from './modules/exceptions';
 
 // Core logic
 const bodyWithCreatedRule = await createRule(supertest, log, basicRule);
-const ruleCopies = duplicateRuleParams(bodyWithCreatedRule, 200);
-const { body } = await detectionsClient.
-                  .performRulesBulkAction({
-                    query: { dry_run: false },
-                    body: {
-                      ids: ruleCopies.map((rule) => rule.id),
-                      action: 'duplicate',
-                    },
-                  })
+const { body } = await securitySolutionApi
+          .performRulesBulkAction({
+            query: { dry_run: false },
+            body: {
+              ids: Array(200).fill(bodyWithCreatedRule.id),
+              action: 'duplicate',
+              duplicate: {
+                include_exceptions: true,
+                include_expired_exceptions: false,
+              },
+            },
+          })
+          .expect(200);
 const createdRules: RuleResponse[] = body.attributes.results.created;
 
 // This map looks a bit confusing, but the concept is simple: take the rules we just created and
