@@ -247,7 +247,8 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
           return await (await row.findByTestSubject('indexTableIndexNameLink')).getVisibleText();
         })
       );
-      expect(indexNames.some((i) => i === indexName)).to.be(true);
+      const indexFound = indexNames.some((i) => i === indexName);
+      expect(indexFound).to.equal(true, `Looked for ${indexName}, but only found: ${indexNames}`);
     },
 
     async confirmDeleteModalIsVisible() {
