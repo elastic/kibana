@@ -27,6 +27,7 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
     .post({
       path: RESPONSE_STREAM_API_ENDPOINT.REDUCER_STREAM,
       access: 'internal',
+      security: { authz: { requiredPrivileges: ['some-privilege'] } },
     })
     .addVersion(
       {

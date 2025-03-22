@@ -15,6 +15,12 @@ export function registerRoutes(http: HttpServiceSetup, usageCounter: UsageCounte
   router.get(
     {
       path: '/api/usage_collection_test_plugin',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     async (context, req, res) => {

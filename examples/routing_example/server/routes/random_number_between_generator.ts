@@ -19,6 +19,9 @@ export function registerGetRandomNumberBetweenRoute(router: IRouter) {
   router.get(
     {
       path: RANDOM_NUMBER_BETWEEN_ROUTE_PATH,
+      security: {
+        authz: { enabled: false, reason: 'This route is opted out of authorization because...' },
+      },
       validate: {
         query: schema.object({
           max: schema.number({ defaultValue: 10 }),

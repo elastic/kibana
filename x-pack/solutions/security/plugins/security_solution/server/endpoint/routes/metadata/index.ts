@@ -79,15 +79,15 @@ export function registerEndpointRoutes(
       access: 'public',
       path: HOST_METADATA_GET_ROUTE,
       options: { authRequired: true },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {
         version: '2023-10-31',
-        security: {
-          authz: {
-            requiredPrivileges: ['securitySolution'],
-          },
-        },
         validate: {
           request: GetMetadataRequestSchema,
         },

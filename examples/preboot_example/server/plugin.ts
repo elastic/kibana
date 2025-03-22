@@ -40,6 +40,7 @@ export class PrebootExamplePlugin implements PrebootPlugin {
       prebootRouter.get(
         {
           path: '/api/preboot/state',
+          security: { authz: { enabled: false, reason: '' } },
           validate: false,
           options: { authRequired: false },
         },
@@ -55,6 +56,7 @@ export class PrebootExamplePlugin implements PrebootPlugin {
       prebootRouter.post(
         {
           path: '/api/preboot/complete_setup',
+          security: { authz: { enabled: false, reason: '' } },
           validate: {
             body: schema.object({ shouldReloadConfig: schema.boolean() }),
           },
@@ -69,6 +71,7 @@ export class PrebootExamplePlugin implements PrebootPlugin {
       prebootRouter.post(
         {
           path: '/api/preboot/write_config',
+          security: { authz: { enabled: false, reason: '' } },
           validate: {
             body: schema.object({ key: schema.string(), value: schema.string() }),
           },
@@ -91,6 +94,7 @@ export class PrebootExamplePlugin implements PrebootPlugin {
       prebootRouter.post(
         {
           path: '/api/preboot/connect_to_es',
+          security: { authz: { enabled: false, reason: '' } },
           validate: {
             body: schema.object({
               host: schema.string(),

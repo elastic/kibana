@@ -12,6 +12,7 @@ import type {
   KibanaRequest,
   KibanaResponseFactory,
   RouteRegistrar,
+  RouteSecurity,
 } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import agent from 'elastic-apm-node';
@@ -229,7 +230,7 @@ export function registerRoutes({
           path: pathname,
           options,
           validate: passThroughValidationObject,
-          security,
+          security: security as RouteSecurity,
         },
         wrappedHandler
       );
@@ -243,7 +244,7 @@ export function registerRoutes({
         path: pathname,
         access: pathname.includes('/internal/apm') ? 'internal' : 'public',
         options,
-        security,
+        security: security as RouteSecurity,
       }).addVersion(
         {
           version,

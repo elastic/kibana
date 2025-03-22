@@ -17,6 +17,7 @@ export function defineRoutes(router: IRouter, logger: Logger) {
     .get({
       path: '/internal/sse_examples/clock',
       access: 'internal',
+      security: { authz: { enabled: false, reason: '' } },
     })
     .addVersion(
       {

@@ -43,54 +43,59 @@ const hasUserDataViewRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.get({ path, access: 'internal' }).addVersion(
-      {
-        version: '1',
+    router.versioned
+      .get({
+        path,
+        access: 'internal',
         security: {
           authz: {
             enabled: false,
             reason: 'Authorization provided by saved objects client',
           },
         },
-        validate: {
-          request: {},
-          response: {
-            200: {
-              body: () =>
-                schema.object({
-                  result: schema.boolean(),
-                }),
+      })
+      .addVersion(
+        {
+          version: '1',
+          validate: {
+            request: {},
+            response: {
+              200: {
+                body: () =>
+                  schema.object({
+                    result: schema.boolean(),
+                  }),
+              },
             },
           },
         },
-      },
-      router.handleLegacyErrors(
-        handleErrors(async (ctx, req, res) => {
-          const core = await ctx.core;
-          const savedObjectsClient = core.savedObjects.client;
-          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-          const [, , { dataViewsServiceFactory }] = await getStartServices();
+        router.handleLegacyErrors(
+          handleErrors(async (ctx, req, res) => {
+            const core = await ctx.core;
+            const savedObjectsClient = core.savedObjects.client;
+            const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+            const [, , { dataViewsServiceFactory }] = await getStartServices();
 
-          const dataViewsService = await dataViewsServiceFactory(
-            savedObjectsClient,
-            elasticsearchClient,
-            req
-          );
+            const dataViewsService = await dataViewsServiceFactory(
+              savedObjectsClient,
+              elasticsearchClient,
+              req
+            );
 
-          const result = await hasUserDataView({
-            dataViewsService,
-            usageCollection,
-            counterName: `${req.route.method} ${path}`,
-          });
+            const result = await hasUserDataView({
+              dataViewsService,
+              usageCollection,
+              counterName: `${req.route.method} ${path}`,
+            });
 
-          const body: { result: boolean } = { result };
+            const body: { result: boolean } = { result };
 
-          return res.ok({
-            body,
-          });
-        })
-      )
-    );
+            return res.ok({
+              body,
+            });
+          })
+        )
+      );
   };
 
 export const registerHasUserDataViewRoute = hasUserDataViewRouteFactory(

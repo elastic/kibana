@@ -195,20 +195,36 @@ it.each([
       createRoutes: (getRouter) => {
         const router1 = getRouter(Symbol('myPlugin'));
         router1.get(
-          { path: '/api/public-test', validate: false, options: { access: 'public' } },
+          {
+            path: '/api/public-test',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { access: 'public' },
+          },
           (_, __, res) => res.ok()
         );
         router1.post(
-          { path: '/api/public-test', validate: false, options: { access: 'public' } },
+          {
+            path: '/api/public-test',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { access: 'public' },
+          },
           (_, __, res) => res.ok()
         );
         router1.get(
-          { path: '/api/public-test/{id}', validate: false, options: { access: 'public' } },
+          {
+            path: '/api/public-test/{id}',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+            options: { access: 'public' },
+          },
           (_, __, res) => res.ok()
         );
         router1.get(
           {
             path: '/api/internal-test',
+            security: { authz: { enabled: false, reason: '' } },
             validate: false,
             options: {
               /* empty */
@@ -218,11 +234,19 @@ it.each([
         );
 
         router1.versioned
-          .get({ path: '/api/versioned', access: 'public' })
+          .get({
+            path: '/api/versioned',
+            security: { authz: { enabled: false, reason: '' } },
+            access: 'public',
+          })
           .addVersion({ version: '2023-10-31', validate: false }, (_, __, res) => res.ok());
 
         router1.versioned
-          .get({ path: '/api/versioned-internal', access: 'internal' })
+          .get({
+            path: '/api/versioned-internal',
+            security: { authz: { enabled: false, reason: '' } },
+            access: 'internal',
+          })
           .addVersion(
             {
               version: '1',
@@ -239,9 +263,30 @@ it.each([
           );
 
         const router2 = getRouter(Symbol('myOtherPlugin'));
-        router2.get({ path: '/api/my-other-plugin', validate: false }, (_, __, res) => res.ok());
-        router2.post({ path: '/api/my-other-plugin', validate: false }, (_, __, res) => res.ok());
-        router2.put({ path: '/api/my-other-plugin', validate: false }, (_, __, res) => res.ok());
+        router2.get(
+          {
+            path: '/api/my-other-plugin',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+          },
+          (_, __, res) => res.ok()
+        );
+        router2.post(
+          {
+            path: '/api/my-other-plugin',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+          },
+          (_, __, res) => res.ok()
+        );
+        router2.put(
+          {
+            path: '/api/my-other-plugin',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+          },
+          (_, __, res) => res.ok()
+        );
       },
     });
     const result = await supertest(server.listener).get('/api/oas').query(queryParam);
