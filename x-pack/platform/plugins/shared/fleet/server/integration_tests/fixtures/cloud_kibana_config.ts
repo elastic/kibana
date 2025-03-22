@@ -11,6 +11,9 @@ export const CLOUD_KIBANA_CONFIG = {
       internal: {
         registry: {
           kibanaVersionCheckEnabled: false,
+          spec: {
+            min: '1.0',
+          },
         },
       },
       packages: [
