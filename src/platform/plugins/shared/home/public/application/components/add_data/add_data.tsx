@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { FC, MouseEvent } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,6 +19,9 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  UseEuiTheme,
+  mathWithUnits,
+  useEuiMinBreakpoint,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -37,19 +41,33 @@ interface Props {
 
 export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isCloudEnabled }) => {
   const { trackUiMetric, guidedOnboardingService } = getServices();
+  const euiBreakpointM = useEuiMinBreakpoint('m');
+  const euiBreakpointL = useEuiMinBreakpoint('l');
+  const styles = ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'block',
+      marginBlock: `0 -${mathWithUnits([euiTheme.size.xl, euiTheme.size.xs], (x, y) => x + y)}`,
+      marginInline: 'auto',
+      [euiBreakpointM]: {
+        marginBlockEnd: euiTheme.size.xl,
+      },
+      [euiBreakpointL]: {
+        inlineSize: '80%',
+      },
+    });
+
   const canAccessIntegrations = application.capabilities.navLinks.integrations;
   if (canAccessIntegrations) {
     return (
       <KibanaPageTemplate.Section
         bottomBorder
         paddingSize="xl"
-        className="homDataAdd"
-        aria-labelledby="homDataAdd__title"
+        aria-labelledby="homeDataAdd__title"
       >
         <EuiFlexGroup alignItems="flexEnd">
           <EuiFlexItem>
             <EuiTitle size="s">
-              <h2 id="homDataAdd__title">
+              <h2 id="homeDataAdd__title">
                 <FormattedMessage
                   id="home.addData.sectionTitle"
                   defaultMessage="Get started by adding integrations"
@@ -135,7 +153,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                 alt={i18n.translate('home.addData.illustration.alt.text', {
                   defaultMessage: 'Illustration of Elastic data integrations',
                 })}
-                className="homDataAdd__illustration"
+                css={styles}
                 src={
                   addBasePath('/plugins/kibanaReact/assets/') +
                   (isDarkMode
