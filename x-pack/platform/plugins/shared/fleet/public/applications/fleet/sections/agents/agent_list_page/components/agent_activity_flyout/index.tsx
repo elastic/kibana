@@ -46,7 +46,15 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   refreshAgentActivity: boolean;
   setSearch: (search: string) => void;
   setSelectedStatus: (status: string[]) => void;
-}> = ({ onClose, onAbortSuccess, refreshAgentActivity, setSearch, setSelectedStatus }) => {
+  openManageAutoUpgradeModal: (policyId: string) => void;
+}> = ({
+  onClose,
+  onAbortSuccess,
+  refreshAgentActivity,
+  setSearch,
+  setSelectedStatus,
+  openManageAutoUpgradeModal,
+}) => {
   const { notifications } = useStartServices();
   const { data: agentPoliciesData } = useGetAgentPolicies({
     perPage: SO_SEARCH_LIMIT,
@@ -75,7 +83,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
       currentActions.map((a) => ({
         ...a,
         newPolicyId: getAgentPolicyName(a.newPolicyId ?? ''),
-        policyId: getAgentPolicyName(a.policyId ?? ''),
+        policyId: a.policyId ? a.policyId : getAgentPolicyName(a.newPolicyId ?? ''),
       })),
     [currentActions, getAgentPolicyName]
   );
@@ -99,6 +107,11 @@ export const AgentActivityFlyout: React.FunctionComponent<{
         }),
       });
     }
+  };
+  const onClickManageAutoUpgradeAgents = async (action: ActionStatus) => {
+    //  use the policy id from the action to manage
+    onClose();
+    openManageAutoUpgradeModal(action.policyId!);
   };
 
   const onClickShowMore = () => {
@@ -153,6 +166,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
           currentActions={currentActionsEnriched}
           abortUpgrade={abortUpgrade}
           onClickViewAgents={onClickViewAgents}
+          onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
           areActionsFullyLoaded={areActionsFullyLoaded}
           onClickShowMore={onClickShowMore}
           dateFilter={dateFilter}

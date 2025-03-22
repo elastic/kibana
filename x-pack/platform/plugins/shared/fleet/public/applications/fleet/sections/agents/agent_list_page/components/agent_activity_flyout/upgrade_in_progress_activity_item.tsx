@@ -16,24 +16,33 @@ import {
   EuiButton,
   EuiLink,
   useEuiTheme,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ActionStatus } from '../../../../../types';
-import { useStartServices } from '../../../../../hooks';
+import { useStartServices, useGetAutoUpgradeAgentsStatusQuery } from '../../../../../hooks';
 
 import { formattedTime, inProgressDescription, inProgressTitle } from './helpers';
+
 import { ViewAgentsButton } from './view_agents_button';
 
 export const UpgradeInProgressActivityItem: React.FunctionComponent<{
   action: ActionStatus;
   abortUpgrade: (action: ActionStatus) => Promise<void>;
   onClickViewAgents: (action: ActionStatus) => void;
-}> = ({ action, abortUpgrade, onClickViewAgents }) => {
+  onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
+}> = ({ action, abortUpgrade, onClickViewAgents, onClickManageAutoUpgradeAgents }) => {
+  // get the total agents in policy from the policy id
+  const { data: autoUpgradeAgentsStatus } = useGetAutoUpgradeAgentsStatusQuery(
+    action.policyId ?? ''
+  );
+  const totalAgentsInPolicy = autoUpgradeAgentsStatus?.totalAgents ?? null;
+
   const { docLinks } = useStartServices();
   const theme = useEuiTheme();
-
+  const isAutomaticUpgrade = action.is_automatic;
   const [isAborting, setIsAborting] = useState(false);
   const onClickAbortUpgrade = useCallback(async () => {
     try {
@@ -81,7 +90,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                     }}
                   />
                 ) : (
-                  inProgressTitle(action)
+                  inProgressTitle(action, totalAgentsInPolicy ?? 0)
                 )}
               </EuiText>
             </EuiFlexItem>
@@ -120,9 +129,27 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                 </p>
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
-            </EuiFlexItem>
+
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
+              </EuiFlexItem>
+              {isAutomaticUpgrade && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={() => onClickManageAutoUpgradeAgents(action)}
+                    size="m"
+                    flush="left"
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.agentActivityFlyout.manageAutoUpgradeAgents"
+                      defaultMessage="Manage auto-upgrade agents"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+
             <EuiFlexItem grow={false}>
               {showCancelButton ? (
                 <EuiButton

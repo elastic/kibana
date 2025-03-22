@@ -615,6 +615,7 @@ export const GetActionStatusResponseSchema = schema.object({
   items: schema.arrayOf(
     schema.object({
       actionId: schema.string(),
+      is_automatic: schema.maybe(schema.boolean()),
       nbAgentsActionCreated: schema.number({
         meta: {
           description: 'number of agents included in action from kibana',
