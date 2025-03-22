@@ -2711,7 +2711,8 @@
     {
       "query": "from a_index | dissect textField \"%{firstWord}\" option ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting '='"
+        "SyntaxError: mismatched input '<EOF>' expecting '='",
+        "Expected [APPEND_SEPARATOR] in [DISSECT] but found [option]"
       ],
       "warning": []
     },
@@ -2719,14 +2720,14 @@
       "query": "from a_index | dissect textField \"%{firstWord}\" option = ",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}",
-        "Invalid option for DISSECT: [option]"
+        "Expected [APPEND_SEPARATOR] in [DISSECT] but found [option]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | dissect textField \"%{firstWord}\" option = 1",
       "error": [
-        "Invalid option for DISSECT: [option]"
+        "Expected [APPEND_SEPARATOR] in [DISSECT] but found [option]"
       ],
       "warning": []
     },
@@ -2738,14 +2739,14 @@
     {
       "query": "from a_index | dissect textField \"%{firstWord}\" ignore_missing = true",
       "error": [
-        "Invalid option for DISSECT: [ignore_missing]"
+        "Expected [APPEND_SEPARATOR] in [DISSECT] but found [ignore_missing]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | dissect textField \"%{firstWord}\" append_separator = true",
       "error": [
-        "Invalid value for DISSECT append_separator: expected a string, but was [true]"
+        "Invalid value for DISSECT APPEND_SEPARATOR: expected a string, but was [true]"
       ],
       "warning": []
     },
