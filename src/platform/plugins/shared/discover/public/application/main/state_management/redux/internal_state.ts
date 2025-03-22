@@ -69,7 +69,7 @@ const initialState: DiscoverInternalState = {
 type TabActionPayload<T extends { [key: string]: unknown } = {}> = { tabId: string } & T;
 type TabAction<T extends { [key: string]: unknown } = {}> = PayloadAction<TabActionPayload<T>>;
 
-const withTab = <TAction extends TabAction<{}>>(
+const withTab = <TAction extends TabAction>(
   state: DiscoverInternalState,
   action: TAction,
   fn: (tab: TabState) => void
@@ -80,18 +80,6 @@ const withTab = <TAction extends TabAction<{}>>(
     fn(tab);
   }
 };
-
-const createTabReducer =
-  <TPayload extends { [key: string]: unknown }>(
-    reducer: (tab: TabState, payload: TPayload, state: DiscoverInternalState) => void
-  ) =>
-  (state: DiscoverInternalState, action: PayloadAction<TabActionPayload<TPayload>>) => {
-    const tab = state.tabs.byId[action.payload.tabId];
-
-    if (tab) {
-      reducer(tab, action.payload, state);
-    }
-  };
 
 export const internalStateSlice = createSlice({
   name: 'internalState',
@@ -189,13 +177,11 @@ export const internalStateSlice = createSlice({
         }),
     },
 
-    resetOnSavedSearchChange: (state, action: TabAction) => {
+    resetOnSavedSearchChange: (state, action: TabAction) =>
       withTab(state, action, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;
-      });
-
-      state.expandedDoc = undefined;
-    },
+        state.expandedDoc = undefined;
+      }),
   },
   extraReducers: (builder) => {
     builder.addCase(loadDataViewList.fulfilled, (state, action) => {
@@ -259,7 +245,7 @@ export const createInternalStateAsyncThunk: CreateInternalStateAsyncThunk =
 type WithoutTabId<T> = Omit<T, 'tabId'>;
 type VoidIfEmpty<T> = keyof T extends never ? void : T;
 
-const createTabInjector =
+export const createTabInjector =
   (tabId: string) =>
   <TPayload extends TabActionPayload, TReturn>(actionCreator: (params: TPayload) => TReturn) =>
   (payload: VoidIfEmpty<WithoutTabId<TPayload>>) => {
