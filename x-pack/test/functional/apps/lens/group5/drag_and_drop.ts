@@ -259,7 +259,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await lens.assertFocusedField('clientip');
       });
       it('should duplicate an element in a group', async () => {
-        await lens.dimensionKeyboardDragDrop('lnsXY_yDimensionPanel', 0, 1);
+        await lens.dimensionKeyboardDragDrop('lnsXY_yDimensionPanel', 0, 2);
         expect(await lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
           'Count of records',
           'Median of bytes',
