@@ -21,6 +21,7 @@ export interface ObservabilityStatusContent {
   goToAppTitle: string;
   goToAppLink: string;
   weight: number;
+  showInServerless: boolean;
 }
 
 export const getContent = (
@@ -40,7 +41,7 @@ export const getContent = (
           'Fast, easy, and scalable centralized log monitoring with out-of-the-box support for common data sources.',
       }),
       addTitle: i18n.translate('xpack.observability.statusVisualization.logs.link', {
-        defaultMessage: 'Add integrations',
+        defaultMessage: 'Add logs',
       }),
       addLink: http.basePath.prepend('/app/integrations/browse?q=logs'),
       learnMoreLink: docLinks.links.observability.monitorLogs,
@@ -49,6 +50,7 @@ export const getContent = (
       }),
       goToAppLink: logsLocator.getRedirectUrl({}),
       weight: 1,
+      showInServerless: true,
     },
     {
       id: 'apm',
@@ -69,6 +71,7 @@ export const getContent = (
       }),
       goToAppLink: http.basePath.prepend('/app/apm/services'),
       weight: 3,
+      showInServerless: true,
     },
     {
       id: 'infra_metrics',
@@ -79,7 +82,7 @@ export const getContent = (
         defaultMessage: 'Stream, visualize, and analyze your infrastructure metrics.',
       }),
       addTitle: i18n.translate('xpack.observability.statusVisualization.metrics.link', {
-        defaultMessage: 'Add integrations',
+        defaultMessage: 'Add metrics',
       }),
       addLink: http.basePath.prepend('/app/integrations/browse?q=metrics'),
       learnMoreLink: docLinks.links.observability.analyzeMetrics,
@@ -88,6 +91,7 @@ export const getContent = (
       }),
       goToAppLink: http.basePath.prepend('/app/metrics/inventory'),
       weight: 2,
+      showInServerless: true,
     },
     {
       id: 'uptime',
@@ -107,6 +111,7 @@ export const getContent = (
       }),
       goToAppLink: http.basePath.prepend('/app/uptime'),
       weight: 4,
+      showInServerless: false,
     },
     {
       id: 'ux',
@@ -127,6 +132,7 @@ export const getContent = (
       }),
       goToAppLink: http.basePath.prepend('/app/ux'),
       weight: 5,
+      showInServerless: false,
     },
     {
       id: 'alert',
@@ -147,6 +153,7 @@ export const getContent = (
       }),
       goToAppLink: http.basePath.prepend('/app/observability/alerts'),
       weight: 6,
+      showInServerless: false,
     },
   ];
 };

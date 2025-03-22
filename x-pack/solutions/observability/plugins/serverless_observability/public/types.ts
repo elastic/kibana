@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DiscoverSetup } from '@kbn/discover-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { ObservabilityPublicSetup } from '@kbn/observability-plugin/public';
@@ -36,7 +35,6 @@ export interface ServerlessObservabilityPublicStartDependencies {
   observabilityShared: ObservabilitySharedPluginStart;
   serverless: ServerlessPluginStart;
   management: ManagementStart;
-  data: DataPublicPluginStart;
   security: SecurityPluginStart;
   streams?: StreamsPluginStart;
 }
