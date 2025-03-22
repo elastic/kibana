@@ -6,7 +6,8 @@
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop"
+      "@emotion/react/types/css-prop",
+      "../../../../../typings/emotion.d.ts",
     ]
   },
   "include": [
@@ -42,5 +43,6 @@
     "@kbn/ai-assistant-icon",
     "@kbn/datemath",
     "@kbn/security-plugin-types-common",
+    "@kbn/ai-assistant-cta",
   ]
 }

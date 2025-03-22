@@ -26,6 +26,20 @@ const installButton = i18n.translate(
   }
 );
 
+const installingButton = i18n.translate(
+  'xpack.aiAssistant.callToAction.installKnowledgeBase.installingButtonLabel',
+  {
+    defaultMessage: 'Installing Knowledge Base',
+  }
+);
+
+const unavailableTooltip = i18n.translate(
+  'xpack.aiAssistant.callToAction.installKnowledgeBase.installingButtonUnavailablToolTip',
+  {
+    defaultMessage: 'Knowledge Base unavailable, please see documentation for more details.',
+  }
+);
+
 /**
  * Translations for the `InstallKnowledgeBaseComponent`.
  */
@@ -33,4 +47,6 @@ export const translations = {
   cardTitle,
   cardDescription,
   installButton,
+  installingButton,
+  unavailableTooltip,
 };
