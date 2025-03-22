@@ -83,5 +83,7 @@ steps:
       PING_SLACK_TEAM: "@appex-qa-team"
     retry:
       automatic:
+        - exit_status: 10
+          limit: 0
         - exit_status: '*'
           limit: 1
