@@ -6,6 +6,9 @@
  */
 
 import { ReactNode } from 'react';
+import { TopAlert } from '../..';
+
+export const NUM_OF_ALERTS = 10000;
 
 export interface AlertDetailsSource {
   label: ReactNode | string;
@@ -14,4 +17,9 @@ export interface AlertDetailsSource {
 
 export interface AlertDetailsAppSectionProps {
   setSources: React.Dispatch<React.SetStateAction<AlertDetailsSource[] | undefined>>;
+}
+
+export interface AlertInsightProps {
+  alert: TopAlert;
+  onViewRelatedAlertsClick: () => void;
 }
