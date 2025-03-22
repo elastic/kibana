@@ -120,6 +120,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
         feature.id = emsIdField ? feature!.properties![emsIdField.id] : index;
       });
 
+      console.log('ft, ', featureCollection);
       return {
         data: featureCollection,
         meta: {},

@@ -181,6 +181,28 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
               } as Partial<JoinDescriptor>);
             }}
           />
+          <AddJoinButton
+            disabledReason={i18n.translate(
+              'xpack.maps.layerPanel.joinEditor.esqlJoin.esqlSingleJoinMsg',
+              {
+                defaultMessage: 'Vector tiles can only support a single join.',
+              }
+            )}
+            isDisabled={layer.getSource().isMvt() && joins.length >= 1}
+            label={i18n.translate('xpack.maps.layerPanel.joinEditor.esqlJoin.addButtonLabel', {
+              defaultMessage: 'Add ES|QL join',
+            })}
+            onClick={() => {
+              addJoin({
+                right: {
+                  type: SOURCE_TYPES.ES_ESQL_TERM_SOURCE,
+                  id: uuidv4(),
+                  applyGlobalQuery: true,
+                  applyGlobalTime: true,
+                },
+              } as Partial<JoinDescriptor>);
+            }}
+          />
         </EuiTextAlign>
       </EuiSkeletonText>
     </div>
