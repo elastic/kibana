@@ -7,15 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/kbn-test'],
-  globals: {
-    /** @type {import('@kbn/scout-info').ScoutJestGlobals} */
-    scout: {
-      configFilePath: __filename,
-      testRunConfigCategory: 'unit-test',
-    },
-  },
-};
+/**
+ * Configuration options for the Scout Jest reporter
+ */
+export interface ScoutJestReporterOptions {
+  name?: string;
+  runId?: string;
+  outputPath?: string;
+}

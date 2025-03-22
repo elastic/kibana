@@ -7,15 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/kbn-test'],
-  globals: {
-    /** @type {import('@kbn/scout-info').ScoutJestGlobals} */
-    scout: {
-      configFilePath: __filename,
-      testRunConfigCategory: 'unit-test',
-    },
-  },
-};
+require('@kbn/babel-register').install();
+module.exports = require('./reporter').ScoutJestReporter;
