@@ -30,6 +30,13 @@ paths:
       operationId: get-upgrade-default
       tags:
         - upgrade
+      parameters:
+        - in: path
+          name: index
+          description: The name of the index.
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
