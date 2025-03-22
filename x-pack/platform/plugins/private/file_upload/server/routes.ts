@@ -162,13 +162,19 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       },
       async (context, request, response) => {
         try {
-          const { index, settings, mappings, ingestPipelines } = request.body;
+          const { index, settings, mappings, ingestPipelines, existingIndex } = request.body;
           const esClient = (await context.core).elasticsearch.client;
 
           await updateTelemetry();
 
           const { initializeImport } = importDataProvider(esClient);
-          const result = await initializeImport(index, settings, mappings, ingestPipelines);
+          const result = await initializeImport(
+            index,
+            settings,
+            mappings,
+            ingestPipelines,
+            existingIndex
+          );
 
           return response.ok({ body: result });
         } catch (e) {

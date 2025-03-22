@@ -25,7 +25,7 @@ describe('merge_tools', () => {
         } as never as FileWrapper,
       ];
 
-      const result = createMergedMappings(files);
+      const result = createMergedMappings(files, null);
       expect(result.mergedMappings).toEqual({ properties: { field1: { type: 'text' } } });
       expect(result.mappingClashes).toEqual([]);
     });
@@ -40,7 +40,7 @@ describe('merge_tools', () => {
         } as never as FileWrapper,
       ];
 
-      const result = createMergedMappings(files);
+      const result = createMergedMappings(files, null);
       expect(result.mergedMappings).toEqual({ properties: { field1: { type: 'text' } } });
       expect(result.mappingClashes).toEqual([]);
     });
@@ -55,7 +55,7 @@ describe('merge_tools', () => {
         } as never as FileWrapper,
       ];
 
-      const result = createMergedMappings(files);
+      const result = createMergedMappings(files, null);
       expect(result.mergedMappings).toEqual({ properties: { field1: { type: 'text' } } });
       expect(result.mappingClashes).toEqual([]);
     });
@@ -72,7 +72,7 @@ describe('merge_tools', () => {
         } as never as FileWrapper,
       ];
 
-      const result = createMergedMappings(files);
+      const result = createMergedMappings(files, null);
       expect(result.mergedMappings).toEqual({ properties: { field1: { type: 'text' } } });
       expect(result.mappingClashes).toEqual([
         {
@@ -99,7 +99,7 @@ describe('merge_tools', () => {
         } as never as FileWrapper,
       ];
 
-      const result = createMergedMappings(files);
+      const result = createMergedMappings(files, null);
 
       expect(result.mergedMappings).toEqual({ properties: { field1: { type: 'text' } } });
       expect(result.mappingClashes).toEqual([
@@ -154,7 +154,7 @@ describe('merge_tools', () => {
         { fileName: 'file3', supportedFormat: true } as FileAnalysis,
       ];
 
-      const result = getMappingClashInfo(mappingClashes, filesStatus);
+      const result = getMappingClashInfo(mappingClashes, undefined, filesStatus);
 
       expect(result).toEqual([
         { fileName: 'file1', clash: true, clashType: CLASH_TYPE.MAPPING },

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { FileManager } from './file_manager';
+export { FileStatus } from './file_status';

@@ -29,6 +29,10 @@ export const UploadFileButton: React.FC<Props> = ({ isSetup }) => {
         onUploadComplete: (results: FileUploadResults) => {
           setSelectedIndices([results.index]);
         },
+        flyoutContent: {
+          showFileSummary: true,
+          showFileContentPreview: true,
+        },
       });
     }
   }, [setSelectedIndices, uiActions]);

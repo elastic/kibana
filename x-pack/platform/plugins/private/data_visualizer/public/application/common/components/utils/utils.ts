@@ -7,6 +7,7 @@
 
 import { isEqual } from 'lodash';
 import type { AnalysisResult, InputOverrides } from '@kbn/file-upload-plugin/common';
+import type { FormattedOverrides } from '@kbn/file-upload-plugin/common/types';
 import { MB, FILE_FORMATS, NO_TIME_FORMAT } from '../../../../../common/constants';
 
 export const DEFAULT_LINES_TO_SAMPLE = 1000;
@@ -56,7 +57,7 @@ export function readFile(file: File): Promise<{ fileContents: string; data: Arra
 }
 
 export function createUrlOverrides(overrides: InputOverrides, originalSettings: InputOverrides) {
-  const formattedOverrides: InputOverrides = {};
+  const formattedOverrides: FormattedOverrides = {};
   for (const o in overrideDefaults) {
     if (Object.hasOwn(overrideDefaults, o)) {
       let value = overrides[o];
@@ -83,10 +84,13 @@ export function createUrlOverrides(overrides: InputOverrides, originalSettings: 
     ) {
       formattedOverrides.format = originalSettings.format;
     }
+  }
 
-    if (Array.isArray(formattedOverrides.column_names)) {
-      formattedOverrides.column_names = formattedOverrides.column_names.join();
-    }
+  if (
+    formattedOverrides.format === FILE_FORMATS.DELIMITED &&
+    Array.isArray(formattedOverrides.column_names)
+  ) {
+    formattedOverrides.column_names = formattedOverrides.column_names.join();
   }
 
   if (

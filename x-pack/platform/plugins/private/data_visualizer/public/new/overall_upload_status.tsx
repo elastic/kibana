@@ -73,6 +73,7 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
               key={i}
               deleteFile={() => {}}
               index={i}
+              lite={false}
             />
           ))}
           <EuiSpacer />
