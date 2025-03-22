@@ -12,6 +12,8 @@ import {
   isWhereExpression,
   isFieldExpression,
   Walker,
+  ESQLCommand,
+  ESQLColumn,
 } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
 import {
@@ -20,7 +22,9 @@ import {
   isFunctionOperatorParam,
   isLiteralItem,
 } from '../shared/helpers';
-import { FunctionDefinitionTypes } from './types';
+import { FieldType, FunctionDefinitionTypes } from './types';
+import { getMessageFromId } from '../validation/errors';
+import { ESQLRealField } from '../validation/types';
 
 function isAggregation(arg: ESQLAstItem): arg is ESQLFunction {
   return (
@@ -105,3 +109,29 @@ export const ENRICH_MODES = [
     }),
   },
 ];
+
+export const validateColumnForGrokDissect = (
+  command: ESQLCommand,
+  { fields }: { fields: Map<string, ESQLRealField> }
+) => {
+  const acceptedColumnTypes: FieldType[] = ['keyword', 'text'];
+  const astCol = command.args[0] as ESQLColumn;
+  const columnRef = fields.get(astCol.name);
+
+  if (columnRef && !acceptedColumnTypes.includes(columnRef.type)) {
+    return [
+      getMessageFromId({
+        messageId: 'unsupportedColumnTypeForCommand',
+        values: {
+          command: command.name.toUpperCase(),
+          type: acceptedColumnTypes.join(', '),
+          givenType: columnRef.type,
+          column: astCol.name,
+        },
+        locations: astCol.location,
+      }),
+    ];
+  }
+
+  return [];
+};

@@ -8,7 +8,7 @@
  */
 
 import { ESQLAstMetricsCommand, ESQLCommand, ESQLMessage, isIdentifier, walk } from '@kbn/esql-ast';
-import { ESQLAstField, ESQLAstItem, ESQLFunction } from '@kbn/esql-ast/src/types';
+import { ESQLAstField, ESQLAstItem, ESQLFunction, ESQLSource } from '@kbn/esql-ast/src/types';
 import {
   isAggFunction,
   isFunctionOperatorParam,
@@ -25,7 +25,7 @@ import {
 } from '../../../..';
 import { errors } from '../../errors';
 import { validateFunction } from '../../function_validation';
-import { validateColumnForCommand, validateSources } from '../../validation';
+import { validateColumnForCommand, validateSource } from '../../validation';
 
 /**
  * Validates the METRICS source command:
@@ -40,7 +40,7 @@ export const validate = (
   const { sources, aggregates, grouping } = command;
 
   // METRICS <sources> ...
-  messages.push(...validateSources(command, sources, references));
+  messages.push(...validateSources(sources, references));
 
   // ... <aggregates> ...
   if (aggregates && aggregates.length) {
@@ -54,6 +54,16 @@ export const validate = (
 
   return messages;
 };
+
+function validateSources(sources: ESQLSource[], references: ReferenceMaps): ESQLMessage[] {
+  const messages: ESQLMessage[] = [];
+
+  for (const source of sources) {
+    messages.push(...validateSource(source, references));
+  }
+
+  return messages;
+}
 
 /**
  * Validates aggregates fields: `... <aggregates> ...`.
