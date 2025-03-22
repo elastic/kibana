@@ -33,10 +33,17 @@ export const resolveLogView = (
   logViewAttributes: LogViewAttributes,
   dataViewsService: DataViewsContract,
   logSourcesService: LogSourcesService,
-  config: LogViewsStaticConfig
+  config: LogViewsStaticConfig,
+  useDataViewLazy: boolean = false
 ): Promise<ResolvedLogView> => {
   if (logViewAttributes.logIndices.type === 'index_name') {
-    return resolveLegacyReference(logViewId, logViewAttributes, dataViewsService, config);
+    return resolveLegacyReference(
+      logViewId,
+      logViewAttributes,
+      dataViewsService,
+      confi,
+      useDataViewLazyg
+    );
   } else if (logViewAttributes.logIndices.type === 'data_view') {
     return resolveDataViewReference(logViewAttributes, dataViewsService);
   } else {
@@ -44,7 +51,8 @@ export const resolveLogView = (
       logViewId,
       logViewAttributes,
       dataViewsService,
-      logSourcesService
+      logSourcesService,
+      useDataViewLazy
     );
   }
 };
@@ -53,40 +61,50 @@ const resolveLegacyReference = async (
   logViewId: string,
   logViewAttributes: LogViewAttributes,
   dataViewsService: DataViewsContract,
-  config: LogViewsStaticConfig
+  config: LogViewsStaticConfig,
+  useDataViewLazy: boolean = false
 ): Promise<ResolvedLogView> => {
   if (logViewAttributes.logIndices.type !== 'index_name') {
     throw new Error('This function can only resolve legacy references');
   }
 
   const indices = logViewAttributes.logIndices.indexName;
-
-  const dataViewReference = await dataViewsService
-    .create(
-      {
+  const createDataViewPromise = useDataViewLazy
+    ? dataViewsService.createDataViewLazy({
         id: `log-view-${logViewId}`,
         name: logViewAttributes.name,
         title: indices,
         timeFieldName: TIMESTAMP_FIELD,
         allowNoIndex: true,
-      },
-      false,
-      false
-    )
-    .catch((error) => {
-      throw new ResolveLogViewError(`Failed to create Data View reference: ${error}`, error);
-    });
+      })
+    : dataViewsService.create(
+        {
+          id: `log-view-${logViewId}`,
+          name: logViewAttributes.name,
+          title: indices,
+          timeFieldName: TIMESTAMP_FIELD,
+          allowNoIndex: true,
+        },
+        false,
+        false
+      );
+  const dataViewReference = await createDataViewPromise.catch((error) => {
+    throw new ResolveLogViewError(`Failed to create Data View reference: ${error}`, error);
+  });
 
   return {
     indices,
     timestampField: TIMESTAMP_FIELD,
     tiebreakerField: TIEBREAKER_FIELD,
     messageField: config.messageFields ?? defaultLogViewsStaticConfig.messageFields,
-    fields: dataViewReference.fields,
+    // TODO: Fix " Property 'fields' does not exist on type 'DataView | DataViewLazy'."
+    fields: useDataViewLazy ? dataViewReference.fields : [],
     runtimeMappings: {},
     columns: logViewAttributes.logColumns,
     name: logViewAttributes.name,
     description: logViewAttributes.description,
+    // TODO: Fix "Type 'DataView | DataViewLazy' is not assignable to type 'DataView'"
+    // Type 'DataViewLazy' is missing the following properties from type 'DataView': fields, flattenHit, etag, getEtag, and 2 more.
     dataViewReference,
   };
 };
@@ -123,7 +141,8 @@ const resolveKibanaAdvancedSettingReference = async (
   logViewId: string,
   logViewAttributes: LogViewAttributes,
   dataViewsService: DataViewsContract,
-  logSourcesService: LogSourcesService
+  logSourcesService: LogSourcesService,
+  useDataViewLazy: boolean = false
 ): Promise<ResolvedLogView> => {
   if (logViewAttributes.logIndices.type !== 'kibana_advanced_setting') {
     throw new Error(
@@ -134,29 +153,35 @@ const resolveKibanaAdvancedSettingReference = async (
   const indices = (await logSourcesService.getLogSources())
     .map((logSource) => logSource.indexPattern)
     .join(',');
-
-  const dataViewReference = await dataViewsService
-    .create(
-      {
+  const createDataViewPromise = useDataViewLazy
+    ? dataViewsService.createDataViewLazy({
         id: `log-view-${logViewId}`,
         name: logViewAttributes.name,
         title: indices,
         timeFieldName: TIMESTAMP_FIELD,
         allowNoIndex: true,
-      },
-      false,
-      false
-    )
-    .catch((error) => {
-      throw new ResolveLogViewError(`Failed to create Data View reference: ${error}`, error);
-    });
+      })
+    : dataViewsService.create(
+        {
+          id: `log-view-${logViewId}`,
+          name: logViewAttributes.name,
+          title: indices,
+          timeFieldName: TIMESTAMP_FIELD,
+          allowNoIndex: true,
+        },
+        false,
+        false
+      );
+  const dataViewReference = await createDataViewPromise.catch((error) => {
+    throw new ResolveLogViewError(`Failed to create Data View reference: ${error}`, error);
+  });
 
   return {
     indices,
     timestampField: TIMESTAMP_FIELD,
     tiebreakerField: TIEBREAKER_FIELD,
     messageField: ['message'],
-    fields: dataViewReference.fields,
+    fields: useDataViewLazy ? dataViewReference.fields : [],
     runtimeMappings: {},
     columns: logViewAttributes.logColumns,
     name: logViewAttributes.name,
