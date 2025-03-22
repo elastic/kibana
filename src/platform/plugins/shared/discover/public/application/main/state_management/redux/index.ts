@@ -11,6 +11,7 @@ import { omit } from 'lodash';
 import { internalStateSlice } from './internal_state';
 import {
   appendAdHocDataViews,
+  initializeSession,
   replaceAdHocDataViewWithId,
   setAdHocDataViews,
   setDataView,
@@ -28,6 +29,7 @@ export const internalStateActions = {
   setDefaultProfileAdHocDataViews,
   appendAdHocDataViews,
   replaceAdHocDataViewWithId,
+  initializeSession,
 };
 
 export {

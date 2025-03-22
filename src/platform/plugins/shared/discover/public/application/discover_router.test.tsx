@@ -13,14 +13,11 @@ import { shallow } from 'enzyme';
 import type { RouteProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
-import { createSearchSessionMock } from '../__mocks__/search_session';
-import { discoverServiceMock as mockDiscoverServices } from '../__mocks__/services';
 import { DiscoverRoutes } from './discover_router';
-import { DiscoverMainRoute } from './main';
 import { SingleDocRoute } from './doc';
 import { ContextAppRoute } from './context';
 import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
-import type { MainRouteProps } from './main/discover_main_route';
+import { DiscoverMainRoute, type MainRouteProps } from './main/discover_main_route';
 
 let pathMap: Record<string, never> = {};
 
@@ -36,8 +33,6 @@ const gatherRoutes = (wrapper: ShallowWrapper) => {
   });
 };
 
-const mockExperimentalFeatures = {};
-
 const props: MainRouteProps = {
   customizationContext: mockCustomizationContext,
 };
@@ -45,15 +40,7 @@ const props: MainRouteProps = {
 describe('DiscoverRouter', () => {
   beforeAll(() => {
     pathMap = {};
-    const { history } = createSearchSessionMock();
-    const component = shallow(
-      <DiscoverRoutes
-        services={mockDiscoverServices}
-        history={history}
-        customizationContext={mockCustomizationContext}
-        experimentalFeatures={mockExperimentalFeatures}
-      />
-    );
+    const component = shallow(<DiscoverRoutes customizationContext={mockCustomizationContext} />);
     gatherRoutes(component);
   });
 

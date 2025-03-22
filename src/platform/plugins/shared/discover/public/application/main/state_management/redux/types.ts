@@ -7,10 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { TimeRange } from '@kbn/es-query';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
+
+export enum LoadingStatus {
+  Uninitialized = 'uninitialized',
+  Loading = 'loading',
+  LoadingMore = 'loading_more',
+  Complete = 'complete',
+  Error = 'error',
+}
+
+type RequestState<
+  TResult extends {},
+  TLoadingStatus extends LoadingStatus = Exclude<LoadingStatus, LoadingStatus.LoadingMore>
+> =
+  | {
+      loadingStatus: Exclude<TLoadingStatus, LoadingStatus.Error>;
+      result: TResult;
+    }
+  | {
+      loadingStatus: LoadingStatus.Error;
+      error: Error;
+    };
+
+export type DocumentsRequest = RequestState<DataTableRecord[], LoadingStatus>;
+export type TotalHitsRequest = RequestState<number>;
+export type ChartRequest = RequestState<{}>;
+
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute?: TimeRange;
   timeRangeRelative?: TimeRange;
@@ -19,7 +44,6 @@ export interface InternalStateDataRequestParams {
 export interface DiscoverInternalState {
   dataViewId: string | undefined;
   isDataViewLoading: boolean;
-  savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
   dataRequestParams: InternalStateDataRequestParams;
@@ -31,4 +55,7 @@ export interface DiscoverInternalState {
     rowHeight: boolean;
     breakdownField: boolean;
   };
+  documentsRequest: DocumentsRequest;
+  totalHitsRequest: TotalHitsRequest;
+  chartRequest: ChartRequest;
 }
