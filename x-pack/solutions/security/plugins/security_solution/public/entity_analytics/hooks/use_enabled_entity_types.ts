@@ -6,28 +6,16 @@
  */
 
 import { useMemo } from 'react';
-import { getAssetCriticalityEntityTypes } from '../../../common/entity_analytics/asset_criticality/utils';
-import { getRiskEngineEntityTypes } from '../../../common/entity_analytics/risk_engine/utils';
-import { getEnabledStoreEntityTypes } from '../../../common/entity_analytics/entity_store/utils';
-import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
+import { getEntityAnalyticsEntityTypes } from '../../../common/entity_analytics/utils';
 
 export const useStoreEntityTypes = () => {
-  const experimentalFeatures = useEnableExperimental();
-
-  return useMemo(() => getEnabledStoreEntityTypes(experimentalFeatures), [experimentalFeatures]);
+  return useMemo(() => getEntityAnalyticsEntityTypes(), []);
 };
 
 export const useRiskEngineEntityTypes = () => {
-  const experimentalFeatures = useEnableExperimental();
-
-  return useMemo(() => getRiskEngineEntityTypes(experimentalFeatures), [experimentalFeatures]);
+  return useMemo(() => getEntityAnalyticsEntityTypes(), []);
 };
 
 export const useAssetCriticalityEntityTypes = () => {
-  const experimentalFeatures = useEnableExperimental();
-
-  return useMemo(
-    () => getAssetCriticalityEntityTypes(experimentalFeatures),
-    [experimentalFeatures]
-  );
+  return useMemo(() => getEntityAnalyticsEntityTypes(), []);
 };

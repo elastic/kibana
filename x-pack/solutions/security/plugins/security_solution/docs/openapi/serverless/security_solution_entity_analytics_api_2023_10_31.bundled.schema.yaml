@@ -1230,6 +1230,7 @@ components:
         - user
         - host
         - service
+        - generic
       type: string
     HostEntity:
       type: object
@@ -1305,6 +1306,7 @@ components:
         - host.name
         - user.name
         - service.name
+        - entity.id
       type: string
     IndexPattern:
       type: string
