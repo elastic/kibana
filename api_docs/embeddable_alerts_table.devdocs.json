@@ -1,0 +1,55 @@
+{
+  "id": "embeddableAlertsTable",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "embeddableAlertsTable",
+      "id": "def-public.EmbeddableAlertsTablePublicSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "EmbeddableAlertsTablePublicSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/embeddable_alerts_table/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "embeddableAlertsTable",
+      "id": "def-public.EmbeddableAlertsTablePublicStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "EmbeddableAlertsTablePublicStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/embeddable_alerts_table/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

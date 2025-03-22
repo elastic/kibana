@@ -110,6 +110,13 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 }),
                 link: 'searchSynonyms',
               },
+              {
+                id: 'searchQueryRules',
+                title: i18n.translate('xpack.serverlessSearch.nav.relevance.searchQueryRules', {
+                  defaultMessage: 'Query Rules',
+                }),
+                link: 'searchQueryRules',
+              },
             ],
           },
           {
