@@ -12,14 +12,63 @@ import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import type { DocLinksService } from '@kbn/core-doc-links-server-internal';
 
+expect.addSnapshotSerializer({
+  test: (val) => val instanceof MockLinkContext,
+  serialize: (val: MockLinkContext) => {
+    return val.toString();
+  },
+});
+
 type DocLinksServiceContract = PublicMethodsOf<DocLinksService>;
+
+export class MockLinkContext {
+  private readonly path: string[] = [];
+  constructor(private readonly root: string) {}
+
+  addKey(key: string) {
+    this.path.push(key);
+    return this;
+  }
+
+  toString = () => {
+    return `https://docs.elastic.test/#${this.root}${
+      this.path.length ? '.' + this.path.join('.') : ''
+    }`;
+  };
+}
+
+function assertString(val: unknown): asserts val is string {
+  if (typeof val !== 'string') throw new Error(`received "${typeof val}", expected "string"`);
+}
+
+function createMockLinkGetter(rootKey: string) {
+  const ctx = new MockLinkContext(rootKey);
+  const proxy = new Proxy(ctx, {
+    get(_, key) {
+      assertString(key);
+      return ctx.addKey(key);
+    },
+  });
+  return proxy;
+}
 
 const createSetupMock = (): DocLinksServiceSetup => {
   const branch = 'test-branch';
   const buildFlavor = 'traditional';
+
+  const links = new Proxy(
+    {},
+    {
+      get: (_, rootKey) => {
+        assertString(rootKey);
+        return createMockLinkGetter(rootKey);
+      },
+    }
+  );
+
   return {
     ...getDocLinksMeta({ kibanaBranch: branch, buildFlavor }),
-    links: getDocLinks({ kibanaBranch: branch, buildFlavor }),
+    links: links as ReturnType<typeof getDocLinks>,
   };
 };
 

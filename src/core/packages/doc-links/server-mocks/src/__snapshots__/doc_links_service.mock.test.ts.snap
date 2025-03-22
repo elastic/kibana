@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`docLinksServiceMock createSetupContract links \`toMatchSnapshot\` 1`] = `https://docs.elastic.test/#alerting.emailExchangeClientSecretConfig`;
