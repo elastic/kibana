@@ -29,11 +29,11 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 
-import './index.scss';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { css, Global } from '@emotion/react';
 import { GraphSavePolicy } from './types';
 import { graphRouter } from './router';
 import { checkLicense } from '../common/check_license';
@@ -117,6 +117,15 @@ export const renderApp = ({ history, element, ...deps }: GraphDependencies) => {
 
   const app = (
     <KibanaRenderContextProvider {...core}>
+      <Global
+        styles={css`
+          .gphAppWrapper {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+          }
+        `}
+      />
       <TableListViewKibanaProvider
         {...{
           core,
