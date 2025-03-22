@@ -52,6 +52,7 @@ import {
 import { useAppContext } from '../../../../app_context';
 import { DataStreamsBadges } from '../data_stream_badges';
 import { useIlmLocator } from '../../../../services/use_ilm_locator';
+import { StreamsPromotion } from './streams_promotion';
 
 interface Detail {
   name: string;
@@ -168,6 +169,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       meteringDocsCount,
       lifecycle,
       indexMode,
+      hidden,
     } = dataStream;
 
     const getManagementDetails = () => {
@@ -454,6 +456,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         )}
 
         <DetailsList details={details} />
+        {!hidden && <StreamsPromotion dataStreamName={dataStreamName} />}
       </>
     );
   }
