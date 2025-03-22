@@ -63,7 +63,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
                 <EuiHeaderLink
                   href={onboardingLocator?.useUrl({ category: 'logs' })}
                   color="primary"
-                  iconType="indexOpen"
                 >
                   {ADD_DATA_LABEL}
                 </EuiHeaderLink>
