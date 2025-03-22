@@ -95,7 +95,7 @@ describe('validateWithScoutCiConfig', () => {
   beforeEach(() => {
     mockLog = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
     jest.spyOn(mockLog, 'warning').mockImplementation(jest.fn());
-    (yaml.load as jest.Mock).mockReturnValue(mockScoutCiConfig);
+    (yaml.safeLoad as jest.Mock).mockReturnValue(mockScoutCiConfig);
   });
 
   afterEach(() => {
