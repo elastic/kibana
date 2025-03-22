@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceTaskType, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { notFound, forbidden } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
@@ -75,6 +75,7 @@ import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
 import { apmInstrumentation } from './operators/apm_instrumentation';
+import { reIndexKnowledgeBase } from '../knowledge_base_service/reindex_knowledge_base';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -670,21 +671,32 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.getStatus();
   };
 
-  setupKnowledgeBase = async (modelId: string | undefined) => {
+  setupKnowledgeBase = async (
+    modelId: string | undefined,
+    taskType: InferenceTaskType | undefined
+  ) => {
     const { esClient, core, logger, knowledgeBaseService } = this.dependencies;
 
     if (!modelId) {
       modelId = await getElserModelId({ core, logger });
     }
 
+    if (!taskType) {
+      taskType = 'sparse_embedding';
+    }
+
     // setup the knowledge base
-    const res = await knowledgeBaseService.setup(esClient, modelId);
+    const res = await knowledgeBaseService.setup(esClient, modelId, taskType);
 
     core
       .getStartServices()
-      .then(([_, pluginsStart]) =>
-        scheduleKbSemanticTextMigrationTask({ taskManager: pluginsStart.taskManager, logger })
-      )
+      .then(async ([_, pluginsStart]) => {
+        await reIndexKnowledgeBase({ logger, esClient });
+        await scheduleKbSemanticTextMigrationTask({
+          taskManager: pluginsStart.taskManager,
+          logger,
+        });
+      })
       .catch((error) => {
         logger.error(`Failed to schedule semantic text migration task: ${error}`);
       });

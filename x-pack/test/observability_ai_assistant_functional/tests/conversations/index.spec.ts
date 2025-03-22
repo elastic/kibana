@@ -16,7 +16,6 @@ import {
   createLlmProxy,
   LlmProxy,
 } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { interceptRequest } from '../../common/intercept_request';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { editor } from '../../../observability_ai_assistant_api_integration/common/users/users';
@@ -165,19 +164,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
               `http://localhost:${proxy.getPort()}`
             );
             await testSubjects.setValue(ui.pages.createConnectorFlyout.apiKeyInput, 'myApiKey');
-
-            // intercept the request to set up the knowledge base,
-            // so we don't have to wait until it's fully downloaded
-            await interceptRequest(
-              driver.driver,
-              '*kb\\/setup*',
-              (responseFactory) => {
-                return responseFactory.fail();
-              },
-              async () => {
-                await testSubjects.clickWhenNotDisabled(ui.pages.createConnectorFlyout.saveButton);
-              }
-            );
 
             await retry.waitFor('Connector created toast', async () => {
               const count = await toasts.getCount();
