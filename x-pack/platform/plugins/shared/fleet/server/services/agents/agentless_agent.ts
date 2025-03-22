@@ -277,6 +277,65 @@ class AgentlessAgentService {
     return response;
   }
 
+  public async getAgentVersionSupported(agentlessPolicyId: string, proposedAgentVersion: string) {
+    const logger = appContextService.getLogger();
+    const traceId = apm.currentTransaction?.traceparent;
+    const agentlessConfig = appContextService.getConfig()?.agentless;
+    const tlsConfig = this.createTlsConfig(agentlessConfig);
+    const requestConfig = {
+      url: prependAgentlessApiBasePathToEndpoint(
+        agentlessConfig,
+        `/versions/${proposedAgentVersion}`
+      ),
+      method: 'GET',
+      ...this.getHeaders(tlsConfig, traceId),
+    };
+
+    const errorMetadata: LogMeta = {
+      trace: {
+        id: traceId,
+      },
+    };
+
+    const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
+
+    logger.debug(
+      `[Agentless API] Start request for agentless agent ${agentlessPolicyId} supported version ${requestConfigDebugStatus}`
+    );
+
+    if (!isAgentlessEnabled) {
+      logger.error(
+        `[Agentless API] Agentless API is not supported. Requesting the agentless agent supported version for ${agentlessPolicyId} is not supported in non-cloud or non-serverless environments`
+      );
+    }
+
+    if (!agentlessConfig) {
+      logger.error('[Agentless API] kibana.yml is currently missing Agentless API configuration');
+    }
+
+    logger.debug(
+      `[Agentless API] Requesting the agentless agent ${agentlessPolicyId} supported version with request config ${requestConfigDebugStatus}`
+    );
+
+    const response = await axios
+      .get(requestConfig.url, requestConfig)
+      .then((res) => res.data)
+      .catch((error: AxiosError) => {
+        this.catchAgentlessApiError(
+          'upgrade',
+          error,
+          logger,
+          agentlessPolicyId,
+          requestConfig,
+          requestConfigDebugStatus,
+          errorMetadata,
+          traceId
+        );
+      });
+
+    return response;
+  }
+
   private getHeaders(tlsConfig: SslConfig, traceId: string | undefined) {
     return {
       headers: {
