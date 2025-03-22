@@ -295,6 +295,7 @@ export function useOnSubmit({
 
   const {
     handleSetupTechnologyChange,
+    handleAgentFeaturesChange,
     allowedSetupTechnologies,
     selectedSetupTechnology,
     defaultSetupTechnology,
@@ -559,6 +560,7 @@ export function useOnSubmit({
     navigateAddAgent,
     navigateAddAgentHelp,
     handleSetupTechnologyChange,
+    handleAgentFeaturesChange,
     allowedSetupTechnologies,
     selectedSetupTechnology,
     defaultSetupTechnology,

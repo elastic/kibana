@@ -15,7 +15,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import type { NewPackagePolicy, SetupTechnology } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -92,12 +92,15 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
 export interface AwsFormProps {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
+  isEditPage?: boolean;
+  setupTechnology?: SetupTechnology;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
   onChange: any;
   setIsValid: (isValid: boolean) => void;
   disabled: boolean;
   hasInvalidRequiredVars: boolean;
+  showCloudConnectors: boolean;
 }
 
 const CloudFormationSetup = ({
@@ -309,6 +312,7 @@ export const AwsCredentialTypeSelector = ({
   type: AwsCredentialsType;
   label: string;
   options: AwsCredentialsTypeOptions;
+  disabled?: boolean;
 }) => (
   <EuiFormRow fullWidth label={label}>
     <EuiSelect

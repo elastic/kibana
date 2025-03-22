@@ -40,7 +40,10 @@ import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_VANILLA,
   CLOUDBEAT_VULN_MGMT_AWS,
+  SINGLE_ACCOUNT,
   SUPPORTED_POLICY_TEMPLATES,
+  TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
+  TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
 } from '../../../common/constants';
 import {
   getMaxPackageName,
@@ -53,6 +56,7 @@ import {
   POSTURE_NAMESPACE,
   POLICY_TEMPLATE_FORM_DTS,
   hasErrors,
+  getAgentFeatures,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -71,6 +75,11 @@ import { useSetupTechnology } from './setup_technology_selector/use_setup_techno
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
 import { AWS_CREDENTIALS_TYPE } from './aws_credentials_form/aws_credentials_form';
 import { useKibana } from '../../common/hooks/use_kibana';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import {
+  SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
+  getTemplateUrlFromPackageInfo,
+} from '../../common/utils/get_template_url_package_info';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -672,6 +681,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     isEditPage,
     packageInfo,
     handleSetupTechnologyChange,
+    handleAgentFeaturesChange,
     isAgentlessEnabled,
     defaultSetupTechnology,
     integrationToEnable,
@@ -691,13 +701,15 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const input = getSelectedOption(newPolicy.inputs, integration);
     const getIsSubscriptionValid = useIsSubscriptionStatusValid();
     const isSubscriptionValid = !!getIsSubscriptionValid.data;
-    const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
-      input,
-      isAgentlessEnabled,
-      handleSetupTechnologyChange,
-      isEditPage,
-      defaultSetupTechnology,
-    });
+    const { isAgentlessAvailable, setupTechnology, updateSetupTechnology, updateAgentFeatures } =
+      useSetupTechnology({
+        input,
+        isAgentlessEnabled,
+        handleSetupTechnologyChange,
+        handleAgentFeaturesChange,
+        isEditPage,
+        defaultSetupTechnology,
+      });
 
     const shouldRenderAgentlessSelector =
       (!isEditPage && isAgentlessAvailable) || (isEditPage && isAgentlessEnabled);
@@ -713,8 +725,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         Extract<PostureInput, 'cloudbeat/cis_aws' | 'cloudbeat/cis_azure' | 'cloudbeat/cis_gcp'>,
         {
           [key: string]: {
-            value: string;
-            type: 'text';
+            value: string | boolean;
+            type: 'text' | 'boolean';
           };
         }
       > = {
@@ -724,6 +736,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
               ? AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS
               : AWS_CREDENTIALS_TYPE.CLOUD_FORMATION,
             type: 'text',
+          },
+          'aws.supports_cloud_connectors': {
+            value: isAgentless ? true : false,
+            type: 'boolean',
           },
         },
         'cloudbeat/cis_gcp': {
@@ -749,10 +765,41 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => {
+        const currentInput = updatedPolicy.inputs.find(
+          (i) => i.enabled === true && i.type === 'cloudbeat/cis_aws'
+        );
+        if (currentInput) {
+          const agentFeatures = getAgentFeatures(
+            currentInput?.streams?.[0].vars?.['aws.credentials.type']?.value,
+            setupTechnology === SetupTechnology.AGENTLESS
+          );
+          updateAgentFeatures(setupTechnology, agentFeatures);
+        }
         onChange({ isValid, updatedPolicy, isExtensionLoaded });
       },
-      [onChange, isValid]
+      [onChange, isValid, setupTechnology, updateAgentFeatures]
     );
+
+    const { cloudConnectorsEnabled } = ExperimentalFeaturesService.get();
+    const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
+
+    // Elastic Service ID refers to the deployment ID or project ID
+    const elasticResourceId = cloud?.isCloudEnabled
+      ? cloud?.deploymentId
+      : cloud?.serverless.projectId;
+
+    const cloudConnectorRemoteRoleTemplate = elasticResourceId
+      ? getTemplateUrlFromPackageInfo(
+          packageInfo,
+          input.policy_template,
+          SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
+        )
+          ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
+          ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId)
+      : undefined;
+
+    const showCloudConnectors =
+      cloud.csp === 'aws' && cloudConnectorsEnabled && !!cloudConnectorRemoteRoleTemplate;
 
     /**
      * - Updates policy inputs by user selection
@@ -760,11 +807,16 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
      */
     const setEnabledPolicyInput = useCallback(
       (inputType: PostureInput) => {
-        const inputVars = getPostureInputHiddenVars(inputType, packageInfo, setupTechnology);
+        const inputVars = getPostureInputHiddenVars(
+          inputType,
+          packageInfo,
+          setupTechnology,
+          showCloudConnectors
+        );
         const policy = getPosturePolicy(newPolicy, inputType, inputVars);
         updatePolicy(policy);
       },
-      [setupTechnology, packageInfo, newPolicy, updatePolicy]
+      [setupTechnology, packageInfo, newPolicy, updatePolicy, showCloudConnectors]
     );
 
     // search for non null fields of the validation?.vars object
@@ -1012,6 +1064,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           setupTechnology={setupTechnology}
           isEditPage={isEditPage}
           hasInvalidRequiredVars={hasInvalidRequiredVars}
+          // temp to show cloud connectors
+          showCloudConnectors={true}
         />
         <EuiSpacer />
       </>

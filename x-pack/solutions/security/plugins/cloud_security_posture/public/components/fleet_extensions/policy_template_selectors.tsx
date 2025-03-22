@@ -81,11 +81,13 @@ interface PolicyTemplateVarsFormProps {
   setupTechnology: SetupTechnology;
   isEditPage?: boolean;
   hasInvalidRequiredVars: boolean;
+  showCloudConnectors: boolean;
 }
 
 export const PolicyTemplateVarsForm = ({
   input,
   setupTechnology,
+  isEditPage,
   ...props
 }: PolicyTemplateVarsFormProps) => {
   const isAgentless = setupTechnology === SetupTechnology.AGENTLESS;
@@ -95,7 +97,14 @@ export const PolicyTemplateVarsForm = ({
       return <EksCredentialsForm {...props} input={input} />;
     case 'cloudbeat/cis_aws':
       if (isAgentless) {
-        return <AwsCredentialsFormAgentless {...props} input={input} />;
+        return (
+          <AwsCredentialsFormAgentless
+            {...props}
+            setupTechnology={setupTechnology}
+            input={input}
+            isEditPage={isEditPage}
+          />
+        );
       }
 
       return <AwsCredentialsForm {...props} input={input} />;

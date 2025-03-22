@@ -35,16 +35,17 @@ import type {
   AwsCredentialsType,
   PostureInput,
   CloudSecurityPolicyTemplate,
+  CredentialsType,
 } from '../../../common/types_old';
 import { cloudPostureIntegrations } from '../../common/constants';
 import { DEFAULT_EKS_VARS_GROUP } from './eks_credentials_form';
 import {
-  DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   DEFAULT_AWS_CREDENTIALS_TYPE,
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
 } from './aws_credentials_form/get_aws_credentials_form_options';
 import { GCP_CREDENTIALS_TYPE } from './gcp_credentials_form/gcp_credential_form';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
+import { AWS_CREDENTIALS_TYPE } from './aws_credentials_form/aws_credentials_form';
 
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';
@@ -217,10 +218,13 @@ export const getArmTemplateUrlFromCspmPackage = (packageInfo: PackageInfo): stri
 
 export const getDefaultAwsCredentialsType = (
   packageInfo: PackageInfo,
+  showCloudConnectors: boolean,
   setupTechnology?: SetupTechnology
 ): AwsCredentialsType => {
   if (setupTechnology && setupTechnology === SetupTechnology.AGENTLESS) {
-    return DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
+    return showCloudConnectors
+      ? AWS_CREDENTIALS_TYPE.ASSUME_ROLE
+      : AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
   }
 
   const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
@@ -284,13 +288,14 @@ export const getDefaultGcpHiddenVars = (
 export const getPostureInputHiddenVars = (
   inputType: PostureInput,
   packageInfo: PackageInfo,
-  setupTechnology: SetupTechnology
+  setupTechnology: SetupTechnology,
+  showCloudConnectors: boolean
 ): Record<string, PackagePolicyConfigRecordEntry> | undefined => {
   switch (inputType) {
     case 'cloudbeat/cis_aws':
       return {
         'aws.credentials.type': {
-          value: getDefaultAwsCredentialsType(packageInfo, setupTechnology),
+          value: getDefaultAwsCredentialsType(packageInfo, showCloudConnectors, setupTechnology),
           type: 'text',
         },
       };
@@ -398,4 +403,24 @@ export const hasErrors = (validationResults: PackagePolicyValidationResults | un
   const flattenedValidation = getFlattenedObject(validationResults);
   const errors = Object.values(flattenedValidation).filter((value) => Boolean(value)) || [];
   return errors.length;
+};
+
+export const getAgentFeatures = (
+  credentialsType: CredentialsType | undefined,
+  isAgentless: boolean
+) => {
+  const defaultAgentlesAgentFeatures = [
+    {
+      name: 'supports_cloud_connectors',
+      enabled: true,
+    },
+  ];
+  if (
+    (isAgentless && !credentialsType) ||
+    (isAgentless && credentialsType === AWS_CREDENTIALS_TYPE.ASSUME_ROLE)
+  ) {
+    return defaultAgentlesAgentFeatures;
+  }
+
+  return [{ name: 'supports_cloud_connectors', enabled: false }];
 };
