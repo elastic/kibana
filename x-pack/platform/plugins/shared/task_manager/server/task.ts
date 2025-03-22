@@ -9,6 +9,7 @@
 
 import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
+import { KibanaRequest } from '@kbn/core/server';
 import { isErr, tryAsResult } from './lib/result_type';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { DecoratedError } from './task_running';
@@ -248,6 +249,12 @@ export interface IntervalSchedule {
   interval: Interval;
 }
 
+export interface TaskUserScope {
+  apiKeyId: string;
+  spaceId?: string;
+  apiKeyCreatedByUser: boolean;
+}
+
 /*
  * A task instance represents all of the data required to store, fetch,
  * and execute a task.
@@ -353,6 +360,16 @@ export interface TaskInstance {
    * Used to break up tasks so each Kibana node can claim tasks on a subset of the partitions
    */
   partition?: number;
+
+  /**
+   * Used to allow tasks to be scoped to a user via their API key
+   */
+  apiKey?: string;
+
+  /**
+   * Meta data related to the API key associated with this task
+   */
+  userScope?: TaskUserScope;
 
   /*
    * Optionally override the priority defined in the task type for this specific task instance
@@ -490,8 +507,16 @@ export type SerializedConcreteTaskInstance = Omit<
   retryAt: string | null;
   runAt: string;
   partition?: number;
+  apiKey?: string;
+  userScope?: TaskUserScope;
 };
 
 export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTaskInstance> & {
   id: SerializedConcreteTaskInstance['id'];
 };
+
+export interface ApiKeyOptions {
+  request?: KibanaRequest;
+}
+
+export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;
