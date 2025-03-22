@@ -15,6 +15,7 @@ import { outputService } from '../../services';
 import { PackageNotFoundError } from '../../errors';
 
 import type { SyncIntegrationsData } from './model';
+import { installCustomAsset } from './custom_assets';
 
 const FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX = 'fleet-synced-integrations-ccr-*';
 
@@ -166,5 +167,16 @@ export const syncIntegrationsOnRemote = async (
       throw new Error('Task was aborted');
     }
     await installPackageIfNotInstalled(pkg, packageClient, logger, abortController);
+  }
+
+  for (const customAsset of Object.values(syncIntegrationsDoc?.custom_assets ?? {})) {
+    if (abortController.signal.aborted) {
+      throw new Error('Task was aborted');
+    }
+    try {
+      await installCustomAsset(customAsset, esClient, abortController, logger);
+    } catch (error) {
+      logger.error(`Failed to install ${customAsset.type} ${customAsset.name}, error: ${error}`);
+    }
   }
 };
