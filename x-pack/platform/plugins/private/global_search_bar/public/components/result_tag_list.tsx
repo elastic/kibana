@@ -7,21 +7,46 @@
 
 import React, { type FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge } from '@elastic/eui';
+import {
+  EuiBadge,
+  UseEuiTheme,
+  useEuiFontSize,
+  mathWithUnits,
+  useEuiMaxBreakpoint,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
 
 const MAX_TAGS_TO_SHOW = 3;
 
-const TagListWrapper: FC<{ children?: React.ReactNode }> = ({ children }) => (
-  <ul
-    className="kbnSearchOption__tagsList"
-    aria-label={i18n.translate('xpack.globalSearchBar.searchBar.optionTagListAriaLabel', {
-      defaultMessage: 'Tags',
-    })}
-  >
-    {children}
-  </ul>
-);
+const TagListWrapper: FC<{ children?: React.ReactNode }> = ({ children }) => {
+  const euiFontSizeM = useEuiFontSize('m');
+  const maxBreakpointM = useEuiMaxBreakpoint('m');
+  const styles = ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'inline-block', // Horizontally aligns the tag list to the 'Go to' badge when row is focused
+      lineHeight: euiFontSizeM.lineHeight, // not sure about this one (also adding !important... hhmm)
+      [maxBreakpointM]: {
+        display: 'none',
+      },
+      '.kbnSearchOption__tagsListItem': {
+        display: 'inline-block',
+        maxWidth: mathWithUnits(euiTheme.size.xxl, (x) => x * 2),
+        marginRight: euiTheme.size.s,
+      },
+    });
+
+  return (
+    <ul
+      css={styles}
+      aria-label={i18n.translate('xpack.globalSearchBar.searchBar.optionTagListAriaLabel', {
+        defaultMessage: 'Tags',
+      })}
+    >
+      {children}
+    </ul>
+  );
+};
 
 const buildListItem = ({ color, name, id }: Tag) => {
   return (
