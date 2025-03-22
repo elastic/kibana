@@ -16,6 +16,11 @@ export const isMouseEvent = (e: Event | React.UIEvent<HTMLElement>): e is UserMo
   return 'clientX' in e;
 };
 
+export const getMouseSensorPosition = ({ clientX, clientY }: UserMouseEvent) => ({
+  clientX,
+  clientY,
+});
+
 const MOUSE_BUTTON_LEFT = 0;
 
 /*
@@ -31,9 +36,9 @@ export const startMouseInteraction = ({
   onEnd,
 }: {
   e: UserMouseEvent;
-  onStart: () => void;
+  onStart: (e: UserInteractionEvent) => void;
   onMove: (e: UserInteractionEvent) => void;
-  onEnd: () => void;
+  onEnd: (e: UserInteractionEvent) => void;
 }) => {
   if (e.button !== MOUSE_BUTTON_LEFT) return;
   startAutoScroll();
@@ -43,15 +48,15 @@ export const startMouseInteraction = ({
     onMove(ev);
   };
 
-  const handleEnd = () => {
+  const handleEnd = (ev: Event) => {
     document.removeEventListener('scroll', onMove);
     document.removeEventListener('mousemove', handleMouseMove);
     stopAutoScroll();
-    onEnd();
+    onEnd(ev);
   };
 
   document.addEventListener('scroll', onMove, { passive: true });
   document.addEventListener('mousemove', handleMouseMove, { passive: true });
   document.addEventListener('mouseup', handleEnd, { once: true, passive: true });
-  onStart();
+  onStart(e);
 };

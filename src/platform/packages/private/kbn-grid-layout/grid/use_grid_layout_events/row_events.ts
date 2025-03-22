@@ -12,7 +12,7 @@ import { useCallback, useRef } from 'react';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { commitAction, moveAction, startAction } from './row_state_manager_actions';
 import {
-  getPointerPosition,
+  getSensorPosition,
   isLayoutInteractive,
   isMouseEvent,
   isTouchEvent,
@@ -41,7 +41,7 @@ export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
 
       const onMove = (ev: UserInteractionEvent) => {
         if (isMouseEvent(ev) || isTouchEvent(ev)) {
-          pointerPixel.current = getPointerPosition(ev);
+          pointerPixel.current = getSensorPosition(ev);
         }
         moveAction(gridLayoutStateManager, startingPointer.current, pointerPixel.current);
       };
