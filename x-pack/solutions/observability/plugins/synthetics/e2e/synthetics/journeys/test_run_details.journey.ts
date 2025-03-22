@@ -21,7 +21,7 @@ journeySkip(`TestRunDetailsPage`, async ({ page, params }) => {
   const services = new SyntheticsServices(params);
 
   before(async () => {
-    await services.cleaUp();
+    await services.cleanUp();
     await services.enableMonitorManagedViaApi();
     await services.addTestMonitor(
       'https://www.google.com',
@@ -47,7 +47,7 @@ journeySkip(`TestRunDetailsPage`, async ({ page, params }) => {
   });
 
   after(async () => {
-    await services.cleaUp();
+    await services.cleanUp();
   });
 
   step('Go to monitor summary page', async () => {

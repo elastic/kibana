@@ -6,14 +6,10 @@
  */
 
 import React from 'react';
-import { inspectStatusRuleAction } from '../../state/alert_rules';
-import { StatusRuleParamsProps } from './status_rule_ui';
+import { inspectTLSRuleAction } from '../../state/alert_rules';
+import { TLSRuleParamsProps } from './tls_rule_ui';
 import { RuleViz } from './rule_viz';
 
-export const StatusRuleViz = ({
-  ruleParams,
-}: {
-  ruleParams: StatusRuleParamsProps['ruleParams'];
-}) => {
-  return <RuleViz dispatchedAction={inspectStatusRuleAction.get(ruleParams)} />;
+export const TLSRuleViz = ({ ruleParams }: { ruleParams: TLSRuleParamsProps['ruleParams'] }) => {
+  return <RuleViz dispatchedAction={inspectTLSRuleAction.get(ruleParams)} />;
 };
