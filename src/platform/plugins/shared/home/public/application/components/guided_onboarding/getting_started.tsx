@@ -28,7 +28,7 @@ import {
   GuideCards,
   GuideFilters,
   GuideCardConstants,
-  guideCards,
+  getGuideCards,
 } from '@kbn/guided-onboarding/guide';
 import {
   GuideCardsClassic,
@@ -37,6 +37,10 @@ import {
   type GuideFilterValuesClassic,
 } from '@kbn/guided-onboarding/classic';
 import { GuideId, GuideState } from '@kbn/guided-onboarding/src/types';
+import {
+  ObservabilityOnboardingLocatorParams,
+  OBSERVABILITY_ONBOARDING_LOCATOR,
+} from '@kbn/deeplinks-observability';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 
@@ -55,7 +59,12 @@ const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.butto
 });
 
 export const GettingStarted = () => {
-  const { application, trackUiMetric, chrome, guidedOnboardingService, cloud } = getServices();
+  const { application, trackUiMetric, chrome, guidedOnboardingService, cloud, share } =
+    getServices();
+
+  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
 
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -69,7 +78,10 @@ export const GettingStarted = () => {
   const [filter, setFilter] = useState<GuideFilterValues | GuideFilterValuesClassic>(
     classicGuide ? useCase ?? 'all' : useCase ?? 'search'
   );
-
+  const guideCards = React.useMemo(
+    () => getGuideCards(application, onboardingLocator),
+    [application, onboardingLocator] // Only recreate when these change
+  );
   const history = useHistory();
 
   useEffect(() => {
@@ -143,13 +155,13 @@ export const GettingStarted = () => {
     },
     [guidedOnboardingService]
   );
-
-  // filter cards for solution and based on classic or new format
-  const guide = classicGuide ? guideCardsClassic : guideCards;
   useEffect(() => {
-    const tempFiltered = guide.filter(({ solution }) => solution === filter);
+    const guide = classicGuide ? guideCardsClassic : guideCards;
+    const tempFiltered = (guide as GuideCardConstants[]).filter(
+      (card: GuideCardConstants) => card.solution === filter
+    );
     setFilteredCards(tempFiltered);
-  }, [filter, guide]);
+  }, [filter, guideCards, classicGuide]);
 
   if (isLoading) {
     return (
@@ -231,7 +243,7 @@ export const GettingStarted = () => {
   ) : (
     <GuideCards
       activateGuide={activateGuide}
-      navigateToApp={application.navigateToApp}
+      navigateToUrl={application.navigateToUrl}
       activeFilter={filter as GuideFilterValues}
       guidesState={guidesState}
       filteredCards={filteredCards}
