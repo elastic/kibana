@@ -64,6 +64,7 @@ function getConfiguration(): Configuration {
       chromiumUserPrefs: {
         'download.default_directory': downloadDir,
         'download.prompt_for_download': false,
+        'profile.password_manager_leak_detection': false,
         'profile.content_settings.exceptions.clipboard': {
           '[*.],*': {
             last_modified: now,
