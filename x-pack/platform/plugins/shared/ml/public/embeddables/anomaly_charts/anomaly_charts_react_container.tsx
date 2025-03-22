@@ -69,7 +69,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
 
   const [tableData, setTableData] = useState<AnomaliesTableData>({
     anomalies: [],
-    examplesByJobId: [''],
+    examplesByJobId: {},
     interval: 0,
     jobIds: [],
     showViewSeriesLink: false,
