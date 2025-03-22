@@ -345,8 +345,8 @@ export class AlertsClient<
     return await this.updatePersistedAlertsWithMaintenanceWindowIds();
   }
 
-  public getRawAlertInstancesForState() {
-    return this.legacyAlertsClient.getRawAlertInstancesForState();
+  public getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean) {
+    return this.legacyAlertsClient.getRawAlertInstancesForState(shouldOptimizeTaskState);
   }
 
   public factory() {
