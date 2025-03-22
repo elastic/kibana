@@ -19,6 +19,8 @@ import {
   EuiTabbedContentTab,
   useEuiTheme,
   EuiFlexGroup,
+  EuiTitle,
+  EuiFlexItem,
 } from '@elastic/eui';
 import {
   AlertStatus,
@@ -54,6 +56,8 @@ import { AlertOverview } from '../../components/alert_overview/alert_overview';
 import { CustomThresholdRule } from '../../components/custom_threshold/components/types';
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 import { AlertHistoryChart } from './components/alert_history';
+import { AlertsTriggeredAroundSameTime } from './components/alerts_triggered_around_same_time';
+import AlertsActiveAtSameTime from './components/alerts_active_at_the_same_time';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -230,6 +234,25 @@ export function AlertDetails() {
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="column" gutterSize="m">
           <SourceBar alert={alertDetail.formatted} sources={sources} />
+          <EuiPanel data-test-subj="alert-summary-container" hasShadow={false} hasBorder={true}>
+            <EuiFlexItem key="alert-insights-title" grow={false}>
+              <EuiTitle size="xs">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.observability.alertDetails.alertInsights.triggeredAroundSameTime"
+                    defaultMessage="Alert insights"
+                  />
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem key="alert-insights" grow={false}>
+              <EuiFlexGroup gutterSize="s" wrap>
+                <AlertsTriggeredAroundSameTime alert={alertDetail?.formatted} />
+                <AlertsActiveAtSameTime alert={alertDetail?.formatted} />
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiPanel>
           <AlertDetailContextualInsights alert={alertDetail} />
           {rule && alertDetail.formatted && (
             <>
