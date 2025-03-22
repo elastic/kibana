@@ -15,6 +15,7 @@ import { caseConnectorMappingsSavedObjectType } from './connector_mappings';
 import { casesTelemetrySavedObjectType } from './telemetry';
 import { casesRulesSavedObjectType } from './cases_rules';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
+import { caseIdIncrementerSavedObjectType } from './id_incrementer';
 
 interface RegisterSavedObjectsArgs {
   core: CoreSetup;
@@ -40,6 +41,7 @@ export const registerSavedObjects = ({
 
   core.savedObjects.registerType(caseConfigureSavedObjectType);
   core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
+  core.savedObjects.registerType(caseIdIncrementerSavedObjectType);
   core.savedObjects.registerType(createCaseSavedObjectType(core, logger));
   core.savedObjects.registerType(
     createCaseUserActionSavedObjectType({

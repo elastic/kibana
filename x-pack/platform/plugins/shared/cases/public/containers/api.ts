@@ -67,6 +67,7 @@ import {
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
   CASES_INTERNAL_URL,
+  INTERNAL_INIT_CASE_ID_INCREMENTER_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -659,4 +660,16 @@ export const getSimilarCases = async ({
   );
 
   return convertSimilarCasesToCamel(decodeCasesSimilarResponse(response));
+};
+
+export const initIncrementalId = async (signal?: AbortSignal): Promise<unknown> => {
+  const response = await KibanaServices.get().http.post<unknown>(
+    INTERNAL_INIT_CASE_ID_INCREMENTER_URL,
+    {
+      method: 'POST',
+      signal,
+    }
+  );
+
+  return response;
 };

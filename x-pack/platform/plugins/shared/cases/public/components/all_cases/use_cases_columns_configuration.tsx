@@ -37,6 +37,12 @@ export const useCasesColumnsConfiguration = (
       canDisplay: canDisplayDefault,
       isCheckedDefault: true,
     },
+    incremental_id: {
+      field: 'incremental_id',
+      name: i18n.INCREMENTAL_ID,
+      canDisplay: canDisplayDefault,
+      isCheckedDefault: true,
+    },
     assignees: {
       field: 'assignees',
       name: i18n.ASSIGNEES,

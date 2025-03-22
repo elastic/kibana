@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/security/packages/index-adapter'],
-};
+import { schema } from '@kbn/config-schema';
+import { casesSchema as casesSchemaV2 } from './v2';
+
+export const casesSchema = casesSchemaV2.extends({
+  incremental_id: schema.maybe(schema.nullable(schema.number())),
+});
