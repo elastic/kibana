@@ -50,7 +50,7 @@ export class DashboardPlugin
   private contentClient?: ReturnType<ContentManagementServerSetup['register']>['contentClient'];
   private readonly logger: Logger;
 
-  constructor(private initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
@@ -68,7 +68,7 @@ export class DashboardPlugin
     const { contentClient } = plugins.contentManagement.register({
       id: CONTENT_ID,
       storage: new DashboardStorage({
-        throwOnResultValidationError: this.initializerContext.env.mode.dev,
+        throwOnResultValidationError: true,
         logger: this.logger.get('storage'),
       }),
       version: {
