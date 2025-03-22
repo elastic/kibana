@@ -18,8 +18,8 @@ import {
   CARD_TITLE_LINE_CLAMP,
   INTEGRATION_APP_ID,
   MAX_CARD_HEIGHT_IN_PX,
-  ONBOARDING_APP_ID,
-  ONBOARDING_LINK,
+  RETURN_APP_ID,
+  RETURN_PATH,
   TELEMETRY_INTEGRATION_CARD,
 } from './constants';
 import type { GetAppUrl, NavigateTo } from '../../../../../common/lib/kibana';
@@ -27,7 +27,7 @@ import { trackOnboardingLinkClick } from '../../../lib/telemetry';
 
 const addPathParamToUrl = (url: string, onboardingLink: string) => {
   const encoded = encodeURIComponent(onboardingLink);
-  const paramsString = `${ONBOARDING_LINK}=${encoded}&${ONBOARDING_APP_ID}=${APP_UI_ID}`;
+  const paramsString = `${RETURN_PATH}=${encoded}&${RETURN_APP_ID}=${APP_UI_ID}`;
 
   if (url.indexOf('?') >= 0) {
     return `${url}&${paramsString}`;
@@ -89,7 +89,7 @@ const addSecuritySpecificProps = ({
   };
   const url =
     card.url.indexOf(APP_INTEGRATIONS_PATH) >= 0 && onboardingLink
-      ? addPathParamToUrl(card.url, onboardingLink)
+      ? addPathParamToUrl(card.url, ONBOARDING_PATH)
       : card.url;
   return {
     ...card,

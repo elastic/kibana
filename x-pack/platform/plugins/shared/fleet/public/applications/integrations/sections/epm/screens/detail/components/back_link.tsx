@@ -6,29 +6,49 @@
  */
 
 import { EuiButtonEmpty } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
+import { useStartServices } from '../../../../../../../hooks';
+
 interface Props {
   queryParams: URLSearchParams;
-  href: string;
+  integrationsPath: string;
 }
 
-export function BackLink({ queryParams, href: integrationsHref }: Props) {
-  const { onboardingLink } = useMemo(() => {
+export function BackLink({ queryParams, integrationsPath }: Props) {
+  const {
+    application: { navigateToApp, getUrlForApp },
+  } = useStartServices();
+  const { returnAppId, returnPath } = useMemo(() => {
     return {
-      onboardingLink:
-        // Users from Security Solution onboarding page will have onboardingLink to redirect back to the onboarding page
-        queryParams.get('observabilityOnboardingLink') || queryParams.get('onboardingLink'),
+      // Check for custom path params to redirect back to a specified app's path
+      returnAppId: queryParams.get('returnAppId'),
+      returnPath: queryParams.get('returnPath'),
     };
   }, [queryParams]);
-  const href = onboardingLink ?? integrationsHref;
-  const message = onboardingLink ? BACK_TO_SELECTION : BACK_TO_INTEGRATIONS;
+
+  const appId = returnAppId && returnPath ? returnAppId : 'integrations';
+  const path = returnAppId && returnPath ? returnPath : integrationsPath;
+
+  const message = returnPath ? BACK_TO_SELECTION : BACK_TO_INTEGRATIONS;
 
   return (
-    <EuiButtonEmpty iconType="arrowLeft" size="xs" flush="left" href={href}>
-      {message}
-    </EuiButtonEmpty>
+    <>
+      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+      <EuiButtonEmpty
+        iconType="arrowLeft"
+        size="xs"
+        flush="left"
+        href={getUrlForApp(appId, { path })}
+        onClick={() => {
+          navigateToApp(appId, { path });
+        }}
+      >
+        {message}
+      </EuiButtonEmpty>
+    </>
   );
 }
 
