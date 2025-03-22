@@ -14,6 +14,7 @@ import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
+export type CSP = 'aws' | 'azure' | 'gcp';
 
 // adding a property here? If it should be cloned when duplicating a policy, add it to `agentPolicyService.copy`
 // x-pack/platform/plugins/shared/fleet/server/services/agent_policy.ts#L571
@@ -73,7 +74,12 @@ export interface AgentTargetVersion {
   percentage: number;
 }
 
+export interface CloudConnectors {
+  target_csp?: CSP;
+  enabled?: boolean;
+}
 export interface AgentlessPolicy {
+  cloud_connectors?: CloudConnectors;
   resources?: {
     requests?: {
       memory?: string;
