@@ -75,6 +75,7 @@ export const mapToCard = ({
   addBasePath,
   packageVerificationKeyId,
   selectedCategory,
+  excludePolicyTemplatesFromInstallationStatus,
 }: {
   getAbsolutePath: (p: string) => string;
   getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => string;
@@ -82,6 +83,7 @@ export const mapToCard = ({
   item: CustomIntegration | PackageListItem;
   packageVerificationKeyId?: string;
   selectedCategory?: string;
+  excludePolicyTemplatesFromInstallationStatus?: boolean;
 }): IntegrationCardItem => {
   let uiInternalPathUrl: string;
 
@@ -138,7 +140,7 @@ export const mapToCard = ({
     extraLabelsBadges,
   };
 
-  if (item.type === 'integration') {
+  if (item.type === 'integration' && !excludePolicyTemplatesFromInstallationStatus) {
     cardResult.installStatus = item.installationInfo?.install_status;
   }
 
