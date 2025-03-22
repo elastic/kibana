@@ -18,7 +18,7 @@ export interface UseKnowledgeBaseResult {
   status: AbortableAsyncState<APIReturnType<'GET /internal/observability_ai_assistant/kb/status'>>;
   isInstalling: boolean;
   installError?: Error;
-  install: () => Promise<void>;
+  setupKb: () => Promise<void>;
 }
 
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
@@ -31,20 +31,21 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     },
     [service]
   );
-
   const [isInstalling, setIsInstalling] = useState(false);
-
   const [installError, setInstallError] = useState<Error>();
-  const [isPollingForDeployment, setIsPollingForDeployment] = useState(false);
 
-  const install = useCallback(async () => {
+  useEffect(() => {
+    if (isInstalling && !!statusRequest.value?.endpoint) {
+      setIsInstalling(false);
+    }
+  }, [isInstalling, statusRequest]);
+
+  const setupKb = useCallback(async () => {
     setIsInstalling(true);
-    setIsPollingForDeployment(false);
     setInstallError(undefined);
 
     let attempts = 0;
     const MAX_ATTEMPTS = 5;
-
     try {
       // install
       await retrySetupIfError();
@@ -55,9 +56,6 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
 
       // do one refresh to get an initial status
       await statusRequest.refresh();
-
-      // start polling for readiness
-      setIsPollingForDeployment(true);
     } catch (e) {
       setInstallError(e);
       notifications!.toasts.addError(e, {
@@ -65,7 +63,8 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
           defaultMessage: 'Could not create inference endpoint',
         }),
       });
-      setIsInstalling(false);
+    } finally {
+      // setIsInstalling(false);
     }
 
     async function retrySetupIfError() {
@@ -89,46 +88,9 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     }
   }, [ml, service, notifications, statusRequest]);
 
-  // poll the status if isPollingForDeployment === true
-  // stop when ready === true or some error
-  useEffect(() => {
-    if (!isPollingForDeployment) {
-      return;
-    }
-
-    const interval = setInterval(async () => {
-      // re-fetch /status
-      await statusRequest.refresh();
-      const { value: currentStatus } = statusRequest;
-
-      // check if the model is now ready
-      if (currentStatus?.ready) {
-        // done installing
-        setIsInstalling(false);
-        setIsPollingForDeployment(false);
-        clearInterval(interval);
-        return;
-      }
-
-      // if "deployment failed" state
-      if (currentStatus?.model_stats?.deployment_state === 'failed') {
-        setInstallError(new Error('model deployment failed'));
-        setIsInstalling(false);
-        setIsPollingForDeployment(false);
-        clearInterval(interval);
-        return;
-      }
-    }, 5000);
-
-    // cleanup the interval if unmount
-    return () => {
-      clearInterval(interval);
-    };
-  }, [isPollingForDeployment, statusRequest]);
-
   return {
     status: statusRequest,
-    install,
+    setupKb,
     isInstalling,
     installError,
   };
