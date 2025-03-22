@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import styled from '@emotion/styled';
 
@@ -16,6 +16,7 @@ import { InstalledIntegrationsTable } from './components/installed_integrations_
 import { useInstalledIntegrations } from './hooks/use_installed_integrations';
 import { useUrlFilters } from './hooks/use_url_filters';
 import { InstalledIntegrationsSearchBar } from './components/installed_integrations_search_bar';
+import type { InstalledPackageUIPackageListItem } from './types';
 
 const ContentWrapper = styled.div`
   max-width: 1200px;
@@ -36,6 +37,8 @@ export const InstalledIntegrationsPage: React.FunctionComponent = () => {
     total,
   } = useInstalledIntegrations(filters, pagination.pagination);
 
+  const [selectedItems, setSelectedItems] = useState<InstalledPackageUIPackageListItem[]>([]);
+
   if (isInitialLoading) {
     return <Loading />;
   }
@@ -46,6 +49,7 @@ export const InstalledIntegrationsPage: React.FunctionComponent = () => {
         filters={filters}
         customIntegrationsCount={customIntegrationsCount}
         countPerStatus={countPerStatus}
+        selectedItems={selectedItems}
       />
       <EuiSpacer size="l" />
       <InstalledIntegrationsTable
@@ -53,6 +57,7 @@ export const InstalledIntegrationsPage: React.FunctionComponent = () => {
         pagination={pagination}
         isLoading={isInitialLoading || isLoading}
         installedPackages={installedPackages}
+        selection={{ selectedItems, setSelectedItems }}
       />
     </ContentWrapper>
   );
