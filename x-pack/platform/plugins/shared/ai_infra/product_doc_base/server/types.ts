@@ -11,6 +11,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { ProductName } from '@kbn/product-doc-common';
 import type { SearchApi } from './services/search';
 import type { ProductDocInstallClient } from './services/doc_install_status';
 import type { PackageInstaller } from './services/package_installer';
@@ -31,6 +32,7 @@ export interface ProductDocBaseSetupContract {}
 
 export interface ProductDocBaseStartContract {
   search: SearchApi;
+  getIndexPattern: (productNames?: ProductName[]) => string | string[];
   management: DocumentationManagerAPI;
 }
 

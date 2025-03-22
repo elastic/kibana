@@ -19,6 +19,12 @@ function generateShortId(size: number): string {
 
 const MAX_ATTEMPTS_AT_LENGTH = 100;
 
+/**
+ * Generates short IDs based on an input id. This
+ * keeps the ID short but unique, which is helpful
+ * when the LLM needs to generate a lot of ids, e.g.
+ * when selecting items.
+ */
 export class ShortIdTable {
   private byShortId: Map<string, string> = new Map();
   private byOriginalId: Map<string, string> = new Map();
@@ -32,7 +38,10 @@ export class ShortIdTable {
 
     let uniqueId: string | undefined;
     let attemptsAtLength = 0;
-    let length = 4;
+    // start at 6 to have some kind of baseline,
+    // concern being that short ids lead to
+    // higher risk of hallucations.
+    let length = 6;
     while (!uniqueId) {
       const nextId = generateShortId(length);
       attemptsAtLength++;
@@ -51,6 +60,6 @@ export class ShortIdTable {
   }
 
   lookup(shortId: string) {
-    return this.byShortId.get(shortId);
+    return this.byShortId.get(shortId) || shortId;
   }
 }

@@ -6,10 +6,14 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import {
+  InferenceInferenceEndpointInfo,
+  MlDeploymentAssignmentState,
+  MlDeploymentAllocationState,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import moment from 'moment';
-import { ObservabilityAIAssistantConfig } from '../config';
 
 export const AI_ASSISTANT_KB_INFERENCE_ID = 'obs_ai_assistant_kb_inference';
 
@@ -90,15 +94,28 @@ export function isInferenceEndpointMissingOrUnavailable(error: Error) {
   );
 }
 
+export interface InferenceModelErrorStatus {
+  available: false;
+  errorMessage: string;
+}
+
+export interface InferenceModelResolvedStatus {
+  available: boolean;
+  endpoint: InferenceInferenceEndpointInfo;
+  allocation_count: number;
+  deployment_state: MlDeploymentAssignmentState | undefined;
+  allocation_state: MlDeploymentAllocationState | undefined;
+}
+
+export type InferenceModelStatus = InferenceModelErrorStatus | InferenceModelResolvedStatus;
+
 export async function getElserModelStatus({
   esClient,
   logger,
-  config,
 }: {
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
-  config: ObservabilityAIAssistantConfig;
-}) {
+}): Promise<InferenceModelStatus> {
   let errorMessage = '';
   const endpoint = await getInferenceEndpoint({
     esClient,
@@ -109,9 +126,8 @@ export async function getElserModelStatus({
     errorMessage = error.message;
   });
 
-  const enabled = config.enableKnowledgeBase;
   if (!endpoint) {
-    return { ready: false, enabled, errorMessage };
+    return { available: false, errorMessage };
   }
 
   const modelId = endpoint.service_settings?.model_id;
@@ -123,7 +139,7 @@ export async function getElserModelStatus({
     });
 
   if (!modelStats) {
-    return { ready: false, enabled, errorMessage };
+    return { available: false, errorMessage };
   }
 
   const elserModelStats = modelStats.trained_model_stats.find(
@@ -133,17 +149,14 @@ export async function getElserModelStatus({
   const allocationState = elserModelStats?.deployment_stats?.allocation_status?.state;
   const allocationCount =
     elserModelStats?.deployment_stats?.allocation_status?.allocation_count ?? 0;
-  const ready =
+  const available =
     deploymentState === 'started' && allocationState === 'fully_allocated' && allocationCount > 0;
 
   return {
     endpoint,
-    ready,
-    enabled,
-    model_stats: {
-      allocation_count: allocationCount,
-      deployment_state: deploymentState,
-      allocation_state: allocationState,
-    },
+    available,
+    allocation_count: allocationCount,
+    deployment_state: deploymentState,
+    allocation_state: allocationState,
   };
 }

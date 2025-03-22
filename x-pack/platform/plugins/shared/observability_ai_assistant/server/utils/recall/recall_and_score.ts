@@ -7,84 +7,96 @@
 
 import type { Logger } from '@kbn/logging';
 import { AnalyticsServiceStart } from '@kbn/core/server';
+import { BoundInferenceClient } from '@kbn/inference-plugin/server';
+import { partition } from 'lodash';
 import { scoreSuggestions } from './score_suggestions';
-import type { Message } from '../../../common';
+import { MessageRole, type Message } from '../../../common';
 import type { ObservabilityAIAssistantClient } from '../../service/client';
-import type { FunctionCallChatFunction } from '../../service/types';
 import { RecallRanking, recallRankingEventType } from '../../analytics/recall_ranking';
-import { RecalledEntry } from '../../service/knowledge_base_service';
+import { rewriteQuery } from '../rewrite_query';
+import {
+  KnowledgeBaseHit,
+  KnowledgeBaseQueryContainer,
+} from '../../service/knowledge_base_service/types';
 
-export type RecalledSuggestion = Pick<RecalledEntry, 'id' | 'text' | 'score'>;
+export interface RecallAndScoreResult {
+  entries: KnowledgeBaseHit[];
+  selected: string[];
+  queries: KnowledgeBaseQueryContainer[];
+  scores?: Map<string, number>;
+}
 
 export async function recallAndScore({
   recall,
-  chat,
+  inferenceClient,
   analytics,
   userPrompt,
-  userMessageFunctionName,
   context,
   messages,
   logger,
   signal,
 }: {
   recall: ObservabilityAIAssistantClient['recall'];
-  chat: FunctionCallChatFunction;
+  inferenceClient: BoundInferenceClient;
   analytics: AnalyticsServiceStart;
   userPrompt: string;
-  userMessageFunctionName?: string;
   context: string;
   messages: Message[];
   logger: Logger;
   signal: AbortSignal;
-}): Promise<{
-  relevantDocuments?: RecalledSuggestion[];
-  scores?: Array<{ id: string; score: number }>;
-  suggestions: RecalledSuggestion[];
-}> {
-  const queries = [
-    { text: userPrompt, boost: 3 },
-    { text: context, boost: 1 },
-  ].filter((query) => query.text.trim());
-
-  const suggestions: RecalledSuggestion[] = (await recall({ queries })).map(
-    ({ id, text, score }) => ({ id, text, score })
+}): Promise<RecallAndScoreResult> {
+  const [[systemMessage], otherMessages] = partition(
+    messages,
+    (message) => message.message.role === MessageRole.System
   );
 
-  if (!suggestions.length) {
+  const { queries } = await rewriteQuery({
+    context,
+    inferenceClient,
+    systemMessage: systemMessage?.message.content,
+    messages: otherMessages,
+  });
+
+  logger.debug(() => `Query rewrite: ${JSON.stringify(queries)}`);
+
+  const entries = await recall({ queries, limit: { tokenCount: 8000 } });
+
+  if (!entries.length) {
     return {
-      relevantDocuments: [],
-      scores: [],
-      suggestions: [],
+      selected: [],
+      entries,
+      queries,
     };
   }
 
   try {
-    const { scores, relevantDocuments } = await scoreSuggestions({
-      suggestions,
+    const { scores, selected } = await scoreSuggestions({
+      entries,
       logger,
       messages,
       userPrompt,
-      userMessageFunctionName,
       context,
       signal,
-      chat,
+      inferenceClient,
     });
 
     analytics.reportEvent<RecallRanking>(recallRankingEventType, {
-      scoredDocuments: suggestions.map((suggestion) => {
-        const llmScore = scores.find((score) => score.id === suggestion.id);
+      scoredDocuments: entries.map((entry) => {
+        const llmScore = scores?.get(entry.id);
         return {
-          elserScore: suggestion.score ?? -1,
-          llmScore: llmScore ? llmScore.score : -1,
+          elserScore: entry.score,
+          llmScore: llmScore ?? -1,
         };
       }),
     });
 
-    return { scores, relevantDocuments, suggestions };
+    return { scores, selected, queries, entries };
   } catch (error) {
     logger.error(`Error scoring documents: ${error.message}`, { error });
     return {
-      suggestions: suggestions.slice(0, 5),
+      entries,
+      selected: entries.slice(0, 5).map((entry) => entry.id),
+      queries,
     };
   }
 }

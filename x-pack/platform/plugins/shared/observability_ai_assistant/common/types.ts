@@ -85,6 +85,7 @@ export interface KnowledgeBaseEntry {
   labels?: Record<string, string>;
   role: KnowledgeBaseEntryRole;
   user?: {
+    id?: string;
     name: string;
   };
 }

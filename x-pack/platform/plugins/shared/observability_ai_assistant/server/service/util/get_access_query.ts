@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+
 export function getAccessQuery({
   user,
   namespace,
 }: {
-  user?: { name: string; id?: string };
-  namespace?: string;
+  user: { name: string; id?: string } | null;
+  namespace: string | null;
 }) {
   return [
     {
@@ -17,50 +20,78 @@ export function getAccessQuery({
         filter: [
           {
             bool: {
-              should: [{ term: { public: true } }, ...getUserAccessFilters(user)],
+              should: [{ term: { public: true } }, getUserAccessQuery(user)],
               minimum_should_match: 1,
             },
           },
-          {
-            bool: {
-              should: [
-                {
-                  term: { namespace },
-                },
-                {
-                  bool: {
-                    must_not: {
-                      exists: {
-                        field: 'namespace',
-                      },
-                    },
-                  },
-                },
-              ],
-            },
-          },
+          getNamespaceAccessQuery(namespace),
         ],
       },
     },
   ];
 }
 
-export function getUserAccessFilters(user?: { name: string; id?: string }) {
+function getNamespaceAccessQuery(namespace: string | null): QueryDslQueryContainer {
+  return {
+    bool: {
+      should: [
+        {
+          term: { namespace },
+        },
+        {
+          bool: {
+            must_not: {
+              exists: {
+                field: 'namespace',
+              },
+            },
+          },
+        },
+      ],
+      minimum_should_match: 1,
+    },
+  };
+}
+
+export function getUserAccessQuery(
+  user: { name: string; id?: string } | null
+): QueryDslQueryContainer {
   if (!user) {
-    return [];
+    return {
+      bool: {
+        must_not: [
+          {
+            exists: {
+              field: 'user.name',
+            },
+          },
+        ],
+      },
+    };
   }
 
   if (user.id) {
-    return [
-      { term: { 'user.id': user.id } },
-      {
-        bool: {
-          must_not: { exists: { field: 'user.id' } },
-          must: { term: { 'user.name': user.name } },
-        },
+    return {
+      bool: {
+        filter: [
+          {
+            term: {
+              'user.id': user.id,
+            },
+          },
+          {
+            term: {
+              'user.name': user.name,
+            },
+          },
+        ],
       },
-    ];
+    };
   }
 
-  return [{ term: { 'user.name': user.name } }];
+  return {
+    term: {
+      'user.name': user.name,
+    },
+  };
 }

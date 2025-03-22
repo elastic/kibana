@@ -5,19 +5,32 @@
  * 2.0.
  */
 
-import { scoreSuggestions } from './score_suggestions';
+import { BoundInferenceClient } from '@kbn/inference-plugin/server';
 import { Logger } from '@kbn/logging';
-import { of } from 'rxjs';
-import { MessageRole, StreamingChatResponseEventType } from '../../../common';
-import { RecalledSuggestion } from './recall_and_score';
-import { FunctionCallChatFunction } from '../../service/types';
-import { ChatEvent } from '../../../common/conversation_complete';
-import { contextualInsightsMessages, normalConversationMessages } from './recall_and_score.test';
+import { MessageRole } from '../../../common';
+import { KnowledgeBaseHit } from '../../service/knowledge_base_service/types';
+import { scoreSuggestions } from './score_suggestions';
+import { createMockInternalKbDoc } from './create_mock_internal_kb_doc';
+import { recallMockData } from './mock_data';
 
-const suggestions: RecalledSuggestion[] = [
-  { id: 'doc1', text: 'Relevant document 1', score: 0.9 },
-  { id: 'doc2', text: 'Relevant document 2', score: 0.8 },
-  { id: 'doc3', text: 'Less relevant document 3', score: 0.3 },
+const { contextualInsightsMessages, normalConversationMessages } = recallMockData;
+
+const entries: KnowledgeBaseHit[] = [
+  createMockInternalKbDoc({
+    id: 'doc1',
+    score: 0.9,
+    text: 'Relevant document 1',
+  }),
+  createMockInternalKbDoc({
+    id: 'doc2',
+    score: 0.8,
+    text: 'Relevant document 2',
+  }),
+  createMockInternalKbDoc({
+    id: 'doc3',
+    score: 0.3,
+    text: 'Relevant document 3',
+  }),
 ];
 
 const userPrompt = 'What is my favourite color?';
@@ -25,122 +38,87 @@ const context = 'Some context';
 
 describe('scoreSuggestions', () => {
   const mockLogger = { error: jest.fn(), debug: jest.fn() } as unknown as Logger;
-  let mockChat: jest.MockedFunction<FunctionCallChatFunction>;
+
+  const mockInferenceClient: jest.Mocked<BoundInferenceClient> = {
+    output: jest.fn(),
+    chatComplete: jest.fn(),
+    getConnectorById: jest.fn(),
+  };
 
   beforeEach(() => {
-    mockChat = jest.fn((_name, _params) =>
-      of({
-        type: StreamingChatResponseEventType.ChatCompletionChunk,
-        message: {
-          function_call: {
-            name: 'score',
-            arguments: JSON.stringify({ scores: 'doc1,7\ndoc2,5\ndoc3,3' }),
-          },
-        },
-      } as ChatEvent)
-    );
+    jest.clearAllMocks();
+
+    mockInferenceClient.output.mockResolvedValue({
+      id: '',
+      content: '',
+      output: {
+        scores: 'doc1,7\ndoc2,5\ndoc3,3',
+      },
+    });
   });
 
   it('should correctly score and return relevant documents', async () => {
     const result = await scoreSuggestions({
-      suggestions,
+      entries,
       messages: normalConversationMessages,
       userPrompt,
       context,
-      chat: mockChat,
       signal: new AbortController().signal,
       logger: mockLogger,
+      inferenceClient: mockInferenceClient,
     });
 
-    expect(result.scores).toEqual([
-      { id: 'doc1', score: 7 },
-      { id: 'doc2', score: 5 },
-      { id: 'doc3', score: 3 },
-    ]);
+    expect(Object.fromEntries(result.scores?.entries()!)).toEqual({
+      doc1: 7,
+      doc2: 5,
+      doc3: 3,
+    });
 
-    expect(result.relevantDocuments).toEqual([
-      { id: 'doc1', text: 'Relevant document 1', score: 0.9 },
-      { id: 'doc2', text: 'Relevant document 2', score: 0.8 },
-    ]);
+    expect(result.selected).toEqual(['doc1', 'doc2']);
   });
 
   it('should return no relevant documents if all scores are low', async () => {
-    mockChat.mockReturnValueOnce(
-      of({
-        id: 'mock-id',
-        type: StreamingChatResponseEventType.ChatCompletionChunk,
-        message: {
-          function_call: {
-            name: 'score',
-            arguments: JSON.stringify({ scores: 'doc1,2\ndoc2,3\ndoc3,1' }),
-          },
-        },
-      })
-    );
-
-    const result = await scoreSuggestions({
-      suggestions,
-      messages: normalConversationMessages,
-      userPrompt,
-      userMessageFunctionName: 'score',
-      context,
-      chat: mockChat,
-      signal: new AbortController().signal,
-      logger: mockLogger,
+    mockInferenceClient.output.mockResolvedValue({
+      id: '',
+      content: '',
+      output: {
+        scores: 'doc1,2\ndoc2,3\ndoc3,1',
+      },
     });
 
-    expect(result.relevantDocuments).toEqual([]);
+    const result = await scoreSuggestions({
+      entries: [],
+      messages: normalConversationMessages,
+      userPrompt,
+      context,
+      signal: new AbortController().signal,
+      logger: mockLogger,
+      inferenceClient: mockInferenceClient,
+    });
+
+    expect(result.selected).toEqual([]);
   });
 
   it('should ignore hallucinated document IDs', async () => {
-    mockChat.mockReturnValueOnce(
-      of({
-        id: 'mock-id',
-        type: StreamingChatResponseEventType.ChatCompletionChunk,
-        message: {
-          function_call: {
-            name: 'score',
-            arguments: JSON.stringify({ scores: 'doc1,6\nfake_doc,5' }),
-          },
-        },
-      })
-    );
+    mockInferenceClient.output.mockResolvedValue({
+      id: '',
+      content: '',
+      output: {
+        scores: 'doc1,6\nfake_doc,5',
+      },
+    });
 
     const result = await scoreSuggestions({
-      suggestions,
+      entries,
       messages: normalConversationMessages,
       userPrompt,
       context,
-      chat: mockChat,
       signal: new AbortController().signal,
       logger: mockLogger,
+      inferenceClient: mockInferenceClient,
     });
 
-    expect(result.relevantDocuments).toEqual([
-      { id: 'doc1', text: 'Relevant document 1', score: 0.9 },
-    ]);
-  });
-
-  it('it throws an exception when function args are invalid', async () => {
-    mockChat.mockReturnValueOnce(
-      of({
-        id: 'mock-id',
-        type: StreamingChatResponseEventType.ChatCompletionChunk,
-        message: { function_call: { name: 'score', arguments: 'invalid_json' } },
-      })
-    );
-
-    await expect(
-      scoreSuggestions({
-        suggestions,
-        messages: normalConversationMessages,
-        userPrompt,
-        context,
-        chat: mockChat,
-        signal: new AbortController().signal,
-        logger: mockLogger,
-      })
-    ).rejects.toThrow();
+    expect(result.selected).toEqual(['doc1']);
   });
 
   it('should handle scenarios where the last user message is a tool response', async () => {
@@ -149,20 +127,19 @@ describe('scoreSuggestions', () => {
       .pop();
 
     const result = await scoreSuggestions({
-      suggestions,
+      entries,
       messages: contextualInsightsMessages,
       userPrompt: lastUserMessage?.message.content!,
-      userMessageFunctionName: lastUserMessage?.message.name,
       context,
-      chat: mockChat,
+      inferenceClient: mockInferenceClient,
       signal: new AbortController().signal,
       logger: mockLogger,
     });
 
-    expect(result.scores).toEqual([
-      { id: 'doc1', score: 7 },
-      { id: 'doc2', score: 5 },
-      { id: 'doc3', score: 3 },
-    ]);
+    expect(Object.fromEntries(result.scores?.entries()!)).toEqual({
+      doc1: 7,
+      doc2: 5,
+      doc3: 3,
+    });
   });
 });

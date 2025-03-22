@@ -13,8 +13,10 @@ import {
   MessageAddEvent,
   MessageRole,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
-import { RecalledSuggestion } from '@kbn/observability-ai-assistant-plugin/server/utils/recall/recall_and_score';
+import {
+  CONTEXT_FUNCTION_NAME,
+  ContextToolResponseV2,
+} from '@kbn/observability-ai-assistant-plugin/server/functions/context';
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import {
   KnowledgeBaseDocument,
@@ -150,7 +152,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('instructs the LLM with the correct tool_choice and tools for scoring', () => {
-          // @ts-expect-error
           expect(firstRequestBody.tool_choice?.function?.name).to.be('score');
           expect(firstRequestBody.tools?.length).to.be(1);
           expect(first(firstRequestBody.tools)?.function.name).to.be('score');
@@ -223,7 +224,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         it('retrieves the screen context correctly', async () => {
           expect(contextFunctionResponse).to.not.be(null);
 
-          const parsedContextResponseContent = JSON.parse(
+          const parsedContextResponseContent: ContextToolResponseV2['content'] = JSON.parse(
             contextFunctionResponse!.message.message.content!
           );
           expect(parsedContextResponseContent).to.have.property('screen_description');
@@ -233,14 +234,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('retrieves entries from the KB correctly with a score', async () => {
-          const parsedContextResponseData = JSON.parse(
+          const parsedContextResponseData: ContextToolResponseV2['content'] = JSON.parse(
             contextFunctionResponse!.message.message.data!
           );
           expect(parsedContextResponseData).to.have.property('suggestions');
           expect(parsedContextResponseData.suggestions).to.be.an('array');
           expect(parsedContextResponseData.suggestions.length).to.be(3);
 
-          parsedContextResponseData.suggestions.forEach((suggestion: RecalledSuggestion) => {
+          parsedContextResponseData.suggestions.forEach((suggestion) => {
             expect(suggestion).to.have.property('id');
             expect(suggestion).to.have.property('text');
             expect(suggestion).to.have.property('score');

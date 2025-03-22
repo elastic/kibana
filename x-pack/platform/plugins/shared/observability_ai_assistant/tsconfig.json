@@ -36,13 +36,11 @@
     "@kbn/spaces-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-ui-settings-server",
     "@kbn/apm-utils",
     "@kbn/features-plugin",
     "@kbn/cloud-plugin",
     "@kbn/serverless",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-ui-settings-server",
     "@kbn/management-settings-ids",
     "@kbn/ai-assistant-common",
     "@kbn/inference-common",
@@ -53,6 +51,8 @@
     "@kbn/ai-assistant-icon",
     "@kbn/security-authorization-core-common",
     "@kbn/core-http-browser",
+    "@kbn/product-doc-base-plugin",
+    "@kbn/product-doc-common",
     "@kbn/sse-utils"
   ],
   "exclude": ["target/**/*"]
