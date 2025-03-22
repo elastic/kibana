@@ -7,6 +7,8 @@
 
 import { ReservedPrivilegesSet } from '@kbn/core/server';
 import type {
+  AllRequiredCondition,
+  AnyRequiredCondition,
   AuthzDisabled,
   AuthzEnabled,
   HttpServiceSetup,
@@ -112,11 +114,30 @@ export function initAPIAuthorization(
       // Operator privileges check should be only performed if the `operator_privileges` are enabled in config.
       const requiredPrivileges = await normalizeRequiredPrivileges(authz.requiredPrivileges);
 
+      const unwindNestedPrivileges = (
+        privileges: AllRequiredCondition | AnyRequiredCondition
+      ): string[] =>
+        privileges.reduce<string[]>(
+          (acc: string[], privilege: string | { anyOf?: string[]; allOf?: string[] }) => {
+            if (typeof privilege === 'object') {
+              acc.push(...(privilege.allOf ?? []), ...(privilege.anyOf ?? []));
+            } else if (typeof privilege === 'string') {
+              acc.push(privilege);
+            }
+
+            return acc;
+          },
+          []
+        );
+
       const { requestedPrivileges, requestedReservedPrivileges } = requiredPrivileges.reduce(
         (acc, privilegeEntry) => {
           const privileges =
             typeof privilegeEntry === 'object'
-              ? [...(privilegeEntry.allRequired ?? []), ...(privilegeEntry.anyRequired ?? [])]
+              ? [
+                  ...unwindNestedPrivileges(privilegeEntry.allRequired ?? []),
+                  ...unwindNestedPrivileges(privilegeEntry.anyRequired ?? []),
+                ]
               : [privilegeEntry];
 
           for (const privilege of privileges) {
@@ -173,9 +194,23 @@ export function initAPIAuthorization(
           const anyRequired = kbPrivilege.anyRequired ?? [];
 
           return (
-            allRequired.every((privilege: string) => kibanaPrivileges[privilege]) &&
+            allRequired.every((privilege) =>
+              typeof privilege === 'string'
+                ? kibanaPrivileges[privilege]
+                : // checking composite privileges
+                  privilege.anyOf.some(
+                    (anyPrivilegeEntry: Privilege) => kibanaPrivileges[anyPrivilegeEntry]
+                  )
+            ) &&
             (!anyRequired.length ||
-              anyRequired.some((privilege: string) => kibanaPrivileges[privilege]))
+              anyRequired.some((privilege) =>
+                typeof privilege === 'string'
+                  ? kibanaPrivileges[privilege]
+                  : // checking composite privileges
+                    privilege.allOf.every(
+                      (allPrivilegeEntry: Privilege) => kibanaPrivileges[allPrivilegeEntry]
+                    )
+              ))
           );
         }
 
