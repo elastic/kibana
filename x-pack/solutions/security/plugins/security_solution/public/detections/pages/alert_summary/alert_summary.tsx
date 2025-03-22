@@ -35,11 +35,11 @@ export const AlertSummaryPage = memo(() => {
     );
   }
 
-  if (installedPackages.length === 0) {
+  if (installedPackages.length > 0) {
     return <LandingPage packages={availablePackages} />;
   }
 
-  return <Wrapper packages={installedPackages} />;
+  return <Wrapper packages={availablePackages} />;
 });
 
 AlertSummaryPage.displayName = 'AlertSummaryPage';
