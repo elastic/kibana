@@ -6,6 +6,7 @@
  */
 export { BackLink } from './back_link';
 export { AddIntegrationButton } from './add_integration_button';
+export { EditReadMeButton } from './edit_readme_button';
 export { CloudPostureThirdPartySupportCallout } from './cloud_posture_third_party_support_callout';
 export { UpdateIcon } from './update_icon';
 export { IntegrationAgentPolicyCount } from './integration_agent_policy_count';
