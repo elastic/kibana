@@ -32,6 +32,7 @@ import { createDataStream, deleteDataStream } from '../../../create_test_data';
 // eslint-disable-next-line import/no-default-export
 export default function ruleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const log = getService('log');
   const indexPatterns = getService('indexPatterns');
   const {
     es,
@@ -50,8 +51,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     { label: 'host.name', searchPath: 'host.name' },
   ];
 
-  // FLAKY: https://github.com/elastic/kibana/issues/194701
-  describe.skip('rule', () => {
+  describe('rule', () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);
@@ -174,6 +174,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         }
 
         const aadDocs = await getAllAADDocs(1);
+        log.info(`aadDocs ${JSON.stringify(aadDocs)}`);
 
         const alertDoc = aadDocs.body.hits.hits[0]._source;
         expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
