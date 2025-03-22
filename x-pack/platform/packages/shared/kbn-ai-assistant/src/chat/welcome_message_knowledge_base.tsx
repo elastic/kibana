@@ -18,10 +18,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import usePrevious from 'react-use/lib/usePrevious';
-
 import { WelcomeMessageKnowledgeBaseSetupErrorPanel } from './welcome_message_knowledge_base_setup_error_panel';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
-import { KbModel, SelectKnowledgeBaseModel } from '../knowledge_base/select_knowledge_base_model';
+import { KbModel } from '../knowledge_base/select_knowledge_base_model';
 
 export function WelcomeMessageKnowledgeBase({
   knowledgeBase,
@@ -33,7 +32,7 @@ export function WelcomeMessageKnowledgeBase({
   // track whether the "inspect issues" popover is open
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const [selectedKbModel, setSelectedKbModel] = useState<KbModel | undefined>();
+  const [selectedKbModel] = useState<KbModel | undefined>();
 
   useEffect(() => {
     if (
@@ -88,8 +87,6 @@ export function WelcomeMessageKnowledgeBase({
             { defaultMessage: `Your Knowledge base hasn't been set up.` }
           )}
         </EuiText>
-
-        <SelectKnowledgeBaseModel onSelectKbModel={setSelectedKbModel} kbModel={selectedKbModel} />
 
         <EuiSpacer size="m" />
 
