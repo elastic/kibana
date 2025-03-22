@@ -46,6 +46,7 @@ export const streamDetailRoute = createServerRoute({
     const docCountResponse = await scopedClusterClient.asCurrentUser.search({
       index: indexPattern,
       track_total_hits: true,
+      ignore_unavailable: true,
       query: {
         range: {
           '@timestamp': {

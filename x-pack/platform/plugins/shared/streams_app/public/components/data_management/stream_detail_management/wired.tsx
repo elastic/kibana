@@ -30,7 +30,7 @@ export function WiredStreamDetailManagement({
 }) {
   const {
     path: { key, subtab },
-  } = useStreamsAppParams('/{key}/management/{subtab}');
+  } = useStreamsAppParams('/{key}/{tab}/{subtab}');
 
   const tabs = {
     route: {
@@ -69,7 +69,10 @@ export function WiredStreamDetailManagement({
 
   if (!isValidManagementSubTab(subtab)) {
     return (
-      <RedirectTo path="/{key}/management/{subtab}" params={{ path: { key, subtab: 'route' } }} />
+      <RedirectTo
+        path="/{key}/{tab}/{subtab}"
+        params={{ path: { key, tab: 'management', subtab: 'route' } }}
+      />
     );
   }
 

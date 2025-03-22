@@ -16,7 +16,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
-import { IngestStreamGetResponse, IngestStreamLifecycleILM } from '@kbn/streams-schema';
+import { IngestStreamGetResponse, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 
 import { LocatorPublic } from '@kbn/share-plugin/public';
@@ -44,7 +44,7 @@ const RetentionDisplay = ({
 }) => {
   if (!definition) return <>-</>;
 
-  if ('dsl' in definition.effective_lifecycle) {
+  if (isDslLifecycle(definition.effective_lifecycle)) {
     return (
       <>
         {definition?.effective_lifecycle.dsl.data_retention ||
@@ -55,12 +55,11 @@ const RetentionDisplay = ({
     );
   }
 
-  return (
-    <IlmLink
-      lifecycle={definition.effective_lifecycle as IngestStreamLifecycleILM}
-      ilmLocator={ilmLocator}
-    />
-  );
+  if (isIlmLifecycle(definition.effective_lifecycle)) {
+    return <IlmLink lifecycle={definition.effective_lifecycle} ilmLocator={ilmLocator} />;
+  }
+
+  return <>-</>;
 };
 
 interface StatItemProps {

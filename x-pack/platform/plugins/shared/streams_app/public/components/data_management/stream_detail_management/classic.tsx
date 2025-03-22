@@ -30,7 +30,28 @@ export function ClassicStreamDetailManagement({
 }) {
   const {
     path: { key, subtab },
-  } = useStreamsAppParams('/{key}/management/{subtab}');
+  } = useStreamsAppParams('/{key}/{tab}/{subtab}');
+
+  if (!definition.data_stream_exists) {
+    return (
+      <EuiFlexGroup direction="column">
+        <EuiCallOut
+          title={i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.title', {
+            defaultMessage: 'Data stream missing',
+          })}
+          color="danger"
+          iconType="error"
+        >
+          <p>
+            {i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.description', {
+              defaultMessage:
+                'The underlying Elasticsearch data stream for this classic stream is missing. Recreate the data stream to restore the stream by sending data before using the management features.',
+            })}{' '}
+          </p>
+        </EuiCallOut>
+      </EuiFlexGroup>
+    );
+  }
 
   const tabs: ManagementTabs = {
     overview: {
@@ -64,8 +85,8 @@ export function ClassicStreamDetailManagement({
   if (!isValidManagementSubTab(subtab)) {
     return (
       <RedirectTo
-        path="/{key}/management/{subtab}"
-        params={{ path: { key, subtab: 'overview' } }}
+        path="/{key}/{tab}/{subtab}"
+        params={{ path: { key, tab: 'management', subtab: 'route' } }}
       />
     );
   }
@@ -87,24 +108,6 @@ function UnmanagedStreamOverview({ definition }: { definition: UnwiredStreamGetR
     }
     return acc;
   }, {} as Record<string, Array<{ type: string; id: string }>>);
-  if (!definition.data_stream_exists) {
-    return (
-      <EuiCallOut
-        title={i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.title', {
-          defaultMessage: 'Data stream missing',
-        })}
-        color="danger"
-        iconType="error"
-      >
-        <p>
-          {i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.description', {
-            defaultMessage:
-              'The underlying Elasticsearch data stream for this classic stream is missing. Recreate the data stream to restore the stream by sending data before using the management features.',
-          })}{' '}
-        </p>
-      </EuiCallOut>
-    );
-  }
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiText>
