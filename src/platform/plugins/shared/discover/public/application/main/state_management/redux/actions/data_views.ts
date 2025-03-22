@@ -9,8 +9,11 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { differenceBy } from 'lodash';
-import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
-import { createInternalStateAsyncThunk } from '../utils';
+import {
+  createInternalStateAsyncThunk,
+  internalStateSlice,
+  type InternalStateThunkActionCreator,
+} from '../internal_state';
 import { selectCurrentTabRuntimeState } from '../runtime_state';
 
 export const loadDataViewList = createInternalStateAsyncThunk(

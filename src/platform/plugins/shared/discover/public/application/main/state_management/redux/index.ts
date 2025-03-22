@@ -23,7 +23,7 @@ import {
 
 export type { DiscoverInternalState, TabState, InternalStateDataRequestParams } from './types';
 
-export { type InternalStateStore, createInternalStateStore, createTabItem } from './internal_state';
+export { type InternalStateStore, createInternalStateStore } from './internal_state';
 
 export const internalStateActions = {
   ...omit(
@@ -62,3 +62,5 @@ export {
   useCurrentDataView,
   useAdHocDataViews,
 } from './runtime_state';
+
+export { createTabItem } from './utils';
