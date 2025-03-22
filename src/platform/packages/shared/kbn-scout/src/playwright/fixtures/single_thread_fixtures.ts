@@ -36,7 +36,7 @@ import {
   perfTrackerFixture,
 } from './test';
 import type { BrowserAuthFixture, ScoutPage, PageObjects, PerfTrackerFixture } from './test';
-export type { ScoutPage, PageObjects } from './test';
+export type { ScoutPage, PageObjects, BrowserAuthFixture } from './test';
 export type { ApiServicesFixture, LighthouseAuditOptions } from './worker';
 
 export const scoutFixtures = mergeTests(

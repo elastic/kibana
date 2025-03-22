@@ -15,6 +15,7 @@ export {
   lighthouseTest,
   globalSetupHook,
   tags,
+  browserAuthFixture,
   createPlaywrightConfig,
   createLazyPageObject,
 } from './src/playwright';
@@ -24,6 +25,8 @@ export type {
   ScoutPage,
   PageObjects,
   ApiServicesFixture,
+  BrowserAuthFixture,
+  SamlAuth,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   ScoutParallelTestFixtures,
@@ -43,5 +46,6 @@ export type {
 
 // re-export from Playwright
 export type { Locator, CDPSession } from 'playwright/test';
+export { mergeTests, test as playwrightTest } from 'playwright/test';
 
 export { measurePerformance, measurePerformanceAsync } from './src/common';
