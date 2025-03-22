@@ -152,7 +152,7 @@ const getEntity = (record: DataTableRecord) => {
   const entityMock = {
     tags: ['infrastructure', 'linux', 'admin', 'active'],
     labels: { Group: 'cloud-sec-dev', Environment: 'Production' },
-    id: 'mock-entity-id',
+    id: '41b2dce5-f057-4bfb-b57b-f1bc64c1c5eb',
     criticality: 'low_impact',
   } as unknown as EntityEcs;
 
@@ -394,6 +394,8 @@ export const AllAssets = () => {
 
   const loadingState =
     isLoadingGridData || !dataView ? DataLoadingState.loading : DataLoadingState.loaded;
+
+  console.log('###', dataView);
 
   return (
     <I18nProvider>

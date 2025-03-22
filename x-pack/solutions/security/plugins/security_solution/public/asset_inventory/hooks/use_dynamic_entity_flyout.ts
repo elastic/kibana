@@ -14,7 +14,7 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import type { EsHitRecord } from '@kbn/discover-utils';
+import type { GenericEntityRecord } from '../types/generic_entity_record';
 import { useKibana } from '../../common/lib/kibana';
 import {
   HostPanelKey,
@@ -26,7 +26,7 @@ import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_exp
 
 interface InventoryFlyoutProps {
   entity: EntityEcs;
-  source?: EsHitRecord['_source'];
+  source?: GenericEntityRecord;
   scopeId?: string;
   contextId?: string;
 }
