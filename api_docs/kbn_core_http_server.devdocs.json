@@ -3706,11 +3706,11 @@
               },
               {
                 "plugin": "upgradeAssistant",
-                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/reindex_data_streams/reindex_data_stream.ts"
+                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/migrate_data_streams/data_stream_routes.ts"
               },
               {
                 "plugin": "upgradeAssistant",
-                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/reindex_data_streams/reindex_data_stream.ts"
+                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/migrate_data_streams/data_stream_routes.ts"
               },
               {
                 "plugin": "watcher",
@@ -5962,11 +5962,23 @@
               },
               {
                 "plugin": "upgradeAssistant",
-                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/reindex_data_streams/reindex_data_stream.ts"
+                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/migrate_data_streams/data_stream_routes.ts"
               },
               {
                 "plugin": "upgradeAssistant",
-                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/reindex_data_streams/reindex_data_stream.ts"
+                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/migrate_data_streams/data_stream_routes.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/migrate_data_streams/data_stream_routes.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/update_index.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/enterprise_search/enterprise_search_deprecations_routes.ts"
               },
               {
                 "plugin": "watcher",
@@ -6251,6 +6263,10 @@
               {
                 "plugin": "searchIndices",
                 "path": "x-pack/solutions/search/plugins/search_indices/server/routes/indices.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/routes.ts"
               },
               {
                 "plugin": "searchPlayground",
