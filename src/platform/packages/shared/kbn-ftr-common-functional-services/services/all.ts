@@ -22,6 +22,7 @@ import { SupertestWithoutAuthProvider } from './supertest_without_auth';
 import { SamlAuthProvider } from './saml_auth';
 import { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './supertest';
 import { SecurityServiceProvider } from './security';
+import { RandomActionService } from './random_actions';
 
 export const services = {
   es: EsProvider,
@@ -34,6 +35,7 @@ export const services = {
   esDeleteAllIndices: EsDeleteAllIndicesProvider,
   indexPatterns: IndexPatternsService,
   savedObjectInfo: SavedObjectInfoService,
+  randomAction: RandomActionService,
   randomness: RandomnessService,
   samlAuth: SamlAuthProvider,
   supertest: KibanaSupertestProvider,
