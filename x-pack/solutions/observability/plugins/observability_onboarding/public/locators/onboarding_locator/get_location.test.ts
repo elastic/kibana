@@ -27,14 +27,14 @@ describe('getLocation', () => {
 
   it('should return the correct location with only source', () => {
     const params: ObservabilityOnboardingLocatorParams = {
-      source: 'systemLogs',
+      source: 'auto-detect',
     };
 
     const result = getLocation(params);
 
     expect(result).toEqual({
       app: PLUGIN_ID,
-      path: '/systemLogs',
+      path: '/auto-detect',
       state: {},
     });
   });

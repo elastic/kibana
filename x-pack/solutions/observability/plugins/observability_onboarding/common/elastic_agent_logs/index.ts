@@ -6,4 +6,3 @@
  */
 
 export * from './custom_logs/generate_custom_logs_yml';
-export * from './system_logs/generate_system_logs_yml';
