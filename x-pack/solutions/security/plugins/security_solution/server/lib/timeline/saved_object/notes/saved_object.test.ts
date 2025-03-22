@@ -187,10 +187,6 @@ describe('persistNote', () => {
     created_at: '2024-06-25T22:56:01.354Z',
     created_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
   };
-  const mockUiSettingsClientGet = jest.fn();
-  const mockUiSettingsClient = {
-    get: mockUiSettingsClientGet,
-  };
   const mockSavedObjectClient = savedObjectsClientMock.create();
   const core = coreMock.createRequestHandlerContext();
   const context = {
@@ -200,10 +196,6 @@ describe('persistNote', () => {
       savedObjects: {
         ...core.savedObjects,
         client: mockSavedObjectClient,
-      },
-      uiSettings: {
-        ...core.uiSettings,
-        client: mockUiSettingsClient,
       },
     },
     resolve: jest.fn(),
@@ -302,22 +294,22 @@ describe('persistNote', () => {
 
   it('should handle 403 errors', async () => {
     mockSavedObjectClient.find.mockResolvedValue({
-      total: 1001,
+      total: 101,
       saved_objects: [],
       per_page: 0,
       page: 0,
     });
     (createNote as jest.Mock).mockResolvedValue({
       code: 403,
-      message: 'Cannot create more than 1000 notes without associating them to a timeline',
+      message:
+        'Cannot create more than 100 notes per document without associating them to a timeline',
       note: mockNote,
     });
-    mockUiSettingsClientGet.mockResolvedValue(1000);
     const result = await persistNote({ request: mockRequest, noteId: null, note: mockNote });
 
     expect(result.code).toBe(403);
     expect(result.message).toBe(
-      'Cannot create more than 1000 notes without associating them to a timeline'
+      'Cannot create more than 100 notes per document without associating them to a timeline'
     );
     expect(result.note).toHaveProperty('noteId');
     expect(result.note).toHaveProperty('version', '');
