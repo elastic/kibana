@@ -15,6 +15,7 @@ export const tlsRuleParamsSchema = schema.object(
     search: schema.maybe(schema.string()),
     certExpirationThreshold: schema.maybe(schema.number()),
     certAgeThreshold: schema.maybe(schema.number()),
+    investigationGuide: schema.maybe(schema.string()),
   },
   {
     meta: { description: 'The parameters for the rule.' },

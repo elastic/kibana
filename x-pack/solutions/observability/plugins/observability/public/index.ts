@@ -58,6 +58,7 @@ export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_a
 export { DatePicker } from './pages/overview/components/date_picker';
 
 export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout/alerts_flyout'));
+export const LazyInvestigationManager = lazy(() => import('./components/investigation_manager'));
 
 export type {
   Stat,

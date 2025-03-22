@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, Suspense } from 'react';
+import { LazyInvestigationManager } from '@kbn/observability-plugin/public';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { EuiSpacer } from '@elastic/eui';
@@ -36,6 +37,12 @@ export const StatusRuleComponent: React.FC<{
       <StatusRuleViz ruleParams={ruleParams} />
       <EuiSpacer size="m" />
       <StatusRuleExpression ruleParams={ruleParams} setRuleParams={setRuleParams} />
+      <Suspense fallback={null}>
+        <LazyInvestigationManager
+          setRuleParams={setRuleParams}
+          value={ruleParams?.investigationGuide ?? ''}
+        />
+      </Suspense>
     </>
   );
 };
