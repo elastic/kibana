@@ -30,7 +30,7 @@ import { FrameType, normalizeFrameType } from '@kbn/profiling-utils';
  */
 const RED = 0xfd8484;
 const ORANGE = 0xffaa00;
-const DARKORANGE = 0xff7700;
+const DARKORANGE = 0xff8800;
 const YELLOW = 0xe1e100;
 
 export const FRAME_TYPE_COLOR_MAP = {
