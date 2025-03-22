@@ -40,18 +40,20 @@ import {
   getSuppressionMaxSignalsWarning,
   stringifyAfterKey,
 } from '../utils/utils';
-import { createEnrichEventsFunction } from '../utils/enrichments';
-import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
+import {
+  alertSuppressionTypeGuard,
+  getIsAlertSuppressionActive,
+} from '../utils/get_is_alert_suppression_active';
 import { multiTermsComposite } from './multi_terms_composite';
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import * as i18n from '../translations';
+import { bulkCreate } from '../factories';
 
 export const createNewTermsAlertType = (
   createOptions: CreateRuleOptions
-): SecurityAlertType<NewTermsRuleParams, { isLoggedRequestsEnabled?: boolean }, {}, 'default'> => {
-  const { logger, licensing, experimentalFeatures, scheduleNotificationResponseActionsService } =
-    createOptions;
+): SecurityAlertType<NewTermsRuleParams, { isLoggedRequestsEnabled?: boolean }> => {
+  const { logger, licensing, scheduleNotificationResponseActionsService } = createOptions;
   return {
     id: NEW_TERMS_RULE_TYPE_ID,
     name: 'New Terms Rule',
@@ -101,7 +103,6 @@ export const createNewTermsAlertType = (
 
       const {
         ruleExecutionLogger,
-        bulkCreate,
         completeRule,
         tuple,
         inputIndex,
@@ -248,14 +249,13 @@ export const createNewTermsAlertType = (
           for (let i = 0; i < eventAndTermsChunks.length; i++) {
             const eventAndTermsChunk = eventAndTermsChunks[i];
 
-            if (isAlertSuppressionActive) {
+            if (isAlertSuppressionActive && alertSuppressionTypeGuard(params.alertSuppression)) {
               bulkCreateResult = await bulkCreateSuppressedNewTermsAlertsInMemory({
                 sharedParams,
                 eventsAndTerms: eventAndTermsChunk,
                 toReturn: result,
                 services,
                 alertSuppression: params.alertSuppression,
-                experimentalFeatures,
               });
             } else {
               const wrappedAlerts = wrapNewTermsAlerts({
@@ -263,14 +263,12 @@ export const createNewTermsAlertType = (
                 eventsAndTerms: eventAndTermsChunk,
               });
 
-              bulkCreateResult = await bulkCreate(
+              bulkCreateResult = await bulkCreate({
                 wrappedAlerts,
-                params.maxSignals - result.createdSignalsCount,
-                createEnrichEventsFunction({
-                  services,
-                  logger: ruleExecutionLogger,
-                })
-              );
+                services,
+                sharedParams,
+                maxAlerts: params.maxSignals - result.createdSignalsCount,
+              });
 
               addToSearchAfterReturn({ current: result, next: bulkCreateResult });
             }
