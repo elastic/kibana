@@ -128,7 +128,6 @@ export const getMonitorFilters = async (context: RouteContext) => {
     filter,
     tags,
     monitorTypes,
-    locations,
     projects,
     schedules,
     monitorQueryIds,
@@ -145,7 +144,7 @@ export const parseArrayFilters = ({
   schedules,
   monitorQueryIds,
   locationFilter,
-}: Filters & {
+}: Omit<Filters, 'locations'> & {
   locationFilter?: string | string[];
   configIds?: string[];
 }) => {
@@ -199,12 +198,23 @@ export const getSavedObjectKqlFilter = ({
   return `${fieldKey}:"${escapeQuotes(values)}"`;
 };
 
-const parseLocationFilter = async (context: RouteContext, locations?: string | string[]) => {
+export const parseLocationFilter = async (
+  {
+    syntheticsMonitorClient,
+    savedObjectsClient,
+    server,
+  }: Pick<RouteContext, 'syntheticsMonitorClient' | 'savedObjectsClient' | 'server'>,
+  locations?: string | string[]
+) => {
   if (!locations || locations?.length === 0) {
     return;
   }
 
-  const { allLocations } = await getAllLocations(context);
+  const { allLocations } = await getAllLocations({
+    syntheticsMonitorClient,
+    savedObjectsClient,
+    server,
+  });
 
   if (Array.isArray(locations)) {
     return locations
