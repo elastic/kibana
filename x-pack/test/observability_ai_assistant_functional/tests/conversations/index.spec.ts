@@ -16,7 +16,6 @@ import {
   createLlmProxy,
   LlmProxy,
 } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { interceptRequest } from '../../common/intercept_request';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { editor } from '../../../observability_ai_assistant_api_integration/common/users/users';
