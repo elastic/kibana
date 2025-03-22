@@ -11,17 +11,17 @@ import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import {
   DOCUMENT_SOURCE,
   createEsDocument,
-} from '../../../../spaces_only/tests/alerting/create_test_data';
-import { Space } from '../../../../common/types';
+} from '../../../../../spaces_only/tests/alerting/create_test_data';
+import { Space } from '../../../../../common/types';
 import {
   GlobalReadAtSpace1,
   Space1,
   Space1AllAtSpace1,
   Superuser,
   SuperuserAtSpace1,
-} from '../../../scenarios';
-import { getUrlPrefix, getEventLog, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+} from '../../../../scenarios';
+import { getUrlPrefix, getEventLog, ObjectRemover } from '../../../../../common/lib';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
   activeO11yAlertsOlderThan90,
   activeO11yAlertsNewerThan90,

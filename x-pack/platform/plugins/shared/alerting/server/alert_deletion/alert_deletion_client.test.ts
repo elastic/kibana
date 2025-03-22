@@ -603,18 +603,22 @@ describe('AlertDeletionClient', () => {
       expect(esClient.openPointInTime).toHaveBeenNthCalledWith(1, {
         keep_alive: '1m',
         index: ['index1', 'index2'],
+        ignore_unavailable: true,
       });
       expect(esClient.openPointInTime).toHaveBeenNthCalledWith(2, {
         keep_alive: '1m',
         index: ['alert-index-1'],
+        ignore_unavailable: true,
       });
       expect(esClient.openPointInTime).toHaveBeenNthCalledWith(3, {
         keep_alive: '1m',
         index: ['index1', 'index2', 'alert-index-3'],
+        ignore_unavailable: true,
       });
       expect(esClient.openPointInTime).toHaveBeenNthCalledWith(4, {
         keep_alive: '1m',
         index: ['index1', 'index2', 'alert-index-3'],
+        ignore_unavailable: true,
       });
 
       expect(esClient.search).toHaveBeenCalledTimes(4);
@@ -724,7 +728,7 @@ describe('AlertDeletionClient', () => {
       // bulk task state update for active alert setting
       expect(taskManagerStart.bulkUpdateState).toHaveBeenCalledTimes(1);
       expect(taskManagerStart.bulkUpdateState).toHaveBeenCalledWith(
-        ['task:1', 'task:3'],
+        ['1', '3'],
         expect.any(Function)
       );
 
@@ -865,6 +869,7 @@ describe('AlertDeletionClient', () => {
       expect(esClient.openPointInTime).toHaveBeenNthCalledWith(1, {
         keep_alive: '1m',
         index: ['alert-index-1'],
+        ignore_unavailable: true,
       });
 
       expect(esClient.search).toHaveBeenCalledTimes(4);
@@ -1328,6 +1333,7 @@ describe('AlertDeletionClient', () => {
         expect(esClient.openPointInTime).toHaveBeenNthCalledWith(1, {
           keep_alive: '1m',
           index: ['index1', 'index2', 'alert-index-3'],
+          ignore_unavailable: true,
         });
 
         expect(esClient.search).toHaveBeenCalledTimes(1);
@@ -1374,10 +1380,7 @@ describe('AlertDeletionClient', () => {
           error: { code: 'Error', message: 'not found' },
         });
         // only 1 task state updated
-        expect(taskManagerStart.bulkUpdateState).toHaveBeenCalledWith(
-          ['task:1'],
-          expect.any(Function)
-        );
+        expect(taskManagerStart.bulkUpdateState).toHaveBeenCalledWith(['1'], expect.any(Function));
 
         expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {

@@ -392,6 +392,7 @@ export class AlertDeletionClient {
         const pitResponse = await esClient.openPointInTime({
           index: indices,
           keep_alive: '1m',
+          ignore_unavailable: true,
         });
         pitId = pitResponse.id;
       }
@@ -434,7 +435,7 @@ export class AlertDeletionClient {
 
               const ruleId = searchResponse.hits.hits[index]._source?.[ALERT_RULE_UUID];
               if (ruleId) {
-                taskIds.add(`task:${ruleId}`);
+                taskIds.add(ruleId);
               }
 
               alertUuidsToClear.push(alertUuid!);
