@@ -35,6 +35,7 @@ export interface EsQueryRuleActionContext extends AlertInstanceContext {
   // a link which navigates to stack management in case of Elastic query rule
   link: string;
   sourceFields: string[];
+  grouping?: object;
 }
 
 interface AddMessagesOpts {
