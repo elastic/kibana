@@ -21,6 +21,7 @@ import { RiskScoreEnableSection } from '../components/risk_score_enable_section'
 import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
 import { RiskEnginePrivilegesCallOut } from '../components/risk_engine_privileges_callout';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
+import { useRiskEnginePrivileges } from '../api/hooks/use_risk_engine_privileges';
 import { RiskScoreUsefulLinksSection } from '../components/risk_score_useful_links_section';
 import { RiskScoreConfigurationSection } from '../components/risk_score_configuration_section';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
@@ -36,6 +37,7 @@ export const EntityAnalyticsManagementPage = () => {
   const { euiTheme } = useEuiTheme();
   const styles = getEntityAnalyticsRiskScorePageStyles(euiTheme);
   const privileges = useMissingRiskEnginePrivileges();
+  const { data: riskEnginePrivileges } = useRiskEnginePrivileges();
   const { data: riskEngineSettings } = useRiskEngineSettings();
   const includeClosedAlerts = riskEngineSettings?.includeClosedAlerts ?? false;
   const from = riskEngineSettings?.range?.start ?? 'now-30d';
@@ -49,12 +51,13 @@ export const EntityAnalyticsManagementPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { mutate: scheduleNowRiskEngine } = useScheduleNowRiskEngineMutation();
   const { addSuccess, addError } = useAppToasts();
+  const userCanRunEngine =
+    riskEnginePrivileges?.privileges?.elasticsearch?.cluster?.manage_transform || false;
 
   const handleRunEngineClick = async () => {
     setIsLoading(true);
     try {
       scheduleNowRiskEngine();
-
       if (!isLoading) {
         addSuccess(i18n.RISK_SCORE_ENGINE_RUN_SUCCESS, { toastLifeTimeMs: 5000 });
       }
@@ -70,6 +73,9 @@ export const EntityAnalyticsManagementPage = () => {
   const { status, runAt } = riskEngineStatus?.risk_engine_task_status || {};
 
   const isRunning = status === 'running' || (!!runAt && new Date(runAt) < new Date());
+
+  const runEngineBtnIsDisabled =
+    !currentRiskEngineStatus || isLoading || !userCanRunEngine || isRunning;
 
   const formatTimeFromNow = (time: string | undefined): string => {
     if (!time) {
@@ -103,6 +109,7 @@ export const EntityAnalyticsManagementPage = () => {
                     <EuiButton
                       size="s"
                       iconType="play"
+                      disabled={runEngineBtnIsDisabled}
                       isLoading={isLoading}
                       onClick={handleRunEngineClick}
                     >
