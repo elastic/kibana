@@ -23,6 +23,14 @@ const configSchema = schema.object({
     },
     defaultValue: '#8A6A0A',
   }),
+  linkColor: schema.string({
+    validate: (color) => {
+      if (!isHexColor(color)) {
+        return `must be an hex color`;
+      }
+    },
+    defaultValue: '#61A2FF',
+  }),
   backgroundColor: schema.string({
     validate: (color) => {
       if (!isHexColor(color)) {
