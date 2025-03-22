@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import eksLogo from '@kbn/cloud-security-posture/assets/cis_eks_logo.svg';
+import googleCloudLogo from '@kbn/cloud-security-posture/assets/google_cloud_logo.svg';
 import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types_old';
 import {
   CLOUDBEAT_EKS,
@@ -19,9 +21,6 @@ import {
   CLOUDBEAT_AKS,
   CLOUDBEAT_GKE,
 } from '../../common/constants';
-
-import eksLogo from '../assets/icons/cis_eks_logo.svg';
-import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 
@@ -163,8 +162,8 @@ export const MIN_VERSION_GCP_CIS = '1.5.2';
 
 export const NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS = 10000;
 
-export const DETECTION_ENGINE_RULES_KEY = 'detection_engine_rules';
-export const DETECTION_ENGINE_ALERTS_KEY = 'detection_engine_alerts';
+// export const DETECTION_ENGINE_RULES_KEY = 'detection_engine_rules';
+// export const DETECTION_ENGINE_ALERTS_KEY = 'detection_engine_alerts';
 
 export const DEFAULT_GROUPING_TABLE_HEIGHT = 512;
 

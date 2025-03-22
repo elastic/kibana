@@ -8,7 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiLoadingSpinner, EuiSkeletonText, EuiText } from '@elastic/eui';
-import type { HttpSetup } from '@kbn/core/public';
+import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import {
   CREATE_DETECTION_RULE_FROM_FLYOUT,
   uiMetricService,
@@ -19,16 +19,15 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useQueryClient } from '@tanstack/react-query';
 import { i18n as kbnI18n } from '@kbn/i18n';
 import type { RuleResponse } from '@kbn/cloud-security-posture-common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import {
   DETECTION_ENGINE_ALERTS_KEY,
   DETECTION_ENGINE_RULES_KEY,
 } from '@kbn/cloud-security-posture';
-import { useFetchDetectionRulesAlertsStatus } from '../common/api/use_fetch_detection_rules_alerts_status';
-import { useFetchDetectionRulesByTags } from '../common/api/use_fetch_detection_rules_by_tags';
-import { useKibana } from '../common/hooks/use_kibana';
+import { useFetchDetectionRulesAlertsStatus } from '../../hooks/use_fetch_detection_rules_alerts_status';
+import { useFetchDetectionRulesByTags } from '../../hooks/use_fetch_detection_rules_by_tags';
 import { showCreateDetectionRuleSuccessToast } from './take_action';
-
-//DEL this File
 
 const RULES_PAGE_PATH = '/rules/management';
 const ALERTS_PAGE_PATH = '/alerts';
@@ -51,7 +50,9 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
   const [isCreateRuleLoading, setIsCreateRuleLoading] = useState(false);
 
   const queryClient = useQueryClient();
-  const { http, notifications, analytics, i18n, theme } = useKibana().services;
+  const { http, notifications, analytics, i18n, theme } = useKibana<
+    CoreStart & CspClientPluginStartDeps
+  >().services;
 
   const history = useHistory();
 

@@ -48,3 +48,7 @@ export {
   getFindingsDetectionRuleSearchTags,
 } from './rules/detection_rules';
 export type { RuleResponse } from './rules/rule';
+export {
+  convertRuleTagsToMatchAllKQL,
+  convertRuleTagsToMatchAnyKQL,
+} from './utils/detection_rules';

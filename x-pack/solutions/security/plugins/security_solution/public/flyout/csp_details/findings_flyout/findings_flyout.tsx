@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useState } from 'react';
+import type { PropsOf, EuiDescriptionListProps } from '@elastic/eui';
 import {
   useEuiTheme,
   EuiFlexItem,
@@ -17,42 +18,42 @@ import {
   EuiTabs,
   EuiTab,
   EuiFlexGroup,
-  PropsOf,
   EuiCodeBlock,
   EuiMarkdownFormat,
   EuiIcon,
   EuiPagination,
   EuiFlyoutFooter,
   EuiToolTip,
-  EuiDescriptionListProps,
   EuiCallOut,
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { assertNever } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
-import type { HttpSetup } from '@kbn/core/public';
+import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import { generatePath } from 'react-router-dom';
 import { css } from '@emotion/react';
-import { CspEvaluationBadge, benchmarksNavigation } from '@kbn/cloud-security-posture';
-import type { CspFinding, BenchmarkId } from '@kbn/cloud-security-posture-common';
-import { BenchmarkName, CSP_MISCONFIGURATIONS_DATASET } from '@kbn/cloud-security-posture-common';
-import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
+import {
+  CspEvaluationBadge,
+  benchmarksNavigation,
+  CISBenchmarkIcon,
+} from '@kbn/cloud-security-posture';
+import type { CspFinding, BenchmarkId, BenchmarkName } from '@kbn/cloud-security-posture-common';
+import { CSP_MISCONFIGURATIONS_DATASET } from '@kbn/cloud-security-posture-common';
+import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
 import { isNativeCspFinding } from '@kbn/cloud-security-posture/src/utils/is_native_csp_finding';
 import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
 import { truthy } from '@kbn/cloud-security-posture/src/utils/helpers';
-import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { createDetectionRuleFromBenchmarkRule } from '@kbn/cloud-security-posture/src/utils/create_detection_rule_from_benchmark'; //
-import { CISBenchmarkIcon } from '@kbn/cloud-security-posture';
 import cisLogoIcon from '@kbn/cloud-security-posture/assets/cis_logo.svg';
-import { TakeAction } from '../../../components/take_action';
+import { TakeAction } from '../components/rules/take_action';
 import { TableTab } from './table_tab';
 import { JsonTab } from './json_tab';
 import { OverviewTab } from './overview_tab';
 import { RuleTab } from './rule_tab';
-import { CspInlineDescriptionList } from '../../../components/csp_inline_description_list';
+import { CspInlineDescriptionList } from '../components/shared/csp_inline_description_list';
 
 const FINDINGS_MISCONFIGS_FLYOUT_DESCRIPTION_LIST = 'misconfigs-findings-flyout-description-list';
 
@@ -243,7 +244,7 @@ export const FindingsRuleFlyout = ({
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
   const createMisconfigurationRuleFn = async (http: HttpSetup) =>
-    await createDetectionRuleFromBenchmarkRule(http, finding.rule);
+    createDetectionRuleFromBenchmarkRule(http, finding.rule);
 
   return (
     <EuiFlyout onClose={onClose} data-test-subj={FINDINGS_FLYOUT}>
