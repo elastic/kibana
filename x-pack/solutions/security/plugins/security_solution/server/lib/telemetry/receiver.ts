@@ -99,6 +99,7 @@ import type {
   IlmPolicy,
   IlmStats,
   Index,
+  IndexSettings,
   IndexStats,
 } from './indices.metadata.types';
 import { chunkStringsByMaxLength } from './collections_helpers';
@@ -260,11 +261,11 @@ export interface ITelemetryReceiver {
 
   setNumDocsToSample(n: number): void;
 
-  getIndices(): Promise<string[]>;
+  getIndices(): Promise<IndexSettings[]>;
   getDataStreams(): Promise<DataStream[]>;
-  getIndicesStats(indices: string[]): AsyncGenerator<IndexStats, void, unknown>;
-  getIlmsStats(indices: string[]): AsyncGenerator<IlmStats, void, unknown>;
-  getIlmsPolicies(ilms: string[]): AsyncGenerator<IlmPolicy, void, unknown>;
+  getIndicesStats(indices: string[], chunkSize: number): AsyncGenerator<IndexStats, void, unknown>;
+  getIlmsStats(indices: string[], chunkSize: number): AsyncGenerator<IlmStats, void, unknown>;
+  getIlmsPolicies(ilms: string[], chunkSize: number): AsyncGenerator<IlmPolicy, void, unknown>;
 
   getIngestPipelinesStats(timeout: Duration): Promise<NodeIngestPipelinesStats[]>;
 }
@@ -1331,7 +1332,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this._esClient;
   }
 
-  public async getIndices(): Promise<string[]> {
+  public async getIndices(): Promise<IndexSettings[]> {
     const es = this.esClient();
 
     this.logger.l('Fetching indices');
@@ -1339,12 +1340,24 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     const request: IndicesGetRequest = {
       index: '*',
       expand_wildcards: ['open', 'hidden'],
-      filter_path: ['*.settings.index.provided_name'],
+      filter_path: [
+        '*.settings.index.final_pipeline',
+        '*.settings.index.default_pipeline',
+        '*.settings.index.provided_name',
+      ],
     };
 
     return es.indices
       .get(request)
-      .then((indices) => Array.from(Object.keys(indices)))
+      .then((indices) =>
+        Object.entries(indices).map(([index, value]) => {
+          return {
+            index_name: index,
+            default_pipeline: value.settings?.index?.default_pipeline,
+            final_pipeline: value.settings?.index?.final_pipeline,
+          } as IndexSettings;
+        })
+      )
       .catch((error) => {
         this.logger.warn('Error fetching indices', { error_message: error } as LogMeta);
         throw error;
@@ -1359,7 +1372,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     const request: IndicesGetDataStreamRequest = {
       name: '*',
       expand_wildcards: ['open', 'hidden'],
-      filter_path: ['data_streams.name', 'data_streams.indices'],
+      filter_path: [
+        'data_streams.indices.ilm_policy',
+        'data_streams.indices.index_name',
+        'data_streams.name',
+        'ilm_policy',
+        'template',
+      ],
     };
 
     return es.indices
@@ -1368,6 +1387,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         response.data_streams.map((ds) => {
           return {
             datastream_name: ds.name,
+            ilm_policy: ds.ilm_policy,
+            template: ds.template,
             indices:
               ds.indices?.map((index) => {
                 return {
@@ -1384,12 +1405,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       });
   }
 
-  public async *getIndicesStats(indices: string[]) {
+  public async *getIndicesStats(indices: string[], chunkSize: number) {
     const es = this.esClient();
+    const safeChunkSize = Math.min(chunkSize, 3000);
 
     this.logger.l('Fetching indices stats');
 
-    const groupedIndices = chunkStringsByMaxLength(indices);
+    const groupedIndices = chunkStringsByMaxLength(indices, safeChunkSize);
 
     this.logger.l('Splitted indices into groups', {
       groups: groupedIndices.length,
@@ -1400,14 +1422,22 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       const request: IndicesStatsRequest = {
         index: group,
         level: 'indices',
-        metric: ['docs', 'search', 'store'],
+        metric: ['docs', 'search', 'store', 'indexing'],
         expand_wildcards: ['open', 'hidden'],
         filter_path: [
           'indices.*.total.search.query_total',
           'indices.*.total.search.query_time_in_millis',
+
           'indices.*.total.docs.count',
           'indices.*.total.docs.deleted',
           'indices.*.total.store.size_in_bytes',
+
+          'indices.*.primaries.docs.count',
+          'indices.*.primaries.docs.deleted',
+          'indices.*.primaries.store.size_in_bytes',
+
+          'indices.*.total.indexing.index_failed',
+          'indices.*.total.indexing.index_failed_due_to_version_conflict',
         ],
       };
 
@@ -1416,11 +1446,22 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         for (const [indexName, stats] of Object.entries(response.indices ?? {})) {
           yield {
             index_name: indexName,
+
             query_total: stats.total?.search?.query_total,
             query_time_in_millis: stats.total?.search?.query_time_in_millis,
+
             docs_count: stats.total?.docs?.count,
             docs_deleted: stats.total?.docs?.deleted,
             docs_total_size_in_bytes: stats.total?.store?.size_in_bytes,
+
+            index_failed: stats.total?.indexing?.index_failed,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            index_failed_due_to_version_conflict: (stats.total?.indexing as any)
+              ?.index_failed_due_to_version_conflict,
+
+            docs_count_primaries: stats.primaries?.docs?.count,
+            docs_deleted_primaries: stats.primaries?.docs?.deleted,
+            docs_total_size_in_bytes_primaries: stats.primaries?.store?.size_in_bytes,
           } as IndexStats;
         }
       } catch (error) {
@@ -1430,10 +1471,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
   }
 
-  public async *getIlmsStats(indices: string[]) {
+  public async *getIlmsStats(indices: string[], chunkSize: number) {
     const es = this.esClient();
+    const safeChunkSize = Math.min(chunkSize, 3000);
 
-    const groupedIndices = chunkStringsByMaxLength(indices);
+    const groupedIndices = chunkStringsByMaxLength(indices, safeChunkSize);
 
     this.logger.l('Splitted ilms into groups', {
       groups: groupedIndices.length,
@@ -1467,8 +1509,9 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
   }
 
-  public async *getIlmsPolicies(ilms: string[]) {
+  public async *getIlmsPolicies(ilms: string[], chunkSize: number) {
     const es = this.esClient();
+    const safeChunkSize = Math.min(chunkSize, 3000);
 
     const phase = (obj: unknown): Nullable<IlmPhase> => {
       let value: Nullable<IlmPhase>;
@@ -1480,7 +1523,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       return value;
     };
 
-    const groupedIlms = chunkStringsByMaxLength(ilms);
+    const groupedIlms = chunkStringsByMaxLength(ilms, safeChunkSize);
 
     this.logger.l('Splitted ilms into groups', {
       groups: groupedIlms.length,
