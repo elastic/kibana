@@ -30,17 +30,17 @@ export const AlertSummaryWidget = ({
   onLoaded,
   dependencies: { charts, uiSettings },
 }: AlertSummaryWidgetProps & AlertSummaryWidgetDependencies) => {
-  const {
-    alertSummary: { activeAlertCount, activeAlerts, recoveredAlertCount },
-    isLoading,
-    error,
-  } = useLoadAlertSummary({
+  const { alertSummary } = useLoadAlertSummary({
     ruleTypeIds,
     consumers,
     filter,
     timeRange,
   });
-
+  const {
+    isLoading,
+    error,
+    alertSummary: { activeAlertCount, activeAlerts, recoveredAlertCount },
+  } = alertSummary;
   useEffect(() => {
     if (!isLoading && onLoaded) {
       onLoaded({ activeAlertCount, recoveredAlertCount });
