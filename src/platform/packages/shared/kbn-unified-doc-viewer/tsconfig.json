@@ -2,19 +2,10 @@
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node",
-      "react"
-    ]
+    "types": ["jest", "node", "react", "../../../../../typings/emotion.d.ts"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/discover-utils",
     "@kbn/data-views-plugin",
@@ -23,6 +14,6 @@
     "@kbn/i18n-react",
     "@kbn/i18n",
     "@kbn/react-field",
-    "@kbn/field-utils",
+    "@kbn/field-utils"
   ]
 }

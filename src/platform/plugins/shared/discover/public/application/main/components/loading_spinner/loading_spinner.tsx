@@ -8,26 +8,27 @@
  */
 
 import React from 'react';
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiLoadingSpinner, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiTitle, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
 export function LoadingSpinner() {
-  const loadingSpinnerCss = ({ euiTheme }: UseEuiTheme) => css`
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    padding: ${euiTheme.size.l} 0;
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-    z-index: 3;
-  `;
-
+  const { euiTheme } = useEuiTheme();
   return (
-    <div className="dscLoading" css={loadingSpinnerCss}>
+    <div
+      className="dscLoading"
+      css={css`
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        padding: ${euiTheme.size.l} 0;
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        z-index: 3;
+      `}
+    >
       <EuiTitle size="s" data-test-subj="loadingSpinnerText">
         <h2>
           <FormattedMessage id="discover.searchingTitle" defaultMessage="Searching" />

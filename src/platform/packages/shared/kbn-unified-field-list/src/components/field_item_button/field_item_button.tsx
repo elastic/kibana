@@ -10,12 +10,20 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
+import { css } from '@emotion/react';
 import { FieldButton, type FieldButtonProps } from '@kbn/react-field';
-import { EuiButtonIcon, EuiButtonIconProps, EuiHighlight, EuiIcon, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiButtonIconProps,
+  EuiHighlight,
+  EuiIcon,
+  EuiToolTip,
+  useEuiShadow,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import { type FieldListItem, type GetCustomFieldType } from '../../types';
-import './field_item_button.scss';
 
 const DRAG_ICON = <EuiIcon type="grabOmnidirectional" size="m" />;
 
@@ -86,6 +94,54 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
   onRemoveFieldFromWorkspace,
   ...otherProps
 }: FieldItemButtonProps<T>) {
+  const euiShadow = useEuiShadow('xs');
+
+  const fieldButtonCss = ({ euiTheme }: UseEuiTheme) => css`
+    width: 100%;
+    background: ${euiTheme.colors.emptyShade};
+    border-radius: ${euiTheme.border.radius};
+    color: ${isEmpty ? euiTheme.colors.darkShade : undefined};
+    ${euiShadow}
+
+    &.kbnFieldButton {
+      &:focus-within,
+      &-isActive {
+        ${removeEuiFocusRing};
+      }
+    }
+
+    .kbnFieldButton__button:focus {
+      ${passDownFocusRing(euiTheme, '.kbnFieldButton__nameInner')};
+    }
+
+    & button .kbnFieldButton__nameInner:hover {
+      text-decoration: underline;
+    }
+
+    &:hover,
+    &[class*='-isActive'] {
+      .unifiedFieldListItemButton__action {
+        opacity: 1;
+      }
+    }
+
+    .unifiedFieldListItemButton__fieldIconDrag {
+      visibility: visible;
+      opacity: 0;
+    }
+
+    &:hover,
+    &[class*='-isActive'],
+    .domDraggable__keyboardHandler:focus + & {
+      .unifiedFieldListItemButton__fieldIcon {
+        opacity: 0;
+      }
+      .unifiedFieldListItemButton__fieldIconDrag {
+        opacity: 1;
+      }
+    }
+  `;
+
   const displayName = field.displayName || field.name;
   const title =
     displayName !== field.name && field.name !== '___records___'
@@ -149,6 +205,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
               fieldActionClassName,
               buttonRemoveFieldFromWorkspaceProps?.className
             )}
+            css={unifiedFieldListItemButtonActionCss}
             color="danger"
             iconType="cross"
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
@@ -169,6 +226,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
             aria-label={addFieldToWorkspaceTooltip}
             {...(buttonAddFieldToWorkspaceProps || {})}
             className={classnames(fieldActionClassName, buttonAddFieldToWorkspaceProps?.className)}
+            css={unifiedFieldListItemButtonActionCss}
             color="text"
             iconType="plusInCircle"
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
@@ -191,6 +249,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
       dataTestSubj={dataTestSubj || `field-${field.name}-showDetails`}
       size={size || 's'}
       className={classes}
+      css={fieldButtonCss}
       isActive={isActive}
       buttonProps={{
         ['aria-label']: i18n.translate('unifiedFieldList.fieldItemButton.ariaLabel', {
@@ -202,12 +261,20 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
         }),
       }}
       fieldIcon={
-        <div className="unifiedFieldListItemButton__fieldIconContainer">
-          <div className="unifiedFieldListItemButton__fieldIcon">
+        <div css={fieldIconContainer}>
+          <div
+            className="unifiedFieldListItemButton__fieldIcon" // class is used in functional tests and dependent styles
+            css={fieldIconCss}
+          >
             <FieldIcon {...iconProps} />
           </div>
           {withDragIcon && (
-            <div className="unifiedFieldListItemButton__fieldIconDrag">{DRAG_ICON}</div>
+            <div
+              className="unifiedFieldListItemButton__fieldIconDrag" // class is used in dependent styles
+              css={dragHandleCss}
+            >
+              {DRAG_ICON}
+            </div>
           )}
         </div>
       }
@@ -260,3 +327,63 @@ function FieldConflictInfoIcon({
     </EuiToolTip>
   );
 }
+
+const removeEuiFocusRing = css`
+  outline: none;
+
+  &:focus-visible {
+    outline-style: none;
+  }
+`;
+
+/**
+ * 1. Only visually hide the action, so that it's still accessible to screen readers.
+ * 2. When tabbed to, this element needs to be visible for keyboard accessibility.
+ */
+const unifiedFieldListItemButtonActionCss = css`
+  opacity: 0; /* 1 */
+
+  &--always {
+    opacity: 1;
+  }
+
+  &:focus {
+    opacity: 1; /* 2 */
+  }
+`;
+
+const passDownFocusRing = (euiTheme: UseEuiTheme['euiTheme'], target: string) => css`
+  ${removeEuiFocusRing}
+
+  ${target} {
+    /* Safari & Firefox */
+    outline: ${euiTheme.focus.width} solid currentColor;
+  }
+
+  &:focus-visible ${target} {
+    /* Chrome */
+    outline-style: auto;
+  }
+
+  &:not(:focus-visible) ${target} {
+    outline: none;
+  }
+`;
+
+const fieldIconContainer = css`
+  position: relative;
+`;
+
+const fieldIconCss = ({ euiTheme }: UseEuiTheme) =>
+  css`
+    transition: opacity ${euiTheme.animation.normal} ease-in-out;
+  `;
+
+const dragHandleCss = ({ euiTheme }: UseEuiTheme) => css`
+  visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: opacity ${euiTheme.animation.normal} ease-in-out;
+  opacity: 0;
+`;

@@ -2,7 +2,7 @@
 
 exports[`fieldAction is rendered 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton--s"
+  className="kbnFieldButton"
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
@@ -19,7 +19,18 @@ exports[`fieldAction is rendered 1`] = `
     </span>
   </button>
   <div
-    className="kbnFieldButton__fieldAction"
+    css={
+      Object {
+        "map": undefined,
+        "name": "135l7mr",
+        "next": undefined,
+        "styles": "
+            margin-left: 8px;
+            line-height: 32px;
+          ",
+        "toString": [Function],
+      }
+    }
   >
     <span>
       fieldAction
@@ -30,14 +41,25 @@ exports[`fieldAction is rendered 1`] = `
 
 exports[`fieldIcon is rendered 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton--s"
+  className="kbnFieldButton"
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
     onClick={[Function]}
   >
     <span
-      className="kbnFieldButton__fieldIcon"
+      css={
+        Object {
+          "map": undefined,
+          "name": "1nycr0t",
+          "next": undefined,
+          "styles": "
+  flex-shrink: 0;
+  line-height: 0;
+",
+          "toString": [Function],
+        }
+      }
     >
       <span>
         fieldIcon
@@ -58,7 +80,7 @@ exports[`fieldIcon is rendered 1`] = `
 
 exports[`isActive defaults to false 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton--s"
+  className="kbnFieldButton"
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
@@ -79,7 +101,7 @@ exports[`isActive defaults to false 1`] = `
 
 exports[`isActive renders true 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton--s kbnFieldButton-isActive"
+  className="kbnFieldButton"
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
@@ -100,7 +122,7 @@ exports[`isActive renders true 1`] = `
 
 exports[`sizes s is applied 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton--s"
+  className="kbnFieldButton"
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
@@ -121,7 +143,7 @@ exports[`sizes s is applied 1`] = `
 
 exports[`sizes xs is applied 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton--xs"
+  className="kbnFieldButton"
 >
   <button
     className="kbn-resetFocusState kbnFieldButton__button"
@@ -142,10 +164,21 @@ exports[`sizes xs is applied 1`] = `
 
 exports[`with drag handle is rendered 1`] = `
 <div
-  className="kbnFieldButton kbnFieldButton--s"
+  className="kbnFieldButton"
 >
   <div
-    className="kbnFieldButton__dragHandle"
+    css={
+      Object {
+        "map": undefined,
+        "name": "55j5ev",
+        "next": undefined,
+        "styles": "
+            margin-right: 8px;
+            line-height: 32px;
+          ",
+        "toString": [Function],
+      }
+    }
   >
     <span>
       drag

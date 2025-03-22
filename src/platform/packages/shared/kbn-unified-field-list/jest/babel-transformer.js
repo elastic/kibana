@@ -8,15 +8,20 @@
  */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-const rootConfig = require('@kbn/test/jest-preset');
+const babelJest = require('babel-jest');
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/kbn-unified-field-list'],
-  transform: {
-    ...rootConfig.transform,
-    '^.+\\.(js|tsx?)$':
-      '<rootDir>/src/platform/packages/shared/kbn-unified-field-list/jest/babel-transformer.js',
-  },
-};
+// eslint-disable-next-line import/no-extraneous-dependencies
+const rootTransformerConfig = require('@kbn/test/src/jest/transforms/babel/transformer_config');
+
+module.exports = babelJest.default.createTransformer({
+  ...rootTransformerConfig,
+  presets: [
+    ...rootTransformerConfig.presets,
+    [
+      require.resolve('@emotion/babel-preset-css-prop'),
+      {
+        labelFormat: '[filename]--[local]',
+      },
+    ],
+  ],
+});

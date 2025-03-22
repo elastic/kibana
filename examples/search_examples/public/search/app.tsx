@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
   EuiCheckbox,
@@ -24,6 +25,7 @@ import {
   EuiTabbedContentTab,
   EuiText,
   EuiTitle,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { IInspectorInfo } from '@kbn/data-plugin/common';
@@ -79,6 +81,11 @@ function formatFieldsToComboBox(fields?: DataViewField[]) {
 
 const bucketAggType = 'terms';
 const metricAggType = 'median';
+
+const searchExampleStepCss = ({ euiTheme }: UseEuiTheme) => css`
+  padding-left: ${euiTheme.size.xl};
+  font-style: italic;
+`;
 
 export const SearchExamplesApp = ({
   http,
@@ -624,7 +631,7 @@ export const SearchExamplesApp = ({
                   defaultMessage="Request from low-level client (data.search.search)."
                 />
               </EuiButtonEmpty>
-              <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+              <EuiText size="xs" color="subdued" css={searchExampleStepCss}>
                 <FormattedMessage
                   id="searchExamples.buttonText"
                   defaultMessage="Metrics aggregation with raw documents in response."
@@ -641,7 +648,7 @@ export const SearchExamplesApp = ({
                   defaultMessage="Request from high-level client (data.search.searchSource)"
                 />
               </EuiButtonEmpty>
-              <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+              <EuiText size="xs" color="subdued" css={searchExampleStepCss}>
                 <FormattedMessage
                   id="searchExamples.buttonText"
                   defaultMessage="Bucket and metrics aggregations, with other bucket and default warnings."
@@ -658,7 +665,7 @@ export const SearchExamplesApp = ({
                   defaultMessage="Request from high-level client (data.search.searchSource)"
                 />
               </EuiButtonEmpty>
-              <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+              <EuiText size="xs" color="subdued" css={searchExampleStepCss}>
                 <FormattedMessage
                   id="searchExamples.buttonText"
                   defaultMessage="Bucket and metrics aggregations, without other bucket and with custom logic to handle warnings."
