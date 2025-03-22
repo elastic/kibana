@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
+import { PassThrough, Readable } from 'stream';
 import { z } from '@kbn/zod';
-import {
-  createConcatStream,
-  createListStream,
-  createMapStream,
-  createPromiseFromStreams,
-} from '@kbn/utils';
-import { createSavedObjectsStreamFromNdJson } from '@kbn/core-saved-objects-server-internal/src/routes/utils';
-import { ContentPack, contentPackSchema } from '@kbn/streams-schema';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
+import { contentPackHeader } from '../../lib/content/content_pack_header';
+import { exportSavedObjects } from '../../lib/content/export_saved_objects';
+import { contentPackSavedObjects } from '../../lib/content/content_pack_saved_objects';
+import { createContentPack } from '../../lib/content/create_content_pack';
 
 const exportContentRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/content/export 2023-10-31',
@@ -44,32 +40,25 @@ const exportContentRoute = createServerRoute({
 
     const dashboards = await assetClient
       .getAssets({ entityId: params.path.name, entityType: 'stream' })
-      .then((assets) => assets.filter(({ assetType }) => assetType === 'dashboard'));
+      .then((assets) =>
+        assets
+          .filter(({ assetType }) => assetType === 'dashboard')
+          .map((asset) => ({ type: asset.assetType, id: asset.assetId }))
+      );
     if (dashboards.length === 0) {
       throw new StatusError(`No dashboards are linked to [${params.path.name}] stream`, 400);
     }
 
-    const exporter = (await context.core).savedObjects.getExporter(soClient);
-    const exportStream = await exporter.exportByObjects({
+    const savedObjects = await exportSavedObjects({
       request,
-      objects: dashboards.map((dashboard) => ({ id: dashboard.assetId, type: 'dashboard' })),
-      includeReferencesDeep: true,
+      objects: dashboards,
+      exporter: (await context.core).savedObjects.getExporter(soClient),
     });
 
-    const savedObjects: string[] = await createPromiseFromStreams([
-      exportStream,
-      createMapStream((savedObject) => {
-        return JSON.stringify(savedObject);
-      }),
-      createConcatStream([]),
-    ]);
-
-    return response.ok({
-      body: { content: savedObjects.join('\n') },
-      headers: {
-        'Content-Disposition': `attachment; filename="content.json"`,
-        'Content-Type': 'application/json',
-      },
+    return response.file({
+      body: createContentPack(savedObjects),
+      filename: 'content.ndjson',
+      fileContentType: 'application/ndjson',
     });
   },
 });
@@ -105,28 +94,15 @@ const importContentRoute = createServerRoute({
 
     await streamsClient.ensureStream(params.path.name);
 
-    const body: ContentPack = await new Promise((resolve, reject) => {
-      let data = '';
-      params.body.content.on('data', (chunk) => (data += chunk));
-      params.body.content.on('end', () => {
-        try {
-          const parsed = JSON.parse(data);
-          resolve(contentPackSchema.parse(parsed));
-        } catch (err) {
-          reject(new StatusError('Invalid content pack format', 400));
-        }
-      });
-      params.body.content.on('error', (error) => reject(error));
-    });
+    const contents = tee(params.body.content);
 
-    const updatedSavedObjectsStream = await createPromiseFromStreams([
-      await createSavedObjectsStreamFromNdJson(Readable.from(body.content)),
-      createConcatStream([]),
-    ]);
+    await contentPackHeader(contents[0]).catch(() => {
+      throw new StatusError('Invalid content pack format', 400);
+    });
 
     const importer = (await context.core).savedObjects.getImporter(soClient);
     const { successResults, errors } = await importer.import({
-      readStream: createListStream(updatedSavedObjectsStream),
+      readStream: contentPackSavedObjects(contents[1]),
       createNewCopies: true,
       overwrite: true,
     });
@@ -150,6 +126,10 @@ const importContentRoute = createServerRoute({
     return { errors, created: createdAssets };
   },
 });
+
+const tee = (source: Readable): [Readable, Readable] => {
+  return [source.pipe(new PassThrough()), source.pipe(new PassThrough())];
+};
 
 export const contentRoutes = {
   ...exportContentRoute,
