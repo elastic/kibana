@@ -159,6 +159,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
             { defaultMessage: 'Select or drag and drop a .ndjson file' }
           )}
           onChange={onChange}
+          accept=".ndjson"
         />
       </EuiFlyoutBody>
 
