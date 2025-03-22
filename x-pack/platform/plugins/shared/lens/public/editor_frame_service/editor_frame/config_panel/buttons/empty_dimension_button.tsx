@@ -33,6 +33,7 @@ import {
 } from '../../../../types';
 
 interface EmptyButtonProps {
+  isInlineEditing: boolean;
   columnId: string;
   onClick: (id: string) => void;
   group: VisualizationDimensionGroupConfig;
@@ -56,12 +57,24 @@ const defaultButtonLabels = {
   ),
 };
 
-const DefaultEmptyButton = ({ columnId, group, onClick }: EmptyButtonProps) => {
+const defaultInlineButtonLabels = {
+  ariaLabel: (l: string) =>
+    i18n.translate('xpack.lens.indexPattern.addColumnAriaLabel.inline', {
+      defaultMessage: 'Add a field to {groupLabel}',
+      values: { groupLabel: l },
+    }),
+  label: (
+    <FormattedMessage id="xpack.lens.configure.emptyConfig.inline" defaultMessage="Add a field" />
+  ),
+};
+
+const DefaultEmptyButton = ({ isInlineEditing, columnId, group, onClick }: EmptyButtonProps) => {
   const { buttonAriaLabel, buttonLabel } = group.labels || {};
+  const defaultLabels = isInlineEditing ? defaultInlineButtonLabels : defaultButtonLabels;
   return (
     <EmptyDimensionButtonInner
-      label={buttonLabel || defaultButtonLabels.label}
-      ariaLabel={buttonAriaLabel || defaultButtonLabels.ariaLabel(group.groupLabel)}
+      label={buttonLabel || defaultLabels.label}
+      ariaLabel={buttonAriaLabel || defaultLabels.ariaLabel(group.groupLabel)}
       dataTestSubj="lns-empty-dimension"
       onClick={() => onClick(columnId)}
     />
@@ -98,6 +111,7 @@ export function EmptyDimensionButton({
   activeVisualization,
   order,
   target,
+  isInlineEditing,
 }: {
   order: [2, number, number, number];
   group: VisualizationDimensionGroupConfig;
@@ -116,6 +130,7 @@ export function EmptyDimensionButton({
       label: string;
     };
   };
+  isInlineEditing: boolean;
 }) {
   const [{ dragging }] = useDragDropContext();
 
@@ -177,6 +192,7 @@ export function EmptyDimensionButton({
     columnId: value.columnId,
     onClick,
     group,
+    isInlineEditing,
   };
 
   return (
