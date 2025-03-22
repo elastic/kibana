@@ -18,8 +18,7 @@ import {
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 
-// FLAKY: https://github.com/elastic/kibana/issues/181889
-describe.skip(
+describe(
   'Alert Event Details',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
@@ -75,7 +74,7 @@ describe.skip(
       inputQueryInFlyout('select * from uptime;');
       submitQuery();
       checkResults();
-      cy.contains('Add to timeline investigation');
+      cy.contains('Add to Timeline investigation');
       cy.contains('Save for later').click();
       cy.contains('Save query');
       cy.get('[data-test-subj="osquery-save-query-flyout"]').within(() => {
