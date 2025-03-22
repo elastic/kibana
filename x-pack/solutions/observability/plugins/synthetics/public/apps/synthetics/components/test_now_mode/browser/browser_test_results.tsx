@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { DisplayFilmstrips } from '../../step_details_page/display_filmstrips';
 import { FAILED_TO_SCHEDULE } from '../manual_test_run_mode/browser_test_results';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
 import {
@@ -117,6 +118,7 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
                   pageSize={completedSteps === 0 ? 5 : 2}
                 />
               )}
+            {summaryDoc && <DisplayFilmstrips checkGroup={summaryDoc.monitor.check_group} />}
 
             {completedSteps > 0 && (
               <>
