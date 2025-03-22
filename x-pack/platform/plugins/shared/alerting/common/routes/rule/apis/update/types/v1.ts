@@ -31,6 +31,7 @@ export interface UpdateRuleRequestBody<Params extends RuleParamsV1 = never> {
   notify_when?: UpdateBodySchema['notify_when'];
   alert_delay?: UpdateBodySchema['alert_delay'];
   flapping?: UpdateBodySchema['flapping'];
+  attachments?: UpdateBodySchema['attachments'];
 }
 
 export interface UpdateRuleResponse<Params extends RuleParamsV1 = never> {

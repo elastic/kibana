@@ -4483,4 +4483,70 @@ describe('create()', () => {
       );
     });
   });
+
+  test('should create rule with linked dashboards', async () => {
+    const dashboards = [
+      {
+        id: 'dashboard-1',
+      },
+      {
+        id: 'dashboard-2',
+      },
+    ];
+
+    const data = getMockData({
+      name: 'my rule name',
+      attachments: {
+        dashboards,
+      },
+    });
+
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        enabled: false,
+        name: ' my rule name ',
+        alertTypeId: '123',
+        schedule: { interval: 10000 },
+        params: {
+          bar: true,
+        },
+        executionStatus: getRuleExecutionStatusPending(now),
+        running: false,
+        createdAt: now,
+        updatedAt: now,
+        actions: [],
+        attachments: { dashboards },
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+      ],
+    });
+
+    const result = await rulesClient.create({ data });
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      expect.objectContaining({
+        attachments: { dashboards },
+      }),
+      {
+        id: 'mock-saved-object-id',
+        references: [
+          {
+            id: '1',
+            name: 'action_0',
+            type: 'action',
+          },
+        ],
+      }
+    );
+
+    expect(result.attachments?.dashboards).toEqual(dashboards);
+  });
 });

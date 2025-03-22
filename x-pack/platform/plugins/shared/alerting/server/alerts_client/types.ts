@@ -48,6 +48,7 @@ export interface AlertRuleData {
   spaceId: string;
   tags: string[];
   alertDelay: number;
+  dashboards?: Array<{ id: string }>;
 }
 
 export interface AlertRule {

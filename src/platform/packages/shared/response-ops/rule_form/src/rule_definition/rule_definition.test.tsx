@@ -106,6 +106,9 @@ const plugins = {
       },
     },
   },
+  featureFlags: {
+    getBooleanValue: jest.fn().mockImplementation(() => false),
+  },
 };
 
 const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
@@ -399,6 +402,9 @@ describe('Rule Definition', () => {
               writeFlappingSettingsUI: true,
             },
           },
+        },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockImplementation(() => false),
         },
       },
       formData: {

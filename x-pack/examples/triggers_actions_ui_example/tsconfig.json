@@ -35,5 +35,7 @@
     "@kbn/licensing-plugin",
     "@kbn/response-ops-rule-form",
     "@kbn/fields-metadata-plugin",
+    "@kbn/dashboard-plugin",
+    "@kbn/core-feature-flags-browser",
   ]
 }

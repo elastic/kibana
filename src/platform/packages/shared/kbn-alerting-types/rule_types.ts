@@ -214,6 +214,14 @@ export interface Flapping extends SavedObjectAttributes {
   statusChangeThreshold: number;
 }
 
+export interface Dashboard extends SavedObjectAttributes {
+  id: string;
+}
+
+export interface Attachment extends SavedObjectAttributes {
+  dashboards?: Dashboard[];
+}
+
 export interface Rule<Params extends RuleTypeParams = never> {
   id: string;
   enabled: boolean;
@@ -250,6 +258,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   viewInAppRelativeUrl?: string;
   alertDelay?: AlertDelay | null;
   flapping?: Flapping | null;
+  attachments?: Attachment | null;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<

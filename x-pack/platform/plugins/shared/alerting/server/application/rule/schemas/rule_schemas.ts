@@ -149,6 +149,12 @@ export const alertDelaySchema = schema.object({
   active: schema.number(),
 });
 
+export const dashboardsSchema = schema.arrayOf(schema.object({ id: schema.string() }));
+
+export const attachmentsSchema = schema.object({
+  dashboards: dashboardsSchema,
+});
+
 /**
  * Unsanitized (domain) rule schema, used by internal rules clients
  */
@@ -189,6 +195,7 @@ export const ruleDomainSchema = schema.object({
   alertDelay: schema.maybe(alertDelaySchema),
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
+  attachments: schema.maybe(attachmentsSchema),
 });
 
 /**
@@ -230,4 +237,5 @@ export const ruleSchema = schema.object({
   alertDelay: schema.maybe(alertDelaySchema),
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
+  attachments: schema.maybe(attachmentsSchema),
 });

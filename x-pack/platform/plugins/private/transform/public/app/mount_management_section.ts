@@ -59,6 +59,8 @@ export async function mountManagementSection(
     savedSearch,
     contentManagement,
     fieldsMetadata,
+    dashboard,
+    featureFlags,
   } = plugins;
   const { docTitle } = chrome;
 
@@ -97,6 +99,8 @@ export async function mountManagementSection(
     savedSearch,
     contentManagement,
     fieldsMetadata,
+    dashboard,
+    featureFlags,
   };
 
   const enabledFeatures: TransformEnabledFeatures = {

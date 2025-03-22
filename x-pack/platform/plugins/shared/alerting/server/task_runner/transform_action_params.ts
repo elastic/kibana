@@ -39,6 +39,7 @@ export interface TransformActionParamsOptions {
   flapping: boolean;
   aadAlert?: AADAlert;
   consecutiveMatches?: number;
+  dashboards?: Array<{ id: string }>;
 }
 
 interface SummarizedAlertsWithAll {

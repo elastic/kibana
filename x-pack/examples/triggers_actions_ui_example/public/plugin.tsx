@@ -20,6 +20,7 @@ import {
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { getConnectorType as getSystemLogExampleConnectorType } from './connector_types/system_log_example/system_log_example';
 
 export interface TriggersActionsUiExamplePublicSetupDeps {
@@ -39,6 +40,7 @@ export interface TriggersActionsUiExamplePublicStartDeps {
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  dashboard: DashboardStart;
 }
 
 export class TriggersActionsUiExamplePlugin
