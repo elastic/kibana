@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { ruleTypesRoute } from './rule_types';
+import { getRuleTypesRoute } from './get_rule_types_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { verifyApiAccess } from '../../../../lib/license_api_access';
-import { mockHandlerArguments } from '../../../_mock_handler_arguments';
-import { rulesClientMock } from '../../../../rules_client.mock';
-import { RecoveredActionGroup } from '../../../../../common';
-import type { RegistryAlertTypeWithAuth } from '../../../../authorization';
-import type { AsApiContract } from '../../../lib';
+import { licenseStateMock } from '../../../../../lib/license_state.mock';
+import { verifyApiAccess } from '../../../../../lib/license_api_access';
+import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../../rules_client.mock';
+import { RecoveredActionGroup } from '../../../../../../common';
+import type { RegistryAlertTypeWithAuth } from '../../../../../authorization';
+import type { AsApiContract } from '../../../../lib';
 
 const rulesClient = rulesClientMock.create();
 
-jest.mock('../../../../lib/license_api_access', () => ({
+jest.mock('../../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -30,7 +30,7 @@ describe('ruleTypesRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    ruleTypesRoute(router, licenseState);
+    getRuleTypesRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -150,7 +150,7 @@ describe('ruleTypesRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    ruleTypesRoute(router, licenseState);
+    getRuleTypesRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 
@@ -208,7 +208,7 @@ describe('ruleTypesRoute', () => {
       throw new Error('OMG');
     });
 
-    ruleTypesRoute(router, licenseState);
+    getRuleTypesRoute(router, licenseState);
 
     const [config, handler] = router.get.mock.calls[0];
 

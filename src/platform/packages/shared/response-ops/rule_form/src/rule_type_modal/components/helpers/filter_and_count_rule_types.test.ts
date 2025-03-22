@@ -27,6 +27,7 @@ const mockRuleType: (
   actionGroups: [],
   defaultActionGroupId: 'default',
   category: 'my-category',
+  isExportable: true,
 });
 
 const pickRuleTypeName = (ruleType: RuleTypeWithDescription) => ({ name: ruleType.name });

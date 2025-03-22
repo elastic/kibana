@@ -9,19 +9,19 @@
 
 import { useMemo } from 'react';
 import { keyBy } from 'lodash';
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { UseQueryOptions } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
-import { i18n } from '@kbn/i18n';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
 import {
   RuleTypeIndexWithDescriptions,
   RuleTypeWithDescription,
 } from '@kbn/triggers-actions-ui-types';
-import { fetchRuleTypes } from '../apis/fetch_rule_types';
+import { useGetRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_types_query';
+import { i18n } from '@kbn/i18n';
 import { ALERTS_FEATURE_ID } from '../constants';
 
-export interface UseRuleTypesProps {
+export interface UseGetRuleTypesPermissionsParams {
   http: HttpStart;
   toasts: ToastsStart;
   filteredRuleTypes?: string[];
@@ -37,7 +37,7 @@ const getFilteredIndex = ({
 }: {
   data: Array<RuleType<string, string>>;
   filteredRuleTypes?: string[];
-  registeredRuleTypes: UseRuleTypesProps['registeredRuleTypes'];
+  registeredRuleTypes: UseGetRuleTypesPermissionsParams['registeredRuleTypes'];
 }) => {
   const index: RuleTypeIndexWithDescriptions = new Map();
   const registeredRuleTypesDictionary = registeredRuleTypes ? keyBy(registeredRuleTypes, 'id') : {};
@@ -63,19 +63,15 @@ const getFilteredIndex = ({
   return filteredIndex;
 };
 
-export const useLoadRuleTypesQuery = ({
+export const useGetRuleTypesPermissions = ({
   http,
   toasts,
   filteredRuleTypes,
   registeredRuleTypes,
   context,
   enabled = true,
-}: UseRuleTypesProps) => {
-  const queryFn = () => {
-    return fetchRuleTypes({ http });
-  };
-
-  const onErrorFn = (error: Error) => {
+}: UseGetRuleTypesPermissionsParams) => {
+  const onErrorFn = (error: unknown) => {
     if (error) {
       toasts.addDanger(
         i18n.translate('alertsUIShared.hooks.useLoadRuleTypesQuery.unableToLoadRuleTypesMessage', {
@@ -84,17 +80,15 @@ export const useLoadRuleTypesQuery = ({
       );
     }
   };
-  const { data, isSuccess, isFetching, isInitialLoading, isLoading, error } = useQuery({
-    queryKey: ['loadRuleTypes'],
-    queryFn,
-    onError: onErrorFn,
-    refetchOnWindowFocus: false,
-    // Leveraging TanStack Query's caching system to avoid duplicated requests as
-    // other state-sharing solutions turned out to be overly complex and less readable
-    staleTime: 60 * 1000,
-    enabled,
-    context,
-  });
+
+  const { data, isSuccess, isFetching, isInitialLoading, isLoading, error } = useGetRuleTypesQuery(
+    { http },
+    {
+      onError: onErrorFn,
+      enabled,
+      context,
+    }
+  );
 
   const filteredIndex = useMemo(
     () =>

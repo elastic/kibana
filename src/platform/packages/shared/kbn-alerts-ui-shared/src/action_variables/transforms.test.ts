@@ -290,5 +290,6 @@ function getAlertType(actionVariables: ActionVariables): RuleType {
     minimumLicenseRequired: 'basic',
     enabledInLicense: true,
     category: 'my-category',
+    isExportable: true,
   };
 }

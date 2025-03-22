@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ruleTypesRoute } from './rule_types';
+export * from './v1';
