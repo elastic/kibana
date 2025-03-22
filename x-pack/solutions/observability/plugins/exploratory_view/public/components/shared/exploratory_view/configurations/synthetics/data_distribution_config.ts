@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  ATTR_OBSERVER_GEO_NAME,
+  ATTR_TAGS,
+  ATTR_URL_FULL,
+  ATTR_URL_PORT,
+} from '@kbn/observability-ui-semantic-conventions';
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
@@ -46,19 +52,19 @@ export function getSyntheticsDistributionConfig({ series, dataView }: ConfigProp
       },
     ],
     hasOperationType: false,
-    filterFields: ['monitor.type', 'observer.geo.name', 'tags', 'url.full'],
+    filterFields: ['monitor.type', ATTR_OBSERVER_GEO_NAME, ATTR_TAGS, ATTR_URL_FULL],
     breakdownFields: [
-      'observer.geo.name',
+      ATTR_OBSERVER_GEO_NAME,
       'monitor.name',
       'monitor.id',
       'monitor.type',
-      'tags',
-      'url.port',
+      ATTR_TAGS,
+      ATTR_URL_PORT,
     ],
     baseFilters: [],
     definitionFields: [
       { field: 'monitor.name', nested: 'synthetics.step.name.keyword', singleSelection: true },
-      { field: 'url.full', filters: buildExistsFilter('summary.up', dataView) },
+      { field: ATTR_URL_FULL, filters: buildExistsFilter('summary.up', dataView) },
     ],
     metricOptions: [
       {

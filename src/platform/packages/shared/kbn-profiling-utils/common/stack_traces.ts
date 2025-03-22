@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ProfilingESField } from './elasticsearch';
+import {
+  ATTR_CONTAINER_NAME,
+  ATTR_HOST_ID,
+  ATTR_ORCHESTRATOR_RESOURCE_NAME,
+  ATTR_PROCESS_THREAD_NAME,
+  ATTR_STACKTRACE_ID,
+} from '@kbn/observability-ui-semantic-conventions';
 import {
   Executable,
   FileID,
@@ -233,10 +239,10 @@ export enum TopNType {
  */
 export function getFieldNameForTopNType(type: TopNType): string {
   return {
-    [TopNType.Containers]: ProfilingESField.ContainerName,
-    [TopNType.Deployments]: ProfilingESField.OrchestratorResourceName,
-    [TopNType.Threads]: ProfilingESField.ProcessThreadName,
-    [TopNType.Hosts]: ProfilingESField.HostID,
-    [TopNType.Traces]: ProfilingESField.StacktraceID,
+    [TopNType.Containers]: ATTR_CONTAINER_NAME,
+    [TopNType.Deployments]: ATTR_ORCHESTRATOR_RESOURCE_NAME,
+    [TopNType.Threads]: ATTR_PROCESS_THREAD_NAME,
+    [TopNType.Hosts]: ATTR_HOST_ID,
+    [TopNType.Traces]: ATTR_STACKTRACE_ID,
   }[type];
 }

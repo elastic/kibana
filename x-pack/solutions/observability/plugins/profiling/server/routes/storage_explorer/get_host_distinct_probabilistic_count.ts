@@ -7,6 +7,12 @@
 
 import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
+  ATTR_HOST_ID,
+  ATTR_PROFILING_AGENT_CONFIG_PROBABILISTIC_THRESHOLD,
+  ATTR_PROFILING_PROJECT_ID,
+  ATTR_TIMESTAMP,
+} from '@kbn/observability-ui-semantic-conventions';
+import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
 } from '../../../common/storage_explorer';
@@ -33,7 +39,7 @@ export async function getHostAndDistinctProbabilisticCount({
           ...kqlQuery(kuery),
           {
             range: {
-              '@timestamp': {
+              [ATTR_TIMESTAMP]: {
                 gte: String(timeFrom),
                 lt: String(timeTo),
                 format: 'epoch_second',
@@ -49,16 +55,16 @@ export async function getHostAndDistinctProbabilisticCount({
     aggs: {
       hostsAndProjectIds: {
         multi_terms: {
-          terms: [{ field: 'host.id' }, { field: 'profiling.project.id' }],
+          terms: [{ field: ATTR_HOST_ID }, { field: ATTR_PROFILING_PROJECT_ID }],
         },
         aggs: {
           activeProbabilisticValue: {
             top_metrics: {
               metrics: {
-                field: 'profiling.agent.config.probabilistic_threshold',
+                field: ATTR_PROFILING_AGENT_CONFIG_PROBABILISTIC_THRESHOLD,
               },
               sort: {
-                '@timestamp': 'desc',
+                [ATTR_TIMESTAMP]: 'desc',
               },
             },
           },
@@ -66,7 +72,7 @@ export async function getHostAndDistinctProbabilisticCount({
       },
       hostCount: {
         cardinality: {
-          field: 'host.id',
+          field: ATTR_HOST_ID,
         },
       },
     },
@@ -76,7 +82,7 @@ export async function getHostAndDistinctProbabilisticCount({
   response.aggregations?.hostsAndProjectIds.buckets.forEach((bucket) => {
     const projectId = bucket.key[1] as string;
     const activeProbabilisticValue = bucket.activeProbabilisticValue.top[0]?.metrics?.[
-      'profiling.agent.config.probabilistic_threshold'
+      ATTR_PROFILING_AGENT_CONFIG_PROBABILISTIC_THRESHOLD
     ] as string | undefined;
     if (activeProbabilisticValue) {
       const currentMap = activeProbabilisticValuesPerProjectId[projectId];

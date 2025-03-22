@@ -8,13 +8,7 @@
 import { LayerConfig, LensAttributes } from './lens_attributes';
 import { mockAppDataView, mockDataView } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
-import { sampleAttribute } from './test_data/sample_attribute';
-
-import {
-  LCP_FIELD,
-  TRANSACTION_DURATION,
-  USER_AGENT_NAME,
-} from './constants/elasticsearch_fieldnames';
+import { sampleAttribute } from './test_data/sample_attribute';‚
 import { buildExistsFilter, buildPhrasesFilter } from './utils';
 import { sampleAttributeKpi } from './test_data/sample_attribute_kpi';
 import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } from './constants';
@@ -23,6 +17,11 @@ import { sampleAttributeWithReferenceLines } from './test_data/sample_attribute_
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { FormulaPublicApi, XYState } from '@kbn/lens-plugin/public';
 import { Query } from '@kbn/es-query';
+import {
+  ATTR_TRANSACTION_DURATION_US,
+  ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT,
+  ATTR_USER_AGENT_NAME,
+} from '@kbn/observability-ui-semantic-conventions';
 
 describe('Lens Attribute', () => {
   mockAppDataView();
@@ -47,7 +46,7 @@ describe('Lens Attribute', () => {
     time: { from: 'now-15m', to: 'now' },
     color: 'green',
     name: 'test-series',
-    selectedMetricField: TRANSACTION_DURATION,
+    selectedMetricField: ATTR_TRANSACTION_DURATION_US,
   };
 
   const lensPluginMockStart = lensPluginMock.createStartContract();
@@ -221,11 +220,13 @@ describe('Lens Attribute', () => {
       seriesType: 'line',
       operationType: 'count',
       dataView: mockDataView,
-      reportDefinitions: { 'performance.metric': [LCP_FIELD] },
+      reportDefinitions: {
+        'performance.metric': [ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT],
+      },
       time: { from: 'now-15m', to: 'now' },
       color: 'green',
       name: 'test-series',
-      selectedMetricField: TRANSACTION_DURATION,
+      selectedMetricField: ATTR_TRANSACTION_DURATION_US,
     };
 
     lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType, formulaHelper);
@@ -234,7 +235,7 @@ describe('Lens Attribute', () => {
       JSON.stringify({
         fieldMeta: {
           count: 0,
-          name: TRANSACTION_DURATION,
+          name: ATTR_TRANSACTION_DURATION_US,
           type: 'number',
           esTypes: ['long'],
           scripted: false,
@@ -242,7 +243,7 @@ describe('Lens Attribute', () => {
           aggregatable: true,
           readFromDocValues: true,
         },
-        fieldName: TRANSACTION_DURATION,
+        fieldName: ATTR_TRANSACTION_DURATION_US,
         columnLabel: 'Page load time',
         showPercentileAnnotations: true,
       })
@@ -461,19 +462,21 @@ describe('Lens Attribute', () => {
         seriesType: 'line',
         operationType: 'count',
         dataView: mockDataView,
-        reportDefinitions: { 'performance.metric': [LCP_FIELD] },
-        breakdown: USER_AGENT_NAME,
+        reportDefinitions: {
+          'performance.metric': [ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT],
+        },
+        breakdown: ATTR_USER_AGENT_NAME,
         time: { from: 'now-15m', to: 'now' },
         color: 'green',
         name: 'test-series',
-        selectedMetricField: LCP_FIELD,
+        selectedMetricField: ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT,
       };
 
       lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType, formulaHelper);
 
       lnsAttr.getBreakdownColumn({
         layerConfig: layerConfig1,
-        sourceField: USER_AGENT_NAME,
+        sourceField: ATTR_USER_AGENT_NAME,
         layerId: 'layer0',
       });
 
@@ -524,7 +527,7 @@ describe('Lens Attribute', () => {
               size: 10,
             },
             scale: 'ordinal',
-            sourceField: 'user_agent.name',
+            sourceField: ATTR_USER_AGENT_NAME,
           },
           'x-axis-column-layer0': {
             dataType: 'number',
@@ -543,7 +546,7 @@ describe('Lens Attribute', () => {
               type: 'histogram',
             },
             scale: 'interval',
-            sourceField: LCP_FIELD,
+            sourceField: ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT,
           },
           'y-axis-column-layer0-0': {
             customLabel: true,
@@ -650,11 +653,13 @@ describe('Lens Attribute', () => {
         seriesType: 'line',
         operationType: 'count',
         dataView: mockDataView,
-        reportDefinitions: { 'performance.metric': [LCP_FIELD] },
+        reportDefinitions: {
+          'performance.metric': [ATTR_TRANSACTION_MARKS_AGENT_LARGEST_CONTENTFUL_PAINT],
+        },
         time: { from: 'now-15m', to: 'now' },
         color: 'green',
         name: 'test-series',
-        selectedMetricField: TRANSACTION_DURATION,
+        selectedMetricField: ATTR_TRANSACTION_DURATION_US,
       };
 
       const filters = lnsAttr.getLayerFilters(layerConfig1, 2);
@@ -675,7 +680,7 @@ describe('Lens Attribute', () => {
         time: { from: 'now-15m', to: 'now' },
         color: 'green',
         name: 'test-series',
-        selectedMetricField: TRANSACTION_DURATION,
+        selectedMetricField: ATTR_TRANSACTION_DURATION_US,
       };
 
       lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType, formulaHelper);

@@ -8,8 +8,14 @@
 import { euiPaletteColorBlind } from '@elastic/eui';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
+import {
+  ATTR_HOST_ID,
+  ATTR_HOST_IP,
+  ATTR_HOST_NAME,
+  ATTR_STACKTRACE_COUNT,
+  ATTR_TIMESTAMP,
+} from '@kbn/observability-ui-semantic-conventions';
 import { orderBy } from 'lodash';
-import { ProfilingESField } from '@kbn/profiling-utils';
 import type { StackFrameMetadata } from '@kbn/profiling-utils';
 import { createUniformBucketsForTimeRange } from './histogram';
 
@@ -68,16 +74,16 @@ export function getTopNAggregationRequest({
         execution_hint: highCardinality ? ('map' as const) : ('global_ordinals' as const),
       },
       aggs: {
-        ...(searchField === ProfilingESField.HostID
+        ...(searchField === ATTR_HOST_ID
           ? {
               sample: {
                 top_metrics: {
-                  metrics: [
-                    { field: ProfilingESField.HostName },
-                    { field: ProfilingESField.HostIP },
-                  ] as [{ field: ProfilingESField.HostName }, { field: ProfilingESField.HostIP }],
+                  metrics: [{ field: ATTR_HOST_NAME }, { field: ATTR_HOST_IP }] as [
+                    { field: ATTR_HOST_NAME },
+                    { field: ATTR_HOST_IP }
+                  ],
                   sort: {
-                    '@timestamp': 'desc' as const,
+                    [ATTR_TIMESTAMP]: 'desc' as const,
                   },
                 },
               },
@@ -85,33 +91,33 @@ export function getTopNAggregationRequest({
           : {}),
         over_time: {
           date_histogram: {
-            field: ProfilingESField.Timestamp,
+            field: ATTR_TIMESTAMP,
             fixed_interval: fixedInterval,
           },
           aggs: {
             count: {
               sum: {
-                field: ProfilingESField.StacktraceCount,
+                field: ATTR_STACKTRACE_COUNT,
               },
             },
           },
         },
         count: {
           sum: {
-            field: ProfilingESField.StacktraceCount,
+            field: ATTR_STACKTRACE_COUNT,
           },
         },
       },
     },
     over_time: {
       date_histogram: {
-        field: ProfilingESField.Timestamp,
+        field: ATTR_TIMESTAMP,
         fixed_interval: fixedInterval,
       },
       aggs: {
         count: {
           sum: {
-            field: ProfilingESField.StacktraceCount,
+            field: ATTR_STACKTRACE_COUNT,
           },
         },
       },

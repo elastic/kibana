@@ -10,10 +10,14 @@ import type { Logger } from '@kbn/core/server';
 import {
   getFieldNameForTopNType,
   groupStackFrameMetadataByStackTrace,
-  ProfilingESField,
   TopNType,
 } from '@kbn/profiling-utils';
 import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
+import {
+  ATTR_HOST_IP,
+  ATTR_HOST_NAME,
+  ATTR_STACKTRACE_ID,
+} from '@kbn/observability-ui-semantic-conventions';
 import type { RouteRegisterParameters } from '.';
 import { IDLE_SOCKET_TIMEOUT } from '.';
 import { getRoutePaths, INDEX_EVENTS } from '../../common';
@@ -100,8 +104,8 @@ export async function topNElasticSearchQuery({
   for (const bucket of groupByBuckets) {
     if (bucket.sample?.top[0]) {
       labels[String(bucket.key)] = String(
-        bucket.sample.top[0].metrics[ProfilingESField.HostName] ||
-          bucket.sample.top[0].metrics[ProfilingESField.HostIP] ||
+        bucket.sample.top[0].metrics[ATTR_HOST_NAME] ||
+          bucket.sample.top[0].metrics[ATTR_HOST_IP] ||
           ''
       );
     }
@@ -110,7 +114,7 @@ export async function topNElasticSearchQuery({
   let totalSampledStackTraces = aggregations.total_count.value ?? 0;
   totalSampledStackTraces = Math.floor(totalSampledStackTraces / eventsIndex.sampleRate);
 
-  if (searchField !== ProfilingESField.StacktraceID) {
+  if (searchField !== ATTR_STACKTRACE_ID) {
     return {
       TotalCount: totalSampledStackTraces,
       TopN: topN,

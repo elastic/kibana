@@ -8,15 +8,16 @@
 import { useMemo } from 'react';
 import { FieldFilter as Filter } from '@kbn/es-query';
 import { getStaticDataViewId } from '@kbn/apm-data-view';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
-  CLIENT_GEO_COUNTRY_ISO_CODE,
-  SERVICE_NAME,
-  TRANSACTION_URL,
-  USER_AGENT_DEVICE,
-  USER_AGENT_NAME,
-  USER_AGENT_OS,
-} from '../../../../../common/elasticsearch_fieldnames';
+  ATTR_CLIENT_GEO_COUNTRY_ISO_CODE,
+  ATTR_SERVICE_NAME,
+  ATTR_TRANSACTION_MARKS_NAVIGATION_TIMING_FETCH_START,
+  ATTR_TRANSACTION_URL,
+  ATTR_USER_AGENT_DEVICE_NAME,
+  ATTR_USER_AGENT_NAME,
+  ATTR_USER_AGENT_OS_NAME,
+} from '@kbn/observability-ui-semantic-conventions';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useUxPluginContext } from '../../../../context/use_ux_plugin_context';
 
 const getWildcardFilter = (field: string, value: string, spaceId: string): Filter => {
@@ -83,12 +84,12 @@ function getExistFilter(spaceId: string): Filter {
       negate: false,
       disabled: false,
       type: 'exists',
-      key: 'transaction.marks.navigationTiming.fetchStart',
+      key: ATTR_TRANSACTION_MARKS_NAVIGATION_TIMING_FETCH_START,
       value: 'exists',
     },
     query: {
       exists: {
-        field: 'transaction.marks.navigationTiming.fetchStart',
+        field: ATTR_TRANSACTION_MARKS_NAVIGATION_TIMING_FETCH_START,
       },
     },
   };
@@ -116,42 +117,44 @@ export const useMapFilters = (): Filter[] => {
   return useMemo(() => {
     const filters: Filter[] = [getExistFilter(spaceId)];
     if (serviceName) {
-      filters.push(getMatchFilter(SERVICE_NAME, serviceName, spaceId));
+      filters.push(getMatchFilter(ATTR_SERVICE_NAME, serviceName, spaceId));
     }
     if (browser) {
-      filters.push(getMultiMatchFilter(USER_AGENT_NAME, browser, spaceId));
+      filters.push(getMultiMatchFilter(ATTR_USER_AGENT_NAME, browser, spaceId));
     }
     if (device) {
-      filters.push(getMultiMatchFilter(USER_AGENT_DEVICE, device, spaceId));
+      filters.push(getMultiMatchFilter(ATTR_USER_AGENT_DEVICE_NAME, device, spaceId));
     }
     if (os) {
-      filters.push(getMultiMatchFilter(USER_AGENT_OS, os, spaceId));
+      filters.push(getMultiMatchFilter(ATTR_USER_AGENT_OS_NAME, os, spaceId));
     }
     if (location) {
-      filters.push(getMultiMatchFilter(CLIENT_GEO_COUNTRY_ISO_CODE, location, spaceId));
+      filters.push(getMultiMatchFilter(ATTR_CLIENT_GEO_COUNTRY_ISO_CODE, location, spaceId));
     }
     if (transactionUrl) {
-      filters.push(getMultiMatchFilter(TRANSACTION_URL, transactionUrl, spaceId));
+      filters.push(getMultiMatchFilter(ATTR_TRANSACTION_URL, transactionUrl, spaceId));
     }
     if (browserExcluded) {
-      filters.push(getMultiMatchFilter(USER_AGENT_NAME, browserExcluded, spaceId, true));
+      filters.push(getMultiMatchFilter(ATTR_USER_AGENT_NAME, browserExcluded, spaceId, true));
     }
     if (deviceExcluded) {
-      filters.push(getMultiMatchFilter(USER_AGENT_DEVICE, deviceExcluded, spaceId, true));
+      filters.push(getMultiMatchFilter(ATTR_USER_AGENT_DEVICE_NAME, deviceExcluded, spaceId, true));
     }
     if (osExcluded) {
-      filters.push(getMultiMatchFilter(USER_AGENT_OS, osExcluded, spaceId, true));
+      filters.push(getMultiMatchFilter(ATTR_USER_AGENT_OS_NAME, osExcluded, spaceId, true));
     }
     if (locationExcluded) {
       filters.push(
-        getMultiMatchFilter(CLIENT_GEO_COUNTRY_ISO_CODE, locationExcluded, spaceId, true)
+        getMultiMatchFilter(ATTR_CLIENT_GEO_COUNTRY_ISO_CODE, locationExcluded, spaceId, true)
       );
     }
     if (transactionUrlExcluded) {
-      filters.push(getMultiMatchFilter(TRANSACTION_URL, transactionUrlExcluded, spaceId, true));
+      filters.push(
+        getMultiMatchFilter(ATTR_TRANSACTION_URL, transactionUrlExcluded, spaceId, true)
+      );
     }
     if (searchTerm) {
-      filters.push(getWildcardFilter(TRANSACTION_URL, searchTerm, spaceId));
+      filters.push(getWildcardFilter(ATTR_TRANSACTION_URL, searchTerm, spaceId));
     }
 
     return filters;

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const TRANSACTION_PAGE_LOAD = 'page-load';
-export const TRANSACTION_PAGE_EXIT = 'page-exit';
-export const TRANSACTION_REQUEST = 'request';
-export const TRANSACTION_ROUTE_CHANGE = 'route-change';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-observability-ui-semantic-conventions'],
+};

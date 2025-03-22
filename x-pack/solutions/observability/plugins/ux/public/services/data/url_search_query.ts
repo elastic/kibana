@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { TRANSACTION_DURATION, TRANSACTION_URL } from '../../../common/elasticsearch_fieldnames';
+import {
+  ATTR_TRANSACTION_DURATION_US,
+  ATTR_TRANSACTION_URL,
+} from '@kbn/observability-ui-semantic-conventions';
 import { SetupUX } from '../../../typings/ui_filters';
 import { getRumPageLoadTransactionsProjection } from './projections';
 import { callDateMath } from './call_date_math';
@@ -25,18 +28,18 @@ export function urlSearchQuery(restFilters: any, uxQuery: any, searchValue: stri
     aggs: {
       totalUrls: {
         cardinality: {
-          field: TRANSACTION_URL,
+          field: ATTR_TRANSACTION_URL,
         },
       },
       urls: {
         terms: {
-          field: TRANSACTION_URL,
+          field: ATTR_TRANSACTION_URL,
           size: 10,
         },
         aggs: {
           medianPLD: {
             percentiles: {
-              field: TRANSACTION_DURATION,
+              field: ATTR_TRANSACTION_DURATION_US,
               percents: [Number(uxQuery?.percentile)],
             },
           },

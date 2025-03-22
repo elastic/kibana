@@ -6,6 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  ATTR_OBSERVER_GEO_NAME,
+  ATTR_TAGS,
+  ATTR_TIMESTAMP,
+  ATTR_URL_FULL,
+} from '@kbn/observability-ui-semantic-conventions';
 import { FINAL_SUMMARY_KQL } from './single_metric_config';
 import { ColumnFilter, ConfigProps, SeriesConfig } from '../../types';
 import {
@@ -41,6 +47,7 @@ import {
   SYNTHETICS_STEP_NAME,
 } from '../constants/field_names/synthetics';
 import { buildExistsFilter } from '../utils';
+
 const SUMMARY_UP = 'summary.up';
 const SUMMARY_DOWN = 'summary.down';
 
@@ -63,7 +70,7 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
     defaultSeriesType: 'bar_stacked',
     seriesTypes: [],
     xAxisColumn: {
-      sourceField: '@timestamp',
+      sourceField: ATTR_TIMESTAMP,
     },
     yAxisColumns: [
       {
@@ -72,9 +79,9 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
       },
     ],
     hasOperationType: true,
-    filterFields: ['observer.geo.name', 'monitor.type', 'tags', 'url.full'],
+    filterFields: [ATTR_OBSERVER_GEO_NAME, 'monitor.type', ATTR_TAGS, ATTR_URL_FULL],
     breakdownFields: [
-      'observer.geo.name',
+      ATTR_OBSERVER_GEO_NAME,
       'monitor.type',
       'monitor.name',
       SYNTHETICS_STEP_NAME,
@@ -83,7 +90,7 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
     baseFilters: [],
     definitionFields: [
       { field: 'monitor.name', nested: SYNTHETICS_STEP_NAME, singleSelection: true },
-      { field: 'url.full', filters: buildExistsFilter('summary.up', dataView) },
+      { field: ATTR_URL_FULL, filters: buildExistsFilter('summary.up', dataView) },
     ],
     metricOptions: [
       {

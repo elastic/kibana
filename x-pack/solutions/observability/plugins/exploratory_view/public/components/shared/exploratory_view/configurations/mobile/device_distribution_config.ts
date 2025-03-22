@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  ATTR_AGENT_NAME,
+  ATTR_PROCESSOR_EVENT,
+  ATTR_SERVICE_NAME,
+  PROCESSOR_EVENT_VALUE_TRANSACTION,
+} from '@kbn/observability-ui-semantic-conventions';
 import { ConfigProps, SeriesConfig } from '../../types';
 import {
   FieldLabels,
@@ -14,7 +20,6 @@ import {
   USE_BREAK_DOWN_COLUMN,
 } from '../constants';
 import { buildPhraseFilter } from '../utils';
-import { SERVICE_NAME } from '../constants/elasticsearch_fieldnames';
 import { MOBILE_APP, NUMBER_OF_DEVICES } from '../constants/labels';
 import { MobileFields } from './mobile_fields';
 
@@ -36,15 +41,15 @@ export function getMobileDeviceDistributionConfig({ dataView }: ConfigProps): Se
     filterFields: [...Object.keys(MobileFields), LABEL_FIELDS_FILTER],
     breakdownFields: Object.keys(MobileFields),
     baseFilters: [
-      ...buildPhraseFilter('agent.name', 'iOS/swift', dataView),
-      ...buildPhraseFilter('processor.event', 'transaction', dataView),
+      ...buildPhraseFilter(ATTR_AGENT_NAME, 'iOS/swift', dataView),
+      ...buildPhraseFilter(ATTR_PROCESSOR_EVENT, PROCESSOR_EVENT_VALUE_TRANSACTION, dataView),
     ],
     labels: {
       ...FieldLabels,
       ...MobileFields,
-      [SERVICE_NAME]: MOBILE_APP,
+      [ATTR_SERVICE_NAME]: MOBILE_APP,
     },
-    definitionFields: [SERVICE_NAME],
+    definitionFields: [ATTR_SERVICE_NAME],
     metricOptions: [
       {
         field: 'labels.device_id',

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import {
+  METRIC_TRANSACTION_EXPERIENCE_LONGTASK_COUNT,
+  METRIC_TRANSACTION_EXPERIENCE_LONGTASK_MAX,
+  METRIC_TRANSACTION_EXPERIENCE_LONGTASK_SUM,
+} from '@kbn/observability-ui-semantic-conventions';
 import { mergeProjection } from '../../../common/utils/merge_projection';
 import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import { PERCENTILE_DEFAULT } from './core_web_vitals_query';
 import { getRumPageLoadTransactionsProjection } from './projections';
-
-const LONG_TASK_SUM_FIELD = 'transaction.experience.longtask.sum';
-const LONG_TASK_COUNT_FIELD = 'transaction.experience.longtask.count';
-const LONG_TASK_MAX_FIELD = 'transaction.experience.longtask.max';
 
 export function longTaskMetricsQuery(
   start: number,
@@ -34,7 +35,7 @@ export function longTaskMetricsQuery(
     aggs: {
       longTaskSum: {
         percentiles: {
-          field: LONG_TASK_SUM_FIELD,
+          field: METRIC_TRANSACTION_EXPERIENCE_LONGTASK_SUM,
           percents: [percentile],
           hdr: {
             number_of_significant_value_digits: 3,
@@ -43,7 +44,7 @@ export function longTaskMetricsQuery(
       },
       longTaskCount: {
         percentiles: {
-          field: LONG_TASK_COUNT_FIELD,
+          field: METRIC_TRANSACTION_EXPERIENCE_LONGTASK_COUNT,
           percents: [percentile],
           hdr: {
             number_of_significant_value_digits: 3,
@@ -52,7 +53,7 @@ export function longTaskMetricsQuery(
       },
       longTaskMax: {
         percentiles: {
-          field: LONG_TASK_MAX_FIELD,
+          field: METRIC_TRANSACTION_EXPERIENCE_LONGTASK_MAX,
           percents: [percentile],
           hdr: {
             number_of_significant_value_digits: 3,
