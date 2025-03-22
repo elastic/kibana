@@ -8,6 +8,8 @@
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import React from 'react';
 
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
@@ -16,6 +18,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
 import { AssistantAvailability } from '../../assistant_context/types';
 
@@ -69,11 +72,18 @@ export const TestProvidersComponent: React.FC<Props> = ({
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
 
+  const application = applicationServiceMock.createStartContract();
+  const triggersActionsUi = triggersActionsUiMock.createStart();
+  const share = sharePluginMock.createStartContract();
+
   return (
     <I18nProvider>
       <ThemeProvider>
         <QueryClientProvider client={queryClient}>
           <AssistantProvider
+            application={application}
+            triggersActionsUi={triggersActionsUi}
+            share={share}
             actionTypeRegistry={actionTypeRegistry}
             assistantAvailability={assistantAvailability}
             augmentMessageCodeBlocks={jest.fn().mockReturnValue([])}

@@ -43,5 +43,8 @@
     "@kbn/shared-ux-router",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/datemath",
+    "@kbn/ai-assistant-cta",
+    "@kbn/share-plugin",
+    "@kbn/alerts-ui-shared",
   ]
 }

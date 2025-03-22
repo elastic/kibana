@@ -144,7 +144,6 @@ export { useFetchCurrentUserConversations } from './impl/assistant/api/conversat
 export * from './impl/assistant/api/conversations/bulk_update_actions_conversations';
 export { getConversationById } from './impl/assistant/api/conversations/conversations';
 
-export { UpgradeButtons } from './impl/upgrade/upgrade_buttons';
 export { getUserConversationsExist, getPrompts, bulkUpdatePrompts } from './impl/assistant/api';
 
 export {

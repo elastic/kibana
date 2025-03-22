@@ -108,46 +108,10 @@ export const AssistantHeader: React.FC<Props> = ({
     [onConversationSelected]
   );
 
-  return (
-    <>
-      <FlyoutNavigation
-        isLoading={isLoading}
-        isExpanded={!!chatHistoryVisible}
-        setIsExpanded={setChatHistoryVisible}
-        onConversationCreate={onConversationCreate}
-        isAssistantEnabled={isAssistantEnabled}
-      >
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <AssistantSettingsModal
-              defaultConnector={defaultConnector}
-              isDisabled={isDisabled}
-              isSettingsModalVisible={isSettingsModalVisible}
-              setIsSettingsModalVisible={setIsSettingsModalVisible}
-              onConversationSelected={onConversationSelected}
-              conversations={conversations}
-              conversationsLoaded={conversationsLoaded}
-              refetchCurrentConversation={refetchCurrentConversation}
-              refetchCurrentUserConversations={refetchCurrentUserConversations}
-              refetchPrompts={refetchPrompts}
-              setPaginationObserver={setPaginationObserver}
-            />
-          </EuiFlexItem>
+  let panel = null;
 
-          {onCloseFlyout && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                aria-label={i18n.CLOSE}
-                data-test-subj="euiFlyoutCloseButton"
-                iconType="cross"
-                color="text"
-                size="xs"
-                onClick={onCloseFlyout}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </FlyoutNavigation>
+  if (!isDisabled) {
+    panel = (
       <EuiPanel
         hasShadow={false}
         paddingSize="m"
@@ -195,6 +159,50 @@ export const AssistantHeader: React.FC<Props> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
+    );
+  }
+
+  return (
+    <>
+      <FlyoutNavigation
+        isLoading={isLoading}
+        isExpanded={!!chatHistoryVisible}
+        setIsExpanded={setChatHistoryVisible}
+        onConversationCreate={onConversationCreate}
+        isAssistantEnabled={isAssistantEnabled}
+      >
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <AssistantSettingsModal
+              defaultConnector={defaultConnector}
+              isDisabled={isDisabled}
+              isSettingsModalVisible={isSettingsModalVisible}
+              setIsSettingsModalVisible={setIsSettingsModalVisible}
+              onConversationSelected={onConversationSelected}
+              conversations={conversations}
+              conversationsLoaded={conversationsLoaded}
+              refetchCurrentConversation={refetchCurrentConversation}
+              refetchCurrentUserConversations={refetchCurrentUserConversations}
+              refetchPrompts={refetchPrompts}
+              setPaginationObserver={setPaginationObserver}
+            />
+          </EuiFlexItem>
+
+          {onCloseFlyout && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                aria-label={i18n.CLOSE}
+                data-test-subj="euiFlyoutCloseButton"
+                iconType="cross"
+                color="text"
+                size="xs"
+                onClick={onCloseFlyout}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </FlyoutNavigation>
+      {panel}
     </>
   );
 };

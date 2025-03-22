@@ -13,11 +13,13 @@ import React from 'react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Theme } from '@elastic/charts';
-import { coreMock } from '@kbn/core/public/mocks';
+import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { EuiThemeProvider } from '@elastic/eui';
 
 import { DataQualityProvider, DataQualityProviderProps } from '../../data_quality_context';
@@ -70,12 +72,19 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
 
+  const application = applicationServiceMock.createStartContract();
+  const triggersActionsUi = triggersActionsUiMock.createStart();
+  const share = sharePluginMock.createStartContract();
+
   return (
     <KibanaRenderContextProvider {...coreMock.createStart()}>
       <I18nProvider>
         <EuiThemeProvider>
           <QueryClientProvider client={queryClient}>
             <AssistantProvider
+              application={application}
+              triggersActionsUi={triggersActionsUi}
+              share={share}
               actionTypeRegistry={actionTypeRegistry}
               assistantAvailability={mockAssistantAvailability}
               augmentMessageCodeBlocks={jest.fn()}
