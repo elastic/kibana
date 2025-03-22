@@ -49,7 +49,7 @@ export function StreamDetailViewContent({ name, tab }: { name: string; tab: stri
     },
     {
       name: 'dashboards',
-      content: <StreamDetailDashboardsView definition={definition} />,
+      content: <StreamDetailDashboardsView definition={definition} refreshDefinition={refresh} />,
       label: i18n.translate('xpack.streams.streamDetailView.dashboardsTab', {
         defaultMessage: 'Dashboards',
       }),
