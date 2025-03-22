@@ -1,0 +1,105 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "An adversary may add the setuid or setgid bit to a file or directory in order to run a file with the privileges of the owning user or group. An adversary can take advantage of this to either do a shell escape or exploit a vulnerability in an application with the setuid or setgid bit to get code running in a different user’s context. Additionally, adversaries can use this mechanism on their own malware to make sure they're able to execute in elevated contexts in the future.",
+    "from": "now-9m",
+    "index": [
+      "auditbeat-*",
+      "logs-endpoint.events.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "max_signals": 33,
+    "name": "SUID/SGID Bit Set",
+    "query": "process where host.os.type == \"linux\" and event.type == \"start\" and event.action == \"exec\" and (\n  (process.name == \"chmod\" and (process.args : (\"+s\", \"u+s\", \"g+s\") or process.args regex \"[24][0-9]{3}\")) or\n  (process.name == \"install\" and process.args : \"-m\" and\n  (process.args : (\"+s\", \"u+s\", \"g+s\") or process.args regex \"[24][0-9]{3}\"))\n) and not (\n  process.parent.executable : (\n    \"/usr/NX/*\", \"/var/lib/docker/*\", \"/var/lib/dpkg/info*\", \"/tmp/newroot/*\",\n    \"/System/Library/PrivateFrameworks/PackageKit.framework/Versions/A/XPCServices/package_script_service.xpc/Contents/MacOS/package_script_service\"\n  ) or\n  process.args : (\n    \"/run/*\", \"/var/run/*\", \"/usr/bin/keybase-redirector\", \"/usr/local/share/fonts\", \"/usr/bin/ssh-agent\"\n  )\n)\n",
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.executable",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "8a1b0278-0f9a-487d-96bd-d4833298e87a",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "OS: macOS",
+      "Use Case: Threat Detection",
+      "Tactic: Privilege Escalation",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1548",
+            "name": "Abuse Elevation Control Mechanism",
+            "reference": "https://attack.mitre.org/techniques/T1548/",
+            "subtechnique": [
+              {
+                "id": "T1548.001",
+                "name": "Setuid and Setgid",
+                "reference": "https://attack.mitre.org/techniques/T1548/001/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": []
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 104
+  },
+  "id": "8a1b0278-0f9a-487d-96bd-d4833298e87a_104",
+  "type": "security-rule"
+}

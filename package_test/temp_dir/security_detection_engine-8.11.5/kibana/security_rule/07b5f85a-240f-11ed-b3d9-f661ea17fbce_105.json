@@ -1,0 +1,95 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Drive and Docs is a Google Workspace service that allows users to leverage Google Drive and Google Docs. Access to files is based on inherited permissions from the child organizational unit the user belongs to which is scoped by administrators. Typically if a user is removed, their files can be transferred to another user by the administrator. This service can also be abused by adversaries to transfer files to an adversary account for potential exfiltration.",
+        "false_positives": [
+            "Administrators may transfer file ownership during employee leave or absence to ensure continued operations by a new or existing employee."
+        ],
+        "from": "now-130m",
+        "index": [
+            "filebeat-*",
+            "logs-google_workspace*"
+        ],
+        "interval": "10m",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Google Drive Ownership Transferred via Google Workspace",
+        "note": "## Triage and analysis\n\n### Investigating Google Drive Ownership Transferred via Google Workspace\n\nGoogle Drive is a cloud storage service that allows users to store and access files. It is available to users with a Google Workspace account.\n\nGoogle Workspace administrators consider users' roles and organizational units when assigning permissions to files or shared drives. Owners of sensitive files and folders can grant permissions to users who make internal or external access requests. Adversaries abuse this trust system by accessing Google Drive resources with improperly scoped permissions and shared settings. Distributing phishing emails is another common approach to sharing malicious Google Drive documents. With this approach, adversaries aim to inherit the recipient's Google Workspace privileges when an external entity grants ownership.\n\nThis rule identifies when the ownership of a shared drive within a Google Workspace organization is transferred to another internal user.\n\n#### Possible investigation steps\n\n- From the admin console, review admin logs for involved user accounts. To find admin logs, go to `Security \u003e Reporting \u003e Audit and investigation \u003e Admin log events`.\n- Determine if involved user accounts are active. To view user activity, go to `Directory \u003e Users`.\n- Check if the involved user accounts were recently disabled, then re-enabled.\n- Review involved user accounts for potentially misconfigured permissions or roles.\n- Review the involved shared drive or files and related policies to determine if this action was expected and appropriate.\n- If a shared drive, access requirements based on Organizational Units in `Apps \u003e Google Workspace \u003e Drive and Docs \u003e Manage shared drives`.\n- Triage potentially related alerts based on the users involved. To find alerts, go to `Security \u003e Alerts`.\n\n### False positive analysis\n\n- Transferring drives requires Google Workspace administration permissions related to Google Drive. Check if this action was planned/expected from the requester and is appropriately targeting the correct receiver.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Disable or limit the account during the investigation and response.\n- Identify the possible impact of the incident and prioritize accordingly; the following actions can help you gain context:\n    - Identify the account role in the cloud environment.\n    - Assess the criticality of affected services and servers.\n    - Work with your IT team to identify and minimize the impact on users.\n    - Identify if the attacker is moving laterally and compromising other accounts, servers, or services.\n    - Identify any regulatory or legal ramifications related to this activity.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords or delete API keys as needed to revoke the attacker's access to the environment. Work with your IT teams to minimize the impact on business operations during these actions.\n- Review the permissions assigned to the implicated user to ensure that the least privilege principle is being followed.\n- Implement security best practices [outlined](https://support.google.com/a/answer/7587183) by Google.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection via the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n\n\n\n### Important Information Regarding Google Workspace Event Lag Times\n- As per Google's documentation, Google Workspace administrators may observe lag times ranging from minutes up to 3 days between the time of an event's occurrence and the event being visible in the Google Workspace admin/audit logs.\n- This rule is configured to run every 10 minutes with a lookback time of 130 minutes.\n- To reduce the risk of false negatives, consider reducing the interval that the Google Workspace (formerly G Suite) Filebeat module polls Google's reporting API for new events.\n- By default, `var.interval` is set to 2 hours (2h). Consider changing this interval to a lower value, such as 10 minutes (10m).\n- See the following references for further information:\n  - https://support.google.com/a/answer/7061566\n  - https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-google_workspace.html",
+        "query": "event.dataset:\"google_workspace.admin\" and event.action:\"CREATE_DATA_TRANSFER_REQUEST\"\n  and event.category:\"iam\" and google_workspace.admin.application.name:Drive*\n",
+        "references": [
+            "https://support.google.com/a/answer/1247799?hl=en"
+        ],
+        "related_integrations": [
+            {
+                "package": "google_workspace",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "google_workspace.admin.application.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "07b5f85a-240f-11ed-b3d9-f661ea17fbce",
+        "setup": "The Google Workspace Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "tags": [
+            "Elastic",
+            "Cloud",
+            "Google Workspace",
+            "Continuous Monitoring",
+            "SecOps",
+            "Collection",
+            "Investigation Guide"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0009",
+                    "name": "Collection",
+                    "reference": "https://attack.mitre.org/tactics/TA0009/"
+                },
+                "technique": [
+                    {
+                        "id": "T1074",
+                        "name": "Data Staged",
+                        "reference": "https://attack.mitre.org/techniques/T1074/",
+                        "subtechnique": [
+                            {
+                                "id": "T1074.002",
+                                "name": "Remote Data Staging",
+                                "reference": "https://attack.mitre.org/techniques/T1074/002/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 105
+    },
+    "id": "07b5f85a-240f-11ed-b3d9-f661ea17fbce_105",
+    "type": "security-rule"
+}

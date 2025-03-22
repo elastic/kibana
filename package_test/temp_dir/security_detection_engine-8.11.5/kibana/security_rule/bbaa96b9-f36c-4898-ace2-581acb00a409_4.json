@@ -1,0 +1,113 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule identifies a potential SYN-Based port scan. A SYN port scan is a technique employed by attackers to scan a target network for open ports by sending SYN packets to multiple ports and observing the response. Attackers use this method to identify potential entry points or services that may be vulnerable to exploitation, allowing them to launch targeted attacks or gain unauthorized access to the system or network, compromising its security and potentially leading to data breaches or further malicious activities. This rule proposes threshold logic to check for connection attempts from one source host to 10 or more destination ports using 2 or less packets per port.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.network-*",
+            "logs-network_traffic.*",
+            "packetbeat-*",
+            "auditbeat-*",
+            "filebeat-*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "max_signals": 5,
+        "name": "Potential SYN-Based Network Scan Detected",
+        "query": "destination.port : * and network.packets \u003c= 2 and source.ip : (10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16)\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            },
+            {
+                "package": "network_traffic",
+                "version": "^1.1.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "destination.port",
+                "type": "long"
+            },
+            {
+                "ecs": true,
+                "name": "network.packets",
+                "type": "long"
+            },
+            {
+                "ecs": true,
+                "name": "source.ip",
+                "type": "ip"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "bbaa96b9-f36c-4898-ace2-581acb00a409",
+        "severity": "low",
+        "tags": [
+            "Domain: Network",
+            "Tactic: Discovery",
+            "Tactic: Reconnaissance",
+            "Use Case: Network Security Monitoring"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0007",
+                    "name": "Discovery",
+                    "reference": "https://attack.mitre.org/tactics/TA0007/"
+                },
+                "technique": [
+                    {
+                        "id": "T1046",
+                        "name": "Network Service Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1046/"
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0043",
+                    "name": "Reconnaissance",
+                    "reference": "https://attack.mitre.org/tactics/TA0043/"
+                },
+                "technique": [
+                    {
+                        "id": "T1595",
+                        "name": "Active Scanning",
+                        "reference": "https://attack.mitre.org/techniques/T1595/",
+                        "subtechnique": [
+                            {
+                                "id": "T1595.001",
+                                "name": "Scanning IP Blocks",
+                                "reference": "https://attack.mitre.org/techniques/T1595/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "threshold": {
+            "cardinality": [
+                {
+                    "field": "destination.port",
+                    "value": 250
+                }
+            ],
+            "field": [
+                "destination.ip",
+                "source.ip"
+            ],
+            "value": 1
+        },
+        "type": "threshold",
+        "version": 4
+    },
+    "id": "bbaa96b9-f36c-4898-ace2-581acb00a409_4",
+    "type": "security-rule"
+}

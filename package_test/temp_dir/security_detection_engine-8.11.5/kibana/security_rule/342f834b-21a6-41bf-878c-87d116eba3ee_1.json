@@ -1,0 +1,82 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule detects the creation or modification of the dynamic linker preload shared object (ld.so.preload) inside a container. The Linux dynamic linker is used to load libraries needed by a program at runtime. Adversaries may hijack the dynamic linker by modifying the /etc/ld.so.preload file to point to malicious libraries. This behavior can be used to grant unauthorized access to system resources and has been used to evade detection of malicious processes in container environments.",
+        "from": "now-6m",
+        "index": [
+            "logs-cloud_defend*"
+        ],
+        "interval": "5m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Modification of Dynamic Linker Preload Shared Object Inside A Container",
+        "query": "file where event.module== \"cloud_defend\" and event.type != \"deletion\" and file.path== \"/etc/ld.so.preload\"\n",
+        "references": [
+            "https://unit42.paloaltonetworks.com/hildegard-malware-teamtnt/",
+            "https://www.anomali.com/blog/rocke-evolves-its-arsenal-with-a-new-malware-family-written-in-golang/",
+            "https://sysdig.com/blog/threat-detection-aws-cloud-containers/"
+        ],
+        "related_integrations": [
+            {
+                "package": "cloud_defend",
+                "version": "^1.0.5"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.module",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "342f834b-21a6-41bf-878c-87d116eba3ee",
+        "severity": "high",
+        "tags": [
+            "Data Source: Elastic Defend for Containers",
+            "Domain: Container",
+            "Tactic: Defense Evasion"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1574",
+                        "name": "Hijack Execution Flow",
+                        "reference": "https://attack.mitre.org/techniques/T1574/",
+                        "subtechnique": [
+                            {
+                                "id": "T1574.006",
+                                "name": "Dynamic Linker Hijacking",
+                                "reference": "https://attack.mitre.org/techniques/T1574/006/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "342f834b-21a6-41bf-878c-87d116eba3ee_1",
+    "type": "security-rule"
+}

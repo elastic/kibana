@@ -1,0 +1,124 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects when Okta user authentication events are reported for multiple users with the same device token hash behind a proxy.",
+    "false_positives": [
+      "An Okta admnistrator may be logged into multiple accounts from the same host for legitimate reasons.",
+      "Users may share an endpoint related to work or personal use in which separate Okta accounts are used.",
+      "Shared systems such as Kiosks and conference room computers may be used by multiple users."
+    ],
+    "from": "now-9m",
+    "index": [
+      "filebeat-*",
+      "logs-okta*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Multiple Okta User Auth Events with Same Device Token Hash Behind a Proxy",
+    "note": "## Triage and analysis\n\n### Investigating Multiple Okta User Auth Events with Same Device Token Hash Behind a Proxy\n\nThis rule detects when Okta user authentication events are reported for multiple users with the same device token hash behind a proxy. This may indicate that a shared device between users, or that a user is using a proxy to access multiple accounts for password spraying.\n\n#### Possible investigation steps:\n- Identify the users involved in this action by examining the `okta.actor.id`, `okta.actor.type`, `okta.actor.alternate_id`, and `okta.actor.display_name` fields.\n- Determine the device client used for these actions by analyzing `okta.client.ip`, `okta.client.user_agent.raw_user_agent`, `okta.client.zone`, `okta.client.device`, and `okta.client.id` fields.\n    - Since the device is behind a proxy, the `okta.client.ip` field will not be useful for determining the actual device IP address.\n- Review the `okta.request.ip_chain` field for more information about the geographic location of the proxy.\n- With Okta end users identified, review the `okta.debug_context.debug_data.dt_hash` field.\n    - Historical analysis should indicate if this device token hash is commonly associated with the user.\n- Review the `okta.event_type` field to determine the type of authentication event that occurred.\n    - If the event type is `user.authentication.sso`, the user may have legitimately started a session via a proxy for security or privacy reasons.\n    - If the event type is `user.authentication.password`, the user may be using a proxy to access multiple accounts for password spraying.\n- Examine the `okta.outcome.result` field to determine if the authentication was successful.\n- Review the past activities of the actor(s) involved in this action by checking their previous actions.\n- Evaluate the actions that happened just before and after this event in the `okta.event_type` field to help understand the full context of the activity.\n    - This may help determine the authentication and authorization actions that occurred between the user, Okta and application.\n\n### False positive analysis:\n- A user may have legitimately started a session via a proxy for security or privacy reasons.\n- Users may share an endpoint related to work or personal use in which separate Okta accounts are used.\n    - Architecturally, this shared endpoint may leverage a proxy for security or privacy reasons.\n    - Shared systems such as Kiosks and conference room computers may be used by multiple users.\n    - Shared working spaces may have a single endpoint that is used by multiple users.\n\n### Response and remediation:\n- Review the profile of the users involved in this action to determine if proxy usage may be expected.\n- If the user is legitimate and the authentication behavior is not suspicious based on device analysis, no action is required.\n- If the user is legitimate but the authentication behavior is suspicious, consider resetting passwords for the users involves and enabling multi-factor authentication (MFA).\n    - If MFA is already enabled, consider resetting MFA for the users.\n- If any of the users are not legitimate, consider deactivating the user's account.\n- Conduct a review of Okta policies and ensure they are in accordance with security best practices.\n- Check with internal IT teams to determine if the accounts involved recently had MFA reset at the request of the user.\n    - If so, confirm with the user this was a legitimate request.\n    - If so and this was not a legitimate request, consider deactivating the user's account temporarily.\n        - Reset passwords and reset MFA for the user.\n- If this is a false positive, consider adding the `okta.debug_context.debug_data.dt_hash` field to the `exceptions` list in the rule.\n    - This will prevent future occurrences of this event for this device from triggering the rule.\n",
+    "query": "event.dataset:okta.system\n    and not okta.actor.id:okta* and okta.debug_context.debug_data.dt_hash:*\n    and okta.event_type:user.authentication* and okta.security_context.is_proxy:true\n",
+    "references": [
+      "https://developer.okta.com/docs/reference/api/system-log/",
+      "https://developer.okta.com/docs/reference/api/event-types/",
+      "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy",
+      "https://sec.okta.com/articles/2023/08/cross-tenant-impersonation-prevention-and-detection"
+    ],
+    "related_integrations": [
+      {
+        "package": "okta",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "okta.actor.id",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "okta.debug_context.debug_data.dt_hash",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "okta.event_type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "okta.security_context.is_proxy",
+        "type": "boolean"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "50887ba8-7ff7-11ee-a038-f661ea17fbcd",
+    "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+    "severity": "medium",
+    "tags": [
+      "Use Case: Identity and Access Audit",
+      "Data Source: Okta",
+      "Tactic: Credential Access"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1110",
+            "name": "Brute Force",
+            "reference": "https://attack.mitre.org/techniques/T1110/",
+            "subtechnique": [
+              {
+                "id": "T1110.003",
+                "name": "Password Spraying",
+                "reference": "https://attack.mitre.org/techniques/T1110/003/"
+              }
+            ]
+          },
+          {
+            "id": "T1110",
+            "name": "Brute Force",
+            "reference": "https://attack.mitre.org/techniques/T1110/",
+            "subtechnique": [
+              {
+                "id": "T1110.004",
+                "name": "Credential Stuffing",
+                "reference": "https://attack.mitre.org/techniques/T1110/004/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "threshold": {
+      "cardinality": [
+        {
+          "field": "okta.actor.id",
+          "value": 3
+        }
+      ],
+      "field": [
+        "okta.debug_context.debug_data.dt_hash"
+      ],
+      "value": 1
+    },
+    "timestamp_override": "event.ingested",
+    "type": "threshold",
+    "version": 2
+  },
+  "id": "50887ba8-7ff7-11ee-a038-f661ea17fbcd_2",
+  "type": "security-rule"
+}

@@ -1,0 +1,93 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies suspicious instances of browser processes, such as unsigned or signed with unusual certificates, that can indicate an attempt to conceal malicious activity, bypass security features such as allowlists, or trick users into executing malware.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Masquerading as Browser Process",
+        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n  (\n    /* Chrome Related Processes */\n    (process.name : (\n      \"chrome.exe\", \"GoogleUpdate.exe\", \"GoogleCrashHandler64.exe\", \"GoogleCrashHandler.exe\",\n      \"GoogleUpdateComRegisterShell64.exe\", \"GoogleUpdateSetup.exe\", \"GoogleUpdateOnDemand.exe\",\n      \"chrome_proxy.exe\", \"remote_assistance_host.exe\", \"remoting_native_messaging_host.exe\",\n      \"GoogleUpdateBroker.exe\"\n     ) and not\n      (process.code_signature.subject_name : (\"Google LLC\", \"Google Inc\") and process.code_signature.trusted == true)\n     and not\n      (\n        process.executable : \"?:\\\\Program Files\\\\HP\\\\Sure Click\\\\servers\\\\chrome.exe\" and\n        process.code_signature.subject_name : (\"Bromium, Inc.\") and process.code_signature.trusted == true\n      )\n      and not process.hash.sha256 : \"6538d54a236349f880d6793d219f558764629efc85d4d08b56b94717c01fb25a\"\n    ) or\n\n    /* MS Edge Related Processes */\n    (process.name : (\n      \"msedge.exe\", \"MicrosoftEdgeUpdate.exe\", \"identity_helper.exe\", \"msedgewebview2.exe\",\n      \"MicrosoftEdgeWebview2Setup.exe\", \"MicrosoftEdge_X*.exe\", \"msedge_proxy.exe\",\n      \"MicrosoftEdgeUpdateCore.exe\", \"MicrosoftEdgeUpdateBroker.exe\", \"MicrosoftEdgeUpdateSetup_X*.exe\",\n      \"MicrosoftEdgeUpdateComRegisterShell64.exe\", \"msedgerecovery.exe\", \"MicrosoftEdgeUpdateSetup.exe\"\n     ) and not\n      (process.code_signature.subject_name : \"Microsoft Corporation\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Brave Related Processes */\n    (process.name : (\n      \"brave.exe\", \"BraveUpdate.exe\", \"BraveCrashHandler64.exe\", \"BraveCrashHandler.exe\",\n      \"BraveUpdateOnDemand.exe\", \"brave_vpn_helper.exe\", \"BraveUpdateSetup*.exe\",\n      \"BraveUpdateComRegisterShell64.exe\"\n     ) and not\n      (process.code_signature.subject_name : \"Brave Software, Inc.\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Firefox Related Processes */\n    (process.name : (\n      \"firefox.exe\", \"pingsender.exe\", \"default-browser-agent.exe\", \"maintenanceservice.exe\",\n      \"plugin-container.exe\", \"maintenanceservice_tmp.exe\", \"maintenanceservice_installer.exe\",\n      \"minidump-analyzer.exe\", \"crashreporter.exe\"\n     ) and not\n      (process.code_signature.subject_name : \"Mozilla Corporation\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Island Related Processes */\n    (process.name : (\n      \"Island.exe\", \"IslandUpdate.exe\", \"IslandCrashHandler.exe\", \"IslandCrashHandler64.exe\",\n      \"IslandUpdateBroker.exe\", \"IslandUpdateOnDemand.exe\", \"IslandUpdateComRegisterShell64.exe\",\n      \"IslandUpdateSetup.exe\"\n     ) and not\n      (process.code_signature.subject_name : \"Island Technology Inc.\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Opera Related Processes */\n    (process.name : (\n      \"opera.exe\", \"opera_*.exe\", \"browser_assistant.exe\"\n     ) and not\n      (process.code_signature.subject_name : \"Opera Norway AS\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Whale Related Processes */\n    (process.name : (\n      \"whale.exe\", \"whale_update.exe\", \"wusvc.exe\"\n     ) and not\n      (process.code_signature.subject_name : \"NAVER Corp.\" and process.code_signature.trusted == true)\n    ) or\n\n    /* Chromium-based Browsers processes */\n    (process.name : (\n      \"chrmstp.exe\", \"notification_helper.exe\", \"elevation_service.exe\"\n     ) and not\n      (process.code_signature.subject_name : (\n        \"Island Technology Inc.\",\n        \"Citrix Systems, Inc.\",\n        \"Brave Software, Inc.\",\n        \"Google LLC\",\n        \"Google Inc\",\n        \"Microsoft Corporation\",\n        \"NAVER Corp.\"\n       ) and process.code_signature.trusted == true\n      )\n    )\n  )\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.subject_name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.trusted",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.hash.sha256",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "5b9eb30f-87d6-45f4-9289-2bf2024f0376",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Rule Type: BBR",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1036",
+                        "name": "Masquerading",
+                        "reference": "https://attack.mitre.org/techniques/T1036/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "5b9eb30f-87d6-45f4-9289-2bf2024f0376_1",
+    "type": "security-rule"
+}

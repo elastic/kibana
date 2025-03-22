@@ -1,0 +1,113 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the execution of PowerShell with suspicious argument values. This behavior is often observed during malware installation leveraging PowerShell.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-windows.*",
+      "logs-system.security*",
+      "logs-windows.sysmon_operational-*",
+      "logs-sentinel_one_cloud_funnel.*",
+      "logs-m365_defender.event-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Suspicious Windows Powershell Arguments",
+    "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n process.name : \"powershell.exe\" and \n  (\n   process.command_line :\n        (\n          \"*^*^*^*^*^*^*^*^*^*\",\n          \"*`*`*`*`*\",\n          \"*+*+*+*+*+*+*\",\n          \"*[char[]](*)*-join*\",\n          \"*Base64String*\",\n          \"*[*Convert]*\",\n          \"*.Compression.*\",\n          \"*-join($*\",\n          \"*.replace*\",\n          \"*MemoryStream*\",\n          \"*WriteAllBytes*\",\n          \"* -enc *\",\n          \"* -ec *\",\n          \"* /e *\",\n          \"* /enc *\",\n          \"* /ec *\",\n          \"*WebClient*\",\n          \"*DownloadFile*\",\n          \"*DownloadString*\",\n          \"* iex*\",\n          \"* iwr*\",\n          \"*Reflection.Assembly*\",\n          \"*Assembly.GetType*\",\n          \"*$env:temp\\\\*start*\",\n          \"*powercat*\",\n          \"*nslookup -q=txt*\",\n          \"*$host.UI.PromptForCredential*\",\n          \"*Net.Sockets.TCPClient*\",\n          \"*curl *;Start*\",\n          \"powershell.exe \\\"<#*\",\n          \"*ssh -p *\",\n          \"*http*|iex*\",\n          \"*@SSL\\\\DavWWWRoot\\\\*.ps1*\",\n          \"*.lnk*.Seek(0x*\",\n          \"*[string]::join(*\",\n          \"*[Array]::Reverse($*\",\n          \"* hidden $(gc *\",\n          \"*=wscri& set*\",\n          \"*http'+'s://*\",\n          \"*.content|i''Ex*\",\n          \"*//:sptth*\",\n          \"*//:ptth*\",\n          \"*$*=Get-Content*AppData*.SubString(*$*\",\n          \"*=cat *AppData*.substring(*);*$*\"\n        ) or\n\n      (process.args : \"-c\" and process.args : \"&{'*\") or\n\n      (process.args : \"-Outfile\" and process.args : \"Start*\") or\n\n      (process.args : \"-bxor\" and process.args : \"0x*\") or\n\n      process.args : \"$*$*;set-alias\" or\n\n      (process.parent.name : (\"explorer.exe\", \"cmd.exe\") and \n       process.command_line : (\"*-encodedCommand*\", \"*Invoke-webrequest*\", \"*WebClient*\", \"*Reflection.Assembly*\"))\n  )\n",
+    "related_integrations": [
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^0.1.0"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.command_line",
+        "type": "wildcard"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "83bf249e-4348-47ba-9741-1202a09556ad",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Execution",
+      "Data Source: System",
+      "Data Source: Sysmon",
+      "Data Source: SentinelOne",
+      "Data Source: Microsoft Defender for Endpoint"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1059",
+            "name": "Command and Scripting Interpreter",
+            "reference": "https://attack.mitre.org/techniques/T1059/",
+            "subtechnique": [
+              {
+                "id": "T1059.001",
+                "name": "PowerShell",
+                "reference": "https://attack.mitre.org/techniques/T1059/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "83bf249e-4348-47ba-9741-1202a09556ad_1",
+  "type": "security-rule"
+}

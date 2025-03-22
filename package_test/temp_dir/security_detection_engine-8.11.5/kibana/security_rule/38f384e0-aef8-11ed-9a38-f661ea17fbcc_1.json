@@ -1,0 +1,96 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects an external Google Workspace user account being added to an existing group. Adversaries may add external user accounts as a means to intercept shared files or emails with that specific group.",
+        "false_positives": [
+            "Administrators may add external users to groups to share files and communication with them via the intended recipient be the group they are added to. It is unlikely an external user account would be added to an organization's group where administrators should create a new user account."
+        ],
+        "from": "now-130m",
+        "index": [
+            "filebeat-*",
+            "logs-google_workspace*"
+        ],
+        "interval": "10m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "External User Added to Google Workspace Group",
+        "note": "## Triage and analysis\n\n### Investigating External User Added to Google Workspace Group\n\nGoogle Workspace groups allow organizations to assign specific users to a group that can share resources. Application specific roles can be manually set for each group, but if not inherit permissions from the top-level organizational unit.\n\nThreat actors may use phishing techniques and container-bound scripts to add external Google accounts to an organization's groups with editorial privileges. As a result, the user account is unable to manually access the organization's resources, settings and files, but will receive anything shared to the group. As a result, confidential information could be leaked or perhaps documents shared with editorial privileges be weaponized for further intrusion.\n\nThis rule identifies when an external user account is added to an organization's groups where the domain name of the target does not match the Google Workspace domain.\n\n#### Possible investigation steps\n- Identify user account(s) associated by reviewing `user.name` or `user.email` in the alert\n  - The `user.target.email` field contains the user added to the groups\n  - The `group.name` field contains the group the target user was added to\n- Identify specific application settings given to the group which may indicate motive for the external user joining a particular group\n- With the user identified, verify administrative privileges are scoped properly to add external users to the group\n  - Unauthorized actions may indicate the `user.email` account has been compromised or leveraged to add an external user\n- To identify other users in this group, search for `event.action: \"ADD_GROUP_MEMBER\"`\n  - It is important to understand if external users with `@gmail.com` are expected to be added to this group based on historical references\n- Review Gmail logs where emails were sent to and from the `group.name` value\n  - This may indicate potential internal spearphishing\n\n### False positive analysis\n- With the user account whom added the new user, verify this action was intentional\n- Verify that the target whom was added to the group is expected to have access to the organization's resources and data\n- If other members have been added to groups that are external, this may indicate historically that this action is expected\n\n### Response and remediation\n- Initiate the incident response process based on the outcome of the triage.\n- Disable or limit the account during the investigation and response.\n- Identify the possible impact of the incident and prioritize accordingly; the following actions can help you gain context:\n    - Identify the account role in the cloud environment.\n    - Assess the criticality of affected services and servers.\n    - Work with your IT team to identify and minimize the impact on users.\n    - Identify if the attacker is moving laterally and compromising other accounts, servers, or services.\n    - Identify any regulatory or legal ramifications related to this activity.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords or delete API keys as needed to revoke the attacker's access to the environment. Work with your IT teams to minimize the impact on business operations during these actions.\n- Reactivate multi-factor authentication for the user.\n- Review the permissions assigned to the implicated user to ensure that the least privilege principle is being followed.\n- Implement security defaults [provided by Google](https://cloud.google.com/security-command-center/docs/how-to-investigate-threats).\n- Determine the initial vector abused by the attacker and take action to prevent reinfection via the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n\n\n\n### Important Information Regarding Google Workspace Event Lag Times\n- As per Google's documentation, Google Workspace administrators may observe lag times ranging from minutes up to 3 days between the time of an event's occurrence and the event being visible in the Google Workspace admin/audit logs.\n- This rule is configured to run every 10 minutes with a lookback time of 130 minutes.\n- To reduce the risk of false negatives, consider reducing the interval that the Google Workspace (formerly G Suite) Filebeat module polls Google's reporting API for new events.\n- By default, `var.interval` is set to 2 hours (2h). Consider changing this interval to a lower value, such as 10 minutes (10m).\n- See the following references for further information:\n  - https://support.google.com/a/answer/7061566\n  - https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-google_workspace.html",
+        "query": "iam where event.dataset == \"google_workspace.admin\" and event.action == \"ADD_GROUP_MEMBER\" and\n  not endsWith(user.target.email, user.target.group.domain)\n",
+        "references": [
+            "https://support.google.com/a/answer/33329"
+        ],
+        "related_integrations": [
+            {
+                "package": "google_workspace",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.target.email",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.target.group.domain",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "38f384e0-aef8-11ed-9a38-f661ea17fbcc",
+        "setup": "The Google Workspace Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "medium",
+        "tags": [
+            "Elastic",
+            "Cloud",
+            "Google Workspace",
+            "Continuous Monitoring",
+            "SecOps",
+            "Identity and Access",
+            "Initial Access",
+            "Investigation Guide"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0001",
+                    "name": "Initial Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0001/"
+                },
+                "technique": [
+                    {
+                        "id": "T1078",
+                        "name": "Valid Accounts",
+                        "reference": "https://attack.mitre.org/techniques/T1078/",
+                        "subtechnique": [
+                            {
+                                "id": "T1078.004",
+                                "name": "Cloud Accounts",
+                                "reference": "https://attack.mitre.org/techniques/T1078/004/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "38f384e0-aef8-11ed-9a38-f661ea17fbcc_1",
+    "type": "security-rule"
+}

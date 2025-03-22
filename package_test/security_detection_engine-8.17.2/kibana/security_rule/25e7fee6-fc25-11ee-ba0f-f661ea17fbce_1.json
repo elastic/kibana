@@ -1,0 +1,106 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies when a specified inbound (ingress) rule is added or adjusted for a VPC security group in AWS EC2. This rule detects when a security group rule is added that allows traffic from any IP address or from a specific IP address to common remote access ports, such as 22 (SSH) or 3389 (RDP). Adversaries may add these rules to allow remote access to VPC instances from any location, increasing the attack surface and potentially exposing the instances to unauthorized access.",
+    "false_positives": [
+      "Administrators may legitimately add security group rules to allow traffic from any IP address or from specific IP addresses to common remote access ports."
+    ],
+    "from": "now-60m",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "interval": "10m",
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Insecure AWS EC2 VPC Security Group Ingress Rule Added",
+    "note": "## Triage and Analysis\n\n### Investigating Insecure AWS EC2 VPC Security Group Ingress Rule Added\n\nThis rule detects the addition of ingress rules to a VPC security group that allow traffic from any IP address (`0.0.0.0/0` or `::/0`) to sensitive ports commonly used for remote access, such as SSH (port 22) and RDP (port 3389). This configuration change can significantly increase the exposure of EC2 instances to potential threats, making it crucial to understand the context and legitimacy of such changes.\n\n#### Possible Investigation Steps:\n\n- **Identify the Actor**: Review the `aws.cloudtrail.user_identity.arn` and `aws.cloudtrail.user_identity.access_key_id` fields to identify who made the change. Investigate whether this actor has the necessary permissions and typically performs these actions.\n- **Review the Request Details**: Examine the `aws.cloudtrail.request_parameters` to understand exactly what changes were made to the security group. Check for any unusual parameters that could suggest a misconfiguration or malicious intent.\n- **Analyze the Source of the Request**: Look at the `source.ip` and `source.geo` fields to determine the geographical origin of the request. An external or unusual location could indicate compromised credentials.\n- **Contextualize with Timestamp**: Use the `@timestamp` field to check when the change occurred. Modifications outside of typical business hours might warrant additional scrutiny.\n- **Correlate with Other Activities**: Search for related CloudTrail events before and after this change to see if the same actor engaged in other potentially suspicious activities.\n\n### False Positive Analysis:\n\n- **Legitimate Administrative Actions**: Verify if the ingress rule change aligns with scheduled updates, maintenance activities, or legitimate administrative tasks documented in change management tickets or systems.\n- **Consistency Check**: Compare the action against historical data of similar actions performed by the user or within the organization. Consistency with past legitimate actions might indicate a false alarm.\n- **Verify through Outcomes**: Check the `aws.cloudtrail.response_elements` and the `event.outcome` to confirm if the change was successful and intended as per policy.\n\n### Response and Remediation:\n\n- **Immediate Review and Reversal if Necessary**: If the change was unauthorized, revert the security group rules to their previous state to close any unintended access.\n- **Enhance Monitoring and Alerts**: Adjust monitoring systems to alert on similar security group changes, especially those that open access to well-known ports from any IP address.\n- **Educate and Train**: Provide additional training to users with administrative rights on the importance of security best practices concerning security group management.\n- **Audit Security Groups and Policies**: Conduct a comprehensive audit of all security groups and associated policies to ensure they adhere to the principle of least privilege.\n- **Incident Response**: If there's an indication of malicious intent or a security breach, initiate the incident response protocol to mitigate any damage and prevent future occurrences.\n\n### Additional Information:\n\nFor further guidance on managing security group rules and securing AWS environments, refer to the [Amazon VPC Security Groups documentation](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html) and AWS best practices for security.\n\n",
+    "query": "event.dataset: \"aws.cloudtrail\"\n    and event.provider: ec2.amazonaws.com\n    and event.action: AuthorizeSecurityGroupIngress\n    and event.outcome: success\n    and aws.cloudtrail.flattened.request_parameters.cidrIp: (\"0.0.0.0/0\" or \"::/0\")\n    and aws.cloudtrail.flattened.request_parameters.fromPort: (\n        21 or 22 or 23 or 445 or 3389 or 5985 or 5986)\n",
+    "references": [
+      "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_AuthorizeSecurityGroupEgress.html",
+      "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_AuthorizeSecurityGroupIngress.html",
+      "https://www.linkedin.com/pulse/my-backdoors-your-aws-infrastructure-part-3-network-micha%C5%82-brygidyn/"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.flattened.request_parameters.cidrIp",
+        "type": "unknown"
+      },
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.flattened.request_parameters.fromPort",
+        "type": "unknown"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "25e7fee6-fc25-11ee-ba0f-f661ea17fbce",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS EC2",
+      "Use Case: Threat Detection",
+      "Tactic: Defense Evasion"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1562",
+            "name": "Impair Defenses",
+            "reference": "https://attack.mitre.org/techniques/T1562/",
+            "subtechnique": [
+              {
+                "id": "T1562.007",
+                "name": "Disable or Modify Cloud Firewall",
+                "reference": "https://attack.mitre.org/techniques/T1562/007/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 1
+  },
+  "id": "25e7fee6-fc25-11ee-ba0f-f661ea17fbce_1",
+  "type": "security-rule"
+}

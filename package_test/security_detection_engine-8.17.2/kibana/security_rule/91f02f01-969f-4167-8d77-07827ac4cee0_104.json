@@ -1,0 +1,68 @@
+{
+  "attributes": {
+    "anomaly_threshold": 50,
+    "author": [
+      "Elastic"
+    ],
+    "description": "A machine learning job detected a rare and unusual user agent indicating web browsing activity by an unusual process other than a web browser. This can be due to persistence, command-and-control, or exfiltration activity. Uncommon user agents coming from remote sources to local destinations are often the result of scanners, bots, and web scrapers, which are part of common Internet background traffic. Much of this is noise, but more targeted attacks on websites using tools like Burp or SQLmap can sometimes be discovered by spotting uncommon user agents. Uncommon user agents in traffic from local sources to remote destinations can be any number of things, including harmless programs like weather monitoring or stock-trading programs. However, uncommon user agents from local sources can also be due to malware or scanning activity.",
+    "false_positives": [
+      "Web activity that is uncommon, like security scans, may trigger this alert and may need to be excluded. A new or rarely used program that calls web services may trigger this alert."
+    ],
+    "from": "now-45m",
+    "interval": "15m",
+    "license": "Elastic License v2",
+    "machine_learning_job_id": "packetbeat_rare_user_agent",
+    "name": "Unusual Web User Agent",
+    "references": [
+      "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "network_traffic",
+        "version": "^1.1.0"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "91f02f01-969f-4167-8d77-07827ac4cee0",
+    "setup": "## Setup\n\nThis rule requires the installation of associated Machine Learning jobs, as well as data coming in from one of the following integrations:\n- Elastic Defend\n- Network Packet Capture\n\n### Anomaly Detection Setup\n\nOnce the rule is enabled, the associated Machine Learning job will start automatically. You can view the Machine Learning job linked under the \"Definition\" panel of the detection rule. If the job does not start due to an error, the issue must be resolved for the job to commence successfully. For more details on setting up anomaly detection jobs, refer to the [helper guide](https://www.elastic.co/guide/en/kibana/current/xpack-ml-anomalies.html).\n\n### Elastic Defend Integration Setup\nElastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.\n\n#### Prerequisite Requirements:\n- Fleet is required for Elastic Defend.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n\n#### The following steps should be executed in order to add the Elastic Defend integration to your system:\n- Go to the Kibana home page and click \"Add integrations\".\n- In the query bar, search for \"Elastic Defend\" and select the integration to see more details about it.\n- Click \"Add Elastic Defend\".\n- Configure the integration name and optionally add a description.\n- Select the type of environment you want to protect, either \"Traditional Endpoints\" or \"Cloud Workloads\".\n- Select a configuration preset. Each preset comes with different default settings for Elastic Agent, you can further customize these later by configuring the Elastic Defend integration policy. [Helper guide](https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html).\n- We suggest selecting \"Complete EDR (Endpoint Detection and Response)\" as a configuration setting, that provides \"All events; all preventions\"\n- Enter a name for the agent policy in \"New agent policy name\". If other agent policies already exist, you can click the \"Existing hosts\" tab and select an existing policy instead.\nFor more details on Elastic Agent configuration settings, refer to the [helper guide](https://www.elastic.co/guide/en/fleet/current/agent-policy.html).\n- Click \"Save and Continue\".\n- To complete the integration, select \"Add Elastic Agent to your hosts\" and continue to the next section to install the Elastic Agent on your hosts.\nFor more details on Elastic Defend refer to the [helper guide](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n\n### Network Packet Capture Integration Setup\nThe Network Packet Capture integration sniffs network packets on a host and dissects known protocols. Monitoring the network traffic is critical to gaining observability and securing your environment — ensuring high levels of performance and security. The Network Packet Capture integration captures the network traffic between your application servers, decodes common application layer protocols and records the interesting fields for each transaction.\n\n#### The following steps should be executed in order to add the Elastic Agent System integration \"network_traffic\" to your system:\n- Go to the Kibana home page and click “Add integrations”.\n- In the query bar, search for “Network Packet Capture” and select the integration to see more details about it.\n- Click “Add Network Packet Capture”.\n- Configure the integration name and optionally add a description.\n- Review optional and advanced settings accordingly.\n- Add the newly installed “network_traffic” to an existing or a new agent policy, and deploy the agent on your system from which network log files are desirable.\n- Click “Save and Continue”.\n- For more details on the integration refer to the [helper guide](https://docs.elastic.co/integrations/network_traffic).\n",
+    "severity": "low",
+    "tags": [
+      "Use Case: Threat Detection",
+      "Rule Type: ML",
+      "Rule Type: Machine Learning",
+      "Tactic: Command and Control"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0011",
+          "name": "Command and Control",
+          "reference": "https://attack.mitre.org/tactics/TA0011/"
+        },
+        "technique": [
+          {
+            "id": "T1071",
+            "name": "Application Layer Protocol",
+            "reference": "https://attack.mitre.org/techniques/T1071/",
+            "subtechnique": [
+              {
+                "id": "T1071.001",
+                "name": "Web Protocols",
+                "reference": "https://attack.mitre.org/techniques/T1071/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "type": "machine_learning",
+    "version": 104
+  },
+  "id": "91f02f01-969f-4167-8d77-07827ac4cee0_104",
+  "type": "security-rule"
+}

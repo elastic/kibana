@@ -1,0 +1,103 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies scripts that contain patterns and known methods that obfuscate PowerShell code. Attackers can use obfuscation techniques to bypass PowerShell security protections such as Antimalware Scan Interface (AMSI).",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-windows.powershell*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Potential PowerShell Obfuscated Script",
+    "query": "event.category:process and host.os.type:windows and\n  powershell.file.script_block_text : (\n    \"[string]::join\" or\n    \"-Join\" or\n    \"[convert]::toint16\" or\n    \"[char][int]$_\" or\n    (\"ConvertTo-SecureString\" and \"PtrToStringAuto\") or\n    \".GetNetworkCredential().password\" or\n    \"-BXor\" or\n    (\"replace\" and \"char\") or\n    \"[array]::reverse\"\n  ) and\n  powershell.file.script_block_text : (\n    (\"$pSHoMe[\" and \"+$pSHoMe[\") or\n    (\"$ShellId[\" and \"+$ShellId[\") or\n    (\"$env:ComSpec[4\" and \"25]-Join\") or\n    ((\"Set-Variable\" or \"SV\" or \"Set-Item\") and \"OFS\") or\n    (\"*MDR*\" and \"Name[3,11,2]\") or\n    (\"$VerbosePreference\" and \"[1,3]+'X'-Join''\") or\n    (\"rahc\" or \"ekovin\" or \"gnirts\" or \"ecnereferpesobrev\" or \"ecalper\" or \"cepsmoc\" or \"dillehs\")\n  )\n",
+    "references": [
+      "https://github.com/danielbohannon/Invoke-Obfuscation"
+    ],
+    "related_integrations": [
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "powershell.file.script_block_text",
+        "type": "unknown"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "8025db49-c57c-4fc0-bd86-7ccd6d10a35a",
+    "setup": "## Setup\n\nThe 'PowerShell Script Block Logging' logging policy must be enabled.\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration >\nAdministrative Templates >\nWindows PowerShell >\nTurn on PowerShell Script Block Logging (Enable)\n```\n\nSteps to implement the logging policy via registry:\n\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```\n",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Defense Evasion",
+      "Data Source: PowerShell Logs"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1027",
+            "name": "Obfuscated Files or Information",
+            "reference": "https://attack.mitre.org/techniques/T1027/"
+          },
+          {
+            "id": "T1140",
+            "name": "Deobfuscate/Decode Files or Information",
+            "reference": "https://attack.mitre.org/techniques/T1140/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1059",
+            "name": "Command and Scripting Interpreter",
+            "reference": "https://attack.mitre.org/techniques/T1059/",
+            "subtechnique": [
+              {
+                "id": "T1059.001",
+                "name": "PowerShell",
+                "reference": "https://attack.mitre.org/techniques/T1059/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 3
+  },
+  "id": "8025db49-c57c-4fc0-bd86-7ccd6d10a35a_3",
+  "type": "security-rule"
+}

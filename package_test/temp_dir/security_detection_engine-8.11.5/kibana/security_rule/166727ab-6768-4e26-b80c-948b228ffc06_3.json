@@ -1,0 +1,93 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies modification of a file creation time. Adversaries may modify file time attributes to blend malicious content with existing files. Timestomping is a technique that modifies the timestamps of a file often to mimic files that are in trusted directories.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-windows.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "File Creation Time Changed",
+        "query": "file where host.os.type == \"windows\" and event.code : \"2\" and\n\n /* Requires Sysmon EventID 2 - File creation time change */\n event.action : \"File creation time changed*\" and \n \n not process.executable : \n          (\"?:\\\\Program Files\\\\*\", \n           \"?:\\\\Program Files (x86)\\\\*\", \n           \"?:\\\\Windows\\\\system32\\\\msiexec.exe\", \n           \"?:\\\\Windows\\\\syswow64\\\\msiexec.exe\", \n           \"?:\\\\Windows\\\\system32\\\\svchost.exe\", \n           \"?:\\\\WINDOWS\\\\system32\\\\backgroundTaskHost.exe\",\n           \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\", \n           \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\slack\\\\app-*\\\\slack.exe\", \n           \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-*\\\\GitHubDesktop.exe\",\n           \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Microsoft\\\\Teams\\\\current\\\\Teams.exe\", \n           \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Microsoft\\\\OneDrive\\\\OneDrive.exe\") and \n not file.extension : (\"tmp\", \"~tmp\", \"xml\") and not user.name : (\"SYSTEM\", \"Local Service\", \"Network Service\")\n",
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.code",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.extension",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "166727ab-6768-4e26-b80c-948b228ffc06",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1070",
+                        "name": "Indicator Removal",
+                        "reference": "https://attack.mitre.org/techniques/T1070/",
+                        "subtechnique": [
+                            {
+                                "id": "T1070.006",
+                                "name": "Timestomp",
+                                "reference": "https://attack.mitre.org/techniques/T1070/006/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 3
+    },
+    "id": "166727ab-6768-4e26-b80c-948b228ffc06_3",
+    "type": "security-rule"
+}

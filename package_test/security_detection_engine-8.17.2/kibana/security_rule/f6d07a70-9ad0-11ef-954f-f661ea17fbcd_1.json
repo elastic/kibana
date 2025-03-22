@@ -1,0 +1,121 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects when an AWS Identity and Access Management (IAM) customer-managed policy is attached to a role by an unusual or unauthorized user. Customer-managed policies are policies created and controlled within an AWS account, granting specific permissions to roles or users when attached. This rule identifies potential privilege escalation by flagging cases where a customer-managed policy is attached to a role by an unexpected actor, which could signal unauthorized access or misuse. Attackers may attach policies to roles to expand permissions and elevate their privileges within the AWS environment. This is a [New Terms](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#create-new-terms-rule) rule that uses the `aws.cloudtrail.user_identity.arn` and `aws.cloudtrail.flattened.request_parameters.roleName` fields to check if the combination of the actor ARN and target role name has not been seen in the last 14 days.",
+    "false_positives": [
+      "Legitimate IAM administrators may attach customer-managed policies to roles for various reasons, such as granting temporary permissions or updating existing policies. Ensure that the user attaching the policy is authorized to do so and that the action is expected."
+    ],
+    "from": "now-9m",
+    "history_window_start": "now-14d",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "investigation_fields": {
+      "field_names": [
+        "@timestamp",
+        "user.name",
+        "source.address",
+        "aws.cloudtrail.user_identity.arn",
+        "aws.cloudtrail.user_identity.type",
+        "user_agent.original",
+        "aws.cloudtrail.flattened.request_parameters.policyArn",
+        "aws.cloudtrail.flattened.request_parameters.roleName",
+        "event.action",
+        "event.outcome",
+        "cloud.region",
+        "event.provider",
+        "aws.cloudtrail.request_parameters"
+      ]
+    },
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "AWS IAM Customer-Managed Policy Attached to Role by Rare User",
+    "new_terms_fields": [
+      "aws.cloudtrail.user_identity.arn",
+      "aws.cloudtrail.flattened.request_parameters.roleName"
+    ],
+    "note": "## Triage and Analysis\n\n### Investigating AWS IAM Customer-Managed Policy Attachment to Role by Unusual User\n\nThis rule detects when a customer-managed IAM policy is attached to a role by an unusual or unauthorized user. This activity may indicate a potential privilege escalation attempt within the AWS environment. Adversaries could attach policies to roles to expand permissions, thereby increasing their capabilities and achieving elevated access.\n\n#### Possible Investigation Steps\n\n- **Identify the Initiating User and Target Role**:\n  - **User Identity**: Examine the `aws.cloudtrail.user_identity.arn` field to determine the user who initiated the policy attachment. Confirm if this user typically has permissions to modify IAM roles and if their activity is consistent with their usual responsibilities.\n  - **Target Role**: Review `aws.cloudtrail.flattened.request_parameters.roleName` to identify the role to which the policy was attached. Assess whether modifying this role is expected for this user or if this action is unusual in your environment.\n\n- **Analyze the Attached Policy**:\n  - **Policy ARN**: Inspect the `aws.cloudtrail.flattened.request_parameters.policyArn` field to identify the specific customer-managed policy attached to the role. Evaluate if this policy grants sensitive permissions, especially permissions that could enable privileged actions or data access.\n  - **Policy Permissions**: Examine the policy content to determine the scope of permissions granted. Policies enabling actions like `s3:*`, `ec2:*`, or `iam:*` could be leveraged for broader access, persistence, or lateral movement.\n\n- **Review Source and User Agent Details**:\n  - **Source IP and Location**: Analyze the `source.address` and `source.geo` fields to confirm the IP address and geographic location where the policy attachment originated. Verify if this matches expected locations for the initiating user.\n  - **User Agent Analysis**: Examine `user_agent.original` to determine if AWS CLI, SDK, or other tooling was used to perform this action. Tool identifiers like `aws-cli` or `boto3` may indicate automation, while others may suggest interactive sessions.\n\n- **Evaluate Anomalous Behavior Patterns**:\n  - **User’s Historical Activity**: Check if the initiating user has a history of attaching policies to roles. An unusual pattern in policy attachments could indicate suspicious behavior, especially if the user lacks authorization.\n  - **Role Modification History**: Investigate if the targeted role is frequently modified by this or other users. Repeated, unauthorized modifications to a role could signal an attempt to maintain elevated access.\n\n- **Correlate with Related CloudTrail Events**:\n  - **Other IAM or CloudTrail Activities**: Look for recent actions associated with the same user or role by reviewing `event.action` by `event.provider` to identify which AWS services were accessed. This may provide context on the user’s intent or additional actions taken.\n  - **Broader Suspicious Patterns**: Identify if similar anomalous events have recently occurred, potentially suggesting a coordinated or escalating attack pattern within the AWS account.\n\n### False Positive Analysis\n\n- **Authorized Administrative Actions**: IAM administrators may legitimately attach policies to roles as part of routine role management. Verify if the user is authorized and if the activity aligns with expected administrative tasks.\n- **Role-Specific Modifications**: Roles that frequently undergo policy updates may trigger this rule during standard operations. Consider monitoring for patterns or establishing known exceptions for specific users or roles where appropriate.\n\n### Response and Remediation\n\n- **Immediate Access Review**: If the policy attachment is unauthorized, consider detaching the policy and reviewing the permissions granted to the initiating user.\n- **Restrict Role Modification Permissions**: Limit which users or roles can attach policies to critical IAM roles. Apply least privilege principles to reduce the risk of unauthorized policy changes.\n- **Enhance Monitoring and Alerts**: Enable real-time alerts and monitoring on IAM policy modifications to detect similar actions promptly.\n- **Regular Policy Audits**: Conduct periodic audits of IAM policies and role permissions to ensure that unauthorized changes are quickly identified and addressed.\n\n### Additional Information\n\nFor more information on managing IAM policies and roles in AWS environments, refer to the [AWS IAM Documentation](https://docs.aws.amazon.com/IAM/latest/APIReference/API_AttachRolePolicy.html) and AWS security best practices.\n",
+    "query": "event.dataset: \"aws.cloudtrail\"\n    and event.provider: \"iam.amazonaws.com\"\n    and event.action: \"AttachRolePolicy\"\n    and event.outcome: \"success\"\n    and not aws.cloudtrail.flattened.request_parameters.policyArn: arn\\:aws\\:iam\\:\\:aws\\:policy*\n",
+    "references": [
+      "https://docs.aws.amazon.com/IAM/latest/APIReference/API_AttachRolePolicy.html"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.flattened.request_parameters.policyArn",
+        "type": "unknown"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "f6d07a70-9ad0-11ef-954f-f661ea17fbcd",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS IAM",
+      "Resources: Investigation Guide",
+      "Use Case: Identity and Access Audit",
+      "Tactic: Privilege Escalation"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1548",
+            "name": "Abuse Elevation Control Mechanism",
+            "reference": "https://attack.mitre.org/techniques/T1548/",
+            "subtechnique": [
+              {
+                "id": "T1548.005",
+                "name": "Temporary Elevated Cloud Access",
+                "reference": "https://attack.mitre.org/techniques/T1548/005/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 1
+  },
+  "id": "f6d07a70-9ad0-11ef-954f-f661ea17fbcd_1",
+  "type": "security-rule"
+}

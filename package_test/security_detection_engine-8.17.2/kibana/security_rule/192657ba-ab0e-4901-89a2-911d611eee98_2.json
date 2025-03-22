@@ -1,0 +1,166 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule leverages the File Integrity Monitoring (FIM) integration to detect file modifications of files that are commonly used for persistence on Linux systems. The rule detects modifications to files that are commonly used for cron jobs, systemd services, message-of-the-day (MOTD), SSH configurations, shell configurations, runtime control, init daemon, passwd/sudoers/shadow files, Systemd udevd, and XDG/KDE autostart entries. To leverage this rule, the paths specified in the query need to be added to the FIM policy in the Elastic Security app.",
+    "from": "now-9m",
+    "index": [
+      "logs-fim.event-*",
+      "auditbeat-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Potential Persistence via File Modification",
+    "query": "file where host.os.type == \"linux\" and event.dataset == \"fim.event\" and event.action == \"updated\" and\nfile.path : (\n  // cron, anacron & at\n  \"/etc/cron.d/*\", \"/etc/cron.daily/*\", \"/etc/cron.hourly/*\", \"/etc/cron.monthly/*\",\n  \"/etc/cron.weekly/*\", \"/etc/crontab\", \"/var/spool/cron/crontabs/*\", \"/etc/cron.allow\",\n  \"/etc/cron.deny\",  \"/var/spool/anacron/*\", \"/var/spool/cron/atjobs/*\",\n\n  // systemd services & timers\n  \"/etc/systemd/system/*\", \"/usr/local/lib/systemd/system/*\", \"/lib/systemd/system/*\",\n  \"/usr/lib/systemd/system/*\", \"/home/*/.config/systemd/user/*\", \"/home/*/.local/share/systemd/user/*\",\n  \"/root/.config/systemd/user/*\", \"/root/.local/share/systemd/user/*\",\n\n  // LD_PRELOAD\n  \"/etc/ld.so.preload\", \"/etc/ld.so.conf.d/*\", \"/etc/ld.so.conf\",\n\n  // message-of-the-day (MOTD)\n  \"/etc/update-motd.d/*\",\n\n  // SSH\n  \"/home/*/.ssh/*\", \"/root/.ssh/*\", \"/etc/ssh/*\",\n\n  // system-wide shell configurations\n  \"/etc/profile\", \"/etc/profile.d/*\", \"/etc/bash.bashrc\", \"/etc/zsh/*\", \"/etc/csh.cshrc\",\n  \"/etc/csh.login\", \"/etc/fish/config.fish\", \"/etc/ksh.kshrc\",\n\n  // root and user shell configurations\n  \"/home/*/.profile\", \"/home/*/.bashrc\", \"/home/*/.bash_login\", \"/home/*/.bash_logout\",\n  \"/root/.profile\", \"/root/.bashrc\", \"/root/.bash_login\", \"/root/.bash_logout\",\n  \"/home/*/.zprofile\", \"/home/*/.zshrc\", \"/root/.zprofile\", \"/root/.zshrc\",\n  \"/home/*/.cshrc\", \"/home/*/.login\", \"/home/*/.logout\", \"/root/.cshrc\", \"/root/.login\", \"/root/.logout\",\n  \"/home/*/.config/fish/config.fish\", \"/root/.config/fish/config.fish\",\n  \"/home/*/.kshrc\", \"/root/.kshrc\",\n\n  // runtime control\n  \"/etc/rc.common\", \"/etc/rc.local\",\n\n  // init daemon\n  \"/etc/init.d/*\",\n\n  // passwd/sudoers/shadow\n  \"/etc/passwd\", \"/etc/shadow\", \"/etc/sudoers\", \"/etc/sudoers.d/*\",\n\n  // Systemd udevd\n  \"/lib/udev/*\", \"/etc/udev/rules.d/*\", \"/usr/lib/udev/rules.d/*\", \"/run/udev/rules.d/*\",\n\n  // XDG/KDE autostart entries\n  \"/home/*/.config/autostart/*\", \"/root/.config/autostart/*\", \"/etc/xdg/autostart/*\", \"/usr/share/autostart/*\",\n  \"/home/*/.kde/Autostart/*\", \"/root/.kde/Autostart/*\",\n  \"/home/*/.kde4/Autostart/*\", \"/root/.kde4/Autostart/*\",\n  \"/home/*/.kde/share/autostart/*\", \"/root/.kde/share/autostart/*\",\n  \"/home/*/.kde4/share/autostart/*\", \"/root/.kde4/share/autostart/*\",\n  \"/home/*/.local/share/autostart/*\", \"/root/.local/share/autostart/*\",\n  \"/home/*/.config/autostart-scripts/*\", \"/root/.config/autostart-scripts/*\"\n) and not (\n  file.path : (\n    \"/var/spool/cron/crontabs/tmp.*\", \"/run/udev/rules.d/*rules.*\", \"/home/*/.ssh/known_hosts.*\", \"/root/.ssh/known_hosts.*\"\n  ) or\n  file.extension in (\"dpkg-new\", \"dpkg-remove\", \"SEQ\")\n)\n",
+    "related_integrations": [
+      {
+        "package": "fim",
+        "version": "^1.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "file.extension",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "file.path",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "192657ba-ab0e-4901-89a2-911d611eee98",
+    "setup": "## Setup\n\nThis rule requires data coming in from the Elastic File Integrity Monitoring (FIM) integration.\n\n### Elastic FIM Integration Setup\nTo configure the Elastic FIM integration, follow these steps:\n\n1. Install and configure the Elastic Agent on your Linux system. You can refer to the [Elastic Agent documentation](https://www.elastic.co/guide/en/fleet/current/elastic-agent-installation.html) for detailed instructions.\n2. Once the Elastic Agent is installed, navigate to the Elastic Security app in Kibana.\n3. In the Kibana home page, click on \"Integrations\" in the left sidebar.\n4. Search for \"File Integrity Monitoring\" in the search bar and select the integration.\n5. Provide a name and optional description for the integration.\n6. Select the appropriate agent policy for your Linux system or create a new one.\n7. Configure the FIM policy by specifying the paths that you want to monitor for file modifications. You can use the same paths mentioned in the `query` field of the rule. Note that FIM does not accept wildcards in the paths, so you need to specify the exact paths you want to monitor.\n8. Save the configuration and the Elastic Agent will start monitoring the specified paths for file modifications.\n\nFor more details on configuring the Elastic FIM integration, you can refer to the [Elastic FIM documentation](https://docs.elastic.co/integrations/fim).\n",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Persistence",
+      "Tactic: Privilege Escalation",
+      "Data Source: File Integrity Monitoring"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1037",
+            "name": "Boot or Logon Initialization Scripts",
+            "reference": "https://attack.mitre.org/techniques/T1037/",
+            "subtechnique": [
+              {
+                "id": "T1037.004",
+                "name": "RC Scripts",
+                "reference": "https://attack.mitre.org/techniques/T1037/004/"
+              }
+            ]
+          },
+          {
+            "id": "T1543",
+            "name": "Create or Modify System Process",
+            "reference": "https://attack.mitre.org/techniques/T1543/",
+            "subtechnique": [
+              {
+                "id": "T1543.002",
+                "name": "Systemd Service",
+                "reference": "https://attack.mitre.org/techniques/T1543/002/"
+              }
+            ]
+          },
+          {
+            "id": "T1556",
+            "name": "Modify Authentication Process",
+            "reference": "https://attack.mitre.org/techniques/T1556/"
+          },
+          {
+            "id": "T1574",
+            "name": "Hijack Execution Flow",
+            "reference": "https://attack.mitre.org/techniques/T1574/",
+            "subtechnique": [
+              {
+                "id": "T1574.006",
+                "name": "Dynamic Linker Hijacking",
+                "reference": "https://attack.mitre.org/techniques/T1574/006/"
+              }
+            ]
+          },
+          {
+            "id": "T1136",
+            "name": "Create Account",
+            "reference": "https://attack.mitre.org/techniques/T1136/",
+            "subtechnique": [
+              {
+                "id": "T1136.001",
+                "name": "Local Account",
+                "reference": "https://attack.mitre.org/techniques/T1136/001/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1053",
+            "name": "Scheduled Task/Job",
+            "reference": "https://attack.mitre.org/techniques/T1053/",
+            "subtechnique": [
+              {
+                "id": "T1053.003",
+                "name": "Cron",
+                "reference": "https://attack.mitre.org/techniques/T1053/003/"
+              }
+            ]
+          },
+          {
+            "id": "T1548",
+            "name": "Abuse Elevation Control Mechanism",
+            "reference": "https://attack.mitre.org/techniques/T1548/",
+            "subtechnique": [
+              {
+                "id": "T1548.003",
+                "name": "Sudo and Sudo Caching",
+                "reference": "https://attack.mitre.org/techniques/T1548/003/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 2
+  },
+  "id": "192657ba-ab0e-4901-89a2-911d611eee98_2",
+  "type": "security-rule"
+}

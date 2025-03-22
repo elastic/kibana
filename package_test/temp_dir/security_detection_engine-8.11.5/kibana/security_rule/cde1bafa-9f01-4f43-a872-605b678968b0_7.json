@@ -1,0 +1,89 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects known PowerShell offensive tooling functions names in PowerShell scripts. Attackers commonly use out-of-the-box offensive tools without modifying the code. This rule aim is to take advantage of that.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-windows.*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Potential PowerShell HackTool Script by Function Names",
+        "query": "event.category:process and host.os.type:windows and\n  powershell.file.script_block_text : (\n    \"Add-DomainGroupMember\" or \"Add-DomainObjectAcl\" or\n    \"Add-RemoteConnection\" or \"Add-ServiceDacl\" or\n    \"Add-Win32Type\" or \"Convert-ADName\" or\n    \"Convert-LDAPProperty\" or \"ConvertFrom-LDAPLogonHours\" or\n    \"ConvertFrom-UACValue\" or \"Copy-ArrayOfMemAddresses\" or\n    \"Create-NamedPipe\" or \"Create-ProcessWithToken\" or\n    \"Create-RemoteThread\" or \"Create-SuspendedWinLogon\" or\n    \"Create-WinLogonProcess\" or \"Emit-CallThreadStub\" or\n    \"Enable-SeAssignPrimaryTokenPrivilege\" or \"Enable-SeDebugPrivilege\" or\n    \"Enum-AllTokens\" or \"Export-PowerViewCSV\" or\n    \"Find-AVSignature\" or \"Find-AppLockerLog\" or\n    \"Find-DomainLocalGroupMember\" or \"Find-DomainObjectPropertyOutlier\" or\n    \"Find-DomainProcess\" or \"Find-DomainShare\" or\n    \"Find-DomainUserEvent\" or \"Find-DomainUserLocation\" or\n    \"Find-InterestingDomainAcl\" or \"Find-InterestingDomainShareFile\" or\n    \"Find-InterestingFile\" or \"Find-LocalAdminAccess\" or\n    \"Find-PSScriptsInPSAppLog\" or \"Find-PathDLLHijack\" or\n    \"Find-ProcessDLLHijack\" or \"Find-RDPClientConnection\" or\n    \"Get-AllAttributesForClass\" or \"Get-CachedGPPPassword\" or\n    \"Get-DecryptedCpassword\" or \"Get-DecryptedSitelistPassword\" or\n    \"Get-DelegateType\" or\n    \"Get-DomainDFSShare\" or \"Get-DomainDFSShareV1\" or\n    \"Get-DomainDFSShareV2\" or \"Get-DomainDNSRecord\" or\n    \"Get-DomainDNSZone\" or \"Get-DomainFileServer\" or\n    \"Get-DomainForeignGroupMember\" or \"Get-DomainForeignUser\" or\n    \"Get-DomainGPO\" or \"Get-DomainGPOComputerLocalGroupMapping\" or\n    \"Get-DomainGPOLocalGroup\" or \"Get-DomainGPOUserLocalGroupMapping\" or\n    \"Get-DomainGUIDMap\" or \"Get-DomainGroup\" or\n    \"Get-DomainGroupMember\" or \"Get-DomainGroupMemberDeleted\" or\n    \"Get-DomainManagedSecurityGroup\" or \"Get-DomainOU\" or\n    \"Get-DomainObject\" or \"Get-DomainObjectAcl\" or\n    \"Get-DomainObjectAttributeHistory\" or \"Get-DomainObjectLinkedAttributeHistory\" or\n    \"Get-DomainPolicyData\" or \"Get-DomainSID\" or\n    \"Get-DomainSPNTicket\" or \"Get-DomainSearcher\" or\n    \"Get-DomainSite\" or \"Get-DomainSubnet\" or\n    \"Get-DomainTrust\" or \"Get-DomainTrustMapping\" or\n    \"Get-DomainUser\" or \"Get-DomainUserEvent\" or\n    \"Get-Forest\" or \"Get-ForestDomain\" or\n    \"Get-ForestGlobalCatalog\" or \"Get-ForestSchemaClass\" or\n    \"Get-ForestTrust\" or \"Get-GPODelegation\" or\n    \"Get-GPPAutologon\" or \"Get-GPPInnerField\" or\n    \"Get-GPPInnerFields\" or \"Get-GPPPassword\" or\n    \"Get-GptTmpl\" or \"Get-GroupsXML\" or\n    \"Get-HttpStatus\" or \"Get-ImageNtHeaders\" or\n    \"Get-Keystrokes\" or\n    \"Get-MemoryProcAddress\" or \"Get-MicrophoneAudio\" or\n    \"Get-ModifiablePath\" or \"Get-ModifiableRegistryAutoRun\" or\n    \"Get-ModifiableScheduledTaskFile\" or \"Get-ModifiableService\" or\n    \"Get-ModifiableServiceFile\" or \"Get-Name\" or\n    \"Get-NetComputerSiteName\" or \"Get-NetLocalGroup\" or\n    \"Get-NetLocalGroupMember\" or \"Get-NetLoggedon\" or\n    \"Get-NetRDPSession\" or \"Get-NetSession\" or\n    \"Get-NetShare\" or \"Get-PEArchitecture\" or\n    \"Get-PEBasicInfo\" or \"Get-PEDetailedInfo\" or\n    \"Get-PathAcl\" or \"Get-PrimaryToken\" or\n    \"Get-ProcAddress\" or \"Get-ProcessTokenGroup\" or\n    \"Get-ProcessTokenPrivilege\" or \"Get-ProcessTokenType\" or\n    \"Get-RegLoggedOn\" or \"Get-RegistryAlwaysInstallElevated\" or\n    \"Get-RegistryAutoLogon\" or \"Get-RemoteProcAddress\" or\n    \"Get-Screenshot\" or \"Get-ServiceDetail\" or\n    \"Get-SiteListPassword\" or \"Get-SitelistField\" or\n    \"Get-System\" or \"Get-SystemNamedPipe\" or\n    \"Get-SystemToken\" or \"Get-ThreadToken\" or\n    \"Get-TimedScreenshot\" or \"Get-TokenInformation\" or\n    \"Get-TopPort\" or \"Get-UnattendedInstallFile\" or\n    \"Get-UniqueTokens\" or \"Get-UnquotedService\" or\n    \"Get-VaultCredential\" or \"Get-VaultElementValue\" or\n    \"Get-VirtualProtectValue\" or \"Get-VolumeShadowCopy\" or\n    \"Get-WMIProcess\" or \"Get-WMIRegCachedRDPConnection\" or\n    \"Get-WMIRegLastLoggedOn\" or \"Get-WMIRegMountedDrive\" or\n    \"Get-WMIRegProxy\" or \"Get-WebConfig\" or\n    \"Get-Win32Constants\" or \"Get-Win32Functions\" or\n    \"Get-Win32Types\" or \"Import-DllImports\" or\n    \"Import-DllInRemoteProcess\" or \"Inject-LocalShellcode\" or\n    \"Inject-RemoteShellcode\" or \"Install-ServiceBinary\" or\n    \"Invoke-CompareAttributesForClass\" or \"Invoke-CreateRemoteThread\" or\n    \"Invoke-CredentialInjection\" or \"Invoke-DllInjection\" or\n    \"Invoke-EventVwrBypass\" or \"Invoke-ImpersonateUser\" or\n    \"Invoke-Kerberoast\" or \"Invoke-MemoryFreeLibrary\" or\n    \"Invoke-MemoryLoadLibrary\" or \"Invoke-Method\" or\n    \"Invoke-Mimikatz\" or \"Invoke-NinjaCopy\" or\n    \"Invoke-PatchDll\" or \"Invoke-Portscan\" or\n    \"Invoke-PrivescAudit\" or \"Invoke-ReflectivePEInjection\" or\n    \"Invoke-ReverseDnsLookup\" or \"Invoke-RevertToSelf\" or\n    \"Invoke-ServiceAbuse\" or \"Invoke-Shellcode\" or\n    \"Invoke-TokenManipulation\" or \"Invoke-UserImpersonation\" or\n    \"Invoke-WmiCommand\" or \"Mount-VolumeShadowCopy\" or\n    \"New-ADObjectAccessControlEntry\" or \"New-DomainGroup\" or\n    \"New-DomainUser\" or \"New-DynamicParameter\" or\n    \"New-InMemoryModule\" or\n    \"New-ThreadedFunction\" or \"New-VolumeShadowCopy\" or\n    \"Out-CompressedDll\" or \"Out-EncodedCommand\" or\n    \"Out-EncryptedScript\" or \"Out-Minidump\" or\n    \"PortScan-Alive\" or \"Portscan-Port\" or\n    \"Remove-DomainGroupMember\" or \"Remove-DomainObjectAcl\" or\n    \"Remove-RemoteConnection\" or \"Remove-VolumeShadowCopy\" or\n    \"Restore-ServiceBinary\" or \"Set-DesktopACLToAllowEveryone\" or\n    \"Set-DesktopACLs\" or \"Set-DomainObject\" or\n    \"Set-DomainObjectOwner\" or \"Set-DomainUserPassword\" or\n    \"Set-ServiceBinaryPath\" or \"Sub-SignedIntAsUnsigned\" or\n    \"Test-AdminAccess\" or \"Test-MemoryRangeValid\" or\n    \"Test-ServiceDaclPermission\" or \"Update-ExeFunctions\" or\n    \"Update-MemoryAddresses\" or \"Update-MemoryProtectionFlags\" or\n    \"Write-BytesToMemory\" or \"Write-HijackDll\" or\n    \"Write-PortscanOut\" or \"Write-ServiceBinary\" or\n    \"Write-UserAddMSI\" or \"Invoke-Privesc\" or\n    \"func_get_proc_address\" or \"Invoke-BloodHound\" or\n    \"Invoke-HostEnum\" or \"Get-BrowserInformation\" or\n    \"Get-DomainAccountPolicy\" or \"Get-DomainAdmins\" or\n    \"Get-AVProcesses\" or \"Get-AVInfo\" or\n    \"Get-RecycleBin\" or \"Invoke-BruteForce\" or\n    \"Get-PassHints\" or \"Invoke-SessionGopher\" or\n    \"Get-LSASecret\" or \"Get-PassHashes\" or\n    \"Invoke-WdigestDowngrade\" or \"Get-ChromeDump\" or\n    \"Invoke-DomainPasswordSpray\" or \"Get-FoxDump\" or\n    \"New-HoneyHash\" or \"Invoke-DCSync\" or\n    \"Invoke-PowerDump\" or \"Invoke-SSIDExfil\" or\n    \"Invoke-PowerShellTCP\" or \"Add-Exfiltration\" or\n    \"Do-Exfiltration\" or \"Invoke-DropboxUpload\" or\n    \"Invoke-ExfilDataToGitHub\" or \"Invoke-EgressCheck\" or\n    \"Invoke-PostExfil\" or \"Create-MultipleSessions\" or\n    \"Invoke-NetworkRelay\" or \"New-GPOImmediateTask\" or\n    \"Invoke-WMIDebugger\" or \"Invoke-SQLOSCMD\" or\n    \"Invoke-SMBExec\" or \"Invoke-PSRemoting\" or\n    \"Invoke-ExecuteMSBuild\" or \"Invoke-DCOM\" or\n    \"Invoke-InveighRelay\" or \"Invoke-PsExec\" or\n    \"Invoke-SSHCommand\" or \"Find-ActiveUsersWMI\" or\n    \"Get-SystemDrivesWMI\" or \"Get-ActiveNICSWMI\" or\n    \"Remove-Persistence\" or \"DNS_TXT_Pwnage\" or\n    \"Execute-OnTime\" or \"HTTP-Backdoor\" or\n    \"Add-ConstrainedDelegationBackdoor\" or \"Add-RegBackdoor\" or\n    \"Add-ScrnSaveBackdoor\" or \"Gupt-Backdoor\" or\n    \"Invoke-ADSBackdoor\" or \"Add-Persistence\" or\n    \"Invoke-ResolverBackdoor\" or \"Invoke-EventLogBackdoor\" or\n    \"Invoke-DeadUserBackdoor\" or \"Invoke-DisableMachineAcctChange\" or\n    \"Invoke-AccessBinary\" or \"Add-NetUser\" or\n    \"Invoke-Schtasks\" or \"Invoke-JSRatRegsvr\" or\n    \"Invoke-JSRatRundll\" or \"Invoke-PoshRatHttps\" or\n    \"Invoke-PsGcatAgent\" or \"Remove-PoshRat\" or\n    \"Install-SSP\" or \"Invoke-BackdoorLNK\" or\n    \"PowerBreach\" or \"InstallEXE-Persistence\" or\n    \"RemoveEXE-Persistence\" or \"Install-ServiceLevel-Persistence\" or\n    \"Remove-ServiceLevel-Persistence\" or \"Invoke-Prompt\" or\n    \"Invoke-PacketCapture\" or \"Start-WebcamRecorder\" or\n    \"Get-USBKeyStrokes\" or \"Invoke-KeeThief\" or\n    \"Get-Keystrokes\" or \"Invoke-NetRipper\" or\n    \"Get-EmailItems\" or \"Invoke-MailSearch\" or\n    \"Invoke-SearchGAL\" or \"Get-WebCredentials\" or\n    \"Start-CaptureServer\" or \"Invoke-PowerShellIcmp\" or\n    \"Invoke-PowerShellTcpOneLine\" or \"Invoke-PowerShellTcpOneLineBind\" or\n    \"Invoke-PowerShellUdp\" or \"Invoke-PowerShellUdpOneLine\" or\n    \"Run-EXEonRemote\" or \"Download-Execute-PS\" or\n    \"Out-RundllCommand\" or \"Set-RemoteWMI\" or\n    \"Set-DCShadowPermissions\" or \"Invoke-PowerShellWMI\" or\n    \"Invoke-Vnc\" or \"Invoke-LockWorkStation\" or\n    \"Invoke-EternalBlue\" or \"Invoke-ShellcodeMSIL\" or\n    \"Invoke-MetasploitPayload\" or \"Invoke-DowngradeAccount\" or\n    \"Invoke-RunAs\" or \"ExetoText\" or\n    \"Disable-SecuritySettings\" or \"Set-MacAttribute\" or\n    \"Invoke-MS16032\" or \"Invoke-BypassUACTokenManipulation\" or\n    \"Invoke-SDCLTBypass\" or \"Invoke-FodHelperBypass\" or\n    \"Invoke-EventVwrBypass\" or \"Invoke-EnvBypass\" or\n    \"Get-ServiceUnquoted\" or \"Get-ServiceFilePermission\" or\n    \"Get-ServicePermission\" or \"Get-ServicePermission\" or\n    \"Enable-DuplicateToken\" or \"Invoke-PsUaCme\" or\n    \"Invoke-Tater\" or \"Invoke-WScriptBypassUAC\" or\n    \"Invoke-AllChecks\" or \"Find-TrustedDocuments\" or\n    \"Invoke-Interceptor\" or \"Invoke-PoshRatHttp\" or\n    \"Invoke-ExecCommandWMI\" or \"Invoke-KillProcessWMI\" or\n    \"Invoke-CreateShareandExecute\" or \"Invoke-RemoteScriptWithOutput\" or\n    \"Invoke-SchedJobManipulation\" or \"Invoke-ServiceManipulation\" or\n    \"Invoke-PowerOptionsWMI\" or \"Invoke-DirectoryListing\" or\n    \"Invoke-FileTransferOverWMI\" or \"Invoke-WMImplant\" or\n    \"Invoke-WMIObfuscatedPSCommand\" or \"Invoke-WMIDuplicateClass\" or\n    \"Invoke-WMIUpload\" or \"Invoke-WMIRemoteExtract\" or \"Invoke-winPEAS\"\n  ) and\n  not powershell.file.script_block_text : (\n    \"sentinelbreakpoints\" and \"Set-PSBreakpoint\"\n  ) and\n  not user.id : (\"S-1-5-18\" or \"S-1-5-19\")\n",
+        "references": [
+            "https://github.com/atc-project/atc-data/blob/master/docs/Logging_Policies/LP_0109_windows_powershell_script_block_log.md",
+            "https://github.com/BC-SECURITY/Empire"
+        ],
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "powershell.file.script_block_text",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "cde1bafa-9f01-4f43-a872-605b678968b0",
+        "setup": "\nThe 'PowerShell Script Block Logging' logging policy must be enabled.\nSteps to implement the logging policy with with Advanced Audit Configuration:\n\n```\nComputer Configuration \u003e\nAdministrative Templates \u003e\nWindows PowerShell \u003e\nTurn on PowerShell Script Block Logging (Enable)\n```\n\nSteps to implement the logging policy via registry:\n\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```\n",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Execution",
+            "Data Source: PowerShell Logs"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1059",
+                        "name": "Command and Scripting Interpreter",
+                        "reference": "https://attack.mitre.org/techniques/T1059/",
+                        "subtechnique": [
+                            {
+                                "id": "T1059.001",
+                                "name": "PowerShell",
+                                "reference": "https://attack.mitre.org/techniques/T1059/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 7
+    },
+    "id": "cde1bafa-9f01-4f43-a872-605b678968b0_7",
+    "type": "security-rule"
+}

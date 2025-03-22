@@ -1,0 +1,120 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies processes executed via Windows Management Instrumentation (WMI) on a remote host. This could be indicative of adversary lateral movement, but could be noisy if administrators use WMI to remotely manage hosts.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*",
+            "winlogbeat-*",
+            "logs-windows.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "WMI Incoming Lateral Movement",
+        "query": "sequence by host.id with maxspan = 2s\n\n /* Accepted Incoming RPC connection by Winmgmt service */\n\n  [network where host.os.type == \"windows\" and process.name : \"svchost.exe\" and network.direction : (\"incoming\", \"ingress\") and\n   source.ip != \"127.0.0.1\" and source.ip != \"::1\" and source.port \u003e= 49152 and destination.port \u003e= 49152\n  ]\n\n  /* Excluding Common FPs Nessus and SCCM */\n\n  [process where host.os.type == \"windows\" and event.type == \"start\" and process.parent.name : \"WmiPrvSE.exe\" and\n   not process.args : (\"C:\\\\windows\\\\temp\\\\nessus_*.txt\",\n                       \"*C:\\\\windows\\\\TEMP\\\\nessus_*.TMP*\",\n                       \"*C:\\\\Windows\\\\CCM\\\\SystemTemp\\\\*\",\n                       \"C:\\\\Windows\\\\CCM\\\\ccmrepair.exe\",\n                       \"C:\\\\Windows\\\\CCMCache\\\\*\",\n                       \"C:\\\\CCM\\\\Cache\\\\*\")\n   ]\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "destination.port",
+                "type": "long"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "network.direction",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "source.ip",
+                "type": "ip"
+            },
+            {
+                "ecs": true,
+                "name": "source.port",
+                "type": "long"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "f3475224-b179-4f78-8877-c2bd64c26b88",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Lateral Movement",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0008",
+                    "name": "Lateral Movement",
+                    "reference": "https://attack.mitre.org/tactics/TA0008/"
+                },
+                "technique": []
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1047",
+                        "name": "Windows Management Instrumentation",
+                        "reference": "https://attack.mitre.org/techniques/T1047/"
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 107
+    },
+    "id": "f3475224-b179-4f78-8877-c2bd64c26b88_107",
+    "type": "security-rule"
+}

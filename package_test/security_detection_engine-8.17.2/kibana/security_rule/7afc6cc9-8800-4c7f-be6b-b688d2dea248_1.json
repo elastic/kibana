@@ -1,0 +1,181 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "It identifies potential malicious shell executions through remote SSH and detects cases where the sshd service suddenly terminates soon after successful execution, suggesting suspicious behavior similar to the XZ backdoor.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Potential Execution via XZBackdoor",
+    "query": "sequence by host.id, user.id with maxspan=1s\n [process where host.os.type == \"linux\" and event.type == \"start\" and event.action == \"exec\" and process.name == \"sshd\" and\n    process.args == \"-D\" and process.args == \"-R\"] by process.pid, process.entity_id\n [process where host.os.type == \"linux\" and event.type == \"start\" and event.action == \"exec\" and process.parent.name == \"sshd\" and \n  process.executable != \"/usr/sbin/sshd\"] by process.parent.pid, process.parent.entity_id\n [process where host.os.type == \"linux\" and event.action == \"end\" and process.name == \"sshd\" and process.exit_code != 0] by process.pid, process.entity_id\n [network where host.os.type == \"linux\" and event.type == \"end\" and event.action == \"disconnect_received\" and process.name == \"sshd\"] by process.pid, process.entity_id\n",
+    "references": [
+      "https://github.com/amlweems/xzbot",
+      "https://access.redhat.com/security/cve/CVE-2024-3094"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.id",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.entity_id",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.executable",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.exit_code",
+        "type": "long"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.entity_id",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.pid",
+        "type": "long"
+      },
+      {
+        "ecs": true,
+        "name": "process.pid",
+        "type": "long"
+      },
+      {
+        "ecs": true,
+        "name": "user.id",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "7afc6cc9-8800-4c7f-be6b-b688d2dea248",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Credential Access",
+      "Tactic: Persistence",
+      "Tactic: Lateral Movement",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1543",
+            "name": "Create or Modify System Process",
+            "reference": "https://attack.mitre.org/techniques/T1543/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1556",
+            "name": "Modify Authentication Process",
+            "reference": "https://attack.mitre.org/techniques/T1556/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0008",
+          "name": "Lateral Movement",
+          "reference": "https://attack.mitre.org/tactics/TA0008/"
+        },
+        "technique": [
+          {
+            "id": "T1021",
+            "name": "Remote Services",
+            "reference": "https://attack.mitre.org/techniques/T1021/",
+            "subtechnique": [
+              {
+                "id": "T1021.004",
+                "name": "SSH",
+                "reference": "https://attack.mitre.org/techniques/T1021/004/"
+              }
+            ]
+          },
+          {
+            "id": "T1563",
+            "name": "Remote Service Session Hijacking",
+            "reference": "https://attack.mitre.org/techniques/T1563/",
+            "subtechnique": [
+              {
+                "id": "T1563.001",
+                "name": "SSH Hijacking",
+                "reference": "https://attack.mitre.org/techniques/T1563/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "7afc6cc9-8800-4c7f-be6b-b688d2dea248_1",
+  "type": "security-rule"
+}

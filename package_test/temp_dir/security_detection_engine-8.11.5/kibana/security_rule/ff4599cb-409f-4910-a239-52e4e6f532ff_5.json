@@ -1,0 +1,107 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies access attempts to the LSASS handle, which may indicate an attempt to dump credentials from LSASS memory.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "LSASS Process Access via Windows API",
+        "query": "api where host.os.type == \"windows\" and \n  process.Ext.api.name in (\"OpenProcess\", \"OpenThread\") and Target.process.name : \"lsass.exe\" and \n  not \n  (\n    process.executable : (\n        \"?:\\\\ProgramData\\\\GetSupportService*\\\\Updates\\\\Update_*.exe\",\n        \"?:\\\\ProgramData\\\\Microsoft\\\\Windows Defender\\\\Platform\\\\*\\\\MsMpEng.exe\",\n        \"?:\\\\Program Files (x86)\\\\Asiainfo Security\\\\OfficeScan Client\\\\NTRTScan.exe\",\n        \"?:\\\\Program Files (x86)\\\\Blackpoint\\\\SnapAgent\\\\SnapAgent.exe\",\n        \"?:\\\\Program Files (x86)\\\\eScan\\\\reload.exe\",\n        \"?:\\\\Program Files (x86)\\\\Google\\\\Update\\\\GoogleUpdate.exe\",\n        \"?:\\\\Program Files (x86)\\\\Kaspersky Lab\\\\*\\\\avp.exe\",\n        \"?:\\\\Program Files (x86)\\\\N-able Technologies\\\\Reactive\\\\bin\\\\NableReactiveManagement.exe\",\n        \"?:\\\\Program Files (x86)\\\\N-able Technologies\\\\Windows Agent\\\\bin\\\\agent.exe\",\n        \"?:\\\\Program Files (x86)\\\\Trend Micro\\\\*\\\\CCSF\\\\TmCCSF.exe\",\n        \"?:\\\\Program Files*\\\\Windows Defender\\\\MsMpEng.exe\",\n        \"?:\\\\Program Files\\\\Bitdefender\\\\Endpoint Security\\\\EPSecurityService.exe\",\n        \"?:\\\\Program Files\\\\Cisco\\\\AMP\\\\*\\\\sfc.exe\",\n        \"?:\\\\Program Files\\\\Common Files\\\\McAfee\\\\AVSolution\\\\mcshield.exe\",\n        \"?:\\\\Program Files\\\\EA\\\\AC\\\\EAAntiCheat.GameService.exe\",\n        \"?:\\\\Program Files\\\\Elastic\\\\Agent\\\\data\\\\elastic-agent-*\\\\components\\\\metricbeat.exe\",\n        \"?:\\\\Program Files\\\\Elastic\\\\Agent\\\\data\\\\elastic-agent-*\\\\components\\\\osqueryd.exe\",\n        \"?:\\\\Program Files\\\\Elastic\\\\Agent\\\\data\\\\elastic-agent-*\\\\components\\\\packetbeat.exe\",\n        \"?:\\\\Program Files\\\\ESET\\\\ESET Security\\\\ekrn.exe\",\n        \"?:\\\\Program Files\\\\Fortinet\\\\FortiClient\\\\FortiProxy.exe\",\n        \"?:\\\\Program Files\\\\Huntress\\\\HuntressAgent.exe\",\n        \"?:\\\\Program Files\\\\LogicMonitor\\\\Agent\\\\bin\\\\sbshutdown.exe\",\n        \"?:\\\\Program Files\\\\Microsoft Security Client\\\\MsMpEng.exe\",\n        \"?:\\\\Program Files\\\\Qualys\\\\QualysAgent\\\\QualysAgent.exe\",\n        \"?:\\\\Program Files\\\\TDAgent\\\\ossec-agent\\\\ossec-agent.exe\",\n        \"?:\\\\Program Files\\\\Topaz OFD\\\\Warsaw\\\\core.exe\",\n        \"?:\\\\Program Files\\\\VMware\\\\VMware Tools\\\\vmtoolsd.exe\",\n        \"?:\\\\Windows\\\\AdminArsenal\\\\PDQDeployRunner\\\\*\\\\exec\\\\Sysmon64.exe\",\n        \"?:\\\\Windows\\\\Sysmon.exe\",\n        \"?:\\\\Windows\\\\Sysmon64.exe\",\n        \"?:\\\\Windows\\\\System32\\\\csrss.exe\",\n        \"?:\\\\Windows\\\\System32\\\\MRT.exe\",\n        \"?:\\\\Windows\\\\System32\\\\msiexec.exe\",\n        \"?:\\\\Windows\\\\System32\\\\RtkAudUService64.exe\",\n        \"?:\\\\Windows\\\\System32\\\\wbem\\\\WmiPrvSE.exe\",\n        \"?:\\\\Windows\\\\SysWOW64\\\\wbem\\\\WmiPrvSE.exe\"\n    ) and process.code_signature.trusted == true\n  )\n",
+        "references": [
+            "https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1003.001/T1003.001.md"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": false,
+                "name": "Target.process.name",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "process.Ext.api.name",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.trusted",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "ff4599cb-409f-4910-a239-52e4e6f532ff",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Credential Access",
+            "Tactic: Execution",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1003",
+                        "name": "OS Credential Dumping",
+                        "reference": "https://attack.mitre.org/techniques/T1003/",
+                        "subtechnique": [
+                            {
+                                "id": "T1003.001",
+                                "name": "LSASS Memory",
+                                "reference": "https://attack.mitre.org/techniques/T1003/001/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1106",
+                        "name": "Native API",
+                        "reference": "https://attack.mitre.org/techniques/T1106/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 5
+    },
+    "id": "ff4599cb-409f-4910-a239-52e4e6f532ff_5",
+    "type": "security-rule"
+}

@@ -1,0 +1,122 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies potential relay attacks against a domain controller (DC) by identifying authentication events using the domain controller computer account coming from other hosts to the DC that owns the account. Attackers may relay the DC hash after capturing it using forced authentication.",
+    "from": "now-9m",
+    "index": [
+      "logs-system.security-*",
+      "logs-windows.forwarded*",
+      "winlogbeat-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Potential Relay Attack against a Domain Controller",
+    "query": "authentication where host.os.type == \"windows\" and event.code in (\"4624\", \"4625\") and endswith~(user.name, \"$\") and\n    winlog.event_data.AuthenticationPackageName : \"NTLM\" and winlog.logon.type : \"network\" and\n\n    /* Filter for a machine account that matches the hostname */\n    startswith~(host.name, substring(user.name, 0, -1)) and\n    \n    /* Verify if the Source IP belongs to the host */\n    not endswith(string(source.ip), string(host.ip)) and\n    source.ip != null and source.ip != \"::1\" and source.ip != \"127.0.0.1\"\n",
+    "references": [
+      "https://github.com/p0dalirius/windows-coerced-authentication-methods",
+      "https://www.thehacker.recipes/a-d/movement/mitm-and-coerced-authentications",
+      "https://attack.mitre.org/techniques/T1187/"
+    ],
+    "related_integrations": [
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.code",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.ip",
+        "type": "ip"
+      },
+      {
+        "ecs": true,
+        "name": "host.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "source.ip",
+        "type": "ip"
+      },
+      {
+        "ecs": true,
+        "name": "user.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "winlog.event_data.AuthenticationPackageName",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "winlog.logon.type",
+        "type": "unknown"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "263481c8-1e9b-492e-912d-d1760707f810",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Credential Access",
+      "Data Source: Elastic Defend",
+      "Data Source: Active Directory",
+      "Use Case: Active Directory Monitoring",
+      "Data Source: System"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1187",
+            "name": "Forced Authentication",
+            "reference": "https://attack.mitre.org/techniques/T1187/"
+          },
+          {
+            "id": "T1557",
+            "name": "Adversary-in-the-Middle",
+            "reference": "https://attack.mitre.org/techniques/T1557/",
+            "subtechnique": [
+              {
+                "id": "T1557.001",
+                "name": "LLMNR/NBT-NS Poisoning and SMB Relay",
+                "reference": "https://attack.mitre.org/techniques/T1557/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 2
+  },
+  "id": "263481c8-1e9b-492e-912d-d1760707f810_2",
+  "type": "security-rule"
+}

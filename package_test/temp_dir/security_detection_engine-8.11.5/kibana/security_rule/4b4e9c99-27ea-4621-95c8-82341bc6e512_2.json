@@ -1,0 +1,50 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Generates a detection alert each time a 'Container Workload Protection' alert is received. Enabling this rule allows you to immediately begin triaging and investigating these alerts.",
+        "enabled": true,
+        "from": "now-10m",
+        "index": [
+            "logs-cloud_defend.alerts-*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "max_signals": 10000,
+        "name": "Container Workload Protection",
+        "query": "event.kind:alert and event.module:cloud_defend\n",
+        "related_integrations": [
+            {
+                "package": "cloud_defend",
+                "version": "^1.0.5"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.kind",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.module",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "4b4e9c99-27ea-4621-95c8-82341bc6e512",
+        "rule_name_override": "message",
+        "severity": "medium",
+        "tags": [
+            "Elastic",
+            "Container Workload Protection",
+            "Kubernetes"
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 2
+    },
+    "id": "4b4e9c99-27ea-4621-95c8-82341bc6e512_2",
+    "type": "security-rule"
+}

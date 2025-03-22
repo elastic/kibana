@@ -1,0 +1,96 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies multiple Windows Filtering Platform block events and where the process name is related to an endpoint security software. Adversaries may add malicious WFP rules to prevent Endpoint security from sending telemetry.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-windows.*",
+      "logs-system.security-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Potential Evasion via Windows Filtering Platform",
+    "query": "sequence by winlog.computer_name with maxspan=1m\n [network where host.os.type == \"windows\" and \n  event.action : (\"windows-firewall-packet-block\", \"windows-firewall-packet-drop\") and \n  process.name : (\n        \"bdagent.exe\", \"bdreinit.exe\", \"pdscan.exe\", \"pdiface.exe\", \"BDSubWiz.exe\", \"ProductAgentService.exe\",\n        \"ProductAgentUI.exe\", \"WatchDog.exe\", \"CarbonBlackClientSetup.exe\", \"TrGUI.exe\", \"TracCAPI.exe\", \"cpmsi_tool.exe\",\n        \"trac.exe\", \"vna_install64.exe\", \"vna_utils.exe\", \"TracSrvWrapper.exe\", \"vsmon.exe\", \"p95tray.exe\",\n        \"CybereasonRansomFreeServiceHost.exe\", \"CrAmTray.exe\", \"minionhost.exe\", \"CybereasonSensor.exe\", \"CylanceUI.exe\",\n        \"CylanceProtectSetup.exe\", \"cylancesvc.exe\", \"cyupdate.exe\", \"elastic-agent.exe\", \"elastic-endpoint.exe\",\n        \"egui.exe\", \"minodlogin.exe\", \"emu-rep.exe\", \"emu_install.exe\", \"emu-cci.exe\", \"emu-gui.exe\", \"emu-uninstall.exe\",\n        \"ndep.exe\", \"spike.exe\", \"ecls.exe\", \"ecmd.exe\", \"ecomserver.exe\", \"eeclnt.exe\", \"eh64.exe\", \"EHttpSrv.exe\",\n        \"xagt.exe\", \"collectoragent.exe\", \"FSAEConfig.exe\", \"uninstalldcagent.exe\", \"rmon.exe\", \"fccomint.exe\",\n        \"fclanguageselector.exe\", \"fortifw.exe\", \"fcreg.exe\", \"fortitray.exe\", \"fcappdb.exe\", \"fcwizard.exe\", \"submitv.exe\",\n        \"av_task.exe\", \"fortiwf.exe\", \"fortiwadbd.exe\", \"fcauth.exe\", \"fcdblog.exe\", \"fcmgr.exe\", \"fortiwad.exe\",\n        \"fortiproxy.exe\", \"fortiscand.exe\", \"fortivpnst.exe\", \"ipsec.exe\", \"fcwscd7.exe\", \"fcasc.exe\", \"fchelper.exe\",\n        \"forticlient.exe\",\"fcwsc.exe\", \"FortiClient.exe\", \"fmon.exe\", \"FSSOMA.exe\", \"FCVbltScan.exe\", \"FortiESNAC.exe\",\n        \"EPCUserAvatar.exe\", \"FortiAvatar.exe\", \"FortiClient_Diagnostic_Tool.exe\", \"FortiSSLVPNdaemon.exe\", \"avp.exe\",\n        \"FCConfig.exe\", \"avpsus.exe\", \"klnagent.exe\", \"klnsacwsrv.exe\", \"kl_platf.exe\", \"stpass.exe\", \"klnagwds.exe\",\n        \"mbae.exe\", \"mbae64.exe\", \"mbae-svc.exe\", \"mbae-uninstaller.exe\", \"mbaeLoader32.exe\", \"mbaeloader64.exe\",\n        \"mbam-dor.exe\", \"mbamgui.exe\", \"mbamservice.exe\", \"mbamtrayctrl.exe\", \"mbampt.exe\", \"mbamscheduler.exe\",\n        \"Coreinst.exe\", \"mbae-setup.exe\", \"mcupdate.exe\", \"ProtectedModuleHost.exe\", \"ESConfigTool.exe\", \"FWInstCheck.exe\",\n        \"FwWindowsFirewallHandler.exe\", \"mfeesp.exe\", \"mfefw.exe\", \"mfeProvisionModeUtility.exe\", \"mfetp.exe\", \"avpui.exe\", \n        \"WscAVExe.exe\", \"mcshield.exe\", \"McChHost.exe\", \"mfewc.exe\", \"mfewch.exe\", \"mfewcui.exe\", \"fwinfo.exe\",\n        \"mfecanary.exe\", \"mfefire.exe\", \"mfehidin.exe\", \"mfemms.exe\", \"mfevtps.exe\", \"mmsinfo.exe\", \"vtpinfo.exe\",\n        \"MarSetup.exe\", \"mctray.exe\", \"masvc.exe\", \"macmnsvc.exe\", \"McAPExe.exe\", \"McPvTray.exe\", \"mcods.exe\",\n        \"mcuicnt.exe\", \"mcuihost.exe\", \"xtray.exe\", \"McpService.exe\", \"epefprtrainer.exe\", \"mfeffcoreservice.exe\",\n        \"MfeEpeSvc.exe\", \"qualysagent.exe\", \"QualysProxy.exe\", \"QualysAgentUI.exe\", \"SVRTgui.exe\", \"SVRTcli.exe\",\n        \"SVRTcli.exe\", \"SVRTgui.exe\", \"SCTCleanupService.exe\", \"SVRTservice.exe\", \"native.exe\", \"SCTBootTasks.exe\",\n        \"ALMon.exe\", \"SAA.exe\", \"SUMService.exe\", \"ssp.exe\", \"SCFService.exe\", \"SCFManager.exe\", \"spa.exe\", \"cabarc.exe\",\n        \"sargui.exe\", \"sntpservice.exe\", \"McsClient.exe\", \"McsAgent.exe\", \"McsHeartbeat.exe\", \"SAVAdminService.exe\",\n        \"sav32cli.exe\", \"ForceUpdateAlongSideSGN.exe\", \"SAVCleanupService.exe\", \"SavMain.exe\", \"SavProgress.exe\", \n        \"SavProxy.exe\", \"SavService.exe\", \"swc_service.exe\", \"swi_di.exe\", \"swi_service.exe\", \"swi_filter.exe\",\n        \"ALUpdate.exe\", \"SophosUpdate.exe\", \"ALsvc.exe\", \"SophosAlert.exe\", \"osCheck.exe\", \"N360Downloader.exe\",\n        \"InstWrap.exe\", \"symbos.exe\", \"nss.exe\", \"symcorpui.exe\", \"isPwdSvc.exe\", \"ccsvchst.exe\", \"ntrmv.exe\",\n        \"pccntmon.exe\", \"AosUImanager.exe\", \"NTRTScan.exe\", \"TMAS_OL.exe\", \"TMAS_OLImp.exe\", \"TMAS_OLSentry.exe\",\n        \"ufnavi.exe\", \"Clnrbin.exe\", \"vizorhtmldialog.exe\", \"pwmConsole.exe\", \"PwmSvc.exe\", \"coreServiceShell.exe\",\n        \"ds_agent.exe\", \"SfCtlCom.exe\", \"MBAMHelper.exe\", \"cb.exe\", \"smc.exe\", \"tda.exe\", \"xagtnotif.exe\", \"ekrn.exe\",\n        \"dsa.exe\", \"Notifier.exe\", \"rphcp.exe\", \"lc_sensor.exe\", \"CSFalconService.exe\", \"CSFalconController.exe\",\n        \"SenseSampleUploader.exe\", \"windefend.exe\", \"MSASCui.exe\", \"MSASCuiL.exe\", \"msmpeng.exe\", \"msmpsvc.exe\",\n        \"MsSense.exe\", \"esensor.exe\", \"sentinelone.exe\", \"tmccsf.exe\", \"csfalconcontainer.exe\", \"sensecncproxy.exe\",\n        \"splunk.exe\", \"sysmon.exe\", \"sysmon64.exe\", \"taniumclient.exe\"\n    )] with runs=5\n",
+    "references": [
+      "https://github.com/dsnezhkov/shutter/tree/main",
+      "https://github.com/netero1010/EDRSilencer/tree/main",
+      "https://www.mdsec.co.uk/2023/09/nighthawk-0-2-6-three-wise-monkeys/",
+      "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-5157",
+      "https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/event-5152"
+    ],
+    "related_integrations": [
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "winlog.computer_name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "92d3a04e-6487-4b62-892d-70e640a590dc",
+    "setup": "## Setup\n\nThe 'Filtering Platform Connection' logging policy must be configured for (Success, Failure).\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration >\nPolicies >\nWindows Settings >\nSecurity Settings >\nAdvanced Audit Policies Configuration >\nAudit Policies >\nObject Access >\nFiltering Platform Connection (Success,Failure)\n```\n",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Defense Evasion",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1562",
+            "name": "Impair Defenses",
+            "reference": "https://attack.mitre.org/techniques/T1562/",
+            "subtechnique": [
+              {
+                "id": "T1562.004",
+                "name": "Disable or Modify System Firewall",
+                "reference": "https://attack.mitre.org/techniques/T1562/004/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "type": "eql",
+    "version": 2
+  },
+  "id": "92d3a04e-6487-4b62-892d-70e640a590dc_2",
+  "type": "security-rule"
+}

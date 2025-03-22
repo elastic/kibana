@@ -1,0 +1,120 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This detection rule identifies a sample of suspicious Linux system file reads used for system fingerprinting, leveraged by the Metasploit Meterpreter shell to gather information about the target that it is executing its shell on. Detecting this pattern is indicative of a successful meterpreter shell connection.",
+        "from": "now-9m",
+        "index": [
+            "auditbeat-*",
+            "logs-auditd_manager.auditd-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Meterpreter Reverse Shell",
+        "query": "sample by host.id, process.pid, user.id\n[file where host.os.type == \"linux\" and event.dataset == \"auditd_manager.auditd\" and auditd.data.syscall == \"open\" and \n  auditd.data.a2 == \"1b6\" and file.path == \"/etc/machine-id\"]\n[file where host.os.type == \"linux\" and event.dataset == \"auditd_manager.auditd\" and auditd.data.syscall == \"open\" and\n  auditd.data.a2 == \"1b6\" and file.path == \"/etc/passwd\"]\n[file where host.os.type == \"linux\" and event.dataset == \"auditd_manager.auditd\" and auditd.data.syscall == \"open\" and \n  auditd.data.a2 == \"1b6\" and file.path == \"/proc/net/route\"]\n[file where host.os.type == \"linux\" and event.dataset == \"auditd_manager.auditd\" and auditd.data.syscall == \"open\" and\n  auditd.data.a2 == \"1b6\" and file.path == \"/proc/net/ipv6_route\"]\n[file where host.os.type == \"linux\" and event.dataset == \"auditd_manager.auditd\" and auditd.data.syscall == \"open\" and\n  auditd.data.a2 == \"1b6\" and file.path == \"/proc/net/if_inet6\"]\n",
+        "related_integrations": [
+            {
+                "integration": "auditd",
+                "package": "auditd_manager",
+                "version": "^1.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": false,
+                "name": "auditd.data.a2",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "auditd.data.syscall",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.pid",
+                "type": "long"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "5c895b4f-9133-4e68-9e23-59902175355c",
+        "setup": "\nThis rule requires data coming in from one of the following integrations:\n- Auditbeat\n- Auditd Manager\n\n### Auditbeat Setup\nAuditbeat is a lightweight shipper that you can install on your servers to audit the activities of users and processes on your systems. For example, you can use Auditbeat to collect and centralize audit events from the Linux Audit Framework. You can also use Auditbeat to detect changes to critical files, like binaries and configuration files, and identify potential security policy violations.\n\n#### The following steps should be executed in order to add the Auditbeat on a Linux System:\n- Elastic provides repositories available for APT and YUM-based distributions. Note that we provide binary packages, but no source packages.\n- To install the APT and YUM repositories follow the setup instructions in this [helper guide](https://www.elastic.co/guide/en/beats/auditbeat/current/setup-repositories.html).\n- To run Auditbeat on Docker follow the setup instructions in the [helper guide](https://www.elastic.co/guide/en/beats/auditbeat/current/running-on-docker.html).\n- To run Auditbeat on Kubernetes follow the setup instructions in the [helper guide](https://www.elastic.co/guide/en/beats/auditbeat/current/running-on-kubernetes.html).\n- For complete \u201cSetup and Run Auditbeat\u201d information refer to the [helper guide](https://www.elastic.co/guide/en/beats/auditbeat/current/setting-up-and-running.html).\n\n### Auditd Manager Integration Setup\nThe Auditd Manager Integration receives audit events from the Linux Audit Framework which is a part of the Linux kernel.\nAuditd Manager provides a user-friendly interface and automation capabilities for configuring and monitoring system auditing through the auditd daemon. With `auditd_manager`, administrators can easily define audit rules, track system events, and generate comprehensive audit reports, improving overall security and compliance in the system.\n\n#### The following steps should be executed in order to add the Elastic Agent System integration \"auditd_manager\" on a Linux System:\n- Go to the Kibana home page and click \u201cAdd integrations\u201d.\n- In the query bar, search for \u201cAuditd Manager\u201d and select the integration to see more details about it.\n- Click \u201cAdd Auditd Manager\u201d.\n- Configure the integration name and optionally add a description.\n- Review optional and advanced settings accordingly.\n- Add the newly installed \u201cauditd manager\u201d to an existing or a new agent policy, and deploy the agent on a Linux system from which auditd log files are desirable.\n- Click \u201cSave and Continue\u201d.\n- For more details on the integration refer to the [helper guide](https://docs.elastic.co/integrations/auditd_manager).\n\n#### Rule Specific Setup Note\nAuditd Manager subscribes to the kernel and receives events as they occur without any additional configuration.\nHowever, if more advanced configuration is required to detect specific behavior, audit rules can be added to the integration in either the \"audit rules\" configuration box or the \"auditd rule files\" box by specifying a file to read the audit rules from.\n- For this detection rule the following additional audit rules are required to be added to the integration:\n  -w /proc/net/ -p r -k audit_proc\n  -w /etc/machine-id -p wa -k machineid\n  -w /etc/passwd -p wa -k passwd\n\n",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Execution"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1059",
+                        "name": "Command and Scripting Interpreter",
+                        "reference": "https://attack.mitre.org/techniques/T1059/",
+                        "subtechnique": [
+                            {
+                                "id": "T1059.004",
+                                "name": "Unix Shell",
+                                "reference": "https://attack.mitre.org/techniques/T1059/004/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0011",
+                    "name": "Command and Control",
+                    "reference": "https://attack.mitre.org/tactics/TA0011/"
+                },
+                "technique": [
+                    {
+                        "id": "T1071",
+                        "name": "Application Layer Protocol",
+                        "reference": "https://attack.mitre.org/techniques/T1071/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 3
+    },
+    "id": "5c895b4f-9133-4e68-9e23-59902175355c_3",
+    "type": "security-rule"
+}

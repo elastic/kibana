@@ -1,0 +1,101 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "A supervised machine learning model (ProblemChild) has identified a suspicious Windows process event with high probability of it being malicious activity. Alternatively, the model's blocklist identified the event as being malicious.",
+    "from": "now-10m",
+    "index": [
+      "endgame-*",
+      "logs-endpoint.events.process-*",
+      "winlogbeat-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Machine Learning Detected a Suspicious Windows Event with a High Malicious Probability Score",
+    "query": "process where ((problemchild.prediction == 1 and problemchild.prediction_probability > 0.98) or\nblocklist_label == 1) and not process.args : (\"*C:\\\\WINDOWS\\\\temp\\\\nessus_*.txt*\", \"*C:\\\\WINDOWS\\\\temp\\\\nessus_*.tmp*\")\n",
+    "references": [
+      "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html",
+      "https://docs.elastic.co/en/integrations/problemchild",
+      "https://www.elastic.co/security-labs/detecting-living-off-the-land-attacks-with-new-elastic-integration"
+    ],
+    "related_integrations": [
+      {
+        "package": "problemchild",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "blocklist_label",
+        "type": "unknown"
+      },
+      {
+        "ecs": false,
+        "name": "problemchild.prediction",
+        "type": "unknown"
+      },
+      {
+        "ecs": false,
+        "name": "problemchild.prediction_probability",
+        "type": "unknown"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "994e40aa-8c85-43de-825e-15f665375ee8",
+    "setup": "## Setup\n\nThe rule requires the Living off the Land (LotL) Attack Detection integration assets to be installed, as well as Windows process events collected by integrations such as Elastic Defend or Winlogbeat.  \n\n### LotL Attack Detection Setup\nThe LotL Attack Detection integration detects living-off-the-land activity in Windows process events.\n\n#### Prerequisite Requirements:\n- Fleet is required for LotL Attack Detection.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n- Windows process events collected by the [Elastic Defend](https://docs.elastic.co/en/integrations/endpoint) integration or Winlogbeat(https://www.elastic.co/guide/en/beats/winlogbeat/current/_winlogbeat_overview.html).\n- To install Elastic Defend, refer to the [documentation](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n- To set up and run Winlogbeat, follow [this](https://www.elastic.co/guide/en/beats/winlogbeat/current/winlogbeat-installation-configuration.html) guide.\n\n#### The following steps should be executed to install assets associated with the LotL Attack Detection integration:\n- Go to the Kibana homepage. Under Management, click Integrations.\n- In the query bar, search for Living off the Land Attack Detection and select the integration to see more details about it.\n- Follow the instructions under the **Installation** section.\n- For this rule to work, complete the instructions through **Configure the ingest pipeline**.\n",
+    "severity": "high",
+    "tags": [
+      "OS: Windows",
+      "Data Source: Elastic Endgame",
+      "Use Case: Living off the Land Attack Detection",
+      "Rule Type: ML",
+      "Rule Type: Machine Learning",
+      "Tactic: Defense Evasion",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1036",
+            "name": "Masquerading",
+            "reference": "https://attack.mitre.org/techniques/T1036/",
+            "subtechnique": [
+              {
+                "id": "T1036.004",
+                "name": "Masquerade Task or Service",
+                "reference": "https://attack.mitre.org/techniques/T1036/004/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 10
+  },
+  "id": "994e40aa-8c85-43de-825e-15f665375ee8_10",
+  "type": "security-rule"
+}

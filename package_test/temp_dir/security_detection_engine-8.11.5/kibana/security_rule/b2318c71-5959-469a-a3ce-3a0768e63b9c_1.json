@@ -1,0 +1,88 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Adversaries may look for folders and drives shared on remote systems to identify sources of information to gather as a precursor for collection and identify potential systems of interest for Lateral Movement.",
+        "from": "now-119m",
+        "index": [
+            "winlogbeat-*",
+            "logs-windows.*",
+            "logs-system.*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Network Share Discovery",
+        "query": "sequence by user.name, source.port, source.ip with maxspan=15s \n [file where event.action == \"network-share-object-access-checked\" and \n  winlog.event_data.ShareName : (\"\\\\*ADMIN$\", \"\\\\*C$\") and \n  source.ip != null and source.ip != \"0.0.0.0\" and source.ip != \"::1\" and source.ip != \"::\" and source.ip != \"127.0.0.1\"]\n [file where event.action == \"network-share-object-access-checked\" and \n  winlog.event_data.ShareName : (\"\\\\*ADMIN$\", \"\\\\*C$\") and \n  source.ip != null and source.ip != \"0.0.0.0\" and source.ip != \"::1\" and source.ip != \"::\" and source.ip != \"127.0.0.1\"]\n",
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            },
+            {
+                "package": "system",
+                "version": "^1.6.4"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "source.ip",
+                "type": "ip"
+            },
+            {
+                "ecs": true,
+                "name": "source.port",
+                "type": "long"
+            },
+            {
+                "ecs": true,
+                "name": "user.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.event_data.ShareName",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "b2318c71-5959-469a-a3ce-3a0768e63b9c",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Discovery",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0007",
+                    "name": "Discovery",
+                    "reference": "https://attack.mitre.org/tactics/TA0007/"
+                },
+                "technique": [
+                    {
+                        "id": "T1135",
+                        "name": "Network Share Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1135/"
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 1
+    },
+    "id": "b2318c71-5959-469a-a3ce-3a0768e63b9c_1",
+    "type": "security-rule"
+}

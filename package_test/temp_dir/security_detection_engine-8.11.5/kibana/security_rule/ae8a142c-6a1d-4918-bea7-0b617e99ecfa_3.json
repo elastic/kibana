@@ -1,0 +1,133 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies execution of common Microsoft Office applications to launch an Office Add-In from a suspicious path or with an unusual parent process. This may indicate an attempt to get initial access via a malicious phishing MS Office Add-In.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-endpoint.events.*",
+            "logs-windows.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Suspicious Execution via Microsoft Office Add-Ins",
+        "query": "process where \n    \n    host.os.type == \"windows\" and event.type == \"start\" and  \n    \n    process.name : (\"WINWORD.EXE\", \"EXCEL.EXE\", \"POWERPNT.EXE\", \"MSACCESS.EXE\", \"VSTOInstaller.exe\") and \n    \n    process.args regex~ \"\"\".+\\.(wll|xll|ppa|ppam|xla|xlam|vsto)\"\"\" and \n    \n    /* Office Add-In from suspicious paths */\n    (process.args :\n             (\"?:\\\\Users\\\\*\\\\Temp\\\\7z*\",\n              \"?:\\\\Users\\\\*\\\\Temp\\\\Rar$*\",\n              \"?:\\\\Users\\\\*\\\\Temp\\\\Temp?_*\",\n              \"?:\\\\Users\\\\*\\\\Temp\\\\BNZ.*\",\n              \"?:\\\\Users\\\\*\\\\Downloads\\\\*\",\n              \"?:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\*\",\n              \"?:\\\\Users\\\\Public\\\\*\",\n              \"?:\\\\ProgramData\\\\*\",\n              \"?:\\\\Windows\\\\Temp\\\\*\",\n              \"\\\\Device\\\\*\",\n              \"http*\") or\n\t      \n    process.parent.name : (\"explorer.exe\", \"OpenWith.exe\") or \n    \n    /* Office Add-In from suspicious parent */\n    process.parent.name : (\"cmd.exe\", \"powershell.exe\")) and\n\t  \n    /* False Positives */\n    not (process.args : \"*.vsto\" and\n         process.parent.executable :\n                   (\"?:\\\\Program Files\\\\Logitech\\\\LogiOptions\\\\PlugInInstallerUtility*.exe\",\n                    \"?:\\\\ProgramData\\\\Logishrd\\\\LogiOptions\\\\Plugins\\\\VSTO\\\\*\\\\VSTOInstaller.exe\",\n                    \"?:\\\\Program Files\\\\Logitech\\\\LogiOptions\\\\PlugInInstallerUtility.exe\",\n                    \"?:\\\\Program Files\\\\LogiOptionsPlus\\\\PlugInInstallerUtility*.exe\",\n                    \"?:\\\\ProgramData\\\\Logishrd\\\\LogiOptionsPlus\\\\Plugins\\\\VSTO\\\\*\\\\VSTOInstaller.exe\",\n                    \"?:\\\\Program Files\\\\Common Files\\\\microsoft shared\\\\VSTO\\\\*\\\\VSTOInstaller.exe\")) and\n    not (process.args : \"/Uninstall\" and process.name : \"VSTOInstaller.exe\") and\n    not (process.parent.name : \"rundll32.exe\" and\n         process.parent.args : \"?:\\\\WINDOWS\\\\Installer\\\\MSI*.tmp,zzzzInvokeManagedCustomActionOutOfProc\") and\n    not (process.name : \"VSTOInstaller.exe\" and process.args : \"https://dl.getsidekick.com/outlook/vsto/Sidekick.vsto\")\n",
+        "references": [
+            "https://github.com/Octoberfest7/XLL_Phishing",
+            "https://labs.f-secure.com/archive/add-in-opportunities-for-office-persistence/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "ae8a142c-6a1d-4918-bea7-0b617e99ecfa",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Initial Access",
+            "Tactic: Persistence",
+            "Data Source: Elastic Endgame",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0001",
+                    "name": "Initial Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0001/"
+                },
+                "technique": [
+                    {
+                        "id": "T1566",
+                        "name": "Phishing",
+                        "reference": "https://attack.mitre.org/techniques/T1566/",
+                        "subtechnique": [
+                            {
+                                "id": "T1566.001",
+                                "name": "Spearphishing Attachment",
+                                "reference": "https://attack.mitre.org/techniques/T1566/001/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1137",
+                        "name": "Office Application Startup",
+                        "reference": "https://attack.mitre.org/techniques/T1137/",
+                        "subtechnique": [
+                            {
+                                "id": "T1137.006",
+                                "name": "Add-ins",
+                                "reference": "https://attack.mitre.org/techniques/T1137/006/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 3
+    },
+    "id": "ae8a142c-6a1d-4918-bea7-0b617e99ecfa_3",
+    "type": "security-rule"
+}

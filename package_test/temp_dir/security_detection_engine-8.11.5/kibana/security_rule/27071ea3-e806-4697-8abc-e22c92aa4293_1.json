@@ -1,0 +1,99 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies the use of Cmdlets and methods related to archive compression activities. Adversaries will often compress and encrypt data in preparation for exfiltration.",
+        "from": "now-119m",
+        "index": [
+            "winlogbeat-*",
+            "logs-windows.*"
+        ],
+        "interval": "60m",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "PowerShell Script with Archive Compression Capabilities",
+        "note": "",
+        "query": "event.category:process and host.os.type:windows and\n(\n  powershell.file.script_block_text : (\n    \"IO.Compression.ZipFile\" or\n    \"IO.Compression.ZipArchive\" or\n    \"ZipFile.CreateFromDirectory\" or\n    \"IO.Compression.BrotliStream\" or\n    \"IO.Compression.DeflateStream\" or\n    \"IO.Compression.GZipStream\" or\n    \"IO.Compression.ZLibStream\"\n  ) and \n  powershell.file.script_block_text : (\n    \"CompressionLevel\" or\n    \"CompressionMode\" or\n    \"ZipArchiveMode\"\n  ) or\n  powershell.file.script_block_text : \"Compress-Archive\"\n)\n",
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "powershell.file.script_block_text",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "27071ea3-e806-4697-8abc-e22c92aa4293",
+        "setup": "The 'PowerShell Script Block Logging' logging policy must be enabled.\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration \u003e\nAdministrative Templates \u003e\nWindows PowerShell \u003e\nTurn on PowerShell Script Block Logging (Enable)\n```\n\nSteps to implement the logging policy via registry:\n\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Collection",
+            "Data Source: PowerShell Logs",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0009",
+                    "name": "Collection",
+                    "reference": "https://attack.mitre.org/tactics/TA0009/"
+                },
+                "technique": [
+                    {
+                        "id": "T1560",
+                        "name": "Archive Collected Data",
+                        "reference": "https://attack.mitre.org/techniques/T1560/"
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1059",
+                        "name": "Command and Scripting Interpreter",
+                        "reference": "https://attack.mitre.org/techniques/T1059/",
+                        "subtechnique": [
+                            {
+                                "id": "T1059.001",
+                                "name": "PowerShell",
+                                "reference": "https://attack.mitre.org/techniques/T1059/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 1
+    },
+    "id": "27071ea3-e806-4697-8abc-e22c92aa4293_1",
+    "type": "security-rule"
+}

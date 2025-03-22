@@ -1,0 +1,104 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "Identifies PowerShell scripts containing cmdlets and parameters that attackers can abuse to disable Windows Defender features. Attackers can tamper with antivirus to reduce the risk of detection when executing their payloads.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-windows.powershell*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "PowerShell Script with Windows Defender Tampering Capabilities",
+    "query": "event.category: \"process\" and host.os.type:windows and\n(\n  powershell.file.script_block_text: \"Set-MpPreference\" and\n  powershell.file.script_block_text: (\n    DisableArchiveScanning or DisableBehaviorMonitoring or\n    DisableIntrusionPreventionSystem or DisableIOAVProtection or\n    DisableRemovableDriveScanning or DisableBlockAtFirstSeen or\n    DisableScanningMappedNetworkDrivesForFullScan or\n    DisableScanningNetworkFiles or DisableScriptScanning or\n    DisableRealtimeMonitoring or LowThreatDefaultAction or\n    ModerateThreatDefaultAction or HighThreatDefaultAction\n  )\n)\n",
+    "related_integrations": [
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "powershell.file.script_block_text",
+        "type": "unknown"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "c124dc1b-cef2-4d01-8d74-ff6b0d5096b6",
+    "setup": "## Setup\n\nThe 'PowerShell Script Block Logging' logging policy must be enabled.\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration >\nAdministrative Templates >\nWindows PowerShell >\nTurn on PowerShell Script Block Logging (Enable)\n```\n\nSteps to implement the logging policy via registry:\n\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```\n",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Defense Evasion",
+      "Data Source: PowerShell Logs",
+      "Rule Type: BBR"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1562",
+            "name": "Impair Defenses",
+            "reference": "https://attack.mitre.org/techniques/T1562/",
+            "subtechnique": [
+              {
+                "id": "T1562.001",
+                "name": "Disable or Modify Tools",
+                "reference": "https://attack.mitre.org/techniques/T1562/001/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1059",
+            "name": "Command and Scripting Interpreter",
+            "reference": "https://attack.mitre.org/techniques/T1059/",
+            "subtechnique": [
+              {
+                "id": "T1059.001",
+                "name": "PowerShell",
+                "reference": "https://attack.mitre.org/techniques/T1059/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 3
+  },
+  "id": "c124dc1b-cef2-4d01-8d74-ff6b0d5096b6_3",
+  "type": "security-rule"
+}
