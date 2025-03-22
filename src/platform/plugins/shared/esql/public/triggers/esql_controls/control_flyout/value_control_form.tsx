@@ -65,6 +65,7 @@ interface ValueControlFormProps {
 }
 
 const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
+const VALUE_VARIABLE_PREFIX = '?';
 
 export function ValueControlForm({
   variableType,
@@ -93,7 +94,7 @@ export function ValueControlForm({
     );
 
     if (initialState) {
-      return initialState.variableName;
+      return `${VALUE_VARIABLE_PREFIX}${initialState.variableName}`;
     }
 
     let variablePrefix = getVariablePrefix(variableType);
@@ -104,7 +105,7 @@ export function ValueControlForm({
       variablePrefix = fieldVariableName;
     }
 
-    return getRecurrentVariableName(variablePrefix, existingVariables);
+    return `${VALUE_VARIABLE_PREFIX}${getRecurrentVariableName(variablePrefix, existingVariables)}`;
   }, [esqlVariables, initialState, valuesField, variableType]);
 
   const [controlFlyoutType, setControlFlyoutType] = useState<EsqlControlType>(
@@ -214,7 +215,7 @@ export function ValueControlForm({
 
   const onVariableNameChange = useCallback(
     (e: { target: { value: React.SetStateAction<string> } }) => {
-      const text = validateVariableName(String(e.target.value));
+      const text = validateVariableName(String(e.target.value), VALUE_VARIABLE_PREFIX);
       setVariableName(text);
     },
     []
@@ -298,12 +299,16 @@ export function ValueControlForm({
 
   const onCreateValueControl = useCallback(async () => {
     const availableOptions = selectedValues.map((value) => value.label);
+    // removes the question mark from the variable name
+    const variableNameWithoutQuestionmark = variableName.startsWith(VALUE_VARIABLE_PREFIX)
+      ? variableName.slice(1)
+      : variableName;
     const state = {
       availableOptions,
       selectedOptions: [availableOptions[0]],
       width: minimumWidth,
-      title: label || variableName,
-      variableName,
+      title: label || variableNameWithoutQuestionmark,
+      variableName: variableNameWithoutQuestionmark,
       variableType,
       esqlQuery: valuesQuery || queryString,
       controlType: controlFlyoutType,

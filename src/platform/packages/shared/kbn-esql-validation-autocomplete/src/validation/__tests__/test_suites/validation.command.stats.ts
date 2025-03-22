@@ -50,6 +50,8 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors('from a_index | stats var0 = avg(doubleField), count(*)', []);
             await expectErrors(`from a_index | stats sum(case(false, 0, 1))`, []);
             await expectErrors(`from a_index | stats var0 = sum( case(false, 0, 1))`, []);
+            await expectErrors('from a_index | stats ??func(doubleField)', []);
+            await expectErrors('from a_index | stats avg(??field)', []);
 
             // "or" must accept "null"
             await expectErrors('from a_index | stats count(textField == "a" or null)', []);
@@ -170,7 +172,7 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
               'from a_index | stats avg(doubleField), percentile(doubleField, 50) + 1 by ipField',
               []
             );
-            await expectErrors('from a_index | stats ?func(doubleField)', []);
+            await expectErrors('from a_index | stats avg(doubleField) by ??field', []);
             for (const op of ['+', '-', '*', '/', '%']) {
               await expectErrors(
                 `from a_index | stats avg(doubleField) ${op} percentile(doubleField, 50) BY ipField`,

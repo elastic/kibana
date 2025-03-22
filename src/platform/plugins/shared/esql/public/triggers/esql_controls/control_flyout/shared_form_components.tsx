@@ -152,7 +152,8 @@ export function VariableName({
   onVariableNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   const genericContent = i18n.translate('esql.flyout.variableName.helpText', {
-    defaultMessage: 'This name will be prefaced with a "?" in the editor',
+    defaultMessage:
+      'Start your control name with ? to replace values or with ?? to replace field names or functions.',
   });
   const isDisabledTooltipText = i18n.translate('esql.flyout.variableName.disabledTooltip', {
     defaultMessage: 'You can’t edit a control name after it’s been created.',
@@ -165,9 +166,7 @@ export function VariableName({
       label={i18n.translate('esql.flyout.variableName.label', {
         defaultMessage: 'Name',
       })}
-      helpText={i18n.translate('esql.flyout.variableName.helpText', {
-        defaultMessage: 'This name will be prefaced with a "?" in the editor',
-      })}
+      helpText={genericContent}
       fullWidth
       autoFocus
       isInvalid={!variableName || variableExists}

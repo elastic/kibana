@@ -48,7 +48,7 @@ describe('IdentifierControlForm', () => {
       expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(`Static values`);
 
       // variable name input should be rendered and with the default value
-      expect(await findByTestId('esqlVariableName')).toHaveValue('field');
+      expect(await findByTestId('esqlVariableName')).toHaveValue('??field');
 
       // fields dropdown should be rendered with available fields column1 and column2
       const fieldsOptionsDropdown = await findByTestId('esqlIdentifiersOptions');
@@ -147,7 +147,7 @@ describe('IdentifierControlForm', () => {
         />
       );
       // variable name input should be rendered and with the default value
-      expect(await findByTestId('esqlVariableName')).toHaveValue('myField');
+      expect(await findByTestId('esqlVariableName')).toHaveValue('??myField');
 
       // fields dropdown should be rendered with column2 selected
       const fieldsOptionsDropdown = await findByTestId('esqlIdentifiersOptions');
@@ -229,7 +229,7 @@ describe('IdentifierControlForm', () => {
       expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(`Static values`);
 
       // variable name input should be rendered and with the default value
-      expect(await findByTestId('esqlVariableName')).toHaveValue('function');
+      expect(await findByTestId('esqlVariableName')).toHaveValue('??function');
 
       // fields dropdown should be rendered with available functions
       const fieldsOptionsDropdown = await findByTestId('esqlIdentifiersOptions');

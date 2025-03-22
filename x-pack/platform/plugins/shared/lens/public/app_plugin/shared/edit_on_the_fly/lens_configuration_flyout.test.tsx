@@ -72,6 +72,7 @@ jest.mock('@kbn/esql-utils', () => {
         },
       },
     ]),
+    fixESQLQueryWithVariables: jest.fn().mockReturnValue('from index1 | limit 10'),
   };
 });
 
