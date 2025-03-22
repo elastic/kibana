@@ -19,7 +19,7 @@ import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
-import { expandAgentQueue } from '#pipeline-utils';
+import { collectEnvFromLabels, expandAgentQueue } from '#pipeline-utils';
 
 const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 
@@ -193,32 +193,6 @@ function getEnabledFtrConfigs(patterns?: string[]) {
   } catch (_) {
     const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
     throw new Error(`unable to collect enabled FTR configs: ${error.message}`);
-  }
-}
-
-/**
- * Collects environment variables from labels on the PR
- * TODO: extract this (and other functions from this big file) to a separate module
- */
-function collectEnvFromLabels() {
-  const LABEL_MAPPING: Record<string, Record<string, string>> = {
-    'ci:use-chrome-beta': {
-      USE_CHROME_BETA: 'true',
-    },
-  };
-
-  const envFromlabels: Record<string, string> = {};
-  if (!process.env.GITHUB_PR_LABELS) {
-    return envFromlabels;
-  } else {
-    const labels = process.env.GITHUB_PR_LABELS.split(',');
-    labels.forEach((label) => {
-      const env = LABEL_MAPPING[label];
-      if (env) {
-        Object.assign(envFromlabels, env);
-      }
-    });
-    return envFromlabels;
   }
 }
 
