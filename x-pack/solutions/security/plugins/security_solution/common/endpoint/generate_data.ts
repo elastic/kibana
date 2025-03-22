@@ -529,6 +529,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
               trusted: false,
               subject_name: 'bad signer',
             },
+            {
+              trusted: true,
+              subject_name: 'a good signer',
+            },
           ],
           malware_classification: {
             identifier: 'endpointpe',

@@ -72,6 +72,8 @@ export interface FileEcs {
 
   type?: string[];
 
+  code_signature?: CodeSignature;
+
   device?: string[];
 
   inode?: string[];
