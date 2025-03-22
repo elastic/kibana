@@ -17,8 +17,13 @@ import {
   Wrapper,
 } from './wrapper';
 import { useKibana } from '../../../common/lib/kibana';
+import { ADD_INTEGRATIONS_BUTTON_TEST_ID } from './integrations/integration_section';
+import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
+import { useIntegrationsLastActivity } from '../../hooks/alert_summary/use_integrations_last_activity';
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/hooks/use_add_integrations_url');
+jest.mock('../../hooks/alert_summary/use_integrations_last_activity');
 
 const packages: PackageListItem[] = [
   {
@@ -40,6 +45,7 @@ describe('<Wrapper />', () => {
             clearInstanceCache: jest.fn(),
           },
         },
+        http: { basePath: { prepend: jest.fn() } },
       },
     });
 
@@ -79,6 +85,11 @@ describe('<Wrapper />', () => {
   });
 
   it('should render the content if the dataView is created correctly', async () => {
+    (useAddIntegrationsUrl as jest.Mock).mockReturnValue({ onClick: jest.fn() });
+    (useIntegrationsLastActivity as jest.Mock).mockReturnValue({
+      isLoading: true,
+      lastActivities: {},
+    });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         data: {
@@ -102,6 +113,7 @@ describe('<Wrapper />', () => {
 
       expect(getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(ADD_INTEGRATIONS_BUTTON_TEST_ID)).toBeInTheDocument();
     });
   });
 });

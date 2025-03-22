@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
+import { IntegrationSection } from './integrations/integration_section';
 
 const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.alertSummary.dataViewError', {
   defaultMessage: 'Unable to create data view',
@@ -89,7 +90,10 @@ export const Wrapper = memo(({ packages }: WrapperProps) => {
               title={<h2>{DATAVIEW_ERROR}</h2>}
             />
           ) : (
-            <div data-test-subj={CONTENT_TEST_ID}>{'wrapper'}</div>
+            <div data-test-subj={CONTENT_TEST_ID}>
+              <IntegrationSection packages={packages} />
+              <EuiHorizontalRule />
+            </div>
           )}
         </>
       }
