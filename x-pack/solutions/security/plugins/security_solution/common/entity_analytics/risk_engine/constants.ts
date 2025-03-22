@@ -24,6 +24,7 @@ type ClusterPrivilege = 'manage_index_templates' | 'manage_transform';
 export const RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
   'manage_index_templates',
   'manage_transform',
+  'manage_ingest_pipelines',
 ] as ClusterPrivilege[];
 
 export const RISK_SCORE_INDEX_PATTERN = 'risk-score.risk-score-*';
