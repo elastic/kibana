@@ -56,7 +56,9 @@ export const createParser = () => {
     },
     reset = function (newAt) {
       ch = text.charAt(newAt);
-      at = newAt + 1;
+      updateRequestEnd();
+      addRequestEnd();
+      at += 1;
     },
     next = function (c) {
       if (c && c !== ch) {
@@ -413,10 +415,11 @@ export const createParser = () => {
         } catch (e) {
           addError(e.message);
           // snap
-          const substring = text.substr(at);
-          const nextMatch = substring.search(/^POST|HEAD|GET|PUT|DELETE|PATCH/m);
-          if (nextMatch < 1) return;
-          reset(at + nextMatch);
+          const remainingText = text.substr(at);
+          const nextMethodIndex = remainingText.search(/^\s*(POST|HEAD|GET|PUT|DELETE|PATCH)\b/mi);
+          if (nextMethodIndex < 1) return;
+          at += nextMethodIndex;
+          reset(at);
         }
       }
     };

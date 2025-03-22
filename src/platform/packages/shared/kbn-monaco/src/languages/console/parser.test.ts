@@ -53,6 +53,26 @@ describe('console parser', () => {
     expect(endOffset).toBe(52);
   });
 
+  it('parses requests with an error', () => {
+    const input =
+      'GET _search\n' +
+      '{ERROR\n' +
+      '  "query": {\n' +
+      '    "match_all": {}\n' +
+      '  }\n' +
+      '}\n\n' +
+      'POST _test_index';
+    const { requests, errors } = parser(input) as ConsoleParserResult;
+    expect(requests.length).toBe(2);
+    expect(requests[0].startOffset).toBe(0);
+    expect(requests[0].endOffset).toBe(57);
+    expect(requests[1].startOffset).toBe(59);
+    expect(requests[1].endOffset).toBe(75);
+    expect(errors.length).toBe(1);
+    expect(errors[0].offset).toBe(14);
+    expect(errors[0].text).toBe('Bad string');
+  });
+
   describe('case insensitive methods', () => {
     const expectedRequests = [
       {
