@@ -24,11 +24,14 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('loads the overview page');
       await ml.navigation.navigateToOverview();
 
+      await ml.testExecution.logTestStep('loads the anomaly detection area');
+      await ml.navigation.navigateToAnomalyExplorerWithSideNav();
+      await ml.navigation.navigateToSingleMetricViewerWithSideNav();
+      await ml.navigation.navigateToDfaMapWithSideNav();
+      await ml.navigation.navigateToDfaResultsExplorerWithSideNav();
+
       await ml.testExecution.logTestStep('loads the notifications page');
       await ml.navigation.navigateToNotifications();
-
-      await ml.testExecution.logTestStep('loads the anomaly detection area');
-      await ml.navigation.navigateToAnomalyDetection();
 
       await ml.testExecution.logTestStep('loads the job management page');
       await ml.navigation.navigateToJobManagement();
@@ -47,22 +50,10 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.dataFrameAnalytics.assertEmptyListMessageExists();
 
       await ml.testExecution.logTestStep('loads the data visualizer page');
+      await ml.navigation.navigateToMl();
       await ml.navigation.navigateToDataVisualizer();
       await ml.dataVisualizer.assertDataVisualizerImportDataCardExists();
       await ml.dataVisualizer.assertDataVisualizerIndexDataCardExists();
-
-      await ml.testExecution.logTestStep(
-        'should load the stack management with the ML menu item being present'
-      );
-      await ml.navigation.navigateToStackManagement();
-
-      await ml.testExecution.logTestStep('should load the jobs list page in stack management');
-      await ml.navigation.navigateToStackManagementJobsListPage();
-
-      await ml.testExecution.logTestStep(
-        'should load the analytics jobs list page in stack management'
-      );
-      await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
     });
   });
 }

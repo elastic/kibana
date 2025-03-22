@@ -24,6 +24,8 @@ import {
   FlyoutType,
   useJobInfoFlyouts,
 } from '../../../../jobs/components/job_details_flyout/job_details_flyout_context';
+import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
+import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 interface Props {
   setIsIdSelectorFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
   selectedId?: string;
@@ -92,9 +94,13 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
   setIsIdSelectorFlyoutVisible,
   selectedId,
 }) => {
+  const [canCreateDataFrameAnalytics] = usePermissionCheck(['canCreateDataFrameAnalytics']);
+
+  const redirectToDfaJobManagement = useCreateAndNavigateToManagementMlLink('', 'analytics');
+
   return (
     <>
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
+      <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
           {selectedId ? (
             <SelectorControl
@@ -122,6 +128,21 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
             <FormattedMessage
               id="xpack.ml.dataframe.analytics.editSelection"
               defaultMessage="Edit selection"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem />
+
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            color="primary"
+            onClick={redirectToDfaJobManagement}
+            disabled={!canCreateDataFrameAnalytics}
+          >
+            <FormattedMessage
+              id="xpack.ml.embeddables.jobSelector.manageJobsLinkLabel"
+              defaultMessage="Manage jobs"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>

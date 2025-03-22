@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { MemoryUsagePage } from './memory_usage_page';
+export {
+  SuppliedConfigurationsButton,
+  AnomalyDetectionSettingsButton,
+} from './anomaly_detection_actions';
+export { SynchronizeSavedObjectsButton } from './synchronize_saved_objects_button';

@@ -21,7 +21,8 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
+import { MlManagementLocatorInternal } from '../../../../locator/ml_management_locator';
 
 export const COMPATIBLE_SERIES_TYPES = [
   'line',
@@ -51,9 +52,9 @@ export async function redirectToADJobWizards(
   lens: LensPublicStart
 ) {
   const { query, filters, to, from, vis } = await getJobsItemsFromEmbeddable(embeddable, lens);
-  const locator = share.url.locators.get(ML_APP_LOCATOR);
+  const locator = new MlManagementLocatorInternal(share);
 
-  const url = await locator?.getUrl({
+  const { url } = await locator?.getUrl({
     page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_LENS,
     pageState: {
       vis: vis as unknown as SerializableRecord,

@@ -11,24 +11,24 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { ML_PAGES } from '../../../../locator';
-import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import {
+  type NavigateToApp,
+  getMlManagementBreadcrumb,
+  getStackManagementBreadcrumb,
+} from '../../breadcrumbs';
 import { MlPageHeader } from '../../../components/page_header';
+import { ML_PAGES } from '../../../../locator';
 
 const SuppliedConfigurations = dynamic(async () => ({
   default: (await import('../../../supplied_configurations/supplied_configurations'))
     .SuppliedConfigurations,
 }));
 
-export const suppliedConfigurationsRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
+export const suppliedConfigurationsRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   id: 'supplied_configurations',
   path: createPath(ML_PAGES.SUPPLIED_CONFIGURATIONS),
   title: i18n.translate('xpack.ml.suppliedConfigurations.suppliedConfigurations.docTitle', {
@@ -36,13 +36,13 @@ export const suppliedConfigurationsRouteFactory = (
   }),
   render: () => <PageWrapper />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
+    getStackManagementBreadcrumb(navigateToApp),
+    getMlManagementBreadcrumb('ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB', navigateToApp),
     {
       text: i18n.translate(
         'xpack.ml.suppliedConfigurationsBreadcrumbs.suppliedConfigurationsLabel',
         {
-          defaultMessage: 'Supplied configurations',
+          defaultMessage: 'Supplied Configurations',
         }
       ),
     },
@@ -63,6 +63,7 @@ const PageWrapper: FC = () => {
           alignItems={'flexStart'}
           gutterSize={'m'}
           direction="column"
+          data-test-subj="mlPageSuppliedConfigurations"
         >
           <EuiFlexItem grow={false}>
             <FormattedMessage

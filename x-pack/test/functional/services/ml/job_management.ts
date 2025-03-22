@@ -16,6 +16,7 @@ export function MachineLearningJobManagementProvider(
   mlApi: MlApi
 ) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     async navigateToNewJobSourceSelection() {
@@ -42,7 +43,9 @@ export function MachineLearningJobManagementProvider(
     },
 
     async assertEmptyStateVisible() {
-      await testSubjects.existOrFail('mlAnomalyDetectionEmptyState');
+      await retry.tryForTime(4 * 1000, async () => {
+        await testSubjects.existOrFail('mlAnomalyDetectionEmptyState');
+      });
     },
 
     async assertJobStatsBarExists() {

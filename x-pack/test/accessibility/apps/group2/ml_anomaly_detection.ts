@@ -350,7 +350,6 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('anomaly detection create advanced job open wizard', async () => {
-          await ml.navigation.navigateToMl();
           await ml.navigation.navigateToJobManagement();
 
           await ml.jobManagement.navigateToNewJobSourceSelection();

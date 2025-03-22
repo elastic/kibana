@@ -39,6 +39,7 @@ interface Props {
   onReload: React.Dispatch<React.SetStateAction<(() => void) | null>>;
 }
 
+// @TODO: Delete this file
 export const SpaceManagement: FC<Props> = ({ spacesApi, onTabChange, onReload }) => {
   const {
     services: { application },
@@ -261,7 +262,7 @@ export const RefreshButton: FC<{ onRefreshClick: () => void; isRefreshing: boole
   isRefreshing,
 }) => (
   <EuiButtonEmpty
-    data-test-subj={`mlRefreshJobListButton${isRefreshing ? ' loading' : ' loaded'}`}
+    data-test-subj={`mlDatePickerRefreshPageButton${isRefreshing ? ' loading' : ' loaded'}`}
     onClick={onRefreshClick}
     isLoading={isRefreshing}
     iconType={'refresh'}

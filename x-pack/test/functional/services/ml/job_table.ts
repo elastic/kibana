@@ -160,19 +160,17 @@ export function MachineLearningJobTableProvider(
           rowObject.latestTimestamp = latestTimestamp;
         }
 
-        if (tableEnvironment === 'stackMgmtJobList') {
-          const $spaces = $tr
-            .findTestSubject('mlJobListColumnSpaces')
-            .find('.euiTableCellContent')
-            .find('.euiAvatar--space');
-          const spaces = [];
-          for (const el of $spaces.toArray()) {
-            // extract the space id from data-test-subj and add to list
-            spaces.push($(el).attr('data-test-subj').replace('space-avatar-', ''));
-          }
-
-          rowObject.spaces = spaces;
+        const $spaces = $tr
+          .findTestSubject('mlTableColumnSpaces')
+          .find('.euiTableCellContent')
+          .find('.euiAvatar--space');
+        const spaces = [];
+        for (const el of $spaces.toArray()) {
+          // extract the space id from data-test-subj and add to list
+          spaces.push($(el).attr('data-test-subj').replace('space-avatar-', ''));
         }
+
+        rowObject.spaces = spaces;
 
         rows.push(rowObject);
       }
@@ -262,7 +260,7 @@ export function MachineLearningJobTableProvider(
       const testSubjStr =
         tableEnvironment === 'mlAnomalyDetection'
           ? 'mlDatePickerRefreshPageButton'
-          : 'mlRefreshJobListButton';
+          : 'mlDatePickerRefreshPageButton';
 
       await this.waitForRefreshButtonLoaded(testSubjStr);
       await testSubjects.click(`~${testSubjStr}`);

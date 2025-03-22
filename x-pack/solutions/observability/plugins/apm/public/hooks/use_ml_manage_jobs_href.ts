@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
+import { ML_PAGES, useMlManagementHref } from '@kbn/ml-plugin/public';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 
 export function useMlManageJobsHref({ jobId }: { jobId?: string } = {}) {
   const {
-    core,
     plugins: { ml },
   } = useApmPluginContext();
 
@@ -23,7 +22,7 @@ export function useMlManageJobsHref({ jobId }: { jobId?: string } = {}) {
     rangeTo = 'now',
   } = urlParams;
 
-  const mlADLink = useMlHref(ml, core.http.basePath.get(), {
+  const mlADLink = useMlManagementHref(ml, {
     page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
     pageState: {
       groupIds: ['apm'],

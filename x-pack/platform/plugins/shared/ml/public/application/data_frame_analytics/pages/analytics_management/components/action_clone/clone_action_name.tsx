@@ -21,7 +21,7 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { DeepReadonly } from '../../../../../../../common/types/common';
-import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
+import { useMlKibana, useMlManagementLocator } from '../../../../../contexts/kibana';
 import { DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES } from '../../hooks/use_create_analytics_form';
 import type { State } from '../../hooks/use_create_analytics_form/state';
 import type { DataFrameAnalyticsListRow } from '../analytics_list/common';
@@ -417,7 +417,7 @@ export const useNavigateToWizardWithClonedJob = () => {
       ...startServices
     },
   } = useMlKibana();
-  const navigateToPath = useNavigateToPath();
+  const mlLocator = useMlManagementLocator();
   const canCreateDataView =
     capabilities.savedObjectsManagement.edit === true || capabilities.indexPatterns.save === true;
 
@@ -479,11 +479,12 @@ export const useNavigateToWizardWithClonedJob = () => {
     }
 
     if (sourceIndexId) {
-      await navigateToPath(
-        `/data_frame_analytics/new_job?index=${encodeURIComponent(sourceIndexId)}&jobId=${
-          item.config.id
-        }`
-      );
+      await mlLocator?.navigate({
+        sectionId: 'ml',
+        appId: `analytics/data_frame_analytics/new_job?index=${encodeURIComponent(
+          sourceIndexId
+        )}&jobId=${item.config.id}`,
+      });
     }
   };
 };
