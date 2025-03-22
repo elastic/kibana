@@ -12,15 +12,15 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { DiscoverMainApp } from './discover_main_app';
-import { DiscoverTopNav } from './components/top_nav/discover_topnav';
+import { DiscoverMainApp } from './main_app';
+import { DiscoverTopNav } from '../top_nav/discover_topnav';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { discoverServiceMock } from '../../__mocks__/services';
+import { discoverServiceMock } from '../../../../__mocks__/services';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
-import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
-import { DiscoverMainProvider } from './state_management/discover_state_provider';
-import { RuntimeStateProvider, internalStateActions } from './state_management/redux';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
+import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
 
 discoverServiceMock.data.query.timefilter.timefilter.getTime = () => {
   return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
@@ -31,9 +31,10 @@ describe('DiscoverMainApp', () => {
     const dataViewList = [dataViewMock].map((ip) => {
       return { ...ip, ...{ attributes: { title: ip.title } } };
     }) as unknown as DataViewListItem[];
+    jest.spyOn(discoverServiceMock.dataViews, 'getIdsWithTitle').mockResolvedValue(dataViewList);
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     stateContainer.actions.setDataView(dataViewMock);
-    stateContainer.internalState.dispatch(internalStateActions.setSavedDataViews(dataViewList));
+    await stateContainer.internalState.dispatch(internalStateActions.loadDataViewList());
     const props = {
       stateContainer,
     };

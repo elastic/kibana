@@ -204,7 +204,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
       const hasESQLUrlState = (stateContainer.appState.getState()?.query as { esql: string })?.esql;
 
-      if (stateContainer.appState.isEmptyURL() || !hasESQLUrlState) {
+      if (!stateContainer.stateStorage.get('_a') || !hasESQLUrlState) {
         if (savedSearchAppState?.savedSearch.timeRange) {
           stateContainer.globalState.set({
             ...stateContainer.globalState.get(),

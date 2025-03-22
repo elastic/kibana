@@ -305,11 +305,6 @@ export const useDiscoverHistogram = ({
       unifiedHistogram.fetch();
     });
 
-    // triggering the initial chart request
-    if (!isEsqlMode) {
-      unifiedHistogram.fetch();
-    }
-
     return () => {
       subscription.unsubscribe();
     };
