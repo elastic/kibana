@@ -122,11 +122,6 @@ export interface ReactEmbeddableFactory<
     uuid: string,
     parentApi: unknown | undefined,
     /** `setApi` should be used when the unsaved changes logic in `buildApi` is unnecessary */
-    setApi: (api: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>) => Api,
-    /**
-     * Last saved runtime state. Different from initialRuntimeState in that it does not contain previous sessions's unsaved changes
-     * Compare with initialRuntimeState to flag unsaved changes on load
-     */
-    lastSavedRuntimeState: RuntimeState
+    setApi: (api: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>) => Api
   ) => Promise<{ Component: React.FC<{}>; api: Api }>;
 }

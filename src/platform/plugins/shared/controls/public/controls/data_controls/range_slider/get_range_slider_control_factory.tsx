@@ -9,7 +9,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, map, skip } from 'rxjs';
-
+import deepEqual from 'fast-deep-equal';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { Filter, RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -24,6 +24,8 @@ import { minMax$ } from './min_max';
 import { initializeRangeControlSelections } from './range_control_selections';
 import { RangeSliderStrings } from './range_slider_strings';
 import type { RangesliderControlApi, RangesliderControlState } from './types';
+
+const DEFAULT_STEP = 1;
 
 export const getRangesliderControlFactory = (): DataControlFactory<
   RangesliderControlState,
@@ -64,7 +66,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
-      const step$ = new BehaviorSubject<number | undefined>(initialState.step ?? 1);
+      const step$ = new BehaviorSubject<number | undefined>(initialState.step ?? DEFAULT_STEP);
 
       const dataControl = initializeDataControl<Pick<RangesliderControlState, 'step'>>(
         uuid,
@@ -86,6 +88,10 @@ export const getRangesliderControlFactory = (): DataControlFactory<
         {
           ...dataControl.api,
           dataLoading$,
+          isSerializedStateEqual: (a, b) => {
+            const defaults = { step: DEFAULT_STEP };
+            return deepEqual({ ...defaults, ...a }, { ...defaults, ...b });
+          },
           getTypeDisplayName: RangeSliderStrings.control.getDisplayName,
           serializeState: () => {
             const { rawState: dataControlState, references } = dataControl.serialize();

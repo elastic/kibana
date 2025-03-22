@@ -8,6 +8,7 @@
  */
 
 import { SerializedPanelState } from '@kbn/presentation-publishing';
+import { Subject } from 'rxjs';
 
 export interface HasSerializedChildState<SerializedState extends object = object> {
   getSerializedStateForChild: (
@@ -15,23 +16,22 @@ export interface HasSerializedChildState<SerializedState extends object = object
   ) => SerializedPanelState<SerializedState> | undefined;
 }
 
-/**
- * @deprecated Use `HasSerializedChildState` instead. All interactions between the container and the child should use the serialized state.
- */
-export interface HasRuntimeChildState<RuntimeState extends object = object> {
-  getRuntimeStateForChild: (childId: string) => Partial<RuntimeState> | undefined;
-}
-
 export const apiHasSerializedChildState = <SerializedState extends object = object>(
   api: unknown
 ): api is HasSerializedChildState<SerializedState> => {
   return Boolean(api && (api as HasSerializedChildState).getSerializedStateForChild);
 };
-/**
- * @deprecated Use `HasSerializedChildState` instead. All interactions between the container and the child should use the serialized state.
- */
-export const apiHasRuntimeChildState = <RuntimeState extends object = object>(
+
+export const apiHasLastSavedChildState = <SerializedState extends object = object>(
   api: unknown
-): api is HasRuntimeChildState<RuntimeState> => {
-  return Boolean(api && (api as HasRuntimeChildState).getRuntimeStateForChild);
+): api is HasLastSavedChildState<SerializedState> => {
+  return (
+    Boolean(api && (api as HasLastSavedChildState).getLastSavedStateForChild) &&
+    Boolean(api && (api as HasLastSavedChildState).saveNotification$)
+  );
 };
+
+export interface HasLastSavedChildState<SerializedState extends object = object> {
+  getLastSavedStateForChild: (childId: string) => SerializedPanelState<SerializedState> | undefined;
+  saveNotification$: Subject<void>; // a notification that state has been saved
+}

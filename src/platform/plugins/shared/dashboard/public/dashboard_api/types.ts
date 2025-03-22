@@ -20,8 +20,7 @@ import { PublishesESQLVariables } from '@kbn/esql-types';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   CanExpandPanels,
-  HasRuntimeChildState,
-  HasSaveNotification,
+  HasLastSavedChildState,
   HasSerializedChildState,
   PresentationContainer,
   PublishesSettings,
@@ -29,7 +28,6 @@ import {
   TracksOverlays,
 } from '@kbn/presentation-containers';
 import {
-  SerializedPanelState,
   EmbeddableAppContext,
   HasAppContext,
   HasExecutionContext,
@@ -38,12 +36,14 @@ import {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesDescription,
-  PublishesTitle,
   PublishesSavedObjectId,
+  PublishesTitle,
   PublishesUnifiedSearch,
+  PublishesUnsavedChanges,
   PublishesViewMode,
   PublishesWritableViewMode,
   PublishingSubject,
+  SerializedPanelState,
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
@@ -169,8 +169,7 @@ export interface UnsavedPanelState {
 export type DashboardApi = CanExpandPanels &
   HasAppContext &
   HasExecutionContext &
-  HasRuntimeChildState &
-  HasSaveNotification &
+  HasLastSavedChildState &
   HasSerializedChildState &
   HasType<typeof DASHBOARD_API_TYPE> &
   HasUniqueId &
@@ -187,9 +186,9 @@ export type DashboardApi = CanExpandPanels &
   PublishesUnifiedSearch &
   PublishesViewMode &
   PublishesWritableViewMode &
+  PublishesUnsavedChanges &
   TrackContentfulRender &
   TracksOverlays & {
-    asyncResetToLastSavedState: () => Promise<void>;
     controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
@@ -202,7 +201,6 @@ export type DashboardApi = CanExpandPanels &
     };
     getDashboardPanelFromId: (id: string) => DashboardPanelState;
     hasOverlays$: PublishingSubject<boolean>;
-    hasUnsavedChanges$: PublishingSubject<boolean>;
     highlightPanel: (panelRef: HTMLDivElement) => void;
     highlightPanelId$: PublishingSubject<string | undefined>;
     isEmbeddedExternally: boolean;
@@ -230,7 +228,7 @@ export type DashboardApi = CanExpandPanels &
 export interface DashboardInternalApi {
   controlGroupReload$: Subject<void>;
   panelsReload$: Subject<void>;
-  getRuntimeStateForControlGroup: () => object | undefined;
+  getLastSavedStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
   getSerializedStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;

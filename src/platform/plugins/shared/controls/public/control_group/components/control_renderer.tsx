@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { StateComparators, initializeHasUnsavedChanges } from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { StateComparators } from '@kbn/presentation-publishing';
-
 import type { DefaultControlState } from '../../../common';
 import { getControlFactory } from '../../control_factory_registry';
 import type { ControlApiRegistration, DefaultControlApi } from '../../controls/types';
@@ -55,10 +52,12 @@ export const ControlRenderer = <
           apiRegistration: ControlApiRegistration<ApiType>,
           comparators: StateComparators<StateType>
         ): ApiType => {
-          const unsavedChanges = initializeUnsavedChanges<StateType>(
-            parentApi.getLastSavedControlState(uuid) as StateType,
+          const unsavedChanges = initializeHasUnsavedChanges<StateType>(
+            uuid,
+            comparators,
+            apiRegistration,
             parentApi,
-            comparators
+            (state) => state.rawState
           );
 
           cleanupFunction.current = () => unsavedChanges.cleanup();

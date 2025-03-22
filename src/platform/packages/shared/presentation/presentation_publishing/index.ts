@@ -10,9 +10,10 @@
 export { isEmbeddableApiContext, type EmbeddableApiContext } from './embeddable_api_context';
 
 export {
-  getInitialValuesFromComparators,
-  getUnchangingComparator,
   runComparators,
+  diffComparators$,
+  latestComparatorValues$,
+  getUnchangingComparator,
   type ComparatorDefinition,
   type ComparatorFunction,
   type StateComparators,
@@ -79,6 +80,10 @@ export {
   type HasSnapshottableState,
   type SerializedPanelState,
 } from './interfaces/has_serializable_state';
+export {
+  apiHasSerializedStateComparator,
+  type HasSerializedStateComparator,
+} from './interfaces/has_serialized_state_comparator';
 export {
   apiHasSupportedTriggers,
   type HasSupportedTriggers,
@@ -147,8 +152,8 @@ export {
 export {
   initializeTitleManager,
   stateHasTitles,
-  type TitlesApi,
   type SerializedTitles,
+  type TitlesApi,
 } from './interfaces/titles/title_manager';
 export {
   useBatchedOptionalPublishingSubjects,
@@ -157,3 +162,4 @@ export {
   useStateFromPublishingSubject,
   type PublishingSubject,
 } from './publishing_subject';
+export { initializeHasUnsavedChanges } from './has_unsaved_changes/initialize_has_unsaved_changes';

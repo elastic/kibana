@@ -18,16 +18,18 @@ export interface SerializedPanelState<RawStateType extends object = object> {
   rawState: RawStateType;
 }
 
-export interface HasSerializableState<State extends object = object> {
+export interface HasSerializableState<SerializedState extends object = object> {
   /**
    * Serializes all state into a format that can be saved into
    * some external store. The opposite of `deserialize` in the {@link ReactEmbeddableFactory}
    */
-  serializeState: () => SerializedPanelState<State>;
+  serializeState: () => SerializedPanelState<SerializedState>;
 }
 
-export const apiHasSerializableState = (api: unknown | null): api is HasSerializableState => {
-  return Boolean((api as HasSerializableState)?.serializeState);
+export const apiHasSerializableState = <SerializedState extends object = object>(
+  api: unknown | null
+): api is HasSerializableState<SerializedState> => {
+  return Boolean((api as HasSerializableState<SerializedState>)?.serializeState);
 };
 
 /**

@@ -11,6 +11,7 @@ import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
   HasEditCapabilities,
   HasLibraryTransforms,
+  HasSerializedStateComparator,
   HasSupportedTriggers,
   HasType,
   PublishesDataLoading,
@@ -52,6 +53,7 @@ export type MapSerializedState = SerializedTitles &
 export type MapRuntimeState = MapSerializedState;
 
 export type MapApi = DefaultEmbeddableApi<MapSerializedState> &
+  HasSerializedStateComparator<MapSerializedState> &
   HasDynamicActions &
   Partial<HasEditCapabilities> &
   HasInspectorAdapters &

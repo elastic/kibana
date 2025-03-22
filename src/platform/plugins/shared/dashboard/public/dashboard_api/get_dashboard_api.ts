@@ -11,7 +11,6 @@ import type { Reference } from '@kbn/content-management-utils';
 import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
 import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { StateComparators } from '@kbn/presentation-publishing';
-import { omit } from 'lodash';
 import { BehaviorSubject, debounceTime, merge } from 'rxjs';
 import { v4 } from 'uuid';
 import {
@@ -19,12 +18,10 @@ import {
   getReferencesForPanelId,
 } from '../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { DASHBOARD_APP_ID } from '../plugin_constants';
-import { PANELS_CONTROL_GROUP_KEY } from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
-import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import { getSerializedState } from './get_serialized_state';
 import { openSaveModal } from './save_modal/open_save_modal';
 import { initializePanelsManager } from './panels_manager';
@@ -39,24 +36,36 @@ import {
   DashboardCreationOptions,
   DashboardInternalApi,
   DashboardState,
-  UnsavedPanelState,
 } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 
+const defaultControlGroupState: ControlGroupSerializedState = {
+  autoApplySelections: true,
+  chainingSystem: 'HIERARCHICAL',
+  controls: [],
+  ignoreParentSettings: {
+    ignoreFilters: false,
+    ignoreQuery: false,
+    ignoreTimerange: false,
+    ignoreValidations: false,
+  },
+  labelPosition: 'oneLine',
+};
+
 export function getDashboardApi({
   creationOptions,
   incomingEmbeddable,
   initialState,
-  initialPanelsRuntimeState,
   savedObjectResult,
   savedObjectId,
+  lastSavedDashboardState,
 }: {
   creationOptions?: DashboardCreationOptions;
+  lastSavedDashboardState?: DashboardState;
   incomingEmbeddable?: EmbeddablePackageState | undefined;
   initialState: DashboardState;
-  initialPanelsRuntimeState?: UnsavedPanelState;
   savedObjectResult?: LoadDashboardReturn;
   savedObjectId?: string;
 }) {
@@ -87,7 +96,6 @@ export function getDashboardApi({
   const panelsManager = initializePanelsManager(
     incomingEmbeddable,
     initialState.panels,
-    initialPanelsRuntimeState ?? {},
     trackPanel,
     getPanelReferences,
     pushPanelReferences
@@ -109,9 +117,8 @@ export function getDashboardApi({
   const unsavedChangesManager = initializeUnsavedChangesManager({
     creationOptions,
     controlGroupApi$,
-    lastSavedState: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
-      ...DEFAULT_DASHBOARD_STATE,
-    },
+    getPanelReferences,
+    lastSavedState: lastSavedDashboardState,
     panelsManager,
     savedObjectId$,
     settingsManager,
@@ -246,28 +253,18 @@ export function getDashboardApi({
     internalApi: {
       ...panelsManager.internalApi,
       ...unifiedSearchManager.internalApi,
-      getSerializedStateForControlGroup: () => {
+      getLastSavedStateForControlGroup: () => {
+        const lastSavedState = unsavedChangesManager.internalApi.getLastSavedState();
         return {
-          rawState: savedObjectResult?.dashboardInput?.controlGroupInput
-            ? savedObjectResult.dashboardInput.controlGroupInput
-            : ({
-                autoApplySelections: true,
-                chainingSystem: 'HIERARCHICAL',
-                controls: [],
-                ignoreParentSettings: {
-                  ignoreFilters: false,
-                  ignoreQuery: false,
-                  ignoreTimerange: false,
-                  ignoreValidations: false,
-                },
-                labelPosition: 'oneLine',
-                showApplySelections: false,
-              } as ControlGroupSerializedState),
-          references: getReferencesForControls(references$.value ?? []),
+          rawState: lastSavedState?.controlGroupInput ?? defaultControlGroupState,
+          references: getReferencesForControls(lastSavedState?.references ?? []),
         };
       },
-      getRuntimeStateForControlGroup: () => {
-        return panelsManager!.api.getRuntimeStateForChild(PANELS_CONTROL_GROUP_KEY);
+      getSerializedStateForControlGroup: () => {
+        return {
+          rawState: initialState.controlGroupInput ?? defaultControlGroupState,
+          references: getReferencesForControls(references$.value ?? []),
+        };
       },
       setControlGroupApi: (controlGroupApi: ControlGroupApi) =>
         controlGroupApi$.next(controlGroupApi),

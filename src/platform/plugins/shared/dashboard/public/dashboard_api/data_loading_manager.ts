@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   PublishesDataLoading,
   PublishingSubject,
   apiPublishesDataLoading,
 } from '@kbn/presentation-publishing';
-import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
+import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
 
 export function initializeDataLoadingManager(
-  children$: PublishingSubject<{ [key: string]: unknown }>
+  children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>
 ) {
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 

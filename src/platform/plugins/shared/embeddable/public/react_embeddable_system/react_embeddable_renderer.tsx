@@ -7,29 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  apiHasRuntimeChildState,
-  apiIsPresentationContainer,
-  HasSerializedChildState,
-  initializeUnsavedChanges,
-} from '@kbn/presentation-containers';
+import { apiIsPresentationContainer, HasSerializedChildState } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import {
-  ComparatorDefinition,
-  StateComparators,
-  HasSnapshottableState,
-  SerializedPanelState,
+  type ComparatorDefinition,
+  type HasSnapshottableState,
+  type SerializedPanelState,
+  type StateComparators,
+  initializeHasUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, map, skip, Subscription } from 'rxjs';
 import { v4 as generateId } from 'uuid';
+import { PhaseTracker } from './phase_tracker';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import {
   BuildReactEmbeddableApiRegistration,
   DefaultEmbeddableApi,
   SetReactEmbeddableApiRegistration,
 } from './types';
-import { PhaseTracker } from './phase_tracker';
 
 const ON_STATE_CHANGE_DEBOUNCE = 100;
 
@@ -95,17 +91,10 @@ export const ReactEmbeddableRenderer = <
         const buildEmbeddable = async () => {
           const factory = await getReactEmbeddableFactory<SerializedState, RuntimeState, Api>(type);
           const serializedState = parentApi.getSerializedStateForChild(uuid);
-          const lastSavedRuntimeState = serializedState
+
+          const initialRuntimeState = serializedState
             ? await factory.deserializeState(serializedState)
             : ({} as RuntimeState);
-
-          // If the parent provides runtime state for the child (usually as a state backup or cache),
-          // we merge it with the last saved runtime state.
-          const partialRuntimeState = apiHasRuntimeChildState<RuntimeState>(parentApi)
-            ? parentApi.getRuntimeStateForChild(uuid) ?? ({} as Partial<RuntimeState>)
-            : ({} as Partial<RuntimeState>);
-
-          const initialRuntimeState = { ...lastSavedRuntimeState, ...partialRuntimeState };
 
           const setApi = (
             apiRegistration: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>
@@ -152,11 +141,14 @@ export const ReactEmbeddableRenderer = <
                   })
               );
             }
+            (apiRegistration as any).type = type;
 
-            const unsavedChanges = initializeUnsavedChanges<RuntimeState>(
-              lastSavedRuntimeState,
+            const unsavedChanges = initializeHasUnsavedChanges<SerializedState, RuntimeState>(
+              uuid,
+              comparators,
+              apiRegistration,
               parentApi,
-              comparators
+              factory.deserializeState
             );
 
             const fullApi = setApi({
@@ -177,8 +169,7 @@ export const ReactEmbeddableRenderer = <
             buildApi,
             uuid,
             parentApi,
-            setApi,
-            lastSavedRuntimeState
+            setApi
           );
 
           phaseTracker.current.trackPhaseEvents(uuid, api);

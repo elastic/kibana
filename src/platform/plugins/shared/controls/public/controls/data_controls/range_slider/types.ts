@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { HasSerializedStateComparator } from '@kbn/presentation-publishing';
 import type { DefaultDataControlState } from '../../../../common';
 import type { DataControlApi } from '../types';
 
@@ -17,4 +18,5 @@ export interface RangesliderControlState extends DefaultDataControlState {
   step?: number;
 }
 
-export type RangesliderControlApi = DataControlApi;
+export type RangesliderControlApi = DataControlApi &
+  HasSerializedStateComparator<RangesliderControlState>;

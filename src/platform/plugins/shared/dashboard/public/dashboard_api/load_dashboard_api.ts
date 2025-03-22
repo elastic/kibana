@@ -8,18 +8,15 @@
  */
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
-import { DashboardPanelMap } from '../../common';
+import { cloneDeep } from 'lodash';
+import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
-import { DashboardCreationOptions, DashboardState, UnsavedPanelState } from './types';
-import { getDashboardApi } from './get_dashboard_api';
-import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
 import { coreServices } from '../services/kibana_services';
 import { logger } from '../services/logger';
-import {
-  PANELS_CONTROL_GROUP_KEY,
-  getDashboardBackupService,
-} from '../services/dashboard_backup_service';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
+import { getDashboardApi } from './get_dashboard_api';
+import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
+import { DashboardCreationOptions, DashboardState } from './types';
 
 export async function loadDashboardApi({
   getCreationOptions,
@@ -51,19 +48,29 @@ export async function loadDashboardApi({
   // Combine saved object state and session storage state
   // --------------------------------------------------------------------------------------
   const dashboardBackupState = getDashboardBackupService().getState(savedObjectResult.dashboardId);
-  const initialPanelsRuntimeState: UnsavedPanelState = creationOptions?.useSessionStorageIntegration
-    ? dashboardBackupState?.panels ?? {}
-    : {};
 
   const sessionStorageInput = ((): Partial<DashboardState> | undefined => {
     if (!creationOptions?.useSessionStorageIntegration) return;
-    return dashboardBackupState?.dashboardState;
+    return dashboardBackupState;
   })();
 
-  const combinedSessionState: DashboardState = {
+  const lastSavedDashboardState: DashboardState = cloneDeep({
     ...DEFAULT_DASHBOARD_STATE,
     ...(savedObjectResult?.dashboardInput ?? {}),
+    references: savedObjectResult?.references,
+  });
+
+  const combinedSessionState: DashboardState = {
+    ...lastSavedDashboardState,
     ...sessionStorageInput,
+    panels: {
+      ...lastSavedDashboardState.panels,
+
+      /**
+       * Panels are spread from the session storage input because only panels which have changed are backed up there.
+       */
+      ...sessionStorageInput?.panels,
+    },
   };
   combinedSessionState.references = sessionStorageInput?.references?.length
     ? sessionStorageInput?.references
@@ -73,32 +80,7 @@ export async function loadDashboardApi({
   // Combine state with overrides.
   // --------------------------------------------------------------------------------------
   const overrideState = creationOptions?.getInitialInput?.();
-  if (overrideState?.panels) {
-    const overridePanels: DashboardPanelMap = {};
-    for (const [panelId, panel] of Object.entries(overrideState?.panels)) {
-      overridePanels[panelId] = {
-        ...panel,
-
-        /**
-         * here we need to keep the state of the panel that was already in the Dashboard if one exists.
-         * This is because this state will become the "last saved state" for this panel.
-         */
-        ...(combinedSessionState.panels[panelId] ?? []),
-      };
-      /**
-       * We also need to add the state of this react embeddable into the runtime state to be restored.
-       */
-      initialPanelsRuntimeState[panelId] = panel.explicitInput;
-    }
-    overrideState.panels = overridePanels;
-  }
-  // Back up any view mode passed in explicitly.
-  if (overrideState?.viewMode) {
-    getDashboardBackupService().storeViewMode(overrideState?.viewMode);
-  }
-  if (overrideState?.controlGroupState) {
-    initialPanelsRuntimeState[PANELS_CONTROL_GROUP_KEY] = overrideState.controlGroupState;
-  }
+  if (overrideState?.viewMode) getDashboardBackupService().storeViewMode(overrideState?.viewMode);
 
   // --------------------------------------------------------------------------------------
   // get dashboard Api
@@ -110,7 +92,7 @@ export async function loadDashboardApi({
       ...combinedSessionState,
       ...overrideState,
     },
-    initialPanelsRuntimeState,
+    lastSavedDashboardState,
     savedObjectResult,
     savedObjectId,
   });

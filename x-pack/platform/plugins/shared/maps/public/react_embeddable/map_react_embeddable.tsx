@@ -12,10 +12,12 @@ import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ReactEmbeddableFactory, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import {
+  StateComparators,
   apiIsOfType,
   areTriggersDisabled,
   getUnchangingComparator,
   initializeTimeRange,
+  runComparators,
   initializeTitleManager,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
@@ -152,6 +154,24 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
       };
     }
 
+    const allComparators: StateComparators<MapRuntimeState> = {
+      ...timeRange.comparators,
+      ...titleManager.comparators,
+      ...(dynamicActionsApi?.dynamicActionsComparator ?? {
+        enhancements: getUnchangingComparator(),
+      }),
+      ...crossPanelActions.comparators,
+      ...reduxSync.comparators,
+      attributes: [attributes$, (next: MapAttributes | undefined) => attributes$.next(next)],
+      mapSettings: [
+        mapSettings$,
+        (next: Partial<MapSettings> | undefined) => mapSettings$.next(next),
+      ],
+      savedObjectId: [savedObjectId$, (next: string | undefined) => savedObjectId$.next(next)],
+      // readonly comparators
+      mapBuffer: getUnchangingComparator(),
+    };
+
     api = buildApi(
       {
         defaultTitle$,
@@ -164,27 +184,17 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
         ...initializeLibraryTransforms(savedMap, serializeState),
         ...initializeDataViews(savedMap.getStore()),
         serializeState,
+        isSerializedStateEqual: (a, b) => {
+          // since map serialized state and runtime state are the same, we can run through the comparators.
+          const comparatorKeys = Object.keys(allComparators) as Array<keyof MapRuntimeState>;
+          const diff = runComparators(allComparators, comparatorKeys, b, a ?? {});
+          return Boolean(diff);
+        },
         supportedTriggers: () => {
           return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
         },
       },
-      {
-        ...timeRange.comparators,
-        ...titleManager.comparators,
-        ...(dynamicActionsApi?.dynamicActionsComparator ?? {
-          enhancements: getUnchangingComparator(),
-        }),
-        ...crossPanelActions.comparators,
-        ...reduxSync.comparators,
-        attributes: [attributes$, (next: MapAttributes | undefined) => attributes$.next(next)],
-        mapSettings: [
-          mapSettings$,
-          (next: Partial<MapSettings> | undefined) => mapSettings$.next(next),
-        ],
-        savedObjectId: [savedObjectId$, (next: string | undefined) => savedObjectId$.next(next)],
-        // readonly comparators
-        mapBuffer: getUnchangingComparator(),
-      }
+      allComparators
     );
 
     const unsubscribeFromFetch = initializeFetch({

@@ -9,7 +9,7 @@
 
 import { Subject } from 'rxjs';
 
-import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { HasSerializedStateComparator, PublishingSubject } from '@kbn/presentation-publishing';
 import type {
   OptionsListControlState,
   OptionsListDisplaySettings,
@@ -18,9 +18,10 @@ import type {
 } from '../../../../common/options_list';
 import type { DataControlApi } from '../types';
 
-export type OptionsListControlApi = DataControlApi & {
-  setSelectedOptions: (options: OptionsListSelection[] | undefined) => void;
-};
+export type OptionsListControlApi = DataControlApi &
+  HasSerializedStateComparator<OptionsListControlState> & {
+    setSelectedOptions: (options: OptionsListSelection[] | undefined) => void;
+  };
 
 export interface OptionsListComponentState
   extends Omit<OptionsListControlState, keyof OptionsListDisplaySettings> {

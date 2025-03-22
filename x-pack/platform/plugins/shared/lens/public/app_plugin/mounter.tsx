@@ -10,6 +10,7 @@ import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 import { HashRouter, Routes, Route } from '@kbn/shared-ux-router';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
@@ -32,6 +33,7 @@ import { App } from './app';
 import { EditorFrameStart, LensTopNavMenuEntryGenerator, VisualizeEditorContext } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { LensPluginStartDependencies } from '../plugin';
+import { extract } from '../../common/embeddable_factory';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
 import { LensAttributesService } from '../lens_attribute_service';
 import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
@@ -217,13 +219,17 @@ export async function mountApp(
       embeddableId = initialContext.embeddableId;
     }
     if (stateTransfer && props?.state) {
-      const { state, isCopied } = props;
-      stateTransfer.navigateToWithEmbeddablePackage(mergedOriginatingApp, {
+      const { state: rawState, isCopied } = props;
+      const { references } = extract(rawState as unknown as EmbeddableStateWithType);
+      stateTransfer.navigateToWithEmbeddablePackage<LensSerializedState>(mergedOriginatingApp, {
         path: embeddableEditorIncomingState?.originatingPath,
         state: {
           embeddableId: isCopied ? undefined : embeddableId,
           type: LENS_EMBEDDABLE_TYPE,
-          input: { ...state, savedObject: state.savedObjectId },
+          serializedState: {
+            references,
+            rawState,
+          },
           searchSessionId: data.search.session.getSessionId(),
         },
       });

@@ -18,9 +18,9 @@ import type {
   PresentationContainer,
 } from '@kbn/presentation-containers';
 import {
+  apiHasSnapshottableState,
   type PublishingSubject,
   type StateComparators,
-  apiHasSnapshottableState,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, first, merge } from 'rxjs';
 import type {
@@ -49,19 +49,10 @@ export function getControlsInOrder(initialControlPanelsState: ControlPanelsState
     .map(({ id, type }) => ({ id, type })); // filter out `order`
 }
 
-export function initControlsManager(
-  /**
-   * Composed from last saved controls state and previous sessions's unsaved changes to controls state
-   */
-  initialControlsState: ControlPanelsState,
-  /**
-   * Observable that publishes last saved controls state only
-   */
-  lastSavedControlsState$: PublishingSubject<ControlPanelsState>
-) {
+export function initControlsManager(initialControlsState: ControlPanelsState) {
   const initialControlIds = Object.keys(initialControlsState);
   const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
-  let currentControlsState: { [panelId: string]: DefaultControlState } = {
+  let currentControlsState: ControlPanelsState = {
     ...initialControlsState,
   };
   const controlsInOrder$ = new BehaviorSubject<ControlsInOrder>(
@@ -103,17 +94,18 @@ export function initControlsManager(
   }
 
   async function addNewPanel(
-    { panelType, initialState }: PanelPackage<{}, DefaultControlState>,
+    { panelType, serializedState }: PanelPackage<DefaultControlState>,
     index: number
   ) {
-    if ((initialState as DefaultDataControlState)?.dataViewId) {
-      lastUsedDataViewId$.next((initialState as DefaultDataControlState).dataViewId);
+    const { rawState } = serializedState;
+    if ((rawState as DefaultDataControlState)?.dataViewId) {
+      lastUsedDataViewId$.next((rawState as DefaultDataControlState).dataViewId);
     }
-    if (initialState?.width) {
-      lastUsedWidth$.next(initialState.width);
+    if (rawState?.width) {
+      lastUsedWidth$.next(rawState.width);
     }
-    if (typeof initialState?.grow === 'boolean') {
-      lastUsedGrow$.next(initialState.grow);
+    if (typeof rawState?.grow === 'boolean') {
+      lastUsedGrow$.next(rawState.grow);
     }
 
     const id = generateId();
@@ -123,7 +115,7 @@ export function initControlsManager(
       type: panelType,
     });
     controlsInOrder$.next(nextControlsInOrder);
-    currentControlsState[id] = initialState ?? {};
+    currentControlsState[id] = { ...rawState, type: panelType, order: index } ?? {};
     return await untilControlLoaded(id);
   }
 
@@ -199,9 +191,9 @@ export function initControlsManager(
       });
       return controlsRuntimeState;
     },
-    resetControlsUnsavedChanges: () => {
+    resetControlsUnsavedChanges: (lastSavedChildControlsState: ControlPanelsState) => {
       currentControlsState = {
-        ...lastSavedControlsState$.value,
+        ...lastSavedChildControlsState,
       };
       const nextControlsInOrder = getControlsInOrder(currentControlsState as ControlPanelsState);
       controlsInOrder$.next(nextControlsInOrder);
@@ -222,8 +214,8 @@ export function initControlsManager(
     },
     api: {
       getSerializedStateForChild: (childId: string) => {
-        const controlPanelState = currentControlsState[childId];
-        return controlPanelState ? { rawState: controlPanelState } : undefined;
+        const { type, order, ...rawState } = currentControlsState[childId];
+        return rawState ? { rawState } : undefined;
       },
       children$: children$ as PublishingSubject<{
         [key: string]: DefaultControlApi;

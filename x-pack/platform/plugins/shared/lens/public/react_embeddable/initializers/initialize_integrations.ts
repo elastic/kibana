@@ -14,7 +14,12 @@ import { noop, omit } from 'lodash';
 import type { HasSerializableState } from '@kbn/presentation-publishing';
 import { SavedObjectReference } from '@kbn/core/types';
 import { emptySerializer, isTextBasedLanguage } from '../helper';
-import type { GetStateType, LensEmbeddableStartServices, LensRuntimeState } from '../types';
+import type {
+  GetStateType,
+  LensEmbeddableStartServices,
+  LensSerializedState,
+  LensRuntimeState,
+} from '../types';
 import type { IntegrationCallbacks } from '../types';
 
 function cleanupSerializedState({
@@ -45,7 +50,7 @@ export function initializeIntegrations(
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
   > &
-    HasSerializableState;
+    HasSerializableState<LensSerializedState>;
   cleanup: () => void;
   serialize: () => {};
   comparators: {};
