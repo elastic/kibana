@@ -104,6 +104,7 @@ export const getMetricVisRenderer = (
               fireEvent={handlers.event}
               filterable={filterable}
               overrides={overrides}
+              theme={core.theme}
             />
           </div>
         </KibanaRenderContextProvider>,

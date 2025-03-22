@@ -26,7 +26,9 @@ import { DatasourceLayers } from '../../types';
 import { showingBar } from './metric_visualization';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor } from './visualization';
 import { MetricVisualizationState } from './types';
-import { metricStateDefaults } from './constants';
+import { SECONDARY_DEFAULT_STATIC_COLOR, metricStateDefaults } from './constants';
+import { getColorMode } from './helpers';
+import { getDefaultTrendConfig } from './dimension_editor';
 import { getAccessorType } from '../../shared_components';
 
 // TODO - deduplicate with gauges?
@@ -147,11 +149,27 @@ export const toExpression = (
     : undefined;
 
   const trendlineExpression = getTrendlineExpression(state, datasourceExpressionsByLayers);
+  const { isNumeric: isNumericType } = getAccessorType(datasource, state.secondaryMetricAccessor);
+
+  const secondaryDynamicColorMode = getColorMode(state.secondaryColorMode, isNumericType);
+  const isSecondaryDynamicColorMode = secondaryDynamicColorMode === 'dynamic';
+  const secondaryTrend = { ...getDefaultTrendConfig(), ...state.secondaryTrend };
 
   const metricFn = buildExpressionFunction<MetricVisExpressionFunctionDefinition>('metricVis', {
     metric: state.metricAccessor,
     secondaryMetric: state.secondaryMetricAccessor,
     secondaryPrefix: state.secondaryPrefix,
+    secondaryColor:
+      secondaryDynamicColorMode === 'static'
+        ? state.secondaryColor || SECONDARY_DEFAULT_STATIC_COLOR
+        : undefined,
+    secondaryTrendVisuals: isSecondaryDynamicColorMode ? secondaryTrend.visuals : undefined,
+    secondaryTrendBaseline: isSecondaryDynamicColorMode
+      ? isMetricNumeric
+        ? secondaryTrend.baselineValue ?? 0
+        : 0
+      : undefined,
+    secondaryTrendPalette: isSecondaryDynamicColorMode ? secondaryTrend.palette.stops : undefined,
     max: state.maxAccessor,
     breakdownBy:
       state.breakdownByAccessor && !state.collapseFn ? state.breakdownByAccessor : undefined,

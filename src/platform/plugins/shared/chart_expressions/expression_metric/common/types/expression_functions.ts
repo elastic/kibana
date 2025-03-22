@@ -40,6 +40,10 @@ export interface MetricArguments {
   trendline?: TrendlineResult;
   subtitle?: string;
   secondaryPrefix?: string;
+  secondaryColor?: string;
+  secondaryTrendVisuals?: string;
+  secondaryTrendBaseline?: number | string;
+  secondaryTrendPalette?: [string, string, string];
   progressDirection?: LayoutDirection;
   titlesTextAlign: MetricStyle['titlesTextAlign'];
   valuesTextAlign: MetricStyle['valuesTextAlign'];

@@ -8,9 +8,16 @@
 import type { LayoutDirection, MetricStyle } from '@elastic/charts';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import type { CollapseFunction } from '@kbn/visualizations-plugin/common';
+import type { EuiColorPalettePickerPaletteProps, EuiThemeShape } from '@elastic/eui';
 import type { LayerType } from '../../../common/types';
 
 export type ValueFontMode = Exclude<MetricStyle['valueFontSize'], number>;
+
+interface SecondaryTrendType {
+  visuals: 'icon' | 'value' | 'both';
+  palette: { name: string; stops: [string, string, string] };
+  baselineValue: number | 'primary';
+}
 
 export interface MetricVisualizationState {
   layerId: string;
@@ -24,6 +31,9 @@ export interface MetricVisualizationState {
   collapseFn?: CollapseFunction;
   subtitle?: string;
   secondaryPrefix?: string;
+  secondaryColorMode?: 'none' | 'static' | 'dynamic';
+  secondaryColor?: string;
+  secondaryTrend?: SecondaryTrendType;
   progressDirection?: LayoutDirection;
   showBar?: boolean;
   titlesTextAlign?: MetricStyle['titlesTextAlign'];
@@ -42,3 +52,13 @@ export interface MetricVisualizationState {
   trendlineSecondaryMetricAccessor?: string;
   trendlineBreakdownByAccessor?: string;
 }
+
+export type EuiColorPalettePickerPaletteFixedProps = Omit<
+  Extract<EuiColorPalettePickerPaletteProps, { type: 'fixed' }>,
+  'palette'
+> & { palette: [string, string, string] };
+
+export type TrendEUIColors = (
+  | keyof EuiThemeShape['colors']['LIGHT']
+  | keyof EuiThemeShape['colors']['vis']
+) & {};

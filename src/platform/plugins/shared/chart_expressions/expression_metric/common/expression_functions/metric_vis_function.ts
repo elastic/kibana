@@ -142,6 +142,35 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       multi: false,
       default: 'default',
     },
+    secondaryColor: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.secondaryColor.help', {
+        defaultMessage: 'A static color to use for the secondary metric',
+      }),
+      required: false,
+    },
+    secondaryTrendVisuals: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.secondaryTrend.visuals.help', {
+        defaultMessage: 'Specifies the mode for the secondary metric trend value',
+      }),
+      required: false,
+    },
+    secondaryTrendBaseline: {
+      types: ['string', 'number'],
+      help: i18n.translate('expressionMetricVis.function.secondaryTrend.baseline.help', {
+        defaultMessage: 'Specifies the baseline used for the secondary metric trend',
+      }),
+      required: false,
+    },
+    secondaryTrendPalette: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.secondaryTrend.palette.help', {
+        defaultMessage: 'Specifies the palette used for the secondary metric trend',
+      }),
+      multi: true,
+      required: false,
+    },
   },
   fn(input, args, handlers) {
     validateAccessor(args.metric, input.columns);
@@ -221,6 +250,12 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             maxCols: args.maxCols,
             minTiles: args.minTiles,
             trends: args.trendline?.trends,
+            secondaryColor: args.secondaryColor,
+            secondaryTrend: {
+              visuals: args.secondaryTrendVisuals,
+              baseline: args.secondaryTrendBaseline,
+              palette: args.secondaryTrendPalette,
+            },
           },
           dimensions: {
             metric: args.metric,

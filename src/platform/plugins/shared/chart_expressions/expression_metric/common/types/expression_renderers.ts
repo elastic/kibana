@@ -25,6 +25,12 @@ export interface DimensionsVisParam {
 export interface MetricVisParam {
   subtitle?: string;
   secondaryPrefix?: string;
+  secondaryColor?: string;
+  secondaryTrend: {
+    visuals?: string;
+    baseline?: number | string;
+    palette?: [string, string, string];
+  };
   color?: string;
   icon?: string;
   palette?: PaletteOutput<CustomPaletteState>;

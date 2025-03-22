@@ -47,6 +47,13 @@ describe('TitlesAndTextPopover', () => {
     valuesTextAlign: 'right',
     iconAlign: 'left',
     valueFontMode: 'default',
+    secondaryColorMode: 'none',
+    secondaryColor: '',
+    secondaryTrend: {
+      visuals: 'icon',
+      palette: { name: 'foo', stops: ['red', 'green', 'blue'] },
+      baselineValue: 'primary',
+    },
   };
 
   const mockSetState = jest.fn();
