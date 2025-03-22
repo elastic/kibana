@@ -12,7 +12,6 @@ import userEvent from '@testing-library/user-event';
 import { basicFileMock } from '../../containers/mock';
 import { FileNameLink } from './file_name_link';
 
-// Failing: See https://github.com/elastic/kibana/issues/207369
 describe('FileNameLink', () => {
   const defaultProps = {
     file: basicFileMock,

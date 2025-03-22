@@ -27,7 +27,6 @@ const defaultProps = {
   isLoadingDescription: false,
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/185879
 describe('Description', () => {
   const onUpdateField = jest.fn();
 

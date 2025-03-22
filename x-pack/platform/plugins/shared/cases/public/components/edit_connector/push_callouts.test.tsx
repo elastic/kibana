@@ -20,7 +20,6 @@ const defaultProps = {
   onEditClick,
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/206367
 describe('PushCallouts ', () => {
   beforeEach(() => {
     jest.clearAllMocks();

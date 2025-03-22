@@ -14,7 +14,6 @@ import { TestProviders } from '../common/mock';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-// Failing: See https://github.com/elastic/kibana/issues/189634
 describe('Use get case hook', () => {
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'resolveCase');
