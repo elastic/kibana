@@ -14,6 +14,9 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import fs from 'fs/promises';
 import path from 'path';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { getEsqlSelfHealingGraph } from '../../server/assistant/tools/esql/esql_self_healing_graph';
 import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/task/agent';
 import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/rules/task/retrievers';
 import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/rules/task/util/esql_knowledge_base';
@@ -34,7 +37,7 @@ const createLlmInstance = () => {
   return mockLlm;
 };
 
-async function getAgentGraph(logger: Logger): Promise<Drawable> {
+async function getSiemMigrationGraph(logger: Logger): Promise<Drawable> {
   const model = createLlmInstance();
   const telemetryClient = {} as SiemMigrationTelemetryClient;
   const graph = getRuleMigrationAgent({
@@ -45,6 +48,16 @@ async function getAgentGraph(logger: Logger): Promise<Drawable> {
     telemetryClient,
   });
   return graph.getGraphAsync({ xray: true });
+}
+
+async function esqlSelfHealing(logger: Logger): Promise<Drawable> {
+  return getEsqlSelfHealingGraph({
+    esClient: {} as unknown as ElasticsearchClient,
+    connectorId: 'connectorId',
+    inference: {} as unknown as InferenceServerStart,
+    logger,
+    request: {} as unknown as KibanaRequest,
+  }).getGraphAsync({ xray: true });
 }
 
 export const drawGraph = async ({
@@ -61,6 +74,7 @@ export const drawGraph = async ({
   logger.info('Compiling graph');
   const outputPath = path.join(__dirname, outputFilename);
   const graph = await getGraphAsync(logger);
+  logger.info('Drawing graph');
   const output = await graph.drawMermaidPng();
   const buffer = Buffer.from(await output.arrayBuffer());
   logger.info(`Writing graph to ${outputPath}`);
@@ -69,7 +83,12 @@ export const drawGraph = async ({
 
 export const draw = async () => {
   await drawGraph({
-    getGraphAsync: getAgentGraph,
+    getGraphAsync: getSiemMigrationGraph,
     outputFilename: '../../docs/siem_migration/img/agent_graph.png',
+  });
+
+  await drawGraph({
+    getGraphAsync: esqlSelfHealing,
+    outputFilename: '../../docs/esql_self_healing/img/esql_self_healing_graph.png',
   });
 };
