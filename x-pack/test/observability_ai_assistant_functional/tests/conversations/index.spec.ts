@@ -32,13 +32,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   const retry = getService('retry');
   const log = getService('log');
   const telemetry = getService('kibana_ebt_ui');
-
-  const driver = getService('__webdriver__');
-
   const toasts = getService('toasts');
-
   const { header } = getPageObjects(['header', 'security']);
-
   const flyoutService = getService('flyout');
 
   async function login(username: string, password: string | undefined) {
