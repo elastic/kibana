@@ -194,7 +194,7 @@ export function ApmOverview() {
                     <EuiLink
                       data-test-subj="apmServiceOverviewViewDependenciesLink"
                       href={router.link('/services/{serviceName}/dependencies', {
-                        path: { serviceName },
+                        path: { serviceName: encodeURIComponent(serviceName) },
                         query,
                       })}
                     >

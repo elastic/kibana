@@ -81,7 +81,7 @@ export function getPathForServiceDetail(
     const apmPath = '/services/{serviceName}/dashboards';
     path = apmRouter.link(apmPath, {
       path: {
-        serviceName: payload.serviceName,
+        serviceName: encodeURIComponent(payload.serviceName),
       },
       query: {
         ...defaultQueryParams,
@@ -107,7 +107,7 @@ export function getPathForServiceDetail(
     };
 
     path = apmRouter.link(apmPath, {
-      path: { serviceName: payload.serviceName },
+      path: { serviceName: encodeURIComponent(payload.serviceName) },
       query,
     });
   }

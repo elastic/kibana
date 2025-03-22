@@ -84,7 +84,7 @@ export function MobileFilters() {
     (callApmApi) => {
       return callApmApi('GET /internal/apm/services/{serviceName}/mobile/filters', {
         params: {
-          path: { serviceName },
+          path: { serviceName: encodeURIComponent(serviceName) },
           query: { start, end, environment, kuery, transactionType },
         },
       });

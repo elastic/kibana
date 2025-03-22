@@ -148,7 +148,7 @@ export function ErrorGroupDetails() {
           return callApmApi('GET /internal/apm/services/{serviceName}/errors/{groupId}/samples', {
             params: {
               path: {
-                serviceName,
+                serviceName: encodeURIComponent(serviceName),
                 groupId,
               },
               query: {

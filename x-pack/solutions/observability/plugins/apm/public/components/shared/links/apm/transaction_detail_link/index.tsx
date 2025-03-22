@@ -61,7 +61,7 @@ export function TransactionDetailLink({
   const location = useLocation();
   const href = getLegacyApmHref({
     basePath: core.http.basePath,
-    path: `/services/${serviceName}/transactions/view`,
+    path: `/services/${encodeURIComponent(serviceName)}/transactions/view`,
     query: {
       traceId,
       transactionId,

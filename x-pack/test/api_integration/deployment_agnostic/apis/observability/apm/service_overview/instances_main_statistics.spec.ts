@@ -42,7 +42,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     const { body } = await apmApiClient.readUser({
       endpoint: `GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics`,
       params: {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query: {
           latencyAggregationType: LatencyAggregationType.avg,
           start: new Date(start).toISOString(),

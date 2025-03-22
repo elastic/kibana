@@ -34,7 +34,7 @@ export function useErrorGroupDistributionFetcher({
       if (start && end) {
         return callApmApi('GET /internal/apm/services/{serviceName}/errors/distribution', {
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: {
               environment,
               kuery,

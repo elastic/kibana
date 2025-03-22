@@ -124,7 +124,7 @@ export function EntityLink() {
   return (
     <Redirect
       to={router.link('/services/{serviceName}/overview', {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query: {
           rangeFrom,
           rangeTo,

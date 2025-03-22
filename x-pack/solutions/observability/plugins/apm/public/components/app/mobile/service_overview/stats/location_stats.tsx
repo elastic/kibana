@@ -55,7 +55,7 @@ export function MobileLocationStats({
     (callApmApi) => {
       return callApmApi('GET /internal/apm/mobile-services/{serviceName}/location/stats', {
         params: {
-          path: { serviceName },
+          path: { serviceName: encodeURIComponent(serviceName) },
           query: {
             start,
             end,

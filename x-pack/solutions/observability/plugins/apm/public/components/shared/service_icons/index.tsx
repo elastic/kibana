@@ -85,7 +85,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
       if (serviceName && start && end) {
         return callApmApi('GET /internal/apm/services/{serviceName}/metadata/icons', {
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: { start, end },
           },
         });
@@ -100,7 +100,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
         return callApmApi('GET /internal/apm/services/{serviceName}/metadata/details', {
           isCachable: true,
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: { start, end, environment },
           },
         });

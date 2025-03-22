@@ -61,6 +61,8 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
+  const serviceNameDecoded = decodeURIComponent(serviceName);
+
   const {
     agentName,
     runtimeName,
@@ -69,7 +71,7 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
     telemetrySdkLanguage,
     status: serviceAgentStatus,
   } = useServiceAgentFetcher({
-    serviceName,
+    serviceName: serviceNameDecoded,
     start,
     end,
   });
@@ -83,7 +85,7 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
   });
 
   const { transactionTypes, status: transactionTypeStatus } = useServiceTransactionTypesFetcher({
-    serviceName,
+    serviceName: serviceNameDecoded,
     start,
     end,
     documentType: preferred?.source.documentType,
@@ -91,7 +93,7 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
   });
 
   const { serviceEntitySummary, serviceEntitySummaryStatus } = useServiceEntitySummaryFetcher({
-    serviceName,
+    serviceName: serviceNameDecoded,
     environment,
   });
 
@@ -109,7 +111,7 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
   return (
     <APMServiceContext.Provider
       value={{
-        serviceName,
+        serviceName: serviceNameDecoded,
         agentName,
         serverlessType,
         telemetrySdkName,

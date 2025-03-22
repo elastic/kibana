@@ -93,7 +93,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       endpoint:
         'GET /internal/apm/services/{serviceName}/transactions/charts/coldstart_rate_by_transaction_name',
       params: {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query: {
           transactionType: 'request',
           transactionName,

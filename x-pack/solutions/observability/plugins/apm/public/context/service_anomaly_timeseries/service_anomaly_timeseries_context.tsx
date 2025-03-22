@@ -54,7 +54,7 @@ export function ServiceAnomalyTimeseriesContextProvider({
       return callApmApi('GET /internal/apm/services/{serviceName}/anomaly_charts', {
         params: {
           path: {
-            serviceName,
+            serviceName: encodeURIComponent(serviceName),
           },
           query: {
             start,

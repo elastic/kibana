@@ -25,7 +25,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     const response = await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/transaction_types',
       params: {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query: {
           start,
           end,

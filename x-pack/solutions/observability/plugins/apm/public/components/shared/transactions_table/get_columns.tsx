@@ -99,7 +99,7 @@ export function getColumns({
                     iconType="warning"
                     color="danger"
                     href={link('/services/{serviceName}/alerts', {
-                      path: { serviceName },
+                      path: { serviceName: encodeURIComponent(serviceName) },
                       query: {
                         ...query,
                         kuery: [

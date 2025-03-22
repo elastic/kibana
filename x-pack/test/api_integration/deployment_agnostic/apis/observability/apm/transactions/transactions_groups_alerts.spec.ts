@@ -53,7 +53,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     const response = await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
       params: {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query: {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),

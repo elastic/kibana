@@ -34,7 +34,7 @@ export function useServiceOrTransactionsOverviewHref({
 }: Props) {
   const query = { environment, transactionType };
   return useAPMHref({
-    path: `/services/${serviceName}`,
+    path: `/services/${encodeURIComponent(serviceName)}`,
     persistedFilters,
     query: removeUndefinedProps(query),
   });

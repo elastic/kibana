@@ -28,7 +28,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/metadata/details',
       params: {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query: {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),

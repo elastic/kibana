@@ -32,7 +32,7 @@ export function useTransactionsOverviewHref({
 
   return getLegacyApmHref({
     basePath: core.http.basePath,
-    path: `/services/${serviceName}/transactions`,
+    path: `/services/${encodeURIComponent(serviceName)}/transactions`,
     query: removeUndefinedProps(query),
     search,
   });

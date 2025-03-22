@@ -56,7 +56,7 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
         {
           params: {
             path: {
-              serviceName,
+              serviceName: encodeURIComponent(serviceName),
             },
             query: {
               kuery,

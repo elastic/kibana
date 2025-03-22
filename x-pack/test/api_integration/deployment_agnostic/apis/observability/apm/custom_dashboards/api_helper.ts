@@ -18,7 +18,7 @@ export async function getServiceDashboardApi(
   return apmApiClient.writeUser({
     endpoint: 'GET /internal/apm/services/{serviceName}/dashboards',
     params: {
-      path: { serviceName },
+      path: { serviceName: encodeURIComponent(serviceName) },
       query: {
         start: new Date(start).toISOString(),
         end: new Date(end).toISOString(),

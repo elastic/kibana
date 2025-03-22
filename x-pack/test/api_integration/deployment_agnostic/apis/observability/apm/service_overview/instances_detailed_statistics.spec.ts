@@ -40,7 +40,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             endpoint:
               'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
             params: {
-              path: { serviceName },
+              path: { serviceName: encodeURIComponent(serviceName) },
               query: {
                 latencyAggregationType: LatencyAggregationType.avg,
                 start,
@@ -93,7 +93,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               endpoint:
                 'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
               params: {
-                path: { serviceName },
+                path: { serviceName: encodeURIComponent(serviceName) },
                 query: {
                   latencyAggregationType: LatencyAggregationType.avg,
                   start,
@@ -150,7 +150,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               endpoint:
                 'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
               params: {
-                path: { serviceName },
+                path: { serviceName: encodeURIComponent(serviceName) },
                 query: {
                   latencyAggregationType: LatencyAggregationType.avg,
                   numBuckets: 20,

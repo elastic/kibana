@@ -43,7 +43,7 @@ export function useServiceMetricChartsFetcher({
       if (serviceName && start && end && agentName) {
         return callApmApi('GET /internal/apm/services/{serviceName}/metrics/charts', {
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: {
               environment,
               kuery,

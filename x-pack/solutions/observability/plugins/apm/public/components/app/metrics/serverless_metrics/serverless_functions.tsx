@@ -37,7 +37,7 @@ export function ServerlessFunctions() {
         {
           params: {
             path: {
-              serviceName,
+              serviceName: encodeURIComponent(serviceName),
             },
             query: {
               kuery,

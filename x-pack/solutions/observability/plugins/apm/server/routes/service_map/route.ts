@@ -90,7 +90,7 @@ const serviceMapRoute = createApmServerRoute({
       mlClient,
       config,
       apmEventClient,
-      serviceName,
+      serviceName: serviceName ? decodeURIComponent(serviceName) : serviceName,
       environment,
       searchAggregatedTransactions,
       logger: logger.get('serviceMap'),
@@ -141,7 +141,7 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
     return getServiceMapServiceNodeInfo({
       environment,
       apmEventClient,
-      serviceName,
+      serviceName: decodeURIComponent(serviceName),
       searchAggregatedTransactions,
       start,
       end,

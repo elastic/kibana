@@ -29,7 +29,7 @@ export function ServerlessFunctionNameLink({ serverlessFunctionName, serverlessI
     <StyledLink
       href={link('/services/{serviceName}/metrics/{id}', {
         path: {
-          serviceName,
+          serviceName: encodeURIComponent(serviceName),
           id: serverlessId,
         },
         query,

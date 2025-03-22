@@ -115,7 +115,7 @@ export function getServiceColumns({
                     iconType="warning"
                     color="danger"
                     href={link('/services/{serviceName}/alerts', {
-                      path: { serviceName },
+                      path: { serviceName: encodeURIComponent(serviceName) },
                       query: {
                         ...query,
                         alertStatus: ALERT_STATUS_ACTIVE,

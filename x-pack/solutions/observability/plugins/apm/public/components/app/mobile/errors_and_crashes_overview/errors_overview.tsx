@@ -95,7 +95,7 @@ export function MobileErrorsOverview() {
           {
             params: {
               path: {
-                serviceName,
+                serviceName: encodeURIComponent(serviceName),
               },
               query: {
                 environment,
@@ -114,7 +114,7 @@ export function MobileErrorsOverview() {
             .sort();
 
           return {
-            // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
+            // Every time the main statistics is refetched, updates the requestId making the comparison API to be refetched.
             requestId: uuidv4(),
             mobileErrorGroupMainStatistics: response.errorGroups,
             currentPageGroupIds,
@@ -145,7 +145,7 @@ export function MobileErrorsOverview() {
           'POST /internal/apm/mobile-services/{serviceName}/errors/groups/detailed_statistics',
           {
             params: {
-              path: { serviceName },
+              path: { serviceName: encodeURIComponent(serviceName) },
               query: {
                 environment,
                 kuery: kueryWithMobileFilters,

@@ -70,7 +70,7 @@ export function ServiceDashboards() {
         return callApmApi(`GET /internal/apm/services/{serviceName}/dashboards`, {
           isCachable: false,
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: { start, end, checkFor: checkForEntities ? 'entities' : 'services' },
           },
         });

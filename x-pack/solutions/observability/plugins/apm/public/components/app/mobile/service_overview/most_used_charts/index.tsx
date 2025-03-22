@@ -67,7 +67,7 @@ export function MostUsedCharts({
     (callApmApi) => {
       return callApmApi('GET /internal/apm/mobile-services/{serviceName}/most_used_charts', {
         params: {
-          path: { serviceName },
+          path: { serviceName: encodeURIComponent(serviceName) },
           query: {
             start,
             end,

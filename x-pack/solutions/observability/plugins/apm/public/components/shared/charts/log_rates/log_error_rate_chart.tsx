@@ -46,7 +46,7 @@ export function LogErrorRateChart({ height }: { height: number }) {
           {
             params: {
               path: {
-                serviceName,
+                serviceName: encodeURIComponent(serviceName),
               },
               query: {
                 environment,

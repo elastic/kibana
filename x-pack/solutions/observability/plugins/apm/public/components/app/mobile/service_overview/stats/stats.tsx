@@ -33,7 +33,7 @@ export function MobileStats({ start, end, kuery }: { start: string; end: string;
     (callApmApi) => {
       return callApmApi('GET /internal/apm/mobile-services/{serviceName}/stats', {
         params: {
-          path: { serviceName },
+          path: { serviceName: encodeURIComponent(serviceName) },
           query: {
             start,
             end,

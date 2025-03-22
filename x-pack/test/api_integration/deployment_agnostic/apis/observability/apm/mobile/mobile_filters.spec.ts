@@ -155,7 +155,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       .readUser({
         endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
         params: {
-          path: { serviceName },
+          path: { serviceName: encodeURIComponent(serviceName) },
           query: {
             environment,
             start: new Date(start).toISOString(),

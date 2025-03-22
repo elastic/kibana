@@ -44,7 +44,7 @@ export function ProfilingHostsFlamegraph({
       if (dataSource) {
         return callApmApi('GET /internal/apm/services/{serviceName}/profiling/hosts/flamegraph', {
           params: {
-            path: { serviceName },
+            path: { serviceName: encodeURIComponent(serviceName) },
             query: {
               start,
               end,

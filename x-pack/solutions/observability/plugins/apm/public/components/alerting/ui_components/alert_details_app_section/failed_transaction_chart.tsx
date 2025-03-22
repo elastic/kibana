@@ -106,7 +106,7 @@ function FailedTransactionChart({
           {
             params: {
               path: {
-                serviceName,
+                serviceName: encodeURIComponent(serviceName),
               },
               query: {
                 environment,

@@ -36,7 +36,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/mobile-services/{serviceName}/transactions/charts/http_requests',
       params: {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query: {
           environment,
           start: new Date(start).toISOString(),

@@ -63,7 +63,7 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
     () => ({
       title,
       href: router.link(`/services/{serviceName}/${selectedTab}` as const, {
-        path: { serviceName },
+        path: { serviceName: encodeURIComponent(serviceName) },
         query,
       }),
     }),

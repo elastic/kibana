@@ -17,5 +17,7 @@ export function RedirectToDefaultServiceRouteView() {
 
   const search = qs.stringify(query);
 
-  return <Redirect to={{ pathname: `/services/${serviceName}/overview`, search }} />;
+  return (
+    <Redirect to={{ pathname: `/services/${encodeURIComponent(serviceName)}/overview`, search }} />
+  );
 }
