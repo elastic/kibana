@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION = '1.13.0-preview02';
+export const CLOUD_SECURITY_POSTURE_PACKAGE_VERSION = '1.13.0';
