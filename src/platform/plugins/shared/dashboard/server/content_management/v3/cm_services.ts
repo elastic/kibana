@@ -282,7 +282,14 @@ export const panelSchema = schema.object({
   id: schema.maybe(
     schema.string({ meta: { description: 'The saved object id for by reference panels' } })
   ),
-  type: schema.string({ meta: { description: 'The embeddable type' } }),
+  // Type is not required if the panel is a by-reference (has `panelRefName`)
+  type: schema.conditional(
+    schema.siblingRef('panelRefName'),
+    schema.string(),
+    schema.maybe(schema.string()),
+    schema.string(),
+    { meta: { description: 'The embeddable type' } }
+  ),
   panelRefName: schema.maybe(schema.string()),
   gridData: gridDataSchema,
   panelIndex: schema.maybe(
