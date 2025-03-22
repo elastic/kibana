@@ -23,7 +23,9 @@ import {
   EuiSplitPanel,
   EuiCallOut,
   IconType,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { isEmpty, partition, some } from 'lodash';
 import { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
 import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
@@ -88,6 +90,30 @@ export const SystemActionTypeForm = ({
   const [actionParamsErrors, setActionParamsErrors] = useState<{ errors: IErrorObject }>({
     errors: {},
   });
+
+  const { euiTheme } = useEuiTheme();
+
+  const actAccordionActionFormCss = css`
+    .actAccordionActionForm {
+      background-color: ${euiTheme.colors.lightestShade};
+
+      .euiCard {
+        box-shador: none;
+      }
+      .actAccordionActionForm__button {
+        padding: ${euiTheme.size.m};
+        padding-left: ${euiTheme.size.l};
+      }
+
+      .euiAccordion__arrow {
+        transform: translateX(${euiTheme.size.m}) rotate(0deg) !important;
+      }
+
+      .euiAccordion__arrow[aria-expanded='true'] {
+        transform: translateX(${euiTheme.size.m}) rotate(90deg) !important;
+      }
+    }
+  `;
 
   const [warning, setWarning] = useState<string | null>(null);
 
@@ -222,7 +248,7 @@ export const SystemActionTypeForm = ({
 
   return (
     <>
-      <EuiSplitPanel.Outer hasShadow={isOpen}>
+      <EuiSplitPanel.Outer hasShadow={isOpen} css={actAccordionActionFormCss}>
         <EuiAccordion
           initialIsOpen={true}
           key={index}

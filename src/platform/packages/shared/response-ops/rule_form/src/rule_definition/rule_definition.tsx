@@ -23,7 +23,9 @@ import {
   EuiSplitPanel,
   EuiText,
   useEuiTheme,
+  useEuiFontSize,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { RuleSpecificFlappingProperties } from '@kbn/alerting-types';
 import {
   RuleSettingsFlappingForm,
@@ -70,8 +72,31 @@ export const RuleDefinition = () => {
     flappingSettings,
   } = useRuleFormState();
 
-  const { colorMode } = useEuiTheme();
+  const { colorMode, euiTheme } = useEuiTheme();
   const dispatch = useRuleFormDispatch();
+
+  const ruleDefinitionContainerCss = css`
+    @media (max-width: 767px) {
+      .euiDescribedFormGroup {
+        flex-direction: column;
+      }
+      .euiDescribedFormGroup > .euiFlexItem {
+        width: 100%;
+      }
+      .ruleDefinitionHeader {
+        flex-direction: column;
+        gap: ${euiTheme.size.m};
+      }
+      .ruleDefinitionHeaderRuleTypeName {
+        font-size: ${useEuiFontSize('m')}
+        margin-bottom: ${euiTheme.size.xs}
+      }
+      .ruleDefinitionHeaderRuleTypeDescription,
+      .ruleDefinitionHeaderDocsLink {
+        font-size: ${useEuiFontSize('s')};
+      }
+    }
+  `;
 
   useEffect(() => {
     // Need to do a dry run validating the params because the Missing Monitor Data rule type
@@ -191,7 +216,12 @@ export const RuleDefinition = () => {
   );
 
   return (
-    <EuiSplitPanel.Outer hasBorder hasShadow={false} data-test-subj="ruleDefinition">
+    <EuiSplitPanel.Outer
+      hasBorder
+      hasShadow={false}
+      data-test-subj="ruleDefinition"
+      css={ruleDefinitionContainerCss}
+    >
       <EuiSplitPanel.Inner color="subdued">
         <EuiFlexGroup gutterSize="s" className="ruleDefinitionHeader">
           <EuiFlexItem grow={false} data-test-subj="ruleDefinitionHeaderRuleTypeName">

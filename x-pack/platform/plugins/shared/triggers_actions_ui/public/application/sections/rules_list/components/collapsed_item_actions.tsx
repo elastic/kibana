@@ -18,8 +18,10 @@ import {
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
 
+import { css } from '@emotion/react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { RuleTableItem, SnoozeSchedule } from '../../../../types';
 import {
@@ -27,7 +29,6 @@ import {
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
 import { isRuleSnoozed } from '../../../lib';
-import './collapsed_item_actions.scss';
 import { futureTimeToInterval, SnoozePanel } from './rule_snooze';
 import {
   SNOOZE_FAILED_MESSAGE,
@@ -69,9 +70,17 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     notifications: { toasts },
   } = useKibana().services;
 
+  const { euiTheme } = useEuiTheme();
+
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(!item.enabled);
   const [isUntrackAlertsModalOpen, setIsUntrackAlertsModalOpen] = useState<boolean>(false);
+
+  const collapsedItemActionsCss = css`
+    .collapsedItemActions__deleteButton {
+      color: ${euiTheme.colors.textDanger};
+    }
+  `;
 
   useEffect(() => {
     setIsDisabled(!item.enabled);
@@ -357,6 +366,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           className="actCollapsedItemActions"
           data-test-subj="collapsedActionPanel"
           data-testid="collapsedActionPanel"
+          css={collapsedItemActionsCss}
         />
       </EuiPopover>
       {isUntrackAlertsModalOpen && (

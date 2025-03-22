@@ -9,6 +9,7 @@
 
 import { EuiFlyoutResizable, EuiLoadingElastic } from '@elastic/eui';
 import React, { Suspense, lazy, useCallback } from 'react';
+import { css } from '@emotion/react';
 import type { RuleFormProps } from '../src/rule_form';
 import type { RuleTypeMetaData } from '../src/types';
 import {
@@ -25,6 +26,11 @@ const RuleFormFlyoutRenderer = <MetaData extends RuleTypeMetaData>(
   props: RuleFormProps<MetaData>
 ) => {
   const { onClickClose, hideCloseButton } = useRuleFlyoutUIContext();
+
+  const inLineContainerCss = css`
+    container-type: inline-size;
+  `;
+
   const onClose = useCallback(() => {
     // If onClickClose has been initialized, call it instead of onCancel. onClickClose should be used to
     // determine if the close confirmation modal should be shown. props.onCancel is passed down the component hierarchy
@@ -41,6 +47,7 @@ const RuleFormFlyoutRenderer = <MetaData extends RuleTypeMetaData>(
   return (
     <EuiFlyoutResizable
       ownFocus
+      css={inLineContainerCss}
       onClose={onClose}
       aria-labelledby="flyoutTitle"
       size={620}
