@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy } from 'react';
 
 import { ALERT_REASON, SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
 
-import type { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import type {
+  AlertDetailsAppSectionProps,
+  ObservabilityRuleTypeModel,
+} from '@kbn/observability-plugin/public';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../../../../common/utils/get_synthetics_monitor_url';
@@ -20,7 +23,10 @@ import type { AlertTypeInitializer } from './types';
 const { defaultActionMessage, defaultRecoveryMessage, description } =
   SyntheticsMonitorStatusTranslations;
 
-const MonitorStatusAlert = React.lazy(() => import('./lazy_wrapper/monitor_status'));
+const MonitorStatusAlert = lazy(() => import('./lazy_wrapper/monitor_status'));
+const MonitorStatusAlertDetailsSection = lazy(
+  () => import('../../components/alerts/details_sections/monitor_status_details')
+);
 
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   core,
@@ -41,6 +47,9 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   defaultActionMessage,
   defaultRecoveryMessage,
   requiresAppContext: false,
+  alertDetailsAppSection: (props: AlertDetailsAppSectionProps) => (
+    <MonitorStatusAlertDetailsSection {...props} core={core} plugins={plugins} />
+  ),
   format: ({ fields }) => {
     return {
       reason: fields[ALERT_REASON] || '',

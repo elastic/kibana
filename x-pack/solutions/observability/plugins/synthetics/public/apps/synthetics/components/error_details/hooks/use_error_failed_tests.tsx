@@ -17,38 +17,50 @@ import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 
-export function useErrorFailedTests() {
+export function useErrorFailedTests({
+  errorStateId,
+  configId,
+}: {
+  errorStateId?: string;
+  configId?: string;
+} = {}) {
   const { lastRefresh } = useSyntheticsRefreshContext();
 
-  const { errorStateId, monitorId } = useParams<{ errorStateId: string; monitorId: string }>();
+  const { errorStateId: errorStateIdUrl, monitorId: monitorIdUrl } = useParams<{
+    errorStateId: string;
+    monitorId: string;
+  }>();
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+
+  const errorStateIdToUse = errorStateId ?? errorStateIdUrl;
+  const monitorId = configId ?? monitorIdUrl;
 
   const { data, loading } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
-      size: 10000,
-      query: {
-        bool: {
-          filter: [
-            SUMMARY_FILTER,
-            EXCLUDE_RUN_ONCE_FILTER,
-            {
-              term: {
-                'state.id': errorStateId,
+        size: 10000,
+        query: {
+          bool: {
+            filter: [
+              SUMMARY_FILTER,
+              EXCLUDE_RUN_ONCE_FILTER,
+              {
+                term: {
+                  'state.id': errorStateIdToUse,
+                },
               },
-            },
-            {
-              term: {
-                config_id: monitorId,
+              {
+                term: {
+                  config_id: monitorId,
+                },
               },
-            },
-          ],
+            ],
+          },
         },
         sort: [{ '@timestamp': 'desc' }],
-      },
     },
-    [lastRefresh, monitorId, dateRangeStart, dateRangeEnd],
+    [lastRefresh, monitorId, dateRangeStart, dateRangeEnd, errorStateIdToUse],
     { name: 'getMonitorErrorFailedTests' }
   );
 

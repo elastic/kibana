@@ -38,6 +38,8 @@ export const infraSources = [
 
 export const apmSources = [SERVICE_NAME, SERVICE_ENVIRONMENT, TRANSACTION_TYPE, TRANSACTION_NAME];
 
+export const syntheticsSources = ['monitor.id'];
+
 const infraSourceLinks: Record<string, string> = {
   [HOST_NAME]: `${METRICS_DETAILS_PATH}/host`,
   [CONTAINER_ID]: `${METRICS_DETAILS_PATH}/container`,
@@ -59,6 +61,10 @@ const generateInfraSourceLink = (
       : `${infraSourceLinks[field]}/${value}?${infraTimeRange}`;
 
   return link;
+};
+
+const generateSyntheticsSourceLink = ({ field, value }: Group) => {
+  return `/app/synthetics/monitor/${value}`;
 };
 
 const generateApmSourceLink = (
@@ -113,5 +119,7 @@ export const generateSourceLink = (
     return prepend?.(generateInfraSourceLink({ field, value }, hostTimeRange, infraTimeRange));
   } else if (apmSources.includes(field)) {
     return generateApmSourceLink({ field, value }, timeRange, serviceName, baseLocator);
+  } else if (syntheticsSources.includes(field)) {
+    return generateSyntheticsSourceLink({ field, value });
   }
 };
