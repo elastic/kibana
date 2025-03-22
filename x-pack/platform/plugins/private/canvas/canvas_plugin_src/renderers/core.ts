@@ -8,9 +8,21 @@
 import { markdownFactory } from './markdown';
 import { pie } from './pie';
 import { plot } from './plot';
+import { repeatImageRendererFactory } from './repeat_image';
+import { revealImageRendererFactory } from './reveal_image';
+import { progressRendererFactory } from './progress';
+import { shapeRendererFactory } from './shape';
 import { textFactory } from './text';
 import { tableFactory } from './table';
 
 export const renderFunctions = [pie, plot];
 
-export const renderFunctionFactories = [markdownFactory, tableFactory, textFactory];
+export const renderFunctionFactories = [
+  markdownFactory,
+  progressRendererFactory,
+  repeatImageRendererFactory,
+  revealImageRendererFactory,
+  shapeRendererFactory,
+  tableFactory,
+  textFactory,
+];

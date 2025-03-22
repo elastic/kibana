@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getAvailableProgressShapes } from '@kbn/expression-shape-plugin/common';
 import { openSans } from '../../../common/lib/fonts';
 import { ViewStrings } from '../../../i18n';
+import { getAvailableProgressShapes } from '../../renderers/progress';
 
 const { Progress: strings } = ViewStrings;
 

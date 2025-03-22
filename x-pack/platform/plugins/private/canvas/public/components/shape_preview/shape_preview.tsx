@@ -7,13 +7,8 @@
 
 import React, { FC, RefCallback, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  ShapeDrawerComponent,
-  getDefaultShapeData,
-  SvgConfig,
-  ShapeRef,
-  ViewBoxParams,
-} from '@kbn/expression-shape-plugin/public';
+import { ShapeDrawerComponent } from '../../../canvas_plugin_src/renderers/shape/components';
+import { getDefaultShapeData, SvgConfig, ShapeRef, ViewBoxParams } from '../shape_drawer';
 
 interface Props {
   shape?: string;
