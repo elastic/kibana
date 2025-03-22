@@ -128,7 +128,12 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     return { field: find(testSubject as TestSubjects), testSubject };
   };
 
-  const addField = async (name: string, type: string, subType?: string) => {
+  const addField = async (
+    name: string,
+    type: string,
+    subType?: string,
+    referenceFieldValue?: string
+  ) => {
     await act(async () => {
       form.setInputValue('nameParameterInput', name);
       jest.advanceTimersByTime(0); // advance timers to allow the form to validate
@@ -149,6 +154,11 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
         form.setInputValue('createFieldForm.fieldSubType', subType);
         jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
+    }
+
+    if (referenceFieldValue !== undefined) {
+      form.setSelectValue('select', referenceFieldValue);
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
     }
 
     await act(async () => {
