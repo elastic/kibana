@@ -49,3 +49,8 @@ export const isBreadcrumbHidden = (id: SolutionPageName): boolean =>
   HIDDEN_BREADCRUMBS.has(id) ||
   /* management sub-pages set their breadcrumbs themselves, the main Management breadcrumb is configured with our navigationTree definition */
   (id.startsWith(ExternalPageName.management) && id !== ExternalPageName.management);
+
+export const isSideNavStatusHidden = (ids: SolutionPageName[]): boolean => {
+  // Dashboard nav children should not be visible. The Dashboard nav item should only navigate to a landing page
+  return ids[0] === SecurityPageName.dashboards;
+};
