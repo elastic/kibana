@@ -24,8 +24,7 @@ export const initSideNavigation = async (
 ) => {
   services.securitySolution.setIsSolutionNavigationEnabled(true);
 
-  const { navigationTree$, panelContentProvider } =
-    await services.securitySolution.getSolutionNavigation();
+  const { navigationTree$ } = await services.securitySolution.getSolutionNavigation();
 
   const serverlessNavigationTree$ = navigationTree$.pipe(
     map((navigationTree) =>
@@ -53,7 +52,6 @@ export const initSideNavigation = async (
   );
 
   services.serverless.initNavigation('security', serverlessNavigationTree$, {
-    panelContentProvider,
     dataTestSubj: 'securitySolutionSideNav',
   });
 };
