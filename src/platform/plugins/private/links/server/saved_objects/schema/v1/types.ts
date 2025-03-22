@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  LinksByValueSerializedState,
-  LinksByReferenceSerializedState,
-  LinksSerializedState,
-} from './latest';
+import { TypeOf } from '@kbn/config-schema';
+import { savedObjectLinksAttributesSchema } from './v1';
 
-export { LinksStorage } from './links_storage';
+export type SavedObjectLinksAttributes = TypeOf<typeof savedObjectLinksAttributesSchema>;

@@ -8,7 +8,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
+import type {
+  ContentManagementServicesDefinition as ServicesDefinition,
+  VersionableObject,
+} from '@kbn/object-versioning';
 import {
   savedObjectSchema,
   createResultSchema,
@@ -16,62 +19,9 @@ import {
   createOptionsSchemas,
   objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
-import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../../../common/content_management/v1';
-import {
-  LINKS_HORIZONTAL_LAYOUT,
-  LINKS_VERTICAL_LAYOUT,
-} from '../../../../common/content_management/v1/constants';
+import { savedObjectLinksAttributesSchema } from '../../saved_objects/schema/v1';
 
-const baseLinkSchema = {
-  id: schema.string(),
-  label: schema.maybe(schema.string()),
-  order: schema.number(),
-};
-
-const dashboardLinkSchema = schema.object({
-  ...baseLinkSchema,
-  destinationRefName: schema.string(),
-  type: schema.literal(DASHBOARD_LINK_TYPE),
-  options: schema.maybe(
-    schema.object(
-      {
-        openInNewTab: schema.boolean(),
-        useCurrentFilters: schema.boolean(),
-        useCurrentDateRange: schema.boolean(),
-      },
-      { unknowns: 'forbid' }
-    )
-  ),
-});
-
-const externalLinkSchema = schema.object({
-  ...baseLinkSchema,
-  type: schema.literal(EXTERNAL_LINK_TYPE),
-  destination: schema.string(),
-  options: schema.maybe(
-    schema.object(
-      {
-        openInNewTab: schema.boolean(),
-        encodeUrl: schema.boolean(),
-      },
-      { unknowns: 'forbid' }
-    )
-  ),
-});
-
-const linksAttributesSchema = schema.object(
-  {
-    title: schema.string(),
-    description: schema.maybe(schema.string()),
-    links: schema.arrayOf(schema.oneOf([dashboardLinkSchema, externalLinkSchema])),
-    layout: schema.maybe(
-      schema.oneOf([schema.literal(LINKS_HORIZONTAL_LAYOUT), schema.literal(LINKS_VERTICAL_LAYOUT)])
-    ),
-  },
-  { unknowns: 'forbid' }
-);
-
-const linksSavedObjectSchema = savedObjectSchema(linksAttributesSchema);
+const linksSavedObjectSchema = savedObjectSchema(savedObjectLinksAttributesSchema);
 
 const searchOptionsSchema = schema.maybe(
   schema.object(
@@ -93,7 +43,7 @@ const linksUpdateOptionsSchema = schema.object({
 
 // Content management service definition.
 // We need it for BWC support between different versions of the content
-export const serviceDefinition: ServicesDefinition = {
+export const cmServiceDefinition: ServicesDefinition = {
   get: {
     out: {
       result: {
@@ -107,7 +57,11 @@ export const serviceDefinition: ServicesDefinition = {
         schema: linksCreateOptionsSchema,
       },
       data: {
-        schema: linksAttributesSchema,
+        schema: savedObjectLinksAttributesSchema,
+        up: (attributes) => {
+          // TODO inject references...
+          return attributes;
+        },
       },
     },
     out: {
@@ -122,7 +76,7 @@ export const serviceDefinition: ServicesDefinition = {
         schema: linksUpdateOptionsSchema, // same schema as "create"
       },
       data: {
-        schema: linksAttributesSchema,
+        schema: savedObjectLinksAttributesSchema,
       },
     },
   },
@@ -139,5 +93,13 @@ export const serviceDefinition: ServicesDefinition = {
         schema: linksSavedObjectSchema,
       },
     },
+  },
+};
+
+export const embeddableVersionableObject: VersionableObject = {
+  schema: savedObjectLinksAttributesSchema,
+  up: (attributes) => {
+    // TODO inject references...
+    return attributes;
   },
 };

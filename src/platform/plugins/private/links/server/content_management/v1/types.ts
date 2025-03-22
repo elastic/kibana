@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ContentManagementServicesDefinition as ServicesDefinition,
-  Version,
-} from '@kbn/object-versioning';
+import type { SavedObjectLinksAttributes } from '../../saved_objects/schema/v1';
 
-// We export the versioned service definition from this file and not the index file to avoid adding
-// the schemas in the "public" js bundle
+export type LinksAttributes = SavedObjectLinksAttributes;
 
-import { serviceDefinition as v1 } from './v1/cm_services';
+export interface LinksByValueSerializedState {
+  attributes: LinksAttributes;
+}
 
-export const cmServicesDefinition: { [version: Version]: ServicesDefinition } = {
-  1: v1,
-};
+export interface LinksByReferenceSerializedState {
+  savedObjectId: string;
+}
+
+export type LinksSerializedState = LinksByValueSerializedState | LinksByReferenceSerializedState;

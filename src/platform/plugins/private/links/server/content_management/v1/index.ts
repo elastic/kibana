@@ -11,6 +11,10 @@ export type {
   LinksByValueSerializedState,
   LinksByReferenceSerializedState,
   LinksSerializedState,
-} from './latest';
+} from './types';
 
-export { LinksStorage } from './links_storage';
+export {
+  dashboardLinkSchema,
+  externalLinkSchema,
+  savedObjectLinksAttributesSchema,
+} from '../../saved_objects/schema/v1';
