@@ -20,7 +20,7 @@ export const useESQLVariables = ({
   closeFlyout,
 }: {
   parentApi: unknown;
-  attributes: TypedLensSerializedState['attributes'];
+  attributes?: TypedLensSerializedState['attributes'];
   panelId?: string;
   closeFlyout?: () => void;
 }) => {
@@ -55,7 +55,7 @@ export const useESQLVariables = ({
           id: uuidv4(),
         },
       });
-      if (panel && updatedQuery) {
+      if (panel && updatedQuery && attributes) {
         panel.updateAttributes({
           ...attributes,
           state: {
