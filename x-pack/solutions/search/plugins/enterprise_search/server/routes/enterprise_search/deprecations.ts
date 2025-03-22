@@ -61,4 +61,68 @@ export function registerDeprecationRoutes({ router, log }: RouteDependencies) {
       });
     })
   );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/deprecations/clean_ent_search_accounts',
+      validate: {
+        body: schema.object({
+          deprecationDetails: schema.object({ domainId: schema.literal('enterpriseSearch') }),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const esClient = client.asCurrentUser;
+
+      const esUser = await esClient.security.getUser({ username: 'enterprise_search' });
+      const esServerCredentials =
+        (await esClient.security.getServiceCredentials({
+          namespace: 'elastic',
+          service: 'enterprise-search-server',
+        })) || {};
+      const esCloudApiKeys =
+        (await esClient.security.getApiKey({ username: 'cloud-internal-enterprise_search-server' }))
+          .api_keys || [];
+
+      const credentialTokenIds: string[] = [];
+      Object.entries(esServerCredentials.tokens).forEach(([tokenId]) => {
+        credentialTokenIds.push(tokenId);
+      });
+
+      if (!esUser && credentialTokenIds.length === 0 && esCloudApiKeys.length === 0) {
+        // nothing to delete or invalidate - just return success
+        return response.ok({
+          body: { success: true },
+          headers: { 'content-type': 'application/json' },
+        });
+      }
+
+      if (esUser) {
+        await esClient.security.deleteUser({ username: 'enterprise_search' });
+      }
+
+      for (const tokenId of credentialTokenIds) {
+        await esClient.security.deleteServiceToken({
+          namespace: 'elastic',
+          service: 'enterprise-search-server',
+          name: tokenId,
+        });
+      }
+
+      if (esCloudApiKeys.length > 0) {
+        const keys = esCloudApiKeys.map((key) => key.id);
+        await esClient.security.invalidateApiKey({ ids: keys });
+      }
+
+      for (const apiKey of esCloudApiKeys) {
+        await esClient.security.invalidateApiKey({ id: apiKey.id });
+      }
+
+      return response.ok({
+        body: { success: true },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
 }
