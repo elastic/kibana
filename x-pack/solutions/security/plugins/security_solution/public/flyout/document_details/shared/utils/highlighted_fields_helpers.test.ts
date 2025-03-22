@@ -11,7 +11,7 @@ import {
 } from './highlighted_fields_helpers';
 
 const scopeId = 'scopeId';
-const isPreview = false;
+const isRulePreview = false;
 
 describe('convertHighlightedFieldsToTableRow', () => {
   it('should convert highlighted fields to a table row', () => {
@@ -20,14 +20,14 @@ describe('convertHighlightedFieldsToTableRow', () => {
         values: ['host-1'],
       },
     };
-    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview)).toEqual([
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isRulePreview)).toEqual([
       {
         field: 'host.name',
         description: {
           field: 'host.name',
           values: ['host-1'],
           scopeId: 'scopeId',
-          isPreview,
+          isRulePreview,
         },
       },
     ]);
@@ -40,7 +40,7 @@ describe('convertHighlightedFieldsToTableRow', () => {
         values: ['host-1'],
       },
     };
-    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview)).toEqual([
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isRulePreview)).toEqual([
       {
         field: 'host.name-override',
         description: {
@@ -48,7 +48,7 @@ describe('convertHighlightedFieldsToTableRow', () => {
           originalField: 'host.name',
           values: ['host-1'],
           scopeId: 'scopeId',
-          isPreview,
+          isRulePreview,
         },
       },
     ]);
@@ -61,7 +61,7 @@ describe('convertHighlightedFieldsToTableRow', () => {
         values: ['host-1'],
       },
     };
-    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview)).toEqual([
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isRulePreview)).toEqual([
       {
         field: 'host.name-override',
         description: {
@@ -69,7 +69,7 @@ describe('convertHighlightedFieldsToTableRow', () => {
           originalField: 'host.name',
           values: ['value override!'],
           scopeId: 'scopeId',
-          isPreview,
+          isRulePreview,
         },
       },
     ]);

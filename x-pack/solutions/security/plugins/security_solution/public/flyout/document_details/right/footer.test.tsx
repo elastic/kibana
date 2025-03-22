@@ -36,7 +36,7 @@ describe('PanelFooter', () => {
     const { queryByTestId } = render(
       <TestProviders>
         <DocumentDetailsContext.Provider value={mockContextValue}>
-          <PanelFooter isPreview={true} />
+          <PanelFooter isRulePreview={true} />
         </DocumentDetailsContext.Provider>
       </TestProviders>
     );
@@ -60,7 +60,7 @@ describe('PanelFooter', () => {
     const wrapper = render(
       <TestProviders>
         <DocumentDetailsContext.Provider value={mockContextValue}>
-          <PanelFooter isPreview={false} />
+          <PanelFooter isRulePreview={false} />
         </DocumentDetailsContext.Provider>
       </TestProviders>
     );

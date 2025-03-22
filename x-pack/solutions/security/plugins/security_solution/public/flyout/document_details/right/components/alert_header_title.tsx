@@ -36,7 +36,7 @@ export const AlertHeaderTitle = memo(() => {
     dataFormattedForFieldBrowser,
     eventId,
     scopeId,
-    isPreview,
+    isRulePreview,
     refetchFlyoutData,
     getFieldsData,
   } = useDocumentDetailsContext();
@@ -46,7 +46,7 @@ export const AlertHeaderTitle = memo(() => {
 
   const { ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const title = useMemo(() => getAlertTitle({ ruleName }), [ruleName]);
-  const href = useRuleDetailsLink({ ruleId: !isPreview ? ruleId : null });
+  const href = useRuleDetailsLink({ ruleId: !isRulePreview ? ruleId : null });
   const ruleTitle = useMemo(
     () =>
       href ? (
@@ -105,7 +105,7 @@ export const AlertHeaderTitle = memo(() => {
               eventId={eventId}
               assignedUserIds={alertAssignees}
               onAssigneesUpdated={onAssigneesUpdated}
-              isPreview={isPreview}
+              isRulePreview={isRulePreview}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -134,7 +134,7 @@ export const AlertHeaderTitle = memo(() => {
                   eventId={eventId}
                   assignedUserIds={alertAssignees}
                   onAssigneesUpdated={onAssigneesUpdated}
-                  isPreview={isPreview}
+                  isRulePreview={isRulePreview}
                 />
               </EuiFlexItem>
               <EuiFlexItem>

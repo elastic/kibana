@@ -43,14 +43,14 @@ const TITLE_TEXT = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(
 );
 const INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID = `${CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID}InvestigateInTimeline`;
 
-const renderSuppressedAlerts = (alertSuppressionCount: number, isPreview: boolean = false) =>
+const renderSuppressedAlerts = (alertSuppressionCount: number, isRulePreview: boolean = false) =>
   render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={mockContextValue}>
         <SuppressedAlerts
           alertSuppressionCount={alertSuppressionCount}
           dataAsNestedObject={mockDataAsNestedObject}
-          isPreview={isPreview}
+          isRulePreview={isRulePreview}
         />
       </DocumentDetailsContext.Provider>
     </TestProviders>
