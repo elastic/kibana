@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
+import type { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
 import { arraysToEqual } from '../../../common/lib/validation';
 import {
   postCommentUserReq,
@@ -17,7 +17,7 @@ import {
   postExternalReferenceESReq,
   persistableStateAttachment,
 } from '../../../common/lib/mock';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
 
 import {

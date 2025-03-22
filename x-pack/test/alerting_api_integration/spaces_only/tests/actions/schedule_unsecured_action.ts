@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { Spaces } from '../../scenarios';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export

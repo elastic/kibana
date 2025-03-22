@@ -7,7 +7,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 const ES_TEST_INDEX_NAME = 'functional-test-connectors-index';
 const ES_TEST_DATASTREAM_PREFIX = 'functional-test-connectors-ds';
