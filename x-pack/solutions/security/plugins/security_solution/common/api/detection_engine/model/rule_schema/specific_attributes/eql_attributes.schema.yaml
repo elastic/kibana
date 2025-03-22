@@ -10,7 +10,7 @@ components:
       type: string
     TimestampField:
       type: string
-      description: Contains the event timestamp used for sorting a sequence of events
+      description: Contains the event timestamp used for sorting a sequence of events. This is different from timestamp_override, which is used for querying events within a range. Defaults to the @timestamp ECS field.
     TiebreakerField:
       type: string
       description: Sets a secondary field for sorting events

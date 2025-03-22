@@ -5734,10 +5734,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -5865,10 +5867,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -6401,10 +6405,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -6532,10 +6538,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -7131,10 +7139,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -7262,10 +7272,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -7730,6 +7742,7 @@ Object {
           "type": "object",
         },
         "anomalyThreshold": Object {
+          "maximum": 100,
           "minimum": 0,
           "type": "integer",
         },
@@ -7779,10 +7792,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -7910,10 +7925,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -8385,7 +8402,8 @@ Object {
           "type": "array",
         },
         "historyWindowStart": Object {
-          "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+          "minLength": 1,
+          "type": "string",
         },
         "index": Object {
           "items": Object {
@@ -8482,10 +8500,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -8613,10 +8633,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -9187,10 +9209,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -9318,10 +9342,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -9892,10 +9918,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -10023,10 +10051,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [

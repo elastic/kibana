@@ -17,13 +17,13 @@
 import { z } from '@kbn/zod';
 
 /**
- * Anomaly threshold
+ * Anomaly score threshold above which the rule creates an alert.
  */
 export type AnomalyThreshold = z.infer<typeof AnomalyThreshold>;
-export const AnomalyThreshold = z.number().int().min(0);
+export const AnomalyThreshold = z.number().int().min(0).max(100);
 
 /**
- * Machine learning job ID
+ * Machine learning job ID(s) the rule monitors for anomaly scores.
  */
 export type MachineLearningJobId = z.infer<typeof MachineLearningJobId>;
 export const MachineLearningJobId = z.union([z.string(), z.array(z.string()).min(1)]);
