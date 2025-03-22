@@ -90,7 +90,8 @@ export function getDashboardApi({
     initialPanelsRuntimeState ?? {},
     trackPanel,
     getPanelReferences,
-    pushPanelReferences
+    pushPanelReferences,
+    savedObjectId
   );
   const dataLoadingManager = initializeDataLoadingManager(panelsManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(
