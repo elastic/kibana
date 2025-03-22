@@ -45,6 +45,7 @@ import { isLogsOnlySignal } from '../../../utils/get_signal_type';
 import { ServiceTabEmptyState } from '../service_tab_empty_state';
 import { useServiceMap } from './use_service_map';
 import { TryItButton } from '../../shared/try_it_button';
+import { WarningTooltip } from './warning_tooltip';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -148,7 +149,11 @@ export function ServiceMap({
   const settingsField = fields[apmEnableServiceMapApiV2];
   const isServiceMapV2Enabled = Boolean(settingsField?.savedValue ?? settingsField?.defaultValue);
 
-  const { data, status, error } = useServiceMap({
+  const {
+    data: { nodes, warnings },
+    status,
+    error,
+  } = useServiceMap({
     environment,
     kuery,
     start,
@@ -184,7 +189,7 @@ export function ServiceMap({
     );
   }
 
-  if (status === FETCH_STATUS.SUCCESS && data.elements.length === 0) {
+  if (status === FETCH_STATUS.SUCCESS && nodes.elements.length === 0) {
     return (
       <PromptContainer>
         <EmptyPrompt />
@@ -210,9 +215,9 @@ export function ServiceMap({
     onPageReady({
       customMetrics: {
         key1: 'num_of_nodes',
-        value1: data.nodesCount,
+        value1: nodes.nodesCount,
         key2: 'num_of_traces',
-        value2: data.tracesCount,
+        value2: nodes.tracesCount,
       },
       meta: { rangeFrom: start, rangeTo: end },
     });
@@ -221,43 +226,48 @@ export function ServiceMap({
   return (
     <>
       <SearchBar showTimeComparison />
-      <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
-        <TryItButton
-          isFeatureEnabled={isServiceMapV2Enabled}
-          linkLabel={
-            isServiceMapV2Enabled
-              ? i18n.translate('xpack.apm.serviceMap.disableServiceMapApiV2', {
-                  defaultMessage: 'Disable the new service map API',
-                })
-              : i18n.translate('xpack.apm.serviceMap.enableServiceMapApiV2', {
-                  defaultMessage: 'Enable the new service map API',
-                })
-          }
-          onClick={() => {
-            saveSingleSetting(apmEnableServiceMapApiV2, !isServiceMapV2Enabled);
-          }}
-          isLoading={isSaving}
-          popoverContent={
-            <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                {i18n.translate('xpack.apm.serviceMap.serviceMapApiV2PopoverContent', {
-                  defaultMessage: 'The new service map API is faster, try it out!',
-                })}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          hideThisContent={i18n.translate('xpack.apm.serviceMap.hideThisContent', {
-            defaultMessage:
-              'Hide this. The setting can be enabled or disabled in Advanced Settings.',
-          })}
-          calloutId="showServiceMapV2Callout"
-        />
+      <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
+        <EuiFlexItem grow>
+          <TryItButton
+            isFeatureEnabled={isServiceMapV2Enabled}
+            linkLabel={
+              isServiceMapV2Enabled
+                ? i18n.translate('xpack.apm.serviceMap.disableServiceMapApiV2', {
+                    defaultMessage: 'Disable the new service map API',
+                  })
+                : i18n.translate('xpack.apm.serviceMap.enableServiceMapApiV2', {
+                    defaultMessage: 'Enable the new service map API',
+                  })
+            }
+            onClick={() => {
+              saveSingleSetting(apmEnableServiceMapApiV2, !isServiceMapV2Enabled);
+            }}
+            isLoading={isSaving}
+            popoverContent={
+              <EuiFlexGroup direction="column" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  {i18n.translate('xpack.apm.serviceMap.serviceMapApiV2PopoverContent', {
+                    defaultMessage: 'The new service map API is faster, try it out!',
+                  })}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            hideThisContent={i18n.translate('xpack.apm.serviceMap.hideThisContent', {
+              defaultMessage:
+                'Hide this. The setting can be enabled or disabled in Advanced Settings.',
+            })}
+            calloutId="showServiceMapV2Callout"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ minHeight: '18px' }}>
+          {warnings ? <WarningTooltip warnings={warnings} /> : null}
+        </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <EuiPanel hasBorder={true} paddingSize="none">
+      <EuiSpacer size="xs" />
+      <EuiPanel hasBorder paddingSize="none">
         <div data-test-subj="serviceMap" style={{ height: heightWithPadding }} ref={ref}>
           <Cytoscape
-            elements={data.elements}
+            elements={nodes.elements}
             height={heightWithPadding}
             serviceName={serviceName}
             style={getCytoscapeDivStyle(euiTheme, status)}

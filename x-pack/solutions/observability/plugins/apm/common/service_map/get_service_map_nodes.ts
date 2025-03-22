@@ -246,6 +246,34 @@ function markBidirectionalConnections({ connections }: { connections: Connection
   return targets.values();
 }
 
+function hasSharedDestinations(exitSpanDestinations: ExitSpanDestination[]): boolean {
+  const destinations = new Map<string, Set<string>>();
+
+  for (const { from, to } of exitSpanDestinations) {
+    const destination = from[SPAN_DESTINATION_SERVICE_RESOURCE];
+    const service = to[SERVICE_NAME];
+
+    const services = destinations.get(destination) ?? new Set<string>();
+
+    if (services.size > 0 && !services.has(service)) {
+      return true;
+    }
+
+    services.add(service);
+    destinations.set(destination, services);
+  }
+
+  return false;
+}
+
+export function getWarnings({
+  exitSpanDestinations,
+}: Pick<ServiceMapConnections, 'exitSpanDestinations'>) {
+  return {
+    sharedDestinations: hasSharedDestinations(exitSpanDestinations),
+  };
+}
+
 export function getServiceMapNodes({
   connections,
   exitSpanDestinations,
