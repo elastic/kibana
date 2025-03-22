@@ -34,8 +34,21 @@ export async function reIndexKnowledgeBase({
 
     // Create next index
     logger.debug(`Creating new KB index "${nextWriteIndexName}"...`);
-    await esClient.asInternalUser.indices.delete({ index: nextWriteIndexName }, { ignore: [404] }); // cleanup if it already exists
-    await esClient.asInternalUser.indices.create({ index: nextWriteIndexName });
+    // await esClient.asInternalUser.indices.delete({ index: nextWriteIndexName }, { ignore: [404] }); // cleanup if it already exists
+
+    try {
+      await esClient.asInternalUser.indices.create({ index: nextWriteIndexName });
+    } catch (error) {
+      if (
+        error instanceof EsErrors.ResponseError &&
+        error?.body?.error?.type === 'resource_already_exists_exception'
+      ) {
+        logger.error(
+          `Re-index of knowledge base cannot continue since the target index "${nextWriteIndexName}" already exists. Please delete it or update the alias "${resourceNames.aliases.kb}" to point to "${nextWriteIndexName}". Aborting.`
+        );
+        return;
+      }
+    }
 
     // Perform reindex to next index
     logger.debug(

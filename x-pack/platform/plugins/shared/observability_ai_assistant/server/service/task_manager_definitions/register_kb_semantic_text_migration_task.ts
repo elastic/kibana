@@ -153,7 +153,9 @@ async function populateSemanticTextFieldRecursively({
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
 }) {
-  logger.debug('Populating semantic_text field for entries without it');
+  logger.debug(
+    'Checking for remaining entries without semantic_text field that need to be migrated'
+  );
 
   const response = await esClient.asInternalUser.search<KnowledgeBaseEntry>({
     size: 100,
