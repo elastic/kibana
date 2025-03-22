@@ -15,8 +15,15 @@ import {
   type ESQLFunction,
   isFunctionExpression,
   isWhereExpression,
+  ESQLCommandMode,
 } from '@kbn/esql-ast';
-import { isAssignment, isColumnItem, isFunctionItem } from '../shared/helpers';
+import {
+  isAssignment,
+  isColumnItem,
+  isFunctionItem,
+  isSingleItem,
+  noCaseCompare,
+} from '../shared/helpers';
 import {
   appendSeparatorOption,
   asOption,
@@ -25,10 +32,9 @@ import {
   onOption,
   withOption,
 } from './options';
-import { ENRICH_MODES } from './settings';
 
 import { type CommandDefinition } from './types';
-import { checkAggExistence, checkFunctionContent } from './commands_helpers';
+import { ENRICH_MODES, checkAggExistence, checkFunctionContent } from './commands_helpers';
 
 import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
 import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
@@ -46,6 +52,8 @@ import { suggest as suggestForShow } from '../autocomplete/commands/show';
 import { suggest as suggestForSort } from '../autocomplete/commands/sort';
 import { suggest as suggestForStats } from '../autocomplete/commands/stats';
 import { suggest as suggestForWhere } from '../autocomplete/commands/where';
+
+import { getMessageFromId } from '../validation/errors';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -147,7 +155,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
     suggest: suggestForRow,
     options: [],
-    modes: [],
   },
   {
     name: 'from',
@@ -157,7 +164,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     examples: ['from logs', 'from logs-*', 'from logs_*, events-*'],
     options: [metadataOption],
-    modes: [],
     signature: {
       multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
@@ -171,7 +177,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     examples: ['SHOW INFO'],
     options: [],
-    modes: [],
     signature: {
       multipleParams: false,
       params: [{ name: 'functions', type: 'function' }],
@@ -200,7 +205,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       'metrics src1, src2 agg1, agg2 by field1, field2',
     ],
     options: [],
-    modes: [],
     signature: {
       multipleParams: true,
       params: [
@@ -222,7 +226,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [{ name: 'expression', type: 'function', optional: true }],
     },
     options: [byOption],
-    modes: [],
     validate: statsValidator,
     suggest: suggestForStats,
   },
@@ -242,7 +245,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [{ name: 'expression', type: 'function', optional: true }],
     },
     options: [byOption],
-    modes: [],
     // Reusing the same validation logic as stats command
     validate: statsValidator,
     suggest: () => [],
@@ -265,7 +267,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [{ name: 'expression', type: 'any' }],
     },
     options: [],
-    modes: [],
     suggest: suggestForEval,
   },
   {
@@ -279,7 +280,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [{ name: 'renameClause', type: 'column' }],
     },
     options: [asOption],
-    modes: [],
     suggest: suggestForRename,
   },
   {
@@ -294,7 +294,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [{ name: 'size', type: 'integer', constantOnly: true }],
     },
     options: [],
-    modes: [],
     suggest: suggestForLimit,
   },
   {
@@ -306,7 +305,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     examples: ['… | keep a', '… | keep a,b'],
     suggest: suggestForKeep,
     options: [],
-    modes: [],
     signature: {
       multipleParams: true,
       params: [{ name: 'column', type: 'column', wildcards: true }],
@@ -319,7 +317,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     examples: ['… | drop a', '… | drop a,b'],
     options: [],
-    modes: [],
     signature: {
       multipleParams: true,
       params: [{ name: 'column', type: 'column', wildcards: true }],
@@ -376,7 +373,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       '… | sort a - abs(b)',
     ],
     options: [],
-    modes: [],
     signature: {
       multipleParams: true,
       params: [{ name: 'expression', type: 'any' }],
@@ -396,7 +392,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [{ name: 'expression', type: 'boolean' }],
     },
     options: [],
-    modes: [],
     suggest: suggestForWhere,
   },
   {
@@ -407,7 +402,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     examples: ['… | DISSECT a "%{b} %{c}" APPEND_SEPARATOR = ":"'],
     options: [appendSeparatorOption],
-    modes: [],
     signature: {
       multipleParams: false,
       params: [
@@ -425,7 +419,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     examples: ['… | GROK a "%{IP:b} %{NUMBER:c}"'],
     options: [],
-    modes: [],
     signature: {
       multipleParams: false,
       params: [
@@ -442,7 +435,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     examples: ['row a=[1,2,3] | mv_expand a'],
     options: [],
-    modes: [],
     preview: true,
     signature: {
       multipleParams: false,
@@ -462,12 +454,37 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       '… | enrich my-policy on pivotField with a = enrichFieldA, b = enrichFieldB',
     ],
     options: [onOption, withOption],
-    modes: [ENRICH_MODES],
     signature: {
       multipleParams: false,
       params: [{ name: 'policyName', type: 'source', innerTypes: ['policy'] }],
     },
     suggest: suggestForEnrich,
+    validate: (command: ESQLCommand) => {
+      const modeArg = command.args.find((arg) => isSingleItem(arg) && arg.type === 'mode') as
+        | ESQLCommandMode
+        | undefined;
+
+      if (!modeArg) {
+        return [];
+      }
+
+      const acceptedValues = ENRICH_MODES.map(({ name }) => '_' + name);
+      if (acceptedValues.some((value) => noCaseCompare(modeArg.text, value))) {
+        return [];
+      }
+
+      return [
+        getMessageFromId({
+          messageId: 'unsupportedMode',
+          values: {
+            command: 'ENRICH',
+            value: modeArg.text,
+            expected: acceptedValues.join(', '),
+          },
+          locations: modeArg.location,
+        }),
+      ];
+    },
   },
   {
     name: 'hidden_command',
@@ -475,7 +492,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     hidden: true,
     examples: [],
     options: [],
-    modes: [],
     signature: {
       params: [],
       multipleParams: false,
@@ -527,7 +543,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       // '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field',
       // '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field, index.field2 = index2.field2',
     ],
-    modes: [],
     signature: {
       multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
