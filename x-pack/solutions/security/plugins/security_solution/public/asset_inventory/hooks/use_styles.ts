@@ -13,6 +13,17 @@ export const useStyles = () => {
 
   const gridContainer = css`
     min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  `;
+
+  const gridProgressBar = css`
+    width: 100%;
+    position: absolute;
+    top: 0;
   `;
 
   const gridStyle = css`
@@ -76,5 +87,6 @@ export const useStyles = () => {
     gridStyle,
     groupBySelector,
     gridContainer,
+    gridProgressBar,
   };
 };

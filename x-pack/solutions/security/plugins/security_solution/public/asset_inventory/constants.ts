@@ -11,6 +11,7 @@ export const ASSET_INVENTORY_INDEX_PATTERN = 'logs-cloud_asset_inventory.asset_i
 
 export const QUERY_KEY_GRID_DATA = 'asset_inventory_grid_data';
 export const QUERY_KEY_CHART_DATA = 'asset_inventory_chart_data';
+export const QUERY_KEY_GROUPING_DATA = 'asset-inventory-grouping-data';
 
 export const ASSET_INVENTORY_TABLE_ID = 'asset-inventory-table';
 
@@ -20,6 +21,7 @@ export const LOCAL_STORAGE_COLUMNS_SETTINGS_KEY = `${LOCAL_STORAGE_COLUMNS_KEY}:
 export const LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY = `${LOCAL_STORAGE_PREFIX}:dataTable:pageSize`;
 export const LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY = `${LOCAL_STORAGE_PREFIX}:dataTable:columns`;
 export const LOCAL_STORAGE_ONBOARDING_SUCCESS_CALLOUT_KEY = `${LOCAL_STORAGE_PREFIX}:onboarding:successCallout`;
+export const LOCAL_STORAGE_ASSETS_GROUPING_KEY = `${LOCAL_STORAGE_PREFIX}:grouping`;
 
 export const TEST_SUBJ_DATA_GRID = 'asset-inventory-test-subj-grid-wrapper';
 export const TEST_SUBJ_PAGE_TITLE = 'asset-inventory-test-subj-page-title';
@@ -29,5 +31,25 @@ export const TEST_SUBJ_ONBOARDING_GET_STARTED = 'asset-inventory-onboarding-get-
 export const TEST_SUBJ_ONBOARDING_INITIALIZING = 'asset-inventory-onboarding-initializing';
 export const TEST_SUBJ_ONBOARDING_NO_DATA_FOUND = 'asset-inventory-onboarding-no-data-found';
 export const TEST_SUBJ_ONBOARDING_SUCCESS_CALLOUT = 'asset-inventory-onboarding-success-callout';
+export const TEST_SUBJ_GROUPING = 'asset-inventory-grouping';
+export const TEST_SUBJ_GROUPING_LOADING = 'asset-inventory-grouping-loading';
+export const TEST_SUBJ_GROUPING_COUNTER = 'asset-inventory-grouping-counter';
 
 export const DOCS_URL = 'https://ela.st/asset-inventory';
+
+export const DEFAULT_TABLE_SECTION_HEIGHT = 512; // px
+
+export const ASSET_FIELDS = {
+  ASSET_TYPE: 'entity.type',
+  ASSET_CATEGORY: 'entity.category',
+  RISK: 'host.risk.calculated_level',
+  CRITICALITY: 'asset.criticality',
+} as const;
+
+export const ASSET_GROUPING_OPTIONS = {
+  NONE: 'none',
+  ASSET_TYPE: ASSET_FIELDS.ASSET_TYPE,
+  ASSET_CATEGORY: ASSET_FIELDS.ASSET_CATEGORY,
+  RISK: ASSET_FIELDS.RISK,
+  CRITICALITY: ASSET_FIELDS.CRITICALITY,
+};

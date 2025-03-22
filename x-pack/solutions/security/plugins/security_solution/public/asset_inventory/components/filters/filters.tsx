@@ -75,9 +75,13 @@ export const Filters = ({ setQuery }: FiltersProps) => {
 
   if (dataViewIsLoading) {
     return (
-      <EuiFlexItem grow={true}>
-        <FilterGroupLoading />
-      </EuiFlexItem>
+      <>
+        <EuiSpacer size="l" />
+        <EuiFlexItem grow={true}>
+          <FilterGroupLoading />
+        </EuiFlexItem>
+        <EuiSpacer size="l" />
+      </>
     );
   }
 
