@@ -6,7 +6,11 @@
  */
 
 import { intersectionBy } from 'lodash';
-import { parseAggregationResults } from '@kbn/triggers-actions-ui-plugin/common';
+import {
+  isPerRowAggregation,
+  parseAggregationResults,
+} from '@kbn/triggers-actions-ui-plugin/common';
+import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
@@ -16,7 +20,7 @@ import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { Filter, Query } from '@kbn/es-query';
 import type { EsqlTable } from '../../../../common';
-import { toEsQueryHits } from '../../../../common';
+import { getEsqlQueryHits } from '../../../../common';
 import type { OnlyEsqlQueryRuleParams } from '../types';
 
 export interface FetchEsqlQueryOpts {
@@ -29,6 +33,7 @@ export interface FetchEsqlQueryOpts {
     logger: Logger;
     scopedClusterClient: IScopedClusterClient;
     share: SharePluginStart;
+    ruleResultService?: PublicRuleResultService;
   };
   dateStart: string;
   dateEnd: string;
@@ -44,7 +49,7 @@ export async function fetchEsqlQuery({
   dateStart,
   dateEnd,
 }: FetchEsqlQueryOpts) {
-  const { logger, scopedClusterClient } = services;
+  const { logger, scopedClusterClient, ruleResultService } = services;
   const esClient = scopedClusterClient.asCurrentUser;
   const query = getEsqlQuery(params, alertLimit, dateStart, dateEnd);
 
@@ -64,23 +69,27 @@ export async function fetchEsqlQuery({
     throw e;
   }
 
-  const hits = toEsQueryHits(response);
   const sourceFields = getSourceFields(response);
-
   const link = `${publicBaseUrl}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`;
+  const isGroupAgg = isPerRowAggregation(params.groupBy);
+  const { results, duplicateAlertIds } = getEsqlQueryHits(
+    response,
+    params.esqlQuery.esql,
+    isGroupAgg
+  );
+
+  if (ruleResultService && duplicateAlertIds.size > 0) {
+    const warning = `Your alerts do not appear to be unique, which will delay recovery of your alerts. There are duplicates for alert IDs: ${Array.from(
+      duplicateAlertIds
+    ).join('; ')}`;
+    ruleResultService.addLastRunWarning(warning);
+    ruleResultService.setLastRunOutcomeMessage(warning);
+  }
 
   return {
     link,
-    numMatches: Number(response.values.length),
     parsedResults: parseAggregationResults({
-      isCountAgg: true,
-      isGroupAgg: false,
-      esResult: {
-        took: 0,
-        timed_out: false,
-        _shards: { failed: 0, successful: 0, total: 0 },
-        hits,
-      },
+      ...results,
       resultLimit: alertLimit,
       sourceFieldsParams: sourceFields,
       generateSourceFieldsFromHits: true,

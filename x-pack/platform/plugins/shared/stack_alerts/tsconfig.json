@@ -51,7 +51,9 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-saved-objects-server",
     "@kbn/alerting-rule-utils",
-    "@kbn/response-ops-rule-params"
+    "@kbn/response-ops-rule-params",
+    "@kbn/esql-ast",
+    "@kbn/esql-validation-autocomplete"
   ],
   "exclude": ["target/**/*"]
 }
