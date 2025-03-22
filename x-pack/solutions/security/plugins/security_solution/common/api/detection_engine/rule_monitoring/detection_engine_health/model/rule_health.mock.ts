@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getEmptyGapSummary } from '../../../../../../server/lib/detection_engine/rule_monitoring/logic/detection_engine_health/gaps/get_gaps_summary_for_rule.mock';
 import { getRulesSchemaMock } from '../../../model/rule_schema/mocks';
 import { healthStatsMock } from './health_stats.mock';
 import type { RuleHealthSnapshot } from './rule_health';
@@ -14,7 +15,10 @@ const getEmptyRuleHealthSnapshot = (): RuleHealthSnapshot => {
     state_at_the_moment: {
       rule: getRulesSchemaMock(),
     },
-    stats_over_interval: healthStatsMock.getEmptyHealthOverviewStats(),
+    stats_over_interval: {
+      ...healthStatsMock.getEmptyHealthOverviewStats(),
+      gap_summary: getEmptyGapSummary(),
+    },
     history_over_interval: {
       buckets: [
         {
