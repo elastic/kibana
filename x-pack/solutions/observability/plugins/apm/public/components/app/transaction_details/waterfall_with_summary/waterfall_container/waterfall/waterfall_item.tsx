@@ -10,8 +10,12 @@ import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useRef, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
+import type {
+  WaterfallSpan,
+  WaterfallTransaction,
+} from '../../../../../../../common/waterfall/typings';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
-import { TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
+import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
 import type { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
@@ -324,8 +328,11 @@ function RelatedErrors({
   );
 
   let kuery = `${TRACE_ID} : "${item.doc.trace.id}"`;
-  if (item.doc.transaction?.id) {
-    kuery += ` and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`;
+  const transactionId = (item.doc as WaterfallTransaction).transaction?.id;
+  const spanId = (item.doc as WaterfallSpan).span?.id;
+
+  if (transactionId || spanId) {
+    kuery += ` and (${TRANSACTION_ID} : "${transactionId}" OR  ${SPAN_ID}: "${spanId}")`;
   }
 
   const mobileHref = apmRouter.link(`/mobile-services/{serviceName}/errors-and-crashes`, {
