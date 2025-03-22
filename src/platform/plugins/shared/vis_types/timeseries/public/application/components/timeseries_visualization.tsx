@@ -182,7 +182,7 @@ function TimeseriesVisualization({
         <Suspense
           fallback={
             <div className="visChart__spinner">
-              <EuiLoadingChart mono size="l" />
+              <EuiLoadingChart size="l" />
             </div>
           }
         >

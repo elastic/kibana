@@ -108,7 +108,7 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
             ResultComponent={CommandExecutionResult}
           />
 
-          {isRunning && <EuiLoadingChart className="busy-indicator" mono={true} />}
+          {isRunning && <EuiLoadingChart className="busy-indicator" />}
 
           {isRunning && isLongRunningCommand && (
             <>
