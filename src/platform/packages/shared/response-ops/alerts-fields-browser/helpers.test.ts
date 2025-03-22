@@ -15,9 +15,9 @@ import {
   getDescription,
   getFieldCount,
   filterBrowserFieldsByFieldName,
-  filterSelectedBrowserFields,
+  filterSelectedAlertFields,
 } from './helpers';
-import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { AlertFieldCategoriesMap } from '@kbn/rule-registry-plugin/common';
 import { EcsFlat } from '@elastic/ecs';
 
 describe('helpers', () => {
@@ -198,7 +198,7 @@ describe('helpers', () => {
     });
 
     test('it returns (only) non-empty categories, where each category contains only the fields matching the substring', () => {
-      const filtered: BrowserFields = {
+      const filtered: AlertFieldCategoriesMap = {
         agent: {
           fields: {
             'agent.ephemeral_id': {
@@ -324,24 +324,24 @@ describe('helpers', () => {
     const columnIds = ['agent.ephemeral_id', 'agent.id', 'container.id'];
 
     test('it returns an empty collection when browserFields is empty', () => {
-      expect(filterSelectedBrowserFields({ browserFields: {}, columnIds: [] })).toEqual({});
+      expect(filterSelectedAlertFields({ alertFields: {}, columnIds: [] })).toEqual({});
     });
 
     test('it returns an empty collection when browserFields is empty and columnIds is non empty', () => {
-      expect(filterSelectedBrowserFields({ browserFields: {}, columnIds })).toEqual({});
+      expect(filterSelectedAlertFields({ alertFields: {}, columnIds })).toEqual({});
     });
 
     test('it returns an empty collection when browserFields is NOT empty and columnIds is empty', () => {
       expect(
-        filterSelectedBrowserFields({
-          browserFields: mockBrowserFields,
+        filterSelectedAlertFields({
+          alertFields: mockBrowserFields,
           columnIds: [],
         })
       ).toEqual({});
     });
 
     test('it returns (only) non-empty categories, where each category contains only the fields matching the substring', () => {
-      const filtered: BrowserFields = {
+      const filtered: AlertFieldCategoriesMap = {
         agent: {
           fields: {
             'agent.ephemeral_id': {
@@ -385,8 +385,8 @@ describe('helpers', () => {
       };
 
       expect(
-        filterSelectedBrowserFields({
-          browserFields: mockBrowserFields,
+        filterSelectedAlertFields({
+          alertFields: mockBrowserFields,
           columnIds,
         })
       ).toEqual(filtered);

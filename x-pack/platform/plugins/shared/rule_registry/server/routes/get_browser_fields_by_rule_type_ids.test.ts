@@ -6,7 +6,7 @@
  */
 
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
-import { getBrowserFieldsByFeatureId } from './get_browser_fields_by_rule_type_ids';
+import { getAlertsFieldsByRuleTypeIds } from './get_browser_fields_by_rule_type_ids';
 import { requestContextMock } from './__mocks__/request_context';
 import { getO11yBrowserFields } from './__mocks__/request_responses';
 import { requestMock, serverMock } from './__mocks__/server';
@@ -24,9 +24,9 @@ describe('getBrowserFieldsByFeatureId', () => {
       '.alerts-observability.logs.alerts-default',
     ]);
 
-    clients.rac.getBrowserFields.mockResolvedValue({ browserFields: {}, fields: [] });
+    clients.rac.getAlertsFieldsByCategory.mockResolvedValue({ browserFields: {}, fields: [] });
 
-    getBrowserFieldsByFeatureId(server.router);
+    getAlertsFieldsByRuleTypeIds(server.router);
   });
 
   test('route registered', async () => {

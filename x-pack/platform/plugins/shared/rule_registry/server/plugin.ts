@@ -26,6 +26,7 @@ import type {
   PluginSetup as DataPluginSetup,
 } from '@kbn/data-plugin/server';
 
+import { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/server';
 import type { RuleRegistryPluginConfig } from './config';
 import { type IRuleDataService, RuleDataService, Dataset } from './rule_data_plugin_service';
 import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
@@ -35,7 +36,7 @@ import { defineRoutes } from './routes';
 import { ruleRegistrySearchStrategyProvider, RULE_SEARCH_STRATEGY_NAME } from './search_strategy';
 
 export interface RuleRegistryPluginSetupDependencies {
-  security?: SecurityPluginSetup;
+  security: SecurityPluginSetup;
   data: DataPluginSetup;
   alerting: AlertingServerSetup;
 }
@@ -44,6 +45,7 @@ export interface RuleRegistryPluginStartDependencies {
   alerting: AlertingServerStart;
   data: DataPluginStart;
   spaces?: SpacesPluginStart;
+  fieldsMetadata: FieldsMetadataServerStart;
 }
 
 export interface RuleRegistryPluginSetupContract {
@@ -70,7 +72,7 @@ export class RuleRegistryPlugin
   private readonly kibanaVersion: string;
   private readonly alertsClientFactory: AlertsClientFactory;
   private ruleDataService: IRuleDataService | null;
-  private security: SecurityPluginSetup | undefined;
+  private security!: SecurityPluginSetup;
   private pluginStop$: Subject<void>;
 
   constructor(initContext: PluginInitializerContext) {
@@ -170,6 +172,7 @@ export class RuleRegistryPlugin
       getRuleType: plugins.alerting.getType,
       getRuleList: plugins.alerting.listTypes,
       getAlertIndicesAlias: plugins.alerting.getAlertIndicesAlias,
+      fieldsMetadata: plugins.fieldsMetadata,
     });
 
     const getRacClientWithRequest = async (request: KibanaRequest) => {

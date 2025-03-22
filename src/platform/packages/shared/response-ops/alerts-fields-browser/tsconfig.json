@@ -20,5 +20,7 @@
     "@kbn/rule-registry-plugin",
     "@kbn/alerts-as-data-utils",
     "@kbn/rule-data-utils",
+    "@kbn/alerting-types",
+    "@kbn/field-utils",
   ]
 }

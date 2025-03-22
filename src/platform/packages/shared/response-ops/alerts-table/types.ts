@@ -43,7 +43,7 @@ import type {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { BrowserFields } from '@kbn/alerting-types';
+import type { AlertFieldCategoriesMap } from '@kbn/alerting-types';
 import type { SetRequired } from 'type-fest';
 import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -158,7 +158,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    * If provided, the table will not fetch fields from the alerts index and
    * use these instead.
    */
-  browserFields?: BrowserFields;
+  browserFields?: AlertFieldCategoriesMap;
   /**
    * Update callback fired when any render context prop is changed
    *
@@ -312,7 +312,7 @@ export type RenderContext<AC extends AdditionalContext> = {
    */
   ecsAlertsData: any[];
   alertsCount: number;
-  browserFields: BrowserFields;
+  browserFields: AlertFieldCategoriesMap;
 
   isLoadingMutedAlerts: boolean;
   mutedAlerts?: MutedAlerts;

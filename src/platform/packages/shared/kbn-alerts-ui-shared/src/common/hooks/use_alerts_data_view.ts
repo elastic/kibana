@@ -15,7 +15,7 @@ import type { ToastsStart, HttpStart } from '@kbn/core/public';
 
 import { DataViewBase } from '@kbn/es-query';
 import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
-import { BrowserFields } from '@kbn/alerting-types';
+import { AlertFieldCategoriesMap } from '@kbn/alerting-types';
 import { useVirtualDataViewQuery } from './use_virtual_data_view_query';
 import { useFetchAlertsFieldsQuery } from './use_fetch_alerts_fields_query';
 import { useFetchAlertsIndexNamesQuery } from './use_fetch_alerts_index_names_query';
@@ -55,7 +55,7 @@ const resolveDataView = ({
   isError: boolean;
   virtualDataView?: DataView;
   indexNames?: string[];
-  fields?: { browserFields: BrowserFields; fields: FieldDescriptor[] };
+  fields?: { browserFields: AlertFieldCategoriesMap; fields: FieldDescriptor[] };
 }) => {
   if (isError) {
     return;

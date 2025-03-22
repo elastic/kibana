@@ -13,7 +13,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { BrowserField } from '@kbn/rule-registry-plugin/common';
+import { AlertFieldCategory } from '@kbn/rule-registry-plugin/common';
 import { Store } from 'redux';
 import { DataProvider } from '@kbn/timelines-plugin/common';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
@@ -53,7 +53,7 @@ export interface LicenseAware {
   isPlatinumPlus(): boolean;
 }
 
-export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
+export type BrowserFields = Readonly<Record<string, Partial<AlertFieldCategory>>>;
 
 export interface SelectedDataView {
   sourcererDataView: DataViewSpec;

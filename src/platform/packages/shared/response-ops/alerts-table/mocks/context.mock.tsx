@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Alert, BrowserFields, LegacyField } from '@kbn/alerting-types';
+import { Alert, AlertFieldCategoriesMap, LegacyField } from '@kbn/alerting-types';
 import { AlertsField, RowSelectionState } from '../types';
 import { AdditionalContext, RenderContext } from '../types';
 import { createCasesServiceMock, getCasesMapMock } from './cases.mock';
@@ -39,7 +39,7 @@ export const mockFieldFormatsRegistry = {
   })),
 } as unknown as FieldFormatsRegistry;
 
-export const mockBrowserFields: BrowserFields = {
+export const mockBrowserFields: AlertFieldCategoriesMap = {
   kibana: {
     fields: {
       [AlertsField.uuid]: {

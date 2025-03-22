@@ -7,24 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { IFieldSubType } from '@kbn/es-query';
-import type { RuntimeField } from '@kbn/data-views-plugin/common';
+import type { FieldDescriptorWithMetadata } from '@kbn/rule-registry-plugin/common/types';
 
-export interface BrowserField {
-  aggregatable: boolean;
+export interface AlertField extends FieldDescriptorWithMetadata {
   category: string;
-  description?: string | null;
-  example?: string | number | null;
-  fields: Readonly<Record<string, Partial<BrowserField>>>;
-  format?: SerializedFieldFormat;
-  indexes: string[];
-  name: string;
-  searchable: boolean;
-  type: string;
-  subType?: IFieldSubType;
-  readFromDocValues: boolean;
-  runtimeField?: RuntimeField;
 }
 
-export type BrowserFields = Record<string, Partial<BrowserField>>;
+export interface AlertFieldCategory {
+  name: string;
+  fields: Record<string, AlertField>;
+  title?: string;
+  description?: string;
+  group?: number;
+  root?: boolean;
+  short?: string;
+}
+
+export type AlertFieldCategoriesMap = Record<string, AlertFieldCategory>;
