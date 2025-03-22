@@ -20,7 +20,7 @@ If you use this connector with [cases](docs-content://explore-analyze/alerts-cas
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
 
-:::{image} ../../images/thehive-connector.png
+:::{image} ../images/thehive-connector.png
 :alt: {{hive}} connector
 :class: screenshot
 :::
@@ -47,12 +47,12 @@ API key
 
 You can test connectors for creating a case or an alert with the [run connector API](https://www.elastic.co/docs/api/doc/kibana/v8/group/endpoint-connectors) or as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../../images/thehive-params-case-test.png
+:::{image} ../images/thehive-params-case-test.png
 :alt: {{hive}} case params test
 :class: screenshot
 :::
 
-:::{image} ../../images/thehive-params-alert-test.png
+:::{image} ../images/thehive-params-alert-test.png
 :alt: {{hive}} alert params test
 :class: screenshot
 :::

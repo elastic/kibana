@@ -14,14 +14,14 @@ The Slack connector uses incoming webhooks or an API method to send Slack messag
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. You can choose to use a webhook URL that’s specific to a single channel. For example:
 
-:::{image} ../../images/slack-webhook-connector.png
+:::{image} ../images/slack-webhook-connector.png
 :alt: Slack connector
 :class: screenshot
 :::
 
 Alternatively, you can create a connector that supports multiple channels. For example:
 
-:::{image} ../../images/slack-api-connector.png
+:::{image} ../images/slack-api-connector.png
 :alt: Slack API connector
 :class: screenshot
 :::
@@ -35,14 +35,14 @@ For Slack setup details, go to [Configure a Slack account](#configuring-slack).
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For the webhook type of connector, its message text cannot contain Markdown, images, or other advanced formatting:
 
-:::{image} ../../images/slack-webhook-params.png
+:::{image} ../images/slack-webhook-params.png
 :alt: Slack webhook connector test
 :class: screenshot
 :::
 
 For the web API type of connector, you must choose one of the channel IDs. You can then test either plain text or block kit messages:
 
-:::{image} ../../images/slack-api-connector-test.png
+:::{image} ../images/slack-api-connector-test.png
 :alt: Slack web API connector test
 :class: screenshot
 :::

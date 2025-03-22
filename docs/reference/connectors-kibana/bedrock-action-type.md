@@ -14,7 +14,7 @@ The {{bedrock}} connector uses [axios](https://github.com/axios/axios) to send a
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
 
-:::{image} ../../images/bedrock-connector.png
+:::{image} ../images/bedrock-connector.png
 :alt: {{bedrock}} connector
 :class: screenshot
 :::
@@ -44,7 +44,7 @@ Secret
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../../images/bedrock-params.png
+:::{image} ../images/bedrock-params.png
 :alt: {{bedrock}} params test
 :class: screenshot
 :::
