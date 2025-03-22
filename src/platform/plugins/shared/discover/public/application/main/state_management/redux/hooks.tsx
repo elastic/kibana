@@ -17,8 +17,9 @@ import {
 } from 'react-redux';
 import React, { type PropsWithChildren, useMemo, createContext } from 'react';
 import { useAdHocDataViews } from './runtime_state';
-import type { DiscoverInternalState } from './types';
-import type { InternalStateDispatch, InternalStateStore } from './internal_state';
+import type { DiscoverInternalState, TabState } from './types';
+import { type InternalStateDispatch, type InternalStateStore } from './internal_state';
+import { selectCurrentTab } from './selectors';
 
 const internalStateContext = createContext<ReactReduxContextValue>(
   // Recommended approach for versions of Redux prior to v9:
@@ -40,6 +41,9 @@ export const useInternalStateDispatch: () => InternalStateDispatch =
 
 export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalState> =
   createSelectorHook(internalStateContext);
+
+export const useCurrentTabSelector: TypedUseSelectorHook<TabState> = (selector) =>
+  selector(useInternalStateSelector(selectCurrentTab));
 
 export const useDataViewsForPicker = () => {
   const originalAdHocDataViews = useAdHocDataViews();

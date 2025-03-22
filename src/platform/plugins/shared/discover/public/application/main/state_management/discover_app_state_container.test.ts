@@ -23,7 +23,8 @@ import { getSavedSearchContainer } from './discover_saved_search_container';
 import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 import { omit } from 'lodash';
 import type { InternalStateStore } from './redux';
-import { createInternalStateStore, createRuntimeStateManager } from './redux';
+import { createInternalStateStore, createRuntimeStateManager, selectCurrentTab } from './redux';
+import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 
 let history: History;
 let stateStorage: IKbnUrlStateStorage;
@@ -41,7 +42,9 @@ describe('Test discover app state container', () => {
     });
     internalState = createInternalStateStore({
       services: discoverServiceMock,
+      customizationContext: mockCustomizationContext,
       runtimeStateManager: createRuntimeStateManager(),
+      urlStateStorage: stateStorage,
     });
     savedSearchState = getSavedSearchContainer({
       services: discoverServiceMock,
@@ -271,13 +274,17 @@ describe('Test discover app state container', () => {
   describe('initAndSync', () => {
     it('should call setResetDefaultProfileState correctly with no initial state', () => {
       const state = getStateContainer();
-      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(
+        omit(selectCurrentTab(internalState.getState()).resetDefaultProfileState, 'resetId')
+      ).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
-      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(
+        omit(selectCurrentTab(internalState.getState()).resetDefaultProfileState, 'resetId')
+      ).toEqual({
         columns: true,
         rowHeight: true,
         breakdownField: true,
@@ -288,13 +295,17 @@ describe('Test discover app state container', () => {
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ columns: ['test'] });
       const state = getStateContainer();
-      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(
+        omit(selectCurrentTab(internalState.getState()).resetDefaultProfileState, 'resetId')
+      ).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
-      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(
+        omit(selectCurrentTab(internalState.getState()).resetDefaultProfileState, 'resetId')
+      ).toEqual({
         columns: false,
         rowHeight: true,
         breakdownField: true,
@@ -305,13 +316,17 @@ describe('Test discover app state container', () => {
       const stateStorageGetSpy = jest.spyOn(stateStorage, 'get');
       stateStorageGetSpy.mockReturnValue({ rowHeight: 5 });
       const state = getStateContainer();
-      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(
+        omit(selectCurrentTab(internalState.getState()).resetDefaultProfileState, 'resetId')
+      ).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
-      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(
+        omit(selectCurrentTab(internalState.getState()).resetDefaultProfileState, 'resetId')
+      ).toEqual({
         columns: true,
         rowHeight: false,
         breakdownField: true,
@@ -328,13 +343,17 @@ describe('Test discover app state container', () => {
         managed: false,
       });
       const state = getStateContainer();
-      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(
+        omit(selectCurrentTab(internalState.getState()).resetDefaultProfileState, 'resetId')
+      ).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,
       });
       state.initAndSync();
-      expect(omit(internalState.getState().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(
+        omit(selectCurrentTab(internalState.getState()).resetDefaultProfileState, 'resetId')
+      ).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,

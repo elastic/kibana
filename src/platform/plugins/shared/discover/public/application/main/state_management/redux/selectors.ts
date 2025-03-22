@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useProfileAccessor } from './use_profile_accessor';
-export { useRootProfile, BaseAppWrapper, type RootProfileState } from './use_root_profile';
-export { useAdditionalCellActions } from './use_additional_cell_actions';
-export { useDefaultAdHocDataViews } from './use_default_ad_hoc_data_views';
+import type { DiscoverInternalState } from './types';
+
+export const selectAllTabs = (state: DiscoverInternalState) =>
+  state.tabs.allIds.map((id) => state.tabs.byId[id]);
+
+export const selectCurrentTab = (state: DiscoverInternalState) =>
+  state.tabs.byId[state.tabs.currentId];

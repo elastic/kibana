@@ -17,7 +17,7 @@ import type { DataDocuments$ } from './discover_data_state_container';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
 import { omit } from 'lodash';
-import { internalStateActions } from './redux';
+import { internalStateActions, selectCurrentTab } from './redux';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
@@ -195,7 +195,10 @@ describe('test getDataStateContainer', () => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
     expect(
-      omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
+      omit(
+        selectCurrentTab(stateContainer.internalState.getState()).resetDefaultProfileState,
+        'resetId'
+      )
     ).toEqual({
       columns: false,
       rowHeight: false,
@@ -230,7 +233,10 @@ describe('test getDataStateContainer', () => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
     expect(
-      omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
+      omit(
+        selectCurrentTab(stateContainer.internalState.getState()).resetDefaultProfileState,
+        'resetId'
+      )
     ).toEqual({
       columns: false,
       rowHeight: false,
