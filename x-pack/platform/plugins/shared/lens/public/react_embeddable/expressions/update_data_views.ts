@@ -15,8 +15,13 @@ export async function getUsedDataViews(
   dataViews: LensEmbeddableStartServices['dataViews']
 ) {
   const [{ indexPatterns }, ...adHocDataViews] = await Promise.all([
-    getIndexPatternsObjects(references.map(({ id }) => id) || [], dataViews),
-    ...Object.values(adHocDataViewsSpecs || {}).map((spec) => dataViews.create(spec)),
+    getIndexPatternsObjects(
+      // get index pattern only references
+      references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id),
+      dataViews
+    ),
+
+    ...Object.values(adHocDataViewsSpecs ?? {}).map((spec) => dataViews.create(spec)),
   ]);
 
   return uniqBy(indexPatterns.concat(adHocDataViews), 'id');
