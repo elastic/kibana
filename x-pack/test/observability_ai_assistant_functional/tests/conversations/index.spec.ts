@@ -166,19 +166,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
             );
             await testSubjects.setValue(ui.pages.createConnectorFlyout.apiKeyInput, 'myApiKey');
 
-            // intercept the request to set up the knowledge base,
-            // so we don't have to wait until it's fully downloaded
-            await interceptRequest(
-              driver.driver,
-              '*kb\\/setup*',
-              (responseFactory) => {
-                return responseFactory.fail();
-              },
-              async () => {
-                await testSubjects.clickWhenNotDisabled(ui.pages.createConnectorFlyout.saveButton);
-              }
-            );
-
             await retry.waitFor('Connector created toast', async () => {
               const count = await toasts.getCount();
               return count > 0;
