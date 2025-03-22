@@ -9,9 +9,9 @@ import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
 import { StreamDefinitionBase } from '../base';
 import { FieldDefinition, fieldDefinitionSchema } from './fields';
+import { IngestStreamLifecycle, ingestStreamLifecycleSchema } from './lifecycle';
 import { ProcessorDefinition, processorDefinitionSchema } from './processors';
 import { RoutingDefinition, routingDefinitionSchema } from './routing';
-import { IngestStreamLifecycle, ingestStreamLifecycleSchema } from './lifecycle';
 
 interface IngestBase {
   lifecycle: IngestStreamLifecycle;
@@ -31,10 +31,12 @@ interface UnwiredIngest extends IngestBase {
 
 interface WiredStreamDefinitionBase {
   ingest: WiredIngest;
+  description: string;
 }
 
 interface UnwiredStreamDefinitionBase {
   ingest: UnwiredIngest;
+  description: string;
 }
 
 interface WiredStreamDefinition extends StreamDefinitionBase {
@@ -71,10 +73,12 @@ const wiredIngestSchema: z.Schema<WiredIngest> = z.intersection(
 
 const unwiredStreamDefinitionSchemaBase: z.Schema<UnwiredStreamDefinitionBase> = z.object({
   ingest: unwiredIngestSchema,
+  description: z.string(),
 });
 
 const wiredStreamDefinitionSchemaBase: z.Schema<WiredStreamDefinitionBase> = z.object({
   ingest: wiredIngestSchema,
+  description: z.string(),
 });
 
 const wiredStreamDefinitionSchema: z.Schema<WiredStreamDefinition> = z.intersection(
@@ -96,23 +100,26 @@ const ingestStreamDefinitionSchema: z.Schema<IngestStreamDefinition> = z.union([
   unwiredStreamDefinitionSchema,
 ]);
 
-const ingestStreamDefinitionSchemaBase: z.Schema<Omit<IngestStreamDefinition, 'name'>> = z.union([
+type IngestStreamDefinitionBase = WiredStreamDefinitionBase | UnwiredStreamDefinitionBase;
+
+const ingestStreamDefinitionSchemaBase: z.Schema<IngestStreamDefinitionBase> = z.union([
   wiredStreamDefinitionSchemaBase,
   unwiredStreamDefinitionSchemaBase,
 ]);
 
 export {
-  type WiredStreamDefinition,
-  wiredStreamDefinitionSchema,
-  wiredStreamDefinitionSchemaBase,
-  type UnwiredStreamDefinition,
-  unwiredStreamDefinitionSchema,
-  unwiredStreamDefinitionSchemaBase,
-  type IngestStreamDefinition,
   ingestStreamDefinitionSchema,
   ingestStreamDefinitionSchemaBase,
-  type WiredIngest,
-  wiredIngestSchema,
-  type UnwiredIngest,
   unwiredIngestSchema,
+  unwiredStreamDefinitionSchema,
+  unwiredStreamDefinitionSchemaBase,
+  wiredIngestSchema,
+  wiredStreamDefinitionSchema,
+  wiredStreamDefinitionSchemaBase,
+  type IngestStreamDefinition,
+  type IngestStreamDefinitionBase,
+  type UnwiredIngest,
+  type UnwiredStreamDefinition,
+  type WiredIngest,
+  type WiredStreamDefinition,
 };

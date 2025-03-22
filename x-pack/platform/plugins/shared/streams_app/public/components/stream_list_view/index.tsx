@@ -6,7 +6,7 @@
  */
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiTitle } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsAppPageHeader } from '../streams_app_page_header';
@@ -40,9 +40,15 @@ export function StreamListView() {
         <StreamsAppPageHeader
           title={
             <StreamsAppPageHeaderTitle
-              title={i18n.translate('xpack.streams.streamsListViewPageHeaderTitle', {
-                defaultMessage: 'Streams',
-              })}
+              title={
+                <EuiTitle size="l">
+                  <h1>
+                    {i18n.translate('xpack.streams.streamsListViewPageHeaderTitle', {
+                      defaultMessage: 'Streams',
+                    })}
+                  </h1>
+                </EuiTitle>
+              }
             />
           }
         />

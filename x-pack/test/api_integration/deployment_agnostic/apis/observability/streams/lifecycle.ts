@@ -84,6 +84,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const wiredPutBody: IngestStreamUpsertRequest = {
       stream: {
+        description: '',
         ingest: {
           lifecycle: { inherit: {} },
           processing: [],
@@ -100,6 +101,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await putStream(apiClient, 'logs', {
           dashboards: [],
           stream: {
+            description: '',
             ingest: {
               ...(rootDefinition as WiredStreamGetResponse).stream.ingest,
               lifecycle: { dsl: { data_retention: '999d' } },
@@ -127,6 +129,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             dashboards: [],
             stream: {
+              description: '',
               ingest: {
                 ...(rootDefinition as WiredStreamGetResponse).stream.ingest,
                 lifecycle: { inherit: {} },
@@ -147,6 +150,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs', {
           dashboards: [],
           stream: {
+            description: '',
             ingest: {
               ...(rootDefinition as WiredStreamGetResponse).stream.ingest,
               lifecycle: { dsl: { data_retention: '10m' } },
@@ -156,6 +160,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.overrides', {
           dashboards: [],
           stream: {
+            description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               wired: {
@@ -182,6 +187,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.10d', {
           dashboards: [],
           stream: {
+            description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '10d' } },
@@ -191,6 +197,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.10d.20d', {
           dashboards: [],
           stream: {
+            description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '20d' } },
@@ -203,6 +210,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.10d.20d', {
           dashboards: [],
           stream: {
+            description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               wired: {
@@ -223,6 +231,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.no', {
           dashboards: [],
           stream: {
+            description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '2d' } },
@@ -233,6 +242,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.no.retention', {
           dashboards: [],
           stream: {
+            description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               lifecycle: { dsl: {} },
@@ -254,6 +264,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               dashboards: [],
               stream: {
+                description: '',
                 ingest: {
                   ...wiredPutBody.stream.ingest,
                   lifecycle: { ilm: { policy: 'my-policy' } },
@@ -269,6 +280,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, 'logs.ilm', {
             dashboards: [],
             stream: {
+              description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
@@ -291,6 +303,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, name, {
             dashboards: [],
             stream: {
+              description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 lifecycle: { ilm: { policy: 'my-policy' } },
@@ -304,6 +317,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, name, {
             dashboards: [],
             stream: {
+              description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
@@ -323,6 +337,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, name, {
             dashboards: [],
             stream: {
+              description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
@@ -340,6 +355,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, name, {
             dashboards: [],
             stream: {
+              description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
@@ -359,6 +375,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Unwired streams update', () => {
       const unwiredPutBody: IngestStreamUpsertRequest = {
         stream: {
+          description: '',
           ingest: {
             lifecycle: { inherit: {} },
             processing: [],
@@ -417,6 +434,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, indexName, {
           dashboards: [],
           stream: {
+            description: '',
             ingest: {
               ...unwiredPutBody.stream.ingest,
               lifecycle: { dsl: { data_retention: '11d' } },
@@ -440,6 +458,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               dashboards: [],
               stream: {
+                description: '',
                 ingest: {
                   ...unwiredPutBody.stream.ingest,
                   lifecycle: { dsl: { data_retention: '1d' } },
@@ -460,6 +479,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, indexName, {
           dashboards: [],
           stream: {
+            description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
               wired: {
@@ -479,6 +499,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             dashboards: [],
             stream: {
+              description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
@@ -509,6 +530,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             dashboards: [],
             stream: {
+              description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {

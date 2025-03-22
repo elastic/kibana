@@ -45836,6 +45836,9 @@
                               "stream": {
                                 "additionalProperties": false,
                                 "properties": {
+                                  "description": {
+                                    "type": "string"
+                                  },
                                   "ingest": {
                                     "allOf": [
                                       {
@@ -46729,7 +46732,8 @@
                                   }
                                 },
                                 "required": [
-                                  "ingest"
+                                  "ingest",
+                                  "description"
                                 ],
                                 "type": "object"
                               }
@@ -46763,6 +46767,9 @@
                               "stream": {
                                 "additionalProperties": false,
                                 "properties": {
+                                  "description": {
+                                    "type": "string"
+                                  },
                                   "ingest": {
                                     "allOf": [
                                       {
@@ -47403,7 +47410,8 @@
                                   }
                                 },
                                 "required": [
-                                  "ingest"
+                                  "ingest",
+                                  "description"
                                 ],
                                 "type": "object"
                               }
@@ -47439,12 +47447,12 @@
                           "stream": {
                             "additionalProperties": false,
                             "properties": {
+                              "description": {
+                                "type": "string"
+                              },
                               "group": {
                                 "additionalProperties": false,
                                 "properties": {
-                                  "description": {
-                                    "type": "string"
-                                  },
                                   "members": {
                                     "items": {
                                       "minLength": 1,
@@ -47460,7 +47468,8 @@
                               }
                             },
                             "required": [
-                              "group"
+                              "group",
+                              "description"
                             ],
                             "type": "object"
                           }
@@ -47747,9 +47756,6 @@
                   "group": {
                     "additionalProperties": false,
                     "properties": {
-                      "description": {
-                        "type": "string"
-                      },
                       "members": {
                         "items": {
                           "minLength": 1,

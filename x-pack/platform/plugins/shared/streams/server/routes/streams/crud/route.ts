@@ -5,19 +5,18 @@
  * 2.0.
  */
 
+import { badData, badRequest } from '@hapi/boom';
 import {
-  isGroupStreamDefinition,
   StreamDefinition,
   StreamGetResponse,
-  isWiredStreamDefinition,
+  isGroupStreamUpsertRequest,
+  isUnwiredStreamUpsertRequest,
+  isWiredStreamUpsertRequest,
   streamUpsertRequestSchema,
-  isGroupStreamDefinitionBase,
-  isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { badData, badRequest } from '@hapi/boom';
-import { hasSupportedStreamsRoot } from '../../../lib/streams/root_stream_definition';
 import { UpsertStreamResponse } from '../../../lib/streams/client';
+import { hasSupportedStreamsRoot } from '../../../lib/streams/root_stream_definition';
 import { createServerRoute } from '../../create_server_route';
 import { readStream } from './read_stream';
 
@@ -109,31 +108,23 @@ export const editStreamRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UpsertStreamResponse> => {
     const { streamsClient } = await getScopedClients({ request });
-    const streamDefinition = { ...params.body.stream, name: params.path.name };
 
-    if (!isUnwiredStreamDefinition(streamDefinition) && !(await streamsClient.isStreamsEnabled())) {
+    if (!isUnwiredStreamUpsertRequest(params.body) && !(await streamsClient.isStreamsEnabled())) {
       throw badData('Streams are not enabled for Wired and Group streams.');
     }
 
-    if (isWiredStreamDefinition(streamDefinition) && !hasSupportedStreamsRoot(params.path.name)) {
+    if (isWiredStreamUpsertRequest(params.body) && !hasSupportedStreamsRoot(params.path.name)) {
       throw badRequest('Cannot create wired stream due to unsupported root stream');
     }
 
-    if (isGroupStreamDefinition(streamDefinition) && params.path.name.startsWith('logs.')) {
+    if (isGroupStreamUpsertRequest(params.body) && params.path.name.startsWith('logs.')) {
       throw badRequest('A group stream name can not start with [logs.]');
     }
 
-    const body = isGroupStreamDefinitionBase(params.body.stream)
-      ? {
-          ...params.body,
-          stream: {
-            group: {
-              ...params.body.stream.group,
-              members: Array.from(new Set(params.body.stream.group.members)),
-            },
-          },
-        }
-      : params.body;
+    const body = params.body;
+    if (isGroupStreamUpsertRequest(body)) {
+      body.stream.group.members = Array.from(new Set(body.stream.group.members));
+    }
 
     return await streamsClient.upsertStream({
       request: body,

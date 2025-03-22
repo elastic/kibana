@@ -360,6 +360,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: IngestStreamUpsertRequest = {
           dashboards: [],
           stream: {
+            description: '',
             ingest: {
               lifecycle: { inherit: {} },
               processing: [],
@@ -381,6 +382,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             ...body,
             stream: {
+              description: '',
               ingest: {
                 ...body.stream.ingest,
                 wired: {
@@ -402,6 +404,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const body: IngestStreamUpsertRequest = {
           dashboards: [],
           stream: {
+            description: '',
             ingest: {
               lifecycle: { inherit: {} },
               processing: [],

@@ -6,12 +6,21 @@
  */
 import { z } from '@kbn/zod';
 import { createAsSchemaOrThrow, createIsNarrowSchema } from '../helpers';
+import { streamUpsertRequestSchema } from './api';
 import { streamDefinitionSchema } from './core';
-import { groupStreamDefinitionBaseSchema, groupStreamDefinitionSchema } from './group';
+import {
+  groupStreamDefinitionSchemaBase,
+  groupStreamDefinitionSchema,
+  groupStreamUpsertRequestSchema,
+} from './group';
 import {
   ingestStreamDefinitionSchema,
+  ingestUpsertRequestSchema,
   unwiredStreamDefinitionSchema,
+  unwiredStreamUpsertRequestSchema,
+  wiredIngestUpsertRequestSchema,
   wiredStreamDefinitionSchema,
+  wiredStreamUpsertRequestSchema,
 } from './ingest';
 
 export const isIngestStreamDefinition = createIsNarrowSchema(
@@ -44,9 +53,29 @@ export const isGroupStreamDefinition = createIsNarrowSchema(
   groupStreamDefinitionSchema
 );
 
+export const isGroupStreamUpsertRequest = createIsNarrowSchema(
+  streamUpsertRequestSchema,
+  groupStreamUpsertRequestSchema
+);
+
+export const isUnwiredStreamUpsertRequest = createIsNarrowSchema(
+  streamUpsertRequestSchema,
+  unwiredStreamUpsertRequestSchema
+);
+
+export const isWiredStreamUpsertRequest = createIsNarrowSchema(
+  streamUpsertRequestSchema,
+  wiredStreamUpsertRequestSchema
+);
+
+export const isWiredIngestUpsertRequest = createIsNarrowSchema(
+  ingestUpsertRequestSchema,
+  wiredIngestUpsertRequestSchema
+);
+
 export const isGroupStreamDefinitionBase = createIsNarrowSchema(
   z.unknown(),
-  groupStreamDefinitionBaseSchema
+  groupStreamDefinitionSchemaBase
 );
 
 export const isRootStreamDefinition = createIsNarrowSchema(
