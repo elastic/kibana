@@ -39,7 +39,7 @@ const defaultDateProcessorFormState: DateFormState = {
 
 const defaultDissectProcessorFormState: DissectFormState = {
   type: 'dissect',
-  field: 'message',
+  field: 'body.text',
   pattern: '',
   ignore_failure: true,
   ignore_missing: true,
@@ -48,7 +48,7 @@ const defaultDissectProcessorFormState: DissectFormState = {
 
 const defaultGrokProcessorFormState: GrokFormState = {
   type: 'grok',
-  field: 'message',
+  field: 'body.text',
   patterns: [{ value: '' }],
   pattern_definitions: {},
   ignore_failure: true,
