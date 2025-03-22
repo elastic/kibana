@@ -47,7 +47,7 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo, selectedTabId, onB
       };
 
       const state = {
-        input: embeddableInput,
+        serializedState: { rawState: embeddableInput },
         type: SLO_ERROR_BUDGET_ID,
       };
 
