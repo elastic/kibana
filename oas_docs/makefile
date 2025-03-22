@@ -28,7 +28,7 @@ merge-api-docs-stateful: ## Merge only kibana.yaml
 
 .PHONY: api-docs-lint
 api-docs-lint: ## Run redocly API docs linter
-	@npx @redocly/cli lint "output/*.yaml" --config "linters/redocly.yaml" --format stylish --max-problems 500
+	@npx @redocly/cli lint "output/kibana.yaml" --config "linters/redocly.yaml" --format stylish --max-problems 500
 
 .PHONY: api-docs-lint-stateful
 api-docs-lint-stateful: ## Run redocly API docs linter on kibana.yaml
