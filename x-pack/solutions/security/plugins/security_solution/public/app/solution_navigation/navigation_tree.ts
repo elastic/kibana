@@ -18,7 +18,11 @@ import {
   isAccordionLinkCategory,
 } from '@kbn/security-solution-navigation';
 import type { SolutionPageName, SolutionLinkCategory, SolutionNavLink } from '../../common/links';
-import { getNavLinkIdFromSolutionPageName, isBreadcrumbHidden } from './util';
+import {
+  getNavLinkIdFromSolutionPageName,
+  isBreadcrumbHidden,
+  isSideNavStatusHidden,
+} from './util';
 import { SOLUTION_NAME } from '../../common/translations';
 
 export const formatNavigationTree = (
@@ -28,7 +32,7 @@ export const formatNavigationTree = (
 ): NavigationTreeDefinition => {
   const [footerNavItems, bodyNavItems] = partition('isFooterLink', solutionNavLinks);
   const bodyChildren = addMainLinksPanelOpenerProp(
-    formatNodesFromLinks(bodyNavItems, bodyCategories)
+    formatNodesFromLinks(bodyNavItems, bodyCategories, [])
   );
   return {
     body: [
@@ -51,22 +55,24 @@ export const formatNavigationTree = (
 
 const formatNodesFromLinks = (
   solutionNavLinks: SolutionNavLink[],
-  parentCategories?: Readonly<Array<LinkCategory<SolutionPageName>>>
+  parentCategories: Readonly<Array<LinkCategory<SolutionPageName>>>,
+  ids: SolutionPageName[]
 ): NodeDefinition[] => {
   const nodes: NodeDefinition[] = [];
   if (parentCategories?.length) {
     parentCategories.forEach((category) => {
-      nodes.push(...formatNodesFromLinksWithCategory(solutionNavLinks, category));
+      nodes.push(...formatNodesFromLinksWithCategory(solutionNavLinks, category, ids));
     }, []);
   } else {
-    nodes.push(...formatNodesFromLinksWithoutCategory(solutionNavLinks));
+    nodes.push(...formatNodesFromLinksWithoutCategory(solutionNavLinks, ids));
   }
   return nodes;
 };
 
 const formatNodesFromLinksWithCategory = (
   solutionNavLinks: SolutionNavLink[],
-  category: LinkCategory<SolutionPageName>
+  category: LinkCategory<SolutionPageName>,
+  ids: SolutionPageName[]
 ): NodeDefinition[] => {
   if (!category?.linkIds) {
     return [];
@@ -76,7 +82,7 @@ const formatNodesFromLinksWithCategory = (
     const children = category.linkIds.reduce<NodeDefinition[]>((acc, linkId) => {
       const solutionNavLink = solutionNavLinks.find(({ id }) => id === linkId);
       if (solutionNavLink != null) {
-        acc.push(createNodeFromSolutionNavLink(solutionNavLink));
+        acc.push(createNodeFromSolutionNavLink(solutionNavLink, ids));
       }
       return acc;
     }, []);
@@ -99,11 +105,18 @@ const formatNodesFromLinksWithCategory = (
 };
 
 const formatNodesFromLinksWithoutCategory = (
-  solutionNavLinks: SolutionNavLink[]
-): NodeDefinition[] =>
-  solutionNavLinks.map((solutionNavLink) => createNodeFromSolutionNavLink(solutionNavLink));
+  solutionNavLinks: SolutionNavLink[],
+  ids: SolutionPageName[]
+): NodeDefinition[] => {
+  return solutionNavLinks.map((solutionNavLink) =>
+    createNodeFromSolutionNavLink(solutionNavLink, ids)
+  );
+};
 
-const createNodeFromSolutionNavLink = (solutionNavLink: SolutionNavLink): NodeDefinition => {
+const createNodeFromSolutionNavLink = (
+  solutionNavLink: SolutionNavLink,
+  ids: SolutionPageName[]
+): NodeDefinition => {
   const { id, title, links, categories, disabled } = solutionNavLink;
   const link = getNavLinkIdFromSolutionPageName(id);
   const node: NodeDefinition = {
@@ -111,10 +124,10 @@ const createNodeFromSolutionNavLink = (solutionNavLink: SolutionNavLink): NodeDe
     link: link as AppDeepLinkId,
     title,
     ...(isBreadcrumbHidden(id) && { breadcrumbStatus: 'hidden' }),
-    ...(disabled && { sideNavStatus: 'hidden' }),
+    ...((isSideNavStatusHidden(ids) || disabled) && { sideNavStatus: 'hidden' }),
   };
   if (links?.length) {
-    node.children = formatNodesFromLinks(links, categories);
+    node.children = formatNodesFromLinks(links, categories ?? [], ids.concat(id));
   }
   return node;
 };
