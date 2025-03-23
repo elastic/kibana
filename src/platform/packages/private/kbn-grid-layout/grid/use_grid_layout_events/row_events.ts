@@ -10,16 +10,19 @@
 import { useCallback, useRef } from 'react';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { commitAction, moveAction, startAction } from './row_state_manager_actions';
+import { cancelAction, commitAction, moveAction, startAction } from './row_state_manager_actions';
 import {
   getSensorPosition,
-  isLayoutInteractive,
+  isKeyboardEvent,
   isMouseEvent,
   isTouchEvent,
+  startKeyboardInteraction,
   startMouseInteraction,
   startTouchInteraction,
 } from './sensors';
 import { PointerPosition, UserInteractionEvent } from './types';
+import { isLayoutInteractive } from './utils';
+import { getNextPositionForRow } from './utils/keyboard_utils';
 
 /*
  * This hook sets up and manages interaction logic for dragging grid rows.
@@ -33,20 +36,30 @@ export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
   const pointerPixel = useRef<PointerPosition>({ clientX: 0, clientY: 0 });
   const startingPointer = useRef<PointerPosition>({ clientX: 0, clientY: 0 });
 
+  const onEnd = useCallback(() => commitAction(gridLayoutStateManager), [gridLayoutStateManager]);
+  const onCancel = useCallback(
+    () => cancelAction(gridLayoutStateManager),
+    [gridLayoutStateManager]
+  );
   const startInteraction = useCallback(
     (e: UserInteractionEvent) => {
       if (!isLayoutInteractive(gridLayoutStateManager)) return;
-
+      pointerPixel.current = getSensorPosition(e);
       const onStart = () => startAction(e, gridLayoutStateManager, rowId, startingPointer);
 
       const onMove = (ev: UserInteractionEvent) => {
         if (isMouseEvent(ev) || isTouchEvent(ev)) {
           pointerPixel.current = getSensorPosition(ev);
+        } else if (isKeyboardEvent(ev)) {
+          pointerPixel.current = getNextPositionForRow(
+            ev,
+            gridLayoutStateManager,
+            pointerPixel.current,
+            rowId
+          );
         }
         moveAction(gridLayoutStateManager, startingPointer.current, pointerPixel.current);
       };
-
-      const onEnd = () => commitAction(gridLayoutStateManager);
 
       if (isMouseEvent(e)) {
         e.stopPropagation();
@@ -63,10 +76,20 @@ export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
           onMove,
           onEnd,
         });
+      } else if (isKeyboardEvent(e)) {
+        const isEventActive = gridLayoutStateManager.activeRowEvent$.value !== undefined;
+        startKeyboardInteraction({
+          e,
+          isEventActive,
+          onStart,
+          onMove,
+          onEnd,
+          onCancel,
+        });
       }
     },
-    [gridLayoutStateManager, rowId]
+    [gridLayoutStateManager, rowId, onEnd, onCancel]
   );
 
-  return startInteraction;
+  return { startDrag: startInteraction, onBlur: onEnd };
 };

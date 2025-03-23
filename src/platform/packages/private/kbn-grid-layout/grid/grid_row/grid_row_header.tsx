@@ -37,7 +37,7 @@ export interface GridRowHeaderProps {
 export const GridRowHeader = React.memo(
   ({ rowId, toggleIsCollapsed, collapseButtonRef }: GridRowHeaderProps) => {
     const { gridLayoutStateManager } = useGridLayoutContext();
-    const startInteraction = useGridLayoutRowEvents({
+    const { startDrag, onBlur } = useGridLayoutRowEvents({
       rowId,
     });
 
@@ -213,8 +213,10 @@ export const GridRowHeader = React.memo(
                         aria-label={i18n.translate('kbnGridLayout.row.moveRow', {
                           defaultMessage: 'Move section',
                         })}
-                        onMouseDown={startInteraction}
-                        onTouchStart={startInteraction}
+                        onMouseDown={startDrag}
+                        onTouchStart={startDrag}
+                        onKeyDown={startDrag}
+                        onBlur={onBlur}
                         data-test-subj={`kbnGridRowHeader-${rowId}--dragHandle`}
                       />
                     </EuiFlexItem>

@@ -45,13 +45,11 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     height: euiTheme.size.l,
     zIndex: euiTheme.levels.modal,
     marginLeft: euiTheme.size.s,
-    scrollMarginTop: '200px', // TODO: OFFSET_TOP
     border: `1px solid ${euiTheme.border.color}`,
     borderBottom: 'none',
     backgroundColor: euiTheme.colors.backgroundBasePlain,
     borderRadius: `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0 0`,
     transition: `${euiTheme.animation.slow} opacity`,
-    touchAction: 'none',
     '.kbnGridPanel:hover &, .kbnGridPanel:focus-within &, &:active, &:focus': {
       opacity: '1 !important',
     },

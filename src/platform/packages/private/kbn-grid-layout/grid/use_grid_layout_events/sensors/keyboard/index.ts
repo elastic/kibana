@@ -8,8 +8,8 @@
  */
 
 import { UserKeyboardEvent } from './types';
-export { startKeyboardInteraction } from './keyboard';
 
+export { startKeyboardInteraction } from './keyboard';
 export const isKeyboardEvent = (e: Event | React.UIEvent<HTMLElement>): e is UserKeyboardEvent => {
   return 'key' in e;
 };

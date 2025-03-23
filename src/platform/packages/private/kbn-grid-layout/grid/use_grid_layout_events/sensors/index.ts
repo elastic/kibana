@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridLayoutStateManager } from '../../types';
 import { UserInteractionEvent } from '../types';
 import { isKeyboardEvent, getFocusedElementPosition } from './keyboard';
 import { isMouseEvent, getMouseSensorPosition } from './mouse';
@@ -27,10 +26,3 @@ export function getSensorPosition(e: UserInteractionEvent) {
   }
   throw new Error('Invalid event type');
 }
-
-export const isLayoutInteractive = (gridLayoutStateManager: GridLayoutStateManager) => {
-  return (
-    gridLayoutStateManager.expandedPanelId$.value === undefined &&
-    gridLayoutStateManager.accessMode$.getValue() === 'EDIT'
-  );
-};

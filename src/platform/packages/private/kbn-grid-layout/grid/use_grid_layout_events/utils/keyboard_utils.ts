@@ -10,27 +10,20 @@
 import { GridLayoutStateManager } from '../../types';
 import { KeyboardCode, UserKeyboardEvent } from '../sensors/keyboard/types';
 
-const OFFSET_TOP = 150; // TODO: Move to runtimeSettings ?
 const OFFSET_BOTTOM = 8; // Aesthetic bottom margin
 
-const updateClientY = (
-  currentY: number,
-  stepY: number,
-  isCloseToEdge: boolean,
-  type: string | undefined,
-  scrollTop: number
-) => {
+const updateClientY = (currentY: number, stepY: number, isCloseToEdge: boolean, type = 'drag') => {
   if (isCloseToEdge && type === 'resize') {
     setTimeout(() => document.activeElement?.scrollIntoView({ behavior: 'smooth', block: 'end' }));
   }
   if (isCloseToEdge && type === 'drag') {
-    window.scrollTo({ top: scrollTop, behavior: 'smooth' });
+    window.scrollTo({ top: window.scrollY + stepY, behavior: 'smooth' });
     return currentY;
   }
   return currentY + stepY;
 };
 
-export const updateNextPointerPixelForKeyboard = (
+export const getNextPositionForPanel = (
   ev: UserKeyboardEvent,
   gridLayoutStateManager: GridLayoutStateManager,
   handlePosition: { clientX: number; clientY: number }
@@ -39,7 +32,7 @@ export const updateNextPointerPixelForKeyboard = (
     interactionEvent$: { value: interactionEvent },
     activePanel$: { value: activePanel },
     runtimeSettings$: {
-      value: { columnPixelWidth, rowHeight, gutterSize },
+      value: { columnPixelWidth, rowHeight, gutterSize, dragTopOffset },
     },
   } = gridLayoutStateManager;
 
@@ -77,28 +70,62 @@ export const updateNextPointerPixelForKeyboard = (
 
       return {
         ...handlePosition,
-        clientY: updateClientY(
-          handlePosition.clientY,
-          stepY,
-          isCloseToBottom,
-          type,
-          window.scrollY + stepY
-        ),
+        clientY: updateClientY(handlePosition.clientY, stepY, isCloseToBottom, type),
       };
     }
     case KeyboardCode.Up: {
       // check if next key will cross the top edge
-      const isCloseToTop = panelPosition.top - stepY - OFFSET_TOP < 0;
+      const isCloseToTop = panelPosition.top - stepY - dragTopOffset < 0;
+      return {
+        ...handlePosition,
+        clientY: updateClientY(handlePosition.clientY, -stepY, isCloseToTop, type),
+      };
+    }
+    default:
+      return handlePosition;
+  }
+};
+
+export const getNextPositionForRow = (
+  ev: UserKeyboardEvent,
+  gridLayoutStateManager: GridLayoutStateManager,
+  handlePosition: { clientX: number; clientY: number },
+  rowId: string
+) => {
+  const {
+    headerRefs: { current: headerRefs },
+    runtimeSettings$: {
+      value: { dragTopOffset },
+    },
+  } = gridLayoutStateManager;
+
+  const headerRef = headerRefs[rowId];
+  const headerRefHeight = (headerRef?.getBoundingClientRect().height || 48) * 0.5;
+  const stepY = headerRefHeight;
+
+  switch (ev.code) {
+    case KeyboardCode.Down: {
+      const bottomOfPageReached = window.innerHeight + window.scrollY >= document.body.scrollHeight;
+
+      // check if next key will cross the bottom edge
+      // if we're at the bottom of the page, the handle can go down even more so we can reorder with the last row
+      const bottomMaxPosition = bottomOfPageReached
+        ? handlePosition.clientY + stepY
+        : handlePosition.clientY + 2 * stepY;
+      const isCloseToBottom = bottomMaxPosition > window.innerHeight;
 
       return {
         ...handlePosition,
-        clientY: updateClientY(
-          handlePosition.clientY,
-          -stepY,
-          isCloseToTop,
-          type,
-          window.scrollY - stepY
-        ),
+        clientY: updateClientY(handlePosition.clientY, stepY, isCloseToBottom),
+      };
+    }
+    case KeyboardCode.Up: {
+      // check if next key will cross the top edge
+      const isCloseToTop = handlePosition.clientY - stepY - dragTopOffset < 0;
+
+      return {
+        ...handlePosition,
+        clientY: updateClientY(handlePosition.clientY, -stepY, isCloseToTop),
       };
     }
     default:

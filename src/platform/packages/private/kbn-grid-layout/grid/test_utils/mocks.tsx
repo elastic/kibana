@@ -36,7 +36,7 @@ export const mockRenderPanelContents = jest.fn((panelId) => (
 
 export const getGridLayoutStateManagerMock = (overrides?: Partial<GridLayoutStateManager>) => {
   return {
-    layoutRef: { current: {}},
+    layoutRef: { current: {} },
     expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
     isMobileView$: new BehaviorSubject<boolean>(false),
     gridLayout$: new BehaviorSubject<GridLayoutData>(getSampleLayout()),

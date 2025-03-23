@@ -50,6 +50,7 @@ import { dashboardInputToGridLayout, gridLayoutToDashboardPanelMap } from './uti
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
+const DASHBOARD_DRAG_TOP_OFFSET = 150;
 
 export const GridExample = ({
   coreStart,
@@ -67,6 +68,7 @@ export const GridExample = ({
     gutterSize: DASHBOARD_MARGIN_SIZE,
     rowHeight: DASHBOARD_GRID_HEIGHT,
     columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+    dragTopOffset: DASHBOARD_DRAG_TOP_OFFSET,
   });
 
   const mockDashboardApi = useMockDashboardApi({ savedState: savedState.current });
@@ -311,7 +313,7 @@ const layoutStyles = ({ euiTheme }: UseEuiTheme) => {
       transition: `opacity 100ms linear`,
     },
     // styling for panel resize handle
-    '.kbnGridPanel--resizeHandle': {
+    '.kbnGridPanel__resizeHandle': {
       opacity: '0',
       transition: `opacity 0.2s, border 0.2s`,
       borderRadius: `7px 0 7px 0`,

@@ -194,13 +194,9 @@ export const commitAction = ({
 export const cancelAction = ({
   activePanel$,
   interactionEvent$,
-  gridLayout$,
   proposedGridLayout$,
 }: GridLayoutStateManager) => {
   activePanel$.next(undefined);
   interactionEvent$.next(undefined);
-  // if (proposedGridLayout$.value) {
-  //   gridLayout$.next(proposedGridLayout$.value);
-  // }
   proposedGridLayout$.next(undefined);
 };

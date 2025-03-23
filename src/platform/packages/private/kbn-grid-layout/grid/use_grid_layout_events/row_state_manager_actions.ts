@@ -50,6 +50,11 @@ export const commitAction = ({
   proposedGridLayout$.next(undefined);
 };
 
+export const cancelAction = ({ activeRowEvent$, proposedGridLayout$ }: GridLayoutStateManager) => {
+  activeRowEvent$.next(undefined);
+  proposedGridLayout$.next(undefined);
+};
+
 export const moveAction = (
   gridLayoutStateManager: GridLayoutStateManager,
   startingPointer: PointerPosition,

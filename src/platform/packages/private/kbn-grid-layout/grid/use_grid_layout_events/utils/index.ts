@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PanelInteractionEvent } from '../../types';
+import { GridLayoutStateManager, PanelInteractionEvent } from '../../types';
 import { getSensorPosition, isKeyboardEvent, isMouseEvent, isTouchEvent } from '../sensors';
 import { UserInteractionEvent, PointerPosition } from '../types';
 
@@ -61,3 +61,10 @@ export function getSensorOffsets(e: UserInteractionEvent, { top, left, right, bo
     bottom: clientY - bottom,
   };
 }
+
+export const isLayoutInteractive = (gridLayoutStateManager: GridLayoutStateManager) => {
+  return (
+    gridLayoutStateManager.expandedPanelId$.value === undefined &&
+    gridLayoutStateManager.accessMode$.getValue() === 'EDIT'
+  );
+};

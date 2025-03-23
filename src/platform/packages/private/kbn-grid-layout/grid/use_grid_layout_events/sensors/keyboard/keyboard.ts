@@ -12,10 +12,6 @@ import { KeyboardCode, KeyboardCodes, UserKeyboardEvent } from './types';
 
 type EventHandler = (e: UserInteractionEvent) => void;
 
-export const isKeyboardEvent = (e: Event | React.UIEvent<HTMLElement>): e is UserKeyboardEvent => {
-  return 'key' in e;
-};
-
 const keyboardCodes: KeyboardCodes = {
   start: [KeyboardCode.Space, KeyboardCode.Enter],
   cancel: [KeyboardCode.Esc],
@@ -40,14 +36,14 @@ const scrollToActiveElement = (shouldScrollToEnd: boolean) => {
   });
 };
 
-const handleStart = (e: UserKeyboardEvent, onStart: EventHandler, onBlur: EventHandler) => {
+const handleStart = (e: UserKeyboardEvent, onStart: EventHandler, onBlur?: EventHandler) => {
   e.stopPropagation();
   e.preventDefault();
   onStart(e);
   disableScroll();
 
   const handleBlur = (blurEvent: Event) => {
-    onBlur(blurEvent as UserInteractionEvent);
+    onBlur?.(blurEvent as UserInteractionEvent);
     enableScroll();
   };
 
@@ -90,7 +86,7 @@ export const startKeyboardInteraction = ({
   onStart: EventHandler;
   onEnd: EventHandler;
   onCancel: EventHandler;
-  onBlur: EventHandler;
+  onBlur?: EventHandler;
 }) => {
   if (!isEventActive) {
     if (isStartKey(e)) handleStart(e, onStart, onBlur);
