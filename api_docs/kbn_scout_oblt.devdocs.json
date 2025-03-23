@@ -1071,11 +1071,11 @@
           },
           "; samlAuth: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/scout",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
-            "section": "def-common.SamlSessionManager",
-            "text": "SamlSessionManager"
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SamlAuth",
+            "text": "SamlAuth"
           },
           "; } & { esArchiver: ",
           "EsArchiverFixture",
@@ -1112,7 +1112,13 @@
           " & ",
           "PlaywrightTestOptions",
           " & { browserAuth: ",
-          "BrowserAuthFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.BrowserAuthFixture",
+            "text": "BrowserAuthFixture"
+          },
           "; } & { page: ",
           {
             "pluginId": "@kbn/scout",
@@ -1177,11 +1183,11 @@
           },
           "; samlAuth: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/scout",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
-            "section": "def-common.SamlSessionManager",
-            "text": "SamlSessionManager"
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SamlAuth",
+            "text": "SamlAuth"
           },
           "; } & { scoutSpace: ",
           "ScoutSpaceParallelFixture",
@@ -1252,7 +1258,13 @@
           " & ",
           "PlaywrightTestOptions",
           " & { browserAuth: ",
-          "BrowserAuthFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.BrowserAuthFixture",
+            "text": "BrowserAuthFixture"
+          },
           "; } & { page: ",
           {
             "pluginId": "@kbn/scout",
@@ -1327,11 +1339,11 @@
           },
           "; samlAuth: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/scout",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
-            "section": "def-common.SamlSessionManager",
-            "text": "SamlSessionManager"
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SamlAuth",
+            "text": "SamlAuth"
           },
           "; } & { esArchiver: ",
           "EsArchiverFixture",
