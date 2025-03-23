@@ -44,7 +44,7 @@ export async function reIndexKnowledgeBase({
         error?.body?.error?.type === 'resource_already_exists_exception'
       ) {
         logger.error(
-          `Re-index of knowledge base cannot continue since the target index "${nextWriteIndexName}" already exists. Please delete it or update the alias "${resourceNames.aliases.kb}" to point to "${nextWriteIndexName}". Aborting.`
+          `Re-index of knowledge base cannot continue since the target index "${nextWriteIndexName}" already exists. Please delete it or update the alias "${resourceNames.writeIndexAlias.kb}" to point to "${nextWriteIndexName}". Aborting.`
         );
         return;
       }
@@ -78,7 +78,11 @@ export async function reIndexKnowledgeBase({
     await esClient.asInternalUser.indices.updateAliases({
       actions: [
         {
-          add: { index: nextWriteIndexName, alias: resourceNames.aliases.kb, is_write_index: true },
+          add: {
+            index: nextWriteIndexName,
+            alias: resourceNames.writeIndexAlias.kb,
+            is_write_index: true,
+          },
         },
       ],
     });
@@ -97,7 +101,7 @@ export async function reIndexKnowledgeBaseIfSemanticTextIsUnsupported({
   esClient: { asInternalUser: ElasticsearchClient };
 }) {
   const indexSettingsResponse = await esClient.asInternalUser.indices.getSettings({
-    index: resourceNames.aliases.kb,
+    index: resourceNames.writeIndexAlias.kb,
   });
 
   const results = Object.entries(indexSettingsResponse);
@@ -133,7 +137,7 @@ export async function getCurrentWriteIndexName({
   esClient: { asInternalUser: ElasticsearchClient };
 }) {
   const res = await esClient.asInternalUser.cat.indices({
-    index: resourceNames.aliases.kb,
+    index: resourceNames.writeIndexAlias.kb,
     format: 'json',
     h: ['index'],
   });
@@ -145,7 +149,7 @@ export async function getCurrentWriteIndexName({
 
   const latestIndexNumber = last(currentWriteIndexName.split('-'))!;
   const nextIndexSequenceNumber = (parseInt(latestIndexNumber, 10) + 1).toString().padStart(6, '0');
-  const nextWriteIndexName = `${resourceNames.aliases.kb}-${nextIndexSequenceNumber}`;
+  const nextWriteIndexName = `${resourceNames.writeIndexAlias.kb}-${nextIndexSequenceNumber}`;
 
   return { currentWriteIndexName, nextWriteIndexName };
 }
@@ -154,7 +158,7 @@ export function isKnowledgeBaseIndexWriteBlocked(error: any) {
   return (
     error instanceof EsErrors.ResponseError &&
     error.message.includes(`cluster_block_exception`) &&
-    error.message.includes(resourceNames.aliases.kb)
+    error.message.includes(resourceNames.writeIndexAlias.kb)
   );
 }
 

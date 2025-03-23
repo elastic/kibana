@@ -74,7 +74,7 @@ function registerKbSemanticTextMigrationTask({
               const esClient = coreStart.elasticsearch.client;
 
               const hasKbIndex = await esClient.asInternalUser.indices.exists({
-                index: resourceNames.aliases.kb,
+                index: resourceNames.writeIndexAlias.kb,
               });
 
               if (!hasKbIndex) {
@@ -160,7 +160,7 @@ async function populateSemanticTextFieldRecursively({
   const response = await esClient.asInternalUser.search<KnowledgeBaseEntry>({
     size: 100,
     track_total_hits: true,
-    index: [resourceNames.aliases.kb],
+    index: [resourceNames.writeIndexAlias.kb],
     query: {
       bool: {
         must_not: {
@@ -194,7 +194,7 @@ async function populateSemanticTextFieldRecursively({
 
       return esClient.asInternalUser.update({
         refresh: 'wait_for',
-        index: resourceNames.aliases.kb,
+        index: resourceNames.writeIndexAlias.kb,
         id: hit._id,
         doc: {
           ...hit._source,

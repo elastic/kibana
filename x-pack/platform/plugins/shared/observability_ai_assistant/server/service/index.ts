@@ -28,7 +28,7 @@ export const resourceNames = {
     conversations: getResourceName('component-template-conversations'),
     kb: getResourceName('component-template-kb'),
   },
-  aliases: {
+  writeIndexAlias: {
     conversations: getResourceName('conversations'),
     kb: getResourceName('kb'),
   },
@@ -39,10 +39,6 @@ export const resourceNames = {
   indexTemplate: {
     conversations: getResourceName('index-template-conversations'),
     kb: getResourceName('index-template-kb'),
-  },
-  concreteIndexName: {
-    conversations: getResourceName('conversations-000001'),
-    kb: getResourceName('kb-000001'),
   },
 };
 

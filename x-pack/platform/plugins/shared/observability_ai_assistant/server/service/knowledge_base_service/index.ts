@@ -103,7 +103,7 @@ export class KnowledgeBaseService {
     const response = await this.dependencies.esClient.asInternalUser.search<
       Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels' | 'title'> & { doc_id?: string }
     >({
-      index: [resourceNames.aliases.kb],
+      index: [resourceNames.indexPatterns.kb],
       query: {
         bool: {
           should: queries.map(({ text, boost = 1 }) => ({
@@ -235,7 +235,7 @@ export class KnowledgeBaseService {
     }
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
-        index: resourceNames.aliases.kb,
+        index: resourceNames.indexPatterns.kb,
         query: {
           bool: {
             filter: [
@@ -283,7 +283,7 @@ export class KnowledgeBaseService {
       const response = await this.dependencies.esClient.asInternalUser.search<
         KnowledgeBaseEntry & { doc_id?: string }
       >({
-        index: resourceNames.aliases.kb,
+        index: resourceNames.indexPatterns.kb,
         query: {
           bool: {
             filter: [
@@ -357,7 +357,7 @@ export class KnowledgeBaseService {
       return null;
     }
     const res = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
-      index: resourceNames.aliases.kb,
+      index: resourceNames.indexPatterns.kb,
       query: {
         bool: {
           filter: [
@@ -405,7 +405,7 @@ export class KnowledgeBaseService {
 
     const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
       size: 1,
-      index: resourceNames.aliases.kb,
+      index: resourceNames.indexPatterns.kb,
       query,
       _source: false,
     });
@@ -430,7 +430,7 @@ export class KnowledgeBaseService {
       await this.dependencies.esClient.asInternalUser.index<
         Omit<KnowledgeBaseEntry, 'id'> & { namespace: string }
       >({
-        index: resourceNames.aliases.kb,
+        index: resourceNames.writeIndexAlias.kb,
         id,
         document: {
           '@timestamp': new Date().toISOString(),
@@ -483,7 +483,7 @@ export class KnowledgeBaseService {
   deleteEntry = async ({ id }: { id: string }): Promise<void> => {
     try {
       await this.dependencies.esClient.asInternalUser.delete({
-        index: resourceNames.aliases.kb,
+        index: resourceNames.indexPatterns.kb,
         id,
         refresh: 'wait_for',
       });

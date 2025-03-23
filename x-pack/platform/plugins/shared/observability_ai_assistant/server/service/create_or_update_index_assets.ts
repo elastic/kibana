@@ -23,11 +23,11 @@ export async function updateExistingIndexAssets({
   const { asInternalUser } = coreStart.elasticsearch.client;
 
   const hasKbIndex = await asInternalUser.indices.exists({
-    index: resourceNames.aliases.kb,
+    index: resourceNames.writeIndexAlias.kb,
   });
 
   const hasConversationIndex = await asInternalUser.indices.exists({
-    index: resourceNames.aliases.conversations,
+    index: resourceNames.writeIndexAlias.conversations,
   });
 
   if (!hasKbIndex && !hasConversationIndex) {
@@ -73,7 +73,7 @@ export async function createOrUpdateIndexAssets({
     });
 
     // Conversations: write index
-    const conversationAliasName = resourceNames.aliases.conversations;
+    const conversationAliasName = resourceNames.writeIndexAlias.conversations;
     await createConcreteWriteIndex({
       esClient: asInternalUser,
       logger,
@@ -82,7 +82,7 @@ export async function createOrUpdateIndexAssets({
         alias: conversationAliasName,
         pattern: `${conversationAliasName}*`,
         basePattern: `${conversationAliasName}*`,
-        name: resourceNames.concreteIndexName.conversations,
+        name: `${conversationAliasName}-000001`,
         template: resourceNames.indexTemplate.conversations,
       },
       dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
@@ -130,7 +130,7 @@ export async function createKbConcreteIndex({
     asInternalUser: ElasticsearchClient;
   };
 }) {
-  const kbAliasName = resourceNames.aliases.kb;
+  const kbAliasName = resourceNames.writeIndexAlias.kb;
   return createConcreteWriteIndex({
     esClient: esClient.asInternalUser,
     logger,
@@ -139,7 +139,7 @@ export async function createKbConcreteIndex({
       alias: kbAliasName,
       pattern: `${kbAliasName}*`,
       basePattern: `${kbAliasName}*`,
-      name: resourceNames.concreteIndexName.kb,
+      name: `${kbAliasName}-000001`,
       template: resourceNames.indexTemplate.kb,
     },
     dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),

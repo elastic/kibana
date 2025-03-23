@@ -106,7 +106,7 @@ export class ObservabilityAIAssistantClient {
     conversationId: string
   ): Promise<SearchHit<Conversation> | undefined> => {
     const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
-      index: resourceNames.aliases.conversations,
+      index: resourceNames.indexPatterns.conversations,
       query: {
         bool: {
           filter: [
@@ -536,7 +536,7 @@ export class ObservabilityAIAssistantClient {
 
   find = async (options?: { query?: string }): Promise<Conversation[]> => {
     const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
-      index: resourceNames.aliases.conversations,
+      index: resourceNames.indexPatterns.conversations,
       allow_no_indices: true,
       query: {
         bool: {
@@ -601,7 +601,7 @@ export class ObservabilityAIAssistantClient {
     );
 
     await this.dependencies.esClient.asInternalUser.index({
-      index: resourceNames.aliases.conversations,
+      index: resourceNames.writeIndexAlias.conversations,
       document: createdConversation,
       refresh: true,
     });
