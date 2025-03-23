@@ -104,7 +104,6 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   spacer = true,
   scrollElementId,
 }) => {
-
   const localSearchRef = useLocalSearch(list, !!isLoading);
   const euiTheme = useEuiTheme();
   const [isPopoverOpen, setPopover] = useState(false);
