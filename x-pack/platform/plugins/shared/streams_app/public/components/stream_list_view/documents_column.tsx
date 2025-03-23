@@ -23,6 +23,9 @@ import {
   Settings,
   LIGHT_THEME,
   DARK_THEME,
+  niceTimeFormatter,
+  Tooltip,
+  TooltipStickTo,
   type SettingsProps,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
@@ -32,7 +35,7 @@ import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 
-export function DocCountColumn({
+export function DocumentsColumn({
   timefilter,
   indexPattern,
   numDataPoints,
@@ -83,13 +86,14 @@ export function DocCountColumn({
     0
   );
 
+  const xFormatter = niceTimeFormatter([start, end]);
+
   return (
     <EuiFlexGroup
       alignItems="center"
       gutterSize="m"
       className={css`
         height: ${euiThemeVars.euiSizeXL};
-        margin-right: ${euiThemeVars.euiSizeXL};
         white-space: nowrap;
       `}
     >
@@ -99,7 +103,7 @@ export function DocCountColumn({
             <EuiSkeletonRectangle isLoading width="100%" height={euiThemeVars.euiFontSizeS} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiSkeletonRectangle isLoading width="100%" height={euiThemeVars.euiSizeXL} />
+            <EuiSkeletonRectangle isLoading width="100%" height={euiThemeVars.euiSizeL} />
           </EuiFlexItem>
         </EuiDelayRender>
       ) : (
@@ -112,8 +116,12 @@ export function DocCountColumn({
             <EuiI18nNumber value={docCount} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <Chart size={{ width: '100%', height: euiThemeVars.euiSizeXL }}>
+            <Chart size={{ width: '100%', height: euiThemeVars.euiSizeL }}>
               <SettingsWithTheme xDomain={{ min: start, max: end }} noResults={<div />} />
+              <Tooltip
+                stickTo={TooltipStickTo.Middle}
+                headerFormatter={({ value }) => xFormatter(value)}
+              />
               {allTimeseries.map((serie) => (
                 <BarSeries
                   key={serie.id}

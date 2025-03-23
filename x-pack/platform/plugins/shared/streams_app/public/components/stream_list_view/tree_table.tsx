@@ -6,40 +6,25 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiIcon,
-  EuiInMemoryTable,
-  EuiText,
-  EuiButtonIcon,
-} from '@elastic/eui';
-import {
-  StreamDefinition,
-  isUnwiredStreamDefinition,
-  isWiredStreamDefinition,
-  isDslLifecycle,
-  isInheritLifecycle,
-} from '@kbn/streams-schema';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiIcon, EuiInMemoryTable } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
+import { isUnwiredStreamDefinition, getSegments, isDescendantOf } from '@kbn/streams-schema';
 import { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
-import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { asTrees, type StreamTree } from '../streams_list';
-import { DocCountColumn } from './doc_count_column';
+import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
+import { DocumentsColumn } from './documents_column';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { RetentionColumn } from './retention_column';
 
 export function StreamsTreeTable({
   timefilter,
   loading,
   streams,
-  onRefresh,
 }: {
   timefilter: TimefilterHook; // Workaround to keep state in sync
-  streams: StreamDefinition[] | undefined;
+  streams: ListStreamDetail[] | undefined;
   loading?: boolean;
-  onRefresh?(): void;
 }) {
   const router = useStreamsAppRouter();
   const items = React.useMemo(() => flattenTrees(asTrees(streams ?? [])), [streams]);
@@ -50,10 +35,10 @@ export function StreamsTreeTable({
       columns={[
         {
           field: 'name',
-          name: i18n.translate('xpack.streams.streamsTreeTableNameColumnName', {
+          name: i18n.translate('xpack.streams.streamsTreeTable.nameColumnName', {
             defaultMessage: 'Name',
           }),
-          width: '50%',
+          width: '40%',
           render: (name: StreamTreeWithLevel['name'], item) => (
             <EuiFlexGroup
               alignItems="center"
@@ -83,36 +68,21 @@ export function StreamsTreeTable({
         },
         {
           field: 'documents',
-          name: i18n.translate('xpack.streams.streamsTreeTableDocumentsColumnName', {
+          name: i18n.translate('xpack.streams.streamsTreeTable.documentsColumnName', {
             defaultMessage: 'Documents',
           }),
-          width: '25%',
+          width: '40%',
           render: (_, item) => (
-            <DocCountColumn timefilter={timefilter} indexPattern={item.name} numDataPoints={25} />
+            <DocumentsColumn timefilter={timefilter} indexPattern={item.name} numDataPoints={25} />
           ),
         },
         {
-          field: 'retention',
-          name: i18n.translate('xpack.streams.streamsTreeTableRetentionColumnName', {
+          field: 'effective_lifecycle',
+          name: i18n.translate('xpack.streams.streamsTreeTable.retentionColumnName', {
             defaultMessage: 'Retention',
           }),
-          width: '25%',
-          render: (_, item) =>
-            isWiredStreamDefinition(item.stream) || isUnwiredStreamDefinition(item.stream) ? (
-              isInheritLifecycle(item.stream.ingest.lifecycle) ? (
-                <EuiText color="subdued">
-                  {i18n.translate('xpack.streams.streamsTreeTableRetentionColumnInheritedBadge', {
-                    defaultMessage: 'Inherited',
-                  })}
-                </EuiText>
-              ) : isDslLifecycle(item.stream.ingest.lifecycle) ? (
-                item.stream.ingest.lifecycle.dsl.data_retention || (
-                  <EuiIcon type="infinity" size="m" />
-                )
-              ) : (
-                item.stream.ingest.lifecycle.ilm.policy
-              )
-            ) : null,
+          width: '20%',
+          render: (_, item) => <RetentionColumn lifecycle={item.effective_lifecycle} />,
         },
       ]}
       itemId="name"
@@ -122,9 +92,8 @@ export function StreamsTreeTable({
         box: {
           incremental: true,
         },
-        toolsRight: [
+        toolsRight: (
           <StreamsAppSearchBar
-            key="timeRangePicker"
             onQuerySubmit={({ dateRange }, isUpdate) => {
               if (dateRange && isUpdate) {
                 timefilter.setTimeRange(dateRange);
@@ -134,19 +103,55 @@ export function StreamsTreeTable({
             onRefresh={timefilter.refreshAbsoluteTimeRange}
             dateRangeFrom={timefilter.timeRange.from}
             dateRangeTo={timefilter.timeRange.to}
-            showSubmitButton={false} // Render own refresh button since there's no way of distinguishing between an actual refresh click event and a time range change in StreamsAppSearchBar component
-          />,
-          <EuiButtonIcon
-            key="refreshButton"
-            iconType="refresh"
-            display="base"
-            size="m"
-            onClick={onRefresh}
-          />,
-        ],
+          />
+        ),
       }}
     />
   );
+}
+
+export interface StreamTree extends ListStreamDetail {
+  name: string;
+  type: 'wired' | 'root' | 'classic';
+  children: StreamTree[];
+}
+
+export function asTrees(streams: ListStreamDetail[]) {
+  const trees: StreamTree[] = [];
+  const sortedStreams = streams
+    .slice()
+    .sort((a, b) => getSegments(a.stream.name).length - getSegments(b.stream.name).length);
+
+  sortedStreams.forEach((streamDetail) => {
+    let currentTree = trees;
+    let existingNode: StreamTree | undefined;
+    // traverse the tree following the prefix of the current name.
+    // once we reach the leaf, the current name is added as child - this works because the ids are sorted by depth
+    while (
+      (existingNode = currentTree.find((node) =>
+        isDescendantOf(node.name, streamDetail.stream.name)
+      ))
+    ) {
+      currentTree = existingNode.children;
+    }
+
+    if (!existingNode) {
+      const segments = getSegments(streamDetail.stream.name);
+      const newNode: StreamTree = {
+        ...streamDetail,
+        name: streamDetail.stream.name,
+        children: [],
+        type: isUnwiredStreamDefinition(streamDetail.stream)
+          ? 'classic'
+          : segments.length === 1
+          ? 'root'
+          : 'wired',
+      };
+      currentTree.push(newNode);
+    }
+  });
+
+  return trees;
 }
 
 interface StreamTreeWithLevel extends StreamTree {

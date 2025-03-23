@@ -30,7 +30,7 @@ export function StreamListView() {
 
   const streamsListFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      const { streams } = await streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', {
+      const { streams } = await streamsRepositoryClient.fetch('GET /internal/streams', {
         signal,
       });
       return streams;
@@ -53,18 +53,18 @@ export function StreamListView() {
             <EuiFlexGroup alignItems="center" gutterSize="m">
               <EuiFlexItem grow={false}>
                 <StreamsAppPageHeaderTitle
-                  title={i18n.translate('xpack.streams.streamsListViewPageHeaderTitle', {
+                  title={i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
                     defaultMessage: 'Streams',
                   })}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge
-                  label={i18n.translate('xpack.streams.streamsListViewBetaBadgeLabel', {
+                  label={i18n.translate('xpack.streams.streamsListView.betaBadgeLabel', {
                     defaultMessage: 'Technical Preview',
                   })}
                   tooltipContent={i18n.translate(
-                    'xpack.streams.streamsListViewBetaBadgeDescription',
+                    'xpack.streams.streamsListView.betaBadgeDescription',
                     {
                       defaultMessage:
                         'This functionality is experimental and not supported. It may change or be removed at any time.',
@@ -86,7 +86,6 @@ export function StreamListView() {
             timefilter={timefilter}
             loading={streamsListFetch.loading}
             streams={streamsListFetch.value}
-            onRefresh={streamsListFetch.refresh}
           />
         )}
       </StreamsAppPageBody>

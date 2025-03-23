@@ -29,12 +29,12 @@ export function StreamsEmptyPrompt() {
       icon={<AssetImage type="noResults" />}
       title={
         <h2>
-          {i18n.translate('xpack.streams.streamsEmptyPromptTitle', {
+          {i18n.translate('xpack.streams.streamsEmptyPrompt.title', {
             defaultMessage: 'No Data Streams Yet',
           })}
         </h2>
       }
-      body={i18n.translate('xpack.streams.streamsEmptyPromptDescription', {
+      body={i18n.translate('xpack.streams.streamsEmptyPrompt.description', {
         defaultMessage:
           'Start streaming your data to Elastic to unlock powerful search, observability, and security insights. Get started by ingesting logs, metrics, or traces, or connecting cloud services.',
       })}
@@ -42,7 +42,7 @@ export function StreamsEmptyPrompt() {
         onboardingLocator
           ? [
               <EuiButton href={onboardingLocator.getRedirectUrl({})} fill>
-                {i18n.translate('xpack.streams.streamsEmptyPromptAddDataButton', {
+                {i18n.translate('xpack.streams.streamsEmptyPrompt.addDataButton', {
                   defaultMessage: 'Add Data',
                 })}
               </EuiButton>,
