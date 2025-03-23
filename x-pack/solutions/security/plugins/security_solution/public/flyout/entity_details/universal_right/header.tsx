@@ -126,18 +126,18 @@ export const UniversalEntityFlyoutHeader = ({
               margin-bottom: ${euiTheme.size.s};
             `}
           >
-            {(entity.tags || entity.labels) && (
+            {(source.tags || source.labels) && (
               <>
                 <EuiSpacer size="s" />
-                <HeaderTags tags={entity.tags} labels={entity.labels} />
+                <HeaderTags tags={source.tags} labels={source.labels} />
               </>
             )}
           </div>
           <HeaderDataCards
             id={entity.id}
             type={entity.type}
-            category={entity.category}
-            criticality={entity.criticality}
+            sub_type={entity.sub_type}
+            criticality={source.asset.criticality}
           />
         </>
       </FlyoutHeader>

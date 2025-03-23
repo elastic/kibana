@@ -53,6 +53,9 @@ const pagination: EuiInMemoryTableProps<FlattenedItem>['pagination'] = {
   showPerPageOptions: false,
 };
 
+const isValidEcsField = (fieldName: string): fieldName is keyof typeof EcsFlat =>
+  fieldName in EcsFlat;
+
 const columns: EuiInMemoryTableProps<FlattenedItem>['columns'] = [
   {
     field: 'key',
@@ -60,9 +63,13 @@ const columns: EuiInMemoryTableProps<FlattenedItem>['columns'] = [
       defaultMessage: 'Field',
     }),
     width: '25%',
-    render: (field, data) => {
-      console.log(data);
-      return <TableFieldNameCell field={field} dataType={EcsFlat[data]} />;
+    render: (fieldName: keyof typeof EcsFlat | string, flattenedItem) => {
+      let dataType: string = typeof flattenedItem.value;
+      if (isValidEcsField(fieldName)) {
+        dataType = EcsFlat[fieldName].type;
+      }
+
+      return <TableFieldNameCell field={fieldName} dataType={dataType} />;
     },
   },
   {

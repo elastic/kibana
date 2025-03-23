@@ -183,9 +183,12 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   },
   {
     key: UniversalEntityPanelKey,
-    component: (props) => (
-      <UniversalEntityPanel {...(props as UniversalEntityPanelExpandableFlyoutProps).params} />
-    ),
+    component: (props) => {
+      console.log(props);
+      return (
+        <UniversalEntityPanel {...(props as UniversalEntityPanelExpandableFlyoutProps).params} />
+      );
+    },
   },
 ];
 

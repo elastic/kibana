@@ -7,23 +7,24 @@
 
 import React, { useEffect } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import {
-  uiMetricService,
-  UNIVERSAL_ENTITY_FLYOUT_OPENED,
-} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import { METRIC_TYPE } from '@kbn/analytics';
 import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
+import { METRIC_TYPE } from '@kbn/analytics';
+import {
+  UNIVERSAL_ENTITY_FLYOUT_OPENED,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useGetGenericEntity } from './hooks/use_get_generic_entity';
 import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
+import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UniversalEntityFlyoutHeader } from './header';
 import { UniversalEntityFlyoutContent } from './content';
-import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 
 export interface UniversalEntityPanelProps {
   entity: EntityEcs;
   source: GenericEntityRecord;
   /** this is because FlyoutPanelProps defined params as Record<string, unknown> {@link FlyoutPanelProps#params} */
   [key: string]: unknown;
+  entityDocId: string;
 }
 
 export interface UniversalEntityPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -31,13 +32,22 @@ export interface UniversalEntityPanelExpandableFlyoutProps extends FlyoutPanelPr
   params: UniversalEntityPanelProps;
 }
 
-export const UniversalEntityPanel = ({ entity, source }: UniversalEntityPanelProps) => {
-  useEffect(() => {
-    uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, UNIVERSAL_ENTITY_FLYOUT_OPENED);
-  }, [entity]);
+export const UniversalEntityPanel = ({ entityDocId }: UniversalEntityPanelProps) => {
+  const getGenericEntity = useGetGenericEntity(entityDocId);
+  console.log('doc', getGenericEntity.data);
 
-  const t = useGetGenericEntity('dd-bVZUBMP-yNCPysK_w');
-  console.log('doc', t.data);
+  useEffect(() => {
+    if (getGenericEntity.data?._id) {
+      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, UNIVERSAL_ENTITY_FLYOUT_OPENED);
+    }
+  }, [getGenericEntity.data?._id]);
+
+  if (!getGenericEntity.isSuccess) {
+    return <>loading</>;
+  }
+
+  const source = getGenericEntity.data._source;
+  const entity = getGenericEntity.data._source.entity;
 
   return (
     <>

@@ -25,8 +25,11 @@ import {
 import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
 
 interface InventoryFlyoutProps {
-  entity: EntityEcs;
+  entity?: EntityEcs;
   source?: GenericEntityRecord;
+  entityDocId?: string;
+  entityType?: string;
+  entityName?: string;
   scopeId?: string;
   contextId?: string;
 }
@@ -36,9 +39,17 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
   const { notifications } = useKibana().services;
   useOnExpandableFlyoutClose({ callback: onFlyoutClose });
 
-  const openDynamicFlyout = ({ entity, source, scopeId, contextId }: InventoryFlyoutProps) => {
+  const openDynamicFlyout = ({
+    entity,
+    entityType,
+    entityName,
+    source,
+    entityDocId,
+    scopeId,
+    contextId,
+  }: InventoryFlyoutProps) => {
     // User, Host, and Service entity flyouts rely on entity name to fetch required data
-    if (['user', 'host', 'service'].includes(entity.type) && !entity.name) {
+    if (['user', 'host', 'service'].includes(entityType) && !entityName) {
       notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.securitySolution.assetInventory.openFlyout.missingEntityNameTitle',
@@ -55,7 +66,7 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
       return;
     }
 
-    switch (entity.type) {
+    switch (entityType) {
       case 'user':
         openFlyout({
           right: { id: UserPanelKey, params: { userName: entity.name, scopeId, contextId } },
@@ -73,7 +84,9 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
         break;
 
       default:
-        openFlyout({ right: { id: UniversalEntityPanelKey, params: { entity, source } } });
+        openFlyout({
+          right: { id: UniversalEntityPanelKey, params: { entityDocId, scopeId, contextId } },
+        });
         break;
     }
 

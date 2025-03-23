@@ -16,9 +16,13 @@ import { useKibana } from '../../../../common/lib/kibana';
 
 type GenericEntityRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 type GenericEntityResponse = IKibanaSearchResponse<estypes.SearchResponse<GenericEntityRecord>>;
+type GenericEntityHit = estypes.SearchHit<GenericEntityRecord> | undefined; // Single hit or undefined if not found
 
-const fetchGenericEntity = async (dataService: DataPublicPluginStart, docId: string) => {
-  const response = await lastValueFrom(
+const fetchGenericEntity = async (
+  dataService: DataPublicPluginStart,
+  docId: string
+): Promise<GenericEntityResponse> => {
+  return lastValueFrom(
     dataService.search.search<GenericEntityRequest, GenericEntityResponse>({
       params: {
         index: ASSET_INVENTORY_INDEX_PATTERN,
@@ -28,8 +32,6 @@ const fetchGenericEntity = async (dataService: DataPublicPluginStart, docId: str
       },
     })
   );
-
-  return response; // Ensure proper handling of response
 };
 
 export const useGetGenericEntity = (docId: string) => {
@@ -38,5 +40,6 @@ export const useGetGenericEntity = (docId: string) => {
   return useQuery({
     queryKey: ['use-get-generic-entity-key', docId],
     queryFn: () => fetchGenericEntity(data, docId),
+    select: (response) => response.rawResponse.hits.hits[0], // Extracting result out of ES
   });
 };

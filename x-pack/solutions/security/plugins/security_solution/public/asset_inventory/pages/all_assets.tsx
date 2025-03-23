@@ -190,11 +190,13 @@ export const AllAssets = () => {
 
   const onExpandDocClick = (record?: DataTableRecord | undefined) => {
     if (record) {
-      const { entity, source } = getEntity(record);
+      console.log(record);
+      // const { entity, source } = getEntity(record);
       setExpandedDoc(record); // Table is expecting the same record ref to highlight the selected row
       openDynamicFlyout({
-        entity,
-        source,
+        entityDocId: record.raw._id,
+        entityType: record.raw._source?.entity?.type,
+        entityName: record.raw._source?.entity?.name,
         scopeId: ASSET_INVENTORY_TABLE_ID,
         contextId: ASSET_INVENTORY_TABLE_ID,
       });
@@ -394,8 +396,6 @@ export const AllAssets = () => {
 
   const loadingState =
     isLoadingGridData || !dataView ? DataLoadingState.loading : DataLoadingState.loaded;
-
-  console.log('###', dataView);
 
   return (
     <I18nProvider>
