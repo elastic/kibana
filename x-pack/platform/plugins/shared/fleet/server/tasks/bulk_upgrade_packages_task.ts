@@ -38,8 +38,9 @@ interface BulkUpgradeTaskState {
   results?: Array<
     | {
         success: true;
+        name: string;
       }
-    | { success: false; error: { message: string } }
+    | { success: false; name: string; error: { message: string } }
   >;
   [k: string]: unknown;
 }
@@ -61,7 +62,7 @@ export function registerBulkUpgradePackagesTask(taskManager: TaskManagerSetupCon
 
             const taskParams = taskInstance.params as BulkUpgradeTaskParams;
             try {
-              const results = await runTask({ abortController, logger, taskParams });
+              const results = await _runBulkUpgradeTask({ abortController, logger, taskParams });
               const state: BulkUpgradeTaskState = {
                 isDone: true,
                 results,
@@ -94,7 +95,7 @@ function formatError(err: Error) {
   return { message: err.message };
 }
 
-async function runTask({
+export async function _runBulkUpgradeTask({
   abortController,
   taskParams,
   logger,
@@ -117,12 +118,11 @@ async function runTask({
   const results: BulkUpgradeTaskState['results'] = [];
 
   for (const pkg of packages) {
+    // Throw between package install if task is aborted
+    if (abortController.signal.aborted) {
+      throw new Error('Task was aborted');
+    }
     try {
-      // Throw between package install if task is aborted
-      if (abortController.signal.aborted) {
-        throw new Error('Task was aborted');
-      }
-
       const installResult = await installPackage({
         spaceId,
         authorizationHeader: authorizationHeader
@@ -153,18 +153,19 @@ async function runTask({
       }
 
       results.push({
+        name: pkg.name,
         success: true,
       });
     } catch (error) {
       logger.error(`Upgrade of package: ${pkg.name} failed`, { error });
       results.push({
+        name: pkg.name,
         success: false,
         error: formatError(error),
       });
     }
-
-    return results;
   }
+  return results;
 }
 
 async function bulkUpgradePackagePolicies({
@@ -183,8 +184,17 @@ async function bulkUpgradePackagePolicies({
   });
 
   if (policyIdsToUpgrade.items.length) {
-    await packagePolicyService.bulkUpgrade(savedObjectsClient, esClient, policyIdsToUpgrade.items);
-    //  Todo error handling
+    const upgradePackagePoliciesResults = await packagePolicyService.bulkUpgrade(
+      savedObjectsClient,
+      esClient,
+      policyIdsToUpgrade.items
+    );
+    const errors = upgradePackagePoliciesResults
+      .filter((result) => !result.success)
+      .map((result) => `${result.statusCode}: ${result.body?.message ?? ''}`);
+    if (errors.length) {
+      throw new Error(`Package policies upgrade for ${pkgName} failed:\n${errors.join('\n')}`);
+    }
   }
 }
 

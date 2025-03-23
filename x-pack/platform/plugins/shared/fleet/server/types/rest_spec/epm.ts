@@ -377,6 +377,7 @@ export const GetOneBulkUpgradePackagesResponseSchema = schema.object({
   results: schema.maybe(
     schema.arrayOf(
       schema.object({
+        name: schema.string(),
         success: schema.boolean(),
         error: schema.maybe(schema.object({ message: schema.string() })),
       })

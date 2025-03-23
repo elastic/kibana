@@ -95,9 +95,6 @@ const UpgradingVersionStatus: React.FunctionComponent<{
           <FormattedMessage
             id="xpack.fleet.epmInstalledIntegrations.upgradingText"
             defaultMessage="Upgrading..."
-            values={{
-              version: item.version,
-            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
