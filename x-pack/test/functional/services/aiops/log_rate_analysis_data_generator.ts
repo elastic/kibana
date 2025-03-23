@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 
@@ -58,7 +58,7 @@ function getArtificialLogsWithDeviation(
   includeTextField = false,
   includeGaps = false
 ) {
-  const bulkBody: estypes.BulkRequest<GeneratedDoc, GeneratedDoc>['body'] = [];
+  const bulkBody: estypes.BulkRequest<GeneratedDoc, GeneratedDoc>['operations'] = [];
   const action = { index: { _index: index } };
   let tsOffset = 0;
 
@@ -237,18 +237,16 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
 
           await es.updateByQuery({
             index: 'ft_farequote',
-            body: {
-              script: {
-                // @ts-expect-error
-                inline: 'ctx._source.custom_field = "default"',
-                lang: 'painless',
-              },
+            script: {
+              // @ts-expect-error
+              inline: 'ctx._source.custom_field = "default"',
+              lang: 'painless',
             },
           });
 
           await es.bulk({
             refresh: 'wait_for',
-            body: [...Array(100)].flatMap((i) => {
+            operations: [...Array(100)].flatMap((i) => {
               return [
                 { index: { _index: 'ft_farequote' } },
                 {
@@ -312,7 +310,7 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
 
           await es.bulk({
             refresh: 'wait_for',
-            body: getArtificialLogsWithDeviation(
+            operations: getArtificialLogsWithDeviation(
               dataGenerator,
               deviationType,
               textField,

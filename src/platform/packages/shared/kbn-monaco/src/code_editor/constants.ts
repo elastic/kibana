@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const CODE_EDITOR_DEFAULT_THEME_ID = 'codeEditorDefaultTheme';
-export const CODE_EDITOR_TRANSPARENT_THEME_ID = 'codeEditorTransparentTheme';
+export const CODE_EDITOR_DEFAULT_THEME_ID = 'codeEditorDefaultTheme' as const;
+export const CODE_EDITOR_TRANSPARENT_THEME_ID = 'codeEditorTransparentTheme' as const;

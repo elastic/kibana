@@ -89,21 +89,19 @@ export const fetchFields = async (
       index,
       doc: await client.asCurrentUser.search({
         index,
-        body: {
-          size: 0,
-          aggs: modelIdFields.reduce(
-            (sum, modelIdField) => ({
-              ...sum,
-              [modelIdField.path]: {
-                terms: {
-                  field: modelIdField.aggField,
-                  size: 1,
-                },
+        size: 0,
+        aggs: modelIdFields.reduce(
+          (sum, modelIdField) => ({
+            ...sum,
+            [modelIdField.path]: {
+              terms: {
+                field: modelIdField.aggField,
+                size: 1,
               },
-            }),
-            {}
-          ),
-        },
+            },
+          }),
+          {}
+        ),
       }),
       mapping: await client.asCurrentUser.indices.getMapping({ index }),
     }))

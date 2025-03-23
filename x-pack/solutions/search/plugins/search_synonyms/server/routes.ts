@@ -7,6 +7,7 @@
 
 import { IRouter, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import { APIRoutes } from '../common/api_routes';
 
 import { errorHandler } from './utils/error_handler';
@@ -19,6 +20,7 @@ import { fetchSynonymRule } from './lib/fetch_synonym_rule';
 import { putSynonymsSet } from './lib/put_synonyms_set';
 import { fetchUniqueRuleId } from './lib/fetch_unique_rule_id';
 import { putSynonymsRule } from './lib/put_synonyms_rule';
+import { fetchSynonymsSetExists } from './lib/fetch_synonyms_set_exists';
 
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
   router.get(
@@ -26,11 +28,10 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       path: APIRoutes.SYNONYM_SETS,
       options: {
         access: 'internal',
-        tags: ['synonyms:read'],
       },
       security: {
         authz: {
-          requiredPrivileges: ['synonyms:read'],
+          requiredPrivileges: ['manage_synonyms'],
         },
       },
       validate: {
@@ -78,11 +79,10 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       path: APIRoutes.SYNONYM_SET_ID,
       options: {
         access: 'internal',
-        tags: ['synonyms:write', 'synonyms:read'],
       },
       security: {
         authz: {
-          requiredPrivileges: ['synonyms:write', 'synonyms:read'],
+          requiredPrivileges: ['manage_synonyms'],
         },
       },
       validate: {
@@ -119,11 +119,10 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       path: APIRoutes.SYNONYM_SET_ID,
       options: {
         access: 'internal',
-        tags: ['synonyms:read'],
       },
       security: {
         authz: {
-          requiredPrivileges: ['synonyms:read'],
+          requiredPrivileges: ['manage_synonyms'],
         },
       },
       validate: {
@@ -177,11 +176,10 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       path: APIRoutes.SYNONYM_SET_ID_RULE_ID,
       options: {
         access: 'internal',
-        tags: ['synonyms:read'],
       },
       security: {
         authz: {
-          requiredPrivileges: ['synonyms:read'],
+          requiredPrivileges: ['manage_synonyms'],
         },
       },
       validate: {
@@ -228,11 +226,10 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       path: APIRoutes.SYNONYM_SET_ID_RULE_ID,
       options: {
         access: 'internal',
-        tags: ['synonyms:write', 'synonyms:read'],
       },
       security: {
         authz: {
-          requiredPrivileges: ['synonyms:write', 'synonyms:read'],
+          requiredPrivileges: ['manage_synonyms'],
         },
       },
       validate: {
@@ -279,16 +276,18 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       path: APIRoutes.SYNONYM_SET_ID,
       options: {
         access: 'internal',
-        tags: ['synonyms:write', 'synonyms:read'],
       },
       security: {
         authz: {
-          requiredPrivileges: ['synonyms:write', 'synonyms:read'],
+          requiredPrivileges: ['manage_synonyms'],
         },
       },
       validate: {
         params: schema.object({
           synonymsSetId: schema.string(),
+        }),
+        query: schema.object({
+          forceWrite: schema.boolean({ defaultValue: false }),
         }),
       },
     },
@@ -313,6 +312,20 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
         });
       }
       const synonymsSetId = request.params.synonymsSetId;
+      const forceWrite = request.query.forceWrite;
+      const isExisting = await fetchSynonymsSetExists(asCurrentUser, synonymsSetId);
+      if (isExisting && !forceWrite) {
+        return response.customError({
+          statusCode: 409,
+          body: i18n.translate(
+            'xpack.search.synonyms.api.routes.synonymsSetAlreadyExistsErrorMessage',
+            {
+              defaultMessage: `Synonyms set {synonymsSetId} already exists. Use forceWrite=true to overwrite it.`,
+              values: { synonymsSetId },
+            }
+          ),
+        });
+      }
       const result = await putSynonymsSet(asCurrentUser, synonymsSetId);
       return response.ok({
         headers: {
@@ -328,11 +341,10 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       path: APIRoutes.GENERATE_SYNONYM_RULE_ID,
       options: {
         access: 'internal',
-        tags: ['synonyms:write', 'synonyms:read'],
       },
       security: {
         authz: {
-          requiredPrivileges: ['synonyms:write', 'synonyms:read'],
+          requiredPrivileges: ['manage_synonyms'],
         },
       },
       validate: {
@@ -377,11 +389,10 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       path: APIRoutes.SYNONYM_SET_ID_RULE_ID,
       options: {
         access: 'internal',
-        tags: ['synonyms:write', 'synonyms:read'],
       },
       security: {
         authz: {
-          requiredPrivileges: ['synonyms:write', 'synonyms:read'],
+          requiredPrivileges: ['manage_synonyms'],
         },
       },
       validate: {

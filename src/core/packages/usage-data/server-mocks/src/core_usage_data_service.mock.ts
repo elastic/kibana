@@ -62,6 +62,7 @@ const createStartContractMock = () => {
             },
             keepaliveTimeout: 120000,
             maxPayloadInBytes: 1048576,
+            protocol: 'http1',
             requestId: {
               allowFromAnyIp: false,
               ipAllowlistConfigured: false,

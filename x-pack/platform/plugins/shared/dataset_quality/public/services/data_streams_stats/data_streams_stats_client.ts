@@ -41,12 +41,15 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   public async getDataStreamsStats(
     params: GetDataStreamsStatsQuery
   ): Promise<DataStreamStatServiceResponse> {
-    const types = params.types.length === 0 ? KNOWN_TYPES : params.types;
+    const types =
+      'types' in params
+        ? rison.encodeArray(params.types.length === 0 ? KNOWN_TYPES : params.types)
+        : undefined;
     const response = await this.http
       .get<GetDataStreamsStatsResponse>('/internal/dataset_quality/data_streams/stats', {
         query: {
           ...params,
-          types: rison.encodeArray(types),
+          types,
         },
       })
       .catch((error) => {

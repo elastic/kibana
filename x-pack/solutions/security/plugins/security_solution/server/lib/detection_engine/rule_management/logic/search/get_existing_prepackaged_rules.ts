@@ -49,16 +49,20 @@ export const getRulesCount = async ({
 export const getRules = async ({
   rulesClient,
   filter,
+  page = 1,
+  perPage = MAX_PREBUILT_RULES_COUNT,
 }: {
   rulesClient: RulesClient;
   filter: string;
+  page?: number;
+  perPage?: number;
 }): Promise<RuleAlertType[]> =>
   withSecuritySpan('getRules', async () => {
     const rules = await findRules({
       rulesClient,
       filter,
-      perPage: MAX_PREBUILT_RULES_COUNT,
-      page: 1,
+      perPage,
+      page,
       sortField: 'createdAt',
       sortOrder: 'desc',
       fields: undefined,
@@ -80,11 +84,17 @@ export const getNonPackagedRules = async ({
 
 export const getExistingPrepackagedRules = async ({
   rulesClient,
+  page,
+  perPage,
 }: {
   rulesClient: RulesClient;
+  page?: number;
+  perPage?: number;
 }): Promise<RuleAlertType[]> => {
   return getRules({
     rulesClient,
+    page,
+    perPage,
     filter: KQL_FILTER_IMMUTABLE_RULES,
   });
 };

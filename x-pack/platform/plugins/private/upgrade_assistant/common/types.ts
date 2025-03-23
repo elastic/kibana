@@ -6,7 +6,7 @@
  */
 
 import { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { SavedObject } from '@kbn/core/types';
 import type { DataStreamsAction } from './data_stream_types';
 
@@ -237,6 +237,7 @@ export interface EnrichedDeprecationInfo
     | 'ilm_policies'
     | 'templates';
   isCritical: boolean;
+  frozen?: boolean;
   status?: estypes.HealthReportIndicatorHealthStatus;
   index?: string;
   correctiveAction?:

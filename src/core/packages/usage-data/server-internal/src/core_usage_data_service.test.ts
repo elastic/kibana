@@ -307,6 +307,7 @@ describe('CoreUsageDataService', () => {
                 },
                 "keepaliveTimeout": 120000,
                 "maxPayloadInBytes": 1048576,
+                "protocol": "http1",
                 "requestId": Object {
                   "allowFromAnyIp": false,
                   "ipAllowlistConfigured": false,

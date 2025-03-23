@@ -26,7 +26,7 @@ export const API_HEADERS = Object.freeze({
 });
 
 export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
-export const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-Inference-Rainbow-Sprinkles'];
+export const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-LLM'];
 
 export const rootRequest = <T = unknown>({
   headers: optionHeaders = {},

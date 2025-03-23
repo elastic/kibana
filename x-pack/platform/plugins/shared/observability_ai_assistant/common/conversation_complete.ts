@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TokenCount as TokenCountType, type Message } from './types';
+import { type Message } from './types';
 
 export enum StreamingChatResponseEventType {
   ChatCompletionChunk = 'chatCompletionChunk',
@@ -16,7 +16,6 @@ export enum StreamingChatResponseEventType {
   MessageAdd = 'messageAdd',
   ChatCompletionError = 'chatCompletionError',
   BufferFlush = 'bufferFlush',
-  TokenCount = 'tokenCount',
 }
 
 type StreamingChatResponseEventBase<
@@ -54,7 +53,6 @@ export type ConversationCreateEvent = StreamingChatResponseEventBase<
       id: string;
       title: string;
       last_updated: string;
-      token_count?: TokenCountType;
     };
   }
 >;
@@ -66,7 +64,6 @@ export type ConversationUpdateEvent = StreamingChatResponseEventBase<
       id: string;
       title: string;
       last_updated: string;
-      token_count?: TokenCountType;
     };
   }
 >;
@@ -95,17 +92,6 @@ export type BufferFlushEvent = StreamingChatResponseEventBase<
   }
 >;
 
-export type TokenCountEvent = StreamingChatResponseEventBase<
-  StreamingChatResponseEventType.TokenCount,
-  {
-    tokens: {
-      completion: number;
-      prompt: number;
-      total: number;
-    };
-  }
->;
-
 export type StreamingChatResponseEvent =
   | ChatCompletionChunkEvent
   | ChatCompletionMessageEvent
@@ -113,7 +99,6 @@ export type StreamingChatResponseEvent =
   | ConversationUpdateEvent
   | MessageAddEvent
   | ChatCompletionErrorEvent
-  | TokenCountEvent
   | BufferFlushEvent;
 
 export type StreamingChatResponseEventWithoutError = Exclude<
@@ -121,7 +106,7 @@ export type StreamingChatResponseEventWithoutError = Exclude<
   ChatCompletionErrorEvent
 >;
 
-export type ChatEvent = ChatCompletionChunkEvent | TokenCountEvent | ChatCompletionMessageEvent;
+export type ChatEvent = ChatCompletionChunkEvent | ChatCompletionMessageEvent;
 export type MessageOrChatEvent = ChatEvent | MessageAddEvent;
 
 export enum ChatCompletionErrorCode {

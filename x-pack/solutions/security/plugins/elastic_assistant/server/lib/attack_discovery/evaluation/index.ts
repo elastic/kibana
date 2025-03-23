@@ -73,6 +73,8 @@ export const evaluateAttackDiscovery = async ({
     }> = connectors.map((connector) => {
       const llmType = getLlmType(connector.actionTypeId);
 
+      console.error('connectors', JSON.stringify(connectors, null, 2));
+
       const traceOptions = {
         projectName: langSmithProject,
         tracers: [
@@ -89,6 +91,7 @@ export const evaluateAttackDiscovery = async ({
         connectorId: connector.id,
         llmType,
         logger,
+        model: connector.config?.defaultModel,
         temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
         timeout: connectorTimeout,
         traceOptions,

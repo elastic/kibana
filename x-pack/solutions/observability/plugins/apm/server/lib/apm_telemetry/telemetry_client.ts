@@ -12,7 +12,9 @@ import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 
 interface RequiredSearchParams {
   index: string | string[];
-  body: { size: number; track_total_hits: boolean | number; timeout: string };
+  size: number;
+  track_total_hits: boolean | number;
+  timeout: string;
 }
 
 export interface IndicesStatsResponse {

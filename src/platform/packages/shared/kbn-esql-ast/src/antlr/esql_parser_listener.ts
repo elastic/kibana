@@ -102,6 +102,8 @@ import { JoinCommandContext } from "./esql_parser.js";
 import { JoinTargetContext } from "./esql_parser.js";
 import { JoinConditionContext } from "./esql_parser.js";
 import { JoinPredicateContext } from "./esql_parser.js";
+import { ChangePointCommandContext } from "./esql_parser.js";
+import { InsistCommandContext } from "./esql_parser.js";
 
 
 /**
@@ -1075,5 +1077,25 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitJoinPredicate?: (ctx: JoinPredicateContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.changePointCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterChangePointCommand?: (ctx: ChangePointCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.changePointCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitChangePointCommand?: (ctx: ChangePointCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.insistCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterInsistCommand?: (ctx: InsistCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.insistCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitInsistCommand?: (ctx: InsistCommandContext) => void;
 }
 

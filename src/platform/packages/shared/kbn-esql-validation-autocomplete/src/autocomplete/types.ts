@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLVariableType } from '../shared/types';
+import type { ESQLVariableType } from '@kbn/esql-types';
 
 // This is a subset of the Monaco's editor CompletitionItemKind type
 export type ItemKind =
@@ -83,7 +83,7 @@ export interface EditorContext {
 }
 
 export type GetColumnsByTypeFn = (
-  type: string | string[],
+  type: Readonly<string> | Readonly<string[]>,
   ignored?: string[],
   options?: {
     advanceCursor?: boolean;

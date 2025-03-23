@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { RawRule, RawRuleExecutionStatus } from '../../../types';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { RawRule, RawRuleExecutionStatus } from '../../../types';
 import { LEGACY_LAST_MODIFIED_VERSION, SIEM_APP_ID, SIEM_SERVER_APP_ID } from '../constants';
 import { createEsoMigration, pipeMigrations } from '../utils';
 

@@ -34,52 +34,50 @@ export function jsErrorsQuery(
   });
 
   const params = mergeProjection(projection, {
-    body: {
-      size: 0,
-      track_total_hits: true,
-      aggs: {
-        totalErrorGroups: {
-          cardinality: {
-            field: ERROR_GROUP_ID,
-          },
+    size: 0,
+    track_total_hits: true,
+    aggs: {
+      totalErrorGroups: {
+        cardinality: {
+          field: ERROR_GROUP_ID,
         },
-        totalErrorPages: {
-          cardinality: {
-            field: TRANSACTION_ID,
-          },
+      },
+      totalErrorPages: {
+        cardinality: {
+          field: TRANSACTION_ID,
         },
-        errors: {
-          terms: {
-            field: ERROR_GROUP_ID,
-            size: 500,
+      },
+      errors: {
+        terms: {
+          field: ERROR_GROUP_ID,
+          size: 500,
+        },
+        aggs: {
+          bucket_truncate: {
+            bucket_sort: {
+              size: pageSize,
+              from: pageIndex * pageSize,
+            },
           },
-          aggs: {
-            bucket_truncate: {
-              bucket_sort: {
-                size: pageSize,
-                from: pageIndex * pageSize,
+          impactedPages: {
+            filter: {
+              term: {
+                [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD,
               },
             },
-            impactedPages: {
-              filter: {
-                term: {
-                  [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD,
-                },
-              },
-              aggs: {
-                pageCount: {
-                  cardinality: {
-                    field: TRANSACTION_ID,
-                  },
+            aggs: {
+              pageCount: {
+                cardinality: {
+                  field: TRANSACTION_ID,
                 },
               },
             },
-            sample: {
-              top_hits: {
-                _source: [ERROR_EXC_MESSAGE, ERROR_EXC_TYPE, ERROR_GROUP_ID, '@timestamp'],
-                sort: [{ '@timestamp': 'desc' as const }],
-                size: 1,
-              },
+          },
+          sample: {
+            top_hits: {
+              _source: [ERROR_EXC_MESSAGE, ERROR_EXC_TYPE, ERROR_GROUP_ID, '@timestamp'],
+              sort: [{ '@timestamp': 'desc' as const }],
+              size: 1,
             },
           },
         },

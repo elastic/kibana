@@ -8,8 +8,6 @@
 import type {
   IndicesPutIndexTemplateRequest,
   Metadata,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
   ClusterPutComponentTemplateRequest,
   IndicesIndexSettings,
   IndicesPutIndexTemplateIndexTemplateMapping,
@@ -78,30 +76,28 @@ export const getIndexTemplate = ({
 
   return {
     name,
-    body: {
-      ...(isDataStream && { data_stream: { hidden } }),
-      index_patterns: indexPatterns,
-      composed_of: componentTemplateRefs,
-      template: {
-        ...template,
-        settings: {
-          hidden,
-          auto_expand_replicas: '0-1',
-          'index.mapping.ignore_malformed': true,
-          'index.mapping.total_fields.limit': totalFieldsLimit,
-          ...template.settings,
-        },
-        mappings: {
-          dynamic: false,
-          _meta: indexMetadata,
-          ...template.mappings,
-        },
+    ...(isDataStream && { data_stream: { hidden } }),
+    index_patterns: indexPatterns,
+    composed_of: componentTemplateRefs,
+    template: {
+      ...template,
+      settings: {
+        hidden,
+        auto_expand_replicas: '0-1',
+        'index.mapping.ignore_malformed': true,
+        'index.mapping.total_fields.limit': totalFieldsLimit,
+        ...template.settings,
       },
-      _meta: indexMetadata,
-
-      // By setting the priority to namespace.length, we ensure that if one namespace is a prefix of another namespace
-      // then newly created indices will use the matching template with the *longest* namespace
-      priority: namespace.length,
+      mappings: {
+        dynamic: false,
+        _meta: indexMetadata,
+        ...template.mappings,
+      },
     },
+    _meta: indexMetadata,
+
+    // By setting the priority to namespace.length, we ensure that if one namespace is a prefix of another namespace
+    // then newly created indices will use the matching template with the *longest* namespace
+    priority: namespace.length,
   };
 };

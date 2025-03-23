@@ -328,6 +328,7 @@ enabled:
   - x-pack/test/security_api_integration/chips.config.ts
   - x-pack/test/security_api_integration/features.config.ts
   - x-pack/test/security_api_integration/session_idle.config.ts
+  - x-pack/test/security_api_integration/session_shard_missing.config.ts
   - x-pack/test/security_api_integration/session_invalidate.config.ts
   - x-pack/test/security_api_integration/session_lifespan.config.ts
   - x-pack/test/security_api_integration/session_concurrent_limit.config.ts

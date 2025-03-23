@@ -9,7 +9,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-jest.mock('!!raw-loader!./disable_animations.css', () => 'MOCK DISABLE ANIMATIONS CSS');
+jest.mock('./disable_animations.css?raw', () => 'MOCK DISABLE ANIMATIONS CSS');
 
 import { StylesService } from './styles_service';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';

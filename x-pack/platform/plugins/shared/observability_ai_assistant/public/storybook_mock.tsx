@@ -9,7 +9,7 @@ import { noop } from 'lodash';
 import React from 'react';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { AssistantScope } from '@kbn/ai-assistant-common';
-import { ChatCompletionChunkEvent, FunctionDefinition, MessageRole } from '.';
+import { ChatCompletionChunkEvent, FunctionDefinition } from '.';
 import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { ObservabilityAIAssistantChatService, ObservabilityAIAssistantService } from './types';
@@ -30,13 +30,7 @@ export const createStorybookChatService = (): ObservabilityAIAssistantChatServic
   ),
   hasFunction: () => true,
   hasRenderFunction: () => true,
-  getSystemMessage: () => ({
-    '@timestamp': new Date().toISOString(),
-    message: {
-      role: MessageRole.System,
-      content: 'System',
-    },
-  }),
+  getSystemMessage: () => 'System',
   functions$: new BehaviorSubject<FunctionDefinition[]>(
     []
   ) as ObservabilityAIAssistantChatService['functions$'],

@@ -8,7 +8,7 @@
  */
 
 import { Walker, type ESQLSingleAstItem, type ESQLFunction } from '@kbn/esql-ast';
-import { logicalOperators } from '../../../definitions/builtin';
+import { logicalOperators } from '../../../definitions/all_operators';
 import { CommandSuggestParams, isParameterType } from '../../../definitions/types';
 import { isFunctionItem } from '../../../shared/helpers';
 import type { SuggestionRawDefinition } from '../../types';
@@ -152,14 +152,14 @@ export async function suggest({
       break;
 
     case 'empty_expression':
-      // Don't suggest MATCH or QSTR after unsupported commands
+      // Don't suggest MATCH, QSTR or KQL after unsupported commands
       const priorCommands = previousCommands?.map((a) => a.name) ?? [];
       const ignored = [];
       if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_MATCH.has(c))) {
         ignored.push('match');
       }
       if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_QSTR.has(c))) {
-        ignored.push('qstr');
+        ignored.push('kql', 'qstr');
       }
       const last = previousCommands?.[previousCommands.length - 1];
       let columnSuggestions: SuggestionRawDefinition[] = [];

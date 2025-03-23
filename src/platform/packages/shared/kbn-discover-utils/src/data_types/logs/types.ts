@@ -16,7 +16,6 @@ export interface LogDocument extends DataTableRecord {
     message?: [string];
     'error.message'?: string;
     'event.original'?: string;
-
     'host.name'?: string;
     'service.name'?: string;
     'trace.id'?: string;

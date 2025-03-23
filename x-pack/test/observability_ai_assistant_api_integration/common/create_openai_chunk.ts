@@ -7,10 +7,9 @@
 
 import { v4 } from 'uuid';
 import type OpenAI from 'openai';
+import { ToolMessage } from './create_llm_proxy';
 
-export function createOpenAiChunk(
-  msg: string | { content?: string; function_call?: { name: string; arguments?: string } }
-): OpenAI.ChatCompletionChunk {
+export function createOpenAiChunk(msg: string | ToolMessage): OpenAI.ChatCompletionChunk {
   msg = typeof msg === 'string' ? { content: msg } : msg;
 
   return {

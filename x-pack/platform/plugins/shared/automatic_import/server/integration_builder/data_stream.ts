@@ -27,8 +27,6 @@ export function createDataStream(
 
   ensureDirSync(specificDataStreamDir);
   const fields = createDataStreamFolders(specificDataStreamDir, pipelineDir);
-  createPipelineTests(specificDataStreamDir, dataStream.rawSamples, packageName, dataStreamName);
-
   const dataStreams: string[] = [];
   for (const inputType of dataStream.inputTypes) {
     let mappedValues = {
@@ -87,30 +85,6 @@ function loadFieldsFromFiles(sourcePath: string, files: string[]): Field[] {
     const content = readSync(filePath);
     return load(content) as Field[];
   });
-}
-
-function createPipelineTests(
-  specificDataStreamDir: string,
-  rawSamples: string[],
-  packageName: string,
-  dataStreamName: string
-): void {
-  const pipelineTestTemplatesDir = joinPath(__dirname, '../templates/pipeline_tests');
-  const pipelineTestsDir = joinPath(specificDataStreamDir, '_dev/test/pipeline');
-  ensureDirSync(pipelineTestsDir);
-  const items = listDirSync(pipelineTestTemplatesDir);
-  for (const item of items) {
-    const s = joinPath(pipelineTestTemplatesDir, item);
-    const d = joinPath(pipelineTestsDir, item.replaceAll('_', '-'));
-    copySync(s, d);
-  }
-  const formattedPackageName = packageName.replace(/_/g, '-');
-  const formattedDataStreamName = dataStreamName.replace(/_/g, '-');
-  const testFileName = joinPath(
-    pipelineTestsDir,
-    `test-${formattedPackageName}-${formattedDataStreamName}.log`
-  );
-  createSync(testFileName, rawSamples.join('\n'));
 }
 
 function prepareCelValues(mappedValues: object, celInput: CelInput | undefined) {

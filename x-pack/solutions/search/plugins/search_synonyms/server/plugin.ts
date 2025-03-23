@@ -49,22 +49,21 @@ export class SearchSynonymsPlugin
       privileges: {
         all: {
           app: ['kibana', PLUGIN_ID],
-          api: ['synonyms:manage', 'synonyms:read'],
+          api: ['manage_synonyms'],
           catalogue: [PLUGIN_ID],
           savedObject: {
             all: [],
             read: [],
           },
-          ui: ['read', 'save'],
+          ui: ['manage'],
         },
         read: {
-          app: ['kibana', PLUGIN_ID],
-          api: ['synonyms:read'],
+          disabled: true,
           savedObject: {
             all: [],
             read: [],
           },
-          ui: ['read'],
+          ui: [],
         },
       },
     });
@@ -72,7 +71,7 @@ export class SearchSynonymsPlugin
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(_: CoreStart) {
     return {};
   }
 

@@ -41,22 +41,18 @@ const infraMetricsTestHarness =
     });
 
     await client.search({
-      body: {
-        query: input,
-        size: 1,
-        track_total_hits: false,
-      },
+      query: input,
+      size: 1,
+      track_total_hits: false,
     });
 
     expect(callWithRequest).toBeCalledWith(
       context,
       'search',
       {
-        body: {
-          query: output,
-          size: 1,
-          track_total_hits: false,
-        },
+        query: output,
+        size: 1,
+        track_total_hits: false,
         ignore_unavailable: true,
         index: ['*.indices'],
       },

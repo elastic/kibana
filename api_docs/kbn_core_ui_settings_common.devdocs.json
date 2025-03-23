@@ -564,6 +564,23 @@
             "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-common",
+            "id": "def-common.UiSettingsParams.solution",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "solution",
+            "description": [
+              "The solution where this setting is applicable.\nThis field is used to determine whether the setting should be displayed in the Advanced settings app.\nIf undefined, the setting must be displayed in all solutions."
+            ],
+            "signature": [
+              "UiSettingsSolution",
+              " | undefined"
+            ],
+            "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -754,6 +771,21 @@
         ],
         "signature": [
           "\"namespace\" | \"global\""
+        ],
+        "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-ui-settings-common",
+        "id": "def-common.UiSettingsSolution",
+        "type": "Type",
+        "tags": [],
+        "label": "UiSettingsSolution",
+        "description": [],
+        "signature": [
+          "\"security\" | \"es\" | \"oblt\""
         ],
         "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
         "deprecated": false,

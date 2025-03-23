@@ -24,15 +24,14 @@ export const getExportAll = async (
   actionsExporter: ISavedObjectsExporter,
   request: KibanaRequest,
   actionsClient: ActionsClient,
-  prebuiltRulesCustomizationEnabled?: boolean
+  isPrebuiltRulesExportAllowed?: boolean
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
   exceptionLists: string | null;
   actionConnectors: string;
-  prebuiltRulesCustomizationEnabled?: boolean;
 }> => {
-  const ruleAlertTypes = prebuiltRulesCustomizationEnabled
+  const ruleAlertTypes = isPrebuiltRulesExportAllowed
     ? await getRules({ rulesClient, filter: '' })
     : await getNonPackagedRules({ rulesClient });
   const rules = transformAlertsToRules(ruleAlertTypes);

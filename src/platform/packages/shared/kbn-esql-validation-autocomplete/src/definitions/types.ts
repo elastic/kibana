@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import type {
   ESQLAstItem,
   ESQLCommand,
@@ -15,13 +14,10 @@ import type {
   ESQLMessage,
   ESQLSource,
 } from '@kbn/esql-ast';
+import { ESQLControlVariable } from '@kbn/esql-types';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type {
-  ESQLCallbacks,
-  ESQLControlVariable,
-  ESQLVariableType,
-  ESQLSourceResult,
-} from '../shared/types';
+import type { ESQLPolicy } from '../validation/types';
+import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 
 /**
  * All supported field types in ES|QL. This is all the types
@@ -174,8 +170,15 @@ export interface Signature {
   returnType: FunctionReturnType;
 }
 
+export enum FunctionDefinitionTypes {
+  AGG = 'agg',
+  SCALAR = 'scalar',
+  OPERATOR = 'operator',
+  GROUPING = 'grouping',
+}
+
 export interface FunctionDefinition {
-  type: 'builtin' | 'agg' | 'scalar' | 'operator' | 'grouping';
+  type: FunctionDefinitionTypes;
   preview?: boolean;
   ignoreAsSuggestion?: boolean;
   name: string;
@@ -187,7 +190,10 @@ export interface FunctionDefinition {
   examples?: string[];
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
   operator?: string;
+  customParametersSnippet?: string;
 }
+
+export type GetPolicyMetadataFn = (name: string) => Promise<ESQLPolicy | undefined>;
 
 export interface CommandSuggestParams<CommandName extends string> {
   /**
@@ -199,10 +205,14 @@ export interface CommandSuggestParams<CommandName extends string> {
    */
   command: ESQLCommand<CommandName>;
   /**
-   * Get a list of columns by type. This includes fields from any sources as well as
-   * variables defined in the query.
+   * Get suggestions for columns by type. This includes fields from any sources as well as
+   * user-defined columns in the query.
    */
   getColumnsByType: GetColumnsByTypeFn;
+  /**
+   * Gets the names of all columns
+   */
+  getAllColumnNames: () => string[];
   /**
    * Check for the existence of a column by name.
    * @param column
@@ -211,9 +221,13 @@ export interface CommandSuggestParams<CommandName extends string> {
   columnExists: (column: string) => boolean;
   /**
    * Gets the name that should be used for the next variable.
+   *
+   * @param extraFieldNames — names that should be recognized as columns
+   * but that won't be found in the current table from Elasticsearch. This is currently only
+   * used to recognize enrichment fields from a policy in the ENRICH command.
    * @returns
    */
-  getSuggestedVariableName: () => string;
+  getSuggestedVariableName: (extraFieldNames?: string[]) => string;
   /**
    * Examine the AST to determine the type of an expression.
    * @param expression
@@ -235,6 +249,14 @@ export interface CommandSuggestParams<CommandName extends string> {
    */
   getSources: () => Promise<ESQLSourceResult[]>;
   /**
+   * Fetch suggestions for all available policies
+   */
+  getPolicies: () => Promise<SuggestionRawDefinition[]>;
+  /**
+   * Get metadata for a policy by name
+   */
+  getPolicyMetadata: GetPolicyMetadataFn;
+  /**
    * Inspect the AST and returns the sources that are used in the query.
    * @param type
    * @returns
@@ -250,13 +272,13 @@ export interface CommandSuggestParams<CommandName extends string> {
    */
   previousCommands?: ESQLCommand[];
   callbacks?: ESQLCallbacks;
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined;
+  getVariables?: () => ESQLControlVariable[] | undefined;
   supportsControls?: boolean;
 }
 
 export type CommandSuggestFunction<CommandName extends string> = (
   params: CommandSuggestParams<CommandName>
-) => Promise<SuggestionRawDefinition[]>;
+) => Promise<SuggestionRawDefinition[]> | SuggestionRawDefinition[];
 
 export interface CommandBaseDefinition<CommandName extends string> {
   name: CommandName;

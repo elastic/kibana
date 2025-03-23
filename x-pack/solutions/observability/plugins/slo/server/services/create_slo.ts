@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
@@ -100,7 +100,7 @@ export class CreateSLO {
         this.summaryTransformManager.start(summaryTransformId),
       ]);
     } catch (err) {
-      this.logger.error(
+      this.logger.debug(
         `Cannot create the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back. ${err}`
       );
 
@@ -108,7 +108,7 @@ export class CreateSLO {
         try {
           await operation();
         } catch (rollbackErr) {
-          this.logger.error(`Rollback operation failed. ${rollbackErr}`);
+          this.logger.debug(`Rollback operation failed. ${rollbackErr}`);
         }
       });
 
@@ -193,9 +193,7 @@ export class CreateSLO {
       temporaryDoc,
       summaryTransform,
       rollUpTransform,
-      // @ts-expect-error there is some issue with deprecated types being used in es types
       rollUpTransformCompositeQuery: getTransformQueryComposite(rollUpTransform),
-      // @ts-expect-error there is some issue with deprecated types being used in es types
       summaryTransformCompositeQuery: getTransformQueryComposite(summaryTransform),
     };
   }

@@ -7,22 +7,23 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import {
+import type {
   IndicesGetDataStreamResponse,
   IndicesDataStreamIndex,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ReplaySubject, Subject, of } from 'rxjs';
 import { AlertsService } from './alerts_service';
-import { IRuleTypeAlerts, RecoveredActionGroup } from '../types';
+import type { IRuleTypeAlerts } from '../types';
+import { RecoveredActionGroup } from '../types';
 import { retryUntil } from './test_utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { AlertsClient } from '../alerts_client';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { getDataStreamAdapter } from './lib/data_stream_adapter';
 import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 
 jest.mock('../alerts_client');
@@ -150,54 +151,52 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
       ];
   return {
     name: `.alerts-${context ? context : 'test'}.alerts-${namespace}-index-template`,
-    body: {
-      index_patterns: indexPatterns,
-      composed_of: [
-        ...(useEcs ? ['.alerts-ecs-mappings'] : []),
-        `.alerts-${context ? `${context}.alerts` : 'test.alerts'}-mappings`,
-        ...(useLegacyAlerts ? ['.alerts-legacy-alert-mappings'] : []),
-        '.alerts-framework-mappings',
-      ],
-      ...(useDataStream ? { data_stream: { hidden: true } } : {}),
-      priority: namespace.length,
-      template: {
-        settings: {
-          auto_expand_replicas: '0-1',
-          hidden: true,
-          ...(useDataStream
-            ? {}
-            : {
-                'index.lifecycle': {
-                  name: '.alerts-ilm-policy',
-                  rollover_alias: `.alerts-${context ? context : 'test'}.alerts-${namespace}`,
-                },
-              }),
-          'index.mapping.ignore_malformed': true,
-          'index.mapping.total_fields.limit': 2500,
-        },
-        mappings: {
-          dynamic: false,
-          _meta: {
-            kibana: { version: '8.8.0' },
-            managed: true,
-            namespace,
-          },
-        },
-        ...(secondaryAlias
-          ? {
-              aliases: {
-                [`${secondaryAlias}-default`]: {
-                  is_write_index: false,
-                },
+    index_patterns: indexPatterns,
+    composed_of: [
+      ...(useEcs ? ['.alerts-ecs-mappings'] : []),
+      `.alerts-${context ? `${context}.alerts` : 'test.alerts'}-mappings`,
+      ...(useLegacyAlerts ? ['.alerts-legacy-alert-mappings'] : []),
+      '.alerts-framework-mappings',
+    ],
+    ...(useDataStream ? { data_stream: { hidden: true } } : {}),
+    priority: namespace.length,
+    template: {
+      settings: {
+        auto_expand_replicas: '0-1',
+        hidden: true,
+        ...(useDataStream
+          ? {}
+          : {
+              'index.lifecycle': {
+                name: '.alerts-ilm-policy',
+                rollover_alias: `.alerts-${context ? context : 'test'}.alerts-${namespace}`,
               },
-            }
-          : {}),
+            }),
+        'index.mapping.ignore_malformed': true,
+        'index.mapping.total_fields.limit': 2500,
       },
-      _meta: {
-        kibana: { version: '8.8.0' },
-        managed: true,
-        namespace,
+      mappings: {
+        dynamic: false,
+        _meta: {
+          kibana: { version: '8.8.0' },
+          managed: true,
+          namespace,
+        },
       },
+      ...(secondaryAlias
+        ? {
+            aliases: {
+              [`${secondaryAlias}-default`]: {
+                is_write_index: false,
+              },
+            },
+          }
+        : {}),
+    },
+    _meta: {
+      kibana: { version: '8.8.0' },
+      managed: true,
+      namespace,
     },
   };
 };
@@ -558,11 +557,9 @@ describe('Alerts Service', () => {
           } else {
             expect(clusterClient.indices.create).toHaveBeenCalledWith({
               index: '.internal.alerts-test.alerts-default-000001',
-              body: {
-                aliases: {
-                  '.alerts-test.alerts-default': {
-                    is_write_index: true,
-                  },
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: true,
                 },
               },
             });
@@ -624,11 +621,9 @@ describe('Alerts Service', () => {
           } else {
             expect(clusterClient.indices.create).toHaveBeenCalledWith({
               index: '.internal.alerts-test.alerts-default-000001',
-              body: {
-                aliases: {
-                  '.alerts-test.alerts-default': {
-                    is_write_index: true,
-                  },
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: true,
                 },
               },
             });
@@ -686,11 +681,9 @@ describe('Alerts Service', () => {
           } else {
             expect(clusterClient.indices.create).toHaveBeenCalledWith({
               index: '.internal.alerts-test.alerts-default-000001',
-              body: {
-                aliases: {
-                  '.alerts-test.alerts-default': {
-                    is_write_index: true,
-                  },
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: true,
                 },
               },
             });
@@ -731,11 +724,9 @@ describe('Alerts Service', () => {
           } else {
             expect(clusterClient.indices.create).toHaveBeenNthCalledWith(1, {
               index: '.internal.alerts-test.alerts-default-000001',
-              body: {
-                aliases: {
-                  '.alerts-test.alerts-default': {
-                    is_write_index: true,
-                  },
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: true,
                 },
               },
             });
@@ -798,11 +789,9 @@ describe('Alerts Service', () => {
           } else {
             expect(clusterClient.indices.create).toHaveBeenNthCalledWith(2, {
               index: '.internal.alerts-test.alerts-another-namespace-000001',
-              body: {
-                aliases: {
-                  '.alerts-test.alerts-another-namespace': {
-                    is_write_index: true,
-                  },
+              aliases: {
+                '.alerts-test.alerts-another-namespace': {
+                  is_write_index: true,
                 },
               },
             });
@@ -855,11 +844,9 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
           expect(clusterClient.indices.create).toHaveBeenCalledWith({
             index: '.internal.alerts-test.alerts-default-000001',
-            body: {
-              aliases: {
-                '.alerts-test.alerts-default': {
-                  is_write_index: true,
-                },
+            aliases: {
+              '.alerts-test.alerts-default': {
+                is_write_index: true,
               },
             },
           });
@@ -891,45 +878,43 @@ describe('Alerts Service', () => {
 
           const template = {
             name: `.alerts-empty.alerts-default-index-template`,
-            body: {
-              index_patterns: useDataStreamForAlerts
-                ? [`.alerts-empty.alerts-default`]
-                : [
-                    `.internal.alerts-empty.alerts-default-*`,
-                    `.reindexed-v8-internal.alerts-empty.alerts-default-*`,
-                  ],
-              composed_of: ['.alerts-framework-mappings'],
-              ...(useDataStreamForAlerts ? { data_stream: { hidden: true } } : {}),
-              priority: 7,
-              template: {
-                settings: {
-                  auto_expand_replicas: '0-1',
-                  hidden: true,
-                  ...(useDataStreamForAlerts
-                    ? {}
-                    : {
-                        'index.lifecycle': {
-                          name: '.alerts-ilm-policy',
-                          rollover_alias: `.alerts-empty.alerts-default`,
-                        },
-                      }),
-                  'index.mapping.ignore_malformed': true,
-                  'index.mapping.total_fields.limit': 2500,
-                },
-                mappings: {
-                  _meta: {
-                    kibana: { version: '8.8.0' },
-                    managed: true,
-                    namespace: 'default',
-                  },
-                  dynamic: false,
-                },
+            index_patterns: useDataStreamForAlerts
+              ? [`.alerts-empty.alerts-default`]
+              : [
+                  `.internal.alerts-empty.alerts-default-*`,
+                  `.reindexed-v8-internal.alerts-empty.alerts-default-*`,
+                ],
+            composed_of: ['.alerts-framework-mappings'],
+            ...(useDataStreamForAlerts ? { data_stream: { hidden: true } } : {}),
+            priority: 7,
+            template: {
+              settings: {
+                auto_expand_replicas: '0-1',
+                hidden: true,
+                ...(useDataStreamForAlerts
+                  ? {}
+                  : {
+                      'index.lifecycle': {
+                        name: '.alerts-ilm-policy',
+                        rollover_alias: `.alerts-empty.alerts-default`,
+                      },
+                    }),
+                'index.mapping.ignore_malformed': true,
+                'index.mapping.total_fields.limit': 2500,
               },
-              _meta: {
-                kibana: { version: '8.8.0' },
-                managed: true,
-                namespace: 'default',
+              mappings: {
+                _meta: {
+                  kibana: { version: '8.8.0' },
+                  managed: true,
+                  namespace: 'default',
+                },
+                dynamic: false,
               },
+            },
+            _meta: {
+              kibana: { version: '8.8.0' },
+              managed: true,
+              namespace: 'default',
             },
           };
 
@@ -944,11 +929,9 @@ describe('Alerts Service', () => {
           } else {
             expect(clusterClient.indices.create).toHaveBeenCalledWith({
               index: '.internal.alerts-empty.alerts-default-000001',
-              body: {
-                aliases: {
-                  '.alerts-empty.alerts-default': {
-                    is_write_index: true,
-                  },
+              aliases: {
+                '.alerts-empty.alerts-default': {
+                  is_write_index: true,
                 },
               },
             });

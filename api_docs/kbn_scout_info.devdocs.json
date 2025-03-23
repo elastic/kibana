@@ -28,7 +28,7 @@
         "tags": [],
         "label": "ScoutTestRunConfigCategory",
         "description": [],
-        "path": "packages/kbn-scout-info/src/reporting.ts",
+        "path": "src/platform/packages/private/kbn-scout-info/src/reporting.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -42,7 +42,7 @@
         "tags": [],
         "label": "SCOUT_OUTPUT_ROOT",
         "description": [],
-        "path": "packages/kbn-scout-info/src/paths.ts",
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -54,7 +54,7 @@
         "tags": [],
         "label": "SCOUT_REPORT_OUTPUT_ROOT",
         "description": [],
-        "path": "packages/kbn-scout-info/src/paths.ts",
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -66,7 +66,7 @@
         "tags": [],
         "label": "SCOUT_REPORTER_ENABLED",
         "description": [],
-        "path": "packages/kbn-scout-info/src/reporting.ts",
+        "path": "src/platform/packages/private/kbn-scout-info/src/reporting.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -81,7 +81,7 @@
         "signature": [
           "string | undefined"
         ],
-        "path": "packages/kbn-scout-info/src/reporting.ts",
+        "path": "src/platform/packages/private/kbn-scout-info/src/reporting.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -96,7 +96,7 @@
         "signature": [
           "string | undefined"
         ],
-        "path": "packages/kbn-scout-info/src/reporting.ts",
+        "path": "src/platform/packages/private/kbn-scout-info/src/reporting.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -108,7 +108,7 @@
         "tags": [],
         "label": "SCOUT_REPORTER_ES_VERIFY_CERTS",
         "description": [],
-        "path": "packages/kbn-scout-info/src/reporting.ts",
+        "path": "src/platform/packages/private/kbn-scout-info/src/reporting.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -120,7 +120,7 @@
         "tags": [],
         "label": "SCOUT_SERVERS_ROOT",
         "description": [],
-        "path": "packages/kbn-scout-info/src/paths.ts",
+        "path": "src/platform/packages/private/kbn-scout-info/src/paths.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -132,7 +132,7 @@
         "tags": [],
         "label": "SCOUT_TEST_EVENTS_DATA_STREAM_NAME",
         "description": [],
-        "path": "packages/kbn-scout-info/src/reporting.ts",
+        "path": "src/platform/packages/private/kbn-scout-info/src/reporting.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -144,7 +144,7 @@
         "tags": [],
         "label": "SCOUT_TEST_EVENTS_INDEX_PATTERN",
         "description": [],
-        "path": "packages/kbn-scout-info/src/reporting.ts",
+        "path": "src/platform/packages/private/kbn-scout-info/src/reporting.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -156,7 +156,7 @@
         "tags": [],
         "label": "SCOUT_TEST_EVENTS_TEMPLATE_NAME",
         "description": [],
-        "path": "packages/kbn-scout-info/src/reporting.ts",
+        "path": "src/platform/packages/private/kbn-scout-info/src/reporting.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -7,7 +7,7 @@
 
 /* eslint-disable no-console */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import fs from 'fs/promises';
 import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
@@ -47,6 +47,8 @@ export async function initDiagnosticsBundle({
     ...(cloudId ? { cloud: { id: cloudId } } : {}),
     auth,
     headers: { ...apiKeyHeader },
+    Connection: HttpConnection,
+    requestTimeout: 30_000,
   });
 
   const kibanaClientOpts = {

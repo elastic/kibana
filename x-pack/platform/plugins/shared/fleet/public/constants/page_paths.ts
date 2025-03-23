@@ -230,6 +230,8 @@ export const pagePathGetters: {
         ? `?kuery=${kuery}&showInactive=true`
         : showInactive
         ? '?showInactive=true'
+        : kuery
+        ? `?kuery=${kuery}`
         : ''
     }`,
   ],

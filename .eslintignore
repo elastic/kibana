@@ -32,8 +32,8 @@ snapshots.js
 /packages/kbn-eslint-config
 /packages/kbn-plugin-generator/template
 /packages/kbn-generate/templates
-/packages/kbn-test/src/functional_test_runner/__tests__/fixtures/
-/packages/kbn-test/src/functional_test_runner/lib/config/__tests__/fixtures/
+/src/platform/packages/shared/kbn-test/src/functional_test_runner/__tests__/fixtures/
+/src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/__tests__/fixtures/
 /src/platform/packages/shared/kbn-flot-charts/lib
 /src/platform/packages/shared/kbn-monaco/src/**/antlr
 /src/platform/packages/shared/kbn-esql-ast/src/**/antlr

@@ -68,7 +68,7 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
-    "name": "theme:name",
+    "name": "borealis",
     "stylesheetPaths": Object {
       "dark": Array [
         "/style-1.css",
@@ -150,7 +150,7 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
-    "name": "theme:name",
+    "name": "borealis",
     "stylesheetPaths": Object {
       "dark": Array [
         "/style-1.css",
@@ -236,7 +236,7 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
-    "name": "theme:name",
+    "name": "borealis",
     "stylesheetPaths": Object {
       "dark": Array [
         "/style-1.css",
@@ -318,7 +318,7 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
-    "name": "theme:name",
+    "name": "borealis",
     "stylesheetPaths": Object {
       "dark": Array [
         "/style-1.css",
@@ -400,7 +400,7 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
-    "name": "theme:name",
+    "name": "borealis",
     "stylesheetPaths": Object {
       "dark": Array [
         "/style-1.css",
@@ -486,7 +486,7 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
-    "name": "theme:name",
+    "name": "borealis",
     "stylesheetPaths": Object {
       "dark": Array [
         "/style-1.css",
@@ -568,7 +568,7 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
-    "name": "theme:name",
+    "name": "borealis",
     "stylesheetPaths": Object {
       "dark": Array [
         "/style-1.css",
@@ -650,7 +650,7 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
-    "name": "theme:name",
+    "name": "borealis",
     "stylesheetPaths": Object {
       "dark": Array [
         "/style-1.css",
@@ -732,7 +732,7 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
-    "name": "theme:name",
+    "name": "borealis",
     "stylesheetPaths": Object {
       "dark": Array [
         "/style-1.css",
@@ -823,7 +823,7 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
-    "name": "theme:name",
+    "name": "borealis",
     "stylesheetPaths": Object {
       "dark": Array [
         "/style-1.css",
@@ -905,7 +905,7 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
-    "name": "theme:name",
+    "name": "borealis",
     "stylesheetPaths": Object {
       "dark": Array [
         "/style-1.css",
@@ -996,7 +996,7 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
-    "name": "theme:name",
+    "name": "borealis",
     "stylesheetPaths": Object {
       "dark": Array [
         "/style-1.css",
@@ -1083,7 +1083,7 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
-    "name": "theme:name",
+    "name": "borealis",
     "stylesheetPaths": Object {
       "dark": Array [
         "/style-1.css",
@@ -1165,7 +1165,7 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
-    "name": "theme:name",
+    "name": "borealis",
     "stylesheetPaths": Object {
       "dark": Array [
         "/style-1.css",
@@ -1256,7 +1256,7 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
-    "name": "theme:name",
+    "name": "borealis",
     "stylesheetPaths": Object {
       "dark": Array [
         "/style-1.css",
@@ -1343,7 +1343,7 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
-    "name": "theme:name",
+    "name": "borealis",
     "stylesheetPaths": Object {
       "dark": Array [
         "/style-1.css",
@@ -1430,7 +1430,7 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
-    "name": "theme:name",
+    "name": "borealis",
     "stylesheetPaths": Object {
       "dark": Array [
         "/style-1.css",
@@ -1519,7 +1519,7 @@ Object {
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
     "darkMode": "theme:darkMode",
-    "name": "theme:name",
+    "name": "borealis",
     "stylesheetPaths": Object {
       "dark": Array [
         "/style-1.css",

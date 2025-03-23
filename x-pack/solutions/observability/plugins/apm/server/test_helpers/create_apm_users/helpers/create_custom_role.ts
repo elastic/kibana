@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { omit } from 'lodash';
 import type { Elasticsearch, Kibana } from '../create_apm_users';
 import { callKibana } from './call_kibana';
@@ -27,7 +27,7 @@ export async function createCustomRole({
   // the security API. They are preserved when updating the role below
   if ('applications' in role) {
     const esClient = getEsClient(elasticsearch);
-    await esClient.security.putRole({ name: roleName, body: role });
+    await esClient.security.putRole({ name: roleName, ...role });
   }
 
   await callKibana({
@@ -58,6 +58,7 @@ export function getEsClient(elasticsearch: Elasticsearch) {
       username,
       password,
     },
+    Connection: HttpConnection,
   });
 
   return client;

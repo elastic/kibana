@@ -64,7 +64,7 @@ export const useConversationsTable = () => {
           align: 'left',
           render: (systemPromptTitle: ConversationTableItem['systemPromptTitle']) =>
             systemPromptTitle ? <EuiBadge color="hollow">{systemPromptTitle}</EuiBadge> : null,
-          sortable: true,
+          sortable: false,
         },
         {
           field: 'connectorTypeTitle',
@@ -72,7 +72,7 @@ export const useConversationsTable = () => {
           align: 'left',
           render: (connectorTypeTitle: ConversationTableItem['connectorTypeTitle']) =>
             connectorTypeTitle ? <EuiBadge color="hollow">{connectorTypeTitle}</EuiBadge> : null,
-          sortable: true,
+          sortable: false,
         },
         {
           field: 'updatedAt',

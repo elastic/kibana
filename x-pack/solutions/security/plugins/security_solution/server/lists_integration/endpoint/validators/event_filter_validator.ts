@@ -59,6 +59,8 @@ export class EventFilterValidator extends BaseValidator {
       await this.validateByPolicyItem(item);
     }
 
+    await this.validateCreateOwnerSpaceIds(item);
+
     return item;
   }
 
@@ -83,6 +85,9 @@ export class EventFilterValidator extends BaseValidator {
     }
 
     await this.validateByPolicyItem(updatedItem);
+    await this.validateUpdateOwnerSpaceIds(_updatedItem, currentItem);
+    await this.validateCanUpdateItemInActiveSpace(_updatedItem, currentItem);
+
     return _updatedItem;
   }
 
@@ -96,16 +101,18 @@ export class EventFilterValidator extends BaseValidator {
     }
   }
 
-  async validatePreGetOneItem(): Promise<void> {
+  async validatePreGetOneItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasReadPrivilege();
+    await this.validateCanReadItemInActiveSpace(currentItem);
   }
 
   async validatePreSummary(): Promise<void> {
     await this.validateHasReadPrivilege();
   }
 
-  async validatePreDeleteItem(): Promise<void> {
+  async validatePreDeleteItem(currentItem: ExceptionListItemSchema): Promise<void> {
     await this.validateHasWritePrivilege();
+    await this.validateCanDeleteItemInActiveSpace(currentItem);
   }
 
   async validatePreExport(): Promise<void> {

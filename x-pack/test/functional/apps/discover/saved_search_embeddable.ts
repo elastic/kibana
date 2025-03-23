@@ -13,11 +13,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
+  const dashboardDrilldownsManage = getService('dashboardDrilldownsManage');
   const filterBar = getService('filterBar');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const { common, dashboard, header } = getPageObjects(['common', 'dashboard', 'header']);
+  const find = getService('find');
+  const queryBar = getService('queryBar');
+  const { common, dashboard, header, discover } = getPageObjects([
+    'common',
+    'dashboard',
+    'header',
+    'discover',
+  ]);
 
   describe('discover saved search embeddable', () => {
     before(async () => {
@@ -105,6 +114,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardPanelActions.removePanel(panels[0]);
       await header.waitUntilLoadingHasFinished();
       await testSubjects.missingOrFail('embeddableError');
+    });
+
+    it('should support URL drilldown', async () => {
+      await addSearchEmbeddableToDashboard();
+      await dashboardDrilldownPanelActions.clickCreateDrilldown();
+      const drilldownName = 'URL drilldown';
+      const urlTemplate =
+        "{{kibanaUrl}}/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{context.panel.timeRange.from}}',to:'{{context.panel.timeRange.to}}'))" +
+        "&_a=(columns:!(_source),filters:{{rison context.panel.filters}},index:'{{context.panel.indexPatternId}}',interval:auto," +
+        "query:(language:{{context.panel.query.language}},query:'clientip:239.190.189.77'),sort:!())";
+      await testSubjects.click('actionFactoryItem-URL_DRILLDOWN');
+      await dashboardDrilldownsManage.fillInDashboardToURLDrilldownWizard({
+        drilldownName,
+        destinationURLTemplate: urlTemplate,
+        trigger: 'CONTEXT_MENU_TRIGGER',
+      });
+      await testSubjects.click('urlDrilldownAdditionalOptions');
+      await testSubjects.click('urlDrilldownOpenInNewTab');
+      await dashboardDrilldownsManage.saveChanges();
+      await dashboard.saveDashboard('Dashboard with URL drilldown', {
+        saveAsNew: true,
+        waitDialogIsClosed: true,
+        exitFromEditMode: true,
+      });
+      await browser.refresh();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
+      await dashboardPanelActions.openContextMenu();
+      await find.clickByLinkText(drilldownName);
+      await discover.waitForDiscoverAppOnScreen();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitForDocTableLoadingComplete();
+      expect(await queryBar.getQueryString()).to.be('clientip:239.190.189.77');
+      expect(await discover.getHitCount()).to.be('6');
     });
   });
 }

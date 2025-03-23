@@ -14,7 +14,12 @@ import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
+import {
+  AdvancedSettingsSetup,
+  AdvancedSettingsStart,
+  AdvancedSettingsPluginSetup,
+  AdvancedSettingsPluginStart,
+} from './types';
 
 const { setup: sectionRegistrySetup, start: sectionRegistryStart } = new SectionRegistry();
 
@@ -29,9 +34,18 @@ const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
 });
 
 export class AdvancedSettingsPlugin
-  implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup>
+  implements
+    Plugin<
+      AdvancedSettingsSetup,
+      AdvancedSettingsStart,
+      AdvancedSettingsPluginSetup,
+      AdvancedSettingsPluginStart
+    >
 {
-  public setup(core: CoreSetup, { management, home }: AdvancedSettingsPluginSetup) {
+  public setup(
+    core: CoreSetup<AdvancedSettingsPluginStart>,
+    { management, home }: AdvancedSettingsPluginSetup
+  ) {
     const kibanaSection = management.sections.section.kibana;
 
     kibanaSection.registerApp({
@@ -39,7 +53,7 @@ export class AdvancedSettingsPlugin
       title,
       order: 3,
       async mount({ element, setBreadcrumbs, history }) {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, { spaces }] = await core.getStartServices();
 
         const { docTitle } = coreStart.chrome;
         docTitle.change(title);
@@ -48,7 +62,12 @@ export class AdvancedSettingsPlugin
         ReactDOM.render(
           <KibanaRenderContextProvider {...coreStart}>
             <KibanaSettingsApplication
-              {...{ ...coreStart, history, sectionRegistry: sectionRegistryStart }}
+              {...{
+                ...coreStart,
+                history,
+                spaces,
+                sectionRegistry: sectionRegistryStart,
+              }}
             />
           </KibanaRenderContextProvider>,
           element

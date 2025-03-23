@@ -18,10 +18,11 @@ import {
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import { type Params, ParamsSchema } from '@kbn/response-ops-rule-params/index_threshold';
+import { ComparatorFns } from '@kbn/response-ops-rule-params/common';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE, STACK_ALERTS_AAD_CONFIG } from '..';
-import { ComparatorFns, getComparatorScript, getHumanReadableComparator } from '../../../common';
+import { getComparatorScript, getHumanReadableComparator } from '../../../common';
 import { ActionContext, BaseActionContext, addMessages } from './action_context';
-import { Params, ParamsSchema } from './rule_type_params';
 import { RuleType, RuleExecutorOptions, StackAlertsStartDeps } from '../../types';
 import { StackAlertType } from '../types';
 

@@ -18,7 +18,6 @@ import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-p
 import { convertMessagesForInference } from '@kbn/observability-ai-assistant-plugin/common/convert_messages_for_inference';
 import { map } from 'rxjs';
 import { v4 } from 'uuid';
-import { RegisterInstructionCallback } from '@kbn/observability-ai-assistant-plugin/server/service/types';
 import type { FunctionRegistrationParameters } from '..';
 import { runAndValidateEsqlQuery } from './validate_esql_query';
 
@@ -30,9 +29,12 @@ export function registerQueryFunction({
   resources,
   pluginsStart,
 }: FunctionRegistrationParameters) {
-  const instruction: RegisterInstructionCallback = ({ availableFunctionNames }) =>
-    availableFunctionNames.includes(QUERY_FUNCTION_NAME)
-      ? `You MUST use the "${QUERY_FUNCTION_NAME}" function when the user wants to:
+  functions.registerInstruction(({ availableFunctionNames }) => {
+    if (!availableFunctionNames.includes(QUERY_FUNCTION_NAME)) {
+      return;
+    }
+
+    return `You MUST use the "${QUERY_FUNCTION_NAME}" function when the user wants to:
   - visualize data
   - run any arbitrary query
   - breakdown or filter ES|QL queries that are displayed on the current page
@@ -48,9 +50,8 @@ export function registerQueryFunction({
   even if it has been called before.
 
   When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
-  If the "${EXECUTE_QUERY_NAME}" function has been called, summarize these results for the user. The user does not see a visualization in this case.`
-      : undefined;
-  functions.registerInstruction(instruction);
+  If the "${EXECUTE_QUERY_NAME}" function has been called, summarize these results for the user. The user does not see a visualization in this case.`;
+  });
 
   functions.registerFunction(
     {
@@ -102,6 +103,7 @@ export function registerQueryFunction({
       };
     }
   );
+
   functions.registerFunction(
     {
       name: QUERY_FUNCTION_NAME,
@@ -128,7 +130,8 @@ export function registerQueryFunction({
         connectorId,
         messages: convertMessagesForInference(
           // remove system message and query function request
-          messages.filter((message) => message.message.role !== MessageRole.System).slice(0, -1)
+          messages.filter((message) => message.message.role !== MessageRole.System).slice(0, -1),
+          resources.logger
         ),
         logger: resources.logger,
         tools: Object.fromEntries(

@@ -6,7 +6,7 @@
  */
 
 import { generateAlertId } from './generate_alert_id';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SignalSource } from '../../types';
 import type { CompleteRule, EsqlRuleParams } from '../../../rule_schema';
 import moment from 'moment';

@@ -171,50 +171,48 @@ export class TLSRuleExecutor {
     const configIds = certs.map((cert) => cert.configId);
     const certIds = certs.map((cert) => cert.sha256);
     const { body } = await this.esClient.search({
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-1d',
-                    lt: 'now',
-                  },
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  gte: 'now-1d',
+                  lt: 'now',
                 },
               },
-              {
-                terms: {
-                  config_id: configIds,
-                },
+            },
+            {
+              terms: {
+                config_id: configIds,
               },
-              FINAL_SUMMARY_FILTER,
-            ],
-            must_not: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      'tls.server.hash.sha256': certIds,
-                    },
+            },
+            FINAL_SUMMARY_FILTER,
+          ],
+          must_not: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    'tls.server.hash.sha256': certIds,
                   },
-                ],
-              },
+                },
+              ],
             },
           },
         },
-        collapse: {
-          field: 'config_id',
-        },
-        _source: ['@timestamp', 'monitor', 'url', 'config_id', 'tls'],
-        sort: [
-          {
-            '@timestamp': {
-              order: 'desc',
-            },
-          },
-        ],
       },
+      collapse: {
+        field: 'config_id',
+      },
+      _source: ['@timestamp', 'monitor', 'url', 'config_id', 'tls'],
+      sort: [
+        {
+          '@timestamp': {
+            order: 'desc',
+          },
+        },
+      ],
     });
 
     return body.hits.hits.map((hit) => hit._source as TLSLatestPing);

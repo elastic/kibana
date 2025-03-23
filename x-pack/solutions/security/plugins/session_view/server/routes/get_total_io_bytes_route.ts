@@ -45,29 +45,27 @@ export const registerGetTotalIOBytesRoute = (router: IRouter, logger: Logger) =>
         try {
           const search = await client.search({
             index: [index],
-            body: {
-              query: {
-                bool: {
-                  must: [
-                    { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
-                    { term: { [EVENT_ACTION]: 'text_output' } },
-                    {
-                      range: {
-                        // optimization to prevent data before this session from being hit.
-                        [TIMESTAMP_PROPERTY]: {
-                          gte: sessionStartTime,
-                        },
+            query: {
+              bool: {
+                must: [
+                  { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
+                  { term: { [EVENT_ACTION]: 'text_output' } },
+                  {
+                    range: {
+                      // optimization to prevent data before this session from being hit.
+                      [TIMESTAMP_PROPERTY]: {
+                        gte: sessionStartTime,
                       },
                     },
-                  ],
-                },
-              },
-              size: 0,
-              aggs: {
-                total_bytes_captured: {
-                  sum: {
-                    field: TOTAL_BYTES_CAPTURED_PROPERTY,
                   },
+                ],
+              },
+            },
+            size: 0,
+            aggs: {
+              total_bytes_captured: {
+                sum: {
+                  field: TOTAL_BYTES_CAPTURED_PROPERTY,
                 },
               },
             },

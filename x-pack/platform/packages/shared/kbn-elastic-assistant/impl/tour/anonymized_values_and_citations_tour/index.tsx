@@ -7,12 +7,16 @@
 
 import { EuiTourStep } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
-import { isEmpty, throttle } from 'lodash';
+import { throttle } from 'lodash';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { Conversation } from '../../assistant_context/types';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
 import { anonymizedValuesAndCitationsTourStep1 } from './step_config';
 import { TourState } from '../knowledge_base';
+import {
+  conversationContainsAnonymizedValues,
+  conversationContainsContentReferences,
+} from '../../assistant/conversations/utils';
 
 interface Props {
   conversation: Conversation | undefined;
@@ -49,12 +53,10 @@ export const AnonymizedValuesAndCitationsTour: React.FC<Props> = ({ conversation
       return;
     }
 
-    const containsContentReferences = conversation.messages.some(
-      (message) => !isEmpty(message.metadata?.contentReferences)
-    );
-    const containsReplacements = !isEmpty(conversation.replacements);
+    const containsContentReferences = conversationContainsContentReferences(conversation);
+    const containsAnonymizedValues = conversationContainsAnonymizedValues(conversation);
 
-    if (containsContentReferences || containsReplacements) {
+    if (containsContentReferences || containsAnonymizedValues) {
       const timer = setTimeout(() => {
         setShowTour(true);
       }, 1000);

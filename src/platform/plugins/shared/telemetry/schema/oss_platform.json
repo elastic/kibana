@@ -8562,6 +8562,12 @@
                     "description": "Maximum payload size in bytes that is allowed."
                   }
                 },
+                "protocol": {
+                  "type": "keyword",
+                  "_meta": {
+                    "description": "Protocol to serve the requests (\"http1\" | \"http2\")"
+                  }
+                },
                 "rewriteBasePath": {
                   "type": "boolean",
                   "_meta": {
@@ -10494,6 +10500,12 @@
           }
         },
         "securitySolution:enableGraphVisualization": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "securitySolution:enableAssetInventory": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."

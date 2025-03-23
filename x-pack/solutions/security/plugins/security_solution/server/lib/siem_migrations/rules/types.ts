@@ -56,3 +56,18 @@ export type RuleSemanticSearchResult = RuleMigrationPrebuiltRule & RuleVersions;
 export type InternalUpdateRuleMigrationData = UpdateRuleMigrationData & {
   translation_result?: RuleMigrationTranslationResult;
 };
+
+/**
+ *
+ * Based on the severity levels defined in the Splunk Common Information Model (CIM) documentation
+ *
+ * https://docs.splunk.com/Documentation/CIM/6.0.2/User/Alerts
+ *
+ * '1': 'INFO';
+ * '2': 'LOW';
+ * '3': 'MEDIUM';
+ * '4': 'HIGH';
+ * '5': 'CRITICAL';
+ *
+ **/
+export type SplunkSeverity = '1' | '2' | '3' | '4' | '5';

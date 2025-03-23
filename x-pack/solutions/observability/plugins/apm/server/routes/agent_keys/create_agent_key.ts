@@ -43,10 +43,8 @@ export async function createAgentKey({
     has_all_requested: hasRequiredPrivileges,
     cluster: clusterPrivileges,
   } = await coreContext.elasticsearch.client.asCurrentUser.security.hasPrivileges({
-    body: {
-      application: [application],
-      cluster: CLUSTER_PRIVILEGES,
-    },
+    application: [application],
+    cluster: CLUSTER_PRIVILEGES,
   });
 
   if (!hasRequiredPrivileges) {
@@ -96,9 +94,7 @@ export async function createAgentKey({
     },
   };
 
-  const agentKey = await coreContext.elasticsearch.client.asCurrentUser.security.createApiKey({
-    body,
-  });
+  const agentKey = await coreContext.elasticsearch.client.asCurrentUser.security.createApiKey(body);
 
   return {
     agentKey,

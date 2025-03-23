@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/node-libs-browser-webpack-plugin",
+  "owner": "@elastic/kibana-operations",
+  "group": "platform",
+  "visibility": "private"
+}

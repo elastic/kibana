@@ -255,6 +255,7 @@ export const getSavedObjectTypes = (
           monitoring_pprof_enabled: { type: 'boolean', index: false },
           monitoring_http: { type: 'flattened', index: false },
           monitoring_diagnostics: { type: 'flattened', index: false },
+          required_versions: { type: 'flattened', index: false },
         },
       },
       migrations: {
@@ -332,6 +333,16 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '7': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                required_versions: { type: 'flattened', index: false },
+              },
+            },
+          ],
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -380,6 +391,7 @@ export const getSavedObjectTypes = (
             dynamic: false,
             properties: {},
           },
+          required_versions: { type: 'flattened', index: false },
         },
       },
       modelVersions: {
@@ -388,6 +400,16 @@ export const getSavedObjectTypes = (
             {
               type: 'mappings_addition',
               addedMappings: {},
+            },
+          ],
+        },
+        '2': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                required_versions: { type: 'flattened', index: false },
+              },
             },
           ],
         },
@@ -637,6 +659,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           description: { type: 'text' },
@@ -844,6 +867,14 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '18': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {}, // Empty to add dynamic:false
+            },
+          ],
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -871,6 +902,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           description: { type: 'text' },
@@ -934,6 +966,14 @@ export const getSavedObjectTypes = (
             {
               type: 'data_backfill',
               backfillFn: packagePolicyV17AdvancedFieldsForEndpointV818,
+            },
+          ],
+        },
+        '4': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {}, // Empty to add dynamic:false
             },
           ],
         },
@@ -1107,6 +1147,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           is_default: { type: 'boolean' },
@@ -1124,6 +1165,14 @@ export const getSavedObjectTypes = (
               addedMappings: {
                 is_internal: { type: 'boolean', index: false },
               },
+            },
+          ],
+        },
+        '2': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
             },
           ],
         },
@@ -1213,9 +1262,14 @@ export const OUTPUT_INCLUDE_AAD_FIELDS = new Set([
   'channel_buffer_size',
 ]);
 
+// dangerouslyExposeValue added to allow the user with access to the SO to see and edit these values through the UI
 export const OUTPUT_ENCRYPTED_FIELDS = new Set([
   { key: 'ssl', dangerouslyExposeValue: true },
   { key: 'password', dangerouslyExposeValue: true },
+]);
+
+export const FLEET_SERVER_HOST_ENCRYPTED_FIELDS = new Set([
+  { key: 'ssl', dangerouslyExposeValue: true },
 ]);
 
 export function registerEncryptedSavedObjects(
@@ -1236,5 +1290,11 @@ export function registerEncryptedSavedObjects(
     type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['token']),
     attributesToIncludeInAAD: new Set(['policy_id', 'token_plain']),
+  });
+  encryptedSavedObjects.registerType({
+    type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: FLEET_SERVER_HOST_ENCRYPTED_FIELDS,
+    // enforceRandomId allows to create an SO with an arbitrary id
+    enforceRandomId: false,
   });
 }

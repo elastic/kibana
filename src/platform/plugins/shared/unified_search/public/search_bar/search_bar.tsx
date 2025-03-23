@@ -57,6 +57,7 @@ export interface SearchBarInjectedDeps {
   onFiltersUpdated?: (filters: Filter[]) => void;
   // Autorefresh
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
+  bubbleSubmitEvent?: boolean;
 }
 
 export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
@@ -665,6 +666,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           renderQueryInputAppend={this.props.renderQueryInputAppend}
           disableExternalPadding={this.props.displayStyle === 'withBorders'}
           onESQLDocsFlyoutVisibilityChanged={this.props.onESQLDocsFlyoutVisibilityChanged}
+          bubbleSubmitEvent={this.props.bubbleSubmitEvent}
         />
       </div>
     );

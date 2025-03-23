@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiTextArea, EuiSpacer, EuiLink, EuiFormRow } from '@elastic/eui';
+import { EuiSpacer, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -16,8 +16,9 @@ import { LogstashInstructions } from '../logstash_instructions';
 import { MultiRowInput } from '../multi_row_input';
 
 import type { OutputFormInputsType } from './use_output_form';
-import { SecretFormRow } from './output_form_secret_form_row';
+
 import { EncryptionKeyRequiredCallout } from './encryption_key_required_callout';
+import { SSLFormSection } from './ssl_form_section';
 
 interface Props {
   inputs: OutputFormInputsType;
@@ -106,96 +107,12 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
         })}
         {...inputs.logstashHostsInput.props}
       />
-      <MultiRowInput
-        placeholder={i18n.translate(
-          'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputPlaceholder',
-          {
-            defaultMessage: 'Specify certificate authority',
-          }
-        )}
-        label={i18n.translate(
-          'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputLabel',
-          {
-            defaultMessage: 'Server SSL certificate authorities (optional)',
-          }
-        )}
-        multiline={true}
-        sortable={false}
-        {...inputs.sslCertificateAuthoritiesInput.props}
+      <SSLFormSection
+        inputs={inputs}
+        useSecretsStorage={useSecretsStorage}
+        isConvertedToSecret={isConvertedToSecret.sslKey}
+        onToggleSecretAndClearValue={onToggleSecretAndClearValue}
       />
-      <EuiFormRow
-        fullWidth
-        label={
-          <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.sslCertificateInputLabel"
-            defaultMessage="Client SSL certificate"
-          />
-        }
-        {...inputs.sslCertificateInput.formRowProps}
-      >
-        <EuiTextArea
-          fullWidth
-          rows={5}
-          {...inputs.sslCertificateInput.props}
-          placeholder={i18n.translate(
-            'xpack.fleet.settings.editOutputFlyout.sslCertificateInputPlaceholder',
-            {
-              defaultMessage: 'Specify ssl certificate',
-            }
-          )}
-        />
-      </EuiFormRow>
-      {!useSecretsStorage ? (
-        <SecretFormRow
-          fullWidth
-          label={
-            <FormattedMessage
-              id="xpack.fleet.settings.editOutputFlyout.sslKeyInputLabel"
-              defaultMessage="Client SSL certificate key"
-            />
-          }
-          {...inputs.sslKeyInput.formRowProps}
-          useSecretsStorage={useSecretsStorage}
-          onToggleSecretStorage={onToggleSecretAndClearValue}
-        >
-          <EuiTextArea
-            fullWidth
-            rows={5}
-            {...inputs.sslKeyInput.props}
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.editOutputFlyout.sslKeyInputPlaceholder',
-              {
-                defaultMessage: 'Specify certificate key',
-              }
-            )}
-          />
-        </SecretFormRow>
-      ) : (
-        <SecretFormRow
-          fullWidth
-          title={i18n.translate('xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTitle', {
-            defaultMessage: 'Client SSL certificate key',
-          })}
-          {...inputs.sslKeySecretInput.formRowProps}
-          useSecretsStorage={useSecretsStorage}
-          isConvertedToSecret={isConvertedToSecret.sslKey}
-          onToggleSecretStorage={onToggleSecretAndClearValue}
-          cancelEdit={inputs.sslKeySecretInput.cancelEdit}
-        >
-          <EuiTextArea
-            fullWidth
-            rows={5}
-            {...inputs.sslKeySecretInput.props}
-            data-test-subj="sslKeySecretInput"
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.editOutputFlyout.sslKeySecretInputPlaceholder',
-              {
-                defaultMessage: 'Specify certificate key',
-              }
-            )}
-          />
-        </SecretFormRow>
-      )}
     </>
   );
 };

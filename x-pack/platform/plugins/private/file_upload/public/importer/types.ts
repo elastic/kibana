@@ -9,9 +9,14 @@ import type {
   IndicesIndexSettings,
   IngestDeletePipelineResponse,
   MappingTypeMapping,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 
-import type { ImportFailure, IngestPipeline, ImportDoc, ImportResponse } from '../../common/types';
+import type {
+  ImportFailure,
+  IngestPipeline,
+  ImportDoc,
+  InitializeImportResponse,
+} from '../../common/types';
 
 export interface ImportConfig {
   settings: IndicesIndexSettings;
@@ -44,23 +49,21 @@ export interface IImporter {
     index: string,
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
-    pipeline: IngestPipeline | undefined,
-    createPipelines?: IngestPipeline[]
-  ): Promise<ImportResponse>;
+    pipeline: Array<IngestPipeline | undefined>
+  ): Promise<InitializeImportResponse>;
   initializeWithoutCreate(
     index: string,
     mappings: MappingTypeMapping,
-    pipeline: IngestPipeline | undefined
+    pipelines: IngestPipeline[]
   ): void;
   import(
-    id: string,
     index: string,
-    pipelineId: string | undefined,
+    ingestPipelineId: string | undefined,
     setImportProgress: (progress: number) => void
   ): Promise<ImportResults>;
   initialized(): boolean;
   getIndex(): string | undefined;
   getTimeField(): string | undefined;
   previewIndexTimeRange(): Promise<{ start: number | null; end: number | null }>;
-  deletePipelines(pipelineIds: string[]): Promise<IngestDeletePipelineResponse[]>;
+  deletePipelines(): Promise<IngestDeletePipelineResponse[]>;
 }

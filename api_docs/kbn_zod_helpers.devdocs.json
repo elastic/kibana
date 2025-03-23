@@ -231,6 +231,39 @@
       },
       {
         "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.isBooleanFromString",
+        "type": "Function",
+        "tags": [],
+        "label": "isBooleanFromString",
+        "description": [],
+        "signature": [
+          "(val: unknown) => val is KbnZodBooleanFromString"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/boolean_from_string.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.isBooleanFromString.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "val",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/boolean_from_string.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
         "id": "def-common.isNonEmptyString",
         "type": "Function",
         "tags": [],
@@ -269,6 +302,39 @@
               "Zod.RefinementCtx"
             ],
             "path": "src/platform/packages/shared/kbn-zod-helpers/src/non_empty_string.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.isPassThroughAny",
+        "type": "Function",
+        "tags": [],
+        "label": "isPassThroughAny",
+        "description": [],
+        "signature": [
+          "(val: unknown) => val is KbnPassThroughAny"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/pass_through_any.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.isPassThroughAny.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "val",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/pass_through_any.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -492,13 +558,11 @@
         "type": "Object",
         "tags": [],
         "label": "BooleanFromString",
-        "description": [
-          "\nThis is a helper schema to convert a boolean string (\"true\" or \"false\") to a\nboolean. Useful for processing query params.\n\nAccepts \"true\" or \"false\" as strings, or a boolean."
-        ],
+        "description": [],
         "signature": [
-          "Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">"
+          "KbnZodBooleanFromString"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/boolean_from_string.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/boolean_from_string.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -514,6 +578,21 @@
           "Zod.ZodEffects<Zod.ZodString, string, string>"
         ],
         "path": "src/platform/packages/shared/kbn-zod-helpers/src/non_empty_string.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.PassThroughAny",
+        "type": "Object",
+        "tags": [],
+        "label": "PassThroughAny",
+        "description": [],
+        "signature": [
+          "KbnPassThroughAny"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/pass_through_any.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

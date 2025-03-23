@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { BooleanFromString, PassThroughAny } from '@kbn/zod-helpers';
 import { convert, convertPathParameters, convertQuery } from './lib';
 
 import { createLargeSchema } from './lib.test.util';
@@ -26,6 +27,19 @@ describe('zod', () => {
               default: true,
               description: 'defaults to to true',
               type: 'boolean',
+            },
+            booleanFromString: {
+              anyOf: [
+                {
+                  enum: ['true', 'false'],
+                  type: 'string',
+                },
+                {
+                  type: 'boolean',
+                },
+              ],
+              default: false,
+              description: 'boolean or string "true" or "false"',
             },
             ipType: {
               format: 'ipv4',
@@ -102,7 +116,10 @@ describe('zod', () => {
   describe('convertPathParameters', () => {
     test('base conversion', () => {
       expect(
-        convertPathParameters(z.object({ a: z.string() }), { a: { optional: false } })
+        convertPathParameters(z.object({ a: z.string(), b: z.enum(['val1', 'val2']) }), {
+          a: { optional: false },
+          b: { optional: true },
+        })
       ).toEqual({
         params: [
           {
@@ -110,6 +127,15 @@ describe('zod', () => {
             name: 'a',
             required: true,
             schema: {
+              type: 'string',
+            },
+          },
+          {
+            in: 'path',
+            name: 'b',
+            required: true,
+            schema: {
+              enum: ['val1', 'val2'],
               type: 'string',
             },
           },
@@ -124,11 +150,50 @@ describe('zod', () => {
         'Path expects key "a" from schema but it was not found. Existing schema keys are: b'
       );
     });
+    test('throws for mixed union', () => {
+      expect(() =>
+        convertPathParameters(z.object({ a: z.union([z.string(), z.number()]) }), {
+          a: { optional: false },
+        })
+      ).toThrow(
+        '[Zod converter] Input parser key: "a" must be ZodString, ZodNumber, ZodBoolean, ZodBigInt or ZodDate'
+      );
+    });
+    test('handles passThrough', () => {
+      expect(
+        convertPathParameters(PassThroughAny, {
+          a: { optional: false },
+          b: { optional: true },
+        })
+      ).toEqual({
+        params: [
+          {
+            in: 'path',
+            name: 'a',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            in: 'path',
+            name: 'b',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+        shared: {},
+      });
+    });
   });
 
   describe('convertQuery', () => {
     test('base conversion', () => {
-      expect(convertQuery(z.object({ a: z.string() }))).toEqual({
+      expect(
+        convertQuery(z.object({ a: z.string(), b: z.enum(['val1', 'val2']).optional() }))
+      ).toEqual({
         query: [
           {
             in: 'query',
@@ -138,7 +203,50 @@ describe('zod', () => {
               type: 'string',
             },
           },
+          {
+            in: 'query',
+            name: 'b',
+            required: false,
+            schema: {
+              enum: ['val1', 'val2'],
+              type: 'string',
+            },
+          },
         ],
+        shared: {},
+      });
+    });
+    test('allows mixed union of coercible types', () => {
+      expect(
+        convertQuery(
+          z.object({ a: z.optional(BooleanFromString).describe('string or boolean flag') })
+        )
+      ).toEqual({
+        query: [
+          {
+            in: 'query',
+            name: 'a',
+            required: false,
+            schema: {
+              anyOf: [
+                {
+                  enum: ['true', 'false'],
+                  type: 'string',
+                },
+                {
+                  type: 'boolean',
+                },
+              ],
+            },
+            description: 'string or boolean flag',
+          },
+        ],
+        shared: {},
+      });
+    });
+    test('handles passThrough', () => {
+      expect(convertQuery(PassThroughAny)).toEqual({
+        query: [],
         shared: {},
       });
     });

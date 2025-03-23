@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../..';
-import { AlertingAuthorization } from '../../../../authorization';
+import type { AlertingAuthorization } from '../../../../authorization';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -26,8 +26,9 @@ import { asyncForEach } from '@kbn/std';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
-import { ConstructorOptions, RulesClient } from '../../../../rules_client';
-import { ScheduleBackfillParam } from './types';
+import type { ConstructorOptions } from '../../../../rules_client';
+import { RulesClient } from '../../../../rules_client';
+import type { ScheduleBackfillParam } from './types';
 import { adHocRunStatus } from '../../../../../common/constants';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 

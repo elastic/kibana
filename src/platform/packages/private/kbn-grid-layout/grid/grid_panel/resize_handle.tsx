@@ -13,39 +13,27 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-import { GridLayoutStateManager } from '../types';
 import { useGridLayoutEvents } from '../use_grid_layout_events';
 
-export const ResizeHandle = React.memo(
-  ({
-    gridLayoutStateManager,
-    rowIndex,
+export const ResizeHandle = React.memo(({ rowId, panelId }: { rowId: string; panelId: string }) => {
+  const startInteraction = useGridLayoutEvents({
+    interactionType: 'resize',
     panelId,
-  }: {
-    gridLayoutStateManager: GridLayoutStateManager;
-    rowIndex: number;
-    panelId: string;
-  }) => {
-    const startInteraction = useGridLayoutEvents({
-      interactionType: 'resize',
-      gridLayoutStateManager,
-      panelId,
-      rowIndex,
-    });
+    rowId,
+  });
 
-    return (
-      <button
-        css={styles}
-        onMouseDown={startInteraction}
-        onTouchStart={startInteraction}
-        className="kbnGridPanel--resizeHandle"
-        aria-label={i18n.translate('kbnGridLayout.resizeHandle.ariaLabel', {
-          defaultMessage: 'Resize panel',
-        })}
-      />
-    );
-  }
-);
+  return (
+    <button
+      css={styles}
+      onMouseDown={startInteraction}
+      onTouchStart={startInteraction}
+      className="kbnGridPanel--resizeHandle"
+      aria-label={i18n.translate('kbnGridLayout.resizeHandle.ariaLabel', {
+        defaultMessage: 'Resize panel',
+      })}
+    />
+  );
+});
 
 const styles = ({ euiTheme }: UseEuiTheme) =>
   css({

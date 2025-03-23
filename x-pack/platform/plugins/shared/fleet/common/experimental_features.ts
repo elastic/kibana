@@ -12,6 +12,9 @@ const _allowedExperimentalValues = {
   useSpaceAwareness: false,
   enableAutomaticAgentUpgrades: false,
   enableSyncIntegrationsOnRemote: false,
+  enableSSLSecrets: false,
+  installedIntegrationsTabularUI: false,
+  enabledUpgradeAgentlessDeploymentsTask: false,
 };
 
 /**

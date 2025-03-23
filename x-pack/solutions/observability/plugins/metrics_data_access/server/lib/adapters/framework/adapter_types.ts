@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { Lifecycle } from '@hapi/hapi';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';

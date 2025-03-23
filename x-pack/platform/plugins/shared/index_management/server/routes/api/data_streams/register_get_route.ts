@@ -122,14 +122,12 @@ const getMeteringStats = (client: IScopedClusterClient, name?: string) => {
 
 const getDataStreamsPrivileges = (client: IScopedClusterClient, names: string[]) => {
   return client.asCurrentUser.security.hasPrivileges({
-    body: {
-      index: [
-        {
-          names,
-          privileges: ['delete_index', 'manage_data_stream_lifecycle'],
-        },
-      ],
-    },
+    index: [
+      {
+        names,
+        privileges: ['delete_index', 'manage_data_stream_lifecycle'],
+      },
+    ],
   });
 };
 

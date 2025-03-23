@@ -45,29 +45,27 @@ export const fetchFailedEventsCorrelationPValues = async ({
     apm: {
       events: [eventType],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [commonQuery, ...termQuery(EVENT_OUTCOME, EventOutcome.failure)],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [commonQuery, ...termQuery(EVENT_OUTCOME, EventOutcome.failure)],
       },
-      aggs: {
-        failure_p_value: {
-          significant_terms: {
-            field: fieldName,
-            background_filter: {
-              // Important to have same query as above here
-              // without it, we would be comparing sets of different filtered elements
-              bool: {
-                filter: [commonQuery, ...termQuery(PROCESSOR_EVENT, eventType)],
-              },
+    },
+    aggs: {
+      failure_p_value: {
+        significant_terms: {
+          field: fieldName,
+          background_filter: {
+            // Important to have same query as above here
+            // without it, we would be comparing sets of different filtered elements
+            bool: {
+              filter: [commonQuery, ...termQuery(PROCESSOR_EVENT, eventType)],
             },
-            // No need to have must_not "event.outcome": "failure" clause
-            // if background_is_superset is set to true
-            p_value: { background_is_superset: true },
           },
+          // No need to have must_not "event.outcome": "failure" clause
+          // if background_is_superset is set to true
+          p_value: { background_is_superset: true },
         },
       },
     },

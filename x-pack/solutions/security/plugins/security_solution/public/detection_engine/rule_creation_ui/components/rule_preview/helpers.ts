@@ -141,7 +141,10 @@ export const getIsRulePreviewDisabled = ({
       isThreatQueryBarValid,
     });
   }
-  if (ruleType === 'eql' || ruleType === 'query' || ruleType === 'threshold') {
+  if (ruleType === 'eql') {
+    return isEmpty(queryBar.query.query);
+  }
+  if (ruleType === 'query' || ruleType === 'threshold') {
     return isEmpty(queryBar.query.query) && isEmpty(queryBar.filters);
   }
   if (ruleType === 'new_terms') {

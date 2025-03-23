@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 
 export const ELSER_MODEL_ID = '.elser_model_2';

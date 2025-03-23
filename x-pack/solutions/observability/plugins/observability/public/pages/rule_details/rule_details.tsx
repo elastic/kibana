@@ -10,6 +10,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import type { BoolQuery } from '@kbn/es-query';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
@@ -50,6 +51,7 @@ interface RuleDetailsPathParams {
   ruleId: string;
 }
 export function RuleDetailsPage() {
+  const { services } = useKibana();
   const {
     application: { capabilities, navigateToUrl },
     http: { basePath },
@@ -60,12 +62,11 @@ export function RuleDetailsPage() {
       actionTypeRegistry,
       ruleTypeRegistry,
       getAlertSummaryWidget: AlertSummaryWidget,
-      getEditRuleFlyout: EditRuleFlyout,
       getRuleDefinition: RuleDefinition,
       getRuleStatusPanel: RuleStatusPanel,
     },
     serverless,
-  } = useKibana().services;
+  } = services;
   const { ObservabilityPageTemplate } = usePluginContext();
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
@@ -267,10 +268,12 @@ export function RuleDetailsPage() {
       />
 
       {isEditRuleFlyoutVisible && (
-        <EditRuleFlyout
-          initialRule={rule}
-          onClose={handleCloseRuleFlyout}
-          onSave={async () => {
+        <RuleFormFlyout
+          plugins={{ ...services, actionTypeRegistry, ruleTypeRegistry }}
+          id={rule.id}
+          onCancel={handleCloseRuleFlyout}
+          onSubmit={() => {
+            handleCloseRuleFlyout();
             refetch();
           }}
         />

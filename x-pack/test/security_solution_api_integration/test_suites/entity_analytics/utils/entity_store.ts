@@ -7,6 +7,7 @@
 
 import { EntityType } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/common.gen';
 import expect from '@kbn/expect';
+import { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
 import { FtrProviderContext } from '../../../../api_integration/ftr_provider_context';
 import { elasticAssetCheckerFactory } from './elastic_asset_checker';
 
@@ -99,13 +100,19 @@ export const EntityStoreUtils = (
           .getEntityEngine({ params: { entityType } }, namespace)
           .expect(200);
         log.debug(`Engine status for ${entityType}: ${body.status}`);
+
+        if (status !== 'error' && body.status === 'error') {
+          // If we are not expecting an error, throw the error to improve logging
+          throw new Error(`Engine not started: ${JSON.stringify(body)}`);
+        }
+
         return body.status === status;
       }
     );
   };
 
-  const enableEntityStore = async () => {
-    const res = await api.initEntityStore({ body: {} }, namespace);
+  const enableEntityStore = async (body: InitEntityStoreRequestBodyInput = {}) => {
+    const res = await api.initEntityStore({ body }, namespace);
     if (res.status !== 200) {
       log.error(`Failed to enable entity store`);
       log.error(JSON.stringify(res.body));

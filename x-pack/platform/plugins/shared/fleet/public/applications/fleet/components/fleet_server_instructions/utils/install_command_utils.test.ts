@@ -8,6 +8,14 @@
 import { getInstallCommandForPlatform } from './install_command_utils';
 
 describe('getInstallCommandForPlatform', () => {
+  const fleetServerHost = {
+    id: 'host-id1',
+    name: 'host',
+    host_urls: ['http://fleetserver:8220'],
+    is_default: false,
+    is_preconfigured: false,
+  };
+
   describe('without policy id', () => {
     it('should return the correct command if the the policyId is not set for linux', () => {
       expect(
@@ -24,7 +32,8 @@ describe('getInstallCommandForPlatform', () => {
         sudo ./elastic-agent install \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
 
       expect(
@@ -41,7 +50,8 @@ describe('getInstallCommandForPlatform', () => {
         sudo ./elastic-agent install \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
     });
 
@@ -60,7 +70,8 @@ describe('getInstallCommandForPlatform', () => {
         sudo ./elastic-agent install \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
 
       expect(
@@ -77,7 +88,8 @@ describe('getInstallCommandForPlatform', () => {
         sudo ./elastic-agent install \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
     });
 
@@ -96,7 +108,8 @@ describe('getInstallCommandForPlatform', () => {
         .\\\\elastic-agent.exe install \`
           --fleet-server-es=http://elasticsearch:9200 \`
           --fleet-server-service-token=service-token-1 \`
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \`
+          --install-servers"
       `);
     });
 
@@ -116,7 +129,8 @@ describe('getInstallCommandForPlatform', () => {
         sudo elastic-agent enroll \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
 
       expect(
@@ -134,7 +148,8 @@ describe('getInstallCommandForPlatform', () => {
         sudo elastic-agent enroll \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
     });
 
@@ -154,7 +169,8 @@ describe('getInstallCommandForPlatform', () => {
         sudo elastic-agent enroll \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
 
       expect(
@@ -172,7 +188,8 @@ describe('getInstallCommandForPlatform', () => {
         sudo elastic-agent enroll \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
     });
 
@@ -192,7 +209,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-es-ca-trusted-fingerprint=fingerprint123456 \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
     });
   });
@@ -215,7 +233,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
 
       expect(
@@ -234,7 +253,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
     });
 
@@ -255,7 +275,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
 
       expect(
@@ -274,7 +295,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
     });
 
@@ -295,7 +317,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es=http://elasticsearch:9200 \`
           --fleet-server-service-token=service-token-1 \`
           --fleet-server-policy=policy-1 \`
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \`
+          --install-servers"
       `);
     });
 
@@ -317,7 +340,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
 
       expect(
@@ -337,7 +361,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
     });
 
@@ -359,7 +384,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
 
       expect(
@@ -379,7 +405,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
     });
   });
@@ -407,7 +434,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
     });
   });
@@ -421,7 +449,7 @@ describe('getInstallCommandForPlatform', () => {
           esOutputHost: 'http://elasticsearch:9200',
           serviceToken: 'service-token-1',
           policyId: 'policy-1',
-          fleetServerHost: 'http://fleetserver:8220',
+          fleetServerHost,
           isProductionDeployment: true,
         })
       ).toMatchInlineSnapshot(`
@@ -436,7 +464,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
           --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \\\\
           --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
 
       expect(
@@ -446,7 +475,7 @@ describe('getInstallCommandForPlatform', () => {
           esOutputHost: 'http://elasticsearch:9200',
           serviceToken: 'service-token-1',
           policyId: 'policy-1',
-          fleetServerHost: 'http://fleetserver:8220',
+          fleetServerHost,
           isProductionDeployment: true,
         })
       ).toMatchInlineSnapshot(`
@@ -461,7 +490,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
           --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \\\\
           --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
     });
 
@@ -473,7 +503,7 @@ describe('getInstallCommandForPlatform', () => {
           esOutputHost: 'http://elasticsearch:9200',
           serviceToken: 'service-token-1',
           policyId: 'policy-1',
-          fleetServerHost: 'http://fleetserver:8220',
+          fleetServerHost,
           isProductionDeployment: true,
         })
       ).toMatchInlineSnapshot(`
@@ -488,7 +518,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
           --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \\\\
           --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
 
       expect(
@@ -498,7 +529,7 @@ describe('getInstallCommandForPlatform', () => {
           esOutputHost: 'http://elasticsearch:9200',
           serviceToken: 'service-token-1',
           policyId: 'policy-1',
-          fleetServerHost: 'http://fleetserver:8220',
+          fleetServerHost,
           isProductionDeployment: true,
         })
       ).toMatchInlineSnapshot(`
@@ -513,7 +544,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
           --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \\\\
           --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
     });
 
@@ -523,7 +555,7 @@ describe('getInstallCommandForPlatform', () => {
         esOutputHost: 'http://elasticsearch:9200',
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         isProductionDeployment: true,
       });
 
@@ -540,7 +572,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es-ca=<PATH_TO_ES_CERT> \`
           --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \`
           --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \`
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \`
+          --install-servers"
       `);
     });
 
@@ -552,7 +585,7 @@ describe('getInstallCommandForPlatform', () => {
           esOutputHost: 'http://elasticsearch:9200',
           serviceToken: 'service-token-1',
           policyId: 'policy-1',
-          fleetServerHost: 'http://fleetserver:8220',
+          fleetServerHost,
           isProductionDeployment: true,
         })
       ).toMatchInlineSnapshot(`
@@ -568,7 +601,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
           --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \\\\
           --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
 
       expect(
@@ -578,7 +612,7 @@ describe('getInstallCommandForPlatform', () => {
           esOutputHost: 'http://elasticsearch:9200',
           serviceToken: 'service-token-1',
           policyId: 'policy-1',
-          fleetServerHost: 'http://fleetserver:8220',
+          fleetServerHost,
           isProductionDeployment: true,
         })
       ).toMatchInlineSnapshot(`
@@ -594,7 +628,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
           --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \\\\
           --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
     });
 
@@ -606,7 +641,7 @@ describe('getInstallCommandForPlatform', () => {
           esOutputHost: 'http://elasticsearch:9200',
           serviceToken: 'service-token-1',
           policyId: 'policy-1',
-          fleetServerHost: 'http://fleetserver:8220',
+          fleetServerHost,
           isProductionDeployment: true,
         })
       ).toMatchInlineSnapshot(`
@@ -622,7 +657,8 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
           --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \\\\
           --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
 
       expect(
@@ -632,7 +668,7 @@ describe('getInstallCommandForPlatform', () => {
           esOutputHost: 'http://elasticsearch:9200',
           serviceToken: 'service-token-1',
           policyId: 'policy-1',
-          fleetServerHost: 'http://fleetserver:8220',
+          fleetServerHost,
           isProductionDeployment: true,
         })
       ).toMatchInlineSnapshot(`
@@ -648,8 +684,81 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
           --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \\\\
           --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
-          --fleet-server-port=8220"
+          --fleet-server-port=8220 \\\\
+          --install-servers"
       `);
+    });
+
+    describe('with full fleet server hosts settings', () => {
+      it('should return the command with correct SSL options', () => {
+        const fullFleetServerHost = {
+          ...fleetServerHost,
+          ssl: {
+            certificate_authorities: ['cert authorities'],
+            certificate: 'path/to/cert',
+            es_certificate: 'path/to/EScert',
+          },
+        };
+        const res = getInstallCommandForPlatform({
+          platform: 'deb_x86_64',
+          esOutputHost: 'http://elasticsearch:9200',
+          serviceToken: 'service-token-1',
+          policyId: 'policy-1',
+          fleetServerHost: fullFleetServerHost,
+          isProductionDeployment: true,
+        });
+
+        expect(res).toMatchInlineSnapshot(`
+        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--amd64.deb
+        sudo dpkg -i elastic-agent--amd64.deb
+        sudo systemctl enable elastic-agent
+        sudo systemctl start elastic-agent
+        sudo elastic-agent enroll --url=http://fleetserver:8220 \\\\
+          --fleet-server-es=http://elasticsearch:9200 \\\\
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-policy=policy-1 \\\\
+          --certificate-authorities='cert authorities' \\\\
+          --fleet-server-es-ca='path/to/EScert' \\\\
+          --fleet-server-cert='path/to/cert' \\\\
+          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
+          --fleet-server-port=8220 \\\\
+          --install-servers"
+      `);
+      });
+      it('should return the command with SSL options and placeholders', () => {
+        const fullFleetServerHost = {
+          ...fleetServerHost,
+          ssl: {
+            certificate_authorities: ['cert authorities'],
+            certificate: 'path/to/cert',
+          },
+        };
+        const res = getInstallCommandForPlatform({
+          platform: 'deb_x86_64',
+          esOutputHost: 'http://elasticsearch:9200',
+          serviceToken: 'service-token-1',
+          policyId: 'policy-1',
+          fleetServerHost: fullFleetServerHost,
+          isProductionDeployment: true,
+        });
+
+        expect(res).toMatchInlineSnapshot(`
+        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--amd64.deb
+        sudo dpkg -i elastic-agent--amd64.deb
+        sudo systemctl enable elastic-agent
+        sudo systemctl start elastic-agent
+        sudo elastic-agent enroll --url=http://fleetserver:8220 \\\\
+          --fleet-server-es=http://elasticsearch:9200 \\\\
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-policy=policy-1 \\\\
+          --certificate-authorities='cert authorities' \\\\
+          --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
+          --fleet-server-cert='path/to/cert' \\\\
+          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
+          --fleet-server-port=8220 \\\\
+          --install-servers"
+      `);
+      });
     });
   });
 
@@ -668,7 +777,7 @@ describe('getInstallCommandForPlatform', () => {
           },
           serviceToken: 'service-token-1',
           policyId: 'policy-1',
-          fleetServerHost: 'http://fleetserver:8220',
+          fleetServerHost,
           downloadSource: {
             id: 'download-src',
             name: 'download-src',
@@ -692,6 +801,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
           --fleet-server-port=8220 \\\\
+          --install-servers \\\\
           --proxy-url=http://es-proxy:1111"
       `);
 
@@ -708,7 +818,7 @@ describe('getInstallCommandForPlatform', () => {
           },
           serviceToken: 'service-token-1',
           policyId: 'policy-1',
-          fleetServerHost: 'http://fleetserver:8220',
+          fleetServerHost,
           downloadSource: {
             id: 'download-src',
             name: 'download-src',
@@ -732,6 +842,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
           --fleet-server-port=8220 \\\\
+          --install-servers \\\\
           --proxy-url=http://es-proxy:1111"
       `);
     });
@@ -750,7 +861,7 @@ describe('getInstallCommandForPlatform', () => {
           },
           serviceToken: 'service-token-1',
           policyId: 'policy-1',
-          fleetServerHost: 'http://fleetserver:8220',
+          fleetServerHost,
           downloadSource: {
             id: 'download-src',
             name: 'download-src',
@@ -774,6 +885,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
           --fleet-server-port=8220 \\\\
+          --install-servers \\\\
           --proxy-url=http://es-proxy:1111"
       `);
 
@@ -790,7 +902,7 @@ describe('getInstallCommandForPlatform', () => {
           },
           serviceToken: 'service-token-1',
           policyId: 'policy-1',
-          fleetServerHost: 'http://fleetserver:8220',
+          fleetServerHost,
           downloadSource: {
             id: 'download-src',
             name: 'download-src',
@@ -814,6 +926,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
           --fleet-server-port=8220 \\\\
+          --install-servers \\\\
           --proxy-url=http://es-proxy:1111"
       `);
     });
@@ -830,7 +943,7 @@ describe('getInstallCommandForPlatform', () => {
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         downloadSource: {
           id: 'download-src',
           name: 'download-src',
@@ -856,6 +969,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1 \`
           --fleet-server-policy=policy-1 \`
           --fleet-server-port=8220 \`
+          --install-servers \`
           --proxy-url=http://es-proxy:1111"
       `);
     });
@@ -874,7 +988,7 @@ describe('getInstallCommandForPlatform', () => {
           },
           serviceToken: 'service-token-1',
           policyId: 'policy-1',
-          fleetServerHost: 'http://fleetserver:8220',
+          fleetServerHost,
           downloadSource: {
             id: 'download-src',
             name: 'download-src',
@@ -899,6 +1013,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
           --fleet-server-port=8220 \\\\
+          --install-servers \\\\
           --proxy-url=http://es-proxy:1111"
       `);
 
@@ -915,7 +1030,7 @@ describe('getInstallCommandForPlatform', () => {
           },
           serviceToken: 'service-token-1',
           policyId: 'policy-1',
-          fleetServerHost: 'http://fleetserver:8220',
+          fleetServerHost,
           downloadSource: {
             id: 'download-src',
             name: 'download-src',
@@ -940,6 +1055,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
           --fleet-server-port=8220 \\\\
+          --install-servers \\\\
           --proxy-url=http://es-proxy:1111"
       `);
     });
@@ -958,7 +1074,7 @@ describe('getInstallCommandForPlatform', () => {
           },
           serviceToken: 'service-token-1',
           policyId: 'policy-1',
-          fleetServerHost: 'http://fleetserver:8220',
+          fleetServerHost,
           downloadSource: {
             id: 'download-src',
             name: 'download-src',
@@ -983,6 +1099,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
           --fleet-server-port=8220 \\\\
+          --install-servers \\\\
           --proxy-url=http://es-proxy:1111"
       `);
 
@@ -999,7 +1116,7 @@ describe('getInstallCommandForPlatform', () => {
           },
           serviceToken: 'service-token-1',
           policyId: 'policy-1',
-          fleetServerHost: 'http://fleetserver:8220',
+          fleetServerHost,
           downloadSource: {
             id: 'download-src',
             name: 'download-src',
@@ -1024,6 +1141,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
           --fleet-server-port=8220 \\\\
+          --install-servers \\\\
           --proxy-url=http://es-proxy:1111"
       `);
     });
@@ -1045,7 +1163,7 @@ describe('getInstallCommandForPlatform', () => {
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         downloadSource: {
           id: 'download-src',
           name: 'download-src',
@@ -1080,6 +1198,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
           --fleet-server-port=8220 \\\\
+          --install-servers \\\\
           --proxy-url=http://es-proxy:1111 \\\\
           --proxy-header=\\"X-Forwarded-For=forwarded-value\\" \\\\
           --proxy-header=\\"test-header=test-value\\""
@@ -1100,6 +1219,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
           --fleet-server-port=8220 \\\\
+          --install-servers \\\\
           --proxy-url=http://es-proxy:1111 \\\\
           --proxy-header=\\"X-Forwarded-For=forwarded-value\\" \\\\
           --proxy-header=\\"test-header=test-value\\""
@@ -1121,7 +1241,7 @@ describe('getInstallCommandForPlatform', () => {
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         downloadSource: {
           id: 'download-src',
           name: 'download-src',
@@ -1156,6 +1276,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
           --fleet-server-port=8220 \\\\
+          --install-servers \\\\
           --proxy-url=http://es-proxy:1111 \\\\
           --proxy-header=\\"X-Forwarded-For=forwarded-value\\" \\\\
           --proxy-header=\\"test-header=test-value\\""
@@ -1176,6 +1297,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
           --fleet-server-port=8220 \\\\
+          --install-servers \\\\
           --proxy-url=http://es-proxy:1111 \\\\
           --proxy-header=\\"X-Forwarded-For=forwarded-value\\" \\\\
           --proxy-header=\\"test-header=test-value\\""
@@ -1198,7 +1320,7 @@ describe('getInstallCommandForPlatform', () => {
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         downloadSource: {
           id: 'download-src',
           name: 'download-src',
@@ -1228,6 +1350,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1 \`
           --fleet-server-policy=policy-1 \`
           --fleet-server-port=8220 \`
+          --install-servers \`
           --proxy-url=http://es-proxy:1111 \`
           --proxy-header=\\"X-Forwarded-For=forwarded-value\\" \`
           --proxy-header=\\"test-header=test-value\\""
@@ -1249,7 +1372,7 @@ describe('getInstallCommandForPlatform', () => {
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         downloadSource: {
           id: 'download-src',
           name: 'download-src',
@@ -1285,6 +1408,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
           --fleet-server-port=8220 \\\\
+          --install-servers \\\\
           --proxy-url=http://es-proxy:1111 \\\\
           --proxy-header=\\"X-Forwarded-For=forwarded-value\\" \\\\
           --proxy-header=\\"test-header=test-value\\""
@@ -1306,6 +1430,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
           --fleet-server-port=8220 \\\\
+          --install-servers \\\\
           --proxy-url=http://es-proxy:1111 \\\\
           --proxy-header=\\"X-Forwarded-For=forwarded-value\\" \\\\
           --proxy-header=\\"test-header=test-value\\""
@@ -1327,7 +1452,7 @@ describe('getInstallCommandForPlatform', () => {
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         downloadSource: {
           id: 'download-src',
           name: 'download-src',
@@ -1363,6 +1488,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
           --fleet-server-port=8220 \\\\
+          --install-servers \\\\
           --proxy-url=http://es-proxy:1111 \\\\
           --proxy-header=\\"X-Forwarded-For=forwarded-value\\" \\\\
           --proxy-header=\\"test-header=test-value\\""
@@ -1384,6 +1510,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-service-token=service-token-1 \\\\
           --fleet-server-policy=policy-1 \\\\
           --fleet-server-port=8220 \\\\
+          --install-servers \\\\
           --proxy-url=http://es-proxy:1111 \\\\
           --proxy-header=\\"X-Forwarded-For=forwarded-value\\" \\\\
           --proxy-header=\\"test-header=test-value\\""

@@ -41,7 +41,7 @@ import {
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
-import { Subscription } from 'rxjs';
+import { Subscription, switchMap } from 'rxjs';
 import { uiActions } from '../../kibana_services';
 import {
   CONTEXT_MENU_TRIGGER,
@@ -188,17 +188,24 @@ export const PresentationPanelHoverActions = ({
 
       for (const frequentlyChangingAction of frequentlyChangingActions) {
         if ((quickActionIds as readonly string[]).includes(frequentlyChangingAction.id)) {
-          subscriptions.add(
-            frequentlyChangingAction.subscribeToCompatibilityChanges(
-              apiContext,
-              (isCompatible, action) =>
-                handleActionCompatibilityChange(
-                  'quickActions',
-                  isCompatible,
-                  action as AnyApiAction
-                )
+          const compatibilitySubscription = frequentlyChangingAction
+            .getCompatibilityChangesSubject(apiContext)
+            ?.pipe(
+              switchMap(async () => {
+                return await frequentlyChangingAction.isCompatible({
+                  ...apiContext,
+                  trigger: contextMenuTrigger,
+                });
+              })
             )
-          );
+            .subscribe(async (isCompatible) => {
+              handleActionCompatibilityChange(
+                'quickActions',
+                isCompatible,
+                frequentlyChangingAction as AnyApiAction
+              );
+            });
+          subscriptions.add(compatibilitySubscription);
         }
       }
 
@@ -214,17 +221,24 @@ export const PresentationPanelHoverActions = ({
         if (
           (ALLOWED_NOTIFICATIONS as readonly string[]).includes(frequentlyChangingNotification.id)
         ) {
-          subscriptions.add(
-            frequentlyChangingNotification.subscribeToCompatibilityChanges(
-              apiContext,
-              (isCompatible, action) =>
-                handleActionCompatibilityChange(
-                  'notifications',
-                  isCompatible,
-                  action as AnyApiAction
-                )
+          const compatibilitySubscription = frequentlyChangingNotification
+            .getCompatibilityChangesSubject(apiContext)
+            ?.pipe(
+              switchMap(async () => {
+                return await frequentlyChangingNotification.isCompatible({
+                  ...apiContext,
+                  trigger: panelNotificationTrigger,
+                });
+              })
             )
-          );
+            .subscribe(async (isCompatible) => {
+              handleActionCompatibilityChange(
+                'notifications',
+                isCompatible,
+                frequentlyChangingNotification as AnyApiAction
+              );
+            });
+          subscriptions.add(compatibilitySubscription);
         }
       }
     })();

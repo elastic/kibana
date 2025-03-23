@@ -348,10 +348,16 @@ describe('Risk Scoring Task', () => {
           // add additional mock responses for the additional identifier calls
           mockRiskScoreService.calculateAndPersistScores
             .mockResolvedValueOnce({
+              // first call - host entity type
               after_keys: { host: { 'user.name': 'value' } },
               scores_written: 5,
               errors: [],
-            })
+            }) // second call - user entity type
+            .mockResolvedValueOnce({
+              after_keys: {},
+              scores_written: 5,
+              errors: [],
+            }) // third call - service entity type
             .mockResolvedValueOnce({
               after_keys: {},
               scores_written: 5,
@@ -369,7 +375,7 @@ describe('Risk Scoring Task', () => {
             entityAnalyticsConfig,
             experimentalFeatures: mockExperimentalFeatures,
           });
-          expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(4);
+          expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledTimes(5);
 
           expect(mockRiskScoreService.calculateAndPersistScores).toHaveBeenCalledWith(
             expect.objectContaining({

@@ -8,25 +8,27 @@
  */
 
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
-import {
-  canImportVisContext,
+import type {
   UnifiedHistogramApi,
   UnifiedHistogramContainerProps,
   UnifiedHistogramCreationOptions,
-  UnifiedHistogramExternalVisContextStatus,
-  UnifiedHistogramFetchStatus,
   UnifiedHistogramState,
   UnifiedHistogramVisContext,
 } from '@kbn/unified-histogram-plugin/public';
+import {
+  canImportVisContext,
+  UnifiedHistogramExternalVisContextStatus,
+  UnifiedHistogramFetchStatus,
+} from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { Observable } from 'rxjs';
 import {
   debounceTime,
   distinctUntilChanged,
   filter,
   map,
   merge,
-  Observable,
   pairwise,
   skip,
   startWith,
@@ -35,7 +37,8 @@ import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import { Filter, isOfAggregateQueryType } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -44,14 +47,19 @@ import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { addLog } from '../../../../utils/add_log';
-import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 import {
   useAppStateSelector,
   type DiscoverAppState,
 } from '../../state_management/discover_app_state_container';
-import { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
+import type { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
 import { useSavedSearch } from '../../state_management/discover_state_provider';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import {
+  internalStateActions,
+  useCurrentDataView,
+  useInternalStateDispatch,
+  useInternalStateSelector,
+} from '../../state_management/redux';
 
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];
@@ -220,7 +228,6 @@ export const useDiscoverHistogram = ({
    */
   const { query, filters } = useQuerySubscriber({ data: services.data });
   const requestParams = useInternalStateSelector((state) => state.dataRequestParams);
-  const customFilters = useInternalStateSelector((state) => state.customFilters);
   const { timeRangeRelative: relativeTimeRange, timeRangeAbsolute: timeRange } = requestParams;
   // When in ES|QL mode, update the data view, query, and
   // columns only when documents are done fetching so the Lens suggestions
@@ -308,17 +315,18 @@ export const useDiscoverHistogram = ({
     };
   }, [isEsqlMode, stateContainer.dataState.fetchChart$, esqlFetchComplete$, unifiedHistogram]);
 
-  const dataView = useInternalStateSelector((state) => state.dataView!);
+  const dataView = useCurrentDataView();
 
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
   const filtersMemoized = useMemo(() => {
-    const allFilters = [...(filters ?? []), ...customFilters];
+    const allFilters = [...(filters ?? [])];
     return allFilters.length ? allFilters : EMPTY_FILTERS;
-  }, [filters, customFilters]);
+  }, [filters]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const timeRangeMemoized = useMemo(() => timeRange, [timeRange?.from, timeRange?.to]);
+  const dispatch = useInternalStateDispatch();
 
   const onVisContextChanged = useCallback(
     (
@@ -332,31 +340,25 @@ export const useDiscoverHistogram = ({
           stateContainer.savedSearchState.updateVisContext({
             nextVisContext,
           });
-          stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation(
-            undefined
-          );
+          dispatch(internalStateActions.setOverriddenVisContextAfterInvalidation(undefined));
           break;
         case UnifiedHistogramExternalVisContextStatus.automaticallyOverridden:
           // if the visualization was invalidated as incompatible and rebuilt
           // (it will be used later for saving the visualization via Save button)
-          stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation(
-            nextVisContext
-          );
+          dispatch(internalStateActions.setOverriddenVisContextAfterInvalidation(nextVisContext));
           break;
         case UnifiedHistogramExternalVisContextStatus.automaticallyCreated:
         case UnifiedHistogramExternalVisContextStatus.applied:
           // clearing the value in the internal state so we don't use it during saved search saving
-          stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation(
-            undefined
-          );
+          dispatch(internalStateActions.setOverriddenVisContextAfterInvalidation(undefined));
           break;
         case UnifiedHistogramExternalVisContextStatus.unknown:
           // using `{}` to overwrite the value inside the saved search SO during saving
-          stateContainer.internalState.transitions.setOverriddenVisContextAfterInvalidation({});
+          dispatch(internalStateActions.setOverriddenVisContextAfterInvalidation({}));
           break;
       }
     },
-    [stateContainer]
+    [dispatch, stateContainer.savedSearchState]
   );
 
   const breakdownField = useAppStateSelector((state) => state.breakdownField);

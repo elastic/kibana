@@ -10,7 +10,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
-  describe('List connectors', () => {
+  describe('List connectors', function () {
     before(async () => {
       await observabilityAIAssistantAPIClient.deleteAllActionConnectors();
     });
@@ -32,7 +32,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         endpoint: 'GET /internal/observability_ai_assistant/connectors',
       });
 
-      expect(res.body.length).to.be(0);
+      const connectorsExcludingPreconfiguredInference = res.body.filter(
+        (c) => c.actionTypeId !== '.inference'
+      );
+      expect(connectorsExcludingPreconfiguredInference.length).to.be(0);
     });
 
     it("returns the gen ai connector if it's been created", async () => {
@@ -44,7 +47,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         endpoint: 'GET /internal/observability_ai_assistant/connectors',
       });
 
-      expect(res.body.length).to.be(1);
+      const connectorsExcludingPreconfiguredInference = res.body.filter(
+        (c) => c.actionTypeId !== '.inference'
+      );
+      expect(connectorsExcludingPreconfiguredInference.length).to.be(1);
 
       await observabilityAIAssistantAPIClient.deleteActionConnector({ actionId: connectorId });
     });

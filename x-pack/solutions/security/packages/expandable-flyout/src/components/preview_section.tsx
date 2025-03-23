@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiSplitPanel,
   EuiText,
+  transparentize,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
@@ -99,7 +100,8 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
       const percentage = rightPercentage
         ? rightPercentage
         : defaultPercentages[type].rightPercentage;
-      return showExpanded ? `calc(${percentage}% - 8px)` : `calc(100% - 8px)`;
+      // we need to keep 1px here to make sure users can click on the EuiResizableButton and resize the flyout with preview opened
+      return showExpanded ? `calc(${percentage}% - 1px)` : `calc(100% - 1px)`;
     }, [defaultPercentages, rightPercentage, showExpanded, type]);
 
     const closeButton = (
@@ -134,21 +136,17 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
       <div
         css={css`
           position: absolute;
-          top: 8px;
-          bottom: 8px;
-          right: 4px;
+          top: 0;
+          bottom: 0;
+          right: 0;
           width: ${width};
           z-index: 1000;
+          padding: ${euiTheme.size.m} ${euiTheme.size.s} 0px ${euiTheme.size.s};
+          // TODO EUI: add color with transparency
+          background: ${transparentize(euiTheme.colors.shadow, 0.1)};
         `}
       >
-        <EuiSplitPanel.Outer
-          css={css`
-            margin: ${euiTheme.size.xs};
-            box-shadow: 0 0 ${euiTheme.size.base} 0 ${euiTheme.colors.lightShade};
-          `}
-          data-test-subj={PREVIEW_SECTION_TEST_ID}
-          className="eui-fullHeight"
-        >
+        <EuiSplitPanel.Outer data-test-subj={PREVIEW_SECTION_TEST_ID} className="eui-fullHeight">
           {isPreviewBanner(banner) && (
             <EuiSplitPanel.Inner
               grow={false}

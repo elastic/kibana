@@ -37,7 +37,7 @@ export class KbnPalettes {
 function buildAliasMappings(palettes: IKbnPalette[]): Map<string, string> {
   return palettes.reduce((acc, { id, aliases }) => {
     aliases.forEach((alias) => {
-      acc.set(alias, id);
+      if (!acc.has(alias)) acc.set(alias, id);
     });
     return acc;
   }, new Map());

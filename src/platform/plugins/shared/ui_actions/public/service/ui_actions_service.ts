@@ -222,7 +222,7 @@ export class UiActionsService {
   ): Promise<FrequentCompatibilityChangeAction[]> => {
     return (await this.getTriggerActions(triggerId)).filter((action) => {
       return (
-        Boolean(action.subscribeToCompatibilityChanges) &&
+        Boolean(action.getCompatibilityChangesSubject) &&
         action.couldBecomeCompatible?.({
           ...context,
           trigger: this.getTrigger(triggerId),

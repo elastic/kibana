@@ -106,14 +106,12 @@ async function getIndicesFromPattern(
   const params = {
     index: pattern,
     ignore_unavailable: true,
-    body: {
-      size: 0, // no hits
-      aggs: {
-        indices: {
-          terms: {
-            field: '_index',
-            size: MAX_INDICES,
-          },
+    size: 0, // no hits
+    aggs: {
+      indices: {
+        terms: {
+          field: '_index',
+          size: MAX_INDICES,
         },
       },
     },

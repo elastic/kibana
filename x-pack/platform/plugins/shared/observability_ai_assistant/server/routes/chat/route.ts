@@ -9,11 +9,11 @@ import { toBooleanRt } from '@kbn/io-ts-utils';
 import { context as otelContext } from '@opentelemetry/api';
 import * as t from 'io-ts';
 import { from, map } from 'rxjs';
+import { v4 } from 'uuid';
 import { Readable } from 'stream';
 import { AssistantScope } from '@kbn/ai-assistant-common';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
-import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { LangTracer } from '../../service/client/instrumentation/lang_tracer';
 import { flushBuffer } from '../../service/util/flush_buffer';
 import { observableIntoOpenAIStream } from '../../service/util/observable_into_openai_stream';
@@ -21,6 +21,7 @@ import { observableIntoStream } from '../../service/util/observable_into_stream'
 import { withAssistantSpan } from '../../service/util/with_assistant_span';
 import { recallAndScore } from '../../utils/recall/recall_and_score';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
+import { Instruction } from '../../../common/types';
 import { assistantScopeType, functionRt, messageRt, screenContextRt } from '../runtime_types';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../types';
 
@@ -41,14 +42,11 @@ const chatCompleteBaseRt = t.type({
         }),
       ]),
       instructions: t.array(
-        t.intersection([
-          t.partial({ id: t.string }),
+        t.union([
+          t.string,
           t.type({
+            id: t.string,
             text: t.string,
-            instruction_type: t.union([
-              t.literal('user_instruction'),
-              t.literal('application_instruction'),
-            ]),
           }),
         ])
       ),
@@ -135,6 +133,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     body: t.intersection([
       t.type({
         name: t.string,
+        systemMessage: t.string,
         messages: t.array(messageRt),
         connectorId: t.string,
         functions: t.array(functionRt),
@@ -149,7 +148,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     const { params } = resources;
 
     const {
-      body: { name, messages, connectorId, functions, functionCall },
+      body: { name, systemMessage, messages, connectorId, functions, functionCall },
     } = params;
 
     const { client, simulateFunctionCalling, signal, isCloudEnabled } = await initializeChatRequest(
@@ -158,6 +157,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
 
     const response$ = client.chat(name, {
       stream: true,
+      systemMessage,
       messages,
       connectorId,
       signal,
@@ -201,16 +201,14 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
       recallAndScore({
         analytics: (await resources.plugins.core.start()).analytics,
         chat: (name, params) =>
-          client
-            .chat(name, {
-              ...params,
-              stream: true,
-              connectorId,
-              simulateFunctionCalling,
-              signal,
-              tracer: new LangTracer(otelContext.active()),
-            })
-            .pipe(withoutTokenCountEvents()),
+          client.chat(name, {
+            ...params,
+            stream: true,
+            connectorId,
+            simulateFunctionCalling,
+            signal,
+            tracer: new LangTracer(otelContext.active()),
+          }),
         context,
         logger: resources.logger,
         messages: [],
@@ -252,7 +250,7 @@ async function chatComplete(
       title,
       persist,
       screenContexts,
-      instructions,
+      instructions: userInstructionsOrStrings,
       disableFunctions,
       scopes,
     },
@@ -270,6 +268,16 @@ async function chatComplete(
     scopes,
   });
 
+  const userInstructions: Instruction[] | undefined = userInstructionsOrStrings?.map(
+    (userInstructionOrString) =>
+      typeof userInstructionOrString === 'string'
+        ? {
+            text: userInstructionOrString,
+            id: v4(),
+          }
+        : userInstructionOrString
+  );
+
   const response$ = client.complete({
     messages,
     connectorId,
@@ -278,7 +286,7 @@ async function chatComplete(
     persist,
     signal,
     functionClient,
-    instructions,
+    userInstructions,
     simulateFunctionCalling,
     disableFunctions,
   });
