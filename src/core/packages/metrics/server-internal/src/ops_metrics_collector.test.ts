@@ -81,8 +81,8 @@ describe('OpsMetricsCollector', () => {
     });
   });
 
-  describe('#registerMetricsToAPM', () => {
-    it('call registerMetricsToAPM on the underlying collectors', () => {
+  describe('#registerMetrics', () => {
+    it('call registerMetrics on the underlying collectors', () => {
       collector.registerMetrics();
 
       expect(mockProcessCollector.registerMetrics).toHaveBeenCalledTimes(1);
