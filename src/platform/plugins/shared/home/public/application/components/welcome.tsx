@@ -29,7 +29,7 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { fullScreenGraphicsMixinStyles } from '../kibanaFullScreenGraphicsMixin';
+import { fullScreenGraphicsMixinStyles } from '@kbn/core/public';
 import { getServices } from '../kibana_services';
 
 import { SampleDataCard } from './sample_data';
