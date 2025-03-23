@@ -67,8 +67,8 @@ export function traversePanels(
   const attributes = savedObject.attributes as DashboardAttributes;
   const panels = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
 
-  for (let j = 0; j < panels.length; j++) {
-    const panel = panels[j];
+  for (let i = 0; i < panels.length; i++) {
+    const panel = panels[i];
     if (panel.type === 'lens') {
       const { query: rootQuery, attributes } = panel.embeddableConfig as LensSerializedState;
       if (rootQuery && 'esql' in rootQuery) {
