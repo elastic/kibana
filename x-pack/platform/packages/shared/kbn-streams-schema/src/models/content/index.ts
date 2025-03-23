@@ -6,6 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
+import type { SavedObject } from '@kbn/core/server';
+import type { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
 
 interface ContentPack {
   content: string;
@@ -15,4 +17,11 @@ const contentPackSchema: z.Schema<ContentPack> = z.object({
   content: z.string(),
 });
 
-export { contentPackSchema, type ContentPack };
+interface ContentPackSavedObject<T = unknown> {
+  type: 'saved_object';
+  content: SavedObject<T>;
+}
+
+type ContentPackObject = ContentPackSavedObject<DashboardAttributes>;
+
+export { contentPackSchema, type ContentPack, type ContentPackObject, type ContentPackSavedObject };

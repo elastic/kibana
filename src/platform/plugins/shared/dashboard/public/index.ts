@@ -10,6 +10,7 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 
 import { DashboardPlugin } from './plugin';
+export { getDashboardBackupService } from './services/dashboard_backup_service';
 export {
   DASHBOARD_APP_ID,
   LEGACY_DASHBOARD_APP_ID,

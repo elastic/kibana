@@ -9,12 +9,13 @@ import { Readable } from 'stream';
 import { z } from '@kbn/zod';
 import {
   createConcatStream,
+  createFilterStream,
   createListStream,
   createMapStream,
   createPromiseFromStreams,
 } from '@kbn/utils';
-import { createSavedObjectsStreamFromNdJson } from '@kbn/core-saved-objects-server-internal/src/routes/utils';
 import { ContentPack, contentPackSchema } from '@kbn/streams-schema';
+import { SavedObject, SavedObjectsExportResultDetails } from '@kbn/core/server';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 
@@ -58,8 +59,12 @@ const exportContentRoute = createServerRoute({
 
     const savedObjects: string[] = await createPromiseFromStreams([
       exportStream,
+      createFilterStream<SavedObject | SavedObjectsExportResultDetails>(
+        (savedObject) =>
+          (savedObject as SavedObjectsExportResultDetails).exportedCount === undefined
+      ),
       createMapStream((savedObject) => {
-        return JSON.stringify(savedObject);
+        return JSON.stringify({ type: 'saved_object', content: savedObject });
       }),
       createConcatStream([]),
     ]);
@@ -119,14 +124,15 @@ const importContentRoute = createServerRoute({
       params.body.content.on('error', (error) => reject(error));
     });
 
-    const updatedSavedObjectsStream = await createPromiseFromStreams([
-      await createSavedObjectsStreamFromNdJson(Readable.from(body.content)),
-      createConcatStream([]),
-    ]);
+    const savedObjects = body.content
+      .split('\n')
+      .map((object) => JSON.parse(object))
+      .filter((object) => object.type === 'saved_object')
+      .map((object) => object.content);
 
     const importer = (await context.core).savedObjects.getImporter(soClient);
     const { successResults, errors } = await importer.import({
-      readStream: createListStream(updatedSavedObjectsStream),
+      readStream: createListStream(savedObjects),
       createNewCopies: true,
       overwrite: true,
     });
