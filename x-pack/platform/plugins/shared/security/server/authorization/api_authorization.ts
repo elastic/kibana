@@ -7,8 +7,6 @@
 
 import { ReservedPrivilegesSet } from '@kbn/core/server';
 import type {
-  AllRequiredCondition,
-  AnyRequiredCondition,
   AuthzDisabled,
   AuthzEnabled,
   HttpServiceSetup,
@@ -115,12 +113,18 @@ export function initAPIAuthorization(
       const requiredPrivileges = await normalizeRequiredPrivileges(authz.requiredPrivileges);
 
       const unwindNestedPrivileges = (
-        privileges: AllRequiredCondition | AnyRequiredCondition
+        privileges: Array<string | Record<string, string[]>>
       ): string[] =>
         privileges.reduce<string[]>(
-          (acc: string[], privilege: string | { anyOf?: string[]; allOf?: string[] }) => {
+          (acc: string[], privilege: string | Record<string, string[]>) => {
             if (typeof privilege === 'object') {
-              acc.push(...(privilege.allOf ?? []), ...(privilege.anyOf ?? []));
+              if ('allOf' in privilege) {
+                acc.push(...privilege.allOf);
+              }
+
+              if ('anyOf' in privilege) {
+                acc.push(...privilege.anyOf);
+              }
             } else if (typeof privilege === 'string') {
               acc.push(privilege);
             }

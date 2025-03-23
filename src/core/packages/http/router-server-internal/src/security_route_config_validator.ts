@@ -8,12 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type {
-  RouteSecurity,
-  RouteConfigOptions,
-  AllRequiredCondition,
-  AnyRequiredCondition,
-} from '@kbn/core-http-server';
+import type { RouteSecurity, RouteConfigOptions } from '@kbn/core-http-server';
 import { ReservedPrivilegesSet } from '@kbn/core-http-server';
 import type { DeepPartial } from '@kbn/utility-types';
 
@@ -47,21 +42,22 @@ const privilegeSetSchema = schema.object(
   }
 );
 
-const unwindNestedPrivileges = (
-  privileges: AllRequiredCondition | AnyRequiredCondition
-): string[] =>
-  privileges.reduce<string[]>(
-    (acc: string[], privilege: string | { anyOf?: string[]; allOf?: string[] }) => {
-      if (typeof privilege === 'object') {
-        acc.push(...(privilege.allOf ?? []), ...(privilege.anyOf ?? []));
-      } else if (typeof privilege === 'string') {
-        acc.push(privilege);
+const unwindNestedPrivileges = (privileges: Array<string | Record<string, string[]>>): string[] =>
+  privileges.reduce((acc: string[], privilege) => {
+    if (typeof privilege === 'object') {
+      if ('allOf' in privilege) {
+        acc.push(...privilege.allOf);
       }
 
-      return acc;
-    },
-    []
-  );
+      if ('anyOf' in privilege) {
+        acc.push(...privilege.anyOf);
+      }
+    } else if (typeof privilege === 'string') {
+      acc.push(privilege);
+    }
+
+    return acc;
+  }, []);
 
 const requiredPrivilegesSchema = schema.arrayOf(
   schema.oneOf([privilegeSetSchema, schema.string()]),
