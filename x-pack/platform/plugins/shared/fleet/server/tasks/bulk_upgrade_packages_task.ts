@@ -14,7 +14,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
+import { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 import { installPackage } from '../services/epm/packages';
 import { appContextService, packagePolicyService } from '../services';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
@@ -122,9 +122,16 @@ async function runTask({
       if (abortController.signal.aborted) {
         throw new Error('Task was aborted');
       }
+
       const installResult = await installPackage({
         spaceId,
-        authorizationHeader,
+        authorizationHeader: authorizationHeader
+          ? new HTTPAuthorizationHeader(
+              authorizationHeader.scheme,
+              authorizationHeader.credentials,
+              authorizationHeader.username
+            )
+          : undefined,
         installSource: 'registry', // Upgrade can only happens from the registry,
         esClient,
         savedObjectsClient,

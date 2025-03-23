@@ -22,8 +22,10 @@ import type { InstalledPackageUIPackageListItem } from '../types';
 export const ConfirmBulkUpgradeModal: React.FunctionComponent<{
   selectedItems: InstalledPackageUIPackageListItem[];
   onClose: () => void;
-}> = ({ onClose, selectedItems }) => {
+  onConfirm: (params: { updatePolicies: boolean }) => void;
+}> = ({ onClose, onConfirm, selectedItems }) => {
   const [updatePolicies, setUpdatePolicies] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <EuiConfirmModal
@@ -46,6 +48,16 @@ export const ConfirmBulkUpgradeModal: React.FunctionComponent<{
         { defaultMessage: 'Review integration selection' }
       )}
       onCancel={onClose}
+      isLoading={isLoading}
+      onConfirm={async () => {
+        try {
+          setIsLoading(true);
+          await onConfirm({ updatePolicies });
+          onClose();
+        } catch (err) {
+          setIsLoading(false);
+        }
+      }}
     >
       <EuiText>
         <FormattedMessage

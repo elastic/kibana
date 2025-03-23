@@ -17,6 +17,7 @@ import { useInstalledIntegrations } from './hooks/use_installed_integrations';
 import { useUrlFilters } from './hooks/use_url_filters';
 import { InstalledIntegrationsSearchBar } from './components/installed_integrations_search_bar';
 import type { InstalledPackageUIPackageListItem } from './types';
+import { BulkActionContextProvider, useBulkActions } from './hooks/use_bulk_actions';
 
 const ContentWrapper = styled.div`
   max-width: 1200px;
@@ -24,10 +25,11 @@ const ContentWrapper = styled.div`
   height: 100%;
 `;
 
-export const InstalledIntegrationsPage: React.FunctionComponent = () => {
+const InstalledIntegrationsPageContent: React.FunctionComponent = () => {
   // State management
   const filters = useUrlFilters();
   const pagination = useUrlPagination();
+  const { upgradingIntegrations } = useBulkActions();
   const {
     installedPackages,
     countPerStatus,
@@ -35,7 +37,7 @@ export const InstalledIntegrationsPage: React.FunctionComponent = () => {
     isLoading,
     isInitialLoading,
     total,
-  } = useInstalledIntegrations(filters, pagination.pagination);
+  } = useInstalledIntegrations(filters, pagination.pagination, upgradingIntegrations);
 
   const [selectedItems, setSelectedItems] = useState<InstalledPackageUIPackageListItem[]>([]);
 
@@ -60,5 +62,13 @@ export const InstalledIntegrationsPage: React.FunctionComponent = () => {
         selection={{ selectedItems, setSelectedItems }}
       />
     </ContentWrapper>
+  );
+};
+
+export const InstalledIntegrationsPage: React.FunctionComponent = () => {
+  return (
+    <BulkActionContextProvider>
+      <InstalledIntegrationsPageContent />
+    </BulkActionContextProvider>
   );
 };

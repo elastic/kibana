@@ -17,7 +17,13 @@ import type {
   InstalledPackageUIPackageListItem,
 } from '../types';
 
-function getIntegrationStatus(item: PackageListItem): InstalledPackagesUIInstallationStatus {
+function getIntegrationStatus(
+  item: PackageListItem,
+  isUpgrading: boolean
+): InstalledPackagesUIInstallationStatus {
+  if (isUpgrading) {
+    return 'upgrading';
+  }
   if (item.status === 'install_failed') {
     return 'install_failed';
   } else if (item.status === 'installed') {
@@ -41,7 +47,8 @@ function getIntegrationStatus(item: PackageListItem): InstalledPackagesUIInstall
 
 export function useInstalledIntegrations(
   filters: InstalledIntegrationsFilter,
-  pagination: Pagination
+  pagination: Pagination,
+  upgradingIntegrations?: InstalledPackageUIPackageListItem[]
 ) {
   const { data, isInitialLoading, isLoading } = useGetPackagesQuery({
     withPackagePoliciesCount: true,
@@ -55,10 +62,13 @@ export function useInstalledIntegrations(
         .map((item) => ({
           ...item,
           ui: {
-            installation_status: getIntegrationStatus(item),
+            installation_status: getIntegrationStatus(
+              item,
+              upgradingIntegrations?.some((u) => u.name === item.name) ?? false
+            ),
           },
         })),
-    [data]
+    [data, upgradingIntegrations]
   );
 
   const localSearch = useLocalSearch(internalInstalledPackages, isInitialLoading);

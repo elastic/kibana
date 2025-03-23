@@ -8,10 +8,12 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { useStartServices } from '../../../../../../../hooks';
 import type { InstalledPackageUIPackageListItem } from '../types';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useBulkActions } from '../hooks/use_bulk_actions';
+
 import { ConfirmBulkUpgradeModal } from './confirm_bulk_upgrade_modal';
 
 export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
@@ -34,25 +36,32 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
     </EuiButton>
   );
 
+  const {
+    actions: { bulkUpgradeIntegrations },
+  } = useBulkActions();
+
   const openUpgradeModal = useCallback(() => {
+    setIsOpen(false);
     const ref = startServices.overlays.openModal(
       toMountPoint(
         <ConfirmBulkUpgradeModal
           onClose={() => {
             ref.close();
           }}
+          onConfirm={({ updatePolicies }) => bulkUpgradeIntegrations(selectedItems, updatePolicies)}
           selectedItems={selectedItems}
         />,
         startServices
       )
     );
-  }, [selectedItems, startServices]);
+  }, [selectedItems, startServices, bulkUpgradeIntegrations]);
 
   const items = useMemo(() => {
     const hasUpgreadableIntegrations = selectedItems.some(
       (item) =>
         item.ui.installation_status === 'upgrade_available' ||
-        item.ui.installation_status === 'upgrade_failed'
+        item.ui.installation_status === 'upgrade_failed' ||
+        item.ui.installation_status === 'install_failed'
     );
 
     return [
@@ -71,7 +80,7 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
         />
       </EuiContextMenuItem>,
       <EuiContextMenuItem key="edit" icon="pencil" onClick={() => {}}>
-        TODO
+        TODO other actions
       </EuiContextMenuItem>,
     ];
   }, [selectedItems, openUpgradeModal]);

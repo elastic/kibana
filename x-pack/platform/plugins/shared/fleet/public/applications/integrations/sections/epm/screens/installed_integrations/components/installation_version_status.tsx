@@ -14,6 +14,8 @@ import {
   EuiIcon,
   EuiCallOut,
   EuiButton,
+  EuiToolTip,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 
@@ -69,6 +71,37 @@ const UpgradeAvailableVersionStatus: React.FunctionComponent<{
         />
       </EuiButtonEmpty>
     </DisabledWrapperTooltip>
+  );
+});
+
+const UpgradingVersionStatus: React.FunctionComponent<{
+  item: InstalledPackageUIPackageListItem;
+}> = React.memo(({ item }) => {
+  return (
+    <EuiToolTip
+      content={
+        <FormattedMessage
+          id="xpack.fleet.epmInstalledIntegrations.upgradingTooltip"
+          defaultMessage={'Upgrading to {version}'}
+          values={{ version: item.version }}
+        />
+      }
+    >
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size={'m'} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <FormattedMessage
+            id="xpack.fleet.epmInstalledIntegrations.upgradingText"
+            defaultMessage="Upgrading..."
+            values={{
+              version: item.version,
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
   );
 });
 
@@ -188,6 +221,8 @@ export const InstallationVersionStatus: React.FunctionComponent<{
     return <InstalledVersionStatus item={item} />;
   } else if (status === 'upgrade_available') {
     return <UpgradeAvailableVersionStatus item={item} />;
+  } else if (status === 'upgrading') {
+    return <UpgradingVersionStatus item={item} />;
   } else if (status === 'upgrade_failed') {
     return <InstallUpgradeFailedVersionStatus isUpgradeFailed={true} item={item} />;
   } else if (status === 'install_failed') {
