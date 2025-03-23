@@ -37,7 +37,6 @@ import { type AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 
 import { EmptyComponent } from '../../common/lib/cell_actions/helpers';
 import { type CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
@@ -145,23 +144,6 @@ const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery): URLQuery => ({
   sort: [['@timestamp', 'desc']],
 });
 
-// TODO: Asset Inventory - adjust and remove type casting once we have real universal entity data
-const getEntity = (record: DataTableRecord) => {
-  const { _source } = record.raw;
-
-  const entityMock = {
-    tags: ['infrastructure', 'linux', 'admin', 'active'],
-    labels: { Group: 'cloud-sec-dev', Environment: 'Production' },
-    id: '41b2dce5-f057-4bfb-b57b-f1bc64c1c5eb',
-    criticality: 'low_impact',
-  } as unknown as EntityEcs;
-
-  return {
-    entity: { ...(_source?.entity || {}), ...entityMock },
-    source: _source || {},
-  };
-};
-
 export const AllAssets = () => {
   const {
     pageSize,
@@ -188,15 +170,13 @@ export const AllAssets = () => {
     onFlyoutClose: () => setExpandedDoc(undefined),
   });
 
-  const onExpandDocClick = (record?: DataTableRecord | undefined) => {
-    if (record) {
-      console.log(record);
-      // const { entity, source } = getEntity(record);
-      setExpandedDoc(record); // Table is expecting the same record ref to highlight the selected row
+  const openTableFlyout = (doc?: DataTableRecord | undefined) => {
+    if (doc) {
+      setExpandedDoc(doc); // Table is expecting the same doc ref to highlight the selected row
       openDynamicFlyout({
-        entityDocId: record.raw._id,
-        entityType: record.raw._source?.entity?.type,
-        entityName: record.raw._source?.entity?.name,
+        entityDocId: doc.raw._id,
+        entityType: doc.raw._source?.entity?.type,
+        entityName: doc.raw._source?.entity?.name,
         scopeId: ASSET_INVENTORY_TABLE_ID,
         contextId: ASSET_INVENTORY_TABLE_ID,
       });
@@ -448,7 +428,7 @@ export const AllAssets = () => {
                 rows={rows}
                 sampleSizeState={MAX_ASSETS_TO_LOAD}
                 expandedDoc={expandedDoc}
-                setExpandedDoc={onExpandDocClick}
+                setExpandedDoc={openTableFlyout}
                 renderDocumentView={EmptyComponent}
                 sort={sort}
                 rowsPerPageState={pageSize}

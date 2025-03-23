@@ -22,7 +22,13 @@ import { FlyoutTitle } from '../../shared/components/flyout_title';
 const initialBadgeLimit = 3;
 const maxBadgeContainerHeight = undefined;
 
-const HeaderTags = ({ tags, labels }: { tags: EntityEcs['tags']; labels: EntityEcs['labels'] }) => {
+const HeaderTags = ({
+  tags,
+  labels,
+}: {
+  tags: GenericEntityRecord['tags'];
+  labels: GenericEntityRecord['labels'];
+}) => {
   const { euiTheme } = useEuiTheme();
 
   const tagBadges = useMemo(
@@ -43,7 +49,7 @@ const HeaderTags = ({ tags, labels }: { tags: EntityEcs['tags']; labels: EntityE
           <>
             <span
               css={css`
-                color: ${euiTheme.colors.disabledText};
+                color: ${euiTheme.colors.textDisabled};
                 border-right: ${euiTheme.border.thick};
                 padding-right: ${euiTheme.size.xs};
               `}

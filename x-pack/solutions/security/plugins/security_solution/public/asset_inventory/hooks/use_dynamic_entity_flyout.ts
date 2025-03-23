@@ -6,7 +6,6 @@
  */
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 import {
   ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS,
   ASSET_INVENTORY_EXPAND_FLYOUT_ERROR,
@@ -14,7 +13,6 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import type { GenericEntityRecord } from '../types/generic_entity_record';
 import { useKibana } from '../../common/lib/kibana';
 import {
   HostPanelKey,
@@ -25,8 +23,6 @@ import {
 import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
 
 interface InventoryFlyoutProps {
-  entity?: EntityEcs;
-  source?: GenericEntityRecord;
   entityDocId?: string;
   entityType?: string;
   entityName?: string;
@@ -40,11 +36,9 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
   useOnExpandableFlyoutClose({ callback: onFlyoutClose });
 
   const openDynamicFlyout = ({
-    entity,
+    entityDocId,
     entityType,
     entityName,
-    source,
-    entityDocId,
     scopeId,
     contextId,
   }: InventoryFlyoutProps) => {

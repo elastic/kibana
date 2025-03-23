@@ -16,7 +16,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 
 type GenericEntityRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 type GenericEntityResponse = IKibanaSearchResponse<estypes.SearchResponse<GenericEntityRecord>>;
-type GenericEntityHit = estypes.SearchHit<GenericEntityRecord> | undefined; // Single hit or undefined if not found
+type GenericEntityHit = estypes.SearchHit<GenericEntityRecord> | undefined;
 
 const fetchGenericEntity = async (
   dataService: DataPublicPluginStart,
@@ -35,11 +35,11 @@ const fetchGenericEntity = async (
 };
 
 export const useGetGenericEntity = (docId: string) => {
-  const { data } = useKibana().services;
+  const { data: dataService } = useKibana().services;
 
   return useQuery({
     queryKey: ['use-get-generic-entity-key', docId],
-    queryFn: () => fetchGenericEntity(data, docId),
+    queryFn: () => fetchGenericEntity(dataService, docId),
     select: (response) => response.rawResponse.hits.hits[0], // Extracting result out of ES
   });
 };

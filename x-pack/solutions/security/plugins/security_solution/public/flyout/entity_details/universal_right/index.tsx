@@ -7,24 +7,20 @@
 
 import React, { useEffect } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   UNIVERSAL_ENTITY_FLYOUT_OPENED,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useGetGenericEntity } from './hooks/use_get_generic_entity';
-import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UniversalEntityFlyoutHeader } from './header';
 import { UniversalEntityFlyoutContent } from './content';
 
 export interface UniversalEntityPanelProps {
-  entity: EntityEcs;
-  source: GenericEntityRecord;
+  entityDocId: string;
   /** this is because FlyoutPanelProps defined params as Record<string, unknown> {@link FlyoutPanelProps#params} */
   [key: string]: unknown;
-  entityDocId: string;
 }
 
 export interface UniversalEntityPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -34,7 +30,6 @@ export interface UniversalEntityPanelExpandableFlyoutProps extends FlyoutPanelPr
 
 export const UniversalEntityPanel = ({ entityDocId }: UniversalEntityPanelProps) => {
   const getGenericEntity = useGetGenericEntity(entityDocId);
-  console.log('doc', getGenericEntity.data);
 
   useEffect(() => {
     if (getGenericEntity.data?._id) {

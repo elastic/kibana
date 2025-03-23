@@ -27,9 +27,12 @@ export const UniversalEntityFlyoutContent = ({ source }: UniversalEntityFlyoutCo
           />
         }
         expanded
-        localStorageKey={'universal_flyout:overview:fields_table'}
+        localStorageKey={'universal_flyout:overview:fields_section'}
       >
-        <FieldsTable document={source || {}} />
+        <FieldsTable
+          document={source || {}}
+          tableStorageKey={'universal_flyout:overview:fields_table_pins'}
+        />
       </ExpandableSection>
     </FlyoutBody>
   );
