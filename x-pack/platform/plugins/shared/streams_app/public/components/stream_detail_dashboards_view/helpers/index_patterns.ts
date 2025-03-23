@@ -13,8 +13,9 @@ import {
   DashboardAttributes,
   SavedDashboardPanel,
 } from '@kbn/dashboard-plugin/common/content_management/v2';
-import { TextBasedPrivateState } from '@kbn/lens-plugin/public/datasources/text_based/types';
 import { LensSerializedState } from '@kbn/lens-plugin/public';
+import { LensAttributes } from '@kbn/lens-embeddable-utils';
+import { IndexPatternRef } from '@kbn/lens-plugin/public/types';
 
 export function findIndexPatterns(
   savedObject: ContentPackSavedObject<DashboardAttributes>['content']
@@ -41,7 +42,7 @@ export function replaceIndexPatterns(
   savedObject: ContentPackSavedObject<DashboardAttributes>['content'],
   replacements: Record<string, string>
 ) {
-  return traversePanels(savedObject, {
+  const updatedPanels = traversePanels(savedObject, {
     esqlQuery(query: string) {
       return replaceESQLIndexPattern(query, replacements);
     },
@@ -55,6 +56,8 @@ export function replaceIndexPatterns(
       };
     },
   });
+
+  return { ...savedObject, panelsJSON: JSON.stringify(updatedPanels) };
 }
 
 export function traversePanels(
@@ -75,31 +78,32 @@ export function traversePanels(
         rootQuery.esql = options.esqlQuery(rootQuery.esql);
       }
 
-      if (attributes?.state) {
-        const {
-          query: stateQuery,
-          datasourceStates: { textBased },
-        } = attributes.state;
+      const state = (attributes as LensAttributes).state;
+      const {
+        query: stateQuery,
+        datasourceStates: { textBased },
+      } = state;
 
-        if (stateQuery && 'esql' in stateQuery) {
-          stateQuery.esql = options.esqlQuery(stateQuery.esql);
-        }
+      if (stateQuery && 'esql' in stateQuery) {
+        stateQuery.esql = options.esqlQuery(stateQuery.esql);
+      }
 
-        if (textBased) {
-          const textBasedState = textBased as TextBasedPrivateState;
-          Object.values(textBasedState.layers).forEach((layer) => {
-            if (layer.query?.esql) {
-              layer.query.esql = options.esqlQuery(layer.query.esql);
-            }
-          });
+      if (textBased) {
+        const textBasedState = textBased;
+        Object.values(textBasedState.layers).forEach((layer) => {
+          if (layer.query?.esql) {
+            layer.query.esql = options.esqlQuery(layer.query.esql);
+          }
+        });
 
-          textBasedState.indexPatternRefs = textBasedState.indexPatternRefs.map((ref) =>
-            options.indexPattern(ref)
+        if ('indexPatternRefs' in textBased) {
+          textBased.indexPatternRefs = (textBased.indexPatternRefs as IndexPatternRef[]).map(
+            (ref) => options.indexPattern(ref)
           );
         }
 
-        if (attributes.state.adHocDataViews) {
-          attributes.state.adHocDataViews = mapValues(attributes.state.adHocDataViews, (dataView) =>
+        if (state.adHocDataViews) {
+          state.adHocDataViews = mapValues(state.adHocDataViews, (dataView) =>
             options.indexPattern(dataView)
           );
         }
@@ -107,8 +111,7 @@ export function traversePanels(
     }
   }
 
-  attributes.panelsJSON = JSON.stringify(panels);
-  return savedObject;
+  return panels;
 }
 
 const replaceESQLIndexPattern = (esql: string, replacements: Record<string, string>) => {

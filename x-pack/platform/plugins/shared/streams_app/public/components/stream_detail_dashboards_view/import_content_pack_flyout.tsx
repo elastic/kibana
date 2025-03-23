@@ -45,7 +45,7 @@ export function ImportContentPackFlyout({
   onImport: () => void;
 }) {
   const {
-    core: { http, plugins },
+    core: { http },
     dependencies: { start },
   } = useKibana();
 
