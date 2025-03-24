@@ -18,7 +18,7 @@ import {
   setupKnowledgeBase,
   waitForKnowledgeBaseReady,
 } from '../utils/knowledge_base';
-import { createOrUpdateIndexAssets } from '../utils/index_assets';
+import { createOrUpdateIndexAssets, deleteWriteIndices } from '../utils/index_assets';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -40,6 +40,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await importTinyElserModel(ml);
       await setupKnowledgeBase(observabilityAIAssistantAPIClient);
       await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+      await deleteWriteIndices(es);
     });
 
     beforeEach(async () => {

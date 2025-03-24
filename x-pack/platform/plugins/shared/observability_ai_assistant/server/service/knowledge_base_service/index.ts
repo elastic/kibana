@@ -499,7 +499,7 @@ export class KnowledgeBaseService {
   deleteEntry = async ({ id }: { id: string }): Promise<void> => {
     try {
       await this.dependencies.esClient.asInternalUser.delete({
-        index: resourceNames.indexPatterns.kb,
+        index: resourceNames.writeIndexAlias.kb,
         id,
         refresh: 'wait_for',
       });

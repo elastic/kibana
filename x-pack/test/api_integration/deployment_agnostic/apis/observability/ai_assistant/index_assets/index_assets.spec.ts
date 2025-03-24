@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { createOrUpdateIndexAssets } from '../utils/index_assets';
+import { createOrUpdateIndexAssets, deleteIndexAssets } from '../utils/index_assets';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -16,21 +16,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('index assets: creating mappings, templates, aliases and write indices', () => {
     before(async () => {
-      const { indexPatterns, indexTemplate, componentTemplate } = resourceNames;
-
-      // delete concrete write indices
-      const response = await es.indices.get({ index: Object.values(indexPatterns) });
-      const indicesToDelete = Object.keys(response);
-      await es.indices.delete({ index: indicesToDelete, ignore_unavailable: true });
-
-      // delete index templates
-      await es.indices.deleteIndexTemplate({ name: Object.values(indexTemplate) });
-
-      // delete component templates
-      await es.cluster.deleteComponentTemplate({ name: Object.values(componentTemplate) });
-
-      // create index assets from scratch
-      await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
+      await deleteIndexAssets(observabilityAIAssistantAPIClient, es);
     });
 
     for (const componentTemplateName of Object.values(resourceNames.componentTemplate)) {

@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { Client } from '@elastic/elasticsearch';
+import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
 
 export async function createOrUpdateIndexAssets(
@@ -15,4 +17,28 @@ export async function createOrUpdateIndexAssets(
     endpoint: 'POST /internal/observability_ai_assistant/index_assets',
   });
   expect(status).to.be(200);
+}
+
+export async function deleteWriteIndices(es: Client) {
+  const response = await es.indices.get({ index: Object.values(resourceNames.indexPatterns) });
+  const indicesToDelete = Object.keys(response);
+  await es.indices.delete({ index: indicesToDelete, ignore_unavailable: true });
+}
+
+export async function deleteIndexAssets(
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient,
+  es: Client
+) {
+  await deleteWriteIndices(es);
+
+  // delete index templates
+  await es.indices.deleteIndexTemplate({ name: Object.values(resourceNames.indexTemplate) });
+
+  // delete component templates
+  await es.cluster.deleteComponentTemplate({
+    name: Object.values(resourceNames.componentTemplate),
+  });
+
+  // create index assets from scratch
+  await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
 }
