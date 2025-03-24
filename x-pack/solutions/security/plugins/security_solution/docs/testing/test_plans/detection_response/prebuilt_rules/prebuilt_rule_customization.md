@@ -55,6 +55,11 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Modified badge should not appear on the rule updates table when prebuilt rule isn't customized**](#scenario-modified-badge-should-not-appear-on-the-rule-updates-table-when-prebuilt-rule-isnt-customized)
     - [**Scenario: User should be able to see only customized rules in the rule updates table**](#scenario-user-should-be-able-to-see-only-customized-rules-in-the-rule-updates-table)
     - [**Scenario: User should be able to filter by non-customized rules on the rule updates table**](#scenario-user-should-be-able-to-filter-by-non-customized-rules-on-the-rule-updates-table)
+  - [Licensing](#licensing)
+    - [**Scenario: User can't customize prebuilt rules under an insufficient license from the rule edit page**](#scenario-user-cant-customize-prebuilt-rules-under-an-insufficient-license-from-the-rule-edit-page)
+    - [**Scenario: User can't bulk edit prebuilt rules under an insufficient license**](#scenario-user-cant-bulk-edit-prebuilt-rules-under-an-insufficient-license)
+    - [**Scenario: User can't bulk edit prebuilt rules in a mixture of prebuilt and custom rules under an insufficient license**](#scenario-user-cant-bulk-edit-prebuilt-rules-in-a-mixture-of-prebuilt-and-custom-rules-under-an-insufficient-license)
+    - [**Scenario: User can't edit prebuilt rules via bulk edit API under an insufficient license**](#scenario-user-cant-edit-prebuilt-rules-via-bulk-edit-api-under-an-insufficient-license)
 
 ## Useful information
 
@@ -70,6 +75,22 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - **Rule source**, or **`ruleSource`**: a rule field that defines the rule's origin. Can be `internal` or `external`. Currently, custom rules have `internal` rule source and prebuilt rules have `external` rule source.
 - **`is_customized`**: a field within `ruleSource` that exists when rule source is set to `external`. It is a boolean value based on if the rule has been changed from its base version.
 - **non-semantic change**: a change to a rule field that is functionally different. We normalize certain fields so for a time-related field such as `from`, `1m` vs `60s` are treated as the same value. We also trim leading and trailing whitespace for query fields.
+- **rule customization**: a change to a customizable field of a prebuilt rule. Full list of customizable rule fields can be found in [Common information about prebuilt rules](./prebuilt_rules_common_info.md#customizable-rule-fields).
+- **insufficient license**: a license or a product tier that doesn't allow rule customization. In Serverless environments customization is only allowed on Security Essentials product tier. In non-Serverless environments customization is only allowed on Trial and Enterprise licenses.
+- **customizable rule fields**: fields of prebuilt rules that are modifiable by user and are taken into account when calculating `is_customized`. Full list can be found in [Common information about prebuilt rules](./prebuilt_rules_common_info.md#customizable-rule-fields).
+- **customizing bulk action**: a bulk action that updates values of customizable fields in multiple rules at once. See list below.
+```Gherkin
+Examples:
+| customizing_bulk_action          |
+| Add index patterns               |
+| Delete index patterns            |
+| Add tags                         |
+| Delete tags                      |
+| Add custom highlighted fields    |
+| Delete custom highlighted fields |
+| Update rule schedules            |
+| Apply timeline template          |
+```
 
 ## Requirements
 
@@ -160,24 +181,15 @@ And should bring the user to the rule edit page when clicked on
 
 #### **Scenario: User can bulk edit prebuilt rules from rules management page**
 
-**Automation**: 7 cypress tests.
+**Automation**: a Cypress test for each bulk action type.
 
 ```Gherkin
 Given a space with N (where N > 1) prebuilt rules installed
 And a user selects M (where M <= N) in the rules table
-When a user applies a <bulk_action_type> bulk action
+When a user applies a <customizing_bulk_action> bulk action
 And the action is successfully applied to M selected rules
 Then rules that have been changed from their base version should have a "Modified" badge on the respective row in the rule management table
-
-Examples:
-| bulk_action_type                 |
-| Add index patterns               |
-| Delete index patterns            |
-| Add tags                         |
-| Delete tags                      |
-| Add custom highlighted fields    |
-| Delete custom highlighted fields |
-| Modify rule schedules            |
+And the update should be reflected on the rule details page
 ```
 
 ### Detecting rule customizations
@@ -357,4 +369,63 @@ When a user navigates to the rule updates page
 And use filter to show non-customized rules
 Then the table should display only non-customized rules
 And the all shown table rows should NOT have the Modified badge present
+```
+
+### Licensing
+
+#### **Scenario: User can't customize prebuilt rules under an insufficient license from the rule edit page**
+
+**Automation**: 2 Cypress tests: one for Serverless, one for non-Serverless.
+
+```Gherkin
+Given a Kibana installation running under an insufficient license
+When user navigates to the rule edit page of a prebuilt rule
+Then About, Definition and Schedule views should be disabled
+When user tries to access the disabled views
+Then they should see a message that editing is not allowed under the current license
+And required license name should be included in the message
+```
+
+#### **Scenario: User can't bulk edit prebuilt rules under an insufficient license**
+
+**Automation**: 2 Cypress tests: one for Serverless, one for non-Serverless.
+
+```Gherkin
+Given a Kibana installation running under an insufficient license
+When a user selects one or more prebuilt rules in the rule management table
+And user's selection doesn't contain any custom rules
+And user attempts to apply a <customizing_bulk_action> bulk action to selected rules
+Then the user should see a message that this action is not allowed for prebuilt rules under the current license
+And required license name should be included in the message
+And no button to proceed with applying the action should be displayed
+```
+
+#### **Scenario: User can't bulk edit prebuilt rules in a mixture of prebuilt and custom rules under an insufficient license**
+
+**Automation**: 2 Cypress tests: one for Serverless, one for non-Serverless.
+
+```Gherkin
+Given a Kibana installation running under an insufficient license
+When a user selects one or more prebuilt rules in the rule management table
+And user also selects one or more custom rules
+And user attempts to apply a <customizing_bulk_action> bulk action to selected rules
+Then the user should see a message that this action is not allowed for prebuilt rules under the current license
+And required license name should be included in the message
+And a button to proceed with applying the action only to custom rules should not be displayed
+```
+
+#### **Scenario: User can't edit prebuilt rules via bulk edit API under an insufficient license**
+
+**Automation**: Multiple API integration tests - one for each bulk action type.
+
+```Gherkin
+Given a Kibana installation running under an insufficient license
+When a user sends a request to bulk edit API
+And request's "dry run" parameter is set to false
+And the bulk edit action is <customizing_bulk_action>
+And this request contains one or more prebuilt rules
+And additionally this request contains one or more custom rules
+Then the response should only list the custom rules as updated
+And all prebuilt rules should be listed as not updated
+And for each prebuilt rule the response should contain a message that the action is not allowed under current license
 ```
