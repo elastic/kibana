@@ -31,7 +31,7 @@ export class MockLinkContext {
   }
 
   public toString = () => {
-    return `https://docs.elastic.test/#${this.root}${
+    return `https://mock-docs.elastic.test/#${this.root}${
       this.path.length ? '.' + this.path.join('.') : ''
     }`;
   };
@@ -85,6 +85,22 @@ const createServiceMock = (): jest.Mocked<DocLinksServiceContract> => {
   };
 };
 
+/**
+ * @remark the `links` object in these mocks returns an object mocking the
+ *         entire {@link DocLinks} object.
+ *
+ *         The side effect of this mocking is that all real doc links are substituted
+ *         with a mock link intended for developers to confirm in snapshots that
+ *         they are accessing the doc link they expect, not that the concrete link
+ *         is what they expect.
+ *
+ * @example
+ * ```ts
+ * const myLink = docLinks.links.myAwesomeLink.livesHere
+ * // In mocks will be something like https://docs.elastic.test/#myAwesomeLink.livesHere
+ * // Outside of mocks will be the concrete, expected link
+ * ```
+ */
 export const docLinksServiceMock = {
   create: createServiceMock,
   createSetupContract: createSetupMock,

@@ -286,12 +286,7 @@ describe('createInitialState', () => {
         "maxBatchSize": 1000,
         "maxBatchSizeBytes": 104857600,
         "maxReadBatchSizeBytes": 524288000,
-        "migrationDocLinks": Object {
-          "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
-          "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
-          "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
-          "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
-        },
+        "migrationDocLinks": https://docs.elastic.test/#kibanaUpgradeSavedObjects,
         "mustRelocateDocuments": true,
         "outdatedDocumentsQuery": Object {
           "bool": Object {
