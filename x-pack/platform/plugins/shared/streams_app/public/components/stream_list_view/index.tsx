@@ -43,6 +43,7 @@ export function StreamListView() {
               title={i18n.translate('xpack.streams.streamsListViewPageHeaderTitle', {
                 defaultMessage: 'Streams',
               })}
+              showTechPreviewBadge
             />
           }
         />

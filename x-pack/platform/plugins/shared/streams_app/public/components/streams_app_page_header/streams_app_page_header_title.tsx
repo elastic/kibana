@@ -4,13 +4,36 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiTitle } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-export function StreamsAppPageHeaderTitle({ title }: { title: React.ReactNode }) {
+export function StreamsAppPageHeaderTitle({
+  title,
+  showTechPreviewBadge,
+}: {
+  title: React.ReactNode;
+  showTechPreviewBadge?: boolean;
+}) {
   return (
-    <EuiTitle size="l">
-      <h1>{title}</h1>
-    </EuiTitle>
+    <EuiFlexGroup alignItems="flexEnd" gutterSize="m">
+      <EuiTitle size="l">
+        <h1>{title}</h1>
+      </EuiTitle>
+      {showTechPreviewBadge && (
+        <EuiBetaBadge
+          label={i18n.translate('xpack.streams.techPreviewBadge.label', {
+            defaultMessage: 'Technical preview',
+          })}
+          size="m"
+          color="hollow"
+          tooltipContent={i18n.translate('xpack.streams.techPreviewBadge.tooltip', {
+            defaultMessage:
+              'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+          })}
+          tooltipPosition={'right'}
+        />
+      )}
+    </EuiFlexGroup>
   );
 }
