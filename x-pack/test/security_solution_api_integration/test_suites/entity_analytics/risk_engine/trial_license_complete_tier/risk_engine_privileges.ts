@@ -113,6 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
             cluster: {
               manage_index_templates: true,
               manage_transform: true,
+              manage_ingest_pipelines: true,
             },
             index: {
               'risk-score.risk-score-*': {
@@ -132,6 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
             cluster: {
               manage_index_templates: true,
               manage_transform: true,
+              manage_ingest_pipelines: true,
             },
             index: {
               'risk-score.risk-score-*': {
@@ -151,6 +153,7 @@ export default ({ getService }: FtrProviderContext) => {
             cluster: {
               manage_index_templates: true,
               manage_transform: true,
+              manage_ingest_pipelines: true,
             },
             index: {
               'risk-score.risk-score-*': {
@@ -170,6 +173,7 @@ export default ({ getService }: FtrProviderContext) => {
             cluster: {
               manage_index_templates: true,
               manage_transform: false,
+              manage_ingest_pipelines: true,
             },
             index: {
               'risk-score.risk-score-*': {
@@ -189,6 +193,7 @@ export default ({ getService }: FtrProviderContext) => {
             cluster: {
               manage_index_templates: false,
               manage_transform: true,
+              manage_ingest_pipelines: true,
             },
             index: {
               'risk-score.risk-score-*': {
