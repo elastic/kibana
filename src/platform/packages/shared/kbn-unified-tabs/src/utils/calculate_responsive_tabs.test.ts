@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { calculateResponsiveTabs } from './calculate_responsive_tabs';
+import { calculateResponsiveTabs, PLUS_BUTTON_SPACE } from './calculate_responsive_tabs';
 import { getNewTabPropsForIndex } from '../hooks/use_new_tab_props';
 import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../constants';
 
@@ -63,6 +63,21 @@ describe('calculateResponsiveTabs', () => {
     expect(tabsSizeConfig).toEqual({
       isScrollable: false,
       regularTabMaxWidth: MAX_TAB_WIDTH,
+      regularTabMinWidth: MIN_TAB_WIDTH,
+    });
+  });
+
+  it('returns reasonable sizes when the available space is enough to fit all tabs with float-precision width', () => {
+    const numberOfItems = 7;
+    const containerWidth = 1310;
+    const tabsSizeConfig = calculateResponsiveTabs({
+      items: Array.from({ length: numberOfItems }).map((_, i) => getNewTabPropsForIndex(i)),
+      containerWidth,
+    });
+
+    expect(tabsSizeConfig).toEqual({
+      isScrollable: false, // the test checks that all tabs are fitting the container and no scroll is needed
+      regularTabMaxWidth: (containerWidth - PLUS_BUTTON_SPACE) / numberOfItems,
       regularTabMinWidth: MIN_TAB_WIDTH,
     });
   });
