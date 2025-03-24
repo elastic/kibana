@@ -32,6 +32,7 @@ export function AdvancedOptions(props: { options: AdvancedOption[] }) {
       }
       css={css`
         padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
+        color: ${euiTheme.colors.primary};
       `}
     >
       {props.options.map(({ dataTestSubj, inlineElement }) => (

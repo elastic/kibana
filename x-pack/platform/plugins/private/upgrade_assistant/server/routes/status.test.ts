@@ -118,6 +118,7 @@ describe('Status API', () => {
         lib: { handleEsError },
         current: currentVersion,
         defaultTarget: nextMajor,
+        log: { error: jest.fn() },
       };
 
       registerUpgradeStatusRoute(routeDependencies);
@@ -278,6 +279,7 @@ describe('Status API', () => {
         lib: { handleEsError },
         current: currentVersion,
         defaultTarget: nextMajor,
+        log: { error: jest.fn() },
       };
 
       registerUpgradeStatusRoute(routeDependencies);

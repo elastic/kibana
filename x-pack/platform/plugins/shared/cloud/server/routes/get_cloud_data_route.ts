@@ -14,6 +14,12 @@ export const setGetCloudSolutionDataRoute = ({ router }: RouteOptions) => {
   router.versioned
     .get({
       path: `/internal/cloud/solution`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the saved objects client',
+        },
+      },
       access: 'internal',
       summary: 'Get cloud data for solutions',
     })
