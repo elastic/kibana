@@ -185,15 +185,16 @@ export const postEvaluateRoute = (
           // Fetch any tools registered to the security assistant
           const assistantTools = assistantContext.getRegisteredTools(DEFAULT_PLUGIN_NAME);
 
-          const { attackDiscoveryGraphs, defendInsightsGraphs, assistantGraphs } = getGraphsFromNames(graphNames);
+          const { attackDiscoveryGraphs, defendInsightsGraphs, assistantGraphs } =
+            getGraphsFromNames(graphNames);
 
           const prepareIndicesForAssistantGraph = new PrepareIndicesForAssistantGraphEvalusations({
             esClient,
-            logger
-          })
+            logger,
+          });
 
           if (assistantGraphs.length > 0) {
-            await prepareIndicesForAssistantGraph.setup()
+            await prepareIndicesForAssistantGraph.setup();
           }
 
           if (defendInsightsGraphs.length > 0) {
@@ -488,8 +489,9 @@ export const postEvaluateRoute = (
               })
               .catch((err) => {
                 logger.error(`evaluation error:\n ${JSON.stringify(err, null, 2)}`);
-              }).finally(async () => {
-                await prepareIndicesForAssistantGraph.cleanup()
+              })
+              .finally(async () => {
+                await prepareIndicesForAssistantGraph.cleanup();
               });
           });
 

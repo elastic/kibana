@@ -1,18 +1,25 @@
-import { IndicesCreateRequest } from "@elastic/elasticsearch/lib/api/types";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 
 export const postgresLogsIndexCreateRequest: IndicesCreateRequest = {
-    index: "postgres-logs.evaluations.2025.03.21",
-    "mappings": {
-        "properties": {
-            "message": {
-                "type": "text"
-            },
-            "query_duration": {
-                "type": "keyword"
-            },
-            "query_duration_num": {
-                "type": "double"
-            }
-        }
-    }
-}
+  index: 'postgres-logs.evaluations.2025.03.21',
+  mappings: {
+    properties: {
+      message: {
+        type: 'text',
+      },
+      query_duration: {
+        type: 'keyword',
+      },
+      query_duration_num: {
+        type: 'double',
+      },
+    },
+  },
+};
