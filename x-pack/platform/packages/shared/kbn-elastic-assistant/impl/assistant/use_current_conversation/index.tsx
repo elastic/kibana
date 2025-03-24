@@ -125,14 +125,18 @@ export const useCurrentConversation = ({
    * @param isStreamRefetch - Are we refetching because stream completed? If so retry several times to ensure the message has updated on the server
    */
   const refetchCurrentConversation = useCallback(
-    async ({ cId, isStreamRefetch = false }: { cId?: string; isStreamRefetch?: boolean } = {}) => {
+    async ({
+      cId,
+      isStreamRefetch = false,
+      silent,
+    }: { cId?: string; isStreamRefetch?: boolean; silent?: boolean } = {}) => {
       if (cId === '') {
         return;
       }
       const cConversationId = cId ?? currentConversation?.id;
 
       if (cConversationId) {
-        let updatedConversation = await getConversation(cConversationId);
+        let updatedConversation = await getConversation(cConversationId, silent);
         let retries = 0;
         const maxRetries = 5;
 
@@ -146,6 +150,7 @@ export const useCurrentConversation = ({
         ) {
           retries++;
           await sleep(2000);
+          console.log('useCurrentConversation---retrying', cConversationId, retries);
           updatedConversation = await getConversation(cConversationId);
         }
 
@@ -203,7 +208,17 @@ export const useCurrentConversation = ({
   );
 
   const handleOnConversationSelected = useCallback(
-    async ({ cId, cTitle, apiConfig }: { apiConfig?: ApiConfig; cId: string; cTitle?: string }) => {
+    async ({
+      cId,
+      cTitle,
+      apiConfig,
+      silent,
+    }: {
+      apiConfig?: ApiConfig;
+      cId: string;
+      cTitle?: string;
+      silent?: boolean;
+    }) => {
       if (cId === '') {
         if (
           currentAppId === 'securitySolutionUI' &&
@@ -228,7 +243,7 @@ export const useCurrentConversation = ({
       }
       // refetch will set the currentConversation
       try {
-        await refetchCurrentConversation({ cId });
+        await refetchCurrentConversation({ cId, silent });
         setLastConversation({
           id: cId,
         });
@@ -249,7 +264,11 @@ export const useCurrentConversation = ({
 
   useEffect(() => {
     if (!mayUpdateConversations || !!currentConversation) return;
-    handleOnConversationSelected({ cId: lastConversation.id, cTitle: lastConversation.title });
+    handleOnConversationSelected({
+      cId: lastConversation.id,
+      cTitle: lastConversation.title,
+      silent: true,
+    });
   }, [lastConversation, handleOnConversationSelected, currentConversation, mayUpdateConversations]);
 
   const handleOnConversationDeleted = useCallback(
