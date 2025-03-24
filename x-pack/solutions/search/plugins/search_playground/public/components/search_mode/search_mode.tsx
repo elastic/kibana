@@ -17,6 +17,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { Controller, useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useQueryClient } from '@tanstack/react-query';
 import { DEFAULT_PAGINATION } from '../../../common';
 import { ResultList } from './result_list';
@@ -54,72 +55,84 @@ export const SearchMode: React.FC = () => {
   };
 
   return (
-    <EuiFlexGroup direction="row" justifyContent="center">
-      <EuiFlexItem
-        grow
-        css={css`
-          max-width: ${euiTheme.base * 48}px;
-        `}
-      >
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem grow={false}>
-            <EuiForm component="form" onSubmit={handleSubmit(() => handleSearch())}>
-              <Controller
-                control={control}
-                name={ChatFormFields.searchQuery}
-                render={({ field }) => (
-                  <EuiFieldText
-                    data-test-subj="searchPlaygroundSearchModeFieldText"
-                    {...field}
-                    value={searchBarValue}
-                    icon="search"
-                    fullWidth
-                    placeholder={i18n.translate(
-                      'xpack.searchPlayground.searchMode.searchBar.placeholder',
-                      { defaultMessage: 'Search for documents' }
-                    )}
-                    isLoading={isSubmitting}
-                  />
-                )}
-              />
-            </EuiForm>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem>
-                {searchQuery.query ? (
-                  <ResultList
-                    searchResults={results}
-                    mappings={mappingData}
-                    pagination={pagination}
-                    onPaginationChange={onPagination}
-                  />
-                ) : (
-                  <EuiEmptyPrompt
-                    iconType={'checkInCircleFilled'}
-                    iconColor="success"
-                    title={
-                      <h2>
-                        {i18n.translate('xpack.searchPlayground.searchMode.readyToSearch', {
-                          defaultMessage: 'Ready to search',
-                        })}
-                      </h2>
-                    }
-                    body={
-                      <p>
-                        {i18n.translate('xpack.searchPlayground.searchMode.searchPrompt', {
-                          defaultMessage:
-                            'Type in a query in the search bar above or view the query we automatically created for you.',
-                        })}
-                      </p>
-                    }
-                  />
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <KibanaPageTemplate.Section
+      alignment="top"
+      restrictWidth
+      grow
+      css={{
+        position: 'relative',
+      }}
+      paddingSize="xl"
+      className="eui-fullHeight"
+      data-test-subj="playground-search-section"
+    >
+      <EuiFlexGroup direction="row" justifyContent="center">
+        <EuiFlexItem
+          grow
+          css={css`
+            max-width: ${euiTheme.base * 48}px;
+          `}
+        >
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <EuiForm component="form" onSubmit={handleSubmit(() => handleSearch())}>
+                <Controller
+                  control={control}
+                  name={ChatFormFields.searchQuery}
+                  render={({ field }) => (
+                    <EuiFieldText
+                      data-test-subj="searchPlaygroundSearchModeFieldText"
+                      {...field}
+                      value={searchBarValue}
+                      icon="search"
+                      fullWidth
+                      placeholder={i18n.translate(
+                        'xpack.searchPlayground.searchMode.searchBar.placeholder',
+                        { defaultMessage: 'Search for documents' }
+                      )}
+                      isLoading={isSubmitting}
+                    />
+                  )}
+                />
+              </EuiForm>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup direction="column">
+                <EuiFlexItem>
+                  {searchQuery.query ? (
+                    <ResultList
+                      searchResults={results}
+                      mappings={mappingData}
+                      pagination={pagination}
+                      onPaginationChange={onPagination}
+                    />
+                  ) : (
+                    <EuiEmptyPrompt
+                      iconType={'checkInCircleFilled'}
+                      iconColor="success"
+                      title={
+                        <h2>
+                          {i18n.translate('xpack.searchPlayground.searchMode.readyToSearch', {
+                            defaultMessage: 'Ready to search',
+                          })}
+                        </h2>
+                      }
+                      body={
+                        <p>
+                          {i18n.translate('xpack.searchPlayground.searchMode.searchPrompt', {
+                            defaultMessage:
+                              'Type in a query in the search bar above or view the query we automatically created for you.',
+                          })}
+                        </p>
+                      }
+                    />
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </KibanaPageTemplate.Section>
   );
 };

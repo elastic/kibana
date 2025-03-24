@@ -1,0 +1,41 @@
+# Chat Project Config
+
+## Enable the Serverless Chat plugin
+xpack.serverless.chat.enabled: true
+
+## Cloud settings
+xpack.cloud.serverless.project_type: search
+
+## Set the home route
+uiSettings.overrides.defaultRoute: /app/home
+
+## Disable plugins that belong to other solutions
+xpack.apm.enabled: false
+xpack.entities_data_access.enabled: false
+xpack.infra.enabled: false
+xpack.inventory.enabled: false
+xpack.investigate.enabled: false
+xpack.investigateApp.enabled: false
+xpack.observability.enabled: false
+xpack.observabilityAIAssistantApp.enabled: false
+xpack.observabilityLogsExplorer.enabled: false
+xpack.profiling.enabled: false
+xpack.serverless.observability.enabled: false
+xpack.slo.enabled: false
+xpack.uptime.enabled: false
+xpack.legacy_uptime.enabled: false
+xpack.ux.enabled: false
+xpack.search.enabled: false
+xpack.searchAssistant.enabled: false
+xpack.search.connectors.enabled: false
+xpack.search.homepage.enabled: false
+xpack.searchIndices.enabled: false
+xpack.searchInferenceEndpoints.enabled: false
+xpack.searchNotebooks.enabled: false
+xpack.searchPlayground.enabled: false
+xpack.searchSynonyms.enabled: false
+xpack.serverless.search.enabled: false
+xpack.cloudSecurityPosture.enabled: false
+xpack.securitySolution.enabled: false
+xpack.securitySolutionEss.enabled: false
+xpack.securitySolutionServerless.enabled: false
