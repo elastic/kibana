@@ -15,14 +15,21 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiThemeComputed,
   useEuiTheme,
+  type EuiThemeComputed,
 } from '@elastic/eui';
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
-import type { TabItem, TabsSizeConfig, GetTabMenuItems, TabsServices } from '../../types';
+import type {
+  TabItem,
+  TabsSizeConfig,
+  GetTabMenuItems,
+  TabsServices,
+  TabPreviewData,
+} from '../../types';
 import { TabWithBackground } from '../tabs_visual_glue_to_header/tab_with_background';
+import { TabPreview } from '../tab_preview';
 
 export interface TabProps {
   item: TabItem;
@@ -34,6 +41,7 @@ export interface TabProps {
   onLabelEdited: EditTabLabelProps['onLabelEdited'];
   onSelect: (item: TabItem) => Promise<void>;
   onClose: ((item: TabItem) => Promise<void>) | undefined;
+  tabPreviewData: TabPreviewData;
 }
 
 export const Tab: React.FC<TabProps> = (props) => {
@@ -47,10 +55,13 @@ export const Tab: React.FC<TabProps> = (props) => {
     onLabelEdited,
     onSelect,
     onClose,
+    tabPreviewData,
   } = props;
   const { euiTheme } = useEuiTheme();
   const tabRef = useRef<HTMLDivElement | null>(null);
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
+  const [showPreview, setShowPreview] = useState<boolean>(false);
+  const [isActionPopoverOpen, setActionPopover] = useState<boolean>(false);
 
   const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
     defaultMessage: 'Close session',
@@ -60,9 +71,12 @@ export const Tab: React.FC<TabProps> = (props) => {
     defaultMessage: 'Click to select or double-click to edit session name',
   });
 
+  const hidePreview = () => setShowPreview(false);
+
   const onSelectEvent = useCallback(
     async (event: MouseEvent<HTMLElement>) => {
       event.stopPropagation();
+      hidePreview();
 
       if (!isSelected) {
         await onSelect(item);
@@ -89,6 +103,11 @@ export const Tab: React.FC<TabProps> = (props) => {
     [onSelectEvent]
   );
 
+  const handleDoubleClick = useCallback(() => {
+    setIsInlineEditActive(true);
+    hidePreview();
+  }, []);
+
   const mainTabContent = (
     <EuiFlexGroup
       alignItems="center"
@@ -111,10 +130,9 @@ export const Tab: React.FC<TabProps> = (props) => {
               css={getTabButtonCss(euiTheme)}
               className="unifiedTabs__tabBtn"
               data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
-              title={item.label}
               type="button"
               onClick={onSelectEvent}
-              onDoubleClick={() => setIsInlineEditActive(true)}
+              onDoubleClick={handleDoubleClick}
             >
               <EuiText color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
                 {item.label}
@@ -124,7 +142,12 @@ export const Tab: React.FC<TabProps> = (props) => {
               <EuiFlexGroup responsive={false} direction="row" gutterSize="none">
                 {!!getTabMenuItems && (
                   <EuiFlexItem grow={false} className="unifiedTabs__tabMenuBtn">
-                    <TabMenu item={item} getTabMenuItems={getTabMenuItems} />
+                    <TabMenu
+                      item={item}
+                      getTabMenuItems={getTabMenuItems}
+                      isPopoverOpen={isActionPopoverOpen}
+                      setPopover={setActionPopover}
+                    />
                   </EuiFlexItem>
                 )}
                 {!!onClose && (
@@ -148,18 +171,26 @@ export const Tab: React.FC<TabProps> = (props) => {
   );
 
   return (
-    <TabWithBackground
-      {...getTabAttributes(item, tabContentId)}
-      ref={tabRef}
-      role="tab"
-      aria-selected={isSelected}
-      data-test-subj={`unifiedTabs_tab_${item.id}`}
-      isSelected={isSelected}
-      services={services}
-      onClick={onClickEvent}
+    <TabPreview
+      showPreview={showPreview}
+      setShowPreview={setShowPreview}
+      stopPreviewOnHover={isInlineEditActive || isActionPopoverOpen}
+      tabPreviewData={tabPreviewData}
+      tabItem={item}
     >
-      {mainTabContent}
-    </TabWithBackground>
+      <TabWithBackground
+        {...getTabAttributes(item, tabContentId)}
+        ref={tabRef}
+        role="tab"
+        aria-selected={isSelected}
+        data-test-subj={`unifiedTabs_tab_${item.id}`}
+        isSelected={isSelected}
+        services={services}
+        onClick={onClickEvent}
+      >
+        {mainTabContent}
+      </TabWithBackground>
+    </TabPreview>
   );
 };
 
