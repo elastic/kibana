@@ -421,9 +421,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     services: StartServices
   ) {
     if (!this._actionsRegistered) {
-      this._actionsRegistered = true;
       const { registerActions } = await this.lazyActions();
-      registerActions(store, history, coreSetup, services);
+      await registerActions(store, history, coreSetup, services);
+      this._actionsRegistered = true;
     }
   }
 
