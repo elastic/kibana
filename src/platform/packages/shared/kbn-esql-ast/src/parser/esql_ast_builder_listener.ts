@@ -146,6 +146,7 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
       type: 'command',
       args: [],
       sources: ctx
+        .indexPatternAndMetadataFields()
         .getTypedRuleContexts(IndexPatternContext)
         .map((sourceCtx) => createSource(sourceCtx)),
     };
