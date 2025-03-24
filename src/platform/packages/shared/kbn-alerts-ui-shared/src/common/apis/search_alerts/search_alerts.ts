@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
+import type {
+  MappingRuntimeFields,
+  QueryDslFieldAndFormat,
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   Alert,
   EsQuerySnapshot,
@@ -15,14 +20,9 @@ import type {
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
 } from '@kbn/alerting-types';
-import { set } from '@kbn/safer-lodash-set';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type {
-  MappingRuntimeFields,
-  QueryDslFieldAndFormat,
-  QueryDslQueryContainer,
-  SortCombinations,
-} from '@elastic/elasticsearch/lib/api/types';
+import { set } from '@kbn/safer-lodash-set';
+import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 
 export interface SearchAlertsParams {
   // Dependencies
@@ -68,6 +68,10 @@ export interface SearchAlertsParams {
    * The page size to fetch
    */
   pageSize: number;
+  /**
+   * Force using the default context, otherwise use the AlertQueryContext
+   */
+  useDefaultContext?: boolean;
 }
 
 export interface SearchAlertsResult {
@@ -167,6 +171,7 @@ const parseAlerts = (rawResponse: RuleRegistrySearchResponse['rawResponse']) =>
       acc.push({
         ...hit.fields,
         _id: hit._id,
+        _score: hit._score,
         _index: hit._index,
       } as Alert);
     }

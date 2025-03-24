@@ -23,7 +23,7 @@ export const ViewRuleDetailsAlertAction = typedMemo(
     alert,
     resolveRulePagePath,
     tableId,
-  }: AlertActionsProps<AC>) => {
+  }: Pick<AlertActionsProps<AC>, 'alert' | 'resolveRulePagePath' | 'tableId'>) => {
     const {
       services: {
         http: {

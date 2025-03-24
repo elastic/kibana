@@ -26,7 +26,15 @@ export const ViewAlertDetailsAlertAction = typedMemo(
     isAlertDetailsEnabled,
     resolveAlertPagePath,
     tableId,
-  }: AlertActionsProps<AC>) => {
+  }: Pick<
+    AlertActionsProps<AC>,
+    | 'alert'
+    | 'openAlertInFlyout'
+    | 'onActionExecuted'
+    | 'isAlertDetailsEnabled'
+    | 'resolveAlertPagePath'
+    | 'tableId'
+  >) => {
     const {
       services: {
         http: {

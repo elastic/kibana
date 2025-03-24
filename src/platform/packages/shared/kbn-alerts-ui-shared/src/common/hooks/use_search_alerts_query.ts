@@ -27,7 +27,11 @@ export const queryKeyPrefix = ['alerts', searchAlerts.name];
  * When testing components that depend on this hook, prefer mocking the {@link searchAlerts} function instead of the hook itself.
  * @external https://tanstack.com/query/v4/docs/framework/react/guides/testing
  */
-export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryParams) => {
+export const useSearchAlertsQuery = ({
+  data,
+  useDefaultContext,
+  ...params
+}: UseSearchAlertsQueryParams) => {
   const {
     ruleTypeIds,
     consumers,
@@ -60,7 +64,7 @@ export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryPa
         pageSize,
       }),
     refetchOnWindowFocus: false,
-    context: AlertsQueryContext,
+    context: useDefaultContext === true ? undefined : AlertsQueryContext,
     enabled: ruleTypeIds.length > 0,
     // To avoid flash of empty state with pagination, see https://tanstack.com/query/latest/docs/framework/react/guides/paginated-queries#better-paginated-queries-with-placeholderdata
     keepPreviousData: true,

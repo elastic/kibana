@@ -24,7 +24,7 @@ export const MarkAsUntrackedAlertAction = typedMemo(
     alert,
     refresh,
     onActionExecuted,
-  }: AlertActionsProps<AC>) => {
+  }: Pick<AlertActionsProps<AC>, 'alert' | 'refresh' | 'onActionExecuted'>) => {
     const {
       services: { http, notifications },
     } = useAlertsTableContext();
