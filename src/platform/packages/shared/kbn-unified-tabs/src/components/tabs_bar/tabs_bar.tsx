@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Tab, type TabProps } from '../tab';
-import type { TabItem, TabsServices } from '../../types';
+import type { TabItem, TabsServices, TabPreviewData } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
@@ -30,6 +30,7 @@ export type TabsBarProps = Pick<
   maxItemsCount?: number;
   services: TabsServices;
   onAdd: () => Promise<void>;
+  getPreviewData: (item: TabItem) => TabPreviewData;
 };
 
 export const TabsBar: React.FC<TabsBarProps> = ({
@@ -43,6 +44,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   onLabelEdited,
   onSelect,
   onClose,
+  getPreviewData,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [tabsContainerWithPlusElement, setTabsContainerWithPlusElement] =
@@ -107,6 +109,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
                   onLabelEdited={onLabelEdited}
                   onSelect={onSelect}
                   onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
+                  tabPreviewData={getPreviewData(item)}
                 />
               ))}
             </EuiFlexGroup>
