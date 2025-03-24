@@ -53,6 +53,7 @@ export const transparentApiProxy = (
               try {
                 const parsedBody = JSON.parse(body);
                 interceptedRequestBody.push(parsedBody);
+                log.debug(`[Transparent API] received ${parsedBody.length} items.`);
               } catch (err) {
                 throw new Error(`[Transparent API] Failed to parse request body as JSON: ${err}`);
               }
