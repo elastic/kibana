@@ -1,14 +1,13 @@
 ---
-navigation_title: "Kibana"
+navigation_title: "Deprecations"
 ---
 
 # Kibana deprecations [kibana-deprecations]
-Review the deprecated functionality for your Kibana version. While deprecations have no immediate impact, we strongly encourage you update your implementation after you upgrade.
+Over time, certain Elastic functionality becomes outdated and is replaced or removed. To help with the transition, Elastic deprecates functionality for a period before removal, giving you time to update your applications.
 
-To learn how to upgrade, check out <uprade docs>.
+Review the deprecated functionality for Kibana. While deprecations have no immediate impact, we strongly encourage you update your implementation after you upgrade. To learn how to upgrade, check out [Upgrade](docs-content://deploy-manage/upgrade.md).
 
 % ## Next version [kibana-versionnext-deprecations]
-% **Release date:** Month day, year
 
 % Use the following template to add entries to this document.
 
@@ -36,7 +35,6 @@ To learn how to upgrade, check out <uprade docs>.
 % Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
 
 ## 9.0.0 [kibana-900-deprecations]
-**Release date:** March 25, 2025
 
 ::::{dropdown} Scripted field creation has been disabled in the Data Views management page
 The ability to create new scripted fields has been removed from the **Data Views** management page in 9.0. Existing scripted fields can still be edited or deleted, and the creation UI can be accessed by navigating directly to `/app/management/kibana/dataViews/dataView/{{dataViewId}}/create-field`, but we recommend migrating to runtime fields or ES|QL queries instead to prepare for removal.
