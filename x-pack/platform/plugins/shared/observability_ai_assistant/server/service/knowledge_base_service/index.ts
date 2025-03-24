@@ -24,7 +24,7 @@ import { getSpaceQuery } from '../util/get_space_query';
 import {
   createInferenceEndpoint,
   deleteInferenceEndpoint,
-  getElserModelStatus,
+  getKbModelStatus,
   isInferenceEndpointMissingOrUnavailable,
 } from '../inference_endpoint';
 import { recallFromSearchConnectors } from './recall_from_search_connectors';
@@ -514,7 +514,7 @@ export class KnowledgeBaseService {
   };
 
   getStatus = async () => {
-    return getElserModelStatus({
+    return getKbModelStatus({
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
       config: this.dependencies.config,

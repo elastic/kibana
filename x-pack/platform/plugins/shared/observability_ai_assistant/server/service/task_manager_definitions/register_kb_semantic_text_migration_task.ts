@@ -13,7 +13,7 @@ import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import { KnowledgeBaseEntry } from '../../../common';
 import { resourceNames } from '..';
-import { getElserModelStatus } from '../inference_endpoint';
+import { getKbModelStatus } from '../inference_endpoint';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { reIndexKnowledgeBase } from '../knowledge_base_service/reindex_knowledge_base';
@@ -227,10 +227,10 @@ async function waitForModel({
 }) {
   return pRetry(
     async () => {
-      const { ready } = await getElserModelStatus({ esClient, logger, config });
+      const { ready } = await getKbModelStatus({ esClient, logger, config });
       if (!ready) {
-        logger.debug('Elser model is not yet ready. Retrying...');
-        throw new Error('Elser model is not yet ready');
+        logger.debug('Knowledge base model is not yet ready. Retrying...');
+        throw new Error('Knowledge base model is not yet ready');
       }
     },
     { retries: 30, factor: 2, maxTimeout: 30_000 }

@@ -97,7 +97,7 @@ export function isInferenceEndpointMissingOrUnavailable(error: Error) {
   );
 }
 
-export async function getElserModelStatus({
+export async function getKbModelStatus({
   esClient,
   logger,
   config,
@@ -122,24 +122,23 @@ export async function getElserModelStatus({
   }
 
   const modelId = endpoint.service_settings?.model_id;
-  const modelStats = await esClient.asInternalUser.ml
+  const trainedModelStatsResponse = await esClient.asInternalUser.ml
     .getTrainedModelsStats({ model_id: modelId })
     .catch((error) => {
       logger.debug(`Failed to get model stats: ${error.message}`);
       errorMessage = error.message;
     });
 
-  if (!modelStats) {
+  if (!trainedModelStatsResponse) {
     return { ready: false, enabled, errorMessage };
   }
 
-  const elserModelStats = modelStats.trained_model_stats.find(
+  const modelStats = trainedModelStatsResponse.trained_model_stats.find(
     (stats) => stats.deployment_stats?.deployment_id === AI_ASSISTANT_KB_INFERENCE_ID
   );
-  const deploymentState = elserModelStats?.deployment_stats?.state;
-  const allocationState = elserModelStats?.deployment_stats?.allocation_status?.state;
-  const allocationCount =
-    elserModelStats?.deployment_stats?.allocation_status?.allocation_count ?? 0;
+  const deploymentState = modelStats?.deployment_stats?.state;
+  const allocationState = modelStats?.deployment_stats?.allocation_status?.state;
+  const allocationCount = modelStats?.deployment_stats?.allocation_status?.allocation_count ?? 0;
   const ready =
     deploymentState === 'started' && allocationState === 'fully_allocated' && allocationCount > 0;
 

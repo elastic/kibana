@@ -40,17 +40,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await importTinyElserModel(ml);
       await setupKnowledgeBase(observabilityAIAssistantAPIClient);
       await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
-      await deleteWriteIndices(es);
     });
 
     beforeEach(async () => {
-      await deleteKbIndex();
+      await deleteWriteIndices(es);
       await restoreKbSnapshot();
       await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
     });
 
     after(async () => {
-      await deleteKbIndex();
+      await deleteWriteIndices(es);
       await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
       await deleteKnowledgeBaseModel(ml);
       await deleteInferenceEndpoint({ es });
@@ -103,15 +102,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     const { settings } = Object.values(indexSettings)[0];
     return parseInt(settings?.index?.version?.created ?? '', 10);
-  }
-
-  async function deleteKbIndex() {
-    log.debug('Deleting KB index');
-
-    await es.indices.delete(
-      { index: resourceNames.concreteWriteIndexName.kb, ignore_unavailable: true },
-      { ignore: [404] }
-    );
   }
 
   async function restoreKbSnapshot() {
