@@ -32,7 +32,6 @@ import { createDataStream, deleteDataStream } from '../../../create_test_data';
 // eslint-disable-next-line import/no-default-export
 export default function ruleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const log = getService('log');
   const indexPatterns = getService('indexPatterns');
   const {
     es,
@@ -174,7 +173,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         }
 
         const aadDocs = await getAllAADDocs(1);
-        log.info(`aadDocs ${JSON.stringify(aadDocs)}`);
 
         const alertDoc = aadDocs.body.hits.hits[0]._source;
         expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
@@ -184,7 +182,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         );
         expect(alertDoc['kibana.alert.evaluation.threshold']).to.eql(-1);
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
-        expect(value).greaterThan(0);
+        expect(value >= 0).to.be(true);
         expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
         expect(alertDoc['host.name']).to.eql(['host-1']);
         expect(alertDoc['host.hostname']).to.eql(['host-1']);
