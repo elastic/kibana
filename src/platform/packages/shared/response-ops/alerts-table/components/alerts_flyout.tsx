@@ -80,7 +80,7 @@ export const AlertsFlyout = <AC extends AdditionalContext>({
     () =>
       Header ? (
         <Suspense fallback={null}>
-          <Header {...props} />
+          <Header<AC> {...props} />
         </Suspense>
       ) : null,
     [Header, props]

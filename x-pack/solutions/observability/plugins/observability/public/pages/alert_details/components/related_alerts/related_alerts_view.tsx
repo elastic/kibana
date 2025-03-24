@@ -64,7 +64,6 @@ export function RelatedAlertsView({ alertData }: Props) {
       render: (item: Alert) => {
         return (
           <AlertActions
-            id={item._id}
             alert={item}
             refresh={() => {}}
             observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}

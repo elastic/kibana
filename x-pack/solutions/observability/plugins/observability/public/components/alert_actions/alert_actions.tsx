@@ -33,13 +33,11 @@ import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
 export function AlertActions({
   observabilityRuleTypeRegistry,
   alert,
-  id,
   tableId,
   refresh,
   openAlertInFlyout,
 }: Pick<AlertActionsProps, 'alert' | 'openAlertInFlyout' | 'tableId' | 'refresh'> & {
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
-  id: string;
 }) {
   const services = useKibana().services;
 
@@ -53,7 +51,7 @@ export function AlertActions({
   } = services.cases! as unknown as CasesPublicStart; // Cases is guaranteed to be defined in Observability
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
 
-  const isInApp = Boolean(id === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
+  const isInApp = Boolean(tableId === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
 
   const userCasesPermissions = canUseCases([observabilityFeatureId]);
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
