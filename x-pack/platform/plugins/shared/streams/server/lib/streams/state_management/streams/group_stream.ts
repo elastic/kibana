@@ -59,7 +59,7 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
     if (target === this.definition.name) {
       return { cascadingChanges: [], changeStatus: 'deleted' };
     }
-    // remove streams from the group that got deleted themselves
+    // remove deleted streams from the group
     if (
       this.changeStatus !== 'deleted' &&
       this._updated_definition.group.members.includes(target)
@@ -84,7 +84,6 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
     const existsInStartingState = startingState.has(this.definition.name);
 
     if (!existsInStartingState) {
-      // TODO in this check, make sure the existing data stream is not a stream-created one (if it is, state might be out of sync, but we can fix it)
       // Check for data stream conflict
       const dataStreamResult =
         await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
@@ -95,7 +94,7 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
         return {
           isValid: false,
           errors: [
-            `Cannot create wired stream "${this.definition.name}" due to conflict caused by existing data stream`,
+            `Cannot create group stream "${this.definition.name}" due to conflict caused by existing data stream`,
           ],
         };
       }
@@ -114,7 +113,7 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
       return {
         isValid: false,
         errors: [
-          `Cannot create wired stream "${this.definition.name}" due to conflict caused by existing index`,
+          `Cannot create group stream "${this.definition.name}" due to conflict caused by existing index`,
         ],
       };
     }
