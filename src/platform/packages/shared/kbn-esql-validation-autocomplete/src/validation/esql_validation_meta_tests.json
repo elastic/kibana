@@ -2643,6 +2643,7 @@
     {
       "query": "from a_index | rename s* as strings",
       "error": [
+        "Using wildcards (*) in RENAME is not allowed [s*]",
         "Unknown column [s*]",
         "Unknown column [strings]"
       ],
@@ -2704,7 +2705,7 @@
     {
       "query": "from a_index | dissect doubleField \"%{firstWord}\"",
       "error": [
-        "DISSECT only supports keyword, text types values, found [doubleField] of type [double]"
+        "DISSECT only supports values of type [keyword, text]. Found [doubleField] of type [double]"
       ],
       "warning": []
     },
@@ -2798,7 +2799,7 @@
     {
       "query": "from a_index | grok doubleField \"%{firstWord}\"",
       "error": [
-        "GROK only supports keyword, text types values, found [doubleField] of type [double]"
+        "GROK only supports values of type [keyword, text]. Found [doubleField] of type [double]"
       ],
       "warning": []
     },
