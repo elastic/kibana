@@ -25,12 +25,12 @@ export class MockLinkContext {
   private readonly path: string[] = [];
   constructor(private readonly root: string) {}
 
-  addKey(key: string) {
+  public addKey(key: string) {
     this.path.push(key);
     return this;
   }
 
-  toString = () => {
+  public toString = () => {
     return `https://docs.elastic.test/#${this.root}${
       this.path.length ? '.' + this.path.join('.') : ''
     }`;
@@ -43,13 +43,15 @@ function assertString(val: unknown): asserts val is string {
 
 function createMockLinkGetter(rootKey: string) {
   const ctx = new MockLinkContext(rootKey);
-  const proxy = new Proxy(ctx, {
+  return new Proxy(ctx, {
     get(_, key) {
+      if (key === 'toString') {
+        return ctx.toString;
+      }
       assertString(key);
       return ctx.addKey(key);
     },
   });
-  return proxy;
 }
 
 const createSetupMock = (): DocLinksServiceSetup => {
