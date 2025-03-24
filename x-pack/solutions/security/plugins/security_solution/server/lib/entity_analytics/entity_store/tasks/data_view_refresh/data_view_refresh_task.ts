@@ -89,7 +89,9 @@ export const registerEntityStoreDataViewRefreshTask = ({
 
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, internalUserClient);
 
-    const appClient = appClientFactory.create(await apiKeyManager.getRequestFromApiKey(apiKey));
+    const request = await apiKeyManager.getRequestFromApiKey(apiKey);
+
+    const appClient = appClientFactory.create(request);
 
     const entityStoreClient: EntityStoreDataClient = new EntityStoreDataClient({
       namespace,
@@ -104,6 +106,8 @@ export const registerEntityStoreDataViewRefreshTask = ({
       kibanaVersion,
       dataViewsService,
       config: entityStoreConfig,
+      security,
+      request,
     });
 
     await entityStoreClient.applyDataViewIndices();

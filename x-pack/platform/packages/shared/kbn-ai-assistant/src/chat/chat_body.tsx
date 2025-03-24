@@ -32,6 +32,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { findLastIndex } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/analytics/schemas/chat_feedback';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../i18n';
 import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
@@ -189,13 +190,28 @@ export function ChatBody({
     if (conversation.value?.conversation && 'user' in conversation.value) {
       const {
         messages: _removedMessages, // Exclude messages
-        conversation: { title: _removedTitle, ...conversationRest }, // Exclude title
-        ...rest
+        conversation: {
+          title: _removedTitle,
+          id,
+          last_updated: lastUpdated,
+          token_count: tokenCount,
+        }, // Exclude title
+        user,
+        labels,
+        numeric_labels: numericLabels,
+        namespace,
+        public: isPublic,
+        '@timestamp': timestamp,
       } = conversation.value;
 
-      const conversationWithoutMessagesAndTitle = {
-        ...rest,
-        conversation: conversationRest,
+      const conversationWithoutMessagesAndTitle: ChatFeedback['conversation'] = {
+        '@timestamp': timestamp,
+        user,
+        labels,
+        numeric_labels: numericLabels,
+        namespace,
+        public: isPublic,
+        conversation: { id, last_updated: lastUpdated, token_count: tokenCount },
       };
 
       chatService.sendAnalyticsEvent({

@@ -173,7 +173,8 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
           content={
             <FormattedMessage
               id="xpack.securitySolution.flyout.insights.alert.alertCountTooltip"
-              defaultMessage="Opens list of alerts in a new flyout"
+              defaultMessage="Opens {count, plural, one {this alert} other {these alerts}} in a new flyout"
+              values={{ count: totalAlertCount }}
             />
           }
         >
