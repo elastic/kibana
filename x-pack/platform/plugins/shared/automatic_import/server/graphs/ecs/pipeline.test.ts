@@ -17,7 +17,7 @@ describe('Testing pipeline templates', () => {
     const client = {
       asCurrentUser: {
         ingest: {
-          simulate: () => [],
+          simulate: jest.fn(),
         },
       },
     };
