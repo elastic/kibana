@@ -186,8 +186,12 @@ export const BulkManualRuleRun = BulkActionBase.merge(
 );
 
 /**
- * The condition for throttling the notification: 'rule', 'no_actions', or time duration
- */
+  * Defines the maximum interval in which a rule’s actions are executed.
+> info
+> The rule level `throttle` field is deprecated in Elastic Security 8.8 and will remain active for at least the next 12 months.
+> In Elastic Security 8.8 and later, you can use the `frequency` field to define frequencies for individual actions. Actions without frequencies will acquire a converted version of the rule’s `throttle` field. In the response, the converted `throttle` setting appears in the individual actions' `frequency` field.
+
+  */
 export type ThrottleForBulkActions = z.infer<typeof ThrottleForBulkActions>;
 export const ThrottleForBulkActions = z.enum(['rule', '1h', '1d', '7d']);
 export type ThrottleForBulkActionsEnum = typeof ThrottleForBulkActions.enum;

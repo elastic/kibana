@@ -496,17 +496,8 @@ export const InvestigationFields = z.object({
 });
 
 /**
-  * Defines how often rule actions are taken.
-- no_actions: Never
-- rule: Every time new alerts are detected
-- 1h: Every hour
-- 1d: Every day
-- 7d: Every week
-> info
-> The rule level `throttle` field is deprecated in Elastic Security 8.8 and will remain active for at least the next 12 months.
-> In Elastic Security 8.8 and later, you can use the `frequency` field to define frequencies for individual actions. Actions without frequencies will acquire a converted version of the rule’s `throttle` field. In the response, the converted `throttle` setting appears in the individual actions' `frequency` field.
-
-  */
+ * Defines how often rule actions are taken.
+ */
 export type RuleActionThrottle = z.infer<typeof RuleActionThrottle>;
 export const RuleActionThrottle = z.union([
   z.enum(['no_actions', 'rule']),
@@ -514,7 +505,7 @@ export const RuleActionThrottle = z.union([
 ]);
 
 /**
- * The condition for throttling the notification
+ * Defines how often rules run actions.
  */
 export type RuleActionNotifyWhen = z.infer<typeof RuleActionNotifyWhen>;
 export const RuleActionNotifyWhen = z.enum([
@@ -582,6 +573,9 @@ export const RuleActionAlertsFilter = z.object({
        * A KQL string.
        */
       kql: z.string().optional(),
+      /**
+       * Array of filter objects, as defined in the `kbn-es-query` package.
+       */
       filters: z.array(z.object({})).optional(),
     })
     .optional(),
