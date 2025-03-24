@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   type EuiSelectableProps,
   type EuiSelectableOption,
@@ -26,7 +26,11 @@ import {
   EuiFlexItem,
   EuiText,
 } from '@elastic/eui';
-import type { GetPackagePoliciesRequest, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type {
+  GetPackagePoliciesRequest,
+  GetPackagePoliciesResponse,
+  PackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import { INTEGRATIONS_PLUGIN_ID, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from '@emotion/styled';
@@ -121,9 +125,24 @@ export interface PolicySelectorProps {
    * A list of Integration policy fields that should be used when user enters a search value. The
    * fields should match those that are defined in the `PackagePolicy` type, including deep
    * references like `package.name`, etc.
-   * Default: `['name', 'id', 'description', 'policy_ids', 'package.name']`
+   * Default: `['name', 'description', 'policy_ids', 'package.name']`
    */
   searchFields?: string[];
+  /**
+   * Callback function that is called everytime a new page of data is fetched from fleet. Use it
+   * if needing to gain access to the API results that are returned
+   */
+  onFetch?: (apiFetchResult: {
+    /**
+     * The type of data search. Will be set to `search` when fetching policies that are available
+     * in the system, and to `selected` if the fetching of data was for policies that were selected.
+     */
+    type: 'search' | 'selected';
+    /** The filter that was entered by the user (if any). Applies only to `type === search`. */
+    filtered: boolean;
+    /** The data returned from the API */
+    data: GetPackagePoliciesResponse;
+  }) => void;
   /**
    * A set of additional items to include in the selectable list. Items will be displayed at the
    * bottom of each policy page.
@@ -157,7 +176,8 @@ export interface PolicySelectorProps {
 
 /**
  * Provides a component that displays a list of policies fetched from Fleet, which the user can
- * select and unselect.
+ * select and unselect. By default, it queries Fleet for Elastic Defend policies, but that can be
+ * configured via `queryOptions.kuery`, thus it can display any type of Fleet integration policies
  */
 export const PolicySelector = memo<PolicySelectorProps>(
   ({
@@ -171,6 +191,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
     selectedPolicyIds,
     searchFields = ['name', 'description', 'policy_ids', 'package.name'],
     onChange,
+    onFetch,
     height,
     useCheckbox = false,
     showPolicyLink = false,
@@ -243,10 +264,15 @@ export const PolicySelector = memo<PolicySelectorProps>(
       );
     }, [additionalListItems, selectedPolicyIds.length]);
 
+    const selectableScrollingWindow = useRef<HTMLElement | undefined>();
+
     const listProps: EuiSelectableProps['listProps'] = useMemo(() => {
       return {
         bordered: false,
         showIcons: !useCheckbox,
+        windowProps: {
+          outerRef: selectableScrollingWindow,
+        },
       };
     }, [useCheckbox]);
 
@@ -493,6 +519,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
       ]
     );
 
+    // Show API errors when they are encountered
     useEffect(() => {
       if (error) {
         toasts.addError(error, {
@@ -504,11 +531,29 @@ export const PolicySelector = memo<PolicySelectorProps>(
       }
     }, [toasts, error]);
 
+    // When viewing Selected Policies, if they are all "un-selected", then set the view back to 'full-list'
     useEffect(() => {
       if (view === 'selected-list' && selectedCount === 0) {
         setView('full-list');
       }
     }, [selectedCount, view]);
+
+    // Everytime the `data` changes:
+    //    1. scroll list back up to the top
+    //    2. call `onFetch()` if defined
+    useEffect(() => {
+      if (selectableScrollingWindow.current) {
+        selectableScrollingWindow.current.scrollTop = 0;
+      }
+
+      if (onFetch && policyListResponse && !isFetching) {
+        onFetch({
+          type: view === 'selected-list' ? 'selected' : 'search',
+          filtered: Boolean(userSearchValue),
+          data: policyListResponse,
+        });
+      }
+    }, [isFetching, onFetch, policyListResponse, userSearchValue, view]);
 
     return (
       <PolicySelectorContainer data-test-subj={dataTestSubj} height={height}>

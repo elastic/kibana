@@ -15,6 +15,23 @@ export type PolicySelectorMenuButtonProps = PolicySelectorProps;
 
 export const PolicySelectorMenuButton = memo<PolicySelectorMenuButtonProps>((props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [countOfPolicies, setCountOfPolicies] = useState(0);
+  const countOfSelectedPolicies = props.selectedPolicyIds.length;
+
+  const onFetch: Required<PolicySelectorMenuButtonProps>['onFetch'] = useCallback(
+    (fetchedData) => {
+      const { type, filtered, data } = fetchedData;
+
+      if (type === 'search' && !filtered) {
+        setCountOfPolicies(data.total);
+      }
+
+      if (props.onFetch) {
+        props.onFetch(fetchedData);
+      }
+    },
+    [props]
+  );
 
   const button = useMemo(
     () => (
@@ -25,9 +42,9 @@ export const PolicySelectorMenuButton = memo<PolicySelectorMenuButtonProps>((pro
           setIsPopoverOpen((prevState) => !prevState);
         }}
         isSelected={isPopoverOpen}
-        numFilters={1000000}
-        hasActiveFilters={true}
-        numActiveFilters={500}
+        numFilters={countOfPolicies > 0 ? countOfPolicies : undefined}
+        hasActiveFilters={countOfSelectedPolicies > 0}
+        numActiveFilters={countOfSelectedPolicies}
       >
         <EuiText>
           <FormattedMessage
@@ -37,7 +54,7 @@ export const PolicySelectorMenuButton = memo<PolicySelectorMenuButtonProps>((pro
         </EuiText>
       </EuiFilterButton>
     ),
-    [isPopoverOpen]
+    [isPopoverOpen, countOfSelectedPolicies, countOfPolicies]
   );
 
   const closePopover = useCallback(() => {
@@ -52,7 +69,7 @@ export const PolicySelectorMenuButton = memo<PolicySelectorMenuButtonProps>((pro
         closePopover={closePopover}
         panelPaddingSize="none"
       >
-        <PolicySelector {...props} />
+        <PolicySelector {...props} onFetch={onFetch} />
       </EuiPopover>
     </EuiFilterGroup>
   );
