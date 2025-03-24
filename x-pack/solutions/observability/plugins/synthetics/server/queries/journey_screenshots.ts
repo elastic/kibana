@@ -34,6 +34,10 @@ export const journeyScreenshotHandler = async ({
     stepIndex,
   });
 
+  if (result === null) {
+    return response.notFound();
+  }
+
   if (isRefResult(result)) {
     return response.ok({
       body: {
@@ -43,5 +47,11 @@ export const journeyScreenshotHandler = async ({
     });
   }
 
-  return response.notFound();
+  return response.custom({
+    statusCode: 500,
+    body: {
+      message: 'Screenshot metadata is not in the expected format',
+      screenshotRef: result,
+    },
+  });
 };
