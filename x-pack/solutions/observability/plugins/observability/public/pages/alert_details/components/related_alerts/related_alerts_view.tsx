@@ -34,6 +34,7 @@ import {
 import { intersection, isEmpty } from 'lodash';
 import React, { useState } from 'react';
 import AlertsFlyout from '@kbn/response-ops-alerts-table/components/alerts_flyout';
+import { useCaseActions } from '../../../../components/alert_actions/use_case_actions';
 import AlertActions from '../../../../components/alert_actions/alert_actions';
 import { AlertData } from '../../../../hooks/use_fetch_alert_detail';
 import { ObservabilityRuleTypeRegistry } from '../../../..';
@@ -54,12 +55,19 @@ export function RelatedAlertsView({ alertData }: Props) {
   const [flyoutAlert, setFlyoutAlert] = useState<Alert | null>(null);
   const [flyoutAlertIndex, setFlyoutAlertIndex] = useState<number>(0);
   const { observabilityRuleTypeRegistry } = usePluginContext();
+  const [selectedAlerts, setSelectedAlerts] = useState<Alert[]>([]);
 
   const services = useKibana().services;
+  const { handleAddToExistingCaseClick } = useCaseActions({
+    alerts: selectedAlerts,
+    refresh: () => {},
+  });
 
   const columns: Array<EuiBasicTableColumn<Alert>> = [
     {
-      name: 'Actions',
+      name: i18n.translate('xpack.observability.relatedAlertsView.columns.actionsColumnTitle', {
+        defaultMessage: 'Actions',
+      }),
       width: '100px',
       render: (item: Alert) => {
         return (
@@ -169,7 +177,6 @@ export function RelatedAlertsView({ alertData }: Props) {
     },
   ];
 
-  const [selectedAlerts, setSelectedAlerts] = useState<Alert[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
   const onSelectionChange = (selected: Alert[]) => {
     setSelectedAlerts(selected);
@@ -184,7 +191,9 @@ export function RelatedAlertsView({ alertData }: Props) {
       <EuiButton
         data-test-subj="o11yRenderToolsRightLoadUsersButton"
         key="loadUsers"
-        onClick={() => {}}
+        onClick={() => {
+          handleAddToExistingCaseClick();
+        }}
         disabled={selectedAlerts.length === 0}
       >
         {i18n.translate('xpack.observability.relatedAlertsView.openCaseForSelectedButtonLabel', {

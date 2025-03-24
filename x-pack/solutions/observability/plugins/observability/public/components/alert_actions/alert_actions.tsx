@@ -85,7 +85,7 @@ export function AlertActions({
   const { isPopoverOpen, setIsPopoverOpen, handleAddToExistingCaseClick, handleAddToNewCaseClick } =
     useCaseActions({
       refresh,
-      alert,
+      alerts: [alert],
     });
 
   const closeActionsPopover = useCallback(() => {

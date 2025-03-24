@@ -6,14 +6,13 @@
  */
 
 import { CaseAttachmentsWithoutOwner, CasesPublicStart } from '@kbn/cases-plugin/public';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { Alert } from '@kbn/alerting-types';
 import type { EventNonEcsData } from '../../../common/typings';
 import { useKibana } from '../../utils/kibana_react';
 
-export const useCaseActions = ({ alert, refresh }: { alert: Alert; refresh?: () => void }) => {
+export const useCaseActions = ({ alerts, refresh }: { alerts: Alert[]; refresh?: () => void }) => {
   const services = useKibana().services;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
@@ -27,47 +26,37 @@ export const useCaseActions = ({ alert, refresh }: { alert: Alert; refresh?: () 
   }, [refresh]);
 
   const selectCaseModal = useCasesAddToExistingCaseModal({ onSuccess });
-  const ecsData = useMemo<Ecs>(
-    () => ({
-      _id: alert._id,
-      _index: alert._index,
-    }),
-    [alert._id, alert._index]
-  );
-  const data = useMemo(
-    () =>
-      Object.entries(alert ?? {}).reduce<EventNonEcsData[]>(
-        (acc, [field, value]) => [...acc, { field, value: value as string[] }],
-        []
-      ),
-    [alert]
-  );
 
-  const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
-    return ecsData?._id
-      ? [
-          {
-            alertId: ecsData?._id ?? '',
-            index: ecsData?._index ?? '',
-            type: AttachmentType.alert,
-            rule: getRuleIdFromEvent({ ecs: ecsData, data: data ?? [] }),
-          },
-        ]
-      : [];
-  }, [ecsData, getRuleIdFromEvent, data]);
-
+  function getCaseAttachments(): CaseAttachmentsWithoutOwner {
+    return alerts.map((alert) => ({
+      alertId: alert?._id ?? '',
+      index: alert?._index ?? '',
+      type: AttachmentType.alert,
+      rule: getRuleIdFromEvent({
+        ecs: {
+          _id: alert?._id ?? '',
+          _index: alert?._index ?? '',
+        },
+        data:
+          Object.entries(alert ?? {}).reduce<EventNonEcsData[]>(
+            (acc, [field, value]) => [...acc, { field, value: value as string[] }],
+            []
+          ) ?? [],
+      }),
+    }));
+  }
   const createCaseFlyout = useCasesAddToNewCaseFlyout({ onSuccess });
   const closeActionsPopover = () => {
     setIsPopoverOpen(false);
   };
 
   const handleAddToNewCaseClick = () => {
-    createCaseFlyout.open({ attachments: caseAttachments });
+    createCaseFlyout.open({ attachments: getCaseAttachments() });
     closeActionsPopover();
   };
 
   const handleAddToExistingCaseClick = () => {
-    selectCaseModal.open({ getAttachments: () => caseAttachments });
+    selectCaseModal.open({ getAttachments: () => getCaseAttachments() });
     closeActionsPopover();
   };
 
