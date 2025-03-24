@@ -887,7 +887,7 @@ export const functions = {
   -->
 
   ### GREATEST
-  Returns the maximum value from multiple columns. This is similar to [\`MV_MAX\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-mv_max)
+  Returns the maximum value from multiple columns. This is similar to \`MV_MAX\`
   except it is intended to run on multiple columns at once.
 
   \`\`\` esql
@@ -1059,7 +1059,7 @@ export const functions = {
   -->
 
   ### LEAST
-  Returns the minimum value from multiple columns. This is similar to [\`MV_MIN\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-mv_min) except it is intended to run on multiple columns at once.
+  Returns the minimum value from multiple columns. This is similar to \`MV_MIN\` except it is intended to run on multiple columns at once.
 
   \`\`\` esql
   ROW a = 10, b = 20
@@ -1306,16 +1306,16 @@ export const functions = {
   -->
 
   ### MATCH
-  Use \`MATCH\` to perform a [match query](https://www.elastic.co/docs/reference/elasticsearch/query-languages/query-dsl/query-dsl-match-query) on the specified field.
+  Use \`MATCH\` to perform a match query on the specified field.
   Using \`MATCH\` is equivalent to using the \`match\` query in the Elasticsearch Query DSL.
 
-  Match can be used on fields from the text family like [text](https://www.elastic.co/docs/reference/elasticsearch/elasticsearch/mapping-reference/text) and [semantic_text](https://www.elastic.co/docs/reference/elasticsearch/elasticsearch/mapping-reference/semantic-text),
+  Match can be used on fields from the text family like text and semantic_text,
   as well as other field types like keyword, boolean, dates, and numeric types.
 
-  Match can use [function named parameters](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-syntax#esql-function-named-params) to specify additional options for the match query.
-  All [match query parameters](https://www.elastic.co/docs/reference/elasticsearch/query-languages/query-dsl/query-dsl-match-query#match-field-params) are supported.
+  Match can use function named parameters to specify additional options for the match query.
+  All match query parameters are supported.
 
-  For a simplified syntax, you can use the [match operator](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-search-operators) \`:\` operator instead of \`MATCH\`.
+  For a simplified syntax, you can use the match operator \`:\` operator instead of \`MATCH\`.
 
   \`MATCH\` returns true if the provided query matches the row.
 
@@ -1556,7 +1556,7 @@ export const functions = {
   ### MV_FIRST
   Converts a multivalued expression into a single valued column containing the
   first value. This is most useful when reading from a function that emits
-  multivalued columns in a known order like [\`SPLIT\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-split).
+  multivalued columns in a known order like \`SPLIT\`.
 
   \`\`\` esql
   ROW a="foo;bar;baz"
@@ -1592,7 +1592,7 @@ export const functions = {
   ### MV_LAST
   Converts a multivalue expression into a single valued column containing the last
   value. This is most useful when reading from a function that emits multivalued
-  columns in a known order like [\`SPLIT\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-split).
+  columns in a known order like \`SPLIT\`.
 
   \`\`\` esql
   ROW a="foo;bar;baz"
@@ -1839,7 +1839,7 @@ export const functions = {
   ### MV_SLICE
   Returns a subset of the multivalued field using the start and end index values.
   This is most useful when reading from a function that emits multivalued columns
-  in a known order like [\`SPLIT\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-split) or [\`MV_SORT\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-mv_sort).
+  in a known order like \`SPLIT\` or \`MV_SORT\`.
 
   \`\`\` esql
   row a = [1, 2, 2, 3]
@@ -2066,7 +2066,7 @@ export const functions = {
   -->
 
   ### QSTR
-  Performs a [query string query](https://www.elastic.co/docs/reference/elasticsearch/query-languages/query-dsl/query-dsl-query-string-query). Returns true if the provided query string matches the row.
+  Performs a query string query. Returns true if the provided query string matches the row.
 
   \`\`\` esql
   FROM books
@@ -2583,7 +2583,7 @@ export const functions = {
 
   ### ST_CONTAINS
   Returns whether the first geometry contains the second geometry.
-  This is the inverse of the [ST_WITHIN](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-st_within) function.
+  This is the inverse of the ST_WITHIN function.
 
   \`\`\` esql
   FROM airport_city_boundaries
@@ -2619,7 +2619,7 @@ export const functions = {
 
   ### ST_DISJOINT
   Returns whether the two geometries or geometry columns are disjoint.
-  This is the inverse of the [ST_INTERSECTS](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-st_intersects) function.
+  This is the inverse of the ST_INTERSECTS function.
   In mathematical terms: ST_Disjoint(A, B) ⇔ A ⋂ B = ∅
 
   \`\`\` esql
@@ -2732,7 +2732,7 @@ export const functions = {
   Returns true if two geometries intersect.
   They intersect if they have any point in common, including their interior points
   (points along lines or within polygons).
-  This is the inverse of the [ST_DISJOINT](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-st_disjoint) function.
+  This is the inverse of the ST_DISJOINT function.
   In mathematical terms: ST_Intersects(A, B) ⇔ A ⋂ B ≠ ∅
 
   \`\`\` esql
@@ -2768,7 +2768,7 @@ export const functions = {
 
   ### ST_WITHIN
   Returns whether the first geometry is within the second geometry.
-  This is the inverse of the [ST_CONTAINS](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-st_contains) function.
+  This is the inverse of the ST_CONTAINS function.
 
   \`\`\` esql
   FROM airport_city_boundaries
@@ -3422,7 +3422,7 @@ export const functions = {
   ### TO_DATETIME
   Converts an input value to a date value.
   A string will only be successfully converted if it’s respecting the format \`yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\`.
-  To convert dates in other formats, use [\`DATE_PARSE\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-date_parse).
+  To convert dates in other formats, use \`DATE_PARSE\`.
 
   \`\`\` esql
   ROW string = ["1953-09-02T00:00:00.000Z", "1964-06-02T00:00:00.000Z", "1964-06-02 00:00:00"]
