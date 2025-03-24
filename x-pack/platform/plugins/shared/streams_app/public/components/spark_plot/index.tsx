@@ -106,8 +106,8 @@ export function SparkPlot({
     },
   };
 
-  const min = timeseries[0].x;
-  const max = timeseries[timeseries.length - 1].x;
+  const min = timeseries[0]?.x;
+  const max = timeseries[timeseries.length - 1]?.x;
 
   const defaultXFormatter = useMemo(() => {
     return niceTimeFormatter([min, max]);

@@ -9,6 +9,7 @@ import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { niceTimeFormatter } from '@elastic/charts';
 import { Timeline } from '.';
 
 const stories: Meta<{}> = {
@@ -21,6 +22,8 @@ export default stories;
 const start = new Date(`2025-03-24T12:00:00.000Z`).getTime();
 const end = new Date(`2025-03-24T14:00:00.000Z`).getTime();
 
+const xFormatter = niceTimeFormatter([start, end]);
+
 export const Empty: StoryFn<{}> = () => {
   return (
     <EuiPanel
@@ -30,7 +33,7 @@ export const Empty: StoryFn<{}> = () => {
       hasBorder={false}
       hasShadow={false}
     >
-      <Timeline events={[]} start={start} end={end} />
+      <Timeline events={[]} start={start} end={end} xFormatter={xFormatter} />
     </EuiPanel>
   );
 };
@@ -47,13 +50,13 @@ export const WithEvents: StoryFn<{}> = () => {
     },
     {
       id: 'some_other_event',
-      time: new Date(`2025-03-24T12:31:00.000Z`).getTime(),
+      time: new Date(`2025-03-24T12:10:00.000Z`).getTime(),
       label: `Some other event`,
       color: theme.euiTheme.colors.danger,
     },
     {
       id: 'another_event',
-      time: new Date(`2025-03-24T13:48.000Z`).getTime(),
+      time: new Date(`2025-03-24T13:48:00.000Z`).getTime(),
       label: `Another event`,
       color: theme.euiTheme.colors.danger,
     },
@@ -66,7 +69,7 @@ export const WithEvents: StoryFn<{}> = () => {
       hasBorder={false}
       hasShadow={false}
     >
-      <Timeline events={events} start={start} end={end} />
+      <Timeline events={events} start={start} end={end} xFormatter={xFormatter} />
     </EuiPanel>
   );
 };

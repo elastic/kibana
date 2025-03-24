@@ -12,16 +12,14 @@ import {
   LineSeries,
   PartialTheme,
   Settings,
+  TickFormatter,
   Tooltip,
   TooltipContainer,
-  TooltipDivider,
-  TooltipHeader,
   TooltipTable,
   TooltipTableBody,
   TooltipTableCell,
   TooltipTableColorCell,
   TooltipTableRow,
-  niceTimeFormatter,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -43,9 +41,10 @@ interface TimelineProps {
   events: TimelineEvent[];
   start: number;
   end: number;
+  xFormatter: TickFormatter;
 }
 
-export function Timeline({ events, start, end }: TimelineProps) {
+export function Timeline({ events, start, end, xFormatter }: TimelineProps) {
   const {
     dependencies: {
       start: { charts },
@@ -64,6 +63,11 @@ export function Timeline({ events, start, end }: TimelineProps) {
       bottom: 12,
     },
     lineSeriesStyle: {
+      fit: {
+        line: {
+          opacity: 0,
+        },
+      },
       point: { opacity: 0 },
     },
     areaSeriesStyle: {
@@ -71,9 +75,14 @@ export function Timeline({ events, start, end }: TimelineProps) {
     },
   };
 
-  const xFormatter = useMemo(() => niceTimeFormatter([start, end]), [start, end]);
-
   const dummyValues = useMemo(() => {
+    if (events.length) {
+      return events.map((event) => {
+        return {
+          x: event.time,
+        };
+      });
+    }
     const delta = calculateAuto.atLeast(20, moment.duration(end - start))?.asMilliseconds()!;
 
     const buckets = Math.floor((end - start) / delta);
@@ -81,10 +90,9 @@ export function Timeline({ events, start, end }: TimelineProps) {
     return range(0, buckets).map((index) => {
       return {
         x: start + index * delta,
-        y: null,
       };
     });
-  }, [start, end]);
+  }, [start, end, events]);
 
   return (
     <EuiPanel hasBorder>
@@ -122,49 +130,54 @@ export function Timeline({ events, start, end }: TimelineProps) {
             hide
             gridLine={{ opacity: 0 }}
           />
-          <LineSeries id="dummy" data={dummyValues} xAccessor={'x'} yAccessors={['y']} />
-          {events.map((event) => {
-            return (
-              <LineAnnotation
-                key={event.id}
-                id={event.id}
-                dataValues={[{ dataValue: event.time }]}
-                domainType={AnnotationDomainType.XDomain}
-                marker={
-                  <EuiIcon
-                    type="dot"
-                    color={event.color}
-                    size="l"
+          <LineSeries
+            id="dummy"
+            data={dummyValues}
+            xAccessor={'x'}
+            yAccessors={['x']}
+            color={'rgba(0,0,0,0)'}
+          />
+          <LineAnnotation
+            id="annotations"
+            dataValues={events.map((event) => ({ dataValue: event.time, event }))}
+            domainType={AnnotationDomainType.XDomain}
+            marker={(point) => {
+              const { event } = point as { dataValue: number; event: TimelineEvent };
+              return (
+                <EuiIcon
+                  type="dot"
+                  color={event.color}
+                  size="l"
+                  className={css`
+                    circle {
+                      stroke: ${theme.colors.backgroundBasePlain};
+                      stroke-width: 1px;
+                    }
+                  `}
+                />
+              );
+            }}
+            customTooltip={({ datum }) => {
+              const { event } = datum as { dataValue: number; event: TimelineEvent };
+              return (
+                <TooltipContainer>
+                  <TooltipTable
+                    gridTemplateColumns="none"
                     className={css`
-                      circle {
-                        stroke: ${theme.colors.backgroundBasePlain};
-                        stroke-width: 1px;
-                      }
+                      padding: ${theme.size.xs};
                     `}
-                  />
-                }
-                customTooltip={({ details, header, datum }) => {
-                  return (
-                    <TooltipContainer>
-                      <TooltipTable
-                        gridTemplateColumns="none"
-                        className={css`
-                          padding: ${theme.size.xs};
-                        `}
-                      >
-                        <TooltipTableBody>
-                          <TooltipTableRow>
-                            <TooltipTableColorCell color={event.color} />
-                            <TooltipTableCell>{event.label}</TooltipTableCell>
-                          </TooltipTableRow>
-                        </TooltipTableBody>
-                      </TooltipTable>
-                    </TooltipContainer>
-                  );
-                }}
-              />
-            );
-          })}
+                  >
+                    <TooltipTableBody>
+                      <TooltipTableRow>
+                        <TooltipTableColorCell color={event.color} />
+                        <TooltipTableCell>{event.label}</TooltipTableCell>
+                      </TooltipTableRow>
+                    </TooltipTableBody>
+                  </TooltipTable>
+                </TooltipContainer>
+              );
+            }}
+          />
         </Chart>
       </EuiFlexGroup>
     </EuiPanel>

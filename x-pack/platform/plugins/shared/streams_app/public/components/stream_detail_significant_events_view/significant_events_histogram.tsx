@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { TickFormatter } from '@elastic/charts';
 import { SparkPlot, SparkPlotAnnotation } from '../spark_plot';
 import { FormattedChangePoint } from './change_point';
+import { getAnnotationFromFormattedChangePoint } from './utils/get_annotation_from_formatted_change_point';
 
 interface Props {
   id: string;
@@ -26,15 +27,12 @@ export function SignificantEventsHistogramChart({ id, occurrences, change, xForm
     if (!change) {
       return [];
     }
-    const color = theme.colors[change?.color];
     return [
-      {
-        color,
-        icon: <EuiIcon type="dot" color={color} />,
-        id: `change_point_${id}`,
-        label: change.label,
-        x: change.time,
-      },
+      getAnnotationFromFormattedChangePoint({
+        query: { id },
+        change,
+        theme,
+      }),
     ];
   }, [change, id, theme]);
 

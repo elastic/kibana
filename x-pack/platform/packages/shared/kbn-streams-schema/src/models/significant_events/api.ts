@@ -28,4 +28,10 @@ type SignificantEventsResponse = StreamQueryKql & {
 
 type SignificantEventsGetResponse = SignificantEventsResponse[];
 
-export type { SignificantEventsResponse, SignificantEventsGetResponse };
+type SignificantEventsPreviewResponse = SignificantEventsResponse;
+
+export type {
+  SignificantEventsResponse,
+  SignificantEventsGetResponse,
+  SignificantEventsPreviewResponse,
+};

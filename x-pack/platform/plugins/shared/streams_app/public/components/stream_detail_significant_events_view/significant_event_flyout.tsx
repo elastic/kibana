@@ -15,16 +15,24 @@ import {
   EuiForm,
   EuiFormLabel,
   EuiFormRow,
+  EuiSpacer,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { StreamQueryKql } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { v4 } from 'uuid';
 import { fromKueryExpression } from '@kbn/es-query';
+import moment from 'moment';
+import { calculateAuto } from '@kbn/calculate-auto';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
+import { SparkPlot } from '../spark_plot';
+import { formatChangePoint } from './change_point';
+import { getAnnotationFromFormattedChangePoint } from './utils/get_annotation_from_formatted_change_point';
 
 function getTitle(query?: StreamQueryKql) {
   if (!query) {
@@ -57,7 +65,7 @@ function getSubmitTitle(query?: StreamQueryKql) {
 }
 
 interface SignificantEventFlyoutProps {
-  indexPattern: string;
+  name: string;
   onClose?: () => void;
   onCreate?: (query: StreamQueryKql) => Promise<void>;
   onUpdate?: (query: StreamQueryKql) => Promise<void>;
@@ -65,7 +73,7 @@ interface SignificantEventFlyoutProps {
 }
 
 export function SignificantEventFlyoutContents({
-  indexPattern,
+  name,
   query,
   onClose,
 }: SignificantEventFlyoutProps) {
@@ -76,9 +84,11 @@ export function SignificantEventFlyoutContents({
 
   const [touched, setTouched] = useState({ title: false, kql: false });
 
+  const theme = useEuiTheme().euiTheme;
+
   const {
     dependencies: {
-      start: { data },
+      start: { data, streams },
     },
   } = useKibana();
 
@@ -89,12 +99,12 @@ export function SignificantEventFlyoutContents({
   const dataViewsFetch = useStreamsAppFetch(() => {
     return data.dataViews
       .create({
-        title: indexPattern,
+        title: name,
       })
       .then((value) => {
         return [value];
       });
-  }, [data.dataViews, indexPattern]);
+  }, [data.dataViews, name]);
 
   const validation = useMemo(() => {
     const { title = '', kql: { query: kqlQuery } = { query: '' } } = queryValues;
@@ -133,10 +143,6 @@ export function SignificantEventFlyoutContents({
     };
   }, [queryValues]);
 
-  const isAllValid = Object.values(validation)
-    .flat()
-    .every((msg) => !msg);
-
   const validationMessages = useMemo(() => {
     return {
       title:
@@ -155,6 +161,89 @@ export function SignificantEventFlyoutContents({
           : {},
     };
   }, [validation, touched]);
+
+  const previewFetch = useStreamsAppFetch(
+    ({ signal }) => {
+      const { id, kql, title } = queryValues;
+      if (!id || !kql?.query || !title) {
+        return;
+      }
+
+      const { from, to } = getAbsoluteTimeRange(timeRange);
+
+      const bucketSize = calculateAuto
+        .near(50, moment.duration(moment(to).diff(from)))
+        ?.asSeconds()!;
+
+      return streams.streamsRepositoryClient.fetch(
+        `POST /api/streams/{name}/significant_events/_preview 2023-10-31`,
+        {
+          signal,
+          params: {
+            path: {
+              name,
+            },
+            query: {
+              bucketSize: `${bucketSize}s`,
+              from,
+              to,
+            },
+            body: {
+              query: {
+                id,
+                kql,
+                title,
+              },
+            },
+          },
+        }
+      );
+    },
+    [timeRange, name, queryValues, streams.streamsRepositoryClient]
+  );
+
+  const sparkPlotData = useMemo(() => {
+    const changePoints = previewFetch.value?.change_points;
+    const occurrences = previewFetch.value?.occurrences;
+
+    const timeseries =
+      occurrences?.map(({ date, count }) => {
+        return {
+          x: new Date(date).getTime(),
+          y: count,
+        };
+      }) ?? [];
+
+    const { id, kql, title } = queryValues;
+
+    const change =
+      changePoints && occurrences && id && kql && title
+        ? formatChangePoint({
+            change_points: changePoints,
+            occurrences: timeseries,
+            query: {
+              id,
+              kql,
+              title,
+            },
+          })
+        : undefined;
+
+    return {
+      timeseries,
+      annotations: change
+        ? [
+            getAnnotationFromFormattedChangePoint({
+              query: {
+                id,
+              },
+              change,
+              theme,
+            }),
+          ]
+        : [],
+    };
+  }, [previewFetch.value, queryValues, theme]);
 
   return (
     <>
@@ -197,12 +286,11 @@ export function SignificantEventFlyoutContents({
             <StreamsAppSearchBar
               query={queryValues.kql?.query ?? ''}
               showQueryInput
-              onQueryChange={(next) => {
-                setQueryValues((prev) => ({ ...prev, query: next.query }));
+              onQueryChange={() => {
                 setTouched((prev) => ({ ...prev, kql: true }));
               }}
               onQuerySubmit={(next) => {
-                setQueryValues((prev) => ({ ...prev, query: next.query }));
+                setQueryValues((prev) => ({ ...prev, kql: { query: next.query } }));
                 setTouched((prev) => ({ ...prev, kql: true }));
                 if (next.dateRange) {
                   setTimeRange(next.dateRange);
@@ -217,6 +305,16 @@ export function SignificantEventFlyoutContents({
             />
           </EuiFormRow>
         </EuiForm>
+        <EuiSpacer size="s" />
+        <SparkPlot
+          id={`query_preview_${query?.id}`}
+          name={i18n.translate('xpack.significantEventFlyout.previewChartSeriesName', {
+            defaultMessage: `Count`,
+          })}
+          timeseries={sparkPlotData.timeseries}
+          type="bar"
+          annotations={sparkPlotData.annotations}
+        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">

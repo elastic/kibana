@@ -29,7 +29,7 @@ export const Create: StoryFn<{}> = () => {
         `
       )}
     >
-      <SignificantEventFlyout indexPattern="logs*" />
+      <SignificantEventFlyout name="logs" />
     </EuiPanel>
   );
 };

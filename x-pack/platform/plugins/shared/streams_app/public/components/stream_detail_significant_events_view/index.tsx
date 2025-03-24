@@ -8,6 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui'
 import { IngestStreamGetResponse, StreamQueryKql } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
 import { niceTimeFormatter } from '@elastic/charts';
+import { omit } from 'lodash';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
@@ -24,7 +25,7 @@ export function StreamDetailSignificantEventsView({
 }) {
   const {
     dependencies: {
-      start: { data },
+      start: { data, streams },
     },
   } = useKibana();
 
@@ -97,7 +98,7 @@ export function StreamDetailSignificantEventsView({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <Timeline start={start} end={end} events={events} />
+          <Timeline start={start} end={end} events={events} xFormatter={xFormatter} />
         </EuiFlexItem>
 
         <EuiSpacer />
@@ -117,12 +118,34 @@ export function StreamDetailSignificantEventsView({
       </EuiFlexGroup>
       {isFlyoutOpen ? (
         <SignificantEventFlyout
+          onCreate={async (query) => {
+            const name = definition?.stream.name;
+
+            if (!definition || !name) {
+              return;
+            }
+
+            await streams.streamsRepositoryClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+              params: {
+                body: {
+                  ...omit(definition, 'effective_lifecycle'),
+                  dashboards: definition.dashboards,
+                  queries: definition.queries,
+                  stream: definition.stream,
+                },
+                path: {
+                  name,
+                },
+              },
+            });
+          }}
+          onUpdate={async () => {}}
           onClose={() => {
             setIsFlyoutOpen(false);
             setQueryToEdit(undefined);
           }}
           query={queryToEdit}
-          indexPattern={definition?.stream.name ?? ''}
+          name={definition?.stream.name ?? ''}
         />
       ) : null}
     </>
