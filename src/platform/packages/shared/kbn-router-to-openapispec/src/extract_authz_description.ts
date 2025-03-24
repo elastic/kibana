@@ -37,12 +37,8 @@ export const extractAuthzDescription = (routeSecurity: InternalRouteSecurity | u
 
         return groups;
       }
-      groups.allRequired.push(
-        ...(privilege.allRequired?.flatMap((p) => (typeof p === 'string' ? [p] : p.anyOf)) ?? [])
-      );
-      groups.anyRequired.push(
-        ...(privilege.anyRequired?.flatMap((p) => (typeof p === 'string' ? [p] : p.allOf)) ?? [])
-      );
+      groups.allRequired.push(...(privilege.allRequired ?? []));
+      groups.anyRequired.push(...(privilege.anyRequired ?? []));
 
       return groups;
     },
@@ -56,10 +52,24 @@ export const extractAuthzDescription = (routeSecurity: InternalRouteSecurity | u
     allRequired: AllRequiredCondition,
     anyRequired: AnyRequiredCondition
   ) => {
-    const allDescription = allRequired.length ? `ALL of [${allRequired.join(', ')}]` : '';
-    const anyDescription = anyRequired.length ? `ANY of [${anyRequired.join(' OR ')}]` : '';
+    const allPrivileges = allRequired
+      .map((privilege) =>
+        typeof privilege === 'string' ? privilege : `(${privilege.anyOf?.join(' OR ')})`
+      )
+      .join(' AND ');
+    const anyPrivileges = anyRequired
+      .map((privilege) =>
+        typeof privilege === 'string' ? privilege : `(${privilege.allOf?.join(' AND ')})`
+      )
+      .join(' OR ');
+    const allDescription = allRequired.length ? allPrivileges : '';
+    const anyDescription = anyRequired.length ? anyPrivileges : '';
 
-    return `${allDescription}${allDescription && anyDescription ? ' AND ' : ''}${anyDescription}`;
+    if (allDescription && anyDescription) {
+      return `(${allDescription}) AND (${anyDescription})`;
+    }
+
+    return `${allDescription}${anyDescription}`;
   };
 
   const getDescriptionForRoute = () => {
