@@ -6,24 +6,31 @@
  */
 
 import { encode } from '@kbn/rison';
-import { SLODefinitionResponse } from '@kbn/slo-schema';
+import { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useCallback } from 'react';
 import { paths } from '../../common/locators/paths';
 import { useKibana } from './use_kibana';
+import { createRemoteSloCloneUrl } from '../utils/slo/remote_slo_urls';
+import { useSpace } from './use_space';
 
 export function useCloneSlo() {
   const {
     http: { basePath },
     application: { navigateToUrl },
   } = useKibana().services;
+  const spaceId = useSpace();
 
   return useCallback(
-    (slo: SLODefinitionResponse) => {
-      const clonePath = paths.sloCreateWithEncodedForm(
-        encode({ ...slo, name: `[Copy] ${slo.name}`, id: undefined })
-      );
-      navigateToUrl(basePath.prepend(clonePath));
+    (slo: SLOWithSummaryResponse | SLODefinitionResponse) => {
+      if ('remote' in slo && slo.remote) {
+        window.open(createRemoteSloCloneUrl(slo, spaceId), '_blank');
+      } else {
+        const clonePath = paths.sloCreateWithEncodedForm(
+          encode({ ...slo, name: `[Copy] ${slo.name}`, id: undefined })
+        );
+        navigateToUrl(basePath.prepend(clonePath));
+      }
     },
-    [navigateToUrl, basePath]
+    [navigateToUrl, basePath, spaceId]
   );
 }
