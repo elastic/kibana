@@ -68,7 +68,6 @@ export function registerMetricThresholdRuleType(
     name: i18n.translate('xpack.infra.metrics.alertName', {
       defaultMessage: 'Metric threshold',
     }),
-    fieldsForAAD: O11Y_AAD_FIELDS,
     validate: {
       params: metricThresholdRuleParamsSchema,
     },

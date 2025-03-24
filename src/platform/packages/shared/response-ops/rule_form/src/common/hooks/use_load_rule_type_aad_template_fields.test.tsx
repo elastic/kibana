@@ -63,8 +63,8 @@ describe('useLoadRuleTypeAlertFields', () => {
       return expect(result.current.isInitialLoading).toEqual(false);
     });
 
-    expect(http.get).toHaveBeenLastCalledWith('/internal/rac/alerts/aad_fields', {
-      query: { ruleTypeId: 'ruleTypeId' },
+    expect(http.get).toHaveBeenLastCalledWith('/internal/rac/alerts/alert_fields', {
+      query: { ruleTypeIds: ['ruleTypeId'] },
     });
 
     expect(result.current.data).toMatchInlineSnapshot(`

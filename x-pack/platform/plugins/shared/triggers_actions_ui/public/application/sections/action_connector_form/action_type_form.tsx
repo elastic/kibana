@@ -63,6 +63,7 @@ import {
   ActionConnectorMode,
   NotifyWhenSelectOptions,
 } from '../../../types';
+import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
@@ -98,7 +99,6 @@ export type ActionTypeFormProps = {
   featureId: string;
   producerId: string;
   ruleTypeId?: string;
-  hasFieldsForAAD?: boolean;
   disableErrorMessages?: boolean;
 } & Pick<
   ActionAccordionFormProps,
@@ -149,7 +149,6 @@ export const ActionTypeForm = ({
   producerId,
   featureId,
   ruleTypeId,
-  hasFieldsForAAD,
   disableErrorMessages,
 }: ActionTypeFormProps) => {
   const {
@@ -188,18 +187,17 @@ export const ActionTypeForm = ({
 
   const isSummaryAction = actionItem.frequency?.summary;
 
-  const [useAadTemplateFields, setUseAadTemplateField] = useState(
+  const [useAlertTemplateFields, setUseAlertTemplateFields] = useState(
     actionItem?.useAlertDataForTemplate ?? false
   );
-  const [storedActionParamsForAadToggle, setStoredActionParamsForAadToggle] = useState<
-    Record<string, SavedObjectAttribute>
-  >({});
+  const [storedActionParamsForAlertFieldsToggle, setStoredActionParamsForAlertFieldsToggle] =
+    useState<Record<string, SavedObjectAttribute>>({});
 
-  const { fields: alertFields } = useRuleTypeAlertFields(http, ruleTypeId, useAadTemplateFields);
+  const { fields: alertFields } = useRuleTypeAlertFields(http, ruleTypeId, useAlertTemplateFields);
 
   const templateFields = useMemo(
-    () => (useAadTemplateFields ? alertFields : availableActionVariables),
-    [alertFields, availableActionVariables, useAadTemplateFields]
+    () => (useAlertTemplateFields ? alertFields : availableActionVariables),
+    [alertFields, availableActionVariables, useAlertTemplateFields]
   );
 
   let showMustacheAutocompleteSwitch;
@@ -210,8 +208,8 @@ export const ActionTypeForm = ({
     showMustacheAutocompleteSwitch = false;
   }
 
-  const handleUseAadTemplateFields = useCallback(() => {
-    setUseAadTemplateField((prevVal) => {
+  const handleUseAlertTemplateFields = useCallback(() => {
+    setUseAlertTemplateFields((prevVal) => {
       if (setActionUseAlertDataForTemplate) {
         setActionUseAlertDataForTemplate(!prevVal, index);
       }
@@ -219,13 +217,13 @@ export const ActionTypeForm = ({
     });
     const currentActionParams = { ...actionItem.params };
     for (const key of Object.keys(currentActionParams)) {
-      setActionParamsProperty(key, storedActionParamsForAadToggle[key] ?? '', index);
+      setActionParamsProperty(key, storedActionParamsForAlertFieldsToggle[key] ?? '', index);
     }
-    setStoredActionParamsForAadToggle(currentActionParams);
+    setStoredActionParamsForAlertFieldsToggle(currentActionParams);
   }, [
     setActionUseAlertDataForTemplate,
-    storedActionParamsForAadToggle,
-    setStoredActionParamsForAadToggle,
+    storedActionParamsForAlertFieldsToggle,
+    setStoredActionParamsForAlertFieldsToggle,
     setActionParamsProperty,
     actionItem.params,
     index,
@@ -288,7 +286,7 @@ export const ActionTypeForm = ({
               defaultAADParams[key] = paramValue;
             }
           }
-          setStoredActionParamsForAadToggle(defaultAADParams);
+          setStoredActionParamsForAlertFieldsToggle(defaultAADParams);
         }
       }
     })();
@@ -306,7 +304,7 @@ export const ActionTypeForm = ({
             defaultAADParams[key] = paramValue;
           }
         }
-        setStoredActionParamsForAadToggle(defaultAADParams);
+        setStoredActionParamsForAlertFieldsToggle(defaultAADParams);
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -338,10 +336,10 @@ export const ActionTypeForm = ({
   }, [actionItem, disableErrorMessages]);
 
   useEffect(() => {
-    if (isEmpty(storedActionParamsForAadToggle) && actionItem.params.subAction) {
-      setStoredActionParamsForAadToggle(actionItem.params);
+    if (isEmpty(storedActionParamsForAlertFieldsToggle) && actionItem.params.subAction) {
+      setStoredActionParamsForAlertFieldsToggle(actionItem.params);
     }
-  }, [actionItem.params, storedActionParamsForAadToggle]);
+  }, [actionItem.params, storedActionParamsForAlertFieldsToggle]);
 
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -416,7 +414,11 @@ export const ActionTypeForm = ({
     setActionGroupIdByIndex &&
     !actionItem.frequency?.summary;
 
-  const showActionAlertsFilter = hasFieldsForAAD || producerId === AlertConsumers.SIEM;
+  const { ruleTypesState } = useLoadRuleTypesQuery({ filteredRuleTypes: [] });
+
+  const ruleType = ruleTypeId ? ruleTypesState.data.get(ruleTypeId) : null;
+
+  const showActionAlertsFilter = ruleType?.hasAlertsMappings || producerId === AlertConsumers.SIEM;
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
@@ -531,8 +533,8 @@ export const ActionTypeForm = ({
                 <EuiFlexItem>
                   <EuiSwitch
                     label="Use template fields from alerts index"
-                    checked={useAadTemplateFields}
-                    onChange={handleUseAadTemplateFields}
+                    checked={useAlertTemplateFields}
+                    onChange={handleUseAlertTemplateFields}
                     data-test-subj="mustacheAutocompleteSwitch"
                   />
                 </EuiFlexItem>

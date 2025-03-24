@@ -39,7 +39,6 @@ export function sloBurnRateRuleType(
     name: i18n.translate('xpack.slo.rules.burnRate.name', {
       defaultMessage: 'SLO burn rate',
     }),
-    fieldsForAAD: SLO_BURN_RATE_AAD_FIELDS,
     validate: {
       params: sloBurnRateParamsSchema,
     },

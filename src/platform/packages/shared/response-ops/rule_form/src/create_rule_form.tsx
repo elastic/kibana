@@ -170,8 +170,6 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
 
   const RuleFormUIComponent = isFlyout ? RuleFlyout : RulePage;
 
-  console.log('CreateRuleForm: ', { alertFields });
-
   return (
     <RuleFormStateProvider
       initialRuleFormState={{

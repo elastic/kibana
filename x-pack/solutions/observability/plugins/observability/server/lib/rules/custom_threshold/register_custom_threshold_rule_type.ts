@@ -59,7 +59,6 @@ export function thresholdRuleType(
     name: i18n.translate('xpack.observability.threshold.ruleName', {
       defaultMessage: 'Custom threshold',
     }),
-    fieldsForAAD: CUSTOM_THRESHOLD_AAD_FIELDS,
     validate: {
       params: customThresholdParamsSchema,
     },

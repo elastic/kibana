@@ -125,7 +125,6 @@ export function registerInventoryThresholdRuleType(
       ],
     },
     alerts: MetricsRulesTypeAlertDefinition,
-    fieldsForAAD: O11Y_AAD_FIELDS,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });

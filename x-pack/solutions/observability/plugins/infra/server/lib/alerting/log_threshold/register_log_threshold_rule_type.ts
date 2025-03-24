@@ -173,7 +173,6 @@ export function registerLogThresholdRuleType(
       injectReferences,
     },
     alerts: LogsRulesTypeAlertDefinition,
-    fieldsForAAD: O11Y_AAD_FIELDS,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });

@@ -134,7 +134,6 @@ export const registerSyntheticsTLSCheckRule = (
       return { state: updateState(ruleState, foundCerts) };
     },
     alerts: SyntheticsRuleTypeAlertDefinition,
-    fieldsForAAD: Object.keys(syntheticsRuleFieldMap),
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });

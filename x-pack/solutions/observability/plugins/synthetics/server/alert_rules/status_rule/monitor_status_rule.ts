@@ -108,7 +108,6 @@ export const registerSyntheticsStatusCheckRule = (
       };
     },
     alerts: SyntheticsRuleTypeAlertDefinition,
-    fieldsForAAD: Object.keys(syntheticsRuleFieldMap),
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });

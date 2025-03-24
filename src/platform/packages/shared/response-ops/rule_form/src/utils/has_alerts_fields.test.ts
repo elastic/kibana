@@ -9,25 +9,12 @@
 
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { RuleTypeWithDescription } from '../common/types';
-import { hasFieldsForAad } from './has_fields_for_aad';
+import { hasAlertsFields } from './has_alerts_fields';
 
-describe('hasFieldsForAad', () => {
-  test('should return true if alert has fields for add', () => {
-    const hasFields = hasFieldsForAad({
-      ruleType: {
-        hasFieldsForAAD: true,
-      } as RuleTypeWithDescription,
-      consumer: 'stackAlerts',
-      validConsumers: [],
-    });
-
-    expect(hasFields).toBeTruthy();
-  });
-
+describe('hasAlertsFields', () => {
   test('should return true if producer is SIEM', () => {
-    const hasFields = hasFieldsForAad({
+    const hasFields = hasAlertsFields({
       ruleType: {
-        hasFieldsForAAD: false,
         producer: AlertConsumers.SIEM,
       } as RuleTypeWithDescription,
       consumer: 'stackAlerts',
@@ -38,9 +25,8 @@ describe('hasFieldsForAad', () => {
   });
 
   test('should return true if has alerts mappings', () => {
-    const hasFields = hasFieldsForAad({
+    const hasFields = hasAlertsFields({
       ruleType: {
-        hasFieldsForAAD: false,
         hasAlertsMappings: true,
       } as RuleTypeWithDescription,
       consumer: 'stackAlerts',

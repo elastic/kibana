@@ -21,7 +21,6 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_CASE_IDS,
   MAX_CASES_PER_ALERT,
-  isSiemRuleType,
 } from '@kbn/rule-data-utils';
 
 import {
@@ -168,8 +167,6 @@ export class AlertsClient {
   private readonly esClient: ElasticsearchClient;
   private readonly spaceId: string | undefined;
   private readonly ruleDataService: IRuleDataService;
-  private readonly getRuleType: RuleTypeRegistry['get'];
-  private readonly getRuleList: RuleTypeRegistry['list'];
   private getAlertIndicesAlias!: AlertingServerStart['getAlertIndicesAlias'];
 
   constructor(options: ConstructorOptions) {
@@ -181,8 +178,6 @@ export class AlertsClient {
     // Otherwise, if space is enabled and not specified, it is "default"
     this.spaceId = this.authorization.getSpaceId();
     this.ruleDataService = options.ruleDataService;
-    this.getRuleType = options.getRuleType;
-    this.getRuleList = options.getRuleList;
     this.getAlertIndicesAlias = options.getAlertIndicesAlias;
   }
 
@@ -1224,12 +1219,9 @@ export class AlertsClient {
       indexFilter,
     });
 
-    const x = {
+    return {
       browserFields: fieldDescriptorToBrowserFieldMapper(fields),
       fields,
     };
-
-    console.log('alerting_client getAlertsFields', { fieldsLength: fields.length });
-    return x;
   }
 }

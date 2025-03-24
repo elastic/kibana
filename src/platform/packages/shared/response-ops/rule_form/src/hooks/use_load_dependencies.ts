@@ -23,10 +23,10 @@ import {
   useLoadConnectorTypes,
   useLoadUiConfig,
   useResolveRule,
+  useLoadRuleTypeAlertFields,
 } from '../common/hooks';
 import type { RuleTypeRegistryContract } from '../common/types';
 import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../constants';
-import { useLoadRuleTypeAlertFields } from '../common/hooks/use_load_rule_type_alert_fields';
 
 export interface UseLoadDependencies {
   http: HttpStart;
@@ -122,8 +122,6 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     enabled: canReadConnectors,
     featureId: connectorFeatureId,
   });
-
-  console.log('useLoadDependencies', { computedRuleTypeId, ruleTypeId });
 
   const {
     data: alertFields,
