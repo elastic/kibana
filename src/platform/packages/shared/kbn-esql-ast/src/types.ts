@@ -88,8 +88,6 @@ export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
 
 export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
   sources: ESQLSource[];
-  aggregates?: ESQLAstField[];
-  grouping?: ESQLAstField[];
 }
 
 export interface ESQLAstJoinCommand extends ESQLCommand<'join'> {

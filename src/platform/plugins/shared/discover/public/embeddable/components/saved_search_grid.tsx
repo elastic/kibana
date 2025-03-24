@@ -21,7 +21,6 @@ import {
   getRowHeight,
 } from '@kbn/unified-data-table';
 import { DiscoverGrid } from '../../components/discover_grid';
-import './saved_search_grid.scss';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
