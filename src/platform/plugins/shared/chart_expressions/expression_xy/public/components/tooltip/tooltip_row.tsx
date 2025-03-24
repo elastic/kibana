@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { type UseEuiTheme, shade } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { FC } from 'react';
 
 export interface TooltipData {
@@ -17,7 +19,12 @@ export interface TooltipData {
 export const TooltipRow: FC<TooltipData> = ({ label, value }) => {
   return label && value ? (
     <tr>
-      <td className="detailedTooltip__label">
+      <td
+        css={({ euiTheme }: UseEuiTheme) => css`
+          font-weight: ${euiTheme.font.weight.medium};
+          color: ${shade(euiTheme.colors.ghost, 0.2)};
+        `}
+      >
         <div className="detailedTooltip__labelContainer">{label}</div>
       </td>
 
