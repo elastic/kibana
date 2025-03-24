@@ -24,6 +24,46 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-public.CardIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "CardIcon",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "UsePackageIconType",
+          " & Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/public/components/package_icon.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CardIcon.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "UsePackageIconType",
+              " & Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/public/components/package_icon.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-public.CustomAssetsAccordion",
         "type": "Function",
         "tags": [],
@@ -415,6 +455,47 @@
             ]
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.useLink",
+        "type": "Function",
+        "tags": [],
+        "label": "useLink",
+        "description": [],
+        "signature": [
+          "() => { getPath: (page: ",
+          "StaticPage",
+          " | ",
+          "DynamicPage",
+          ", values?: ",
+          {
+            "pluginId": "fleet",
+            "scope": "public",
+            "docId": "kibFleetPluginApi",
+            "section": "def-public.DynamicPagePathValues",
+            "text": "DynamicPagePathValues"
+          },
+          ") => string; getAbsolutePath: (path: string) => string; getAssetsPath: (path: string) => string; getHref: (page: ",
+          "StaticPage",
+          " | ",
+          "DynamicPage",
+          ", values?: ",
+          {
+            "pluginId": "fleet",
+            "scope": "public",
+            "docId": "kibFleetPluginApi",
+            "section": "def-public.DynamicPagePathValues",
+            "text": "DynamicPagePathValues"
+          },
+          " | undefined) => string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/public/hooks/use_link.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }
