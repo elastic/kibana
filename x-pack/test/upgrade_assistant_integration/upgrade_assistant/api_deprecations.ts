@@ -225,9 +225,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       // There are critical deprecations for Kibana API usage, but we do not
       // surface them in readiness status
-      expect(body.readyForUpgrade).to.be(false);
-      expect(body.details?.length > 0).to.be(true);
-      expect(/Kibana/gi.test(body.details)).to.be(false);
+      expectExpect(body).toEqual({
+        readyForUpgrade: true,
+        details: 'All deprecation warnings have been resolved.',
+      });
     });
   });
 }
