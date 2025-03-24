@@ -16,11 +16,13 @@ import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_clie
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
 import type { SiemRuleMigrationsClientDependencies } from '../types';
 import type {
+  RuleMigrationTaskEvaluateParams,
   RuleMigrationTaskStartParams,
   RuleMigrationTaskStartResult,
   RuleMigrationTaskStopResult,
 } from './types';
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
+import { RuleMigrationTaskEvaluator } from './rule_migrations_task_evaluator';
 
 export type MigrationsRunning = Map<string, RuleMigrationTaskRunner>;
 
@@ -172,5 +174,28 @@ export class RuleMigrationsTaskClient {
       this.logger.error(`Error stopping migration ID:${migrationId}`, err);
       return { exists: true, stopped: false };
     }
+  }
+
+  /** Creates a new evaluator for the rule migration task */
+  async evaluate(params: RuleMigrationTaskEvaluateParams): Promise<void> {
+    const { evaluationId, langsmithSettings, connectorId, invocationConfig, abortController } =
+      params;
+
+    const migrationLogger = this.logger.get('evaluate');
+
+    const migrationTaskEvaluator = new RuleMigrationTaskEvaluator(
+      evaluationId,
+      this.currentUser,
+      abortController,
+      this.data,
+      migrationLogger,
+      this.dependencies
+    );
+
+    await migrationTaskEvaluator.evaluate({
+      connectorId,
+      langsmithSettings,
+      invocationConfig,
+    });
   }
 }

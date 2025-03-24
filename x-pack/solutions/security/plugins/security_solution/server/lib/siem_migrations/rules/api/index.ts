@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { ConfigType } from '../../../../config';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { registerSiemRuleMigrationsCreateRoute } from './create';
 import { registerSiemRuleMigrationsUpdateRoute } from './update';
@@ -22,9 +23,11 @@ import { registerSiemRuleMigrationsResourceGetMissingRoute } from './resources/m
 import { registerSiemRuleMigrationsPrebuiltRulesRoute } from './get_prebuilt_rules';
 import { registerSiemRuleMigrationsIntegrationsRoute } from './get_integrations';
 import { registerSiemRuleMigrationsGetMissingPrivilegesRoute } from './privileges/get_missing_privileges';
+import { registerSiemRuleMigrationsEvaluateRoute } from './evaluation/evaluate';
 
 export const registerSiemRuleMigrationsRoutes = (
   router: SecuritySolutionPluginRouter,
+  config: ConfigType,
   logger: Logger
 ) => {
   registerSiemRuleMigrationsCreateRoute(router, logger);
@@ -44,4 +47,9 @@ export const registerSiemRuleMigrationsRoutes = (
   registerSiemRuleMigrationsResourceGetMissingRoute(router, logger);
 
   registerSiemRuleMigrationsGetMissingPrivilegesRoute(router, logger);
+
+  // Use the same experimental feature flag as the assistant model evaluation for now
+  if (config.experimentalFeatures.assistantModelEvaluation) {
+    registerSiemRuleMigrationsEvaluateRoute(router, logger);
+  }
 };

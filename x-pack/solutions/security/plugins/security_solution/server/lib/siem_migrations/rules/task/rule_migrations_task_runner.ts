@@ -17,7 +17,7 @@ import type { MigrateRuleState } from './agent/types';
 import { getRuleMigrationAgent } from './agent';
 import { RuleMigrationsRetriever } from './retrievers';
 import { SiemMigrationTelemetryClient } from './rule_migrations_telemetry_client';
-import type { MigrationAgent } from './types';
+import type { MigrationAgent, RuleMigrationInput } from './types';
 import { generateAssistantComment } from './util/comments';
 import type { SiemRuleMigrationsClientDependencies, StoredRuleMigration } from '../types';
 import { ActionsClientChat } from './util/actions_client_chat';
@@ -58,8 +58,8 @@ const EXECUTOR_RECOVER_MAX_ATTEMPTS = 3 as const;
 
 export class RuleMigrationTaskRunner {
   private telemetry?: SiemMigrationTelemetryClient;
-  private agent?: MigrationAgent;
-  private retriever?: RuleMigrationsRetriever;
+  protected agent?: MigrationAgent;
+  private retriever: RuleMigrationsRetriever;
   private actionsClientChat: ActionsClientChat;
   private abort: ReturnType<typeof abortSignalToPromise>;
   private executorSleepMultiplier: number = EXECUTOR_SLEEP.initialValueSeconds;
@@ -70,16 +70,21 @@ export class RuleMigrationTaskRunner {
     public readonly startedBy: AuthenticatedUser,
     public readonly abortController: AbortController,
     private readonly data: RuleMigrationsDataClient,
-    private readonly logger: Logger,
-    private readonly dependencies: SiemRuleMigrationsClientDependencies
+    protected readonly logger: Logger,
+    protected readonly dependencies: SiemRuleMigrationsClientDependencies
   ) {
     this.actionsClientChat = new ActionsClientChat(this.dependencies.actionsClient, this.logger);
+    this.retriever = new RuleMigrationsRetriever(this.migrationId, {
+      data: this.data,
+      rules: this.dependencies.rulesClient,
+      savedObjects: this.dependencies.savedObjectsClient,
+    });
     this.abort = abortSignalToPromise(this.abortController.signal);
   }
 
   /** Retrieves the connector and creates the migration agent */
   public async setup(connectorId: string) {
-    const { rulesClient, savedObjectsClient, inferenceClient } = this.dependencies;
+    const { inferenceClient } = this.dependencies;
 
     const model = await this.actionsClientChat.createModel({
       connectorId,
@@ -93,12 +98,6 @@ export class RuleMigrationTaskRunner {
       inferenceClient,
       this.logger
     );
-
-    this.retriever = new RuleMigrationsRetriever(this.migrationId, {
-      data: this.data,
-      rules: rulesClient,
-      savedObjects: savedObjectsClient,
-    });
 
     this.telemetry = new SiemMigrationTelemetryClient(
       this.dependencies.telemetry,
@@ -117,8 +116,7 @@ export class RuleMigrationTaskRunner {
   }
 
   /** Initializes the retriever populating ELSER indices. It may take a few minutes */
-  private async initialize() {
-    assert(this.retriever, 'setup() must be called before initialize()');
+  protected async initialize() {
     await this.retriever.initialize();
   }
 
@@ -166,7 +164,13 @@ export class RuleMigrationTaskRunner {
             try {
               await this.saveRuleProcessing(ruleMigration);
 
-              const migrationResult = await migrateRuleTask(ruleMigration);
+              const resources = await this.retriever.resources.getResources(ruleMigration);
+
+              const migrationResult = await migrateRuleTask({
+                id: ruleMigration.id,
+                original_rule: ruleMigration.original_rule,
+                resources,
+              });
 
               await this.saveRuleCompleted(ruleMigration, migrationResult);
               ruleTranslationTelemetry.success(migrationResult);
@@ -204,7 +208,7 @@ export class RuleMigrationTaskRunner {
     }
   }
 
-  private createMigrateRuleTask(invocationConfig: RunnableConfig) {
+  protected createMigrateRuleTask(invocationConfig: RunnableConfig) {
     assert(this.agent, 'agent is missing please call setup() first');
     const { agent } = this;
     const config: RunnableConfig = {
@@ -213,26 +217,24 @@ export class RuleMigrationTaskRunner {
       ...invocationConfig,
     };
 
-    const invoke = async (migrationRule: StoredRuleMigration): Promise<MigrateRuleState> => {
+    const invoke = async (input: RuleMigrationInput): Promise<MigrateRuleState> => {
       // using withAbort in the agent invocation is not ideal but is a workaround for the issue with the langGraph signal not working properly
-      return this.withAbort<MigrateRuleState>(
-        agent.invoke({ original_rule: migrationRule.original_rule }, config)
-      );
+      return this.withAbort<MigrateRuleState>(agent.invoke(input, config));
     };
 
     // Invokes the rule translation with exponential backoff, should be called only when the rate limit has been hit
     const invokeWithBackoff = async (
-      migrationRule: StoredRuleMigration
+      ruleMigration: RuleMigrationInput
     ): Promise<MigrateRuleState> => {
-      this.logger.debug(`Rate limit backoff started for rule "${migrationRule.id}"`);
+      this.logger.debug(`Rate limit backoff started for rule "${ruleMigration.id}"`);
       let retriesLeft: number = RETRY_CONFIG.maxRetries;
       while (true) {
         try {
           await this.sleepRetry(retriesLeft);
           retriesLeft--;
-          const result = await invoke(migrationRule);
+          const result = await invoke(ruleMigration);
           this.logger.info(
-            `Rate limit backoff completed successfully for rule "${migrationRule.id}" after ${
+            `Rate limit backoff completed successfully for rule "${ruleMigration.id}" after ${
               RETRY_CONFIG.maxRetries - retriesLeft
             } retries`
           );
@@ -240,17 +242,17 @@ export class RuleMigrationTaskRunner {
         } catch (error) {
           if (!this.isRateLimitError(error) || retriesLeft === 0) {
             this.logger.debug(
-              `Rate limit backoff completed unsuccessfully for rule "${migrationRule.id}"`
+              `Rate limit backoff completed unsuccessfully for rule "${ruleMigration.id}"`
             );
             const logMessage =
               retriesLeft === 0
-                ? `Rate limit backoff completed unsuccessfully for rule "${migrationRule.id}"`
-                : `Rate limit backoff interrupted for rule "${migrationRule.id}". ${error} `;
+                ? `Rate limit backoff completed unsuccessfully for rule "${ruleMigration.id}"`
+                : `Rate limit backoff interrupted for rule "${ruleMigration.id}". ${error} `;
             this.logger.debug(logMessage);
             throw error;
           }
           this.logger.debug(
-            `Rate limit backoff not completed for rule "${migrationRule.id}", retries left: ${retriesLeft}`
+            `Rate limit backoff not completed for rule "${ruleMigration.id}", retries left: ${retriesLeft}`
           );
         }
       }
@@ -259,19 +261,19 @@ export class RuleMigrationTaskRunner {
     let backoffPromise: Promise<MigrateRuleState> | undefined;
     // Migrates one rule, this function will be called concurrently by the promise pool.
     // Handles rate limit errors and ensures only one task is executing the backoff retries at a time, the rest of translation will await.
-    const migrateRule = async (migrationRule: StoredRuleMigration): Promise<MigrateRuleState> => {
+    const migrateRule = async (ruleMigration: RuleMigrationInput): Promise<MigrateRuleState> => {
       let recoverAttemptsLeft: number = EXECUTOR_RECOVER_MAX_ATTEMPTS;
       while (true) {
         try {
           await this.executorSleep(); // Random sleep, increased every time we hit the rate limit.
-          return await invoke(migrationRule);
+          return await invoke(ruleMigration);
         } catch (error) {
           if (!this.isRateLimitError(error) || recoverAttemptsLeft === 0) {
             throw error;
           }
           if (!backoffPromise) {
             // only one translation handles the rate limit backoff retries, the rest will await it and try again when it's resolved
-            backoffPromise = invokeWithBackoff(migrationRule);
+            backoffPromise = invokeWithBackoff(ruleMigration);
             this.isWaiting = true;
             return backoffPromise.finally(() => {
               backoffPromise = undefined;
@@ -279,7 +281,7 @@ export class RuleMigrationTaskRunner {
               this.isWaiting = false;
             });
           }
-          this.logger.debug(`Awaiting backoff task for rule "${migrationRule.id}"`);
+          this.logger.debug(`Awaiting backoff task for rule "${ruleMigration.id}"`);
           await backoffPromise.catch(() => {
             throw error; // throw the original error
           });
