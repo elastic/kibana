@@ -994,7 +994,7 @@ x-pack/solutions/search/plugins/search_playground @elastic/search-kibana
 x-pack/solutions/search/plugins/search_solution/search_navigation @elastic/search-kibana
 x-pack/solutions/search/plugins/search_synonyms @elastic/search-kibana
 x-pack/solutions/search/plugins/serverless_search @elastic/search-kibana
-x-pack/solutions/search/plugins/workchat/wci_external_server @elastic/search-kibana
+x-pack/solutions/chat/plugins/wci-external-server @elastic/search-kibana
 x-pack/solutions/search/plugins/workchat/wci_index_source @elastic/search-kibana
 x-pack/solutions/search/plugins/workchat/wci_salesforce @elastic/search-kibana
 x-pack/solutions/search/plugins/workchat/workchat_app @elastic/search-kibana
