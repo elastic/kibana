@@ -32,21 +32,19 @@ function getLinkAndDescription(plugin: Plugin): { link: string; description: str
 }
 
 export function generatePluginList(ossPlugins: Plugins, xpackPlugins: Plugins) {
-  return `<!---
-This is an automatically generated file. Please do not edit directly.
-Instead, run the following from within the kibana repository:
-
-  node scripts/build_plugin_list_docs
-
-You can update the template within ${normalizePath(
-    relative(REPO_ROOT, resolve(__dirname, __filename))
-  )}
--->
-
----
+  return `---
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/plugin-list.html
 ---
+
+% This is an automatically generated file. Please do not edit directly.
+% Instead, run the following from within the kibana repository:
+%
+%  node scripts/build_plugin_list_docs
+%
+% You can update the template within ${normalizePath(
+    relative(REPO_ROOT, resolve(__dirname, __filename))
+  )}
 
 # List of Kibana plugins [plugin-list]
 

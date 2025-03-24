@@ -1,16 +1,14 @@
-<!---
-This is an automatically generated file. Please do not edit directly.
-Instead, run the following from within the kibana repository:
-
-  node scripts/build_plugin_list_docs
-
-You can update the template within src/platform/packages/shared/kbn-dev-utils/src/plugin_list/generate_plugin_list.ts
--->
-
 ---
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/plugin-list.html
 ---
+
+% This is an automatically generated file. Please do not edit directly.
+% Instead, run the following from within the kibana repository:
+%
+%  node scripts/build_plugin_list_docs
+%
+% You can update the template within src/platform/packages/shared/kbn-dev-utils/src/plugin_list/generate_plugin_list.ts
 
 # List of Kibana plugins [plugin-list]
 
