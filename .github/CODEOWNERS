@@ -818,6 +818,7 @@ x-pack/solutions/search/plugins/search_inference_endpoints @elastic/search-kiban
 x-pack/solutions/search/plugins/search_solution/search_navigation @elastic/search-kibana
 x-pack/solutions/search/plugins/search_notebooks @elastic/search-kibana
 x-pack/solutions/search/plugins/search_playground @elastic/search-kibana
+x-pack/solutions/search/plugins/search_query_rules @elastic/search-kibana
 src/platform/packages/shared/kbn-search-response-warnings @elastic/kibana-data-discovery
 x-pack/solutions/search/packages/shared-ui @elastic/search-kibana
 x-pack/solutions/search/plugins/search_synonyms @elastic/search-kibana
