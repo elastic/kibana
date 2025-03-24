@@ -18,3 +18,4 @@
 .buildkite/scripts/steps/checks/renovate.sh
 .buildkite/scripts/steps/checks/native_modules.sh
 .buildkite/scripts/steps/checks/styled_components_mapping.sh
+.buildkite/scripts/steps/checks/check_scout_config.sh

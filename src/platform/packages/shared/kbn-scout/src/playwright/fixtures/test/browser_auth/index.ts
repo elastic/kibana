@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchRoleDescriptor, KibanaRole, PROJECT_DEFAULT_ROLES } from '../../../../common';
+import { KibanaRole, PROJECT_DEFAULT_ROLES } from '../../../../common';
 import { coreWorkerFixtures } from '../../worker';
 
 export type LoginFunction = (role: string) => Promise<void>;
@@ -28,6 +28,12 @@ export interface BrowserAuthFixture {
    * @returns A Promise that resolves once the cookie in browser is set.
    */
   loginAsPrivilegedUser: () => Promise<void>;
+  /**
+   * Logs in as a user with a role.
+   * @param role - A role object that defines the Kibana and ES previleges.
+   * @returns A Promise that resolves once the cookie in browser is set.
+   */
+  loginAs: (role: string) => Promise<void>;
   /**
    * Logs in as a user with a custom role.
    * @param role - A role object that defines the Kibana and ES previleges. Role will re-created if it doesn't exist.
@@ -62,7 +68,7 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
       await setSessionCookie(cookie);
     };
 
-    const loginWithCustomRole = async (role: KibanaRole | ElasticsearchRoleDescriptor) => {
+    const loginWithCustomRole = async (role: KibanaRole) => {
       await samlAuth.setCustomRole(role);
       isCustomRoleCreated = true;
       return loginAs(samlAuth.customRoleName);
@@ -82,6 +88,7 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
       loginAsAdmin,
       loginAsViewer,
       loginAsPrivilegedUser,
+      loginAs,
       loginWithCustomRole,
     });
 
