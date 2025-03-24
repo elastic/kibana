@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { capitalize, mapValues, uniq } from 'lodash';
+import { capitalize, omitBy, uniq } from 'lodash';
 import {
   ContentPackObject,
   ContentPackSavedObject,
@@ -20,8 +20,10 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiCallOut,
-  EuiCheckboxGroup,
+  EuiFieldText,
   EuiFilePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -58,7 +60,9 @@ export function ImportContentPackFlyout({
     []
   );
   const [indexPatterns, setIndexPatterns] = useState<string[]>([]);
-  const [selectedIndexPatterns, setSelectedIndexPatterns] = useState<Record<string, boolean>>({});
+  const [indexPatternReplacements, setIndexPatternReplacements] = useState<Record<string, string>>(
+    {}
+  );
 
   return (
     <EuiFlyout onClose={onClose}>
@@ -115,20 +119,32 @@ export function ImportContentPackFlyout({
 
             {indexPatterns.length ? (
               <EuiCallOut>
-                <p>
-                  We detected index patterns in the content pack. Check the ones you want to replace
-                  with <b>{definition.stream.name}</b>.
-                </p>
-                <EuiCheckboxGroup
-                  options={indexPatterns.map((index) => ({ id: index, label: index }))}
-                  idToSelectedMap={selectedIndexPatterns}
-                  onChange={(id) =>
-                    setSelectedIndexPatterns({
-                      ...selectedIndexPatterns,
-                      ...{ [id]: !selectedIndexPatterns[id] },
-                    })
-                  }
-                />
+                <details>
+                  <summary>Advanced settings</summary>
+                  <EuiSpacer />
+                  <p>
+                    We detected index patterns in the content pack. You can update them here or
+                    later in the imported objects.
+                  </p>
+                  {indexPatterns.map((index) => (
+                    <EuiFlexGroup alignItems="center">
+                      <EuiFlexItem grow={false}>{index}</EuiFlexItem>
+
+                      <EuiFlexItem grow={false}>
+                        <EuiFieldText
+                          compressed
+                          placeholder={index}
+                          onChange={(e) => {
+                            setIndexPatternReplacements({
+                              ...indexPatternReplacements,
+                              [index]: e.target.value,
+                            });
+                          }}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  ))}
+                </details>
               </EuiCallOut>
             ) : null}
 
@@ -171,7 +187,7 @@ export function ImportContentPackFlyout({
                             const service = getDashboardBackupService();
                             const updatedContent = replaceIndexPatterns(
                               record.content,
-                              mapValues(selectedIndexPatterns, () => definition.stream.name)
+                              omitBy(indexPatternReplacements, (value) => !value)
                             );
                             const panels = JSON.parse(updatedContent.attributes.panelsJSON).reduce(
                               (
@@ -238,7 +254,7 @@ export function ImportContentPackFlyout({
                   type: 'saved_object',
                   content: replaceIndexPatterns(
                     object.content,
-                    mapValues(selectedIndexPatterns, () => definition.stream.name)
+                    omitBy(indexPatternReplacements, (value) => !value)
                   ),
                 };
               }
