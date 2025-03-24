@@ -54,5 +54,6 @@ export const useGetMutedAlertsQuery = (
       }
     },
     enabled: ruleIds.length > 0 && enabled !== false,
+    refetchOnWindowFocus: false,
   });
 };

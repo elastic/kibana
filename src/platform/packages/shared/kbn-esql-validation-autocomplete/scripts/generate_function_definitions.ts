@@ -912,7 +912,12 @@ ${
 
   const ESFunctionDefinitionsDirectory = join(
     pathToElasticsearch,
-    'docs/reference/esql/functions/kibana/definition'
+    '/docs/reference/query-languages/esql/kibana/definition/functions'
+  );
+
+  const ESOperatorsDefinitionsDirectory = join(
+    pathToElasticsearch,
+    '/docs/reference/query-languages/esql/kibana/definition/operators'
   );
 
   // read all ES function definitions (the directory is full of JSON files) and create an array of definitions
@@ -920,12 +925,18 @@ ${
     JSON.parse(readFileSync(`${ESFunctionDefinitionsDirectory}/${file}`, 'utf-8'))
   );
 
+  const ESFOperatorDefinitions = readdirSync(ESOperatorsDefinitionsDirectory).map((file) =>
+    JSON.parse(readFileSync(`${ESOperatorsDefinitionsDirectory}/${file}`, 'utf-8'))
+  );
+
+  const allFunctionDefinitions = ESFunctionDefinitions.concat(ESFOperatorDefinitions);
+
   const scalarFunctionDefinitions: FunctionDefinition[] = [];
   const aggFunctionDefinitions: FunctionDefinition[] = [];
   const operatorDefinitions: FunctionDefinition[] = [];
   const groupingFunctionDefinitions: FunctionDefinition[] = [];
 
-  for (const ESDefinition of ESFunctionDefinitions) {
+  for (const ESDefinition of allFunctionDefinitions) {
     if (aliases.has(ESDefinition.name) || excludedFunctions.has(ESDefinition.name)) {
       continue;
     }

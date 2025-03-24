@@ -72,7 +72,11 @@ const generateNoteMock = (documentId: string): Note => ({
 });
 
 const mockNote1 = generateNoteMock('1');
-const mockNote2 = generateNoteMock('2');
+const mockNote2 = {
+  ...generateNoteMock('2'),
+  created: new Date().getTime() + 1000,
+  updated: new Date().getTime() + 1000,
+};
 
 const initialNonEmptyState: NotesState = {
   entities: {
@@ -117,8 +121,7 @@ describe('notesSlice', () => {
       expect(notesReducer(initalEmptyState, { type: 'unknown' })).toEqual(initalEmptyState);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/213905
-    describe.skip('fetchNotesByDocumentIds', () => {
+    describe('fetchNotesByDocumentIds', () => {
       it('should set correct status state when fetching notes by document ids', () => {
         const action = { type: fetchNotesByDocumentIds.pending.type };
 
@@ -175,7 +178,7 @@ describe('notesSlice', () => {
             [newMockNote.noteId]: newMockNote,
             [mockNote2.noteId]: mockNote2,
           },
-          ids: [mockNote2.noteId, newMockNote.noteId],
+          ids: [newMockNote.noteId, mockNote2.noteId],
           status: {
             ...initalEmptyState.status,
             fetchNotesByDocumentIds: ReqStatus.Succeeded,
@@ -200,8 +203,7 @@ describe('notesSlice', () => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/213906
-    describe.skip('fetchNotesBySavedObjectIds', () => {
+    describe('fetchNotesBySavedObjectIds', () => {
       it('should set correct status state when fetching notes by saved object ids', () => {
         const action = { type: fetchNotesBySavedObjectIds.pending.type };
 
@@ -258,7 +260,7 @@ describe('notesSlice', () => {
             [newMockNote.noteId]: newMockNote,
             [mockNote2.noteId]: mockNote2,
           },
-          ids: [mockNote2.noteId, newMockNote.noteId],
+          ids: [newMockNote.noteId, mockNote2.noteId],
           status: {
             ...initalEmptyState.status,
             fetchNotesBySavedObjectIds: ReqStatus.Succeeded,

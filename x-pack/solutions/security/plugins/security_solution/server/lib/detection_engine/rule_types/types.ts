@@ -89,7 +89,6 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   listClient: ListClient;
   searchAfterSize: number;
   bulkCreate: BulkCreate;
-  wrapHits: WrapHits;
   ruleDataClient: IRuleDataClient;
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -106,6 +105,8 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   experimentalFeatures?: ExperimentalFeatures;
   intendedTimestamp: Date | undefined;
   spaceId: string;
+  ignoreFields: Record<string, boolean>;
+  ignoreFieldsRegexes: string[];
 }
 
 export type SecurityAlertType<
@@ -339,11 +340,6 @@ export type BulkCreate = <T extends BaseFieldsLatest>(
 ) => Promise<GenericBulkCreateResponse<T>>;
 
 export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
-
-export type WrapHits = (
-  hits: Array<estypes.SearchHit<SignalSource>>,
-  buildReasonMessage: BuildReasonMessage
-) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
 
 export type WrapSuppressedHits = (
   hits: Array<estypes.SearchHit<SignalSource>>,

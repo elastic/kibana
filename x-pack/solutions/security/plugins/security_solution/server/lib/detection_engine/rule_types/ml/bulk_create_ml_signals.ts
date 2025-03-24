@@ -13,25 +13,13 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { GenericBulkCreateResponse } from '../factories';
+import { wrapHits, type GenericBulkCreateResponse } from '../factories';
 import type { Anomaly } from '../../../machine_learning';
-import type { BulkCreate, WrapHits } from '../types';
-import type { CompleteRule, MachineLearningRuleParams } from '../../rule_schema';
+import type { SecuritySharedParams } from '../types';
+import type { MachineLearningRuleParams } from '../../rule_schema';
 import { buildReasonMessageForMlAlert } from '../utils/reason_formatters';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { createEnrichEventsFunction } from '../utils/enrichments';
-
-interface BulkCreateMlSignalsParams {
-  anomalyHits: Array<estypes.SearchHit<Anomaly>>;
-  completeRule: CompleteRule<MachineLearningRuleParams>;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  id: string;
-  signalsIndex: string;
-  bulkCreate: BulkCreate;
-  wrapHits: WrapHits;
-}
 
 interface EcsAnomaly extends Anomaly {
   '@timestamp': string;
@@ -75,19 +63,24 @@ const transformAnomalyResultsToEcs = (
   }));
 };
 
-export const bulkCreateMlSignals = async (
-  params: BulkCreateMlSignalsParams
-): Promise<GenericBulkCreateResponse<BaseFieldsLatest>> => {
-  const anomalyResults = params.anomalyHits;
-  const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
+export const bulkCreateMlSignals = async ({
+  sharedParams,
+  anomalyHits,
+  services,
+}: {
+  sharedParams: SecuritySharedParams<MachineLearningRuleParams>;
+  anomalyHits: Array<estypes.SearchHit<Anomaly>>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+}): Promise<GenericBulkCreateResponse<BaseFieldsLatest>> => {
+  const ecsResults = transformAnomalyResultsToEcs(anomalyHits);
 
-  const wrappedDocs = params.wrapHits(ecsResults, buildReasonMessageForMlAlert);
-  return params.bulkCreate(
+  const wrappedDocs = wrapHits(sharedParams, ecsResults, buildReasonMessageForMlAlert);
+  return sharedParams.bulkCreate(
     wrappedDocs,
     undefined,
     createEnrichEventsFunction({
-      services: params.services,
-      logger: params.ruleExecutionLogger,
+      services,
+      logger: sharedParams.ruleExecutionLogger,
     })
   );
 };

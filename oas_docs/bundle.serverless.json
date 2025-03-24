@@ -1777,6 +1777,206 @@
         "requestBody": {
           "content": {
             "application/json": {
+              "examples": {
+                "createEsQueryEsqlRuleRequest": {
+                  "description": "Create an Elasticsearch query rule that uses Elasticsearch Query Language (ES|QL) to define its query and a server log connector to send notifications.\n",
+                  "summary": "Elasticsearch query rule (ES|QL)",
+                  "value": {
+                    "actions": [
+                      {
+                        "frequency": {
+                          "notify_when": "onActiveAlert",
+                          "summary": false
+                        },
+                        "group": "query matched",
+                        "id": "d0db1fe0-78d6-11ee-9177-f7d404c8c945",
+                        "params": {
+                          "level": "info",
+                          "message": "Elasticsearch query rule '{{rule.name}}' is active:\n- Value: {{context.value}} - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}} - Timestamp: {{context.date}} - Link: {{context.link}}"
+                        }
+                      }
+                    ],
+                    "consumer": "stackAlerts",
+                    "name": "my Elasticsearch query ESQL rule",
+                    "params": {
+                      "esqlQuery": {
+                        "esql": "FROM kibana_sample_data_logs | KEEP bytes, clientip, host, geo.dest | where geo.dest != \"GB\" | STATS sumbytes = sum(bytes) by clientip, host | WHERE sumbytes > 5000 | SORT sumbytes desc | LIMIT 10"
+                      },
+                      "searchType": "esqlQuery",
+                      "size": 0,
+                      "threshold": [
+                        0
+                      ],
+                      "thresholdComparator": ">",
+                      "timeField": "@timestamp",
+                      "timeWindowSize": 1,
+                      "timeWindowUnit": "d"
+                    },
+                    "rule_type_id": ".es-query",
+                    "schedule": {
+                      "interval": "1d"
+                    }
+                  }
+                },
+                "createEsQueryKqlRuleRequest": {
+                  "description": "Create an Elasticsearch query rule that uses Kibana query language (KQL).",
+                  "summary": "Elasticsearch query rule (KQL)",
+                  "value": {
+                    "consumer": "alerts",
+                    "name": "my Elasticsearch query KQL rule",
+                    "params": {
+                      "aggType": "count",
+                      "excludeHitsFromPreviousRun": true,
+                      "groupBy": "all",
+                      "searchConfiguration": {
+                        "index": "90943e30-9a47-11e8-b64d-95841ca0b247",
+                        "query": {
+                          "language": "kuery",
+                          "query": "\"\"geo.src : \"US\" \"\""
+                        }
+                      },
+                      "searchType": "searchSource",
+                      "size": 100,
+                      "threshold": [
+                        1000
+                      ],
+                      "thresholdComparator": ">",
+                      "timeWindowSize": 5,
+                      "timeWindowUnit": "m"
+                    },
+                    "rule_type_id": ".es-query",
+                    "schedule": {
+                      "interval": "1m"
+                    }
+                  }
+                },
+                "createEsQueryRuleRequest": {
+                  "description": "Create an Elasticsearch query rule that uses Elasticsearch query domain specific language (DSL) to define its query and a server log connector to send notifications.\n",
+                  "summary": "Elasticsearch query rule (DSL)",
+                  "value": {
+                    "actions": [
+                      {
+                        "frequency": {
+                          "notify_when": "onThrottleInterval",
+                          "summary": true,
+                          "throttle": "1d"
+                        },
+                        "group": "query matched",
+                        "id": "fdbece50-406c-11ee-850e-c71febc4ca7f",
+                        "params": {
+                          "level": "info",
+                          "message": "The system has detected {{alerts.new.count}} new, {{alerts.ongoing.count}} ongoing, and {{alerts.recovered.count}} recovered alerts."
+                        }
+                      },
+                      {
+                        "frequency": {
+                          "notify_when": "onActionGroupChange",
+                          "summary": false
+                        },
+                        "group": "recovered",
+                        "id": "fdbece50-406c-11ee-850e-c71febc4ca7f",
+                        "params": {
+                          "level": "info",
+                          "message": "Recovered"
+                        }
+                      }
+                    ],
+                    "consumer": "alerts",
+                    "name": "my Elasticsearch query rule",
+                    "params": {
+                      "esQuery": "\"\"\"{\"query\":{\"match_all\" : {}}}\"\"\"",
+                      "index": [
+                        "kibana_sample_data_logs"
+                      ],
+                      "size": 100,
+                      "threshold": [
+                        100
+                      ],
+                      "thresholdComparator": ">",
+                      "timeField": "@timestamp",
+                      "timeWindowSize": 1,
+                      "timeWindowUnit": "d"
+                    },
+                    "rule_type_id": ".es-query",
+                    "schedule": {
+                      "interval": "1d"
+                    }
+                  }
+                },
+                "createIndexThresholdRuleRequest": {
+                  "description": "Create an index threshold rule that uses a server log connector to send notifications when the threshold is met.\n",
+                  "summary": "Index threshold rule",
+                  "value": {
+                    "actions": [
+                      {
+                        "frequency": {
+                          "notify_when": "onActionGroupChange",
+                          "summary": false
+                        },
+                        "group": "threshold met",
+                        "id": "48de3460-f401-11ed-9f8e-399c75a2deeb",
+                        "params": {
+                          "level": "info",
+                          "message": "Rule '{{rule.name}}' is active for group '{{context.group}}':\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+                        }
+                      }
+                    ],
+                    "alert_delay": {
+                      "active": 3
+                    },
+                    "consumer": "alerts",
+                    "name": "my rule",
+                    "params": {
+                      "aggField": "sheet.version",
+                      "aggType": "avg",
+                      "groupBy": "top",
+                      "index": [
+                        ".test-index"
+                      ],
+                      "termField": "name.keyword",
+                      "termSize": 6,
+                      "threshold": [
+                        1000
+                      ],
+                      "thresholdComparator": ">",
+                      "timeField": "@timestamp",
+                      "timeWindowSize": 5,
+                      "timeWindowUnit": "m"
+                    },
+                    "rule_type_id": ".index-threshold",
+                    "schedule": {
+                      "interval": "1m"
+                    },
+                    "tags": [
+                      "cpu"
+                    ]
+                  }
+                },
+                "createTrackingContainmentRuleRequest": {
+                  "description": "Create a tracking containment rule that checks when an entity is contained or no longer contained within a boundary.\n",
+                  "summary": "Tracking containment rule",
+                  "value": {
+                    "consumer": "alerts",
+                    "name": "my tracking rule",
+                    "params": {
+                      "boundaryGeoField": "location",
+                      "boundaryIndexId": "0cd90abf-abe7-44c7-909a-f621bbbcfefc",
+                      "boundaryIndexTitle": "boundary*",
+                      "boundaryNameField": "name",
+                      "boundaryType": "entireIndex",
+                      "dateField\"": "@timestamp",
+                      "entity": "agent.keyword",
+                      "geoField": "geo.coordinates",
+                      "index": "kibana_sample_data_logs",
+                      "indexId": "90943e30-9a47-11e8-b64d-95841ca0b247"
+                    },
+                    "rule_type_id": ".geo-containment",
+                    "schedule": {
+                      "interval": "1h"
+                    }
+                  }
+                }
+              },
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -2073,6 +2273,339 @@
           "200": {
             "content": {
               "application/json": {
+                "examples": {
+                  "createEsQueryEsqlRuleResponse": {
+                    "description": "The response for successfully creating an Elasticsearch query rule that uses Elasticsearch Query Language (ES|QL).",
+                    "summary": "Elasticsearch query rule (ES|QL)",
+                    "value": {
+                      "actions": [
+                        {
+                          "connector_type_id": ".server-log",
+                          "frequency": {
+                            "notify_when": "onActiveAlert",
+                            "summary": false,
+                            "throttle": null
+                          },
+                          "group": "query matched",
+                          "id": "d0db1fe0-78d6-11ee-9177-f7d404c8c945",
+                          "params": {
+                            "level": "info",
+                            "message": "Elasticsearch query rule '{{rule.name}}' is active:\n- Value: {{context.value}} - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}} - Timestamp: {{context.date}} - Link: {{context.link}}"
+                          },
+                          "uuid": "bfe370a3-531b-4855-bbe6-ad739f578844"
+                        }
+                      ],
+                      "api_key_created_by_user": false,
+                      "api_key_owner": "elastic",
+                      "consumer": "stackAlerts",
+                      "created_at": "2023-11-01T19:00:10.453Z",
+                      "created_by": "elastic",
+                      "enabled": true,
+                      "execution_status": {
+                        "last_execution_date": "2023-11-01T19:00:10.453Z",
+                        "status": "pending"
+                      },
+                      "id": "e0d62360-78e8-11ee-9177-f7d404c8c945",
+                      "mute_all": false,
+                      "muted_alert_ids": [],
+                      "name": "my Elasticsearch query ESQL rule",
+                      "notify_when": null,
+                      "params": {
+                        "aggType": "count",
+                        "esqlQuery": {
+                          "esql": "FROM kibana_sample_data_logs | keep bytes, clientip, host, geo.dest | WHERE geo.dest != \"GB\" | stats sumbytes = sum(bytes) by clientip, host | WHERE sumbytes > 5000 | sort sumbytes desc | limit 10"
+                        },
+                        "excludeHitsFromPreviousRun\"": "true,",
+                        "groupBy": "all",
+                        "searchType": "esqlQuery",
+                        "size": 0,
+                        "threshold": [
+                          0
+                        ],
+                        "thresholdComparator": ">",
+                        "timeField": "@timestamp",
+                        "timeWindowSize": 1,
+                        "timeWindowUnit": "d"
+                      },
+                      "revision": 0,
+                      "rule_type_id": ".es-query",
+                      "running": false,
+                      "schedule": {
+                        "interval": "1d"
+                      },
+                      "scheduled_task_id": "e0d62360-78e8-11ee-9177-f7d404c8c945",
+                      "tags": [],
+                      "throttle": null,
+                      "updated_at": "2023-11-01T19:00:10.453Z",
+                      "updated_by": "elastic\","
+                    }
+                  },
+                  "createEsQueryKqlRuleResponse": {
+                    "description": "The response for successfully creating an Elasticsearch query rule that uses Kibana query language (KQL).",
+                    "summary": "Elasticsearch query rule (KQL)",
+                    "value": {
+                      "actions": [],
+                      "api_key_created_by_user": false,
+                      "api_key_owner": "elastic",
+                      "consumer": "alerts",
+                      "created_at": "2023-07-14T20:24:50.729Z",
+                      "created_by": "elastic",
+                      "enabled": true,
+                      "execution_status": {
+                        "last_execution_date": "2023-07-14T20:24:50.729Z",
+                        "status": "pending"
+                      },
+                      "id": "7bd506d0-2284-11ee-8fad-6101956ced88",
+                      "mute_all": false,
+                      "muted_alert_ids": [],
+                      "name": "my Elasticsearch query KQL rule\"",
+                      "notify_when": null,
+                      "params": {
+                        "aggType": "count",
+                        "excludeHitsFromPreviousRun": true,
+                        "groupBy": "all",
+                        "searchConfiguration": {
+                          "index": "90943e30-9a47-11e8-b64d-95841ca0b247",
+                          "query": {
+                            "language": "kuery",
+                            "query": "\"\"geo.src : \"US\" \"\""
+                          }
+                        },
+                        "searchType": "searchSource",
+                        "size": 100,
+                        "threshold": [
+                          1000
+                        ],
+                        "thresholdComparator": ">",
+                        "timeWindowSize": 5,
+                        "timeWindowUnit": "m"
+                      },
+                      "revision": 0,
+                      "rule_type_id": ".es-query",
+                      "running": false,
+                      "schedule": {
+                        "interval": "1m"
+                      },
+                      "scheduled_task_id": "7bd506d0-2284-11ee-8fad-6101956ced88",
+                      "tags": [],
+                      "throttle": null,
+                      "updated_at": "2023-07-14T20:24:50.729Z",
+                      "updated_by": "elastic"
+                    }
+                  },
+                  "createEsQueryRuleResponse": {
+                    "description": "The response for successfully creating an Elasticsearch query rule that uses Elasticsearch query domain specific language (DSL).",
+                    "summary": "Elasticsearch query rule (DSL)",
+                    "value": {
+                      "actions": [
+                        {
+                          "connector_type_id": ".server-log",
+                          "frequency": {
+                            "notify_when": "onThrottleInterval",
+                            "summary": true,
+                            "throttle": "1d"
+                          },
+                          "group": "query matched",
+                          "id": "fdbece50-406c-11ee-850e-c71febc4ca7f",
+                          "params": {
+                            "level": "info",
+                            "message": "The system has detected {{alerts.new.count}} new, {{alerts.ongoing.count}} ongoing, and {{alerts.recovered.count}} recovered alerts."
+                          },
+                          "uuid": "53f3c2a3-e5d0-4cfa-af3b-6f0881385e78"
+                        },
+                        {
+                          "connector_type_id": ".server-log",
+                          "frequency": {
+                            "notify_when": "onActionGroupChange",
+                            "summary": false,
+                            "throttle": null
+                          },
+                          "group": "recovered",
+                          "id": "fdbece50-406c-11ee-850e-c71febc4ca7f",
+                          "params": {
+                            "level": "info",
+                            "message": "Recovered"
+                          },
+                          "uuid": "2324e45b-c0df-45c7-9d70-4993e30be758"
+                        }
+                      ],
+                      "api_key_created_by_user": false,
+                      "api_key_owner": "elastic",
+                      "consumer": "alerts",
+                      "created_at": "2023-08-22T00:03:38.263Z",
+                      "created_by": "elastic",
+                      "enabled": true,
+                      "execution_status": {
+                        "last_execution_date": "2023-08-22T00:03:38.263Z",
+                        "status": "pending"
+                      },
+                      "id": "58148c70-407f-11ee-850e-c71febc4ca7f",
+                      "mute_all": false,
+                      "muted_alert_ids": [],
+                      "name": "my Elasticsearch query rule",
+                      "notify_when": null,
+                      "params": {
+                        "aggType": "count",
+                        "esQuery": "\"\"\"{\"query\":{\"match_all\" : {}}}\"\"\"",
+                        "excludeHitsFromPreviousRun": true,
+                        "groupBy": "all",
+                        "index": [
+                          "kibana_sample_data_logs"
+                        ],
+                        "searchType": "esQuery",
+                        "size": 100,
+                        "threshold": [
+                          100
+                        ],
+                        "thresholdComparator": ">",
+                        "timeField": "@timestamp",
+                        "timeWindowSize": 1,
+                        "timeWindowUnit": "d"
+                      },
+                      "revision": 0,
+                      "rule_type_id": ".es-query",
+                      "running": false,
+                      "schedule": {
+                        "interval": "1d"
+                      },
+                      "scheduled_task_id": "58148c70-407f-11ee-850e-c71febc4ca7f",
+                      "tags": [],
+                      "throttle": null,
+                      "updated_at": "2023-08-22T00:03:38.263Z",
+                      "updated_by": "elastic"
+                    }
+                  },
+                  "createIndexThresholdRuleResponse": {
+                    "description": "The response for successfully creating an index threshold rule.",
+                    "summary": "Index threshold rule",
+                    "value": {
+                      "actions": [
+                        {
+                          "connector_type_id": ".server-log",
+                          "frequency": {
+                            "notify_when": "onActionGroupChange",
+                            "summary": false,
+                            "throttle": null
+                          },
+                          "group": "threshold met",
+                          "id": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2",
+                          "params": {
+                            "level": "info",
+                            "message": "Rule {{rule.name}} is active for group {{context.group} :\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+                          },
+                          "uuid": "07aef2a0-9eed-4ef9-94ec-39ba58eb609d"
+                        }
+                      ],
+                      "alert_delay": {
+                        "active": 3
+                      },
+                      "api_key_created_by_user": false,
+                      "api_key_owner": "elastic",
+                      "consumer": "alerts",
+                      "created_at": "2022-06-08T17:20:31.632Z",
+                      "created_by": "elastic",
+                      "enabled": true,
+                      "execution_status": {
+                        "last_execution_date": "2022-06-08T17:20:31.632Z",
+                        "status": "pending"
+                      },
+                      "id": "41893910-6bca-11eb-9e0d-85d233e3ee35",
+                      "mute_all": false,
+                      "muted_alert_ids": [],
+                      "name": "my rule",
+                      "notify_when": null,
+                      "params": {
+                        "aggField": "sheet.version",
+                        "aggType": "avg",
+                        "groupBy": "top",
+                        "index": [
+                          ".test-index"
+                        ],
+                        "termField": "name.keyword",
+                        "termSize": 6,
+                        "threshold": [
+                          1000
+                        ],
+                        "thresholdComparator": ">",
+                        "timeField": "@timestamp",
+                        "timeWindowSize": 5,
+                        "timeWindowUnit": "m"
+                      },
+                      "revision": 0,
+                      "rule_type_id": ".index-threshold",
+                      "running": false,
+                      "schedule": {
+                        "interval": "1m"
+                      },
+                      "scheduled_task_id": "425b0800-6bca-11eb-9e0d-85d233e3ee35",
+                      "tags": [
+                        "cpu"
+                      ],
+                      "throttle": null,
+                      "updated_at": "2022-06-08T17:20:31.632Z",
+                      "updated_by": "elastic"
+                    }
+                  },
+                  "createTrackingContainmentRuleResponse": {
+                    "description": "The response for successfully creating a tracking containment rule.",
+                    "summary": "Tracking containment rule",
+                    "value": {
+                      "actions": [],
+                      "api_key_created_by_user": false,
+                      "api_key_owner": "elastic",
+                      "consumer": "alerts",
+                      "created_at": "2024-02-14T19:52:55.920Z",
+                      "created_by": "elastic",
+                      "enabled": true,
+                      "execution_status": {
+                        "last_duration": 74,
+                        "last_execution_date": "2024-02-15T03:25:38.125Z",
+                        "status": "ok"
+                      },
+                      "id": "b6883f9d-5f70-4758-a66e-369d7c26012f",
+                      "last_run": {
+                        "alerts_count": {
+                          "active": 0,
+                          "ignored": 0,
+                          "new": 0,
+                          "recovered": 0
+                        },
+                        "outcome": "succeeded",
+                        "outcome_msg": null,
+                        "outcome_order": 0,
+                        "warning": null
+                      },
+                      "mute_all": false,
+                      "muted_alert_ids": [],
+                      "name": "my tracking rule",
+                      "next_run": "2024-02-15T03:26:38.033Z",
+                      "notify_when": null,
+                      "params": {
+                        "boundaryGeoField": "location",
+                        "boundaryIndexId": "0cd90abf-abe7-44c7-909a-f621bbbcfefc",
+                        "boundaryIndexTitle": "boundary*",
+                        "boundaryNameField": "name",
+                        "boundaryType": "entireIndex",
+                        "dateField": "@timestamp",
+                        "entity": "agent.keyword",
+                        "geoField": "geo.coordinates",
+                        "index": "kibana_sample_data_logs",
+                        "indexId": "90943e30-9a47-11e8-b64d-95841ca0b247"
+                      },
+                      "revision": 1,
+                      "rule_type_id": ".geo-containment",
+                      "running": false,
+                      "schedule": {
+                        "interval": "1h"
+                      },
+                      "scheduled_task_id": "b6883f9d-5f70-4758-a66e-369d7c26012f",
+                      "tags": [],
+                      "throttle": null,
+                      "updated_at": "2024-02-15T03:24:32.574Z",
+                      "updated_by": "elastic"
+                    }
+                  }
+                },
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -2970,6 +3503,50 @@
         "requestBody": {
           "content": {
             "application/json": {
+              "examples": {
+                "updateRuleRequest": {
+                  "description": "Update an index threshold rule that uses a server log connector to send notifications when the threshold is met.",
+                  "summary": "Index threshold rule",
+                  "value": {
+                    "actions": [
+                      {
+                        "frequency": {
+                          "notify_when": "onActionGroupChange",
+                          "summary": false
+                        },
+                        "group": "threshold met",
+                        "id": "96b668d0-a1b6-11ed-afdf-d39a49596974",
+                        "params": {
+                          "level": "info",
+                          "message": "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+                        }
+                      }
+                    ],
+                    "name": "new name",
+                    "params": {
+                      "aggField": "sheet.version",
+                      "aggType": "avg",
+                      "groupBy": "top",
+                      "index": [
+                        ".updated-index"
+                      ],
+                      "termField": "name.keyword",
+                      "termSize": 6,
+                      "threshold": [
+                        1000
+                      ],
+                      "thresholdComparator": ">",
+                      "timeField": "@timestamp",
+                      "timeWindowSize": 5,
+                      "timeWindowUnit": "m"
+                    },
+                    "schedule": {
+                      "interval": "1m"
+                    },
+                    "tags": []
+                  }
+                }
+              },
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -3249,6 +3826,86 @@
           "200": {
             "content": {
               "application/json": {
+                "examples": {
+                  "updateRuleResponse": {
+                    "description": "The response for successfully updating an index threshold rule.",
+                    "summary": "Index threshold rule",
+                    "value": {
+                      "actions": [
+                        {
+                          "connector_type_id": ".server-log",
+                          "frequency": {
+                            "notify_when": "onActionGroupChange",
+                            "summary": false,
+                            "throttle": null
+                          },
+                          "group": "threshold met",
+                          "id": "96b668d0-a1b6-11ed-afdf-d39a49596974",
+                          "params": {
+                            "level": "info",
+                            "message": "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}"
+                          },
+                          "uuid": "07aef2a0-9eed-4ef9-94ec-39ba58eb609d"
+                        }
+                      ],
+                      "api_key_created_by_user": false,
+                      "api_key_owner": "elastic",
+                      "consumer": "alerts",
+                      "created_at": "2024-03-26T23:13:20.985Z",
+                      "created_by": "elastic",
+                      "enabled": true,
+                      "execution_status": {
+                        "last_duration": 52,
+                        "last_execution_date": "2024-03-26T23:22:51.390Z",
+                        "status": "ok"
+                      },
+                      "id": "ac4e6b90-6be7-11eb-ba0d-9b1c1f912d74",
+                      "last_run": {
+                        "alerts_count": {
+                          "active": 0,
+                          "ignored": 0,
+                          "new": 0,
+                          "recovered": 0
+                        },
+                        "outcome": "succeeded",
+                        "outcome_msg": null,
+                        "warning": null
+                      },
+                      "mute_all": false,
+                      "muted_alert_ids": [],
+                      "name": "new name",
+                      "next_run": "2024-03-26T23:23:51.316Z",
+                      "params": {
+                        "aggField": "sheet.version",
+                        "aggType": "avg",
+                        "groupBy": "top",
+                        "index": [
+                          ".updated-index"
+                        ],
+                        "termField": "name.keyword",
+                        "termSize": 6,
+                        "threshold": [
+                          1000
+                        ],
+                        "thresholdComparator": ">",
+                        "timeField": "@timestamp",
+                        "timeWindowSize": 5,
+                        "timeWindowUnit": "m"
+                      },
+                      "revision": 1,
+                      "rule_type_id": ".index-threshold",
+                      "running": false,
+                      "schedule": {
+                        "interval": "1m"
+                      },
+                      "scheduled_task_id": "4c5eda00-e74f-11ec-b72f-5b18752ff9ea",
+                      "tags": [],
+                      "throttle": null,
+                      "updated_at": "2024-03-26T23:22:59.949Z",
+                      "updated_by": "elastic"
+                    }
+                  }
+                },
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -4604,6 +5261,59 @@
         ]
       }
     },
+    "/api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}": {
+      "delete": {
+        "operationId": "delete-alerting-rule-ruleid-snooze-schedule-scheduleid",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The identifier for the rule.",
+            "in": "path",
+            "name": "ruleId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The identifier for the snooze schedule.",
+            "in": "path",
+            "name": "scheduleId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "description": "Indicates an invalid schema."
+          },
+          "403": {
+            "description": "Indicates that this call is forbidden."
+          },
+          "404": {
+            "description": "Indicates a rule with the given id does not exist."
+          }
+        },
+        "summary": "Delete a snooze schedule for a rule",
+        "tags": [
+          "alerting"
+        ]
+      }
+    },
     "/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute": {
       "post": {
         "operationId": "post-alerting-rule-rule-id-alert-alert-id-mute",
@@ -4861,6 +5571,257 @@
           "200": {
             "content": {
               "application/json": {
+                "examples": {
+                  "findConditionalActionRulesResponse": {
+                    "description": "A response that contains information about an index threshold rule.",
+                    "summary": "Index threshold rule",
+                    "value": {
+                      "data": [
+                        {
+                          "actions": [
+                            {
+                              "frequency": {
+                                "notify_when": "onActionGroupChange",
+                                "summary": false,
+                                "throttle": null
+                              },
+                              "group": "threshold met",
+                              "id": "9dca3e00-74f5-11ed-9801-35303b735aef",
+                              "params": {
+                                "connector_type_id": ".server-log",
+                                "level": "info",
+                                "message": "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+                              },
+                              "uuid": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61"
+                            }
+                          ],
+                          "api_key_created_by_user": false,
+                          "api_key_owner": "elastic",
+                          "consumer": "alerts",
+                          "created_at": "2022-12-05T23:40:33.132Z",
+                          "created_by": "elastic",
+                          "enabled": true,
+                          "execution_status": {
+                            "last_duration": 48,
+                            "last_execution_date": "2022-12-06T01:44:23.983Z",
+                            "status": "ok"
+                          },
+                          "id": "3583a470-74f6-11ed-9801-35303b735aef",
+                          "last_run": {
+                            "alerts_count": {
+                              "active": 0,
+                              "ignored": 0,
+                              "new": 0,
+                              "recovered": 0
+                            },
+                            "outcome": "succeeded",
+                            "outcome_msg": null,
+                            "warning": null
+                          },
+                          "mute_all": false,
+                          "muted_alert_ids": [],
+                          "name": "my alert",
+                          "next_run": "2022-12-06T01:45:23.912Z",
+                          "params": {
+                            "aggField": "sheet.version",
+                            "aggType": "avg",
+                            "groupBy": "top",
+                            "index": [
+                              "test-index"
+                            ],
+                            "termField": "name.keyword",
+                            "termSize": 6,
+                            "threshold": [
+                              1000
+                            ],
+                            "thresholdComparator": ">",
+                            "timeField": "@timestamp",
+                            "timeWindowSize": 5,
+                            "timeWindowUnit": "m"
+                          },
+                          "revision": 1,
+                          "rule_type_id": ".index-threshold",
+                          "schedule": {
+                            "interval": "1m"
+                          },
+                          "scheduled_task_id": "3583a470-74f6-11ed-9801-35303b735aef",
+                          "tags": [
+                            "cpu"
+                          ],
+                          "throttle": null,
+                          "updated_at": "2022-12-05T23:40:33.132Z",
+                          "updated_by": "elastic"
+                        }
+                      ],
+                      "page": 1,
+                      "per_page": 10,
+                      "total": 1
+                    }
+                  },
+                  "findRulesResponse": {
+                    "description": "A response that contains information about a security rule that has conditional actions.",
+                    "summary": "Security rule",
+                    "value": {
+                      "data": [
+                        {
+                          "actions": [
+                            {
+                              "alerts_filter": {
+                                "query": {
+                                  "filters": [
+                                    {
+                                      "$state": {
+                                        "store": "appState"
+                                      },
+                                      "meta": {
+                                        "alias": null,
+                                        "disabled": false,
+                                        "field": "client.geo.region_iso_code",
+                                        "index": "c4bdca79-e69e-4d80-82a1-e5192c621bea",
+                                        "key": "client.geo.region_iso_code",
+                                        "negate": false,
+                                        "params": {
+                                          "query": "CA-QC",
+                                          "type": "phrase"
+                                        }
+                                      },
+                                      "query": {
+                                        "match_phrase": {
+                                          "client.geo.region_iso_code": "CA-QC"
+                                        }
+                                      }
+                                    }
+                                  ],
+                                  "kql": ""
+                                },
+                                "timeframe": {
+                                  "days": [
+                                    7
+                                  ],
+                                  "hours": {
+                                    "end": "17:00",
+                                    "start": "08:00"
+                                  },
+                                  "timezone": "UTC"
+                                }
+                              },
+                              "connector_type_id": ".index",
+                              "frequency": {
+                                "notify_when": "onActiveAlert",
+                                "summary": true,
+                                "throttle": null
+                              },
+                              "group": "default",
+                              "id": "49eae970-f401-11ed-9f8e-399c75a2deeb",
+                              "params": {
+                                "documents": [
+                                  {
+                                    "alert_id": {
+                                      "[object Object]": null
+                                    },
+                                    "context_message": {
+                                      "[object Object]": null
+                                    },
+                                    "rule_id": {
+                                      "[object Object]": null
+                                    },
+                                    "rule_name": {
+                                      "[object Object]": null
+                                    }
+                                  }
+                                ]
+                              },
+                              "uuid": "1c7a1280-f28c-4e06-96b2-e4e5f05d1d61"
+                            }
+                          ],
+                          "api_key_created_by_user": false,
+                          "api_key_owner": "elastic",
+                          "consumer": "siem",
+                          "created_at": "2023-05-16T15:50:28.358Z",
+                          "created_by": "elastic",
+                          "enabled": true,
+                          "execution_status": {
+                            "last_duration": 166,
+                            "last_execution_date": "2023-05-16T20:26:49.590Z",
+                            "status": "ok"
+                          },
+                          "id": "6107a8f0-f401-11ed-9f8e-399c75a2deeb",
+                          "last_run": {
+                            "alerts_count": {
+                              "active": 0,
+                              "ignored": 0,
+                              "new": 0,
+                              "recovered": 0
+                            },
+                            "outcome": "succeeded",
+                            "outcome_msg": [
+                              "Rule execution completed successfully"
+                            ],
+                            "outcome_order": 0,
+                            "warning": null
+                          },
+                          "mute_all": false,
+                          "muted_alert_ids": [],
+                          "name": "security_rule",
+                          "next_run": "2023-05-16T20:27:49.507Z",
+                          "notify_when": null,
+                          "params": {
+                            "author": [],
+                            "description": "A security threshold rule.",
+                            "exceptionsList": [],
+                            "falsePositives": [],
+                            "filters": [],
+                            "from": "now-3660s",
+                            "immutable": false,
+                            "index": [
+                              "kibana_sample_data_logs"
+                            ],
+                            "language": "kuery",
+                            "license": "",
+                            "maxSignals": 100,
+                            "meta": {
+                              "from": "1h",
+                              "kibana_siem_app_url": "https://localhost:5601/app/security"
+                            },
+                            "outputIndex": "",
+                            "query": "*",
+                            "references": [],
+                            "riskScore": 21,
+                            "riskScoreMapping": [],
+                            "ruleId": "an_internal_rule_id",
+                            "severity": "low",
+                            "severityMapping": [],
+                            "threat": [],
+                            "threshold": {
+                              "cardinality": [],
+                              "field": [
+                                "bytes"
+                              ],
+                              "value": 1
+                            },
+                            "to": "now",
+                            "type": "threshold",
+                            "version": 1
+                          },
+                          "revision": 1,
+                          "rule_type_id": "siem.thresholdRule",
+                          "running": false,
+                          "schedule": {
+                            "interval": "1m"
+                          },
+                          "scheduled_task_id": "6107a8f0-f401-11ed-9f8e-399c75a2deeb",
+                          "tags": [],
+                          "throttle": null,
+                          "updated_at": "2023-05-16T20:25:42.559Z",
+                          "updated_by": "elastic"
+                        }
+                      ],
+                      "page": 1,
+                      "per_page": 10,
+                      "total": 1
+                    }
+                  }
+                },
                 "schema": {
                   "additionalProperties": false,
                   "properties": {
@@ -9034,6 +9995,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -9261,6 +10225,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -9336,6 +10303,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -9477,6 +10447,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -9712,6 +10685,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -10795,6 +11771,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -12087,6 +13066,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -13117,6 +14099,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -13210,6 +14195,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -13385,6 +14373,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -14381,6 +15372,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -15688,6 +16682,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -16716,6 +17713,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -16798,6 +17798,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -16823,6 +17826,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -17427,6 +18433,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -17575,6 +18584,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -17718,6 +18730,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -17838,6 +18853,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -18420,6 +19438,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -18509,6 +19530,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -18737,6 +19761,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -18868,6 +19895,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -18927,6 +19957,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -19037,6 +20070,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -19144,6 +20180,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -19260,6 +20299,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -19374,6 +20416,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -19500,6 +20545,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -19581,6 +20629,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -19645,6 +20696,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -19739,6 +20793,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -19827,6 +20884,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -19904,6 +20964,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -19984,6 +21047,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -20439,6 +21505,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -20919,6 +21988,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -21125,6 +22197,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -21211,6 +22286,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -21310,6 +22388,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -21459,6 +22540,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -21569,6 +22653,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -21641,6 +22728,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -21788,6 +22878,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -21970,6 +23063,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -22104,6 +23200,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -22182,6 +23281,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -22283,6 +23385,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -22426,6 +23531,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -22525,6 +23633,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -22733,6 +23844,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -22847,6 +23961,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -23448,6 +24565,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -23630,6 +24750,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -23907,6 +25030,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -24138,6 +25264,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -24197,6 +25326,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -24273,6 +25405,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -24442,6 +25577,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -25152,6 +26290,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -25369,6 +26510,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -26063,6 +27207,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -26081,6 +27228,196 @@
           }
         },
         "summary": "Update package settings",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ]
+      }
+    },
+    "/api/fleet/epm/packages/{pkgName}/{pkgVersion}/kibana_assets": {
+      "delete": {
+        "description": "[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].",
+        "operationId": "delete-fleet-epm-packages-pkgname-pkgversion-kibana-assets",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pkgName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pkgVersion",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Delete Kibana assets for a package",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ]
+      },
+      "post": {
+        "description": "[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].",
+        "operationId": "post-fleet-epm-packages-pkgname-pkgversion-kibana-assets",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pkgName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pkgVersion",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "nullable": true,
+                "properties": {
+                  "force": {
+                    "type": "boolean"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "success"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Install Kibana assets for a package",
         "tags": [
           "Elastic Package Manager (EPM)"
         ]
@@ -26196,6 +27533,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -26266,6 +27606,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -26427,6 +27770,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -26484,6 +27830,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -26682,6 +28031,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -27009,6 +28361,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -27084,6 +28439,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -27274,6 +28632,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -27600,6 +28961,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -27693,6 +29057,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -27718,6 +29085,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -27803,6 +29173,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -27877,6 +29250,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -27902,6 +29278,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -27971,6 +29350,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -28051,6 +29433,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -28076,6 +29461,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -29250,6 +30638,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -31530,6 +32921,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -31607,6 +33001,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -31632,6 +33029,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -32798,6 +34198,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -35062,6 +36465,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -35138,6 +36544,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -35858,6 +37267,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -37138,6 +38550,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -37163,6 +38578,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -37848,6 +39266,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -38060,6 +39481,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -38173,6 +39597,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -38362,7 +39789,6 @@
                                     }
                                   },
                                   "required": [
-                                    "id",
                                     "data_stream"
                                   ],
                                   "type": "object"
@@ -39379,6 +40805,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -39462,6 +40891,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -40114,6 +41546,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -41413,6 +42848,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -41438,6 +42876,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -41561,6 +43002,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -41738,6 +43182,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -41813,6 +43260,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -41928,6 +43378,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -42108,6 +43561,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -42196,6 +43652,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -42315,6 +43774,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -42510,6 +43972,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -42616,6 +44081,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -42776,6 +44244,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -42872,6 +44343,9 @@
                   "properties": {
                     "attributes": {},
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -44431,7 +45905,7 @@
                                                 {
                                                   "additionalProperties": false,
                                                   "properties": {
-                                                    "grok": {
+                                                    "date": {
                                                       "allOf": [
                                                         {
                                                           "properties": {
@@ -44578,27 +46052,33 @@
                                                               "minLength": 1,
                                                               "type": "string"
                                                             },
-                                                            "ignore_missing": {
-                                                              "type": "boolean"
-                                                            },
-                                                            "pattern_definitions": {
-                                                              "additionalProperties": {
-                                                                "type": "string"
-                                                              },
-                                                              "type": "object"
-                                                            },
-                                                            "patterns": {
+                                                            "formats": {
                                                               "items": {
                                                                 "minLength": 1,
                                                                 "type": "string"
                                                               },
-                                                              "minItems": 1,
                                                               "type": "array"
+                                                            },
+                                                            "locale": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "output_format": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "target_field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                              "minLength": 1,
+                                                              "type": "string"
                                                             }
                                                           },
                                                           "required": [
                                                             "field",
-                                                            "patterns"
+                                                            "formats"
                                                           ],
                                                           "type": "object"
                                                         }
@@ -44606,7 +46086,7 @@
                                                     }
                                                   },
                                                   "required": [
-                                                    "grok"
+                                                    "date"
                                                   ],
                                                   "type": "object"
                                                 },
@@ -44783,6 +46263,188 @@
                                                   },
                                                   "required": [
                                                     "dissect"
+                                                  ],
+                                                  "type": "object"
+                                                },
+                                                {
+                                                  "additionalProperties": false,
+                                                  "properties": {
+                                                    "grok": {
+                                                      "allOf": [
+                                                        {
+                                                          "properties": {
+                                                            "description": {
+                                                              "type": "string"
+                                                            },
+                                                            "if": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "field": {
+                                                                          "minLength": 1,
+                                                                          "type": "string"
+                                                                        },
+                                                                        "operator": {
+                                                                          "enum": [
+                                                                            "exists",
+                                                                            "notExists"
+                                                                          ],
+                                                                          "type": "string"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "field",
+                                                                        "operator"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "field": {
+                                                                          "minLength": 1,
+                                                                          "type": "string"
+                                                                        },
+                                                                        "operator": {
+                                                                          "enum": [
+                                                                            "eq",
+                                                                            "neq",
+                                                                            "lt",
+                                                                            "lte",
+                                                                            "gt",
+                                                                            "gte",
+                                                                            "contains",
+                                                                            "startsWith",
+                                                                            "endsWith"
+                                                                          ],
+                                                                          "type": "string"
+                                                                        },
+                                                                        "value": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "field",
+                                                                        "operator",
+                                                                        "value"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "and": {
+                                                                      "items": {},
+                                                                      "type": "array"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "and"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "or": {
+                                                                      "items": {},
+                                                                      "type": "array"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "or"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "never": {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {},
+                                                                      "type": "object"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "never"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "always": {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {},
+                                                                      "type": "object"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "always"
+                                                                  ],
+                                                                  "type": "object"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "ignore_failure": {
+                                                              "type": "boolean"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "if"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "properties": {
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "ignore_missing": {
+                                                              "type": "boolean"
+                                                            },
+                                                            "pattern_definitions": {
+                                                              "additionalProperties": {
+                                                                "type": "string"
+                                                              },
+                                                              "type": "object"
+                                                            },
+                                                            "patterns": {
+                                                              "items": {
+                                                                "minLength": 1,
+                                                                "type": "string"
+                                                              },
+                                                              "minItems": 1,
+                                                              "type": "array"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field",
+                                                            "patterns"
+                                                          ],
+                                                          "type": "object"
+                                                        }
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "grok"
                                                   ],
                                                   "type": "object"
                                                 }
@@ -45170,7 +46832,7 @@
                                                 {
                                                   "additionalProperties": false,
                                                   "properties": {
-                                                    "grok": {
+                                                    "date": {
                                                       "allOf": [
                                                         {
                                                           "properties": {
@@ -45317,27 +46979,33 @@
                                                               "minLength": 1,
                                                               "type": "string"
                                                             },
-                                                            "ignore_missing": {
-                                                              "type": "boolean"
-                                                            },
-                                                            "pattern_definitions": {
-                                                              "additionalProperties": {
-                                                                "type": "string"
-                                                              },
-                                                              "type": "object"
-                                                            },
-                                                            "patterns": {
+                                                            "formats": {
                                                               "items": {
                                                                 "minLength": 1,
                                                                 "type": "string"
                                                               },
-                                                              "minItems": 1,
                                                               "type": "array"
+                                                            },
+                                                            "locale": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "output_format": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "target_field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "timezone": {
+                                                              "minLength": 1,
+                                                              "type": "string"
                                                             }
                                                           },
                                                           "required": [
                                                             "field",
-                                                            "patterns"
+                                                            "formats"
                                                           ],
                                                           "type": "object"
                                                         }
@@ -45345,7 +47013,7 @@
                                                     }
                                                   },
                                                   "required": [
-                                                    "grok"
+                                                    "date"
                                                   ],
                                                   "type": "object"
                                                 },
@@ -45522,6 +47190,188 @@
                                                   },
                                                   "required": [
                                                     "dissect"
+                                                  ],
+                                                  "type": "object"
+                                                },
+                                                {
+                                                  "additionalProperties": false,
+                                                  "properties": {
+                                                    "grok": {
+                                                      "allOf": [
+                                                        {
+                                                          "properties": {
+                                                            "description": {
+                                                              "type": "string"
+                                                            },
+                                                            "if": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "anyOf": [
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "field": {
+                                                                          "minLength": 1,
+                                                                          "type": "string"
+                                                                        },
+                                                                        "operator": {
+                                                                          "enum": [
+                                                                            "exists",
+                                                                            "notExists"
+                                                                          ],
+                                                                          "type": "string"
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "field",
+                                                                        "operator"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    },
+                                                                    {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {
+                                                                        "field": {
+                                                                          "minLength": 1,
+                                                                          "type": "string"
+                                                                        },
+                                                                        "operator": {
+                                                                          "enum": [
+                                                                            "eq",
+                                                                            "neq",
+                                                                            "lt",
+                                                                            "lte",
+                                                                            "gt",
+                                                                            "gte",
+                                                                            "contains",
+                                                                            "startsWith",
+                                                                            "endsWith"
+                                                                          ],
+                                                                          "type": "string"
+                                                                        },
+                                                                        "value": {
+                                                                          "anyOf": [
+                                                                            {
+                                                                              "type": "string"
+                                                                            },
+                                                                            {
+                                                                              "type": "number"
+                                                                            },
+                                                                            {
+                                                                              "type": "boolean"
+                                                                            }
+                                                                          ]
+                                                                        }
+                                                                      },
+                                                                      "required": [
+                                                                        "field",
+                                                                        "operator",
+                                                                        "value"
+                                                                      ],
+                                                                      "type": "object"
+                                                                    }
+                                                                  ]
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "and": {
+                                                                      "items": {},
+                                                                      "type": "array"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "and"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "or": {
+                                                                      "items": {},
+                                                                      "type": "array"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "or"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "never": {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {},
+                                                                      "type": "object"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "never"
+                                                                  ],
+                                                                  "type": "object"
+                                                                },
+                                                                {
+                                                                  "additionalProperties": false,
+                                                                  "properties": {
+                                                                    "always": {
+                                                                      "additionalProperties": false,
+                                                                      "properties": {},
+                                                                      "type": "object"
+                                                                    }
+                                                                  },
+                                                                  "required": [
+                                                                    "always"
+                                                                  ],
+                                                                  "type": "object"
+                                                                }
+                                                              ]
+                                                            },
+                                                            "ignore_failure": {
+                                                              "type": "boolean"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "if"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "properties": {
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "ignore_missing": {
+                                                              "type": "boolean"
+                                                            },
+                                                            "pattern_definitions": {
+                                                              "additionalProperties": {
+                                                                "type": "string"
+                                                              },
+                                                              "type": "object"
+                                                            },
+                                                            "patterns": {
+                                                              "items": {
+                                                                "minLength": 1,
+                                                                "type": "string"
+                                                              },
+                                                              "minItems": 1,
+                                                              "type": "array"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field",
+                                                            "patterns"
+                                                          ],
+                                                          "type": "object"
+                                                        }
+                                                      ]
+                                                    }
+                                                  },
+                                                  "required": [
+                                                    "grok"
                                                   ],
                                                   "type": "object"
                                                 }
@@ -46075,7 +47925,7 @@
                                     {
                                       "additionalProperties": false,
                                       "properties": {
-                                        "grok": {
+                                        "date": {
                                           "allOf": [
                                             {
                                               "properties": {
@@ -46222,27 +48072,33 @@
                                                   "minLength": 1,
                                                   "type": "string"
                                                 },
-                                                "ignore_missing": {
-                                                  "type": "boolean"
-                                                },
-                                                "pattern_definitions": {
-                                                  "additionalProperties": {
-                                                    "type": "string"
-                                                  },
-                                                  "type": "object"
-                                                },
-                                                "patterns": {
+                                                "formats": {
                                                   "items": {
                                                     "minLength": 1,
                                                     "type": "string"
                                                   },
-                                                  "minItems": 1,
                                                   "type": "array"
+                                                },
+                                                "locale": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "output_format": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "target_field": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "timezone": {
+                                                  "minLength": 1,
+                                                  "type": "string"
                                                 }
                                               },
                                               "required": [
                                                 "field",
-                                                "patterns"
+                                                "formats"
                                               ],
                                               "type": "object"
                                             }
@@ -46250,7 +48106,7 @@
                                         }
                                       },
                                       "required": [
-                                        "grok"
+                                        "date"
                                       ],
                                       "type": "object"
                                     },
@@ -46427,6 +48283,188 @@
                                       },
                                       "required": [
                                         "dissect"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "grok": {
+                                          "allOf": [
+                                            {
+                                              "properties": {
+                                                "description": {
+                                                  "type": "string"
+                                                },
+                                                "if": {
+                                                  "anyOf": [
+                                                    {
+                                                      "anyOf": [
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "operator": {
+                                                              "enum": [
+                                                                "exists",
+                                                                "notExists"
+                                                              ],
+                                                              "type": "string"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field",
+                                                            "operator"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "operator": {
+                                                              "enum": [
+                                                                "eq",
+                                                                "neq",
+                                                                "lt",
+                                                                "lte",
+                                                                "gt",
+                                                                "gte",
+                                                                "contains",
+                                                                "startsWith",
+                                                                "endsWith"
+                                                              ],
+                                                              "type": "string"
+                                                            },
+                                                            "value": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field",
+                                                            "operator",
+                                                            "value"
+                                                          ],
+                                                          "type": "object"
+                                                        }
+                                                      ]
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "and": {
+                                                          "items": {},
+                                                          "type": "array"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "and"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "or": {
+                                                          "items": {},
+                                                          "type": "array"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "or"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "never": {
+                                                          "additionalProperties": false,
+                                                          "properties": {},
+                                                          "type": "object"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "never"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "always": {
+                                                          "additionalProperties": false,
+                                                          "properties": {},
+                                                          "type": "object"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "always"
+                                                      ],
+                                                      "type": "object"
+                                                    }
+                                                  ]
+                                                },
+                                                "ignore_failure": {
+                                                  "type": "boolean"
+                                                }
+                                              },
+                                              "required": [
+                                                "if"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            {
+                                              "properties": {
+                                                "field": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "ignore_missing": {
+                                                  "type": "boolean"
+                                                },
+                                                "pattern_definitions": {
+                                                  "additionalProperties": {
+                                                    "type": "string"
+                                                  },
+                                                  "type": "object"
+                                                },
+                                                "patterns": {
+                                                  "items": {
+                                                    "minLength": 1,
+                                                    "type": "string"
+                                                  },
+                                                  "minItems": 1,
+                                                  "type": "array"
+                                                }
+                                              },
+                                              "required": [
+                                                "field",
+                                                "patterns"
+                                              ],
+                                              "type": "object"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "grok"
                                       ],
                                       "type": "object"
                                     }
@@ -46787,7 +48825,7 @@
                                     {
                                       "additionalProperties": false,
                                       "properties": {
-                                        "grok": {
+                                        "date": {
                                           "allOf": [
                                             {
                                               "properties": {
@@ -46934,27 +48972,33 @@
                                                   "minLength": 1,
                                                   "type": "string"
                                                 },
-                                                "ignore_missing": {
-                                                  "type": "boolean"
-                                                },
-                                                "pattern_definitions": {
-                                                  "additionalProperties": {
-                                                    "type": "string"
-                                                  },
-                                                  "type": "object"
-                                                },
-                                                "patterns": {
+                                                "formats": {
                                                   "items": {
                                                     "minLength": 1,
                                                     "type": "string"
                                                   },
-                                                  "minItems": 1,
                                                   "type": "array"
+                                                },
+                                                "locale": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "output_format": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "target_field": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "timezone": {
+                                                  "minLength": 1,
+                                                  "type": "string"
                                                 }
                                               },
                                               "required": [
                                                 "field",
-                                                "patterns"
+                                                "formats"
                                               ],
                                               "type": "object"
                                             }
@@ -46962,7 +49006,7 @@
                                         }
                                       },
                                       "required": [
-                                        "grok"
+                                        "date"
                                       ],
                                       "type": "object"
                                     },
@@ -47141,6 +49185,188 @@
                                         "dissect"
                                       ],
                                       "type": "object"
+                                    },
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "grok": {
+                                          "allOf": [
+                                            {
+                                              "properties": {
+                                                "description": {
+                                                  "type": "string"
+                                                },
+                                                "if": {
+                                                  "anyOf": [
+                                                    {
+                                                      "anyOf": [
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "operator": {
+                                                              "enum": [
+                                                                "exists",
+                                                                "notExists"
+                                                              ],
+                                                              "type": "string"
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field",
+                                                            "operator"
+                                                          ],
+                                                          "type": "object"
+                                                        },
+                                                        {
+                                                          "additionalProperties": false,
+                                                          "properties": {
+                                                            "field": {
+                                                              "minLength": 1,
+                                                              "type": "string"
+                                                            },
+                                                            "operator": {
+                                                              "enum": [
+                                                                "eq",
+                                                                "neq",
+                                                                "lt",
+                                                                "lte",
+                                                                "gt",
+                                                                "gte",
+                                                                "contains",
+                                                                "startsWith",
+                                                                "endsWith"
+                                                              ],
+                                                              "type": "string"
+                                                            },
+                                                            "value": {
+                                                              "anyOf": [
+                                                                {
+                                                                  "type": "string"
+                                                                },
+                                                                {
+                                                                  "type": "number"
+                                                                },
+                                                                {
+                                                                  "type": "boolean"
+                                                                }
+                                                              ]
+                                                            }
+                                                          },
+                                                          "required": [
+                                                            "field",
+                                                            "operator",
+                                                            "value"
+                                                          ],
+                                                          "type": "object"
+                                                        }
+                                                      ]
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "and": {
+                                                          "items": {},
+                                                          "type": "array"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "and"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "or": {
+                                                          "items": {},
+                                                          "type": "array"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "or"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "never": {
+                                                          "additionalProperties": false,
+                                                          "properties": {},
+                                                          "type": "object"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "never"
+                                                      ],
+                                                      "type": "object"
+                                                    },
+                                                    {
+                                                      "additionalProperties": false,
+                                                      "properties": {
+                                                        "always": {
+                                                          "additionalProperties": false,
+                                                          "properties": {},
+                                                          "type": "object"
+                                                        }
+                                                      },
+                                                      "required": [
+                                                        "always"
+                                                      ],
+                                                      "type": "object"
+                                                    }
+                                                  ]
+                                                },
+                                                "ignore_failure": {
+                                                  "type": "boolean"
+                                                }
+                                              },
+                                              "required": [
+                                                "if"
+                                              ],
+                                              "type": "object"
+                                            },
+                                            {
+                                              "properties": {
+                                                "field": {
+                                                  "minLength": 1,
+                                                  "type": "string"
+                                                },
+                                                "ignore_missing": {
+                                                  "type": "boolean"
+                                                },
+                                                "pattern_definitions": {
+                                                  "additionalProperties": {
+                                                    "type": "string"
+                                                  },
+                                                  "type": "object"
+                                                },
+                                                "patterns": {
+                                                  "items": {
+                                                    "minLength": 1,
+                                                    "type": "string"
+                                                  },
+                                                  "minItems": 1,
+                                                  "type": "array"
+                                                }
+                                              },
+                                              "required": [
+                                                "field",
+                                                "patterns"
+                                              ],
+                                              "type": "object"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "required": [
+                                        "grok"
+                                      ],
+                                      "type": "object"
                                     }
                                   ]
                                 },
@@ -47185,6 +49411,108 @@
           "streams"
         ],
         "x-state": "Technical Preview"
+      }
+    },
+    "/api/streams/{name}/content/export": {
+      "post": {
+        "description": "Exports the content associated to a stream.",
+        "operationId": "post-streams-name-content-export",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "properties": {},
+                    "type": "object"
+                  },
+                  {
+                    "enum": [
+                      "null"
+                    ],
+                    "nullable": true
+                  },
+                  {
+                    "not": {}
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Export stream content",
+        "tags": [
+          "streams"
+        ]
+      }
+    },
+    "/api/streams/{name}/content/import": {
+      "post": {
+        "description": "Links content objects to a stream.",
+        "operationId": "post-streams-name-content-import",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "content": {}
+                },
+                "required": [
+                  "content"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {},
+        "summary": "Import content into a stream",
+        "tags": [
+          "streams"
+        ]
       }
     },
     "/api/streams/{name}/dashboards": {
