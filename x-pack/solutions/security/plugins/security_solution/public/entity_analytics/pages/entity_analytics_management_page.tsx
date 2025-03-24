@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,6 +28,7 @@ import { useScheduleNowRiskEngineMutation } from '../api/hooks/use_schedule_now_
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 import { getEntityAnalyticsRiskScorePageStyles } from '../components/risk_score_page_styles';
+import { useRiskEngineSettings } from '../api/hooks/use_risk_engine_settings';
 
 const TEN_SECONDS = 10000;
 
@@ -35,9 +36,10 @@ export const EntityAnalyticsManagementPage = () => {
   const { euiTheme } = useEuiTheme();
   const styles = getEntityAnalyticsRiskScorePageStyles(euiTheme);
   const privileges = useMissingRiskEnginePrivileges();
-  const [includeClosedAlerts, setIncludeClosedAlerts] = useState(false);
-  const [from, setFrom] = useState(localStorage.getItem('dateStart') || 'now-30m');
-  const [to, setTo] = useState(localStorage.getItem('dateEnd') || 'now');
+  const { data: riskEngineSettings } = useRiskEngineSettings();
+  const includeClosedAlerts = riskEngineSettings?.includeClosedAlerts ?? false;
+  const from = riskEngineSettings?.range?.start ?? 'now-30d';
+  const to = riskEngineSettings?.range?.end || 'now';
   const { data: riskEngineStatus } = useRiskEngineStatus({
     refetchInterval: TEN_SECONDS,
     structuralSharing: false, // Force the component to rerender after every Risk Engine Status API call
@@ -63,20 +65,6 @@ export const EntityAnalyticsManagementPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleIncludeClosedAlertsToggle = useCallback(
-    (value: boolean) => {
-      setIncludeClosedAlerts(value);
-    },
-    [setIncludeClosedAlerts]
-  );
-
-  const handleDateChange = ({ start, end }: { start: string; end: string }) => {
-    setFrom(start);
-    setTo(end);
-    localStorage.setItem('dateStart', start);
-    localStorage.setItem('dateEnd', end);
   };
 
   const { status, runAt } = riskEngineStatus?.risk_engine_task_status || {};
@@ -148,10 +136,8 @@ export const EntityAnalyticsManagementPage = () => {
         <EuiFlexItem grow={2}>
           <RiskScoreConfigurationSection
             includeClosedAlerts={includeClosedAlerts}
-            setIncludeClosedAlerts={handleIncludeClosedAlertsToggle}
             from={from}
             to={to}
-            onDateChange={handleDateChange}
           />
           <EuiHorizontalRule />
           <RiskScoreUsefulLinksSection />

@@ -24,8 +24,6 @@ import {
 import { isNumericFieldForDatatable } from '../../../../common/expressions/datatable/utils';
 import { DatatableInspectorTables } from '../../../../common/expressions/datatable/datatable_fn';
 
-import './dimension_editor.scss';
-
 type ColumnType = DatatableVisualizationState['columns'][number];
 type SummaryRowType = Extract<ColumnState['summaryRow'], string>;
 
