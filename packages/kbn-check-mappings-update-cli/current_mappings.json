@@ -2912,6 +2912,14 @@
       }
     }
   },
+  "privilege-monitoring-status": {
+    "dynamic": false,
+    "properties": {
+      "status": {
+        "type": "keyword"
+      }
+    }
+  },
   "product-doc-install-status": {
     "dynamic": false,
     "properties": {
