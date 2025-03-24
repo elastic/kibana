@@ -228,8 +228,7 @@ mapped_pages:
 | [upgradeAssistant](https://github.com/elastic/kibana/blob/master/x-pack/platform/plugins/private/upgrade_assistant/README.md) | Upgrade Assistant helps users prepare their Stack for being upgraded to the next version of the Elastic stack. |
 | [uptime](https://github.com/elastic/kibana/blob/master/x-pack/solutions/observability/plugins/uptime/README.md) | The purpose of this plugin is to provide users of Heartbeat more visibility of what’s happeningin their infrastructure. |
 | [urlDrilldown](https://github.com/elastic/kibana/blob/master/x-pack/platform/plugins/private/drilldowns/url_drilldown/README.md) | NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin. |
-| [ux](https://github.com/elastic/kibana/blob/master/x-pack/solutions/observability/plugins/ux/readme.md) |
-| [https://docs.elastic.dev/kibana-dev-docs/welcome](https://docs.elastic.dev/kibana-dev-docs/welcome) |
+| [ux](https://github.com/elastic/kibana/blob/master/x-pack/solutions/observability/plugins/ux/readme.md) | [https://docs.elastic.dev/kibana-dev-docs/welcome](https://docs.elastic.dev/kibana-dev-docs/welcome) |
 | [watcher](https://github.com/elastic/kibana/blob/master/x-pack/platform/plugins/private/watcher/README.md) | This plugins adopts some conventions in addition to or in place of conventions in Kibana (at the time of the plugin’s creation): |
 
 
