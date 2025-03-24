@@ -18,6 +18,7 @@ import type { DiscoverStateContainer } from '../state_management/discover_state'
 import { getValidViewMode } from '../utils/get_valid_view_mode';
 import { FetchStatus } from '../../types';
 import { internalStateActions, useInternalStateDispatch } from '../state_management/redux';
+import { useCurrentTabAction } from '../state_management/redux/hooks';
 
 const MAX_NUM_OF_COLUMNS = 50;
 
@@ -32,6 +33,9 @@ export function useEsqlMode({
   stateContainer: DiscoverStateContainer;
   dataViews: DataViewsContract;
 }) {
+  const setResetDefaultProfileState = useCurrentTabAction(
+    internalStateActions.setResetDefaultProfileState
+  );
   const dispatch = useInternalStateDispatch();
   const savedSearch = useSavedSearchInitial();
   const prev = useRef<{
@@ -96,10 +100,12 @@ export function useEsqlMode({
               // Reset all default profile state when index pattern changes
               if (indexPatternChanged) {
                 dispatch(
-                  internalStateActions.setResetDefaultProfileState({
-                    columns: true,
-                    rowHeight: true,
-                    breakdownField: true,
+                  setResetDefaultProfileState({
+                    resetDefaultProfileState: {
+                      columns: true,
+                      rowHeight: true,
+                      breakdownField: true,
+                    },
                   })
                 );
               }
@@ -154,10 +160,12 @@ export function useEsqlMode({
           // due to transformational commands, reset the associated default profile state
           if (!indexPatternChanged && allColumnsChanged) {
             dispatch(
-              internalStateActions.setResetDefaultProfileState({
-                columns: true,
-                rowHeight: false,
-                breakdownField: false,
+              setResetDefaultProfileState({
+                resetDefaultProfileState: {
+                  columns: true,
+                  rowHeight: false,
+                  breakdownField: false,
+                },
               })
             );
           }
@@ -192,5 +200,5 @@ export function useEsqlMode({
       cleanup();
       subscription.unsubscribe();
     };
-  }, [dataViews, stateContainer, savedSearch, cleanup, dispatch]);
+  }, [dataViews, stateContainer, savedSearch, cleanup, dispatch, setResetDefaultProfileState]);
 }

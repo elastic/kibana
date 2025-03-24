@@ -30,7 +30,7 @@ import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/v
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { updateSavedSearch } from '../../utils/update_saved_search';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
-import { selectCurrentTabRuntimeState } from '../runtime_state';
+import { selectTabRuntimeState } from '../runtime_state';
 
 export interface InitializeSessionParams {
   stateContainer: DiscoverStateContainer;
@@ -109,7 +109,7 @@ export const initializeSession: InternalStateThunkActionCreator<
     let dataView: DataView;
 
     if (isOfAggregateQueryType(initialQuery)) {
-      const { currentDataView$ } = selectCurrentTabRuntimeState(getState(), runtimeStateManager);
+      const { currentDataView$ } = selectTabRuntimeState(getState(), runtimeStateManager);
 
       // Regardless of what was requested, we always use ad hoc data views for ES|QL
       dataView = await getEsqlDataView(

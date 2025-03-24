@@ -10,7 +10,7 @@
 import type { TabbedContentState } from '@kbn/unified-tabs/src/components/tabbed_content/tabbed_content';
 import { differenceBy } from 'lodash';
 import type { TabState } from '../types';
-import { selectAllTabs, selectCurrentTab } from '../selectors';
+import { selectAllTabs, selectTab } from '../selectors';
 import {
   defaultTabState,
   internalStateSlice,
@@ -47,7 +47,7 @@ export const updateTabs: InternalStateThunkActionCreator<[UpdateTabsParams], Pro
   ({ updateState: { items, selectedItem }, stopSyncing }) =>
   async (dispatch, getState, { urlStateStorage }) => {
     const currentState = getState();
-    const currentTab = selectCurrentTab(currentState);
+    const currentTab = selectTab(currentState);
     let updatedTabs = items.map<TabState>((item) => {
       const existingTab = currentState.tabs.byId[item.id];
       return existingTab ? { ...existingTab, ...item } : { ...defaultTabState, ...item };

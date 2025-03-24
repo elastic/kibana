@@ -17,7 +17,7 @@ import type { SavedSearch, SaveSavedSearchOptions } from '@kbn/saved-search-plug
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
-import { internalStateActions, selectCurrentTab } from '../../state_management/redux';
+import { internalStateActions, selectTab } from '../../state_management/redux';
 
 async function saveDataSource({
   savedSearch,
@@ -95,7 +95,7 @@ export async function onSaveSearch({
 }) {
   const { uiSettings, savedObjectsTagging } = services;
   const dataView = savedSearch.searchSource.getField('index');
-  const currentTab = selectCurrentTab(state.internalState.getState());
+  const currentTab = selectTab(state.internalState.getState());
   const overriddenVisContextAfterInvalidation = currentTab.overriddenVisContextAfterInvalidation;
 
   const onSave = async ({

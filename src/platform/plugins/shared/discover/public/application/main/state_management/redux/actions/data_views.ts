@@ -14,7 +14,7 @@ import {
   internalStateSlice,
   type InternalStateThunkActionCreator,
 } from '../internal_state';
-import { selectCurrentTabRuntimeState } from '../runtime_state';
+import { selectTabRuntimeState } from '../runtime_state';
 
 export const loadDataViewList = createInternalStateAsyncThunk(
   'internalState/loadDataViewList',
@@ -25,7 +25,7 @@ export const setDataView: InternalStateThunkActionCreator<[DataView]> =
   (dataView) =>
   (dispatch, getState, { runtimeStateManager }) => {
     dispatch(internalStateSlice.actions.setDataViewId(dataView.id));
-    const { currentDataView$ } = selectCurrentTabRuntimeState(getState(), runtimeStateManager);
+    const { currentDataView$ } = selectTabRuntimeState(getState(), runtimeStateManager);
     currentDataView$.next(dataView);
   };
 

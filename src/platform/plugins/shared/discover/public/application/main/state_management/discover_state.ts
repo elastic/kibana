@@ -44,11 +44,15 @@ import {
   isDataSourceType,
 } from '../../../../common/data_sources';
 import type { InternalStateStore, RuntimeStateManager } from './redux';
-import { internalStateActions, selectCurrentTabRuntimeState } from './redux';
+import { internalStateActions, selectTabRuntimeState } from './redux';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { getSavedSearchContainer } from './discover_saved_search_container';
 
 export interface DiscoverStateContainerParams {
+  /**
+   * The ID of the tab associated with this state container
+   */
+  tabId: string;
   /**
    * The current savedSearch
    */
@@ -306,7 +310,7 @@ export function getDiscoverStateContainer({
    * This is to prevent duplicate ids messing with our system
    */
   const updateAdHocDataViewId = async () => {
-    const { currentDataView$ } = selectCurrentTabRuntimeState(
+    const { currentDataView$ } = selectTabRuntimeState(
       internalState.getState(),
       runtimeStateManager
     );
@@ -457,7 +461,7 @@ export function getDiscoverStateContainer({
 
     // updates saved search when query or filters change, triggers data fetching
     const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(() => {
-      const { currentDataView$ } = selectCurrentTabRuntimeState(
+      const { currentDataView$ } = selectTabRuntimeState(
         internalState.getState(),
         runtimeStateManager
       );

@@ -31,7 +31,7 @@ import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
 import type { InternalStateStore, RuntimeStateManager } from './redux';
-import { internalStateActions, selectCurrentTab, selectCurrentTabRuntimeState } from './redux';
+import { internalStateActions, selectTab, selectTabRuntimeState } from './redux';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -264,8 +264,8 @@ export function getDataStateContainer({
           });
 
           const currentInternalState = internalState.getState();
-          const { resetDefaultProfileState } = selectCurrentTab(currentInternalState);
-          const { currentDataView$ } = selectCurrentTabRuntimeState(
+          const { resetDefaultProfileState } = selectTab(currentInternalState);
+          const { currentDataView$ } = selectTabRuntimeState(
             currentInternalState,
             runtimeStateManager
           );
@@ -297,8 +297,9 @@ export function getDataStateContainer({
               ...commonFetchDeps,
             },
             async () => {
-              const { resetDefaultProfileState: currentResetDefaultProfileState } =
-                selectCurrentTab(internalState.getState());
+              const { resetDefaultProfileState: currentResetDefaultProfileState } = selectTab(
+                internalState.getState()
+              );
 
               if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
                 return;

@@ -50,13 +50,13 @@ export {
   useDataViewsForPicker,
 } from './hooks';
 
-export { selectAllTabs, selectCurrentTab } from './selectors';
+export { selectAllTabs, selectTab } from './selectors';
 
 export {
   type RuntimeStateManager,
   createRuntimeStateManager,
   useRuntimeState,
-  selectCurrentTabRuntimeState,
+  selectTabRuntimeState,
   useCurrentTabRuntimeState,
   RuntimeStateProvider,
   useCurrentDataView,

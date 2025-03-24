@@ -75,6 +75,7 @@ export const DiscoverMainRoute = ({
       urlStateStorage,
     })
   );
+  const [initialTabId] = useState(() => internalState.getState().tabs.allIds[0]);
   const { initializeProfileDataViews } = useDefaultAdHocDataViews({ internalState });
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
     async (loadedRootProfileState) => {

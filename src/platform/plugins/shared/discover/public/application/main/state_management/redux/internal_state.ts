@@ -63,10 +63,11 @@ const initialState: DiscoverInternalState = {
   savedDataViews: [],
   expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
-  tabs: { byId: {}, allIds: [], currentId: '' },
+  tabs: { byId: {}, allIds: [] },
 };
 
-type TabActionPayload<T extends { [key: string]: unknown } = {}> = { tabId: string } & T;
+export type TabActionPayload<T extends { [key: string]: unknown } = {}> = { tabId: string } & T;
+
 type TabAction<T extends { [key: string]: unknown } = {}> = PayloadAction<TabActionPayload<T>>;
 
 const withTab = <TAction extends TabAction>(
@@ -92,7 +93,7 @@ export const internalStateSlice = createSlice({
       state.initializationState = action.payload;
     },
 
-    setTabs: (state, action: PayloadAction<{ allTabs: TabState[]; selectedTabId: string }>) => {
+    setTabs: (state, action: PayloadAction<{ allTabs: TabState[] }>) => {
       state.tabs.byId = action.payload.allTabs.reduce<Record<string, TabState>>(
         (acc, tab) => ({
           ...acc,
@@ -101,12 +102,6 @@ export const internalStateSlice = createSlice({
         {}
       );
       state.tabs.allIds = action.payload.allTabs.map((tab) => tab.id);
-
-      if (action.payload.selectedTabId !== state.tabs.currentId) {
-        state.expandedDoc = undefined;
-      }
-
-      state.tabs.currentId = action.payload.selectedTabId;
     },
 
     setDataViewId: (state, action: TabAction<{ dataViewId: string | undefined }>) =>
@@ -209,7 +204,7 @@ export const createInternalStateStore = (options: InternalStateThunkDependencies
     ...defaultTabState,
     ...createTabItem(selectAllTabs(store.getState())),
   };
-  store.dispatch(setTabs({ allTabs: [defaultTab], selectedTabId: defaultTab.id }));
+  store.dispatch(setTabs({ allTabs: [defaultTab] }));
 
   return store;
 };

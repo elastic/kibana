@@ -20,7 +20,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import { getDataViewAppState } from './get_switch_data_view_app_state';
 import {
   internalStateActions,
-  selectCurrentTabRuntimeState,
+  selectTabRuntimeState,
   type InternalStateStore,
   type RuntimeStateManager,
 } from '../redux';
@@ -44,10 +44,7 @@ export async function changeDataView({
   addLog('[ui] changeDataView', { id: dataViewId });
 
   const { dataViews, uiSettings } = services;
-  const { currentDataView$ } = selectCurrentTabRuntimeState(
-    internalState.getState(),
-    runtimeStateManager
-  );
+  const { currentDataView$ } = selectTabRuntimeState(internalState.getState(), runtimeStateManager);
   const currentDataView = currentDataView$.getValue();
   const state = appState.getState();
   let nextDataView: DataView | null = null;

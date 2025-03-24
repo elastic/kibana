@@ -16,7 +16,7 @@ import {
   createTabItem,
   internalStateActions,
   selectAllTabs,
-  selectCurrentTab,
+  selectTab,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
@@ -25,7 +25,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 export const TabsView = ({ sessionViewProps }: { sessionViewProps: DiscoverSessionViewProps }) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
-  const currentTab = useInternalStateSelector(selectCurrentTab);
+  const currentTab = useInternalStateSelector(selectTab);
   const allTabs = useInternalStateSelector(selectAllTabs);
   const [initialItems] = useState<TabItem[]>(() => allTabs.map((tab) => pick(tab, 'id', 'label')));
   const sessionViewRef = useRef<DiscoverSessionViewRef>(null);
