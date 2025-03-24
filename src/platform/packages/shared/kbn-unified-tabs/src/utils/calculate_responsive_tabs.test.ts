@@ -11,7 +11,10 @@ import { calculateResponsiveTabs, PLUS_BUTTON_SPACE } from './calculate_responsi
 import { getNewTabPropsForIndex } from '../hooks/use_new_tab_props';
 import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../constants';
 
-const items = Array.from({ length: 5 }).map((_, i) => getNewTabPropsForIndex(i));
+function generateItems(count: number) {
+  return Array.from({ length: count }).map((_, i) => getNewTabPropsForIndex(i));
+}
+const items = generateItems(5);
 
 describe('calculateResponsiveTabs', () => {
   it('renders a single tab without limitation', () => {
@@ -71,7 +74,7 @@ describe('calculateResponsiveTabs', () => {
     const numberOfItems = 7;
     const containerWidth = 1310;
     const tabsSizeConfig = calculateResponsiveTabs({
-      items: Array.from({ length: numberOfItems }).map((_, i) => getNewTabPropsForIndex(i)),
+      items: generateItems(numberOfItems),
       containerWidth,
     });
 
