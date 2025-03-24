@@ -19,7 +19,6 @@ export const ALERT_ACTION = {
 
 export type EsqlRuleParams = z.infer<typeof esqlRuleParams>;
 export const esqlRuleParams = z.object({
-  type: z.literal('esql'),
   language: z.literal('esql'),
   query: z.string(),
 });
