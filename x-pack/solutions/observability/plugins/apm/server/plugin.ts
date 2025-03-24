@@ -258,17 +258,17 @@ export class APMPlugin
 
     // create .apm-agent-configuration index without blocking start lifecycle
     createApmAgentConfigurationIndex({ client, logger }).catch((e) => {
-      logger.warn(`Failed to create .apm-agent-configuration index: ${e.message}`);
+      logger.debug(`Failed to create .apm-agent-configuration index: ${e.message}`);
     });
 
     // create .apm-custom-link index without blocking start lifecycle
     createApmCustomLinkIndex({ client, logger }).catch((e) => {
-      logger.warn(`Failed to create .apm-custom-link index: ${e.message}`);
+      logger.debug(`Failed to create .apm-custom-link index: ${e.message}`);
     });
 
     // create .apm-source-map index without blocking start lifecycle
     createApmSourceMapIndexTemplate({ client, logger }).catch((e) => {
-      logger.warn(`Failed to create apm-source-map index template: ${e.message}`);
+      logger.debug(`Failed to create apm-source-map index template: ${e.message}`);
     });
   }
 
