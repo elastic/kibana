@@ -145,7 +145,7 @@ export const AlertsPreview = ({
             <EuiFlexItem>
               <EuiSpacer />
               <DistributionBar
-                stats={alertStats.reverse()}
+                stats={alertStats}
                 data-test-subj="AlertsPreviewDistributionBarTestId"
               />
             </EuiFlexItem>
