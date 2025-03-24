@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { IngestStreamLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import { omit } from 'lodash';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -60,7 +61,7 @@ export async function updateOrRolloverDataStream({
 }: UpdateOrRolloverDataStreamOptions) {
   const dataStreams = await esClient.indices.getDataStream({ name });
   for (const dataStream of dataStreams.data_streams) {
-    // simulate index and try to path on write index
+    // simulate index and try to patch the write index
     // if that doesn't work, roll it over
     const simulatedIndex = await esClient.indices.simulateIndexTemplate({
       name,
@@ -70,25 +71,24 @@ export async function updateOrRolloverDataStream({
       continue;
     }
     try {
-      // Hack to make test pass (before State refactor changes)
-      delete simulatedIndex.template.settings.index?.logsdb;
+      // Apply blocklist to avoid changing settings we don't want to
+      const simulatedIndexSettings = omit(simulatedIndex.template.settings, [
+        'index.codec',
+        'index.mapping.ignore_malformed',
+        'index.mode',
+        'index.logsdb.sort_on_host_name',
+      ]);
 
       await retryTransientEsErrors(
         () =>
           Promise.all([
             esClient.indices.putMapping({
               index: writeIndex.index_name,
-              // TODO - do I need to do the same for settings?
               properties: simulatedIndex.template.mappings.properties,
             }),
             esClient.indices.putSettings({
               index: writeIndex.index_name,
-              // TODO - do I need to do the same for settings?
-              settings: simulatedIndex.template.settings,
-              // Hack to make test pass (before State refactor changes)
-              querystring: {
-                reopen: true,
-              },
+              settings: simulatedIndexSettings,
             }),
           ]),
         {
