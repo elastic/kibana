@@ -56,6 +56,8 @@ const UNASSIGNED_ENTRIES = i18n.translate(
   }
 );
 
+// FIXME:PT Delete after all refactoring is done!
+
 export const PoliciesSelector = memo<PoliciesSelectorProps>(
   ({ policies, onChangeSelection, defaultExcludedPolicies, defaultIncludedPolicies }) => {
     const { euiTheme } = useEuiTheme();
