@@ -208,6 +208,7 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'searchInferenceEndpoints:inferenceEndpoints' },
                     { link: 'searchSynonyms:synonyms' },
+                    { link: 'searchQueryRules' },
                   ],
                   id: 'relevance',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.relevance', {
