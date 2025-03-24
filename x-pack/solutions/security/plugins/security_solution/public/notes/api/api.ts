@@ -28,6 +28,10 @@ export const createNote = async ({ note }: { note: BareNote }) => {
     });
     return response.note;
   } catch (err) {
+    if (err?.body?.message) {
+      throw new Error(err.body.message);
+    }
+
     throw new Error(('message' in err && err.message) || 'Request failed');
   }
 };

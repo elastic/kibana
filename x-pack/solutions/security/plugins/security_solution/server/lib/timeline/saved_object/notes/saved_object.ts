@@ -6,7 +6,6 @@
  */
 
 import { failure } from 'io-ts/lib/PathReporter';
-import { v1 as uuidv1 } from 'uuid';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
@@ -15,6 +14,7 @@ import { identity } from 'fp-ts/lib/function';
 import type { SavedObjectsFindOptions } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getUserDisplayName } from '@kbn/user-profile-components';
+import * as Boom from '@hapi/boom';
 import { MAX_NOTES_PER_DOCUMENT, UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   Note,
@@ -136,16 +136,9 @@ export const createNote = async ({
     const notesCount = await countUnassignedNotesLinkedToDocument(savedObjectsClient, note.eventId);
 
     if (notesCount >= MAX_NOTES_PER_DOCUMENT) {
-      return {
-        code: 403,
-        message: `Cannot create more than ${MAX_NOTES_PER_DOCUMENT} notes per document without associating them to a timeline`,
-        note: {
-          ...note,
-          noteId: uuidv1(),
-          version: '',
-          timelineId: '',
-        },
-      };
+      throw Boom.forbidden(
+        `Cannot create more than ${MAX_NOTES_PER_DOCUMENT} notes per document without associating them to a timeline`
+      );
     }
   }
   const noteAttributes: SavedObjectNoteWithoutExternalRefs = {
