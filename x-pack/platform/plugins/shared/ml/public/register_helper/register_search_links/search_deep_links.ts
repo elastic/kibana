@@ -60,8 +60,7 @@ function createDeepLinks(
               defaultMessage: 'Supplied configurations',
             }),
             // @deprecated since 9.1, kept here to redirect to new management page location
-            // Until we can register custom deep links in Management
-            // https://github.com/elastic/kibana/issues/213152
+            // TODO: Change redirect to management page once #213152 is resolved
             path: `/supplied_configurations`,
           },
         ],
@@ -106,18 +105,11 @@ function createDeepLinks(
           title: i18n.translate('xpack.ml.deepLink.nodes', {
             defaultMessage: 'Nodes',
           }),
+          // TODO: Change redirect to management page once #213152 is resolved
           path: `/${ML_PAGES.NODES}`,
         });
       }
-
-      return {
-        id: 'modelManagement',
-        title: i18n.translate('xpack.ml.deepLink.modelManagement', {
-          defaultMessage: 'Model Management',
-        }),
-        path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
-        deepLinks,
-      };
+      return null;
     },
 
     getMemoryUsageDeepLink: (): AppDeepLink<LinkId> | null => {
@@ -130,6 +122,7 @@ function createDeepLinks(
         title: i18n.translate('xpack.ml.deepLink.memoryUsage', {
           defaultMessage: 'Memory Usage',
         }),
+        // TODO: Change redirect to management page once #213152 is resolved
         path: `/${ML_PAGES.MEMORY_USAGE}`,
       };
     },
@@ -180,6 +173,7 @@ function createDeepLinks(
         title: i18n.translate('xpack.ml.deepLink.notifications', {
           defaultMessage: 'Notifications',
         }),
+        // TODO: Change redirect to management page once #213152 is resolved
         path: `/${ML_PAGES.NOTIFICATIONS}`,
       };
     },
