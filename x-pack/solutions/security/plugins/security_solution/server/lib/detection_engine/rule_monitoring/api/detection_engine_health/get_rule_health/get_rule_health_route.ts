@@ -54,7 +54,7 @@ export const getRuleHealthRoute = (router: SecuritySolutionPluginRouter) => {
         try {
           const params = validateGetRuleHealthRequest(request.body);
 
-          const ctx = await context.resolve(['securitySolution', 'alerting']);
+          const ctx = await context.resolve(['securitySolution']);
           const healthClient = ctx.securitySolution.getDetectionEngineHealthClient();
 
           const ruleHealthParameters = { interval: params.interval, rule_id: params.ruleId };
