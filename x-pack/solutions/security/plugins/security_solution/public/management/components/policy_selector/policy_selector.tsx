@@ -208,7 +208,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
     const [page, setPage] = useState(1);
     const [selectedListPage, setSelectedListPage] = useState(1);
     const [userSearchValue, setUserSearchValue] = useState('');
-    const [searchKuery, setSearchKuery] = useState('');
+    const [searchKuery, setSearchKuery] = useState(kuery);
     const [view, setView] = useState<'full-list' | 'selected-list'>('full-list');
     const reactWindowFixedSizeList = useRef<{ scrollToItem: (index: number) => void }>();
     const handledApiData = useRef(new WeakSet<GetPackagePoliciesResponse>());
