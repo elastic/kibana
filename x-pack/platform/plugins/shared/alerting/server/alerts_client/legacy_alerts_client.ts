@@ -210,10 +210,11 @@ export class LegacyAlertsClient<
     return {};
   }
 
-  public getRawAlertInstancesForState() {
+  public getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean) {
     return toRawAlertInstances<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       this.processedAlerts.trackedActiveAlerts,
-      this.processedAlerts.trackedRecoveredAlerts
+      this.processedAlerts.trackedRecoveredAlerts,
+      shouldOptimizeTaskState
     );
   }
 
