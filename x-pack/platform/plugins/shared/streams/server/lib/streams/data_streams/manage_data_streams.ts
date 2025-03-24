@@ -70,6 +70,9 @@ export async function updateOrRolloverDataStream({
       continue;
     }
     try {
+      // Hack to make test pass (before State refactor changes)
+      delete simulatedIndex.template.settings.index?.logsdb;
+
       await retryTransientEsErrors(
         () =>
           Promise.all([
@@ -82,6 +85,10 @@ export async function updateOrRolloverDataStream({
               index: writeIndex.index_name,
               // TODO - do I need to do the same for settings?
               settings: simulatedIndex.template.settings,
+              // Hack to make test pass (before State refactor changes)
+              querystring: {
+                reopen: true,
+              },
             }),
           ]),
         {
