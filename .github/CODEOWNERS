@@ -996,7 +996,7 @@ x-pack/solutions/search/plugins/search_synonyms @elastic/search-kibana
 x-pack/solutions/search/plugins/serverless_search @elastic/search-kibana
 x-pack/solutions/chat/plugins/wci-external-server @elastic/search-kibana
 x-pack/solutions/chat/plugins/wci-index-source @elastic/search-kibana
-x-pack/solutions/search/plugins/workchat/wci_salesforce @elastic/search-kibana
+x-pack/solutions/chat/plugins/wci-salesforce @elastic/search-kibana
 x-pack/solutions/search/plugins/workchat/workchat_app @elastic/search-kibana
 x-pack/solutions/security/packages/connectors @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-hunting
