@@ -107,7 +107,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/shared/esql_datagrid/README.md[esqlDataGrid]
-|Contains a Discover-like table specifically for ES|QL queries:
+|Contains a Discover-like table specifically for ES\|QL queries:
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/shared/es_ui_shared/README.md[esUiShared]
