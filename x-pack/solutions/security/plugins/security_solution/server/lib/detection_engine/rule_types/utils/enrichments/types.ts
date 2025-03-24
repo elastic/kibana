@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter } from '@kbn/es-query';
 
+import type { ExperimentalFeatures } from '../../../../../../common';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
@@ -114,6 +115,7 @@ export type CreateFieldsMatchEnrichment = <T extends BaseFieldsLatest>(
 export type EnrichEvents = <T extends BaseFieldsLatest>(
   params: BasedEnrichParameters<T> & {
     spaceId: string;
+    experimentalFeatures?: ExperimentalFeatures;
   }
 ) => Promise<Array<EventsForEnrichment<T>>>;
 

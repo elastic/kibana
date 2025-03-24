@@ -80,6 +80,7 @@ export const bulkCreateWithSuppression = async <
         logger: sharedParams.ruleExecutionLogger,
         events: alerts,
         spaceId: params.spaceId,
+        experimentalFeatures: sharedParams.experimentalFeatures,
       });
       return enrichedAlerts;
     } catch (error) {

@@ -23,7 +23,13 @@ import { applyEnrichmentsToEvents } from './utils/transforms';
 import { isIndexExist } from './utils/is_index_exist';
 import { createServiceRiskEnrichments } from './enrichment_by_type/service_risk';
 
-export const enrichEvents: EnrichEvents = async ({ services, logger, events, spaceId }) => {
+export const enrichEvents: EnrichEvents = async ({
+  services,
+  logger,
+  events,
+  spaceId,
+  experimentalFeatures,
+}) => {
   try {
     const enrichments: Array<Promise<EventsMapByEnrichments>> = [];
 

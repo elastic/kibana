@@ -68,6 +68,7 @@ export const bulkCreate = async <T extends BaseFieldsLatest>({
         logger: sharedParams.ruleExecutionLogger,
         events: alerts,
         spaceId: params.spaceId,
+        experimentalFeatures: sharedParams.experimentalFeatures,
       });
       return enrichedAlerts;
     } catch (error) {
