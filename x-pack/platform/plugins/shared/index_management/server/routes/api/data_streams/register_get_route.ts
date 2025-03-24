@@ -11,7 +11,6 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import {
   IndicesDataStream,
   IndicesDataStreamsStatsDataStreamsStatsItem,
-  IndicesGetIndexTemplateIndexTemplateItem,
   SecurityHasPrivilegesResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MeteringStats } from '../../../lib/types';
