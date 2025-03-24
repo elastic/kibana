@@ -221,15 +221,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         'When you perform more than one aggregation, separate each aggregation with a comma.',
     }),
     declaration: '',
-    examples: [
-      'METRICS index',
-      'METRICS index, index2',
-      'METRICS index avg = avg(a)',
-      'METRICS index sum(b) by b',
-      'METRICS index, index2 sum(b) by b % 2',
-      'METRICS <sources> [ <aggregates> [ by <grouping> ]]',
-      'METRICS src1, src2 agg1, agg2 by field1, field2',
-    ],
+    examples: ['METRICS index', 'METRICS index, index2'],
     signature: {
       multipleParams: true,
       params: [

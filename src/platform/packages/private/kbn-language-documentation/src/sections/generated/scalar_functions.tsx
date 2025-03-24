@@ -71,7 +71,7 @@ export const functions = {
   -->
 
   ### ACOS
-  Returns the arccosine of \`n\` as an angle, expressed in radians.
+  Returns the [arccosine](https://en.wikipedia.org/wiki/Inverse_trigonometric_functions) of \`n\` as an angle, expressed in radians.
 
   \`\`\` esql
   ROW a=.9
@@ -102,7 +102,7 @@ export const functions = {
   -->
 
   ### ASIN
-  Returns the arcsine of the input
+  Returns the [arcsine](https://en.wikipedia.org/wiki/Inverse_trigonometric_functions) of the input
   numeric expression as an angle, expressed in radians.
 
   \`\`\` esql
@@ -134,7 +134,7 @@ export const functions = {
   -->
 
   ### ATAN
-  Returns the arctangent of the input
+  Returns the [arctangent](https://en.wikipedia.org/wiki/Inverse_trigonometric_functions) of the input
   numeric expression as an angle, expressed in radians.
 
   \`\`\` esql
@@ -168,7 +168,7 @@ export const functions = {
   -->
 
   ### ATAN2
-  The angle between the positive x-axis and the ray from the
+  The [angle](https://en.wikipedia.org/wiki/Atan2) between the positive x-axis and the ray from the
   origin to the point (x , y) in the Cartesian plane, expressed in radians.
 
   \`\`\` esql
@@ -353,7 +353,7 @@ export const functions = {
   ROW a=1.8
   | EVAL a=CEIL(a)
   \`\`\`
-  Note: This is a noop for \`long\` (including unsigned) and \`integer\`. For \`double\` this picks the closest \`double\` value to the integer similar to Math.ceil.
+  Note: This is a noop for \`long\` (including unsigned) and \`integer\`. For \`double\` this picks the closest \`double\` value to the integer similar to [Math.ceil](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Math.html#ceil(double)).
   `,
             description:
               'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -483,7 +483,7 @@ export const functions = {
   -->
 
   ### COS
-  Returns the cosine of an angle.
+  Returns the [cosine](https://en.wikipedia.org/wiki/Sine_and_cosine) of an angle.
 
   \`\`\` esql
   ROW a=1.8
@@ -514,7 +514,7 @@ export const functions = {
   -->
 
   ### COSH
-  Returns the hyperbolic cosine of a number.
+  Returns the [hyperbolic cosine](https://en.wikipedia.org/wiki/Hyperbolic_functions) of a number.
 
   \`\`\` esql
   ROW a=1.8
@@ -718,7 +718,7 @@ export const functions = {
   -->
 
   ### E
-  Returns Euler’s number.
+  Returns [Euler’s number](https://en.wikipedia.org/wiki/E_(mathematical_constant)).
 
   \`\`\` esql
   ROW E()
@@ -824,7 +824,7 @@ export const functions = {
   \`\`\`
   Note: This is a noop for \`long\` (including unsigned) and \`integer\`.
   For \`double\` this picks the closest \`double\` value to the integer
-  similar to Math.floor.
+  similar to [Math.floor](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Math.html#floor(double)).
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -1309,7 +1309,7 @@ export const functions = {
   Use \`MATCH\` to perform a match query on the specified field.
   Using \`MATCH\` is equivalent to using the \`match\` query in the Elasticsearch Query DSL.
 
-  Match can be used on fields from the text family like  text and  semantic_text,
+  Match can be used on fields from the text family like text and semantic_text,
   as well as other field types like keyword, boolean, dates, and numeric types.
 
   Match can use function named parameters to specify additional options for the match query.
@@ -2004,7 +2004,7 @@ export const functions = {
   -->
 
   ### PI
-  Returns Pi, the ratio of a circle’s circumference to its diameter.
+  Returns [Pi](https://en.wikipedia.org/wiki/Pi), the ratio of a circle’s circumference to its diameter.
 
   \`\`\` esql
   ROW PI()
@@ -2419,7 +2419,7 @@ export const functions = {
   -->
 
   ### SIN
-  Returns the sine of an angle.
+  Returns the [sine](https://en.wikipedia.org/wiki/Sine_and_cosine) of an angle.
 
   \`\`\` esql
   ROW a=1.8
@@ -2450,7 +2450,7 @@ export const functions = {
   -->
 
   ### SINH
-  Returns the hyperbolic sine of a number.
+  Returns the [hyperbolic sine](https://en.wikipedia.org/wiki/Hyperbolic_functions) of a number.
 
   \`\`\` esql
   ROW a=1.8
@@ -2583,7 +2583,7 @@ export const functions = {
 
   ### ST_CONTAINS
   Returns whether the first geometry contains the second geometry.
-  This is the inverse of the \`ST_WITHIN\` function.
+  This is the inverse of the ST_WITHIN function.
 
   \`\`\` esql
   FROM airport_city_boundaries
@@ -2619,7 +2619,7 @@ export const functions = {
 
   ### ST_DISJOINT
   Returns whether the two geometries or geometry columns are disjoint.
-  This is the inverse of the \`ST_INTERSECTS\` function.
+  This is the inverse of the ST_INTERSECTS function.
   In mathematical terms: ST_Disjoint(A, B) ⇔ A ⋂ B = ∅
 
   \`\`\` esql
@@ -2732,7 +2732,7 @@ export const functions = {
   Returns true if two geometries intersect.
   They intersect if they have any point in common, including their interior points
   (points along lines or within polygons).
-  This is the inverse of the \`ST_DISJOINT\` function.
+  This is the inverse of the ST_DISJOINT function.
   In mathematical terms: ST_Intersects(A, B) ⇔ A ⋂ B ≠ ∅
 
   \`\`\` esql
@@ -2768,7 +2768,7 @@ export const functions = {
 
   ### ST_WITHIN
   Returns whether the first geometry is within the second geometry.
-  This is the inverse of the \`ST_CONTAINS\` function.
+  This is the inverse of the ST_CONTAINS function.
 
   \`\`\` esql
   FROM airport_city_boundaries
@@ -3087,7 +3087,7 @@ export const functions = {
   -->
 
   ### TAN
-  Returns the tangent of an angle.
+  Returns the [tangent](https://en.wikipedia.org/wiki/Sine_and_cosine) of an angle.
 
   \`\`\` esql
   ROW a=1.8
@@ -3118,7 +3118,7 @@ export const functions = {
   -->
 
   ### TANH
-  Returns the hyperbolic tangent of a number.
+  Returns the [hyperbolic tangent](https://en.wikipedia.org/wiki/Hyperbolic_functions) of a number.
 
   \`\`\` esql
   ROW a=1.8
@@ -3283,7 +3283,8 @@ export const functions = {
 
   ### TO_CARTESIANPOINT
   Converts an input value to a \`cartesian_point\` value.
-  A string will only be successfully converted if it respects WKT Point format.
+  A string will only be successfully converted if it respects the
+  [WKT Point](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format.
 
   \`\`\` esql
   ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]
@@ -3319,7 +3320,8 @@ export const functions = {
 
   ### TO_CARTESIANSHAPE
   Converts an input value to a \`cartesian_shape\` value.
-  A string will only be successfully converted if it respects WKT format.
+  A string will only be successfully converted if it respects the
+  [WKT](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format.
 
   \`\`\` esql
   ROW wkt = ["POINT(4297.11 -1475.53)", "POLYGON ((3339584.72 1118889.97, 4452779.63 4865942.27, 2226389.81 4865942.27, 1113194.90 2273030.92, 3339584.72 1118889.97))"]
@@ -3455,7 +3457,7 @@ export const functions = {
   -->
 
   ### TO_DEGREES
-  Converts a number in radians to degrees.
+  Converts a number in [radians](https://en.wikipedia.org/wiki/Radian) to [degrees](https://en.wikipedia.org/wiki/Degree_(angle)).
 
   \`\`\` esql
   ROW rad = [1.57, 3.14, 4.71]
@@ -3490,7 +3492,7 @@ export const functions = {
 
   ### TO_DOUBLE
   Converts an input value to a double value. If the input parameter is of a date type,
-  its value will be interpreted as milliseconds since the Unix epoch,
+  its value will be interpreted as milliseconds since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time),
   converted to double. Boolean \`true\` will be converted to double \`1.0\`, \`false\` to \`0.0\`.
 
   \`\`\` esql
@@ -3526,7 +3528,8 @@ export const functions = {
 
   ### TO_GEOPOINT
   Converts an input value to a \`geo_point\` value.
-  A string will only be successfully converted if it respects WKT Point format.
+  A string will only be successfully converted if it respects the
+  [WKT Point](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format.
 
   \`\`\` esql
   ROW wkt = "POINT(42.97109630194 14.7552534413725)"
@@ -3561,7 +3564,8 @@ export const functions = {
 
   ### TO_GEOSHAPE
   Converts an input value to a \`geo_shape\` value.
-  A string will only be successfully converted if it respects WKT format.
+  A string will only be successfully converted if it respects the
+  [WKT](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format.
 
   \`\`\` esql
   ROW wkt = "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"
@@ -3597,7 +3601,7 @@ export const functions = {
   ### TO_INTEGER
   Converts an input value to an integer value.
   If the input parameter is of a date type, its value will be interpreted as milliseconds
-  since the Unix epoch, converted to integer.
+  since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time), converted to integer.
   Boolean \`true\` will be converted to integer \`1\`, \`false\` to \`0\`.
 
   \`\`\` esql
@@ -3668,7 +3672,7 @@ export const functions = {
 
   ### TO_LONG
   Converts an input value to a long value. If the input parameter is of a date type,
-  its value will be interpreted as milliseconds since the Unix epoch, converted to long.
+  its value will be interpreted as milliseconds since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time), converted to long.
   Boolean \`true\` will be converted to long \`1\`, \`false\` to \`0\`.
 
   \`\`\` esql
@@ -3737,7 +3741,7 @@ export const functions = {
   -->
 
   ### TO_RADIANS
-  Converts a number in degrees to radians.
+  Converts a number in [degrees](https://en.wikipedia.org/wiki/Degree_(angle)) to [radians](https://en.wikipedia.org/wiki/Radian).
 
   \`\`\` esql
   ROW deg = [90.0, 180.0, 270.0]
@@ -3839,7 +3843,7 @@ export const functions = {
 
   ### TO_UNSIGNED_LONG
   Converts an input value to an unsigned long value. If the input parameter is of a date type,
-  its value will be interpreted as milliseconds since the Unix epoch, converted to unsigned long.
+  its value will be interpreted as milliseconds since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time), converted to unsigned long.
   Boolean \`true\` will be converted to unsigned long \`1\`, \`false\` to \`0\`.
 
   \`\`\` esql
