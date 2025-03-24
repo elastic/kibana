@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/search/packages/workchat/wci-browser'],
+  roots: ['<rootDir>/x-pack/solutions/chat/packages/wci-browser'],
 };
