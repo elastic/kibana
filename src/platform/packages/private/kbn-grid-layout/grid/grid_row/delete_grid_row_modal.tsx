@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { deleteRow, movePanelsToRow } from '../utils/row_management';
 import { useGridLayoutContext } from '../use_grid_layout_context';
+import { deleteRow, movePanelsToRow } from '../utils/row_management';
 
 export const DeleteGridRowModal = ({
   rowId,
