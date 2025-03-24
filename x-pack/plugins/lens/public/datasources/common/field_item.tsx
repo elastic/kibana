@@ -246,7 +246,7 @@ export function InnerFieldItem(props: FieldItemProps) {
   }, [dataViewField, filters, hideDetails, indexPattern, query, services]);
 
   return (
-    <li>
+    <li data-attr-field={field.name}>
       <FieldPopover
         isOpen={infoIsOpen}
         closePopover={closePopover}
