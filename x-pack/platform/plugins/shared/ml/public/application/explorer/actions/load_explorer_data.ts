@@ -17,28 +17,24 @@ import { useCallback, useMemo } from 'react';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
-import type { TimeBucketsInterval, TimeRangeBounds } from '@kbn/ml-time-buckets';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { AppStateSelectedCells, ExplorerJob } from '../explorer_utils';
 import {
-  getDateFormatTz,
   getSelectionInfluencers,
   getSelectionJobIds,
   getSelectionTimeRange,
   loadAnnotationsTableData,
-  loadAnomaliesTableData,
   loadFilteredTopInfluencers,
   loadTopInfluencers,
   loadOverallAnnotations,
 } from '../explorer_utils';
 
-import { useMlApi, useUiSettings } from '../../contexts/kibana';
+import { useMlApi } from '../../contexts/kibana';
 import type { MlResultsService } from '../../services/results_service';
 import { mlResultsServiceProvider } from '../../services/results_service';
 import type { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
 import { useAnomalyExplorerContext } from '../anomaly_explorer_context';
 import type { MlApi } from '../../services/ml_api_service';
-import { useMlJobService, type MlJobService } from '../../services/job_service';
 import type { ExplorerState } from '../explorer_data';
 
 // Memoize the data fetching methods.
@@ -68,20 +64,13 @@ const memoizedLoadFilteredTopInfluencers = memoize(loadFilteredTopInfluencers);
 
 const memoizedLoadTopInfluencers = memoize(loadTopInfluencers);
 
-const memoizedLoadAnomaliesTableData = memoize(loadAnomaliesTableData);
-
 export interface LoadExplorerDataConfig {
   influencersFilterQuery: InfluencersFilterQuery;
   lastRefresh: number;
   noInfluencersConfigured: boolean;
   selectedCells: AppStateSelectedCells | undefined | null;
   selectedJobs: ExplorerJob[];
-  swimlaneBucketInterval: TimeBucketsInterval;
-  swimlaneLimit: number;
-  tableInterval: string;
-  tableSeverity: number;
   viewBySwimlaneFieldName: string;
-  swimlaneContainerWidth: number;
 }
 
 export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfig => {
@@ -97,9 +86,7 @@ export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfi
  * Fetches the data necessary for the Anomaly Explorer using observables.
  */
 const loadExplorerDataProvider = (
-  uiSettings: IUiSettingsClient,
   mlApi: MlApi,
-  mlJobService: MlJobService,
   mlResultsService: MlResultsService,
   anomalyExplorerChartsService: AnomalyExplorerChartsService,
   timefilter: TimefilterContract
@@ -115,8 +102,6 @@ const loadExplorerDataProvider = (
       noInfluencersConfigured,
       selectedCells,
       selectedJobs,
-      tableInterval,
-      tableSeverity,
       viewBySwimlaneFieldName,
     } = config;
 
@@ -127,10 +112,8 @@ const loadExplorerDataProvider = (
 
     const timerange = getSelectionTimeRange(selectedCells, bounds);
 
-    const dateFormatTz = getDateFormatTz(uiSettings);
-
     // First get the data where we have all necessary args at hand using forkJoin:
-    // annotationsData, anomalyChartRecords, influencers, overallState, tableData
+    // annotationsData, anomalyChartRecords, influencers, overallState
     return forkJoin({
       overallAnnotations: memoizedLoadOverallAnnotations(lastRefresh, mlApi, selectedJobs, bounds),
       annotationsData: memoizedLoadAnnotationsTableData(
@@ -161,70 +144,54 @@ const loadExplorerDataProvider = (
               influencersFilterQuery
             )
           : Promise.resolve({}),
-      tableData: memoizedLoadAnomaliesTableData(
-        lastRefresh,
-        mlApi,
-        mlJobService,
-        selectedCells,
-        selectedJobs,
-        dateFormatTz,
-        bounds,
-        viewBySwimlaneFieldName,
-        tableInterval,
-        tableSeverity,
-        influencersFilterQuery
-      ),
     }).pipe(
-      switchMap(
-        ({ overallAnnotations, anomalyChartRecords, influencers, annotationsData, tableData }) =>
-          forkJoin({
-            filteredTopInfluencers:
-              (selectionInfluencers.length > 0 || influencersFilterQuery !== undefined) &&
-              anomalyChartRecords !== undefined &&
-              anomalyChartRecords.length > 0
-                ? memoizedLoadFilteredTopInfluencers(
-                    lastRefresh,
-                    mlResultsService,
-                    jobIds,
-                    timerange.earliestMs,
-                    timerange.latestMs,
-                    anomalyChartRecords,
-                    selectionInfluencers,
-                    noInfluencersConfigured,
-                    influencersFilterQuery
-                  )
-                : Promise.resolve(influencers),
-          }).pipe(
-            map(({ filteredTopInfluencers }) => {
-              return {
-                overallAnnotations,
-                annotations: annotationsData,
-                influencers: filteredTopInfluencers as any,
-                loading: false,
-                anomalyChartsDataLoading: false,
-                tableData,
-              };
-            })
-          )
+      switchMap(({ overallAnnotations, anomalyChartRecords, influencers, annotationsData }) =>
+        forkJoin({
+          filteredTopInfluencers:
+            (selectionInfluencers.length > 0 || influencersFilterQuery !== undefined) &&
+            anomalyChartRecords !== undefined &&
+            anomalyChartRecords.length > 0
+              ? memoizedLoadFilteredTopInfluencers(
+                  lastRefresh,
+                  mlResultsService,
+                  jobIds,
+                  timerange.earliestMs,
+                  timerange.latestMs,
+                  anomalyChartRecords,
+                  selectionInfluencers,
+                  noInfluencersConfigured,
+                  influencersFilterQuery
+                )
+              : Promise.resolve(influencers),
+        }).pipe(
+          map(({ filteredTopInfluencers }) => {
+            return {
+              overallAnnotations,
+              annotations: annotationsData,
+              influencers: filteredTopInfluencers as any,
+              loading: false,
+              anomalyChartsDataLoading: false,
+            };
+          })
+        )
       )
     );
   };
 };
 
-export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any) => void] => {
-  const uiSettings = useUiSettings();
+export const useExplorerData = (): [
+  Partial<ExplorerState> | undefined,
+  (d: LoadExplorerDataConfig) => void
+] => {
   const timefilter = useTimefilter();
   const mlApi = useMlApi();
-  const mlJobService = useMlJobService();
   const { anomalyExplorerChartsService } = useAnomalyExplorerContext();
 
   const loadExplorerData = useMemo(() => {
     const mlResultsService = mlResultsServiceProvider(mlApi);
 
     return loadExplorerDataProvider(
-      uiSettings,
       mlApi,
-      mlJobService,
       mlResultsService,
       anomalyExplorerChartsService,
       timefilter
