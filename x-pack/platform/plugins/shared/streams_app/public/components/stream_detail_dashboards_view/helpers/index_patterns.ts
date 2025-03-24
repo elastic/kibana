@@ -79,6 +79,13 @@ export function traversePanels(
       }
 
       const state = (attributes as LensAttributes).state;
+
+      if (state.adHocDataViews) {
+        state.adHocDataViews = mapValues(state.adHocDataViews, (dataView) =>
+          options.indexPattern(dataView)
+        );
+      }
+
       const {
         query: stateQuery,
         datasourceStates: { textBased },
@@ -89,8 +96,7 @@ export function traversePanels(
       }
 
       if (textBased) {
-        const textBasedState = textBased;
-        Object.values(textBasedState.layers).forEach((layer) => {
+        Object.values(textBased.layers).forEach((layer) => {
           if (layer.query?.esql) {
             layer.query.esql = options.esqlQuery(layer.query.esql);
           }
@@ -99,12 +105,6 @@ export function traversePanels(
         if ('indexPatternRefs' in textBased) {
           textBased.indexPatternRefs = (textBased.indexPatternRefs as IndexPatternRef[]).map(
             (ref) => options.indexPattern(ref)
-          );
-        }
-
-        if (state.adHocDataViews) {
-          state.adHocDataViews = mapValues(state.adHocDataViews, (dataView) =>
-            options.indexPattern(dataView)
           );
         }
       }
