@@ -222,7 +222,7 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
           name: 'context',
           data: {
             suggestions,
-            scores: llmScores,
+            llmScores,
           },
           content: {
             relevantDocuments,

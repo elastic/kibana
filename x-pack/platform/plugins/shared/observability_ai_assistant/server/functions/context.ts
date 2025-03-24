@@ -80,7 +80,7 @@ export function registerContextFunction({
         return {
           content: { ...content, learnings: relevantDocuments as unknown as Serializable },
           data: {
-            scores: llmScores,
+            llmScores,
             suggestions,
           },
         };
