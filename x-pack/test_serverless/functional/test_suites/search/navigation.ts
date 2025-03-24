@@ -265,6 +265,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'build',
         'dev_tools',
         'searchPlayground',
+        'searchSynonyms',
         'relevance',
         'searchInferenceEndpoints',
         'analyze',
