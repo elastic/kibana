@@ -24,7 +24,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ActionStatus } from '../../../../../types';
 import { useStartServices, useGetAutoUpgradeAgentsStatusQuery } from '../../../../../hooks';
 
-import { formattedTime, inProgressDescription, inProgressTitle } from './helpers';
+import {
+  automaticUpgradeTitle,
+  formattedTime,
+  inProgressDescription,
+  inProgressTitle,
+} from './helpers';
 
 import { ViewAgentsButton } from './view_agents_button';
 
@@ -71,65 +76,58 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
     <EuiPanel hasBorder={true} borderRadius="none">
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
-          <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
-            <EuiFlexItem grow={false}>
-              {isScheduled ? <EuiIcon type="clock" /> : <EuiLoadingSpinner size="m" />}
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText
-                color={theme.euiTheme.colors.textPrimary}
-                data-test-subj="upgradeInProgressTitle"
-              >
-                {isScheduled && action.startTime ? (
+          <EuiText color="subdued" data-test-subj="upgradeInProgressDescription">
+            <p>
+              {isScheduled && action.startTime ? (
+                <>
                   <FormattedMessage
-                    id="xpack.fleet.agentActivityFlyout.scheduleTitle"
-                    defaultMessage="{nbAgents} agents scheduled to upgrade to version {version}"
-                    values={{
-                      nbAgents: action.nbAgentsActioned - action.nbAgentsAck,
-                      version: action.version,
-                    }}
+                    id="xpack.fleet.agentActivityFlyout.scheduledDescription"
+                    defaultMessage="Scheduled for "
                   />
-                ) : (
-                  inProgressTitle(action, totalAgentsInPolicy ?? 0)
-                )}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+                  <strong>{formattedTime(action.startTime)}</strong>.&nbsp;
+                </>
+              ) : (
+                <>{inProgressDescription(action.creationTime)}&nbsp;</>
+              )}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          {isAutomaticUpgrade ? (
+            automaticUpgradeTitle(action, totalAgentsInPolicy ?? 0)
+          ) : (
+            <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
+              <EuiFlexItem grow={false}>
+                {isScheduled ? (
+                  <EuiIcon type="clock" />
+                ) : !isAutomaticUpgrade ? (
+                  <EuiLoadingSpinner size="m" />
+                ) : null}
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText
+                  color={theme.euiTheme.colors.textPrimary}
+                  data-test-subj="upgradeInProgressTitle"
+                >
+                  {isScheduled && action.startTime ? (
+                    <FormattedMessage
+                      id="xpack.fleet.agentActivityFlyout.scheduleTitle"
+                      defaultMessage="{nbAgents} agents scheduled to upgrade to version {version}"
+                      values={{
+                        nbAgents: action.nbAgentsActioned - action.nbAgentsAck,
+                        version: action.version,
+                      }}
+                    />
+                  ) : (
+                    inProgressTitle(action, totalAgentsInPolicy ?? 0)
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" alignItems="flexStart">
-            <EuiFlexItem>
-              <EuiText color="subdued" data-test-subj="upgradeInProgressDescription">
-                <p>
-                  {isScheduled && action.startTime ? (
-                    <>
-                      <FormattedMessage
-                        id="xpack.fleet.agentActivityFlyout.scheduledDescription"
-                        defaultMessage="Scheduled for "
-                      />
-                      <strong>{formattedTime(action.startTime)}</strong>.&nbsp;
-                    </>
-                  ) : (
-                    <>{inProgressDescription(action.creationTime)}&nbsp;</>
-                  )}
-                  <FormattedMessage
-                    id="xpack.fleet.agentActivityFlyout.upgradeDescription"
-                    defaultMessage="{guideLink} about agent upgrades."
-                    values={{
-                      guideLink: (
-                        <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
-                          <FormattedMessage
-                            id="xpack.fleet.agentActivityFlyout.guideLink"
-                            defaultMessage="Learn more"
-                          />
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </p>
-              </EuiText>
-            </EuiFlexItem>
-
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
@@ -148,6 +146,24 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               )}
+              <EuiFlexItem>
+                <EuiButtonEmpty>
+                  <FormattedMessage
+                    id="xpack.fleet.agentActivityFlyout.learnMore"
+                    defaultMessage="{value}"
+                    values={{
+                      value: (
+                        <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
+                          <FormattedMessage
+                            id="xpack.fleet.agentActivityFlyout.guideLink"
+                            defaultMessage="Learn more"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
             </EuiFlexGroup>
 
             <EuiFlexItem grow={false}>

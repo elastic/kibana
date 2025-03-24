@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
+import { EuiProgress, EuiText } from '@elastic/eui';
 
 import type { ActionStatus } from '../../../../../types';
 
@@ -89,10 +90,33 @@ export const inProgressTitle = (action: ActionStatus, totalAgents?: number) => (
       policyText: action.is_automatic ? ' in policy ' : '',
       reassignText:
         action.type === 'POLICY_REASSIGN' && action.newPolicyId ? `to ${action.newPolicyId}` : '',
-      upgradeText: action.type === 'UPGRADE' ? `to version ${action.version}` : '',
+      upgradeText: action.type === 'UPGRADE' ? ` to version ${action.version}` : '',
       failuresText: action.nbAgentsFailed > 0 ? `, has ${action.nbAgentsFailed} failure(s)` : '',
     }}
   />
+);
+
+export const automaticUpgradeTitle = (action: ActionStatus, totalAgents: number) => (
+  <EuiText>
+    <h3>Upgrade to {action.version}</h3>
+    <EuiProgress
+      color="primary"
+      label={
+        <FormattedMessage
+          id="xpack.fleet.agentActivityFlyout.automaticUpgradeTitle"
+          defaultMessage="Target: {percentage}% of {agentsText}"
+          values={{
+            percentage: (action.nbAgentsActioned / totalAgents) * 100,
+            agentsCount: (action.nbAgentsActioned / totalAgents) * totalAgents,
+            agentsText: totalAgents === 1 ? 'agent' : 'agents',
+          }}
+        />
+      }
+      value={action.nbAgentsAck}
+      max={action.nbAgentsActioned}
+      valueText={`${action.nbAgentsAck} of ${action.nbAgentsActioned} upgraded`}
+    />
+  </EuiText>
 );
 
 export const inProgressDescription = (time?: string) => (

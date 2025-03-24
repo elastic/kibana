@@ -275,6 +275,7 @@ async function getActions(
           hasRolloutPeriod: !!source.rollout_duration_seconds,
           is_automatic: source.is_automatic,
           policyId: source.policyId,
+          is_retry: source.is_retry,
         };
       }
 

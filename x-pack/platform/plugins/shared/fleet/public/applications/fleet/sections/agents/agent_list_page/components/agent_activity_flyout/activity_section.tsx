@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiText, EuiPanel } from '@elastic/eui';
+import { EuiText, EuiPanel, EuiIcon } from '@elastic/eui';
 
 import type { ActionStatus } from '../../../../../types';
 
@@ -55,6 +55,9 @@ export const ActivitySection: React.FunctionComponent<{
     <>
       <EuiPanel color="subdued" hasBorder={true} borderRadius="none">
         <EuiText>
+          {unifiedActions.some((action) => action.status === 'IN_PROGRESS') && (
+            <EuiIcon type="dot" color="success" />
+          )}
           <b>{title}</b>
         </EuiText>
       </EuiPanel>
