@@ -7,14 +7,11 @@
 
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 
-import {
-  sendGetPackageInfoByKeyForRq,
-  sendInstallKibanaAssetsForRq,
-} from '../../../../../../hooks';
+import { sendGetPackageInfoByKeyForRq, sendInstallKibanaAssetsForRq } from '../../../hooks';
 
 import { ensurePackageKibanaAssetsInstalled } from './ensure_kibana_assets_installed';
 
-jest.mock('../../../../../../hooks');
+jest.mock('../../../hooks');
 
 describe('ensurePackageKibanaAssetsInstalled', () => {
   beforeEach(() => {

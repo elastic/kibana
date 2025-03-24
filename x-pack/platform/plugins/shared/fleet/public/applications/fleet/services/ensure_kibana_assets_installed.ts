@@ -9,22 +9,18 @@ import type { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
-import {
-  sendGetPackageInfoByKeyForRq,
-  sendInstallKibanaAssetsForRq,
-} from '../../../../../../hooks';
+import { sendGetPackageInfoByKeyForRq, sendInstallKibanaAssetsForRq } from '../../../hooks';
 
 export async function ensurePackageKibanaAssetsInstalled({
-  currentSpaceId,
   pkgName,
   pkgVersion,
   toasts,
+  ...rest
 }: {
-  currentSpaceId: string;
   pkgName: string;
   pkgVersion: string;
   toasts: IToasts;
-}) {
+} & ({ currentSpaceId: string } | { spaceIds: string[] })) {
   try {
     const packageInfo = await sendGetPackageInfoByKeyForRq(pkgName, pkgVersion, {
       prerelease: true,
@@ -40,21 +36,41 @@ export async function ensurePackageKibanaAssetsInstalled({
       installationInfo.installed_kibana_space_id ?? DEFAULT_SPACE_ID,
       ...Object.keys(installationInfo.additional_spaces_installed_kibana ?? {}),
     ];
-    if (!kibanaAssetsSpaces.includes(currentSpaceId)) {
+
+    if ('currentSpaceId' in rest) {
+      if (kibanaAssetsSpaces.includes(rest.currentSpaceId)) {
+        return;
+      }
       await sendInstallKibanaAssetsForRq({
         pkgName: installationInfo.name,
         pkgVersion: installationInfo.version,
       });
-      toasts.addSuccess(
-        i18n.translate('xpack.fleet.installKibanaAssets.successNotificationTitle', {
-          defaultMessage: 'Successfully installed kibana assets',
-        })
-      );
+    } else {
+      console.log(pkgName, rest.spaceIds, kibanaAssetsSpaces);
+      if (rest.spaceIds.every((spaceId) => kibanaAssetsSpaces.includes(spaceId))) {
+        return;
+      }
+      await sendInstallKibanaAssetsForRq({
+        pkgName: installationInfo.name,
+        pkgVersion: installationInfo.version,
+        spaceIds: rest.spaceIds,
+      });
     }
+    toasts.addSuccess(
+      i18n.translate('xpack.fleet.installKibanaAssets.successNotificationTitle', {
+        defaultMessage: 'Successfully installed kibana assets for {pkgName}',
+        values: {
+          pkgName: installationInfo.name,
+        },
+      })
+    );
   } catch (err) {
     toasts.addError(err, {
       title: i18n.translate('xpack.fleet.installKibanaAssets.errorNotificationTitle', {
-        defaultMessage: 'Unable to install kibana assets',
+        defaultMessage: 'Unable to install kibana assets for {pkgName}',
+        values: {
+          pkgName,
+        },
       }),
     });
   }
