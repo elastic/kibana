@@ -18,13 +18,14 @@ import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_an
 import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_contract';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import {
-  RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
+  TO_RUN_RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
+  TO_ENABLE_RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
   getMissingRiskEnginePrivileges,
 } from '../../../../common/entity_analytics/risk_engine';
 import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
 
-export const getUserRiskEnginePrivileges = async (
+export const getRunRiskEnginePrivileges = async (
   request: KibanaRequest,
   security: SecurityPluginStart
 ) => {
@@ -33,7 +34,23 @@ export const getUserRiskEnginePrivileges = async (
     security,
     privilegesToCheck: {
       elasticsearch: {
-        cluster: RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
+        cluster: TO_RUN_RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
+        index: {},
+      },
+    },
+  });
+};
+
+export const getEnableRiskEnginePrivileges = async (
+  request: KibanaRequest,
+  security: SecurityPluginStart
+) => {
+  return checkAndFormatPrivileges({
+    request,
+    security,
+    privilegesToCheck: {
+      elasticsearch: {
+        cluster: TO_ENABLE_RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
         index: RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
       },
     },
@@ -96,11 +113,11 @@ export const withRiskEnginePrivilegeCheck = <P, Q, B>(
     response: KibanaResponseFactory
   ) => {
     const [_, { security }] = await getStartServices();
-    const privileges = await getUserRiskEnginePrivileges(request, security);
-    if (
-      !privileges.has_all_required &&
-      !privileges.privileges.elasticsearch.cluster?.manage_transform
-    ) {
+    const privilegeCheckFn = request.route.path.includes('/risk_score/engine/schedule_now')
+      ? getRunRiskEnginePrivileges
+      : getEnableRiskEnginePrivileges;
+    const privileges = await privilegeCheckFn(request, security);
+    if (!privileges.has_all_required) {
       const siemResponse = buildSiemResponse(response);
       return siemResponse.error({
         statusCode: 403,

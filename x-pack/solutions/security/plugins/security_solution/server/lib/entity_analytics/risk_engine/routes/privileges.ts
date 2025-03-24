@@ -14,7 +14,7 @@ import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import { RiskScoreAuditActions } from '../../risk_score/audit';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
-import { getUserRiskEnginePrivileges } from '../risk_engine_privileges';
+import { getEnableRiskEnginePrivileges } from '../risk_engine_privileges';
 
 export const riskEnginePrivilegesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -41,7 +41,7 @@ export const riskEnginePrivilegesRoute = (
         const [_, { security }] = await getStartServices();
         const securitySolution = await context.securitySolution;
 
-        const body = await getUserRiskEnginePrivileges(request, security);
+        const body = await getEnableRiskEnginePrivileges(request, security);
 
         securitySolution.getAuditLogger()?.log({
           message: 'User checked if they have the required privileges to configure the risk engine',

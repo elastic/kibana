@@ -21,7 +21,11 @@ export const RISK_ENGINE_CONFIGURE_SO_URL =
   `${PUBLIC_RISK_ENGINE_URL}/saved_object/configure` as const;
 
 type ClusterPrivilege = 'manage_index_templates' | 'manage_transform';
-export const RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
+export const TO_RUN_RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
+  'manage_transform',
+] as ClusterPrivilege[];
+
+export const TO_ENABLE_RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
   'manage_index_templates',
   'manage_transform',
 ] as ClusterPrivilege[];

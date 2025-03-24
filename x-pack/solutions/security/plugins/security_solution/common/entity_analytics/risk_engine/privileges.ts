@@ -9,7 +9,7 @@ import type { NonEmptyArray } from 'fp-ts/NonEmptyArray';
 import type { EntityAnalyticsPrivileges } from '../../api/entity_analytics';
 import type { RiskEngineIndexPrivilege } from './constants';
 import {
-  RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
+  TO_ENABLE_RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
 } from './constants';
 
@@ -54,12 +54,13 @@ export const getMissingRiskEnginePrivileges = (
     privileges.elasticsearch.index,
     required
   );
-  const missingClusterPrivileges = RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES.filter(
-    (privilege) => !privileges.elasticsearch.cluster?.[privilege]
-  );
+  const missingClusterPrivilegesToEnableEngine =
+    TO_ENABLE_RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES.filter(
+      (privilege) => !privileges.elasticsearch.cluster?.[privilege]
+    );
 
   return {
     indexPrivileges: missingIndexPrivileges,
-    clusterPrivileges: missingClusterPrivileges,
+    clusterPrivileges: missingClusterPrivilegesToEnableEngine,
   };
 };
