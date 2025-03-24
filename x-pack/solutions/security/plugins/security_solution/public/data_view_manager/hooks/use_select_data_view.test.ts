@@ -8,14 +8,32 @@
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { useSelectDataView } from './use_select_data_view';
+import { useDispatch } from 'react-redux';
+import { DataViewManagerScopeName } from '../constants';
+
+jest.mock('react-redux', () => {
+  const dispatch = jest.fn();
+
+  return {
+    ...jest.requireActual('react-redux'),
+    useDispatch: () => dispatch,
+  };
+});
 
 describe('useSelectDataView', () => {
-  it('should render', () => {
-    renderHook(
+  it('should render and dispatch data view selection actions', () => {
+    const { result } = renderHook(
       () => {
         return useSelectDataView();
       },
       { wrapper: TestProviders }
     );
+
+    result.current({ id: 'test', scope: [DataViewManagerScopeName.default] });
+
+    expect(useDispatch()).toHaveBeenCalledWith({
+      payload: { id: 'test', scope: ['default'] },
+      type: 'x-pack/security_solution/dataViewManager/selectDataView',
+    });
   });
 });
