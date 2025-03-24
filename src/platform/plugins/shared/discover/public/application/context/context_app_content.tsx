@@ -204,7 +204,7 @@ export function ContextAppContent({
           isDisabled={isAnchorLoading}
         />
       </WrapperWithPadding>
-      <div className="dscDocsGrid">
+      <div css={dscDocsGridCss}>
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <DiscoverGridMemoized
             ariaLabelledBy="surDocumentsAriaLabel"
@@ -266,3 +266,8 @@ const WrapperWithPadding: FC<React.PropsWithChildren<{}>> = ({ children }) => {
     </div>
   );
 };
+
+const dscDocsGridCss = css`
+  flex: 1 1 100%;
+  overflow: auto;
+`;
