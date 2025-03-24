@@ -12,12 +12,15 @@ import React from 'react';
 import { FieldConfiguration } from '../../resources/get_field_configuration';
 import { FieldWithActions } from '../../components/field_with_actions/field_with_actions';
 
-export interface TransactionSummaryProps {
+export interface TransactionSummaryFieldProps {
   fieldId: string;
   fieldConfiguration: FieldConfiguration;
 }
 
-export function TransactionSummary({ fieldConfiguration, fieldId }: TransactionSummaryProps) {
+export function TransactionSummaryField({
+  fieldConfiguration,
+  fieldId,
+}: TransactionSummaryFieldProps) {
   if (!fieldConfiguration.value) {
     return null;
   }

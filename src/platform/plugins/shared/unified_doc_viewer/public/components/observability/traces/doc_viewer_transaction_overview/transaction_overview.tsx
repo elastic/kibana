@@ -15,7 +15,7 @@ import { getTraceDocumentOverview } from '@kbn/discover-utils';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { transactionFields } from './resources/fields';
 import { getTransactionFieldConfiguration } from './resources/get_transaction_field_configuration';
-import { TransactionSummary } from './sub_components/transaction_summary';
+import { TransactionSummaryField } from './sub_components/transaction_summary_field';
 export type TransactionOverviewProps = DocViewRenderProps;
 
 export function TransactionOverview({
@@ -51,7 +51,7 @@ export function TransactionOverview({
           const fieldConfiguration = getTransactionFieldConfiguration(parsedDoc)[fieldId];
 
           return (
-            <TransactionSummary
+            <TransactionSummaryField
               key={fieldId}
               fieldId={fieldId}
               fieldConfiguration={fieldConfiguration}
