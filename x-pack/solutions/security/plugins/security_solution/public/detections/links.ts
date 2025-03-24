@@ -4,20 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import {
-  ALERTS_PATH,
-  SecurityPageName,
-  SECURITY_FEATURE_ID,
   ALERT_SUMMARY_PATH,
+  ALERTS_PATH,
+  SECURITY_FEATURE_ID,
+  SecurityPageName,
 } from '../../common/constants';
-import { ALERTS } from '../app/translations';
+import { ALERT_SUMMARY, ALERTS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 
 export const alertsLink: LinkItem = {
-  id: SecurityPageName.alerts,
-  title: ALERTS,
-  path: ALERTS_PATH,
   capabilities: [`${SECURITY_FEATURE_ID}.show`],
   globalNavPosition: 3,
   globalSearchKeywords: [
@@ -25,12 +23,12 @@ export const alertsLink: LinkItem = {
       defaultMessage: 'Alerts',
     }),
   ],
+  id: SecurityPageName.alerts,
+  path: ALERTS_PATH,
+  title: ALERTS,
 };
 
 export const alertSummaryLink: LinkItem = {
-  id: SecurityPageName.alertSummary,
-  path: ALERT_SUMMARY_PATH,
-  title: 'Alert summary',
   capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.alerts_summary`]],
   globalNavPosition: 3,
   globalSearchKeywords: [
@@ -39,4 +37,7 @@ export const alertSummaryLink: LinkItem = {
     }),
   ],
   hideTimeline: true,
+  id: SecurityPageName.alertSummary,
+  path: ALERT_SUMMARY_PATH,
+  title: ALERT_SUMMARY,
 };
