@@ -432,7 +432,7 @@ export class TaskRunner<
     // Only serialize alerts into task state if we're auto-recovering, otherwise
     // we don't need to keep this information around.
     if (this.ruleType.autoRecoverAlerts) {
-      const alerts = alertsClient.getRawAlertInstancesForState();
+      const alerts = alertsClient.getRawAlertInstancesForState(true);
       alertsToReturn = alerts.rawActiveAlerts;
       recoveredAlertsToReturn = alerts.rawRecoveredAlerts;
     }
