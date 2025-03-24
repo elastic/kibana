@@ -25,6 +25,7 @@ import { CREATE_RULE_ROUTE, EDIT_RULE_ROUTE, RuleForm } from '@kbn/response-ops-
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { AlertsFiltersFormSandbox } from './components/alerts_boolean_filters_sandbox';
 import { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
 import { Page } from './components/page';
@@ -243,6 +244,20 @@ const TriggersActionsUiExampleApp = ({
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
                     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
                     ...startServices,
+                  }}
+                />
+              </Page>
+            )}
+          />
+          <Route
+            exact
+            path="/alerts_filters_form"
+            render={() => (
+              <Page title="Alerts filters form">
+                <AlertsFiltersFormSandbox
+                  services={{
+                    http,
+                    notifications,
                   }}
                 />
               </Page>
