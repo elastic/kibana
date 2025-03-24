@@ -13,6 +13,7 @@ import type {
   ApiDeprecationDetails,
   DomainDeprecationDetails,
 } from '@kbn/core-deprecations-common';
+import { USAGE_COUNTERS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const getApiDeprecations = (allDeprecations: DomainDeprecationDetails[]) => {
@@ -39,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
     }));
 
     const { hits } = await es.search<{ 'usage-counter': UsageCountersSavedObjectAttributes }>({
-      index: '.kibana_usage_counters',
+      index: USAGE_COUNTERS_SAVED_OBJECT_INDEX,
       query: { bool: { should } },
     });
 
