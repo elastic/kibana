@@ -11,7 +11,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { MockRouter } from '../__mocks__/router.mock';
 import { ConversationalChain } from './lib/conversational_chain';
 import { getChatParams } from './lib/get_chat_params';
-import { createRetriever, defineRoutes } from './routes';
+import { parseElasticsearchQuery, defineRoutes } from './routes';
 import { ContextLimitError } from './lib/errors';
 
 jest.mock('./lib/get_chat_params', () => ({
@@ -20,15 +20,30 @@ jest.mock('./lib/get_chat_params', () => ({
 
 jest.mock('./lib/conversational_chain');
 
-describe('createRetriever', () => {
+describe('parseElasticsearchQuery', () => {
   test('works when the question has quotes', () => {
     const esQuery = '{"query": {"match": {"text": "{query}"}}}';
     const question = 'How can I "do something" with quotes?';
 
-    const retriever = createRetriever(esQuery);
+    const retriever = parseElasticsearchQuery(esQuery);
     const result = retriever(question);
 
     expect(result).toEqual({ query: { match: { text: 'How can I "do something" with quotes?' } } });
+  });
+  test('throws an error when esQuery is invalid JSON', () => {
+    const esQuery = 'invalid json';
+    const question = 'How can I "do something" with quotes?';
+
+    try {
+      parseElasticsearchQuery(esQuery)(question);
+      fail('Expected an error to be thrown');
+    } catch (e) {
+      expect(e.message).toMatchInlineSnapshot(
+        `"Failed to parse the Elasticsearch Query. Check Query to make sure it's valid."`
+      );
+      expect(e.cause).toBeDefined();
+      expect(e.cause).toBeInstanceOf(SyntaxError);
+    }
   });
 });
 
