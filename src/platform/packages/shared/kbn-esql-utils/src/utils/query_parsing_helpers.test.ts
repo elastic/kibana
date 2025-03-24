@@ -21,6 +21,7 @@ import {
   mapVariableToColumn,
   getValuesFromQueryField,
 } from './query_parsing_helpers';
+import { monaco } from '@kbn/monaco';
 
 describe('esql query helpers', () => {
   describe('getIndexPatternFromESQLQuery', () => {
@@ -548,9 +549,27 @@ describe('esql query helpers', () => {
       expect(values).toEqual('my_field');
     });
 
+    it('should return the values from the query field when cursor is not at the end', () => {
+      const queryString = 'FROM my_index | WHERE my_field >= | STATS COUNT(*)';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 33,
+      } as monaco.Position);
+      expect(values).toEqual('my_field');
+    });
+
     it('should return the values from the query field with new lines', () => {
       const queryString = 'FROM my_index \n| WHERE my_field >=';
       const values = getValuesFromQueryField(queryString);
+      expect(values).toEqual('my_field');
+    });
+
+    it('should return the values from the query field with new lines when cursor is not at the end', () => {
+      const queryString = 'FROM my_index \n| WHERE my_field >= \n| STATS COUNT(*)';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 2,
+        column: 36,
+      } as monaco.Position);
       expect(values).toEqual('my_field');
     });
   });
