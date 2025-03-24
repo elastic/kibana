@@ -77,7 +77,7 @@ export const BulkEditActionResults = z.object({
 });
 
 /**
- * A rule can only be skipped when the bulk action to be performed on it results in nothing being done. For example, if the edit action is used to add a tag to a rule that already has that tag, or to delete an index pattern that is not specified in a rule. Objects returned in attributes.results.skipped will only include rules' id, name, and skip_reason.
+ * A rule can only be skipped when the bulk action to be performed on it results in nothing being done. For example, if the `edit` action is used to add a tag to a rule that already has that tag, or to delete an index pattern that is not specified in a rule. Objects returned in `attributes.results.skipped` will only include rules' `id`, `name`, and `skip_reason`.
  */
 export type BulkEditActionSummary = z.infer<typeof BulkEditActionSummary>;
 export const BulkEditActionSummary = z.object({
@@ -325,9 +325,9 @@ export const PerformRulesBulkActionRequestQuery = z.object({
 
 Enable dry run mode to verify that bulk actions can be applied to specified rules. Certain rules, such as prebuilt Elastic rules, can’t be edited and will return errors in the request response. Error details will contain an explanation, the rule name and/or ID, and additional troubleshooting information.
 
-To enable dry run mode on a request, add the query parameter dry_run=true to the end of the request URL. Rules specified in the request will be temporarily updated. These updates won’t be written to Elasticsearch.
+To enable dry run mode on a request, add the query parameter `dry_run=true` to the end of the request URL. Rules specified in the request will be temporarily updated. These updates won’t be written to Elasticsearch.
 > info
-> Dry run mode is not supported for the export bulk action. A 400 error will be returned in the request response.
+> Dry run mode is not supported for the `export` bulk action. A 400 error will be returned in the request response.
  
       */
   dry_run: BooleanFromString.optional(),

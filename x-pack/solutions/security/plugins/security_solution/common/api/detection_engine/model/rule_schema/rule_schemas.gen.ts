@@ -166,7 +166,7 @@ several integrations; in this case, `integration` should be specified.
   /** 
       * Elasticsearch fields and their types that need to be present for the rule to function.
 > info
-> The value of required_fields does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use required_fields as an informational property to document the fields that the rule expects to be present in the data.
+> The value of `required_fields` does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use `required_fields` as an informational property to document the fields that the rule expects to be present in the data.
  
       */
   required_fields: z.array(RequiredFieldInput).optional(),

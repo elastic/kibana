@@ -145,11 +145,7 @@ export type RiskScore = z.infer<typeof RiskScore>;
 export const RiskScore = z.number().int().min(0).max(100);
 
 /**
-  * Overrides generated alerts' risk_score with a value from the source event:
-
-- field (string, required): Source event field used to override the default risk_score. This field must be an integer.
-- operator (string, required): Must be equals.
-- value(string, required): Must be an empty string ("").
+  * Overrides generated alerts' risk_score with a value from the source event
 
   */
 export type RiskScoreMapping = z.infer<typeof RiskScoreMapping>;
@@ -267,12 +263,6 @@ export const AlertsIndexNamespace = z.string();
 export type MaxSignals = z.infer<typeof MaxSignals>;
 export const MaxSignals = z.number().int().min(1);
 
-/**
-  * Array containing more specific information on the attack technique.
-> info
-> Only threats described using the MITRE ATT&CKTM framework are displayed in the UI (Rules → Detection rules (SIEM) → Rule name).
-
-  */
 export type ThreatSubtechnique = z.infer<typeof ThreatSubtechnique>;
 export const ThreatSubtechnique = z.object({
   /**
@@ -303,6 +293,12 @@ export const ThreatTechnique = z.object({
    * Technique reference
    */
   reference: z.string(),
+  /** 
+      * Array containing more specific information on the attack technique.
+> info
+> Only threats described using the MITRE ATT&CKTM framework are displayed in the UI (Rules → Detection rules (SIEM) → Rule name).
+ 
+      */
   subtechnique: z.array(ThreatSubtechnique).optional(),
 });
 
@@ -376,7 +372,7 @@ export type RuleFilterArray = z.infer<typeof RuleFilterArray>;
 export const RuleFilterArray = z.array(z.unknown());
 
 /**
- * Sets the source field for the alert's signal.rule.name value. (in the UI, this value is displayed on the Rules page in the Rule column). When unspecified, the rule’s name value is used. The source field must be a string data type.
+ * Sets the source field for the alert's signal.rule.name value (in the UI, this value is displayed on the Rules page in the Rule column). When unspecified, the rule’s name value is used. The source field must be a string data type.
  */
 export type RuleNameOverride = z.infer<typeof RuleNameOverride>;
 export const RuleNameOverride = z.string();
@@ -518,7 +514,7 @@ export const RuleActionThrottle = z.union([
 ]);
 
 /**
- * The condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`,  or `onThrottleInterval`
+ * The condition for throttling the notification
  */
 export type RuleActionNotifyWhen = z.infer<typeof RuleActionNotifyWhen>;
 export const RuleActionNotifyWhen = z.enum([
@@ -696,11 +692,11 @@ export const RuleExceptionList = z.object({
   /**
    * ID of the exception container
    */
-  id: NonEmptyString,
+  id: z.string().min(1).superRefine(isNonEmptyString),
   /**
    * List ID of the exception container
    */
-  list_id: NonEmptyString,
+  list_id: z.string().min(1).superRefine(isNonEmptyString),
   type: ExceptionListType,
   /**
    * Determines the exceptions validity in rule's Kibana space

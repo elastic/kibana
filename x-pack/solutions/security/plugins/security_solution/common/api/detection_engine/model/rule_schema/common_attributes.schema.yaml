@@ -360,7 +360,7 @@ components:
 
     RuleNameOverride:
       type: string
-      description: Sets the source field for the alert's signal.rule.name value. (in the UI, this value is displayed on the Rules page in the Rule column). When unspecified, the rule’s name value is used. The source field must be a string data type.
+      description: Sets the source field for the alert's signal.rule.name value (in the UI, this value is displayed on the Rules page in the Rule column). When unspecified, the rule’s name value is used. The source field must be a string data type.
 
     TimestampOverride:
       type: string
@@ -492,17 +492,8 @@ components:
       required:
         - field_names
 
-    RuleActionThrottle:
-      description: |
-        Defines how often rule actions are taken.
-        - no_actions: Never
-        - rule: Every time new alerts are detected
-        - 1h: Every hour
-        - 1d: Every day
-        - 7d: Every week
-        > info
-        > The rule level `throttle` field is deprecated in Elastic Security 8.8 and will remain active for at least the next 12 months.
-        > In Elastic Security 8.8 and later, you can use the `frequency` field to define frequencies for individual actions. Actions without frequencies will acquire a converted version of the rule’s `throttle` field. In the response, the converted `throttle` setting appears in the individual actions' `frequency` field.
+    RuleActionThrottle: 
+      description: Defines how often rule actions are taken.
       oneOf:
         - type: string
           enum:
@@ -519,7 +510,7 @@ components:
         - 'onActiveAlert'
         - 'onThrottleInterval'
         - 'onActionGroupChange'
-      description: 'The condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`,  or `onThrottleInterval`'
+      description: Defines how often rules run actions.
 
     RuleActionFrequency:
       type: object
@@ -573,10 +564,9 @@ components:
               description: A KQL string.
             filters:
               type: array
+              description: Array of filter objects, as defined in the `kbn-es-query` package.
               items:
                 type: object
-                description: A filter object, as defined in the `kbn-es-query` package.
-
     RuleActionParams:
       type: object
       description: |
@@ -678,10 +668,14 @@ components:
         Array of [exception containers](https://www.elastic.co/guide/en/security/current/exceptions-api-overview.html), which define exceptions that prevent the rule from generating alerts even when its other criteria are met.
       properties:
         id:
-          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          type: string
+          format: nonempty
+          minLength: 1
           description: ID of the exception container
         list_id:
-          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          type: string
+          format: nonempty
+          minLength: 1
           description: List ID of the exception container
         type:
           $ref: '#/components/schemas/ExceptionListType'
