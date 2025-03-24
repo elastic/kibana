@@ -6,10 +6,14 @@
  */
 
 import React, { useState } from 'react';
+import { capitalize, mapValues, uniq } from 'lodash';
 import {
   ContentPackObject,
   ContentPackSavedObject,
   IngestStreamGetResponse,
+  findIndexPatterns,
+  isIndexPlaceholder,
+  replaceIndexPatterns,
 } from '@kbn/streams-schema';
 import {
   EuiBadge,
@@ -31,9 +35,7 @@ import type {
   SavedDashboardPanel,
 } from '@kbn/dashboard-plugin/common/content_management/v2';
 import { getDashboardBackupService } from '@kbn/dashboard-plugin/public';
-import { capitalize, mapValues, uniq } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
-import { findIndexPatterns, replaceIndexPatterns } from './helpers/index_patterns';
 
 export function ImportContentPackFlyout({
   definition,
@@ -95,7 +97,7 @@ export function ImportContentPackFlyout({
 
                 const indexPatterns = uniq(
                   objects.flatMap((object) => findIndexPatterns(object.content))
-                );
+                ).filter((index) => !isIndexPlaceholder(index));
 
                 setContentPackObjects(objects);
                 setIndexPatterns(indexPatterns);

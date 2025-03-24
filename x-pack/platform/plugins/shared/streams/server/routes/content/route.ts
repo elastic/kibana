@@ -14,8 +14,16 @@ import {
   createMapStream,
   createPromiseFromStreams,
 } from '@kbn/utils';
-import { ContentPack, contentPackSchema } from '@kbn/streams-schema';
+import {
+  ContentPack,
+  ContentPackObject,
+  INDEX_PLACEHOLDER,
+  contentPackSchema,
+  findIndexPatterns,
+  replaceIndexPatterns,
+} from '@kbn/streams-schema';
 import { SavedObject, SavedObjectsExportResultDetails } from '@kbn/core/server';
+import { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 
@@ -63,8 +71,20 @@ const exportContentRoute = createServerRoute({
         (savedObject) =>
           (savedObject as SavedObjectsExportResultDetails).exportedCount === undefined
       ),
-      createMapStream((savedObject) => {
-        return JSON.stringify({ type: 'saved_object', content: savedObject });
+      createMapStream((savedObject: SavedObject<DashboardAttributes>) => {
+        const patterns = findIndexPatterns(savedObject);
+        const replacements = patterns
+          .filter((pattern) => pattern.startsWith(params.path.name))
+          .reduce((acc, pattern) => {
+            acc[pattern] = pattern.replace(params.path.name, INDEX_PLACEHOLDER);
+            return acc;
+          }, {} as Record<string, string>);
+
+        return JSON.stringify({
+          type: 'saved_object',
+          content:
+            patterns.length > 0 ? replaceIndexPatterns(savedObject, replacements) : savedObject,
+        });
       }),
       createConcatStream([]),
     ]);
@@ -128,7 +148,19 @@ const importContentRoute = createServerRoute({
       .split('\n')
       .map((object) => JSON.parse(object))
       .filter((object) => object.type === 'saved_object')
-      .map((object) => object.content);
+      .map((object: ContentPackObject) => {
+        const patterns = findIndexPatterns(object.content);
+        const replacements = patterns
+          .filter((pattern) => pattern.startsWith(INDEX_PLACEHOLDER))
+          .reduce((acc, pattern) => {
+            acc[pattern] = pattern.replace(INDEX_PLACEHOLDER, params.path.name);
+            return acc;
+          }, {} as Record<string, string>);
+
+        return patterns.length > 0
+          ? replaceIndexPatterns(object.content, replacements)
+          : object.content;
+      });
 
     const importer = (await context.core).savedObjects.getImporter(soClient);
     const { successResults, errors } = await importer.import({

@@ -8,14 +8,18 @@
 import { mapValues, uniq } from 'lodash';
 import { ESQLSource, EsqlQuery } from '@kbn/esql-ast';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { ContentPackSavedObject } from '@kbn/streams-schema';
-import {
+import type { ContentPackSavedObject } from '@kbn/streams-schema';
+import type {
   DashboardAttributes,
   SavedDashboardPanel,
 } from '@kbn/dashboard-plugin/common/content_management/v2';
-import { LensSerializedState } from '@kbn/lens-plugin/public';
-import { LensAttributes } from '@kbn/lens-embeddable-utils';
-import { IndexPatternRef } from '@kbn/lens-plugin/public/types';
+import type { LensSerializedState } from '@kbn/lens-plugin/public';
+import type { LensAttributes } from '@kbn/lens-embeddable-utils';
+import type { IndexPatternRef } from '@kbn/lens-plugin/public/types';
+
+export const INDEX_PLACEHOLDER = '<stream_name_placeholder>';
+
+export const isIndexPlaceholder = (index: string) => index.startsWith(INDEX_PLACEHOLDER);
 
 export function findIndexPatterns(
   savedObject: ContentPackSavedObject<DashboardAttributes>['content']
@@ -51,13 +55,16 @@ export function replaceIndexPatterns(
         ...pattern,
         title: pattern.title
           ?.split(',')
-          .map((pattern) => replacements[pattern] ?? pattern)
+          .map((index) => replacements[index] ?? index)
           .join(','),
       };
     },
   });
 
-  return { ...savedObject, panelsJSON: JSON.stringify(updatedPanels) };
+  return {
+    ...savedObject,
+    attributes: { ...savedObject.attributes, panelsJSON: JSON.stringify(updatedPanels) },
+  };
 }
 
 export function traversePanels(
@@ -73,12 +80,13 @@ export function traversePanels(
   for (let i = 0; i < panels.length; i++) {
     const panel = panels[i];
     if (panel.type === 'lens') {
-      const { query: rootQuery, attributes } = panel.embeddableConfig as LensSerializedState;
+      const { query: rootQuery, attributes: lensAttributes } =
+        panel.embeddableConfig as LensSerializedState;
       if (rootQuery && 'esql' in rootQuery) {
         rootQuery.esql = options.esqlQuery(rootQuery.esql);
       }
 
-      const state = (attributes as LensAttributes).state;
+      const state = (lensAttributes as LensAttributes).state;
 
       if (state.adHocDataViews) {
         state.adHocDataViews = mapValues(state.adHocDataViews, (dataView) =>
