@@ -210,8 +210,8 @@ export const PolicySelector = memo<PolicySelectorProps>(
     const [userSearchValue, setUserSearchValue] = useState('');
     const [searchKuery, setSearchKuery] = useState('');
     const [view, setView] = useState<'full-list' | 'selected-list'>('full-list');
-
-    // FIXME:PT see if there is away to scroll the selectable list back up to the top after displaying a new page of data
+    const reactWindowFixedSizeList = useRef<{ scrollToItem: (index: number) => void }>();
+    const handledApiData = useRef(new WeakSet<GetPackagePoliciesResponse>());
 
     // Delays setting the `searchKuery` value thus allowing the user to pause typing - so
     // that we don't call the API on every character change.
@@ -264,14 +264,13 @@ export const PolicySelector = memo<PolicySelectorProps>(
       );
     }, [additionalListItems, selectedPolicyIds.length]);
 
-    const selectableScrollingWindow = useRef<HTMLElement | undefined>();
-
+    // @ts-expect-error EUI does not seem to have correctly types the `windowProps` which come from React-Window `FixedSizeList` component
     const listProps: EuiSelectableProps['listProps'] = useMemo(() => {
       return {
         bordered: false,
         showIcons: !useCheckbox,
         windowProps: {
-          outerRef: selectableScrollingWindow,
+          ref: reactWindowFixedSizeList,
         },
       };
     }, [useCheckbox]);
@@ -400,6 +399,25 @@ export const PolicySelector = memo<PolicySelectorProps>(
       return option['data-type'] === 'customItem';
     }, []);
 
+    const getUpdatedAdditionalListItems = useCallback(
+      (
+        updatedItem: AdditionalListItemProps,
+        listOfAdditionalItems: AdditionalListItemProps[]
+      ): AdditionalListItemProps[] => {
+        return listOfAdditionalItems.map((item) => {
+          if (item.label === updatedItem.label) {
+            return {
+              ...item,
+              checked: updatedItem.checked,
+            };
+          }
+
+          return item;
+        });
+      },
+      []
+    );
+
     const listBuilderCallback = useCallback<NonNullable<EuiSelectableProps['children']>>(
       (list, _search) => {
         return <>{list}</>;
@@ -430,21 +448,18 @@ export const PolicySelector = memo<PolicySelectorProps>(
           : selectedPolicyIds;
 
         const updatedAdditionalItems: AdditionalListItemProps[] = isChangedOptionCustom
-          ? additionalListItems.map((additionalItem) => {
-              if (additionalItem.label === changedOption.label) {
-                return {
-                  ...additionalItem,
-                  checked: changedOption.checked,
-                };
-              }
-
-              return additionalItem;
-            })
+          ? getUpdatedAdditionalListItems(changedOption, additionalListItems)
           : additionalListItems;
 
         return onChange(updatedPolicyIds, updatedAdditionalItems);
       },
-      [additionalListItems, isCustomOption, onChange, selectedPolicyIds]
+      [
+        additionalListItems,
+        getUpdatedAdditionalListItems,
+        isCustomOption,
+        onChange,
+        selectedPolicyIds,
+      ]
     );
 
     const onPageClickHandler: Required<EuiPaginationProps>['onPageClick'] = useCallback(
@@ -481,26 +496,29 @@ export const PolicySelector = memo<PolicySelectorProps>(
         const isSelectAll = ev.currentTarget.value === 'selectAll';
         const policiesToSelect: string[] = [];
         const policiesToUnSelect: string[] = [];
-        const updatedAdditionalItems: AdditionalListItemProps[] = [];
+        let updatedAdditionalItems = additionalListItems;
 
         for (const option of selectableOptions) {
           if (isSelectAll) {
             if (!isCustomOption(option)) {
               policiesToSelect.push(option.policy.id);
             } else {
-              updatedAdditionalItems.push({
-                ...(additionalListItems.find((item) => item.label === option.label) ?? option),
-                checked: 'on',
-              });
+              updatedAdditionalItems = getUpdatedAdditionalListItems(
+                { ...option, checked: 'on' },
+                updatedAdditionalItems
+              );
             }
           } else {
             if (!isCustomOption(option)) {
               policiesToUnSelect.push(option.policy.id);
             } else {
-              updatedAdditionalItems.push({
-                ...(additionalListItems.find((item) => item.label === option.label) ?? option),
-                checked: 'off',
-              });
+              updatedAdditionalItems = getUpdatedAdditionalListItems(
+                {
+                  ...option,
+                  checked: undefined,
+                },
+                updatedAdditionalItems
+              );
             }
           }
         }
@@ -512,6 +530,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
       },
       [
         additionalListItems,
+        getUpdatedAdditionalListItems,
         getUpdatedSelectedPolicyIds,
         isCustomOption,
         onChange,
@@ -542,16 +561,20 @@ export const PolicySelector = memo<PolicySelectorProps>(
     //    1. scroll list back up to the top
     //    2. call `onFetch()` if defined
     useEffect(() => {
-      if (selectableScrollingWindow.current) {
-        selectableScrollingWindow.current.scrollTop = 0;
-      }
+      if (policyListResponse && !isFetching && !handledApiData.current.has(policyListResponse)) {
+        handledApiData.current.add(policyListResponse);
 
-      if (onFetch && policyListResponse && !isFetching) {
-        onFetch({
-          type: view === 'selected-list' ? 'selected' : 'search',
-          filtered: Boolean(userSearchValue),
-          data: policyListResponse,
-        });
+        if (reactWindowFixedSizeList.current) {
+          reactWindowFixedSizeList.current.scrollToItem(0);
+        }
+
+        if (onFetch) {
+          onFetch({
+            type: view === 'selected-list' ? 'selected' : 'search',
+            filtered: Boolean(userSearchValue),
+            data: policyListResponse,
+          });
+        }
       }
     }, [isFetching, onFetch, policyListResponse, userSearchValue, view]);
 

@@ -16,14 +16,21 @@ export type PolicySelectorMenuButtonProps = PolicySelectorProps;
 export const PolicySelectorMenuButton = memo<PolicySelectorMenuButtonProps>((props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [countOfPolicies, setCountOfPolicies] = useState(0);
-  const countOfSelectedPolicies = props.selectedPolicyIds.length;
+
+  const countOfSelectedPolicies: number = useMemo(() => {
+    return (
+      props.selectedPolicyIds.length +
+      (props.additionalListItems ?? []).filter((additionalItem) => additionalItem.checked === 'on')
+        .length
+    );
+  }, [props.additionalListItems, props.selectedPolicyIds.length]);
 
   const onFetch: Required<PolicySelectorMenuButtonProps>['onFetch'] = useCallback(
     (fetchedData) => {
       const { type, filtered, data } = fetchedData;
 
       if (type === 'search' && !filtered) {
-        setCountOfPolicies(data.total);
+        setCountOfPolicies(data.total + (props.additionalListItems ?? []).length);
       }
 
       if (props.onFetch) {
