@@ -9,7 +9,7 @@ import { prefixSamples } from '../../util/samples';
 import { mergeAndChunkSamples } from './chunk';
 import { ECS_EXAMPLE_ANSWER, ECS_FIELDS } from './constants';
 import { createPipeline } from './pipeline';
-import type { EcsBaseNodeParams } from './types';
+import type { EcsBaseNodeParams, EcsCreatePipelineNodeParams } from './types';
 import { removeReservedFields } from './validate';
 
 export function modelSubOutput({ state }: EcsBaseNodeParams): Partial<EcsMappingState> {
@@ -42,8 +42,11 @@ export function modelInput({ state }: EcsBaseNodeParams): Partial<EcsMappingStat
   };
 }
 
-export function modelOutput({ state }: EcsBaseNodeParams): Partial<EcsMappingState> {
-  const currentPipeline = createPipeline(state);
+export async function modelOutput({
+  state,
+  client,
+}: EcsCreatePipelineNodeParams): Promise<Partial<EcsMappingState>> {
+  const currentPipeline = await createPipeline(state, client);
   return {
     finalized: true,
     lastExecutedChain: 'modelOutput',

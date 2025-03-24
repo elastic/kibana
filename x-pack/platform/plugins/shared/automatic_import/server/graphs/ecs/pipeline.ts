@@ -8,12 +8,15 @@
 import { load } from 'js-yaml';
 import { Environment, FileSystemLoader } from 'nunjucks';
 import { join as joinPath } from 'path';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+
 import { Pipeline, ESProcessorItem } from '../../../common';
 import type { EcsMappingState } from '../../types';
 import { ECS_TYPES } from './constants';
 import { deepCopy } from '../../util/util';
 import { type FieldPath, fieldPathToProcessorString } from '../../util/fields';
 import { fieldPathToPainlessExpression, SafePainlessExpression } from '../../util/painless';
+import { ensureProcessorsCompile } from '../../util/pipeline';
 
 interface ECSField {
   target: string;
@@ -186,7 +189,10 @@ export function generateProcessors(
   return results;
 }
 
-export function createPipeline(state: EcsMappingState): Pipeline {
+export async function createPipeline(
+  state: EcsMappingState,
+  client: IScopedClusterClient
+): Promise<Pipeline> {
   const samples = JSON.parse(state.combinedSamples);
 
   const processors = generateProcessors(state.finalMapping, samples);
@@ -219,7 +225,10 @@ export function createPipeline(state: EcsMappingState): Pipeline {
   if (state.additionalProcessors.length > 0) {
     ingestPipeline = combineProcessors(ingestPipeline, state.additionalProcessors);
   }
-  return ingestPipeline;
+  return {
+    ...ingestPipeline,
+    processors: await ensureProcessorsCompile(ingestPipeline.processors, client),
+  };
 }
 
 export function combineProcessors(

@@ -23,10 +23,19 @@ import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 const model = new FakeLLM({
   response: "I'll callback later.",
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+
+const client = {
+  asCurrentUser: {
+    ingest: {
+      simulate: jest.fn(),
+    },
+  },
+} as unknown as IScopedClusterClient;
 
 jest.mock('./mapping');
 jest.mock('./duplicates');
@@ -69,7 +78,7 @@ describe('EcsGraph', () => {
       // When getEcsGraph runs, langgraph compiles the graph it will error if the graph has any issues.
       // Common issues for example detecting a node has no next step, or there is a infinite loop between them.
       try {
-        await getEcsGraph({ model });
+        await getEcsGraph({ model, client });
       } catch (error) {
         throw Error(`getEcsGraph threw an error: ${error}`);
       }
@@ -77,7 +86,7 @@ describe('EcsGraph', () => {
     it('Runs the whole graph, with mocked outputs from the LLM.', async () => {
       // The mocked outputs are specifically crafted to trigger ALL different conditions, allowing us to test the whole graph.
       // This is why we have all the expects ensuring each function was called.
-      const ecsGraph = await getEcsGraph({ model });
+      const ecsGraph = await getEcsGraph({ model, client });
       let response;
       try {
         response = await ecsGraph.invoke(mockedRequest);

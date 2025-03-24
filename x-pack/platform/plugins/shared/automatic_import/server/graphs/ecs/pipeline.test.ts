@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IScopedClusterClient } from '@kbn/core/server';
 import { ecsPipelineState } from '../../../__jest__/fixtures/ecs_mapping';
 import type { EcsMappingState } from '../../types';
 import { createPipeline, generateProcessors } from './pipeline';
@@ -13,7 +14,16 @@ const state: EcsMappingState = ecsPipelineState;
 
 describe('Testing pipeline templates', () => {
   it('handle pipeline creation', async () => {
-    const pipeline = createPipeline(state);
+    const client = {
+      asCurrentUser: {
+        ingest: {
+          simulate: () => [],
+        },
+      },
+    };
+
+    const pipeline = await createPipeline(state, client as unknown as IScopedClusterClient);
+
     expect(pipeline.processors).toEqual([
       {
         set: { field: 'ecs.version', tag: 'set_ecs_version', value: '8.11.0' },

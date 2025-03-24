@@ -64,6 +64,9 @@ export function registerEcsRoutes(router: IRouter<AutomaticImportRouteHandlerCon
           mapping,
           langSmithOptions,
         } = req.body;
+        const services = await context.resolve(['core']);
+        const { client } = services.core.elasticsearch;
+
         const { getStartServices, logger } = await context.automaticImport;
 
         const [, { actions: actionsPlugin }] = await getStartServices();
@@ -108,7 +111,7 @@ export function registerEcsRoutes(router: IRouter<AutomaticImportRouteHandlerCon
             ],
           };
 
-          const graph = await getEcsGraph({ model });
+          const graph = await getEcsGraph({ model, client });
           const results = await graph
             .withConfig({ runName: 'ECS Mapping' })
             .invoke(parameters, options);
