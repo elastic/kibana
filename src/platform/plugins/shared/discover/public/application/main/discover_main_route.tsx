@@ -15,6 +15,7 @@ import React from 'react';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
+  type DiscoverInternalState,
   InternalStateProvider,
   createInternalStateStore,
   createRuntimeStateManager,
@@ -29,7 +30,6 @@ import {
   NoDataPage,
 } from './components/session_view';
 import { useAsyncFunction } from './hooks/use_async_function';
-import type { MainRouteInitializationState } from './types';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -39,7 +39,7 @@ export interface MainRouteProps {
 
 type InitializeMainRoute = (
   rootProfileState: Extract<RootProfileState, { rootProfileLoading: false }>
-) => Promise<MainRouteInitializationState>;
+) => Promise<DiscoverInternalState['initializationState']>;
 
 const defaultCustomizationCallbacks: CustomizationCallback[] = [];
 
@@ -81,11 +81,14 @@ export const DiscoverMainRoute = ({
         internalState.dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
         initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
       ]);
-
-      return {
+      const initializationState: DiscoverInternalState['initializationState'] = {
         hasESData,
         hasUserDataView: hasUserDataView && defaultDataViewExists,
       };
+
+      internalState.dispatch(internalStateActions.setInitializationState(initializationState));
+
+      return initializationState;
     }
   );
 
@@ -121,7 +124,6 @@ export const DiscoverMainRoute = ({
     <InternalStateProvider store={internalState}>
       <rootProfileState.AppWrapper>
         <DiscoverSessionView
-          mainRouteInitializationState={mainRouteInitializationState.value}
           customizationContext={customizationContext}
           customizationCallbacks={customizationCallbacks}
           urlStateStorage={urlStateStorage}

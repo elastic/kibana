@@ -28,6 +28,7 @@ import {
 } from './types';
 
 const initialState: DiscoverInternalState = {
+  initializationState: { hasESData: false, hasUserDataView: false },
   dataViewId: undefined,
   isDataViewLoading: false,
   defaultProfileAdHocDataViewIds: [],
@@ -71,6 +72,13 @@ export const internalStateSlice = createSlice({
   name: 'internalState',
   initialState,
   reducers: {
+    setInitializationState: (
+      state,
+      action: PayloadAction<DiscoverInternalState['initializationState']>
+    ) => {
+      state.initializationState = action.payload;
+    },
+
     setDataViewId: (state, action: PayloadAction<string | undefined>) => {
       if (action.payload !== state.dataViewId) {
         state.expandedDoc = undefined;

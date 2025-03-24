@@ -14,7 +14,7 @@ import type {
   AnalyticsNoDataPageProps,
 } from '@kbn/shared-ux-page-analytics-no-data-types';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import type { MainRouteInitializationState } from '../../types';
+import type { DiscoverInternalState } from '../../state_management/redux';
 
 const importNoData = () => import('@kbn/shared-ux-page-analytics-no-data');
 const AnalyticsNoDataPageKibanaProvider = withSuspense(
@@ -29,7 +29,7 @@ export const NoDataPage = ({
   hasUserDataView,
   onDataViewCreated,
   onESQLNavigationComplete,
-}: MainRouteInitializationState & AnalyticsNoDataPageProps) => {
+}: DiscoverInternalState['initializationState'] & AnalyticsNoDataPageProps) => {
   const services = useDiscoverServices();
   const noDataDependencies = useMemo<AnalyticsNoDataPageKibanaDependencies>(
     () => ({

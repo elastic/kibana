@@ -12,7 +12,6 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isEqual } from 'lodash';
-import type { MainRouteInitializationState } from '../../../types';
 import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
 import {
   getInitialState,
@@ -34,7 +33,6 @@ import { APP_STATE_URL_KEY } from '../../../../../../common';
 
 export interface InitializeSessionParams {
   stateContainer: DiscoverStateContainer;
-  mainRouteInitializationState: MainRouteInitializationState;
   discoverSessionId: string | undefined;
   dataViewSpec: DataViewSpec | undefined;
   defaultUrlState: DiscoverAppState | undefined;
@@ -44,13 +42,7 @@ export const initializeSession: InternalStateThunkActionCreator<
   [InitializeSessionParams],
   Promise<{ showNoDataPage: boolean }>
 > =
-  ({
-    stateContainer,
-    mainRouteInitializationState,
-    discoverSessionId,
-    dataViewSpec,
-    defaultUrlState,
-  }) =>
+  ({ stateContainer, discoverSessionId, dataViewSpec, defaultUrlState }) =>
   async (
     dispatch,
     getState,
@@ -65,7 +57,7 @@ export const initializeSession: InternalStateThunkActionCreator<
     const discoverSessionLoadTracker =
       services.ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
     const urlState = cleanupUrlState(
-      urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? defaultUrlState,
+      defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
       services.uiSettings
     );
     const persistedDiscoverSession = discoverSessionId
@@ -78,7 +70,7 @@ export const initializeSession: InternalStateThunkActionCreator<
     const discoverSessionHasAdHocDataView = Boolean(
       discoverSessionDataView && !discoverSessionDataView.isPersisted()
     );
-    const { defaultProfileAdHocDataViewIds } = getState();
+    const { initializationState, defaultProfileAdHocDataViewIds } = getState();
     const profileDataViews = runtimeStateManager.adHocDataViews$
       .getValue()
       .filter(({ id }) => id && defaultProfileAdHocDataViewIds.includes(id));
@@ -90,7 +82,7 @@ export const initializeSession: InternalStateThunkActionCreator<
       profileDataViewsExist ||
       locationStateHasDataViewSpec;
 
-    if (!mainRouteInitializationState.hasUserDataView && !canAccessWithoutPersistedDataView) {
+    if (!initializationState.hasUserDataView && !canAccessWithoutPersistedDataView) {
       return { showNoDataPage: true };
     }
 

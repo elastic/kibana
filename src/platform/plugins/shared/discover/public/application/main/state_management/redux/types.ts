@@ -43,6 +43,7 @@ export interface InternalStateDataRequestParams {
 }
 
 export interface DiscoverInternalState {
+  initializationState: { hasESData: boolean; hasUserDataView: boolean };
   dataViewId: string | undefined;
   isDataViewLoading: boolean;
   savedDataViews: DataViewListItem[];

@@ -19,7 +19,7 @@ import { createDataViewDataSource, createEsqlDataSource } from '../../../../../c
  * @param appStateFromUrl
  */
 export function cleanupUrlState(
-  appStateFromUrl: AppStateUrl | undefined,
+  appStateFromUrl: AppStateUrl | null | undefined,
   uiSettings: IUiSettingsClient
 ): DiscoverAppState | undefined {
   if (!appStateFromUrl) {

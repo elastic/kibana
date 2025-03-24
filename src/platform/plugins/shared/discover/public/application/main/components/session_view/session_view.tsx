@@ -26,6 +26,7 @@ import {
   RuntimeStateProvider,
   internalStateActions,
   useInternalStateDispatch,
+  useInternalStateSelector,
   useRuntimeState,
 } from '../../state_management/redux';
 import type {
@@ -43,11 +44,9 @@ import { DiscoverMainProvider } from '../../state_management/discover_state_prov
 import { BrandedLoadingIndicator } from './branded_loading_indicator';
 import { RedirectWhenSavedObjectNotFound } from './redirect_not_found';
 import { DiscoverMainApp } from './main_app';
-import type { MainRouteInitializationState } from '../../types';
 import { useAsyncFunction } from '../../hooks/use_async_function';
 
 interface DiscoverSessionViewProps {
-  mainRouteInitializationState: MainRouteInitializationState;
   customizationContext: DiscoverCustomizationContext;
   customizationCallbacks: CustomizationCallback[];
   urlStateStorage: IKbnUrlStateStorage;
@@ -71,7 +70,6 @@ type InitializeSession = (options?: {
 }) => Promise<SessionInitializationState>;
 
 export const DiscoverSessionView = ({
-  mainRouteInitializationState,
   customizationContext,
   customizationCallbacks,
   urlStateStorage,
@@ -94,7 +92,6 @@ export const DiscoverSessionView = ({
       const { showNoDataPage } = await dispatch(
         internalStateActions.initializeSession({
           stateContainer,
-          mainRouteInitializationState,
           discoverSessionId,
           dataViewSpec,
           defaultUrlState,
@@ -117,6 +114,7 @@ export const DiscoverSessionView = ({
     customizationCallbacks,
     stateContainer: initializeSessionState.value?.stateContainer,
   });
+  const initializationState = useInternalStateSelector((state) => state.initializationState);
   const currentDataView = useRuntimeState(runtimeStateManager.currentDataView$);
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
 
@@ -160,9 +158,12 @@ export const DiscoverSessionView = ({
   if (initializeSessionState.value.showNoDataPage) {
     return (
       <NoDataPage
-        {...mainRouteInitializationState}
+        {...initializationState}
         onDataViewCreated={async (dataViewUnknown) => {
           await dispatch(internalStateActions.loadDataViewList());
+          dispatch(
+            internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
+          );
           const dataView = dataViewUnknown as DataView;
           initializeSession({
             defaultUrlState: dataView.id
