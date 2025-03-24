@@ -39,11 +39,6 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: User can navigate to rule editing page from the rule details page**](#scenario-user-can-navigate-to-rule-editing-page-from-the-rule-details-page)
     - [**Scenario: User can navigate to rule editing page from the rule management page**](#scenario-user-can-navigate-to-rule-editing-page-from-the-rule-management-page)
     - [**Scenario: User can bulk edit prebuilt rules from rules management page**](#scenario-user-can-bulk-edit-prebuilt-rules-from-rules-management-page)
-  - [Editing prebuilt rules under an insufficient license](#editing-prebuilt-rules-under-an-insufficient-license)
-    - [**Scenario: User can't customize prebuilt rules under an insufficient license from the rule edit page**](#scenario-user-cant-customize-prebuilt-rules-under-an-insufficient-license-from-the-rule-edit-page)
-    - [**Scenario: User can't bulk edit prebuilt rules under an insufficient license**](#scenario-user-cant-bulk-edit-prebuilt-rules-under-an-insufficient-license)
-    - [**Scenario: User can't bulk edit prebuilt rules in a mixture of prebuilt and custom rules under an insufficient license**](#scenario-user-cant-bulk-edit-prebuilt-rules-in-a-mixture-of-prebuilt-and-custom-rules-under-an-insufficient-license)
-    - [**Scenario: User can't edit prebuilt rules via bulk edit API under an insufficient license**](#scenario-user-cant-edit-prebuilt-rules-via-bulk-edit-api-under-an-insufficient-license)
   - [Detecting rule customizations](#detecting-rule-customizations)
     - [**Scenario: is\_customized is set to true when user edits a customizable rule field**](#scenario-is_customized-is-set-to-true-when-user-edits-a-customizable-rule-field)
     - [**Scenario: is\_customized calculation is not affected by specific fields**](#scenario-is_customized-calculation-is-not-affected-by-specific-fields)
@@ -60,6 +55,11 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [**Scenario: Modified badge should not appear on the rule updates table when prebuilt rule isn't customized**](#scenario-modified-badge-should-not-appear-on-the-rule-updates-table-when-prebuilt-rule-isnt-customized)
     - [**Scenario: User should be able to see only customized rules in the rule updates table**](#scenario-user-should-be-able-to-see-only-customized-rules-in-the-rule-updates-table)
     - [**Scenario: User should be able to filter by non-customized rules on the rule updates table**](#scenario-user-should-be-able-to-filter-by-non-customized-rules-on-the-rule-updates-table)
+  - [Licensing](#licensing)
+    - [**Scenario: User can't customize prebuilt rules under an insufficient license from the rule edit page**](#scenario-user-cant-customize-prebuilt-rules-under-an-insufficient-license-from-the-rule-edit-page)
+    - [**Scenario: User can't bulk edit prebuilt rules under an insufficient license**](#scenario-user-cant-bulk-edit-prebuilt-rules-under-an-insufficient-license)
+    - [**Scenario: User can't bulk edit prebuilt rules in a mixture of prebuilt and custom rules under an insufficient license**](#scenario-user-cant-bulk-edit-prebuilt-rules-in-a-mixture-of-prebuilt-and-custom-rules-under-an-insufficient-license)
+    - [**Scenario: User can't edit prebuilt rules via bulk edit API under an insufficient license**](#scenario-user-cant-edit-prebuilt-rules-via-bulk-edit-api-under-an-insufficient-license)
 
 ## Useful information
 
@@ -191,66 +191,6 @@ And the action is successfully applied to M selected rules
 Then rules that have been changed from their base version should have a "Modified" badge on the respective row in the rule management table
 And the update should be reflected on the rule details page
 ```
-
-### Editing prebuilt rules under an insufficient license
-
-#### **Scenario: User can't customize prebuilt rules under an insufficient license from the rule edit page**
-
-**Automation**: 2 Cypress tests: one for Serverless, one for non-Serverless.
-
-```Gherkin
-Given a Kibana installation running under an insufficient license
-When user navigates to the rule edit page of a prebuilt rule
-Then About, Definition and Schedule views should be disabled
-When user tries to access the disabled views
-Then they should see a message that editing is not allowed under the current license
-And required license name should be included in the message
-```
-
-#### **Scenario: User can't bulk edit prebuilt rules under an insufficient license**
-
-**Automation**: 2 Cypress tests: one for Serverless, one for non-Serverless.
-
-```Gherkin
-Given a Kibana installation running under an insufficient license
-When a user selects one or more prebuilt rules in the rule management table
-And user's selection doesn't contain any custom rules
-And user attempts to apply a <customizing_bulk_action> bulk action to selected rules
-Then the user should see a message that this action is not allowed for prebuilt rules under the current license
-And required license name should be included in the message
-And no button to proceed with applying the action should be displayed
-```
-
-#### **Scenario: User can't bulk edit prebuilt rules in a mixture of prebuilt and custom rules under an insufficient license**
-
-**Automation**: 2 Cypress tests: one for Serverless, one for non-Serverless.
-
-```Gherkin
-Given a Kibana installation running under an insufficient license
-When a user selects one or more prebuilt rules in the rule management table
-And user also selects one or more custom rules
-And user attempts to apply a <customizing_bulk_action> bulk action to selected rules
-Then the user should see a message that this action is not allowed for prebuilt rules under the current license
-And required license name should be included in the message
-And a button to proceed with applying the action only to custom rules should not be displayed
-```
-
-#### **Scenario: User can't edit prebuilt rules via bulk edit API under an insufficient license**
-
-**Automation**: Multiple API integration tests - one for each bulk action type.
-
-```Gherkin
-Given a Kibana installation running under an insufficient license
-When a user sends a request to bulk edit API
-And request's "dry run" parameter is set to false
-And the bulk edit action is <customizing_bulk_action>
-And this request contains one or more prebuilt rules
-And additionally this request contains one or more custom rules
-Then the response should only list the custom rules as updated
-And all prebuilt rules should be listed as not updated
-And for each prebuilt rule the response should contain a message that the action is not allowed under current license
-```
-
 
 ### Detecting rule customizations
 
@@ -429,4 +369,63 @@ When a user navigates to the rule updates page
 And use filter to show non-customized rules
 Then the table should display only non-customized rules
 And the all shown table rows should NOT have the Modified badge present
+```
+
+### Licensing
+
+#### **Scenario: User can't customize prebuilt rules under an insufficient license from the rule edit page**
+
+**Automation**: 2 Cypress tests: one for Serverless, one for non-Serverless.
+
+```Gherkin
+Given a Kibana installation running under an insufficient license
+When user navigates to the rule edit page of a prebuilt rule
+Then About, Definition and Schedule views should be disabled
+When user tries to access the disabled views
+Then they should see a message that editing is not allowed under the current license
+And required license name should be included in the message
+```
+
+#### **Scenario: User can't bulk edit prebuilt rules under an insufficient license**
+
+**Automation**: 2 Cypress tests: one for Serverless, one for non-Serverless.
+
+```Gherkin
+Given a Kibana installation running under an insufficient license
+When a user selects one or more prebuilt rules in the rule management table
+And user's selection doesn't contain any custom rules
+And user attempts to apply a <customizing_bulk_action> bulk action to selected rules
+Then the user should see a message that this action is not allowed for prebuilt rules under the current license
+And required license name should be included in the message
+And no button to proceed with applying the action should be displayed
+```
+
+#### **Scenario: User can't bulk edit prebuilt rules in a mixture of prebuilt and custom rules under an insufficient license**
+
+**Automation**: 2 Cypress tests: one for Serverless, one for non-Serverless.
+
+```Gherkin
+Given a Kibana installation running under an insufficient license
+When a user selects one or more prebuilt rules in the rule management table
+And user also selects one or more custom rules
+And user attempts to apply a <customizing_bulk_action> bulk action to selected rules
+Then the user should see a message that this action is not allowed for prebuilt rules under the current license
+And required license name should be included in the message
+And a button to proceed with applying the action only to custom rules should not be displayed
+```
+
+#### **Scenario: User can't edit prebuilt rules via bulk edit API under an insufficient license**
+
+**Automation**: Multiple API integration tests - one for each bulk action type.
+
+```Gherkin
+Given a Kibana installation running under an insufficient license
+When a user sends a request to bulk edit API
+And request's "dry run" parameter is set to false
+And the bulk edit action is <customizing_bulk_action>
+And this request contains one or more prebuilt rules
+And additionally this request contains one or more custom rules
+Then the response should only list the custom rules as updated
+And all prebuilt rules should be listed as not updated
+And for each prebuilt rule the response should contain a message that the action is not allowed under current license
 ```
