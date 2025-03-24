@@ -20,7 +20,9 @@ describe('WelcomeMessageKnowledgeBase', () => {
     partial: Partial<UseKnowledgeBaseResult> = {}
   ): UseKnowledgeBaseResult {
     return {
+      isInstalling: partial.isInstalling ?? false,
       setupKb: partial.setupKb ?? jest.fn(),
+      installError: partial.installError,
       status: partial.status ?? {
         value: {
           ready: false,

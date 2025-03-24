@@ -36,18 +36,13 @@ export function WelcomeMessageKnowledgeBase({
       return;
     }
 
-    const interval = setInterval(async () => {
-      // re-fetch /status
-      await knowledgeBase.status.refresh();
-      const { value: currentStatus } = knowledgeBase.status;
+    const interval = setInterval(knowledgeBase.status.refresh, 5000);
 
-      // check if the model is now ready
-      if (currentStatus?.ready) {
-        // done installing
-        clearInterval(interval);
-        return;
-      }
-    }, 5000);
+    if (knowledgeBase.status.value?.ready) {
+      // done installing
+      clearInterval(interval);
+      return;
+    }
 
     // cleanup the interval if unmount
     return () => {

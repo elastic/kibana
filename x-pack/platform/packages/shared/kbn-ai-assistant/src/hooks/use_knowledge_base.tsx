@@ -6,6 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { useCallback, useEffect, useState } from 'react';
+import pRetry from 'p-retry';
 import {
   type AbortableAsyncState,
   useAbortableAsync,
@@ -44,47 +45,31 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     setIsInstalling(true);
     setInstallError(undefined);
 
-    let attempts = 0;
-    const MAX_ATTEMPTS = 5;
     try {
-      // install
-      await retrySetupIfError();
-
+      // Retry the setup with a maximum of 5 attempts
+      await pRetry(
+        async () => {
+          await service.callApi('POST /internal/observability_ai_assistant/kb/setup', {
+            signal: null,
+          });
+        },
+        {
+          retries: 5,
+        }
+      );
       if (ml.mlApi?.savedObjects.syncSavedObjects) {
         await ml.mlApi.savedObjects.syncSavedObjects();
       }
 
-      // do one refresh to get an initial status
-      await statusRequest.refresh();
-    } catch (e) {
-      setInstallError(e);
-      notifications!.toasts.addError(e, {
+      // Refresh status after installation
+      statusRequest.refresh();
+    } catch (error) {
+      setInstallError(error);
+      notifications!.toasts.addError(error, {
         title: i18n.translate('xpack.aiAssistant.errorSettingUpInferenceEndpoint', {
           defaultMessage: 'Could not create inference endpoint',
         }),
       });
-    } finally {
-      // setIsInstalling(false);
-    }
-
-    async function retrySetupIfError() {
-      while (true) {
-        try {
-          await service.callApi('POST /internal/observability_ai_assistant/kb/setup', {
-            signal: null,
-          });
-          break;
-        } catch (error) {
-          if (
-            (error.body?.statusCode === 503 || error.body?.statusCode === 504) &&
-            attempts < MAX_ATTEMPTS
-          ) {
-            attempts++;
-            continue;
-          }
-          throw error;
-        }
-      }
     }
   }, [ml, service, notifications, statusRequest]);
 
