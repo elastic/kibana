@@ -22,15 +22,14 @@ export function EmptySections() {
   const theme = useContext(ThemeContext);
   const { hasDataMap } = useHasData();
 
-  const appEmptySections = getEmptySections({ http })
-    .filter(({ id }) => {
-      const app = hasDataMap[id];
-      if (app) {
-        return app.status === FETCH_STATUS.FAILURE || !app.hasData;
-      }
-      return false;
-    })
-    .filter(({ showInServerless }) => !Boolean(isServerless) || showInServerless);
+  const appEmptySections = getEmptySections({ http }).filter(({ id, showInServerless }) => {
+    const app = hasDataMap[id];
+
+    const appFailedOrMissingData = app && (app.status === FETCH_STATUS.FAILURE || !app.hasData);
+    const serverlessCheck = !Boolean(isServerless) || showInServerless;
+
+    return appFailedOrMissingData && serverlessCheck;
+  });
   return (
     <EuiFlexItem>
       <EuiSpacer size="s" />
@@ -44,7 +43,7 @@ export function EmptySections() {
         {appEmptySections.map((app) => {
           return (
             <EuiFlexItem
-              data-test-subj="empty-section"
+              data-test-subj={`empty-section-${app.id}`}
               key={app.id}
               style={{
                 border: `${theme.eui.euiBorderEditable}`,

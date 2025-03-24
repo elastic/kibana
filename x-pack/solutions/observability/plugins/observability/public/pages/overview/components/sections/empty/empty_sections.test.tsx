@@ -63,7 +63,13 @@ describe('EmptySections', () => {
     });
 
     const { queryAllByTestId } = render(<EmptySections />);
-    expect(queryAllByTestId('empty-section').length).toEqual(7);
+    expect(queryAllByTestId('empty-section-infra_logs')).toBeTruthy();
+    expect(queryAllByTestId('empty-section-apm')).toBeTruthy();
+    expect(queryAllByTestId('empty-section-infra_metrics')).toBeTruthy();
+    expect(queryAllByTestId('empty-section-uptime')).toBeTruthy();
+    expect(queryAllByTestId('empty-section-ux')).toBeTruthy();
+    expect(queryAllByTestId('empty-section-alert')).toBeTruthy();
+    expect(queryAllByTestId('empty-section-universal_profiling')).toBeTruthy();
   });
 
   it("should display only sections containing 'showInServerless: true' when serverless", () => {
@@ -75,6 +81,9 @@ describe('EmptySections', () => {
     });
 
     const { queryAllByTestId } = render(<EmptySections />);
-    expect(queryAllByTestId('empty-section').length).toEqual(4);
+    expect(queryAllByTestId('empty-section-infra_logs')).toBeTruthy();
+    expect(queryAllByTestId('empty-section-apm')).toBeTruthy();
+    expect(queryAllByTestId('empty-section-infra_metrics')).toBeTruthy();
+    expect(queryAllByTestId('empty-section-alert')).toBeTruthy();
   });
 });
