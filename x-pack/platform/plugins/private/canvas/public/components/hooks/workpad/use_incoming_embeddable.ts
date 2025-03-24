@@ -23,7 +23,7 @@ import {
   fetchEmbeddableRenderable,
 } from '../../../state/actions/embeddable';
 import { clearValue } from '../../../state/actions/resolved_args';
-import { embeddableInputToExpression } from '../../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
+import { embeddableStateToExpression } from '../../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
 import { embeddableService, presentationUtilService } from '../../../services/kibana_services';
 
 const { actionsElements: strings } = ErrorStrings;
@@ -83,7 +83,7 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
         } else {
           updatedState = { ...originalState, ...incomingState.rawState };
         }
-        const expression = embeddableInputToExpression(updatedState, type, undefined, true);
+        const expression = embeddableStateToExpression(updatedState, type, undefined, true);
 
         dispatch(
           updateEmbeddableExpression({
@@ -98,7 +98,7 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
         // select new embeddable element
         dispatch(selectToplevelNodes([embeddableId]));
       } else {
-        const expression = embeddableInputToExpression(
+        const expression = embeddableStateToExpression(
           incomingState.rawState,
           type,
           undefined,

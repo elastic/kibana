@@ -21,7 +21,7 @@ export const inputToExpressionTypeMap = {
 /*
   Take the input from an embeddable and the type of embeddable and convert it into an expression
 */
-export function embeddableInputToExpression<
+export function embeddableStateToExpression<
   UseGenericEmbeddable extends boolean,
   ConditionalReturnType = UseGenericEmbeddable extends true ? string : string | undefined
 >(
