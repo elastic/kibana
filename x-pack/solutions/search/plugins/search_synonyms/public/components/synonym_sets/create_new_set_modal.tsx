@@ -26,6 +26,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { formatSynonymsSetName } from '../../utils/synonyms_utils';
 import { usePutSynonymsSet } from '../../hooks/use_put_synonyms_set';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 interface CreateSynonymsSetModalProps {
   onClose: () => void;
@@ -47,6 +49,7 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
       setConflictError(true);
     }
   );
+  const usageTracker = useUsageTracker();
   return (
     <EuiModal onClose={onClose}>
       <EuiModalHeader>
@@ -64,6 +67,7 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
           component="form"
           onSubmit={(e) => {
             e.preventDefault();
+            usageTracker?.click(AnalyticsEvents.new_set_created);
             createSynonymsSet({ synonymsSetId: name, forceWrite });
           }}
         >

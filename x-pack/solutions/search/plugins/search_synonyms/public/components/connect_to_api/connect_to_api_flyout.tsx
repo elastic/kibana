@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiAccordion,
   EuiButton,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -23,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { docLinks } from '../../../common/doc_links';
-import { getExampleCode } from './code_examples';
+import { getExampleCode, getExistingIndexExampleCode } from './code_examples';
 
 interface ConnectToApiFlyoutProps {
   onClose: () => void;
@@ -78,11 +79,41 @@ export const ConnectToApiFlyout: React.FC<ConnectToApiFlyoutProps> = ({ onClose,
           </p>
         </EuiText>
         <EuiSpacer />
-        <EuiThemeProvider colorMode="dark">
-          <EuiCodeBlock language="json" isCopyable fontSize="m">
-            {getExampleCode(rulesetId)}
-          </EuiCodeBlock>
-        </EuiThemeProvider>
+        <EuiAccordion
+          id="connectToIndexNewIndexAccordion"
+          buttonContent={i18n.translate(
+            'xpack.searchSynonyms.ConnectToApiFlyout.exampleButton.newIndex',
+            {
+              defaultMessage: 'Example with new index',
+            }
+          )}
+          initialIsOpen
+        >
+          <EuiSpacer size="m" />
+          <EuiThemeProvider colorMode="dark">
+            <EuiCodeBlock language="json" isCopyable fontSize="m">
+              {getExampleCode(rulesetId)}
+            </EuiCodeBlock>
+          </EuiThemeProvider>
+        </EuiAccordion>
+        <EuiSpacer size="l" />
+        <EuiAccordion
+          id="connectToIndexExistingIndexAccordion"
+          buttonContent={i18n.translate(
+            'xpack.searchSynonyms.ConnectToApiFlyout.exampleButton.existingIndex',
+            {
+              defaultMessage: 'Example with existing index',
+            }
+          )}
+          initialIsOpen
+        >
+          <EuiSpacer size="m" />
+          <EuiThemeProvider colorMode="dark">
+            <EuiCodeBlock language="json" isCopyable fontSize="m">
+              {getExistingIndexExampleCode(rulesetId)}
+            </EuiCodeBlock>
+          </EuiThemeProvider>
+        </EuiAccordion>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
