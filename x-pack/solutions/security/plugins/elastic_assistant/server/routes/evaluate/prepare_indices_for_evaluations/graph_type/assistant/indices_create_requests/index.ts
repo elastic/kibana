@@ -4,6 +4,7 @@ import { nycTaxisIndexCreateRequest } from "./nyc_taxis.evaluations.2025.03.21";
 import { postgresLogsIndexCreateRequest } from "./postgres-logs.evaluations.2025.03.21";
 import { employeesIndexCreateRequest } from "./employees.evaluations.2025.03.21";
 import { metricbeatIndexCreateRequest } from "./metricbeat.evaluations-2025.03.21";
+import { packetbeatIndexCreateRequest } from "./packetbeat-network.evaluations.2025.03.21";
 
 export const indicesCreateRequests = {
     metricsApmIndexCreateRequest,
@@ -12,4 +13,5 @@ export const indicesCreateRequests = {
     postgresLogsIndexCreateRequest,
     employeesIndexCreateRequest,
     metricbeatIndexCreateRequest,
+    packetbeatIndexCreateRequest
 }
