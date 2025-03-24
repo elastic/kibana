@@ -4,6 +4,6 @@
   "owner": [
     "@elastic/search-kibana"
   ],
-  "group": "search",
+  "group": "chat",
   "visibility": "private"
-} 
+}

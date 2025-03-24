@@ -2,6 +2,6 @@
   "type": "shared-browser",
   "id": "@kbn/wci-browser",
   "owner": "@elastic/search-kibana",
-  "group": "search",
+  "group": "chat",
   "visibility": "private"
 }

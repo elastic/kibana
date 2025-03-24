@@ -1,17 +1,17 @@
 {
   "type": "plugin",
-  "id": "@kbn/wci-external-server",
+  "id": "@kbn/wci-index-source",
   "owner": "@elastic/search-kibana",
-  "group": "search",
+  "group": "chat",
   "visibility": "private",
-  "description": "WorkChat External Server Integration plugin",
+  "description": "WorkChat Index Source Integration plugin",
   "plugin": {
-    "id": "wciExternalServer",
+    "id": "wciIndexSource",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "wciExternalServer"],
+    "configPath": ["xpack", "wciIndexSource"],
     "requiredPlugins": ["workchatApp"],
     "optionalPlugins": [],
     "requiredBundles": []
   }
-} 
+}

@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/workchat-app",
   "owner": "@elastic/search-kibana",
-  "group": "search",
+  "group": "chat",
   "visibility": "private",
   "description": "WorkChat application",
   "plugin": {

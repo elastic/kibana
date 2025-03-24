@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -9,16 +9,17 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
-    "../../../../typings/**/*"
+    "../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/wci-common",
     "@kbn/wci-server",
-    "@kbn/workchat-app"
+    "@kbn/zod",
+    "@kbn/workchat-app",
   ],
   "exclude": [
-    "target/**/*"
+    "target/**/*",
   ]
-} 
+}
