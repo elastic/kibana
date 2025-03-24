@@ -8,6 +8,6 @@
 module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/search/plugins/workchat/wci_external_server/server'],
+  roots: ['<rootDir>/x-pack/solutions/chat/plugins/wci_external_server'],
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
 };
