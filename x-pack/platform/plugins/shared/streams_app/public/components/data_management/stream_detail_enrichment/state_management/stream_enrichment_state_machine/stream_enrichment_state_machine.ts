@@ -41,6 +41,7 @@ import {
   createSimulationMachineImplementations,
 } from '../simulation_state_machine';
 import { processorMachine, ProcessorActorRef } from '../processor_state_machine';
+import { getConfiguredProcessors, getMappedFields } from './utils';
 
 const createId = htmlIdGenerator();
 
@@ -187,10 +188,7 @@ export const streamEnrichmentMachine = setup({
       type: 'parallel',
       entry: [
         { type: 'stopProcessors' },
-        {
-          type: 'setupProcessors',
-          params: ({ context }) => ({ definition: context.definition }),
-        },
+        { type: 'setupProcessors', params: ({ context }) => ({ definition: context.definition }) },
       ],
       on: {
         'stream.received': {
@@ -224,11 +222,8 @@ export const streamEnrichmentMachine = setup({
                 src: 'upsertStream',
                 input: ({ context }) => ({
                   definition: context.definition,
-                  processors: context.processorsRefs
-                    .map((proc) => proc.getSnapshot())
-                    .filter((proc) => proc.matches('configured'))
-                    .map((proc) => proc.context.processor),
-                  fields: undefined, // TODO: implementing in follow-up PR
+                  processors: getConfiguredProcessors(context),
+                  fields: getMappedFields(context),
                 }),
                 onDone: {
                   target: 'idle',
@@ -302,6 +297,9 @@ export const streamEnrichmentMachine = setup({
                 viewDetectedFields: {
                   on: {
                     'simulation.viewDataPreview': 'viewDataPreview',
+                    'streamEnrichment.fields.*': {
+                      actions: forwardTo('simulator'),
+                    },
                   },
                 },
               },

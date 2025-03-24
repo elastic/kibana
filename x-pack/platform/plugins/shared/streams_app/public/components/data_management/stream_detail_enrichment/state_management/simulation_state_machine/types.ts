@@ -15,8 +15,10 @@ import {
 } from '../../../../../state_management/date_range_state_machine';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { PreviewDocsFilterOption } from './preview_docs_filter';
+import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 
 export type Simulation = APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
+export type DetectedField = Simulation['detected_fields'][number];
 
 export interface SimulationMachineDeps {
   data: DataPublicPluginStart;
@@ -39,10 +41,13 @@ export type SimulationEvent =
   | { type: 'processors.add'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.cancel'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.change'; processors: ProcessorDefinitionWithUIAttributes[] }
-  | { type: 'processor.delete'; processors: ProcessorDefinitionWithUIAttributes[] };
+  | { type: 'processor.delete'; processors: ProcessorDefinitionWithUIAttributes[] }
+  | { type: 'streamEnrichment.fields.map'; field: MappedSchemaField }
+  | { type: 'streamEnrichment.fields.unmap'; fieldName: string };
 
 export interface SimulationContext {
   dateRangeRef: DateRangeActorRef;
+  detectedSchemaFields: SchemaField[];
   previewDocsFilter: PreviewDocsFilterOption;
   previewDocuments: FlattenRecord[];
   processors: ProcessorDefinitionWithUIAttributes[];

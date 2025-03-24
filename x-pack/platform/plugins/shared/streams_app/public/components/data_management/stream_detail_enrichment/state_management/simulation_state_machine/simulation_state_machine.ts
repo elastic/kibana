@@ -30,7 +30,14 @@ import {
   createSimulationRunnerActor,
   createSimulationRunFailureNofitier,
 } from './simulation_runner_actor';
-import { filterSimulationDocuments, composeSamplingCondition } from './utils';
+import {
+  filterSimulationDocuments,
+  composeSamplingCondition,
+  getSchemaFieldsFromSimulation,
+  mapField,
+  unmapField,
+} from './utils';
+import { MappedSchemaField } from '../../../schema_editor/types';
 
 export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
 export type SimulationActorSnapshot = SnapshotFrom<typeof simulationMachine>;
@@ -82,8 +89,24 @@ export const simulationMachine = setup({
     deriveSamplingCondition: assign(({ context }) => ({
       samplingCondition: composeSamplingCondition(context.processors),
     })),
+    deriveDetectedSchemaFields: assign(({ context }) => ({
+      detectedSchemaFields: context.simulation
+        ? getSchemaFieldsFromSimulation(
+            context.simulation.detected_fields,
+            context.detectedSchemaFields,
+            context.streamName
+          )
+        : context.detectedSchemaFields,
+    })),
+    mapField: assign(({ context }, params: { field: MappedSchemaField }) => ({
+      detectedSchemaFields: mapField(context.detectedSchemaFields, params.field),
+    })),
+    unmapField: assign(({ context }, params: { fieldName: string }) => ({
+      detectedSchemaFields: unmapField(context.detectedSchemaFields, params.fieldName),
+    })),
     resetSimulation: assign({
       processors: [],
+      detectedSchemaFields: [],
       simulation: undefined,
       samplingCondition: composeSamplingCondition([]),
       previewDocsFilter: 'outcome_filter_all',
@@ -114,6 +137,7 @@ export const simulationMachine = setup({
         parentRef: self,
       },
     }),
+    detectedSchemaFields: [],
     previewDocsFilter: 'outcome_filter_all',
     previewDocuments: [],
     processors: input.processors,
@@ -176,7 +200,16 @@ export const simulationMachine = setup({
       ],
     },
 
-    idle: {},
+    idle: {
+      on: {
+        'streamEnrichment.fields.map': {
+          actions: [{ type: 'mapField', params: ({ event }) => event }],
+        },
+        'streamEnrichment.fields.unmap': {
+          actions: [{ type: 'unmapField', params: ({ event }) => event }],
+        },
+      },
+    },
 
     debouncingChanges: {
       on: {
@@ -252,6 +285,7 @@ export const simulationMachine = setup({
           actions: [
             { type: 'storeSimulation', params: ({ event }) => ({ simulation: event.output }) },
             { type: 'derivePreviewDocuments' },
+            { type: 'deriveDetectedSchemaFields' },
           ],
         },
         onError: {
