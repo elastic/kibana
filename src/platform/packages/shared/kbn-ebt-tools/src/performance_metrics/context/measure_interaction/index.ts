@@ -17,8 +17,9 @@ import { perfomanceMarkers } from '../../performance_markers';
 import { DescriptionWithPrefix } from '../types';
 
 interface PerformanceMeta {
-  queryRangeSecs: number;
-  queryOffsetSecs: number;
+  queryRangeSecs?: number;
+  queryFromOffsetSecs?: number;
+  queryToOffsetSecs?: number;
   isInitialLoad?: boolean;
   description?: DescriptionWithPrefix;
 }
@@ -33,11 +34,11 @@ export function measureInteraction(pathname: string) {
      * @param customMetrics - Custom metrics to be included in the performance measure.
      */
     pageReady(eventData?: EventData) {
-      let performanceMeta: PerformanceMeta | undefined;
+      const performanceMeta: PerformanceMeta = {};
       performance.mark(perfomanceMarkers.endPageReady);
 
-      if (eventData?.meta) {
-        const { rangeFrom, rangeTo, description } = eventData.meta;
+      if (eventData?.meta?.rangeFrom && eventData?.meta?.rangeTo) {
+        const { rangeFrom, rangeTo } = eventData.meta;
 
         // Convert the date range  to epoch timestamps (in milliseconds)
         const dateRangesInEpoch = getDateRange({
@@ -45,12 +46,15 @@ export function measureInteraction(pathname: string) {
           to: rangeTo,
         });
 
-        performanceMeta = {
-          queryRangeSecs: getTimeDifferenceInSeconds(dateRangesInEpoch),
-          queryOffsetSecs:
-            rangeTo === 'now' ? 0 : getOffsetFromNowInSeconds(dateRangesInEpoch.endDate),
-          description,
-        };
+        performanceMeta.queryRangeSecs = getTimeDifferenceInSeconds(dateRangesInEpoch);
+        performanceMeta.queryFromOffsetSecs =
+          rangeFrom === 'now' ? 0 : getOffsetFromNowInSeconds(dateRangesInEpoch.startDate);
+        performanceMeta.queryToOffsetSecs =
+          rangeTo === 'now' ? 0 : getOffsetFromNowInSeconds(dateRangesInEpoch.endDate);
+      }
+
+      if (eventData?.meta?.description) {
+        performanceMeta.description = eventData.meta.description;
       }
 
       if (

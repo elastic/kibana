@@ -21,6 +21,7 @@ export async function recallAndScore({
   chat,
   analytics,
   userPrompt,
+  userMessageFunctionName,
   context,
   messages,
   logger,
@@ -30,6 +31,7 @@ export async function recallAndScore({
   chat: FunctionCallChatFunction;
   analytics: AnalyticsServiceStart;
   userPrompt: string;
+  userMessageFunctionName?: string;
   context: string;
   messages: Message[];
   logger: Logger;
@@ -62,6 +64,7 @@ export async function recallAndScore({
       logger,
       messages,
       userPrompt,
+      userMessageFunctionName,
       context,
       signal,
       chat,

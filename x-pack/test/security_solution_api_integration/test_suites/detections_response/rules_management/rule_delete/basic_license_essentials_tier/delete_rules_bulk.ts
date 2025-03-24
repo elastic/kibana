@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await utils.getUsername()
         );
 
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should return an error if the id does not exist when trying to delete an id', async () => {
@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(500);
 
-        expect(body).to.eql({
+        expect(body).toEqual({
           statusCode: 500,
           error: 'Internal Server Error',
           message: 'Bulk edit failed',

@@ -11,6 +11,7 @@ import React from 'react';
 import type { Meta, StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { Tab, type TabProps } from '../tab';
+import { servicesMock } from '../../../__mocks__/services';
 import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../../constants';
 
 const asyncAction =
@@ -39,6 +40,7 @@ const TabTemplate: StoryFn<TabProps> = (args) => (
   <Tab
     {...args}
     tabsSizeConfig={tabsSizeConfig}
+    services={servicesMock}
     onLabelEdited={asyncAction('onLabelEdited')}
     onSelect={asyncAction('onSelect')}
     onClose={asyncAction('onClose')}
