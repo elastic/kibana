@@ -53,28 +53,28 @@ interface Debuggable {
   debug?: Record<string, unknown>;
 }
 
-type RuleHealth = Debuggable & {
+interface RuleHealth extends Debuggable {
   /**
    * Health state at the moment of the calculation request.
    */
   state_at_the_moment: {
     rule: RuleResponse;
   };
-};
+}
 
-type SpaceHealth = Debuggable & {
+interface SpaceHealth extends Debuggable {
   /**
    * Health state at the moment of the calculation request.
    */
   state_at_the_moment: HealthOverviewState;
-};
+}
 
-type ClusterHealth = Debuggable & {
+interface ClusterHealth extends Debuggable {
   /**
    * Health state at the moment of the calculation request.
    */
   state_at_the_moment: HealthOverviewState;
-};
+}
 
 export const createRuleObjectsHealthClient = (
   rulesClient: RulesClientApi,

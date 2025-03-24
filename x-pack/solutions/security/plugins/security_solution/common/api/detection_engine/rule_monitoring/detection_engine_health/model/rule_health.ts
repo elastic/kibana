@@ -53,9 +53,9 @@ export interface RuleHealthState {
 /**
  * Health stats calculated over a given interval.
  */
-export type RuleHealthStats = HealthOverviewStats & {
+export interface RuleHealthStats extends HealthOverviewStats {
   /**
    * Gaps summary for the rule execution.
    */
   gap_summary: GapSummary;
-};
+}
