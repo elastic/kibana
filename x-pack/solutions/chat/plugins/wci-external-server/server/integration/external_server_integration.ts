@@ -6,12 +6,12 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import { IntegrationType } from '@kbn/wci-common';
 import {
-  IntegrationType,
+  getClientForExternalServer,
   WorkchatIntegrationDefinition,
   WorkChatIntegration,
-} from '@kbn/wci-common';
-import { getClientForExternalServer } from '@kbn/wci-server';
+} from '@kbn/wci-server';
 import { WCIExternalServerConfiguration } from '../../common/types';
 
 export const getExternalServerIntegrationDefinition = ({

@@ -131,6 +131,7 @@ export async function createMcpServer({
       result = await elasticsearchClient.search<SearchResult>({
         index,
         query: {
+          // @ts-ignore esFilter length issue
           bool: {
             must: [queryClause],
             ...(esFilters.length > 0 ? { filter: esFilters } : {}),
