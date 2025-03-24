@@ -18,6 +18,8 @@
     "@kbn/wci-server",
     "@kbn/zod",
     "@kbn/workchat-app",
+    "@kbn/wci-browser",
+    "@kbn/i18n-react",
   ],
   "exclude": [
     "target/**/*",

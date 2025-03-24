@@ -36,6 +36,8 @@
     "@kbn/logging-mocks",
     "@kbn/wci-server",
     "@kbn/actions-plugin",
+    "@kbn/wci-browser",
+    "@kbn/features-plugin",
   ],
   "exclude": [
     "target/**/*",
