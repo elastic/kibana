@@ -50,8 +50,8 @@ export function EntitiesInventoryCallout({ onDismiss }: EntitiesInventoryCallout
         >
           <EuiButtonIcon
             data-test-subj="apmEntitiesInventoryCalloutDismiss"
-            aria-label={i18n.translate('xpack.apm.entitiesInventoryCallout.linkTooltip', {
-              defaultMessage: 'Hide this',
+            aria-label={i18n.translate('xpack.apm.entitiesInventoryCallout.closeCallout', {
+              defaultMessage: 'Hide the entities inventory callout',
             })}
             iconType="cross"
             onClick={onDismiss}
