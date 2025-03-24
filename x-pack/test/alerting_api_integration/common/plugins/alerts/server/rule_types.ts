@@ -48,6 +48,7 @@ export const DeepContextVariables = {
   nullJ: null,
   undefinedK: undefined,
   dateL: '2023-04-20T04:13:17.858Z',
+  encodeableUrl: 'https://www.elastic.co?foo=bar&baz= qux',
 };
 
 function getAlwaysFiringRuleType() {
