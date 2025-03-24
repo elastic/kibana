@@ -15,9 +15,6 @@ export const nycTaxisIndexCreateRequest: IndicesCreateRequest = {
         type: 'date',
         format: 'strict_date_optional_time||epoch_millis',
       },
-      other_field: {
-        type: 'keyword',
-      },
     },
   },
 };

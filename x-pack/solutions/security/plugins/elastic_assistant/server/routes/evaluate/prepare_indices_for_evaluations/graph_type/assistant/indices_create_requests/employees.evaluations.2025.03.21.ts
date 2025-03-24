@@ -18,6 +18,9 @@ export const employeesIndexCreateRequest: IndicesCreateRequest = {
         type: 'date',
         format: 'yyyy-MM-dd',
       },
+      "salary": {
+        "type": "double"
+      },
     },
   },
 };

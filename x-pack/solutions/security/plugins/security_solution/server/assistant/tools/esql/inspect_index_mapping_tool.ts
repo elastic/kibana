@@ -17,7 +17,7 @@ import {
 
 const toolDetails = {
   name: 'inspect_index_mapping',
-  description: `Use this tool when there is a "Unknown column" error or to see which fields and types are used in the index. Call this tool repeatedly to inspect nested fields. For example:
+  description: `Use this tool when there is a "verification_exception Unknown column" error or to see which fields and types are used in the index. Call this tool repeatedly to inspect nested fields.
 This is an example of the fields in logs-*:
 \`\`\`
 ${JSON.stringify(

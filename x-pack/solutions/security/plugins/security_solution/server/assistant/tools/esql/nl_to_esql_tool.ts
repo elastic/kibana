@@ -71,7 +71,7 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
         const result = await selfHealingGraph.invoke({
           messages: [humanMessage, aiMessage],
           shouldValidate,
-        });
+        }, {recursionLimit: 30});
         const { messages } = result;
         const lastMessage = messages[messages.length - 1];
         return lastMessage.content;

@@ -12,6 +12,7 @@ import { postgresLogsIndexCreateRequest } from './postgres-logs.evaluations.2025
 import { employeesIndexCreateRequest } from './employees.evaluations.2025.03.21';
 import { metricbeatIndexCreateRequest } from './metricbeat.evaluations-2025.03.21';
 import { packetbeatIndexCreateRequest } from "./packetbeat-network.evaluations.2025.03.21";
+import { logsIndexCreateRequest } from './logs-all.evaluations.2025.03.24';
 
 export const indicesCreateRequests = {
   metricsApmIndexCreateRequest,
@@ -20,5 +21,6 @@ export const indicesCreateRequests = {
   postgresLogsIndexCreateRequest,
   employeesIndexCreateRequest,
   metricbeatIndexCreateRequest,
-  packetbeatIndexCreateRequest
+  packetbeatIndexCreateRequest,
+  logsIndexCreateRequest
 };
