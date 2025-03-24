@@ -8,6 +8,8 @@
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest, RequestHandlerContext, SavedObject } from '@kbn/core/server';
+import * as Boom from '@hapi/boom';
+
 import type { SavedObjectNoteWithoutExternalRefs } from '../../../../../common/types/timeline/note/saved_object';
 import type { FrameworkRequest } from '../../../framework';
 import { internalFrameworkRequest } from '../../../framework';
@@ -305,14 +307,13 @@ describe('persistNote', () => {
         'Cannot create more than 100 notes per document without associating them to a timeline',
       note: mockNote,
     });
-    const result = await persistNote({ request: mockRequest, noteId: null, note: mockNote });
 
-    expect(result.code).toBe(403);
-    expect(result.message).toBe(
-      'Cannot create more than 100 notes per document without associating them to a timeline'
+    await expect(
+      persistNote({ request: mockRequest, noteId: null, note: mockNote })
+    ).rejects.toThrow(
+      Boom.forbidden(
+        'Cannot create more than 100 notes per document without associating them to a timeline'
+      )
     );
-    expect(result.note).toHaveProperty('noteId');
-    expect(result.note).toHaveProperty('version', '');
-    expect(result.note).toHaveProperty('timelineId', '');
   });
 });
