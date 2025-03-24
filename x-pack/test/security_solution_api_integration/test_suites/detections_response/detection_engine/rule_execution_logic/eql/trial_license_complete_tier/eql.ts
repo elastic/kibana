@@ -249,13 +249,18 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('parses shard failures for EQL event query', async () => {
       await esArchiver.load(packetBeatPath);
+      await setBrokenRuntimeField({ es, index: 'packetbeat-*' });
+
+      // sometimes we would hit max signals on the good shard
+      // and never search the shard with the bad runtime field
+      // by changing the agent.type to be packetbeat
+      // we ensure that both shards are searched
+      // which I believe was the cause of the test being flakey.
       const rule: EqlRuleCreateProps = {
         ...getEqlRuleForAlertTesting(['auditbeat-*', 'packetbeat-*']),
-        query: 'any where agent.type == "packetbeat" or broken == 1',
+        query: 'any where agent.type == "packetbeat" and broken == 1',
       };
-      await setBrokenRuntimeField({ es, index: 'auditbeat-*' });
       const { logs } = await previewRule({ supertest, rule });
-
       expect(logs).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -267,7 +272,7 @@ export default ({ getService }: FtrProviderContext) => {
           }),
         ])
       );
-      await unsetBrokenRuntimeField({ es, index: 'auditbeat-*' });
+      await unsetBrokenRuntimeField({ es, index: 'packetbeat-*' });
       await esArchiver.unload(packetBeatPath);
     });
 
