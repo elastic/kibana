@@ -22,7 +22,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
     name: WORKCHAT_FEATURE_NAME,
     minimumLicense: 'enterprise',
     order: 1000,
-    category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+    category: DEFAULT_APP_CATEGORIES.chat,
     scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: ['kibana', WORKCHAT_APP_ID],
     catalogue: [WORKCHAT_FEATURE_ID],
