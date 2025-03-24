@@ -35,7 +35,7 @@ export const entityEngineDescriptorTypeMappings: SavedObjectsType['mappings'] = 
       type: 'keyword', // timestampFieldName : @timestamp | event.ingested
     },
   },
-}; 
+};
 
 const version1: SavedObjectsModelVersion = {
   changes: [
