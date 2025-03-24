@@ -644,6 +644,7 @@ export function LayerPanel(props: LayerPanelProps) {
                         }}
                         onDrop={onDrop}
                         indexPatterns={dataViews.indexPatterns}
+                        isInlineEditing={isInlineEditing}
                       />
                     ) : null}
                   </>
