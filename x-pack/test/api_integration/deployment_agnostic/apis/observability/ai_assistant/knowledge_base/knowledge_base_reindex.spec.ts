@@ -18,8 +18,7 @@ import {
   setupKnowledgeBase,
   waitForKnowledgeBaseReady,
 } from '../utils/knowledge_base';
-
-const concreteWriteIndex = `${resourceNames.writeIndexAlias.kb}-000001`;
+import { createOrUpdateIndexAssets } from '../utils/index_assets';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -46,12 +45,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     beforeEach(async () => {
       await deleteKbIndex();
       await restoreKbSnapshot();
-      await createOrUpdateIndexAssets();
+      await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
     });
 
     after(async () => {
       await deleteKbIndex();
-      await createOrUpdateIndexAssets();
+      await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
       await deleteKnowledgeBaseModel(ml);
       await deleteInferenceEndpoint({ es });
     });
@@ -98,7 +97,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   async function getKbIndexCreatedVersion() {
     const indexSettings = await es.indices.getSettings({
-      index: concreteWriteIndex,
+      index: resourceNames.concreteWriteIndexName.kb,
     });
 
     const { settings } = Object.values(indexSettings)[0];
@@ -109,14 +108,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     log.debug('Deleting KB index');
 
     await es.indices.delete(
-      { index: concreteWriteIndex, ignore_unavailable: true },
+      { index: resourceNames.concreteWriteIndexName.kb, ignore_unavailable: true },
       { ignore: [404] }
     );
   }
 
   async function restoreKbSnapshot() {
     log.debug(
-      `Restoring snapshot of ${concreteWriteIndex} from ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`
+      `Restoring snapshot of ${resourceNames.concreteWriteIndexName.kb} from ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`
     );
     const snapshotRepoName = 'snapshot-repo-8-10';
     const snapshotName = 'my_snapshot';
@@ -132,17 +131,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       repository: snapshotRepoName,
       snapshot: snapshotName,
       wait_for_completion: true,
-      indices: concreteWriteIndex,
+      indices: resourceNames.concreteWriteIndexName.kb,
     });
 
     await es.snapshot.deleteRepository({ name: snapshotRepoName });
-  }
-
-  async function createOrUpdateIndexAssets() {
-    const { status } = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'POST /internal/observability_ai_assistant/index_assets',
-    });
-    expect(status).to.be(200);
   }
 
   async function runKbSemanticTextMigration() {

@@ -688,10 +688,15 @@ export class ObservabilityAIAssistantClient {
     // setup the knowledge base
     const res = await knowledgeBaseService.setup(esClient, modelId, taskType);
 
+    // re-index knowledge base if there are existing entries
+    const hasEntries = await knowledgeBaseService.hasEntries();
+    if (hasEntries) {
+      await reIndexKnowledgeBase({ logger, esClient });
+    }
+
     core
       .getStartServices()
       .then(async ([_, pluginsStart]) => {
-        await reIndexKnowledgeBase({ logger, esClient });
         await scheduleKbSemanticTextMigrationTask({
           taskManager: pluginsStart.taskManager,
           logger,

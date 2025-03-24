@@ -344,6 +344,22 @@ export class KnowledgeBaseService {
     }
   };
 
+  hasEntries = async () => {
+    const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
+      index: resourceNames.indexPatterns.kb,
+      size: 0,
+      _source: false,
+      track_total_hits: 1,
+    });
+
+    const hitCount =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total?.value ?? 0;
+
+    return hitCount > 0;
+  };
+
   getPersonalUserInstructionId = async ({
     isPublic,
     user,
