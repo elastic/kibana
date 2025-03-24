@@ -12,6 +12,7 @@ import moment from 'moment';
 import { EuiButton, EuiCallOut, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
+import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { TopAlert } from '../../../typings/alerts';
 import { useKibana } from '../../../utils/kibana_react';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
@@ -35,6 +36,7 @@ function StaleAlert({
   } = services;
   const [ruleConditionsFlyoutOpen, setRuleConditionsFlyoutOpen] = useState<boolean>(false);
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
+  const trackEvent = useUiTracker();
   const handleUntrackAlert = useCallback(async () => {
     const alertUuid = alert?.fields[ALERT_UUID];
     if (alertUuid) {
@@ -60,7 +62,12 @@ function StaleAlert({
       // 1. The alert has been active for more than 5 days
       // 2. The alert has no cases associated with it
       // 3. The rule is snoozed with no notifications
-      if (diffInDays >= 5 && numOfCases === 0 && (rule?.isSnoozedUntil || rule?.muteAll)) {
+      if ((diffInDays >= 0 && numOfCases === 0) || rule?.isSnoozedUntil || rule?.muteAll) {
+        trackEvent({
+          app: 'alerts',
+          metricType: METRIC_TYPE.LOADED,
+          metric: `alert_details_alert_stale_callout__ruleType_${rule?.ruleTypeId}`,
+        });
         return {
           isStale: true,
           days: diffInDays,
@@ -72,7 +79,15 @@ function StaleAlert({
         days: 0,
       };
     }
-  }, [alert, alertStatus, rule]);
+  }, [
+    alert.fields,
+    alert.start,
+    alertStatus,
+    rule?.isSnoozedUntil,
+    rule?.muteAll,
+    rule?.ruleTypeId,
+    trackEvent,
+  ]);
 
   return (
     <>
