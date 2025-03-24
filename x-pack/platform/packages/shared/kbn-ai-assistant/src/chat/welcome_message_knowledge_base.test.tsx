@@ -41,6 +41,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
 
   it('renders install message if isInstalling', () => {
     const kb = createMockKnowledgeBase({
+      isInstalling: true,
       status: {
         value: { ready: false, enabled: true, endpoint: { inference_id: 'inference_id' } },
         loading: false,
@@ -56,8 +57,9 @@ describe('WelcomeMessageKnowledgeBase', () => {
   it('renders the success banner after a transition from installing to not installing with no error', async () => {
     // 1) Start in an installing state
     let kb = createMockKnowledgeBase({
+      isInstalling: true,
       status: {
-        value: { ready: false, enabled: true, endpoint: { inference_id: 'inference_id' } },
+        value: { ready: false, enabled: true },
         loading: false,
         refresh: jest.fn(),
       },
@@ -67,16 +69,19 @@ describe('WelcomeMessageKnowledgeBase', () => {
     // Should not see success banner initially
     expect(screen.queryByText(/Knowledge base successfully installed/i)).toBeNull();
 
-    // 2) Transition to isInstalling = false, no installError
     kb = {
       ...kb,
+      isInstalling: false,
       status: {
         ...kb.status,
         value: {
           ...kb.status.value,
           ready: true,
           enabled: true,
+          endpoint: { inference_id: 'inference_id' },
         },
+        loading: false,
+        refresh: jest.fn(),
       },
     };
 
@@ -90,6 +95,8 @@ describe('WelcomeMessageKnowledgeBase', () => {
 
   it('renders "not set up" if installError is present', () => {
     const kb = createMockKnowledgeBase({
+      isInstalling: false,
+      installError: undefined,
       status: {
         value: {
           ready: false,
@@ -123,6 +130,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     // which can happen for on prem users with preconfigured connector where /setup is not
     // automatically called
     const kb = createMockKnowledgeBase({
+      isInstalling: false,
       status: {
         value: {
           ready: false,

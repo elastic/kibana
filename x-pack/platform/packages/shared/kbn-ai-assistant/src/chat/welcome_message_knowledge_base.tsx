@@ -57,7 +57,7 @@ export function WelcomeMessageKnowledgeBase({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   useEffect(() => {
-    if (prevIsInstalling && isLoading) {
+    if (prevIsInstalling) {
       setShowSuccessBanner(true);
     }
   }, [isLoading, prevIsInstalling]);
