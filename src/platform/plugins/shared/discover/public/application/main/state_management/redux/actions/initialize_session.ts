@@ -15,7 +15,6 @@ import { cloneDeep, isEqual } from 'lodash';
 import type { MainRouteInitializationState } from '../../../types';
 import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
 import {
-  APP_STATE_URL_KEY,
   getInitialState,
   type AppStateUrl,
   type DiscoverAppState,
@@ -31,6 +30,7 @@ import { copySavedSearch } from '../../discover_saved_search_container';
 import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/validate_time';
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { updateSavedSearch } from '../../utils/update_saved_search';
+import { APP_STATE_URL_KEY } from '../../../../../../common';
 
 export interface InitializeSessionParams {
   stateContainer: DiscoverStateContainer;

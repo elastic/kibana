@@ -18,6 +18,7 @@ import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
+import { APP_STATE_URL_KEY } from '@kbn/discover-plugin/common';
 import { updateSavedSearchId } from '../../../../store/actions';
 import { useDiscoverInTimelineContext } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
@@ -204,7 +205,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
       const hasESQLUrlState = (stateContainer.appState.getState()?.query as { esql: string })?.esql;
 
-      if (!stateContainer.stateStorage.get('_a') || !hasESQLUrlState) {
+      if (!stateContainer.stateStorage.get(APP_STATE_URL_KEY) || !hasESQLUrlState) {
         if (savedSearchAppState?.savedSearch.timeRange) {
           stateContainer.globalState.set({
             ...stateContainer.globalState.get(),

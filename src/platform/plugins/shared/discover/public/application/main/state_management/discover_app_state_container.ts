@@ -43,8 +43,8 @@ import {
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import type { InternalStateStore } from './redux';
 import { internalStateActions } from './redux';
+import { APP_STATE_URL_KEY } from '../../../../common';
 
-export const APP_STATE_URL_KEY = '_a';
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<DiscoverAppState> {
   /**
    * Returns the previous state, used for diffing e.g. if fetching new data is necessary
