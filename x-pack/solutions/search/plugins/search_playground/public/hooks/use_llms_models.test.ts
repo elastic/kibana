@@ -131,7 +131,7 @@ describe('useLLMsModels Hook', () => {
         connectorType: LLMs.inference,
         disabled: false,
         icon: expect.any(String),
-        id: 'connectorId4EIS Connector (AI Connector)',
+        id: 'connectorId4EIS Connector',
         name: 'EIS Connector',
         showConnectorName: false,
         value: undefined,
