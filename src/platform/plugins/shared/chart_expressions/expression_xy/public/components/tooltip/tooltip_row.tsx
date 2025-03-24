@@ -25,11 +25,26 @@ export const TooltipRow: FC<TooltipData> = ({ label, value }) => {
           color: ${shade(euiTheme.colors.ghost, 0.2)};
         `}
       >
-        <div className="detailedTooltip__labelContainer">{label}</div>
+        <div
+          css={({ euiTheme }: UseEuiTheme) =>
+            css`
+              max-width: calc(${euiTheme.size.xl} * 5);
+              overflow-wrap: break-word;
+            `
+          }
+        >
+          {label}
+        </div>
       </td>
 
-      <td className="detailedTooltip__value">
-        <div className="detailedTooltip__valueContainer">{value}</div>
+      <td>
+        <div
+          css={css`
+            overflow-wrap: break-word;
+          `}
+        >
+          {value}
+        </div>
       </td>
     </tr>
   ) : null;
