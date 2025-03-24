@@ -7,7 +7,7 @@
 
 import { initializeDataViews } from '../../tasks/login';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
-import { checkActionItemsInResults, loadRuleAlerts } from '../../tasks/live_query';
+import { checkActionItemsInResults, loadRuleAlerts, navigateToRule } from '../../tasks/live_query';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
@@ -17,18 +17,21 @@ describe(
   () => {
     let ruleId: string;
 
+    let ruleName;
     before(() => {
       initializeDataViews();
-    });
-
-    beforeEach(() => {
       loadRule(true).then((data) => {
         ruleId = data.id;
-        loadRuleAlerts(data.name);
+        ruleName = data.name;
+        loadRuleAlerts(ruleName);
       });
     });
 
-    afterEach(() => {
+    beforeEach(() => {
+      navigateToRule(ruleName);
+    });
+
+    after(() => {
       cleanupRule(ruleId);
     });
 
@@ -51,7 +54,7 @@ describe(
           // @ts-expect-error-next-line href string - check types
           cy.visit($href);
           cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
-            cy.contains('action_data{ "query":');
+            cy.contains(/action_data\{[^}]*"query":[^}]*\}/);
           });
           cy.contains(discoverRegex);
         });
