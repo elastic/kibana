@@ -67,7 +67,7 @@ export function WideChart({ chart, data, id, isLoading, state, onBrushed, slo }:
   });
 
   if (isLoading) {
-    return <EuiLoadingChart size="m" mono data-test-subj="wideChartLoading" />;
+    return <EuiLoadingChart size="m" data-test-subj="wideChartLoading" />;
   }
 
   return (

@@ -111,7 +111,7 @@ export function StackTraces({
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <AsyncComponent size="m" mono {...state} style={{ minHeight: 200 }}>
+          <AsyncComponent size="m" {...state} style={{ minHeight: 200 }}>
             <>
               <EuiSpacer />
               <EuiTitle size="s">

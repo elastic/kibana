@@ -240,7 +240,7 @@ export function DataPreviewChart({
           {(isLoading || isError) && (
             <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: 160 }}>
               <EuiFlexItem grow={false}>
-                {isLoading && <EuiLoadingChart size="m" mono />}
+                {isLoading && <EuiLoadingChart size="m" />}
                 {isError && (
                   <span>
                     {i18n.translate('xpack.slo.sloEdit.dataPreviewChart.errorMessage', {
