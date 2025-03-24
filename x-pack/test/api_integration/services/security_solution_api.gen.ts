@@ -1265,6 +1265,13 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    privMonHealth(kibanaSpace: string = 'default') {
+      return supertest
+        .get('/api/entity_analytics/monitoring/privileges/health')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     readAlertsIndex(kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/api/detection_engine/index', kibanaSpace))
