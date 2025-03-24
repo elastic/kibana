@@ -7,7 +7,7 @@ id: kibDevDocsPluginDirectory
 slug: /kibana-dev-docs/api-meta/plugin-api-directory
 title: Directory
 description: Directory of public APIs available through plugins or packages.
-date: 2025-03-14
+date: 2025-03-24
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 ---
 
@@ -15,13 +15,13 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 
 | Count | Plugins or Packages with a <br /> public API | Number of teams |
 |--------------|----------|------------------------|
-| 924 | 785 | 42 |
+| 936 | 796 | 42 |
 
 ### Public API health stats
 
 | API Count | Any Count | Missing comments | Missing exports |
 |--------------|----------|-----------------|--------|
-| 56734 | 251 | 42367 | 2753 |
+| 57351 | 254 | 42653 | 2770 |
 
 ## Plugin Directory
 
@@ -33,7 +33,8 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibAiopsPluginApi" text="aiops"/> | [@elastic/ml-ui](https://github.com/orgs/elastic/teams/ml-ui) | AIOps plugin maintained by ML team. | 73 | 0 | 8 | 2 |
 | <DocLink id="kibAlertingPluginApi" text="alerting"/> | [@elastic/response-ops](https://github.com/orgs/elastic/teams/response-ops) | - | 879 | 1 | 846 | 52 |
 | <DocLink id="kibApmPluginApi" text="apm"/> | [@elastic/obs-ux-infra_services-team](https://github.com/orgs/elastic/teams/obs-ux-infra_services-team) | The user interface for Elastic APM | 26 | 0 | 26 | 120 |
-| <DocLink id="kibApmDataAccessPluginApi" text="apmDataAccess"/> | [@elastic/obs-ux-infra_services-team](https://github.com/orgs/elastic/teams/obs-ux-infra_services-team) | - | 93 | 0 | 93 | 3 |
+| <DocLink id="kibApmDataAccessPluginApi" text="apmDataAccess"/> | [@elastic/obs-ux-infra_services-team](https://github.com/orgs/elastic/teams/obs-ux-infra_services-team) | - | 92 | 0 | 92 | 3 |
+| <DocLink id="kibApmSourcesAccessPluginApi" text="apmSourcesAccess"/> | [@elastic/obs-ux-infra_services-team](https://github.com/orgs/elastic/teams/obs-ux-infra_services-team) | - | 19 | 0 | 11 | 2 |
 | <DocLink id="kibAutomaticImportPluginApi" text="automaticImport"/> | [@elastic/security-scalability](https://github.com/orgs/elastic/teams/security-scalability) | Plugin implementing the Automatic Import API and UI | 78 | 0 | 62 | 4 |
 | <DocLink id="kibBannersPluginApi" text="banners"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 9 | 0 | 9 | 0 |
 | <DocLink id="kibCanvasPluginApi" text="canvas"/> | [@elastic/kibana-presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | Adds Canvas application to Kibana | 9 | 0 | 8 | 3 |
@@ -52,7 +53,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | crossClusterReplication | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 0 | 0 | 0 | 0 |
 | customBranding | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) |  Enables customization of Kibana | 0 | 0 | 0 | 0 |
 | <DocLink id="kibCustomIntegrationsPluginApi" text="customIntegrations"/> | [@elastic/fleet](https://github.com/orgs/elastic/teams/fleet) | Add custom data integrations so they can be displayed in the Fleet integrations app | 268 | 0 | 249 | 1 |
-| <DocLink id="kibDashboardPluginApi" text="dashboard"/> | [@elastic/kibana-presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | Adds the Dashboard app to Kibana | 95 | 0 | 91 | 12 |
+| <DocLink id="kibDashboardPluginApi" text="dashboard"/> | [@elastic/kibana-presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | Adds the Dashboard app to Kibana | 96 | 0 | 92 | 11 |
 | <DocLink id="kibDashboardEnhancedPluginApi" text="dashboardEnhanced"/> | [@elastic/kibana-presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | - | 53 | 0 | 50 | 0 |
 | <DocLink id="kibDataPluginApi" text="data"/> | [@elastic/kibana-visualizations](https://github.com/orgs/elastic/teams/kibana-visualizations) | Data services are useful for searching and querying data from Elasticsearch. Helpful utilities include: a re-usable react query bar, KQL autocomplete, async search, Data Views (Index Patterns) and field formatters. | 3219 | 31 | 2602 | 27 |
 | <DocLink id="kibDataQualityPluginApi" text="dataQuality"/> | [@elastic/obs-ux-logs-team](https://github.com/orgs/elastic/teams/obs-ux-logs-team) | - | 6 | 0 | 6 | 0 |
@@ -64,12 +65,13 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibDataVisualizerPluginApi" text="dataVisualizer"/> | [@elastic/ml-ui](https://github.com/orgs/elastic/teams/ml-ui) | The Data Visualizer tools help you understand your data, by analyzing the metrics and fields in a log file or an existing Elasticsearch index. | 31 | 3 | 25 | 4 |
 | <DocLink id="kibDatasetQualityPluginApi" text="datasetQuality"/> | [@elastic/obs-ux-logs-team](https://github.com/orgs/elastic/teams/obs-ux-logs-team) | This plugin introduces the concept of data set quality, where users can easily get an overview on the data sets they have. | 31 | 0 | 31 | 11 |
 | <DocLink id="kibDevToolsPluginApi" text="devTools"/> | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 15 | 0 | 9 | 2 |
-| <DocLink id="kibDiscoverPluginApi" text="discover"/> | [@elastic/kibana-data-discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | This plugin contains the Discover application and the saved search embeddable. | 198 | 0 | 150 | 27 |
+| <DocLink id="kibDiscoverPluginApi" text="discover"/> | [@elastic/kibana-data-discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | This plugin contains the Discover application and the saved search embeddable. | 199 | 0 | 151 | 27 |
 | <DocLink id="kibDiscoverEnhancedPluginApi" text="discoverEnhanced"/> | [@elastic/kibana-data-discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | - | 35 | 0 | 33 | 2 |
-| <DocLink id="kibDiscoverSharedPluginApi" text="discoverShared"/> | [@elastic/kibana-data-discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | A stateful layer to register shared features and provide an access point to discover without a direct dependency | 26 | 0 | 23 | 2 |
+| <DocLink id="kibDiscoverSharedPluginApi" text="discoverShared"/> | [@elastic/kibana-data-discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | A stateful layer to register shared features and provide an access point to discover without a direct dependency | 26 | 0 | 24 | 4 |
 | <DocLink id="kibEcsDataQualityDashboardPluginApi" text="ecsDataQualityDashboard"/> | [@elastic/security-threat-hunting-explore](https://github.com/orgs/elastic/teams/security-threat-hunting-explore) | APIs used to assess the quality of data in Elasticsearch indexes | 2 | 0 | 0 | 0 |
 | <DocLink id="kibElasticAssistantPluginApi" text="elasticAssistant"/> | [@elastic/security-generative-ai](https://github.com/orgs/elastic/teams/security-generative-ai) | Server APIs for the Elastic AI Assistant | 60 | 0 | 44 | 3 |
 | <DocLink id="kibEmbeddablePluginApi" text="embeddable"/> | [@elastic/kibana-presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | Adds embeddables service to Kibana | 158 | 0 | 131 | 2 |
+| <DocLink id="kibEmbeddableAlertsTablePluginApi" text="embeddableAlertsTable"/> | [@elastic/response-ops](https://github.com/orgs/elastic/teams/response-ops) | - | 2 | 0 | 2 | 0 |
 | <DocLink id="kibEmbeddableEnhancedPluginApi" text="embeddableEnhanced"/> | [@elastic/kibana-presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | Extends embeddable plugin with more functionality | 15 | 0 | 15 | 2 |
 | <DocLink id="kibEncryptedSavedObjectsPluginApi" text="encryptedSavedObjects"/> | [@elastic/kibana-security](https://github.com/orgs/elastic/teams/kibana-security) | This plugin provides encryption and decryption utilities for saved objects containing sensitive information. | 54 | 0 | 47 | 1 |
 | <DocLink id="kibEnterpriseSearchPluginApi" text="enterpriseSearch"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | Adds dashboards for discovering and managing Enterprise Search products. | 4 | 0 | 4 | 0 |
@@ -77,7 +79,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibEntityManagerPluginApi" text="entityManager"/> | [@elastic/obs-entities](https://github.com/orgs/elastic/teams/obs-entities) | Entity manager plugin for entity assets (inventory, topology, etc) | 45 | 0 | 45 | 4 |
 | entityManagerApp | [@elastic/obs-entities](https://github.com/orgs/elastic/teams/obs-entities) | Entity manager plugin for entity assets (inventory, topology, etc) | 0 | 0 | 0 | 0 |
 | <DocLink id="kibEsUiSharedPluginApi" text="esUiShared"/> | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 100 | 3 | 98 | 3 |
-| <DocLink id="kibEsqlPluginApi" text="esql"/> | [@elastic/kibana-esql](https://github.com/orgs/elastic/teams/kibana-esql) | - | 51 | 0 | 29 | 2 |
+| <DocLink id="kibEsqlPluginApi" text="esql"/> | [@elastic/kibana-esql](https://github.com/orgs/elastic/teams/kibana-esql) | - | 47 | 0 | 27 | 2 |
 | <DocLink id="kibEsqlDataGridPluginApi" text="esqlDataGrid"/> | [@elastic/kibana-esql](https://github.com/orgs/elastic/teams/kibana-esql) | - | 2 | 0 | 2 | 0 |
 | <DocLink id="kibEventAnnotationPluginApi" text="eventAnnotation"/> | [@elastic/kibana-visualizations](https://github.com/orgs/elastic/teams/kibana-visualizations) | The Event Annotation service contains expressions for event annotations | 201 | 0 | 201 | 6 |
 | <DocLink id="kibEventAnnotationListingPluginApi" text="eventAnnotationListing"/> | [@elastic/kibana-visualizations](https://github.com/orgs/elastic/teams/kibana-visualizations) | The listing page for event annotations. | 15 | 0 | 15 | 0 |
@@ -103,7 +105,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibFileUploadPluginApi" text="fileUpload"/> | [@elastic/kibana-presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | The file upload plugin contains components and services for uploading a file, analyzing its data, and then importing the data into an Elasticsearch index. Supported file types include CSV, TSV, newline-delimited JSON and GeoJSON. | 93 | 0 | 93 | 8 |
 | <DocLink id="kibFilesPluginApi" text="files"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | File upload, download, sharing, and serving over HTTP implementation in Kibana. | 240 | 0 | 24 | 9 |
 | <DocLink id="kibFilesManagementPluginApi" text="filesManagement"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | Simple UI for managing files in Kibana | 3 | 0 | 3 | 0 |
-| <DocLink id="kibFleetPluginApi" text="fleet"/> | [@elastic/fleet](https://github.com/orgs/elastic/teams/fleet) | - | 1466 | 5 | 1338 | 87 |
+| <DocLink id="kibFleetPluginApi" text="fleet"/> | [@elastic/fleet](https://github.com/orgs/elastic/teams/fleet) | - | 1484 | 5 | 1356 | 90 |
 | ftrApis | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 0 | 0 | 0 | 0 |
 | <DocLink id="kibGlobalSearchPluginApi" text="globalSearch"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 72 | 0 | 14 | 5 |
 | globalSearchBar | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 0 | 0 | 0 | 0 |
@@ -114,7 +116,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibHomePluginApi" text="home"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 159 | 0 | 121 | 2 |
 | <DocLink id="kibImageEmbeddablePluginApi" text="imageEmbeddable"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | Image embeddable | 1 | 0 | 1 | 0 |
 | indexLifecycleManagement | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 0 | 0 | 0 | 0 |
-| <DocLink id="kibIndexManagementPluginApi" text="indexManagement"/> | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 244 | 0 | 239 | 1 |
+| <DocLink id="kibIndexManagementPluginApi" text="indexManagement"/> | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 246 | 0 | 241 | 1 |
 | <DocLink id="kibInferencePluginApi" text="inference"/> | [@elastic/appex-ai-infra](https://github.com/orgs/elastic/teams/appex-ai-infra) | - | 42 | 0 | 29 | 6 |
 | <DocLink id="kibInferenceEndpointPluginApi" text="inferenceEndpoint"/> | [@elastic/ml-ui](https://github.com/orgs/elastic/teams/ml-ui) | - | 5 | 0 | 5 | 0 |
 | <DocLink id="kibInfraPluginApi" text="infra"/> | [@elastic/obs-ux-logs-team](https://github.com/orgs/elastic/teams/obs-ux-logs-team) | This plugin visualizes data from Filebeat and Metricbeat, and integrates with other Observability solutions | 24 | 0 | 24 | 5 |
@@ -151,7 +153,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibNewsfeedPluginApi" text="newsfeed"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 17 | 0 | 17 | 0 |
 | <DocLink id="kibNoDataPagePluginApi" text="noDataPage"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 3 | 0 | 3 | 0 |
 | <DocLink id="kibNotificationsPluginApi" text="notifications"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 2 | 0 | 2 | 1 |
-| <DocLink id="kibObservabilityPluginApi" text="observability"/> | [@elastic/obs-ux-management-team](https://github.com/orgs/elastic/teams/obs-ux-management-team) | - | 744 | 2 | 736 | 23 |
+| <DocLink id="kibObservabilityPluginApi" text="observability"/> | [@elastic/obs-ux-management-team](https://github.com/orgs/elastic/teams/obs-ux-management-team) | - | 757 | 2 | 749 | 23 |
 | <DocLink id="kibObservabilityAIAssistantPluginApi" text="observabilityAIAssistant"/> | [@elastic/obs-ai-assistant](https://github.com/orgs/elastic/teams/obs-ai-assistant) | - | 389 | 1 | 387 | 27 |
 | <DocLink id="kibObservabilityAIAssistantAppPluginApi" text="observabilityAIAssistantApp"/> | [@elastic/obs-ai-assistant](https://github.com/orgs/elastic/teams/obs-ai-assistant) | - | 8 | 0 | 7 | 0 |
 | <DocLink id="kibObservabilityAiAssistantManagementPluginApi" text="observabilityAiAssistantManagement"/> | [@elastic/obs-ai-assistant](https://github.com/orgs/elastic/teams/obs-ai-assistant) | - | 2 | 0 | 2 | 0 |
@@ -181,11 +183,12 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibSearchAssistantPluginApi" text="searchAssistant"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | AI Assistant for Search | 6 | 0 | 6 | 0 |
 | <DocLink id="kibSearchConnectorsPluginApi" text="searchConnectors"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | Plugin hosting shared features for connectors | 7 | 0 | 7 | 0 |
 | <DocLink id="kibSearchHomepagePluginApi" text="searchHomepage"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | - | 18 | 0 | 10 | 0 |
-| <DocLink id="kibSearchIndicesPluginApi" text="searchIndices"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | - | 18 | 0 | 18 | 0 |
+| <DocLink id="kibSearchIndicesPluginApi" text="searchIndices"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | - | 19 | 0 | 19 | 0 |
 | <DocLink id="kibSearchInferenceEndpointsPluginApi" text="searchInferenceEndpoints"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | - | 4 | 0 | 4 | 0 |
 | <DocLink id="kibSearchNavigationPluginApi" text="searchNavigation"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | - | 22 | 0 | 22 | 1 |
 | <DocLink id="kibSearchNotebooksPluginApi" text="searchNotebooks"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | Plugin to provide access to and rendering of python notebooks for use in the persistent developer console. | 10 | 0 | 10 | 1 |
 | <DocLink id="kibSearchPlaygroundPluginApi" text="searchPlayground"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | - | 14 | 0 | 14 | 0 |
+| <DocLink id="kibSearchQueryRulesPluginApi" text="searchQueryRules"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | - | 5 | 0 | 5 | 0 |
 | <DocLink id="kibSearchSynonymsPluginApi" text="searchSynonyms"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | - | 5 | 0 | 5 | 0 |
 | searchprofiler | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 0 | 0 | 0 | 0 |
 | <DocLink id="kibSecurityPluginApi" text="security"/> | [@elastic/kibana-security](https://github.com/orgs/elastic/teams/kibana-security) | This plugin provides authentication and authorization features, and exposes functionality to understand the capabilities of the currently authenticated user. | 462 | 0 | 238 | 0 |
@@ -193,6 +196,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibSecuritySolutionEssPluginApi" text="securitySolutionEss"/> | [@elastic/security-solution](https://github.com/orgs/elastic/teams/security-solution) | ESS customizations for Security Solution. | 6 | 0 | 6 | 0 |
 | <DocLink id="kibSecuritySolutionServerlessPluginApi" text="securitySolutionServerless"/> | [@elastic/security-solution](https://github.com/orgs/elastic/teams/security-solution) | Serverless customizations for security. | 7 | 0 | 7 | 0 |
 | <DocLink id="kibServerlessPluginApi" text="serverless"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | The core Serverless plugin, providing APIs to Serverless Project plugins. | 24 | 0 | 24 | 0 |
+| <DocLink id="kibServerlessChatPluginApi" text="serverlessChat"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | Serverless customizations for chat. | 4 | 0 | 4 | 0 |
 | <DocLink id="kibServerlessObservabilityPluginApi" text="serverlessObservability"/> | [@elastic/obs-ux-management-team](https://github.com/orgs/elastic/teams/obs-ux-management-team) | Serverless customizations for observability. | 6 | 0 | 6 | 0 |
 | <DocLink id="kibServerlessSearchPluginApi" text="serverlessSearch"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | Serverless customizations for search. | 7 | 0 | 7 | 0 |
 | <DocLink id="kibSessionViewPluginApi" text="sessionView"/> | [@elastic/kibana-cloud-security-posture](https://github.com/orgs/elastic/teams/kibana-cloud-security-posture) | - | 144 | 0 | 141 | 8 |
@@ -221,7 +225,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibUnifiedDocViewerPluginApi" text="unifiedDocViewer"/> | [@elastic/kibana-data-discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | This plugin contains services reliant on the plugin lifecycle for the unified doc viewer component (see @kbn/unified-doc-viewer). | 19 | 0 | 12 | 3 |
 | <DocLink id="kibUnifiedHistogramPluginApi" text="unifiedHistogram"/> | [@elastic/kibana-data-discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | The `unifiedHistogram` plugin provides UI components to create a layout including a resizable histogram and a main display. | 69 | 0 | 35 | 6 |
 | <DocLink id="kibUnifiedSearchPluginApi" text="unifiedSearch"/> | [@elastic/kibana-presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | Contains all the key functionality of Kibana's unified search experience.Contains all the key functionality of Kibana's unified search experience. | 150 | 2 | 113 | 20 |
-| upgradeAssistant | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 0 | 0 | 0 | 0 |
+| upgradeAssistant | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 0 | 0 | 0 | 0 |
 | <DocLink id="kibUptimePluginApi" text="uptime"/> | [@elastic/obs-ux-management-team](https://github.com/orgs/elastic/teams/obs-ux-management-team) | This plugin visualizes data from Heartbeat, and integrates with other Observability solutions. | 1 | 0 | 0 | 0 |
 | urlDrilldown | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | Adds drilldown implementations to Kibana | 0 | 0 | 0 | 0 |
 | <DocLink id="kibUrlForwardingPluginApi" text="urlForwarding"/> | [@elastic/kibana-visualizations](https://github.com/orgs/elastic/teams/kibana-visualizations) | - | 12 | 0 | 12 | 0 |
@@ -268,7 +272,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnApmConfigLoaderPluginApi" text="@kbn/apm-config-loader"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 18 | 0 | 18 | 0 |
 | <DocLink id="kibKbnApmDataViewPluginApi" text="@kbn/apm-data-view"/> | [@elastic/obs-ux-infra_services-team](https://github.com/orgs/elastic/teams/obs-ux-infra_services-team) | - | 4 | 0 | 4 | 0 |
 | <DocLink id="kibKbnApmSynthtracePluginApi" text="@kbn/apm-synthtrace"/> | [@elastic/obs-ux-infra_services-team](https://github.com/orgs/elastic/teams/obs-ux-infra_services-team) | - | 98 | 0 | 98 | 11 |
-| <DocLink id="kibKbnApmSynthtraceClientPluginApi" text="@kbn/apm-synthtrace-client"/> | [@elastic/obs-ux-infra_services-team](https://github.com/orgs/elastic/teams/obs-ux-infra_services-team) | - | 291 | 0 | 291 | 38 |
+| <DocLink id="kibKbnApmSynthtraceClientPluginApi" text="@kbn/apm-synthtrace-client"/> | [@elastic/obs-ux-infra_services-team](https://github.com/orgs/elastic/teams/obs-ux-infra_services-team) | - | 293 | 0 | 293 | 38 |
 | <DocLink id="kibKbnApmTypesPluginApi" text="@kbn/apm-types"/> | [@elastic/obs-ux-infra_services-team](https://github.com/orgs/elastic/teams/obs-ux-infra_services-team) | - | 340 | 0 | 339 | 0 |
 | <DocLink id="kibKbnApmUtilsPluginApi" text="@kbn/apm-utils"/> | [@elastic/obs-ux-infra_services-team](https://github.com/orgs/elastic/teams/obs-ux-infra_services-team) | - | 12 | 0 | 12 | 0 |
 | <DocLink id="kibKbnAvcBannerPluginApi" text="@kbn/avc-banner"/> | [@elastic/security-defend-workflows](https://github.com/orgs/elastic/teams/security-defend-workflows) | - | 3 | 0 | 3 | 0 |
@@ -290,7 +294,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnCloudSecurityPostureGraphPluginApi" text="@kbn/cloud-security-posture-graph"/> | [@elastic/kibana-cloud-security-posture](https://github.com/orgs/elastic/teams/kibana-cloud-security-posture) | - | 28 | 0 | 18 | 7 |
 | <DocLink id="kibKbnCodeEditorPluginApi" text="@kbn/code-editor"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 49 | 0 | 25 | 0 |
 | <DocLink id="kibKbnCodeEditorMockPluginApi" text="@kbn/code-editor-mock"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 2 | 0 | 2 | 0 |
-| <DocLink id="kibKbnCodeOwnersPluginApi" text="@kbn/code-owners"/> | [@elastic/appex-qa](https://github.com/orgs/elastic/teams/appex-qa) | - | 22 | 0 | 11 | 0 |
+| <DocLink id="kibKbnCodeOwnersPluginApi" text="@kbn/code-owners"/> | [@elastic/appex-qa](https://github.com/orgs/elastic/teams/appex-qa) | - | 23 | 0 | 11 | 0 |
 | <DocLink id="kibKbnColoringPluginApi" text="@kbn/coloring"/> | [@elastic/kibana-visualizations](https://github.com/orgs/elastic/teams/kibana-visualizations) | - | 191 | 0 | 149 | 8 |
 | <DocLink id="kibKbnConfigPluginApi" text="@kbn/config"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 79 | 0 | 50 | 9 |
 | <DocLink id="kibKbnConfigMocksPluginApi" text="@kbn/config-mocks"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 24 | 0 | 24 | 0 |
@@ -382,7 +386,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnCoreHttpResourcesServerMocksPluginApi" text="@kbn/core-http-resources-server-mocks"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 7 | 0 | 7 | 0 |
 | <DocLink id="kibKbnCoreHttpRouterServerInternalPluginApi" text="@kbn/core-http-router-server-internal"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 57 | 7 | 57 | 0 |
 | <DocLink id="kibKbnCoreHttpRouterServerMocksPluginApi" text="@kbn/core-http-router-server-mocks"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 15 | 0 | 15 | 0 |
-| <DocLink id="kibKbnCoreHttpServerPluginApi" text="@kbn/core-http-server"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 571 | 2 | 244 | 0 |
+| <DocLink id="kibKbnCoreHttpServerPluginApi" text="@kbn/core-http-server"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 572 | 2 | 244 | 0 |
 | <DocLink id="kibKbnCoreHttpServerInternalPluginApi" text="@kbn/core-http-server-internal"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 98 | 0 | 85 | 0 |
 | <DocLink id="kibKbnCoreHttpServerMocksPluginApi" text="@kbn/core-http-server-mocks"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 46 | 0 | 45 | 0 |
 | <DocLink id="kibKbnCoreHttpServerUtilsPluginApi" text="@kbn/core-http-server-utils"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 6 | 0 | 2 | 0 |
@@ -403,8 +407,8 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnCoreLoggingServerPluginApi" text="@kbn/core-logging-server"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 61 | 0 | 34 | 0 |
 | <DocLink id="kibKbnCoreLoggingServerInternalPluginApi" text="@kbn/core-logging-server-internal"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 9 | 0 | 5 | 0 |
 | <DocLink id="kibKbnCoreLoggingServerMocksPluginApi" text="@kbn/core-logging-server-mocks"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 13 | 0 | 13 | 0 |
-| <DocLink id="kibKbnCoreMetricsCollectorsServerInternalPluginApi" text="@kbn/core-metrics-collectors-server-internal"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 29 | 0 | 25 | 0 |
-| <DocLink id="kibKbnCoreMetricsCollectorsServerMocksPluginApi" text="@kbn/core-metrics-collectors-server-mocks"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 11 | 1 | 11 | 0 |
+| <DocLink id="kibKbnCoreMetricsCollectorsServerInternalPluginApi" text="@kbn/core-metrics-collectors-server-internal"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 30 | 0 | 26 | 0 |
+| <DocLink id="kibKbnCoreMetricsCollectorsServerMocksPluginApi" text="@kbn/core-metrics-collectors-server-mocks"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 12 | 1 | 12 | 0 |
 | <DocLink id="kibKbnCoreMetricsServerPluginApi" text="@kbn/core-metrics-server"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 61 | 0 | 9 | 0 |
 | <DocLink id="kibKbnCoreMetricsServerInternalPluginApi" text="@kbn/core-metrics-server-internal"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 6 | 0 | 6 | 0 |
 | <DocLink id="kibKbnCoreMetricsServerMocksPluginApi" text="@kbn/core-metrics-server-mocks"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 11 | 0 | 11 | 0 |
@@ -504,7 +508,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnDeeplinksManagementPluginApi" text="@kbn/deeplinks-management"/> | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 4 | 0 | 4 | 0 |
 | <DocLink id="kibKbnDeeplinksMlPluginApi" text="@kbn/deeplinks-ml"/> | [@elastic/ml-ui](https://github.com/orgs/elastic/teams/ml-ui) | - | 3 | 0 | 3 | 0 |
 | <DocLink id="kibKbnDeeplinksObservabilityPluginApi" text="@kbn/deeplinks-observability"/> | [@elastic/obs-ux-management-team](https://github.com/orgs/elastic/teams/obs-ux-management-team) | - | 55 | 0 | 54 | 0 |
-| <DocLink id="kibKbnDeeplinksSearchPluginApi" text="@kbn/deeplinks-search"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | - | 19 | 0 | 19 | 0 |
+| <DocLink id="kibKbnDeeplinksSearchPluginApi" text="@kbn/deeplinks-search"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | - | 20 | 0 | 20 | 0 |
 | <DocLink id="kibKbnDeeplinksSecurityPluginApi" text="@kbn/deeplinks-security"/> | [@elastic/security-solution](https://github.com/orgs/elastic/teams/security-solution) | - | 5 | 0 | 5 | 0 |
 | <DocLink id="kibKbnDeeplinksSharedPluginApi" text="@kbn/deeplinks-shared"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 2 | 0 | 2 | 0 |
 | <DocLink id="kibKbnDefaultNavAnalyticsPluginApi" text="@kbn/default-nav-analytics"/> | [@elastic/kibana-data-discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | - | 8 | 0 | 8 | 0 |
@@ -517,13 +521,13 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnDevProcRunnerPluginApi" text="@kbn/dev-proc-runner"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 15 | 0 | 9 | 0 |
 | <DocLink id="kibKbnDevUtilsPluginApi" text="@kbn/dev-utils"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 38 | 2 | 33 | 0 |
 | <DocLink id="kibKbnDiscoverContextualComponentsPluginApi" text="@kbn/discover-contextual-components"/> | [@elastic/obs-ux-logs-team](https://github.com/orgs/elastic/teams/obs-ux-logs-team) | - | 40 | 0 | 38 | 2 |
-| <DocLink id="kibKbnDiscoverUtilsPluginApi" text="@kbn/discover-utils"/> | [@elastic/kibana-data-discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | - | 328 | 0 | 278 | 3 |
+| <DocLink id="kibKbnDiscoverUtilsPluginApi" text="@kbn/discover-utils"/> | [@elastic/kibana-data-discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | - | 336 | 0 | 286 | 4 |
 | <DocLink id="kibKbnDocLinksPluginApi" text="@kbn/doc-links"/> | [@elastic/docs](https://github.com/orgs/elastic/teams/docs) | - | 81 | 0 | 81 | 2 |
 | <DocLink id="kibKbnDocsUtilsPluginApi" text="@kbn/docs-utils"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 5 | 0 | 5 | 1 |
 | <DocLink id="kibKbnDomDragDropPluginApi" text="@kbn/dom-drag-drop"/> | [@elastic/kibana-visualizations](https://github.com/orgs/elastic/teams/kibana-visualizations) | - | 57 | 0 | 30 | 6 |
 | <DocLink id="kibKbnEbtToolsPluginApi" text="@kbn/ebt-tools"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 39 | 0 | 30 | 3 |
 | <DocLink id="kibKbnEcsDataQualityDashboardPluginApi" text="@kbn/ecs-data-quality-dashboard"/> | [@elastic/security-threat-hunting-explore](https://github.com/orgs/elastic/teams/security-threat-hunting-explore) | - | 16 | 0 | 8 | 0 |
-| <DocLink id="kibKbnElasticAgentUtilsPluginApi" text="@kbn/elastic-agent-utils"/> | [@elastic/obs-ux-logs-team](https://github.com/orgs/elastic/teams/obs-ux-logs-team) | - | 46 | 0 | 45 | 0 |
+| <DocLink id="kibKbnElasticAgentUtilsPluginApi" text="@kbn/elastic-agent-utils"/> | [@elastic/obs-ux-logs-team](https://github.com/orgs/elastic/teams/obs-ux-logs-team) | - | 48 | 0 | 47 | 0 |
 | <DocLink id="kibKbnElasticAssistantPluginApi" text="@kbn/elastic-assistant"/> | [@elastic/security-generative-ai](https://github.com/orgs/elastic/teams/security-generative-ai) | - | 164 | 0 | 135 | 9 |
 | <DocLink id="kibKbnElasticAssistantCommonPluginApi" text="@kbn/elastic-assistant-common"/> | [@elastic/security-generative-ai](https://github.com/orgs/elastic/teams/security-generative-ai) | - | 508 | 0 | 435 | 0 |
 | <DocLink id="kibKbnEntitiesSchemaPluginApi" text="@kbn/entities-schema"/> | [@elastic/obs-entities](https://github.com/orgs/elastic/teams/obs-entities) | - | 51 | 0 | 51 | 0 |
@@ -533,11 +537,11 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnEsQueryPluginApi" text="@kbn/es-query"/> | [@elastic/kibana-data-discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | - | 276 | 1 | 215 | 14 |
 | <DocLink id="kibKbnEsTypesPluginApi" text="@kbn/es-types"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 30 | 0 | 30 | 1 |
 | <DocLink id="kibKbnEslintPluginImportsPluginApi" text="@kbn/eslint-plugin-imports"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 2 | 0 | 1 | 0 |
-| <DocLink id="kibKbnEsqlAstPluginApi" text="@kbn/esql-ast"/> | [@elastic/kibana-esql](https://github.com/orgs/elastic/teams/kibana-esql) | - | 314 | 1 | 250 | 25 |
-| <DocLink id="kibKbnEsqlEditorPluginApi" text="@kbn/esql-editor"/> | [@elastic/kibana-esql](https://github.com/orgs/elastic/teams/kibana-esql) | - | 38 | 0 | 15 | 0 |
+| <DocLink id="kibKbnEsqlAstPluginApi" text="@kbn/esql-ast"/> | [@elastic/kibana-esql](https://github.com/orgs/elastic/teams/kibana-esql) | - | 315 | 1 | 251 | 26 |
+| <DocLink id="kibKbnEsqlEditorPluginApi" text="@kbn/esql-editor"/> | [@elastic/kibana-esql](https://github.com/orgs/elastic/teams/kibana-esql) | - | 34 | 0 | 13 | 1 |
 | <DocLink id="kibKbnEsqlTypesPluginApi" text="@kbn/esql-types"/> | [@elastic/kibana-esql](https://github.com/orgs/elastic/teams/kibana-esql) | - | 13 | 0 | 13 | 0 |
-| <DocLink id="kibKbnEsqlUtilsPluginApi" text="@kbn/esql-utils"/> | [@elastic/kibana-esql](https://github.com/orgs/elastic/teams/kibana-esql) | - | 101 | 0 | 88 | 0 |
-| <DocLink id="kibKbnEsqlValidationAutocompletePluginApi" text="@kbn/esql-validation-autocomplete"/> | [@elastic/kibana-esql](https://github.com/orgs/elastic/teams/kibana-esql) | - | 198 | 0 | 186 | 12 |
+| <DocLink id="kibKbnEsqlUtilsPluginApi" text="@kbn/esql-utils"/> | [@elastic/kibana-esql](https://github.com/orgs/elastic/teams/kibana-esql) | - | 102 | 0 | 89 | 0 |
+| <DocLink id="kibKbnEsqlValidationAutocompletePluginApi" text="@kbn/esql-validation-autocomplete"/> | [@elastic/kibana-esql](https://github.com/orgs/elastic/teams/kibana-esql) | - | 184 | 0 | 166 | 13 |
 | <DocLink id="kibKbnEventAnnotationCommonPluginApi" text="@kbn/event-annotation-common"/> | [@elastic/kibana-visualizations](https://github.com/orgs/elastic/teams/kibana-visualizations) | - | 40 | 0 | 40 | 0 |
 | <DocLink id="kibKbnEventAnnotationComponentsPluginApi" text="@kbn/event-annotation-components"/> | [@elastic/kibana-visualizations](https://github.com/orgs/elastic/teams/kibana-visualizations) | - | 52 | 0 | 52 | 1 |
 | <DocLink id="kibKbnEventStacktracePluginApi" text="@kbn/event-stacktrace"/> | [@elastic/obs-ux-infra_services-team](https://github.com/orgs/elastic/teams/obs-ux-infra_services-team) | - | 18 | 0 | 18 | 0 |
@@ -554,6 +558,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnGenerateConsoleDefinitionsPluginApi" text="@kbn/generate-console-definitions"/> | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 1 | 0 | 1 | 0 |
 | <DocLink id="kibKbnGenerateCsvPluginApi" text="@kbn/generate-csv"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 26 | 0 | 26 | 1 |
 | <DocLink id="kibKbnGridLayoutPluginApi" text="@kbn/grid-layout"/> | [@elastic/kibana-presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | - | 20 | 0 | 19 | 2 |
+| <DocLink id="kibKbnGrokUiPluginApi" text="@kbn/grok-ui"/> | [@elastic/streams-program-team](https://github.com/orgs/elastic/teams/streams-program-team) | - | 2 | 0 | 2 | 0 |
 | <DocLink id="kibKbnGroupingPluginApi" text="@kbn/grouping"/> | [@elastic/response-ops](https://github.com/orgs/elastic/teams/response-ops) | - | 17 | 0 | 12 | 11 |
 | <DocLink id="kibKbnGuidedOnboardingPluginApi" text="@kbn/guided-onboarding"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 49 | 0 | 47 | 0 |
 | <DocLink id="kibKbnHandlebarsPluginApi" text="@kbn/handlebars"/> | [@elastic/kibana-security](https://github.com/orgs/elastic/teams/kibana-security) | - | 33 | 3 | 24 | 6 |
@@ -566,7 +571,8 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnImportResolverPluginApi" text="@kbn/import-resolver"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 47 | 0 | 40 | 0 |
 | <DocLink id="kibKbnIndexAdapterPluginApi" text="@kbn/index-adapter"/> | [@elastic/security-threat-hunting](https://github.com/orgs/elastic/teams/security-threat-hunting) | - | 87 | 0 | 82 | 2 |
 | <DocLink id="kibKbnIndexLifecycleManagementCommonSharedPluginApi" text="@kbn/index-lifecycle-management-common-shared"/> | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 78 | 0 | 76 | 0 |
-| <DocLink id="kibKbnIndexManagementSharedTypesPluginApi" text="@kbn/index-management-shared-types"/> | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 127 | 3 | 127 | 0 |
+| <DocLink id="kibKbnIndexManagementSharedTypesPluginApi" text="@kbn/index-management-shared-types"/> | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 130 | 3 | 130 | 0 |
+| <DocLink id="kibKbnInferenceCliPluginApi" text="@kbn/inference-cli"/> | [@elastic/appex-ai-infra](https://github.com/orgs/elastic/teams/appex-ai-infra) | - | 13 | 0 | 13 | 0 |
 | <DocLink id="kibKbnInferenceCommonPluginApi" text="@kbn/inference-common"/> | [@elastic/appex-ai-infra](https://github.com/orgs/elastic/teams/appex-ai-infra) | - | 193 | 0 | 68 | 4 |
 | <DocLink id="kibKbnInferenceEndpointUiCommonPluginApi" text="@kbn/inference-endpoint-ui-common"/> | [@elastic/response-ops](https://github.com/orgs/elastic/teams/response-ops) | - | 128 | 0 | 128 | 0 |
 | <DocLink id="kibKbnInferenceLangchainPluginApi" text="@kbn/inference-langchain"/> | [@elastic/appex-ai-infra](https://github.com/orgs/elastic/teams/appex-ai-infra) | - | 50 | 0 | 49 | 0 |
@@ -581,6 +587,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnJsonAstPluginApi" text="@kbn/json-ast"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 41 | 2 | 35 | 0 |
 | <DocLink id="kibKbnJsonSchemasPluginApi" text="@kbn/json-schemas"/> | [@elastic/ml-ui](https://github.com/orgs/elastic/teams/ml-ui) | - | 9 | 0 | 7 | 0 |
 | <DocLink id="kibKbnKeyValueMetadataTablePluginApi" text="@kbn/key-value-metadata-table"/> | [@elastic/obs-ux-infra_services-team](https://github.com/orgs/elastic/teams/obs-ux-infra_services-team) | - | 10 | 0 | 10 | 0 |
+| <DocLink id="kibKbnKibanaApiCliPluginApi" text="@kbn/kibana-api-cli"/> | [@elastic/appex-ai-infra](https://github.com/orgs/elastic/teams/appex-ai-infra) | - | 19 | 0 | 19 | 0 |
 | <DocLink id="kibKbnKibanaManifestSchemaPluginApi" text="@kbn/kibana-manifest-schema"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 112 | 0 | 111 | 0 |
 | <DocLink id="kibKbnLanguageDocumentationPluginApi" text="@kbn/language-documentation"/> | [@elastic/kibana-esql](https://github.com/orgs/elastic/teams/kibana-esql) | - | 11 | 0 | 7 | 0 |
 | <DocLink id="kibKbnLensEmbeddableUtilsPluginApi" text="@kbn/lens-embeddable-utils"/> | [@elastic/obs-ux-infra_services-team](https://github.com/orgs/elastic/teams/obs-ux-infra_services-team) | - | 193 | 0 | 190 | 6 |
@@ -635,13 +642,14 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnMlValidatorsPluginApi" text="@kbn/ml-validators"/> | [@elastic/ml-ui](https://github.com/orgs/elastic/teams/ml-ui) | - | 32 | 0 | 0 | 0 |
 | <DocLink id="kibKbnMockIdpUtilsPluginApi" text="@kbn/mock-idp-utils"/> | [@elastic/kibana-security](https://github.com/orgs/elastic/teams/kibana-security) | - | 22 | 0 | 16 | 0 |
 | <DocLink id="kibKbnMonacoPluginApi" text="@kbn/monaco"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 183 | 6 | 183 | 3 |
-| <DocLink id="kibKbnObjectUtilsPluginApi" text="@kbn/object-utils"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 8 | 0 | 0 | 0 |
+| <DocLink id="kibKbnObjectUtilsPluginApi" text="@kbn/object-utils"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 11 | 0 | 3 | 0 |
 | <DocLink id="kibKbnObjectVersioningPluginApi" text="@kbn/object-versioning"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 55 | 1 | 50 | 0 |
 | <DocLink id="kibKbnObjectVersioningUtilsPluginApi" text="@kbn/object-versioning-utils"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 2 | 0 | 2 | 0 |
 | <DocLink id="kibKbnObservabilityAlertDetailsPluginApi" text="@kbn/observability-alert-details"/> | [@elastic/obs-ux-management-team](https://github.com/orgs/elastic/teams/obs-ux-management-team) | - | 10 | 0 | 10 | 2 |
 | <DocLink id="kibKbnObservabilityAlertingTestDataPluginApi" text="@kbn/observability-alerting-test-data"/> | [@elastic/obs-ux-management-team](https://github.com/orgs/elastic/teams/obs-ux-management-team) | - | 99 | 1 | 99 | 0 |
 | <DocLink id="kibKbnObservabilityGetPaddedAlertTimeRangeUtilPluginApi" text="@kbn/observability-get-padded-alert-time-range-util"/> | [@elastic/obs-ux-management-team](https://github.com/orgs/elastic/teams/obs-ux-management-team) | - | 6 | 0 | 6 | 1 |
-| <DocLink id="kibKbnObservabilitySyntheticsTestDataPluginApi" text="@kbn/observability-synthetics-test-data"/> | [@elastic/obs-ux-management-team](https://github.com/orgs/elastic/teams/obs-ux-management-team) | - | 31 | 2 | 31 | 2 |
+| <DocLink id="kibKbnObservabilitySchemaPluginApi" text="@kbn/observability-schema"/> | [@elastic/obs-ux-management-team](https://github.com/orgs/elastic/teams/obs-ux-management-team) | - | 7 | 0 | 7 | 0 |
+| <DocLink id="kibKbnObservabilitySyntheticsTestDataPluginApi" text="@kbn/observability-synthetics-test-data"/> | [@elastic/obs-ux-management-team](https://github.com/orgs/elastic/teams/obs-ux-management-team) | - | 34 | 2 | 34 | 2 |
 | <DocLink id="kibKbnOpenapiBundlerPluginApi" text="@kbn/openapi-bundler"/> | [@elastic/security-detection-rule-management](https://github.com/orgs/elastic/teams/security-detection-rule-management) | - | 12 | 0 | 12 | 0 |
 | <DocLink id="kibKbnOpenapiGeneratorPluginApi" text="@kbn/openapi-generator"/> | [@elastic/security-detection-rule-management](https://github.com/orgs/elastic/teams/security-detection-rule-management) | - | 15 | 0 | 15 | 0 |
 | <DocLink id="kibKbnOptimizerPluginApi" text="@kbn/optimizer"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 45 | 0 | 45 | 9 |
@@ -654,10 +662,11 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnPluginGeneratorPluginApi" text="@kbn/plugin-generator"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 1 | 0 | 1 | 0 |
 | <DocLink id="kibKbnPluginHelpersPluginApi" text="@kbn/plugin-helpers"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 1 | 0 | 1 | 0 |
 | <DocLink id="kibKbnPresentationContainersPluginApi" text="@kbn/presentation-containers"/> | [@elastic/kibana-presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | - | 79 | 0 | 68 | 1 |
-| <DocLink id="kibKbnPresentationPublishingPluginApi" text="@kbn/presentation-publishing"/> | [@elastic/kibana-presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | - | 242 | 0 | 205 | 5 |
+| <DocLink id="kibKbnPresentationPublishingPluginApi" text="@kbn/presentation-publishing"/> | [@elastic/kibana-presentation](https://github.com/orgs/elastic/teams/kibana-presentation) | - | 247 | 0 | 208 | 5 |
 | <DocLink id="kibKbnProductDocArtifactBuilderPluginApi" text="@kbn/product-doc-artifact-builder"/> | [@elastic/appex-ai-infra](https://github.com/orgs/elastic/teams/appex-ai-infra) | - | 1 | 0 | 1 | 0 |
 | <DocLink id="kibKbnProductDocCommonPluginApi" text="@kbn/product-doc-common"/> | [@elastic/appex-ai-infra](https://github.com/orgs/elastic/teams/appex-ai-infra) | - | 32 | 0 | 32 | 0 |
 | <DocLink id="kibKbnProfilingUtilsPluginApi" text="@kbn/profiling-utils"/> | [@elastic/obs-ux-infra_services-team](https://github.com/orgs/elastic/teams/obs-ux-infra_services-team) | - | 165 | 0 | 54 | 0 |
+| <DocLink id="kibKbnProjectsSolutionsGroupsPluginApi" text="@kbn/projects-solutions-groups"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 17 | 0 | 0 | 0 |
 | <DocLink id="kibKbnRandomSamplingPluginApi" text="@kbn/random-sampling"/> | [@elastic/kibana-visualizations](https://github.com/orgs/elastic/teams/kibana-visualizations) | - | 13 | 0 | 7 | 0 |
 | <DocLink id="kibKbnReactFieldPluginApi" text="@kbn/react-field"/> | [@elastic/kibana-data-discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | - | 27 | 0 | 14 | 0 |
 | <DocLink id="kibKbnReactHooksPluginApi" text="@kbn/react-hooks"/> | [@elastic/obs-ux-logs-team](https://github.com/orgs/elastic/teams/obs-ux-logs-team) | - | 26 | 0 | 19 | 2 |
@@ -689,20 +698,21 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnResponseOpsAlertsFieldsBrowserPluginApi" text="@kbn/response-ops-alerts-fields-browser"/> | [@elastic/response-ops](https://github.com/orgs/elastic/teams/response-ops) | - | 15 | 0 | 6 | 2 |
 | <DocLink id="kibKbnResponseOpsAlertsTablePluginApi" text="@kbn/response-ops-alerts-table"/> | [@elastic/response-ops](https://github.com/orgs/elastic/teams/response-ops) | - | 8 | 0 | 6 | 13 |
 | <DocLink id="kibKbnResponseOpsRuleFormPluginApi" text="@kbn/response-ops-rule-form"/> | [@elastic/response-ops](https://github.com/orgs/elastic/teams/response-ops) | - | 184 | 0 | 183 | 7 |
-| <DocLink id="kibKbnResponseOpsRuleParamsPluginApi" text="@kbn/response-ops-rule-params"/> | [@elastic/response-ops](https://github.com/orgs/elastic/teams/response-ops) | - | 8 | 0 | 8 | 0 |
+| <DocLink id="kibKbnResponseOpsRuleParamsPluginApi" text="@kbn/response-ops-rule-params"/> | [@elastic/response-ops](https://github.com/orgs/elastic/teams/response-ops) | - | 9 | 0 | 9 | 0 |
 | <DocLink id="kibKbnRisonPluginApi" text="@kbn/rison"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 13 | 2 | 8 | 0 |
 | <DocLink id="kibKbnRollupPluginApi" text="@kbn/rollup"/> | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 3 | 0 | 3 | 0 |
 | <DocLink id="kibKbnRouterToOpenapispecPluginApi" text="@kbn/router-to-openapispec"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 10 | 0 | 9 | 1 |
 | <DocLink id="kibKbnRouterUtilsPluginApi" text="@kbn/router-utils"/> | [@elastic/obs-ux-logs-team](https://github.com/orgs/elastic/teams/obs-ux-logs-team) | - | 2 | 0 | 1 | 1 |
 | <DocLink id="kibKbnRrulePluginApi" text="@kbn/rrule"/> | [@elastic/response-ops](https://github.com/orgs/elastic/teams/response-ops) | - | 18 | 0 | 18 | 2 |
-| <DocLink id="kibKbnRuleDataUtilsPluginApi" text="@kbn/rule-data-utils"/> | [@elastic/security-detections-response](https://github.com/orgs/elastic/teams/security-detections-response) | - | 153 | 0 | 141 | 0 |
+| <DocLink id="kibKbnRuleDataUtilsPluginApi" text="@kbn/rule-data-utils"/> | [@elastic/security-detections-response](https://github.com/orgs/elastic/teams/security-detections-response) | - | 192 | 0 | 180 | 0 |
 | <DocLink id="kibKbnSampleLogParserPluginApi" text="@kbn/sample-log-parser"/> | [@elastic/streams-program-team](https://github.com/orgs/elastic/teams/streams-program-team) | - | 18 | 0 | 18 | 1 |
 | <DocLink id="kibKbnSavedObjectsSettingsPluginApi" text="@kbn/saved-objects-settings"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 2 | 0 | 2 | 0 |
 | <DocLink id="kibKbnSavedSearchComponentPluginApi" text="@kbn/saved-search-component"/> | [@elastic/obs-ux-logs-team](https://github.com/orgs/elastic/teams/obs-ux-logs-team) | - | 15 | 0 | 14 | 0 |
-| <DocLink id="kibKbnScoutPluginApi" text="@kbn/scout"/> | [@elastic/appex-qa](https://github.com/orgs/elastic/teams/appex-qa) | - | 388 | 2 | 97 | 15 |
+| <DocLink id="kibKbnScoutPluginApi" text="@kbn/scout"/> | [@elastic/appex-qa](https://github.com/orgs/elastic/teams/appex-qa) | - | 441 | 2 | 119 | 15 |
 | <DocLink id="kibKbnScoutInfoPluginApi" text="@kbn/scout-info"/> | [@elastic/appex-qa](https://github.com/orgs/elastic/teams/appex-qa) | - | 12 | 0 | 12 | 0 |
-| <DocLink id="kibKbnScoutObltPluginApi" text="@kbn/scout-oblt"/> | [@elastic/appex-qa](https://github.com/orgs/elastic/teams/appex-qa) | - | 356 | 2 | 65 | 2 |
+| <DocLink id="kibKbnScoutObltPluginApi" text="@kbn/scout-oblt"/> | [@elastic/appex-qa](https://github.com/orgs/elastic/teams/appex-qa) | - | 360 | 2 | 69 | 2 |
 | <DocLink id="kibKbnScoutReportingPluginApi" text="@kbn/scout-reporting"/> | [@elastic/appex-qa](https://github.com/orgs/elastic/teams/appex-qa) | - | 109 | 0 | 87 | 4 |
+| <DocLink id="kibKbnScoutSecurityPluginApi" text="@kbn/scout-security"/> | [@elastic/appex-qa](https://github.com/orgs/elastic/teams/appex-qa) | - | 356 | 2 | 66 | 6 |
 | <DocLink id="kibKbnScreenshottingServerPluginApi" text="@kbn/screenshotting-server"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 35 | 0 | 34 | 0 |
 | <DocLink id="kibKbnSearchApiKeysComponentsPluginApi" text="@kbn/search-api-keys-components"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | - | 5 | 0 | 5 | 0 |
 | <DocLink id="kibKbnSearchApiKeysServerPluginApi" text="@kbn/search-api-keys-server"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | - | 3 | 0 | 3 | 0 |
@@ -751,6 +761,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnServerRouteRepositoryPluginApi" text="@kbn/server-route-repository"/> | [@elastic/obs-knowledge-team](https://github.com/orgs/elastic/teams/obs-knowledge-team) | - | 40 | 0 | 40 | 0 |
 | <DocLink id="kibKbnServerRouteRepositoryClientPluginApi" text="@kbn/server-route-repository-client"/> | [@elastic/obs-knowledge-team](https://github.com/orgs/elastic/teams/obs-knowledge-team) | - | 15 | 0 | 15 | 0 |
 | <DocLink id="kibKbnServerRouteRepositoryUtilsPluginApi" text="@kbn/server-route-repository-utils"/> | [@elastic/obs-knowledge-team](https://github.com/orgs/elastic/teams/obs-knowledge-team) | - | 28 | 0 | 28 | 2 |
+| <DocLink id="kibKbnServerlessChatSettingsPluginApi" text="@kbn/serverless-chat-settings"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | - | 1 | 0 | 1 | 0 |
 | <DocLink id="kibKbnServerlessCommonSettingsPluginApi" text="@kbn/serverless-common-settings"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 1 | 0 | 1 | 0 |
 | <DocLink id="kibKbnServerlessObservabilitySettingsPluginApi" text="@kbn/serverless-observability-settings"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 1 | 0 | 1 | 0 |
 | <DocLink id="kibKbnServerlessSearchSettingsPluginApi" text="@kbn/serverless-search-settings"/> | [@elastic/search-kibana](https://github.com/orgs/elastic/teams/search-kibana) | - | 1 | 0 | 1 | 0 |
@@ -761,7 +772,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnSharedUxButtonExitFullScreenPluginApi" text="@kbn/shared-ux-button-exit-full-screen"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 8 | 0 | 2 | 1 |
 | <DocLink id="kibKbnSharedUxButtonToolbarPluginApi" text="@kbn/shared-ux-button-toolbar"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 30 | 0 | 8 | 0 |
 | <DocLink id="kibKbnSharedUxCardNoDataPluginApi" text="@kbn/shared-ux-card-no-data"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 10 | 0 | 4 | 0 |
-| <DocLink id="kibKbnSharedUxCardNoDataMocksPluginApi" text="@kbn/shared-ux-card-no-data-mocks"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 32 | 0 | 28 | 0 |
+| <DocLink id="kibKbnSharedUxCardNoDataMocksPluginApi" text="@kbn/shared-ux-card-no-data-mocks"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 33 | 0 | 29 | 0 |
 | <DocLink id="kibKbnSharedUxChromeNavigationPluginApi" text="@kbn/shared-ux-chrome-navigation"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 38 | 0 | 29 | 2 |
 | <DocLink id="kibKbnSharedUxErrorBoundaryPluginApi" text="@kbn/shared-ux-error-boundary"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 8 | 0 | 3 | 1 |
 | <DocLink id="kibKbnSharedUxFileContextPluginApi" text="@kbn/shared-ux-file-context"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 5 | 0 | 4 | 0 |
@@ -775,20 +786,20 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnSharedUxLinkRedirectAppPluginApi" text="@kbn/shared-ux-link-redirect-app"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 17 | 0 | 9 | 0 |
 | <DocLink id="kibKbnSharedUxLinkRedirectAppMocksPluginApi" text="@kbn/shared-ux-link-redirect-app-mocks"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 10 | 0 | 9 | 0 |
 | <DocLink id="kibKbnSharedUxMarkdownPluginApi" text="@kbn/shared-ux-markdown"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 2 | 0 | 2 | 1 |
-| <DocLink id="kibKbnSharedUxMarkdownMocksPluginApi" text="@kbn/shared-ux-markdown-mocks"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 41 | 0 | 40 | 0 |
+| <DocLink id="kibKbnSharedUxMarkdownMocksPluginApi" text="@kbn/shared-ux-markdown-mocks"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 46 | 0 | 45 | 0 |
 | <DocLink id="kibKbnSharedUxPageAnalyticsNoDataPluginApi" text="@kbn/shared-ux-page-analytics-no-data"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 20 | 0 | 9 | 1 |
-| <DocLink id="kibKbnSharedUxPageAnalyticsNoDataMocksPluginApi" text="@kbn/shared-ux-page-analytics-no-data-mocks"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 21 | 0 | 20 | 0 |
+| <DocLink id="kibKbnSharedUxPageAnalyticsNoDataMocksPluginApi" text="@kbn/shared-ux-page-analytics-no-data-mocks"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 24 | 0 | 23 | 0 |
 | <DocLink id="kibKbnSharedUxPageKibanaNoDataPluginApi" text="@kbn/shared-ux-page-kibana-no-data"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 8 | 0 | 3 | 0 |
-| <DocLink id="kibKbnSharedUxPageKibanaNoDataMocksPluginApi" text="@kbn/shared-ux-page-kibana-no-data-mocks"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 25 | 0 | 24 | 0 |
+| <DocLink id="kibKbnSharedUxPageKibanaNoDataMocksPluginApi" text="@kbn/shared-ux-page-kibana-no-data-mocks"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 28 | 0 | 27 | 0 |
 | <DocLink id="kibKbnSharedUxPageKibanaTemplatePluginApi" text="@kbn/shared-ux-page-kibana-template"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 11 | 0 | 6 | 0 |
 | <DocLink id="kibKbnSharedUxPageKibanaTemplateMocksPluginApi" text="@kbn/shared-ux-page-kibana-template-mocks"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 43 | 5 | 43 | 2 |
 | <DocLink id="kibKbnSharedUxPageNoDataPluginApi" text="@kbn/shared-ux-page-no-data"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 14 | 0 | 5 | 0 |
 | <DocLink id="kibKbnSharedUxPageNoDataConfigPluginApi" text="@kbn/shared-ux-page-no-data-config"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 11 | 0 | 9 | 0 |
-| <DocLink id="kibKbnSharedUxPageNoDataConfigMocksPluginApi" text="@kbn/shared-ux-page-no-data-config-mocks"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 24 | 0 | 24 | 0 |
-| <DocLink id="kibKbnSharedUxPageNoDataMocksPluginApi" text="@kbn/shared-ux-page-no-data-mocks"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 27 | 0 | 26 | 0 |
+| <DocLink id="kibKbnSharedUxPageNoDataConfigMocksPluginApi" text="@kbn/shared-ux-page-no-data-config-mocks"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 27 | 0 | 27 | 0 |
+| <DocLink id="kibKbnSharedUxPageNoDataMocksPluginApi" text="@kbn/shared-ux-page-no-data-mocks"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 30 | 0 | 29 | 0 |
 | <DocLink id="kibKbnSharedUxPageSolutionNavPluginApi" text="@kbn/shared-ux-page-solution-nav"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 5 | 0 | 3 | 1 |
 | <DocLink id="kibKbnSharedUxPromptNoDataViewsPluginApi" text="@kbn/shared-ux-prompt-no-data-views"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 36 | 1 | 14 | 1 |
-| <DocLink id="kibKbnSharedUxPromptNoDataViewsMocksPluginApi" text="@kbn/shared-ux-prompt-no-data-views-mocks"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 26 | 0 | 25 | 0 |
+| <DocLink id="kibKbnSharedUxPromptNoDataViewsMocksPluginApi" text="@kbn/shared-ux-prompt-no-data-views-mocks"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 28 | 0 | 27 | 0 |
 | <DocLink id="kibKbnSharedUxPromptNotFoundPluginApi" text="@kbn/shared-ux-prompt-not-found"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 2 | 0 | 1 | 0 |
 | <DocLink id="kibKbnSharedUxRouterPluginApi" text="@kbn/shared-ux-router"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 16 | 0 | 15 | 2 |
 | <DocLink id="kibKbnSharedUxRouterMocksPluginApi" text="@kbn/shared-ux-router-mocks"/> | [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sharedux) | - | 1 | 0 | 1 | 0 |
@@ -800,18 +811,18 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnSloSchemaPluginApi" text="@kbn/slo-schema"/> | [@elastic/obs-ux-management-team](https://github.com/orgs/elastic/teams/obs-ux-management-team) | - | 188 | 0 | 188 | 0 |
 | <DocLink id="kibKbnSomeDevLogPluginApi" text="@kbn/some-dev-log"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 20 | 0 | 12 | 0 |
 | <DocLink id="kibKbnSortPredicatesPluginApi" text="@kbn/sort-predicates"/> | [@elastic/kibana-visualizations](https://github.com/orgs/elastic/teams/kibana-visualizations) | - | 4 | 0 | 4 | 0 |
-| <DocLink id="kibKbnSseUtilsPluginApi" text="@kbn/sse-utils"/> | [@elastic/obs-knowledge-team](https://github.com/orgs/elastic/teams/obs-knowledge-team) | - | 19 | 0 | 19 | 3 |
+| <DocLink id="kibKbnSseUtilsPluginApi" text="@kbn/sse-utils"/> | [@elastic/obs-knowledge-team](https://github.com/orgs/elastic/teams/obs-knowledge-team) | - | 20 | 0 | 20 | 3 |
 | <DocLink id="kibKbnSseUtilsClientPluginApi" text="@kbn/sse-utils-client"/> | [@elastic/obs-knowledge-team](https://github.com/orgs/elastic/teams/obs-knowledge-team) | - | 1 | 0 | 1 | 1 |
 | <DocLink id="kibKbnSseUtilsServerPluginApi" text="@kbn/sse-utils-server"/> | [@elastic/obs-knowledge-team](https://github.com/orgs/elastic/teams/obs-knowledge-team) | - | 8 | 0 | 6 | 0 |
 | <DocLink id="kibKbnStdPluginApi" text="@kbn/std"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 108 | 2 | 70 | 1 |
 | <DocLink id="kibKbnStdioDevHelpersPluginApi" text="@kbn/stdio-dev-helpers"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 4 | 0 | 2 | 0 |
 | <DocLink id="kibKbnStorageAdapterPluginApi" text="@kbn/storage-adapter"/> | [@elastic/observability-ui](https://github.com/orgs/elastic/teams/observability-ui) | - | 77 | 0 | 76 | 2 |
-| <DocLink id="kibKbnStorybookPluginApi" text="@kbn/storybook"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 45 | 2 | 25 | 0 |
-| <DocLink id="kibKbnStreamsSchemaPluginApi" text="@kbn/streams-schema"/> | [@elastic/streams-program-team](https://github.com/orgs/elastic/teams/streams-program-team) | - | 292 | 6 | 288 | 3 |
+| <DocLink id="kibKbnStorybookPluginApi" text="@kbn/storybook"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 27 | 2 | 27 | 0 |
+| <DocLink id="kibKbnStreamsSchemaPluginApi" text="@kbn/streams-schema"/> | [@elastic/streams-program-team](https://github.com/orgs/elastic/teams/streams-program-team) | - | 307 | 7 | 303 | 3 |
 | <DocLink id="kibKbnSyntheticsE2ePluginApi" text="@kbn/synthetics-e2e"/> | [@elastic/obs-ux-management-team](https://github.com/orgs/elastic/teams/obs-ux-management-team) | - | 9 | 0 | 9 | 0 |
 | <DocLink id="kibKbnSyntheticsPrivateLocationPluginApi" text="@kbn/synthetics-private-location"/> | [@elastic/obs-ux-management-team](https://github.com/orgs/elastic/teams/obs-ux-management-team) | - | 19 | 0 | 19 | 0 |
 | <DocLink id="kibKbnTelemetryToolsPluginApi" text="@kbn/telemetry-tools"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 7 | 0 | 5 | 1 |
-| <DocLink id="kibKbnTestPluginApi" text="@kbn/test"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 362 | 4 | 307 | 14 |
+| <DocLink id="kibKbnTestPluginApi" text="@kbn/test"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 363 | 4 | 308 | 14 |
 | <DocLink id="kibKbnTestEuiHelpersPluginApi" text="@kbn/test-eui-helpers"/> | [@elastic/kibana-visualizations](https://github.com/orgs/elastic/teams/kibana-visualizations) | - | 37 | 1 | 19 | 0 |
 | <DocLink id="kibKbnTestJestHelpersPluginApi" text="@kbn/test-jest-helpers"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 131 | 3 | 98 | 2 |
 | <DocLink id="kibKbnTestSubjSelectorPluginApi" text="@kbn/test-subj-selector"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 2 | 0 | 1 | 0 |
@@ -829,7 +840,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnUnifiedDataTablePluginApi" text="@kbn/unified-data-table"/> | [@elastic/kibana-data-discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | Contains functionality for the unified data table which can be integrated into apps | 188 | 0 | 109 | 1 |
 | <DocLink id="kibKbnUnifiedDocViewerPluginApi" text="@kbn/unified-doc-viewer"/> | [@elastic/kibana-data-discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | - | 18 | 0 | 17 | 5 |
 | <DocLink id="kibKbnUnifiedFieldListPluginApi" text="@kbn/unified-field-list"/> | [@elastic/kibana-data-discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | Contains functionality for the field list and field stats which can be integrated into apps | 317 | 0 | 288 | 8 |
-| <DocLink id="kibKbnUnifiedTabsPluginApi" text="@kbn/unified-tabs"/> | [@elastic/kibana-data-discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | - | 17 | 0 | 17 | 2 |
+| <DocLink id="kibKbnUnifiedTabsPluginApi" text="@kbn/unified-tabs"/> | [@elastic/kibana-data-discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | - | 24 | 0 | 24 | 3 |
 | <DocLink id="kibKbnUnsavedChangesBadgePluginApi" text="@kbn/unsaved-changes-badge"/> | [@elastic/kibana-data-discovery](https://github.com/orgs/elastic/teams/kibana-data-discovery) | - | 13 | 0 | 9 | 0 |
 | <DocLink id="kibKbnUnsavedChangesPromptPluginApi" text="@kbn/unsaved-changes-prompt"/> | [@elastic/kibana-management](https://github.com/orgs/elastic/teams/kibana-management) | - | 2 | 0 | 2 | 0 |
 | <DocLink id="kibKbnUseTrackedPromisePluginApi" text="@kbn/use-tracked-promise"/> | [@elastic/obs-ux-logs-team](https://github.com/orgs/elastic/teams/obs-ux-logs-team) | - | 3 | 0 | 2 | 1 |
@@ -838,7 +849,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibKbnUtilityTypesJestPluginApi" text="@kbn/utility-types-jest"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 2 | 0 | 2 | 0 |
 | <DocLink id="kibKbnUtilsPluginApi" text="@kbn/utils"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 26 | 0 | 15 | 0 |
 | <DocLink id="kibKbnVisualizationUiComponentsPluginApi" text="@kbn/visualization-ui-components"/> | [@elastic/kibana-visualizations](https://github.com/orgs/elastic/teams/kibana-visualizations) | - | 145 | 0 | 139 | 4 |
-| <DocLink id="kibKbnVisualizationUtilsPluginApi" text="@kbn/visualization-utils"/> | [@elastic/kibana-visualizations](https://github.com/orgs/elastic/teams/kibana-visualizations) | - | 24 | 0 | 22 | 1 |
+| <DocLink id="kibKbnVisualizationUtilsPluginApi" text="@kbn/visualization-utils"/> | [@elastic/kibana-visualizations](https://github.com/orgs/elastic/teams/kibana-visualizations) | - | 27 | 0 | 25 | 1 |
 | <DocLink id="kibKbnXstateUtilsPluginApi" text="@kbn/xstate-utils"/> | [@elastic/obs-ux-logs-team](https://github.com/orgs/elastic/teams/obs-ux-logs-team) | - | 16 | 0 | 16 | 0 |
 | <DocLink id="kibKbnYarnLockValidatorPluginApi" text="@kbn/yarn-lock-validator"/> | [@elastic/kibana-operations](https://github.com/orgs/elastic/teams/kibana-operations) | - | 9 | 0 | 4 | 0 |
 | <DocLink id="kibKbnZodPluginApi" text="@kbn/zod"/> | [@elastic/kibana-core](https://github.com/orgs/elastic/teams/kibana-core) | - | 1254 | 0 | 4 | 0 |

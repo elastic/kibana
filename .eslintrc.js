@@ -641,14 +641,14 @@ module.exports = {
       files: [
         '**/*.stories.tsx',
         '**/*.test.js',
+        'src/platform/test/*/config.ts',
+        'src/platform/test/*/config_open.ts',
+        'src/platform/test/*/*.config.ts',
+        'src/platform/test/*/{tests,test_suites,apis,apps}/**/*',
+        'src/platform/test/server_integration/**/*.ts',
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/solutions/observability/plugins/apm/**/*.js',
-        'test/*/config.ts',
-        'test/*/config_open.ts',
-        'test/*/*.config.ts',
-        'test/*/{tests,test_suites,apis,apps}/**/*',
-        'test/server_integration/**/*.ts',
         'x-pack/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
@@ -788,7 +788,10 @@ module.exports = {
      * Harden specific rules
      */
     {
-      files: ['test/harden/*.js', 'src/platform/packages/shared/kbn-safer-lodash-set/test/*.js'],
+      files: [
+        'src/platform/test/harden/*.js',
+        'src/platform/packages/shared/kbn-safer-lodash-set/test/*.js',
+      ],
       rules: {
         'mocha/handle-done-callback': 'off',
       },
@@ -1341,6 +1344,10 @@ module.exports = {
         'react/display-name': ['error', { ignoreTranspilerName: true }],
       },
     },
+    {
+      files: ['x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.tsx'],
+      extends: ['plugin:testing-library/react'],
+    },
 
     /**
      * Lists overrides. These rules below are maintained and owned by
@@ -1421,8 +1428,8 @@ module.exports = {
     },
     {
       files: [
-        'test/{accessibility,*functional*}/apps/**/*.{js,ts}',
-        'test/*api_integration*/**/*.{js,ts}',
+        'src/platform/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
+        'src/platform/test/*api_integration*/**/*.{js,ts}',
         'x-pack/test/{accessibility,*functional*}/apps/**/*.{js,ts}',
         'x-pack/test/*api_integration*/**/*.{js,ts}',
         'x-pack/test_serverless/{functional,api_integration}/test_suites/**/*.{js,ts}',
@@ -1444,6 +1451,7 @@ module.exports = {
       files: [
         'src/platform/packages/shared/kbn-scout/src/playwright/**/*.ts',
         'x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/**/*.ts',
+        'x-pack/solutions/security/packages/kbn-scout-security/src/playwright/**/*.ts',
         'src/platform/plugins/**/ui_tests/**/*.ts',
         'x-pack/platform/plugins/**/ui_tests/**/*.ts',
         'x-pack/solutions/**/plugins/**/ui_tests/**/*.ts',
@@ -1641,6 +1649,7 @@ module.exports = {
         'x-pack/platform/plugins/shared/stack_alerts/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/stack_connectors/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/triggers_actions_ui/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/embeddable_alerts_table/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
@@ -1926,8 +1935,8 @@ module.exports = {
     {
       files: [
         'src/platform/plugins/private/interactive_setup/**/*.{js,mjs,ts,tsx}',
-        'test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}',
-        'test/interactive_setup_functional/**/*.{js,mjs,ts,tsx}',
+        'src/platform/test/interactive_setup_api_integration/**/*.{js,mjs,ts,tsx}',
+        'src/platform/test/interactive_setup_functional/**/*.{js,mjs,ts,tsx}',
 
         'packages/kbn-mock-idp-plugin/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/private/kbn-mock-idp-utils/**/*.{js,mjs,ts,tsx}',
@@ -2104,10 +2113,12 @@ module.exports = {
         'x-pack/platform/plugins/shared/osquery/**',
         // FIXME PhilippeOberti @kbn/timelines-plugin depends on security-solution-plugin (security/private) (timelines is going to disappear)
         'x-pack/platform/plugins/shared/timelines/**',
+        // FIXME @dmlemeshko
+        `src/platform/test/api_integration/apis/guided_onboarding/get_guides.ts`,
+        `src/platform/test/api_integration/apis/guided_onboarding/put_state.ts`,
 
         // For now, we keep the exception to let tests depend on anythying.
         // Ideally, we need to classify the solution specific ones to reduce CI times
-        'test/**',
         'x-pack/test_serverless/**',
         'x-pack/test/**',
         'x-pack/test/plugin_functional/plugins/resolver_test/**',

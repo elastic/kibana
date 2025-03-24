@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
@@ -19,6 +20,7 @@ import { handleStreamResponse } from './utils/handle_stream_response';
 import {
   APIRoutes,
   ElasticsearchRetrieverContentField,
+  QueryTestResponse,
   SearchPlaygroundPluginStart,
   SearchPlaygroundPluginStartDependencies,
 } from './types';
@@ -28,15 +30,31 @@ import { isNotNullish } from '../common/is_not_nullish';
 import { MODELS } from '../common/models';
 import { ContextLimitError } from './lib/errors';
 import { parseSourceFields } from './utils/parse_source_fields';
+import { getErrorMessage } from '../common/errors';
 
-export function createRetriever(esQuery: string) {
+const EMPTY_INDICES_ERROR_MESSAGE = i18n.translate(
+  'xpack.searchPlayground.serverErrors.emptyIndices',
+  {
+    defaultMessage: 'Indices cannot be empty',
+  }
+);
+
+export function parseElasticsearchQuery(esQuery: string) {
   return (question: string) => {
     try {
       const replacedQuery = esQuery.replace(/\"{query}\"/g, JSON.stringify(question));
       const query = JSON.parse(replacedQuery);
-      return query;
+      return query as Partial<SearchRequest>;
     } catch (e) {
-      throw Error("Failed to parse the Elasticsearch Query. Check Query to make sure it's valid.");
+      throw new Error(
+        i18n.translate('xpack.searchPlayground.serverErrors.parseRetriever', {
+          defaultMessage:
+            "Failed to parse the Elasticsearch Query. Check Query to make sure it's valid.",
+        }),
+        {
+          cause: e,
+        }
+      );
     }
   };
 }
@@ -143,7 +161,7 @@ export function defineRoutes({
         model: chatModel,
         rag: {
           index: data.indices,
-          retriever: createRetriever(data.elasticsearch_query),
+          retriever: parseElasticsearchQuery(data.elasticsearch_query),
           content_field: sourceFields,
           size: Number(data.doc_size),
           inputTokensLimit: modelPromptLimit,
@@ -269,15 +287,27 @@ export function defineRoutes({
         if (indices.length === 0) {
           return response.badRequest({
             body: {
-              message: 'Indices cannot be empty',
+              message: EMPTY_INDICES_ERROR_MESSAGE,
+            },
+          });
+        }
+        let parsedElasticsearchQuery: Partial<SearchRequest>;
+        try {
+          parsedElasticsearchQuery = parseElasticsearchQuery(elasticsearchQuery)(
+            request.body.search_query
+          );
+        } catch (e) {
+          logger.error(e);
+          return response.badRequest({
+            body: {
+              message: getErrorMessage(e),
             },
           });
         }
 
-        const retriever = createRetriever(elasticsearchQuery)(request.body.search_query);
         const searchResult = await client.asCurrentUser.search({
+          ...parsedElasticsearchQuery,
           index: indices,
-          retriever: retriever.retriever,
           from,
           size,
         });
@@ -337,7 +367,7 @@ export function defineRoutes({
         if (indices.length === 0) {
           return response.badRequest({
             body: {
-              message: 'Indices cannot be empty',
+              message: EMPTY_INDICES_ERROR_MESSAGE,
             },
           });
         }
@@ -361,6 +391,68 @@ export function defineRoutes({
         }
         throw e;
       }
+    })
+  );
+  router.post(
+    {
+      path: APIRoutes.POST_QUERY_TEST,
+      options: {
+        access: 'internal',
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [PLUGIN_ID],
+        },
+      },
+      validate: {
+        body: schema.object({
+          query: schema.string(),
+          elasticsearch_query: schema.string(),
+          indices: schema.arrayOf(schema.string()),
+          size: schema.maybe(schema.number({ defaultValue: 10, min: 0 })),
+          from: schema.maybe(schema.number({ defaultValue: 0, min: 0 })),
+        }),
+      },
+    },
+    errorHandler(logger)(async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { elasticsearch_query: elasticsearchQuery, indices, size, from } = request.body;
+
+      if (indices.length === 0) {
+        return response.badRequest({
+          body: {
+            message: EMPTY_INDICES_ERROR_MESSAGE,
+          },
+        });
+      }
+
+      let searchQuery: Partial<SearchRequest>;
+      try {
+        searchQuery = parseElasticsearchQuery(elasticsearchQuery)(request.body.query);
+      } catch (e) {
+        logger.error(e);
+        return response.badRequest({
+          body: {
+            message: getErrorMessage(e),
+          },
+        });
+      }
+      const searchResponse = await client.asCurrentUser.search({
+        ...searchQuery,
+        index: indices,
+        from,
+        size,
+      });
+      const body: QueryTestResponse = {
+        searchResponse,
+      };
+
+      return response.ok({
+        body,
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
     })
   );
 }
