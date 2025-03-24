@@ -19,7 +19,8 @@ export const pruneContentReferences = (
   content: string,
   contentReferencesStore: ContentReferencesStore
 ): {
-  prunedContentReferencesStore: ContentReferences, prunedContent: string
+  prunedContentReferencesStore: ContentReferences;
+  prunedContent: string;
 } => {
   const fullStore = contentReferencesStore.getStore();
   const prunedContentReferencesStore: Record<string, ContentReference> = {};

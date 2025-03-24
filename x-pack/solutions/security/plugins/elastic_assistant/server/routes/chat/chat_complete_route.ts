@@ -190,7 +190,10 @@ export const chatCompleteRoute = (
             isError = false
           ): Promise<void> => {
             if (conversationId && conversationsDataClient) {
-              const {prunedContent, prunedContentReferencesStore} = pruneContentReferences(content, contentReferencesStore);
+              const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
+                content,
+                contentReferencesStore
+              );
 
               await appendAssistantMessageToConversation({
                 conversationId,

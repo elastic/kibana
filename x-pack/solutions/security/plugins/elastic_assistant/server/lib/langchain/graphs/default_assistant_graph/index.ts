@@ -270,10 +270,15 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     traceOptions,
   });
 
-  const {prunedContentReferencesStore, prunedContent} = pruneContentReferences(graphResponse.output, contentReferencesStore);
+  const { prunedContentReferencesStore, prunedContent } = pruneContentReferences(
+    graphResponse.output,
+    contentReferencesStore
+  );
 
   const metadata: MessageMetadata = {
-    ...(!isEmpty(prunedContentReferencesStore) ? { contentReferences: prunedContentReferencesStore } : {}),
+    ...(!isEmpty(prunedContentReferencesStore)
+      ? { contentReferences: prunedContentReferencesStore }
+      : {}),
   };
 
   return {

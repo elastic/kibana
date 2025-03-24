@@ -122,7 +122,10 @@ export const postActionsConnectorExecuteRoute = (
             isError = false
           ): Promise<void> => {
             if (conversationsDataClient && conversationId) {
-              const {prunedContent, prunedContentReferencesStore} = pruneContentReferences(content, contentReferencesStore);
+              const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
+                content,
+                contentReferencesStore
+              );
 
               await appendAssistantMessageToConversation({
                 conversationId,
