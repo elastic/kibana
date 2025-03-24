@@ -44,7 +44,7 @@ export const App: FC<Props> = ({ workpad, stage }) => {
   };
 
   return (
-    <EuiProvider>
+    <EuiProvider highContrastMode={false}>
       <CanvasShareableStateProvider initialState={initialState}>
         <Canvas />
       </CanvasShareableStateProvider>
