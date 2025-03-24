@@ -46,13 +46,13 @@ const transformTemplateCaseFieldsToCaseFormFields = (
 
   const transFormedCustomFields = caseFields?.customFields?.map((customField) => {
     const customFieldFactory = customFieldsBuilderMap[customField.type];
-    const { sanitizeTemplateValue } = customFieldFactory();
+    const { sanitizeTemplateValue, convertNullToEmpty } = customFieldFactory();
     const customFieldConfiguration = configuration.customFields.find(
       (configCustomField) => configCustomField.key === customField.key
     );
     const value = sanitizeTemplateValue
       ? sanitizeTemplateValue(customField.value, customFieldConfiguration)
-      : customField.value;
+      : convertNullToEmpty?.(customField.value) ?? customField.value;
 
     return {
       ...customField,
