@@ -19,6 +19,8 @@ import {
   waitForKnowledgeBaseReady,
 } from '../utils/knowledge_base';
 
+const concreteWriteIndex = `${resourceNames.writeIndexAlias.kb}-000001`;
+
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
@@ -96,7 +98,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   async function getKbIndexCreatedVersion() {
     const indexSettings = await es.indices.getSettings({
-      index: resourceNames.concreteIndexName.kb,
+      index: concreteWriteIndex,
     });
 
     const { settings } = Object.values(indexSettings)[0];
@@ -107,14 +109,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     log.debug('Deleting KB index');
 
     await es.indices.delete(
-      { index: resourceNames.concreteIndexName.kb, ignore_unavailable: true },
+      { index: concreteWriteIndex, ignore_unavailable: true },
       { ignore: [404] }
     );
   }
 
   async function restoreKbSnapshot() {
     log.debug(
-      `Restoring snapshot of ${resourceNames.concreteIndexName.kb} from ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`
+      `Restoring snapshot of ${concreteWriteIndex} from ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`
     );
     const snapshotRepoName = 'snapshot-repo-8-10';
     const snapshotName = 'my_snapshot';
@@ -130,7 +132,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       repository: snapshotRepoName,
       snapshot: snapshotName,
       wait_for_completion: true,
-      indices: resourceNames.concreteIndexName.kb,
+      indices: concreteWriteIndex,
     });
 
     await es.snapshot.deleteRepository({ name: snapshotRepoName });
