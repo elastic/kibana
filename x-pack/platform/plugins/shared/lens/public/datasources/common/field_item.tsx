@@ -22,7 +22,7 @@ import {
   type GetCustomFieldType,
   type FieldItemButtonProps,
   type FieldListItem,
-  type FieldItemButton,
+  type GenericFieldItemButtonType,
 } from '@kbn/unified-field-list';
 import { Draggable } from '@kbn/dom-drag-drop';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
@@ -42,7 +42,7 @@ const LazyFieldItemButton = lazy(
       default: module.FieldItemButton,
     }))
   // unfortunately this force cast is necessary as the lazy load would remove the generic type information
-) as typeof FieldItemButton;
+) as GenericFieldItemButtonType;
 
 // Async load the FieldItemButton component to avoid bundle size increase when inline editing
 const WrappedFieldItemButton = <T extends FieldListItem = LensFieldListItem>(
