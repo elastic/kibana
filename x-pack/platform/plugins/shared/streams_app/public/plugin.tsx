@@ -19,6 +19,8 @@ import type {
   StreamsApplicationProps,
 } from './types';
 import { StreamsAppServices } from './services/types';
+import { createDiscoverStreamsLink } from './discover_streams_link';
+import { StreamsAppLocatorDefinition } from './app_locator';
 import { StreamsTelemetryService } from './telemetry/service';
 
 const StreamsApplication = dynamic(() =>
@@ -46,6 +48,19 @@ export class StreamsAppPlugin
   }
 
   start(coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
+    const locator = new StreamsAppLocatorDefinition();
+    pluginsStart.share.url.locators.create(locator);
+    pluginsStart.streams.status$.subscribe((status) => {
+      if (status.status !== 'enabled') return;
+      pluginsStart.discoverShared.features.registry.register({
+        id: 'streams',
+        renderStreamsField: createDiscoverStreamsLink({
+          streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
+          locator: pluginsStart.share.url.locators.get(locator.id)!,
+          coreApplication: coreStart.application,
+        }),
+      });
+    });
     return {
       createStreamsApplicationComponent: () => {
         return ({ appMountParameters, PageTemplate }: StreamsApplicationProps) => {

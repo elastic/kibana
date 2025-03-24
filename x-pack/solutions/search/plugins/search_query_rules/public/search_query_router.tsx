@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
-import { PageTemplate } from './template';
-import { SystemLogsPanel } from '../quickstart_flows/system_logs';
-import { BackButton } from '../shared/back_button';
 
-export const SystemLogsPage = () => (
-  <PageTemplate>
-    <BackButton />
-    <SystemLogsPanel />
-  </PageTemplate>
-);
+export const QueryRulesRouter = () => {
+  return (
+    <Routes>
+      <Route exact path="/">
+        Query rules
+      </Route>
+    </Routes>
+  );
+};
