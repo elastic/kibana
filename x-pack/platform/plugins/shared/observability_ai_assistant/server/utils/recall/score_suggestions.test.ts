@@ -59,8 +59,8 @@ describe('scoreSuggestions', () => {
     ]);
 
     expect(result.relevantDocuments).toEqual([
-      { id: 'doc1', text: 'Relevant document 1', llmScore: 0.9 },
-      { id: 'doc2', text: 'Relevant document 2', llmScore: 0.8 },
+      { id: 'doc1', text: 'Relevant document 1', esScore: 0.9 },
+      { id: 'doc2', text: 'Relevant document 2', esScore: 0.8 },
     ]);
   });
 
@@ -117,7 +117,7 @@ describe('scoreSuggestions', () => {
     });
 
     expect(result.relevantDocuments).toEqual([
-      { id: 'doc1', text: 'Relevant document 1', llmScore: 0.9 },
+      { id: 'doc1', text: 'Relevant document 1', esScore: 0.9 },
     ]);
   });
 
