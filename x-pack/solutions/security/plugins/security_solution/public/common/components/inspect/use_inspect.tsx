@@ -6,11 +6,15 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
+import { TimelineId } from '../../../../common/types/timeline';
+import { selectTimelineById } from '../../../timelines/store/selectors';
+import { timelineDefaults } from '../../../timelines/store/defaults';
+import type { State } from '../../store';
 
 interface UseInspectModalProps {
   inputId?: InputsModelId.global | InputsModelId.timeline;
@@ -34,12 +38,16 @@ export const useInspect = ({
   const dispatch = useDispatch();
 
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
-  const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelector(), []);
+  const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelectorFactory(), []);
+  const { activeTab } = useSelector(
+    (state: State) => selectTimelineById(state, TimelineId.active) ?? timelineDefaults
+  );
+
   const { loading, inspect, selectedInspectIndex, isInspected, searchSessionId } =
     useDeepEqualSelector((state) =>
       inputId === InputsModelId.global
         ? getGlobalQuery(state, queryId)
-        : getTimelineQuery(state, queryId)
+        : getTimelineQuery(state, `${TimelineId.active}-${activeTab}`)
     );
 
   const handleClick = useCallback(() => {
