@@ -16,6 +16,7 @@ import type { TabItem, TabsServices, TabPreviewData } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
+import { TabsBarMenu } from '../tabs_bar_menu';
 
 const growingFlexItemCss = css`
   min-width: 0;
@@ -130,14 +131,13 @@ export const TabsBar: React.FC<TabsBarProps> = ({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="boxesVertical"
-          color="text"
-          aria-label="Tabs menu placeholder"
-          title="Tabs menu placeholder"
-          onClick={() => alert('TODO: Implement tabs menu')}
-        />
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          margin-right: ${euiTheme.size.base};
+        `}
+      >
+        <TabsBarMenu />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
