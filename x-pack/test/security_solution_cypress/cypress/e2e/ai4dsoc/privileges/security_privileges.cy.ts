@@ -8,23 +8,23 @@
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 
-
 const selectSpaces = (): void => {
   cy.get('[data-test-subj="addSpacePrivilegeButton"]').click();
-  cy.get('[data-test-subj="spaceSelectorComboBox"]').click();
+  cy.get('[data-test-subj="spaceSelectorComboBox"]').should('be.visible');
 
   // select space
-  cy.get('[data-test-subj="spaceSelectorComboBox"]').should('be.visible');
-  cy.get('[data-test-subj="spaceSelectorComboBox"]').type('Default').type('{enter}');
+  cy.get('[data-test-subj="spaceSelectorComboBox"]').click();
+  cy.get('[data-test-subj="spaceSelectorComboBox"]').type('Default');
+  cy.get('[data-test-subj="spaceSelectorComboBox"]').type('{enter}');
 
   // expand security privileges
   cy.get('[data-test-subj="featureCategory_securitySolution"]').should('be.visible');
   cy.get('[data-test-subj="featureCategory_securitySolution"]').click();
-}
+};
 
 const verifyNonExistentSubPrivilege = (privilege: string): void => {
   cy.get(`[data-test-subj="featureCategory_securitySolution_${privilege}"]`).should('not.exist');
-}
+};
 
 describe('Custom role creation', { tags: '@serverless' }, () => {
   beforeEach(() => {
@@ -40,5 +40,4 @@ describe('Custom role creation', { tags: '@serverless' }, () => {
       verifyNonExistentSubPrivilege('securitySolutionNotes');
     });
   });
-
 });
