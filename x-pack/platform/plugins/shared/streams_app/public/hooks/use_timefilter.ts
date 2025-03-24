@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import * as jest from 'jest-mock';
-import { StreamsAppStorybookDecorator } from './storybook_decorator';
+import { useKibana } from './use_kibana';
 
-window.jest = jest;
+export function useTimefilter() {
+  const {
+    dependencies: {
+      start: { data },
+    },
+  } = useKibana();
 
-export const decorators = [StreamsAppStorybookDecorator];
+  return data.query.timefilter.timefilter.useTimefilter();
+}

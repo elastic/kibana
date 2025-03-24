@@ -7,15 +7,24 @@
 
 import { calculateAuto } from '@kbn/calculate-auto';
 import moment from 'moment';
+import { SignificantEventsResponse, StreamQuery } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 
+export interface SignificantEventItem {
+  query: StreamQuery;
+  occurrences: Array<{ x: number; y: number }>;
+  change_points: SignificantEventsResponse['change_points'];
+}
+
 export const useFetchSignificantEvents = ({
   name,
-  range,
+  start,
+  end,
 }: {
   name?: string;
-  range: { from: string; to: string };
+  start: number;
+  end: number;
 }) => {
   const {
     dependencies: {
@@ -27,41 +36,60 @@ export const useFetchSignificantEvents = ({
   } = useKibana();
 
   const result = useStreamsAppFetch(
-    async ({ signal }) => {
+    async ({ signal }): Promise<undefined | SignificantEventItem[]> => {
       if (!name) {
         return Promise.resolve(undefined);
       }
 
-      const nowm = moment();
+      const isoFrom = new Date(start).toISOString();
+      const isoTo = new Date(end).toISOString();
 
-      const { min = nowm.clone().subtract(1, 'days'), max = nowm } =
-        data.query.timefilter.timefilter.calculateBounds(range);
+      const { min, max } = data.query.timefilter.timefilter.calculateBounds({
+        from: isoFrom,
+        to: isoTo,
+      });
 
-      const bucketSize =
-        calculateAuto.near(50, moment.duration(max.diff(min))) ?? moment.duration(6, 'hour');
+      if (!min || !max) {
+        return Promise.resolve(undefined);
+      }
 
-      const response = await streamsRepositoryClient.fetch(
-        'GET /api/streams/{name}/significant_events 2023-10-31',
-        {
+      const bucketSize = calculateAuto.near(50, moment.duration(max.diff(min)));
+      if (!bucketSize) {
+        return Promise.resolve(undefined);
+      }
+
+      const intervalString = `${bucketSize.asSeconds()}s`;
+
+      const response = await streamsRepositoryClient
+        .fetch('GET /api/streams/{name}/significant_events 2023-10-31', {
           params: {
             path: { name },
             query: {
-              from: min.toISOString(),
-              to: max.toISOString(),
-              bucketSize: `${bucketSize.asMinutes()}m`,
+              from: isoFrom,
+              to: isoTo,
+              bucketSize: intervalString,
             },
           },
           signal,
-        }
-      );
+        })
+        .then((res) => {
+          return res.map((series) => {
+            const { occurrences, change_points: changePoints, ...query } = series;
+            return {
+              query,
+              change_points: changePoints,
+              occurrences: occurrences.map((occurrence) => ({
+                x: new Date(occurrence.date).getTime(),
+                y: occurrence.count,
+              })),
+            };
+          });
+        });
 
       return response;
     },
-    [name, range, streamsRepositoryClient]
+    [name, start, end, streamsRepositoryClient]
   );
 
-  return {
-    data: result.value,
-    isLoading: result.loading,
-  };
+  return result;
 };

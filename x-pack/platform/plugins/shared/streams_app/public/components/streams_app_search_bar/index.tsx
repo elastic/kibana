@@ -19,6 +19,7 @@ export interface StreamsAppSearchBarProps {
   onRefresh?: Required<React.ComponentProps<typeof SearchBar>>['onRefresh'];
   placeholder?: string;
   dataViews?: DataView[];
+  showQueryInput?: boolean;
 }
 
 export function StreamsAppSearchBar({
@@ -30,6 +31,7 @@ export function StreamsAppSearchBar({
   query,
   placeholder,
   dataViews,
+  showQueryInput,
 }: StreamsAppSearchBarProps) {
   const {
     dependencies: {
@@ -37,9 +39,10 @@ export function StreamsAppSearchBar({
     },
   } = useKibana();
 
-  const queryObj = useMemo(() => (query ? { query, language: 'kuery' } : undefined), [query]);
-
-  const showQueryInput = query === undefined;
+  const queryObj = useMemo(
+    () => (showQueryInput ? { query: query ?? '', language: 'kuery' } : undefined),
+    [query, showQueryInput]
+  );
 
   return (
     <unifiedSearch.ui.SearchBar

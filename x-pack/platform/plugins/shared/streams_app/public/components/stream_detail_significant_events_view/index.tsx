@@ -4,22 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiBadge,
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSuperDatePicker,
-  EuiTableFieldDataColumnType,
-  OnTimeChangeProps,
-} from '@elastic/eui';
-import { IngestStreamGetResponse, SignificantEventsResponse } from '@kbn/streams-schema';
-import React, { useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { IngestStreamGetResponse, StreamQueryKql } from '@kbn/streams-schema';
+import React, { useMemo, useState } from 'react';
+import { niceTimeFormatter } from '@elastic/charts';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
-import { SignificantEventsHistogramChart } from './significant_events_histogram';
-import { buildDiscoverParams } from './utils/discover_helpers';
+import { StreamsAppSearchBar } from '../streams_app_search_bar';
+import { SignificantEventsTable } from './significant_events_table';
+import { SignificantEventFlyout } from './significant_event_flyout';
+import { Timeline, TimelineEvent } from '../timeline';
+import { formatChangePoint } from './change_point';
+import { ChangePointSummary } from './change_point_summary';
 
 export function StreamDetailSignificantEventsView({
   definition,
@@ -28,81 +24,107 @@ export function StreamDetailSignificantEventsView({
 }) {
   const {
     dependencies: {
-      start: { discover },
+      start: { data },
     },
   } = useKibana();
-  const [range, setRange] = useState({ from: 'now-1d', to: 'now' });
-  const { isLoading, data: significantEvents } = useFetchSignificantEvents({
+
+  const {
+    timeRange,
+    setTimeRange,
+    absoluteTimeRange: { start, end },
+  } = data.query.timefilter.timefilter.useTimefilter();
+
+  const theme = useEuiTheme().euiTheme;
+
+  const xFormatter = useMemo(() => {
+    return niceTimeFormatter([start, end]);
+  }, [start, end]);
+
+  const significantEventsFetchState = useFetchSignificantEvents({
     name: definition?.stream.name,
-    range,
+    start,
+    end,
   });
 
-  const onTimeChange = ({ start, end }: OnTimeChangeProps) => {
-    setRange({ from: start, to: end });
-  };
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
-  const columns: Array<EuiTableFieldDataColumnType<SignificantEventsResponse>> = [
-    {
-      field: 'title',
-      name: 'Event name',
-      render: (_, record: SignificantEventsResponse) => (
-        <EuiLink
-          target="_blank"
-          href={discover?.locator?.getRedirectUrl(
-            buildDiscoverParams(record, definition?.stream.name)
-          )}
-        >
-          {record.title}
-        </EuiLink>
-      ),
-    },
-    {
-      field: 'query',
-      name: 'Query',
-      render: (_, record: SignificantEventsResponse) => <>{record.kql.query}</>,
-    },
-    {
-      field: 'occurrences',
-      name: 'Occurrences',
-      render: (_, record: SignificantEventsResponse) => (
-        <SignificantEventsHistogramChart occurrences={record.occurrences} />
-      ),
-    },
-    {
-      field: 'change_points',
-      name: 'Change points',
-      render: (_, record: SignificantEventsResponse) => (
-        <EuiBadge>
-          {Object.keys(record.change_points.type)[0]} -{' '}
-          {Object.values(record.change_points.type)[0]?.p_value ?? 0}
-        </EuiBadge>
-      ),
-    },
-  ];
+  const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
+
+  const events = useMemo(() => {
+    return (
+      significantEventsFetchState.value?.flatMap((item): TimelineEvent[] => {
+        const change = formatChangePoint(item);
+
+        if (!change) {
+          return [];
+        }
+
+        return [
+          {
+            id: item.query.id,
+            label: <ChangePointSummary change={change} xFormatter={xFormatter} />,
+            color: theme.colors[change.color],
+            time: change.time,
+          },
+        ];
+      }) ?? []
+    );
+  }, [significantEventsFetchState.value, theme, xFormatter]);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="row" alignItems="flexStart" justifyContent="flexEnd">
-          <EuiSuperDatePicker
-            isLoading={isLoading}
-            start={range.from}
-            end={range.to}
-            onTimeChange={onTimeChange}
-            showUpdateButton
-          />
-        </EuiFlexGroup>
-      </EuiFlexItem>
+    <>
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="row" alignItems="flexStart" justifyContent="flexEnd">
+            <StreamsAppSearchBar
+              onQuerySubmit={({ dateRange }, isUpdate) => {
+                if (!isUpdate) {
+                  significantEventsFetchState.refresh();
+                  return;
+                }
 
-      <EuiFlexItem grow={false}>
-        <EuiBasicTable
-          tableCaption="Significant Events"
-          items={significantEvents ?? []}
-          rowHeader="title"
-          columns={columns}
-          loading={isLoading}
+                if (dateRange) {
+                  setTimeRange({ from: dateRange.from, to: dateRange?.to, mode: dateRange.mode });
+                }
+              }}
+              onRefresh={() => {
+                significantEventsFetchState.refresh();
+              }}
+              dateRangeFrom={timeRange.from}
+              dateRangeTo={timeRange.to}
+            />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <Timeline start={start} end={end} events={events} />
+        </EuiFlexItem>
+
+        <EuiSpacer />
+
+        <EuiFlexItem grow={false}>
+          <SignificantEventsTable
+            name={definition?.stream.name}
+            response={significantEventsFetchState}
+            onEditClick={(item) => {
+              setIsFlyoutOpen(true);
+              setQueryToEdit(item.query);
+            }}
+            onDeleteClick={() => {}}
+            xFormatter={xFormatter}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {isFlyoutOpen ? (
+        <SignificantEventFlyout
+          onClose={() => {
+            setIsFlyoutOpen(false);
+            setQueryToEdit(undefined);
+          }}
+          query={queryToEdit}
+          indexPattern={definition?.stream.name ?? ''}
         />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      ) : null}
+    </>
   );
 }

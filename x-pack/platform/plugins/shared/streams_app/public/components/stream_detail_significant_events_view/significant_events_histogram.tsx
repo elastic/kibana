@@ -5,39 +5,49 @@
  * 2.0.
  */
 
-import { BarSeries, Chart, Settings } from '@elastic/charts';
-import React from 'react';
-import { SignificantEventsResponse } from '@kbn/streams-schema';
-import { useKibana } from '../../hooks/use_kibana';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { TickFormatter } from '@elastic/charts';
+import { SparkPlot, SparkPlotAnnotation } from '../spark_plot';
+import { FormattedChangePoint } from './change_point';
 
 interface Props {
-  occurrences: SignificantEventsResponse['occurrences'];
+  id: string;
+  occurrences: Array<{ x: number; y: number }>;
+  change?: FormattedChangePoint;
+  xFormatter?: TickFormatter;
 }
 
-export function SignificantEventsHistogramChart({ occurrences }: Props) {
-  const {
-    dependencies: {
-      start: { charts },
-    },
-  } = useKibana();
-  const baseTheme = charts.theme.useChartsBaseTheme();
-  const sparklineTheme = charts.theme.useSparklineOverrides();
+export function SignificantEventsHistogramChart({ id, occurrences, change, xFormatter }: Props) {
+  const theme = useEuiTheme().euiTheme;
+
+  const annotations = useMemo((): SparkPlotAnnotation[] => {
+    if (!change) {
+      return [];
+    }
+    const color = theme.colors[change?.color];
+    return [
+      {
+        color,
+        icon: <EuiIcon type="dot" color={color} />,
+        id: `change_point_${id}`,
+        label: change.label,
+        x: change.time,
+      },
+    ];
+  }, [change, id, theme]);
 
   return (
-    <Chart size={{ height: 16, width: 128 }}>
-      <Settings baseTheme={baseTheme} showLegend={false} theme={[sparklineTheme]} />
-      <BarSeries
-        data={occurrences.map((occurrence) => ({
-          key: new Date(occurrence.date).getTime(),
-          value: occurrence.count,
-        }))}
-        id="occurrences"
-        xAccessor={'key'}
-        xScaleType="time"
-        yAccessors={['value']}
-        yScaleType="linear"
-        enableHistogramMode
-      />
-    </Chart>
+    <SparkPlot
+      id={id}
+      name={i18n.translate('xpack.apm.significantEventsTable.histogramSeriesTitle', {
+        defaultMessage: 'Count',
+      })}
+      timeseries={occurrences}
+      type="bar"
+      annotations={annotations}
+      xFormatter={xFormatter}
+    />
   );
 }

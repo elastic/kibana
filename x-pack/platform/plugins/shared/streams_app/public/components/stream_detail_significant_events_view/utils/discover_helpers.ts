@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { SignificantEventsResponse } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
+import { SignificantEventItem } from '../../../hooks/use_fetch_significant_events';
 
-export function buildDiscoverParams(significantEvent: SignificantEventsResponse, name?: string) {
+export function buildDiscoverParams(significantEvent: SignificantEventItem, name?: string) {
   return {
     timeRange: {
       from: 'now-7d',
       to: 'now',
     },
     query: {
-      query: significantEvent.kql.query,
+      query: significantEvent.query.kql.query,
       language: 'kuery',
     },
     dataViewSpec: {

@@ -78,9 +78,7 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
 
     const baseQuery = `FROM ${indexPatterns.join(', ')}`;
 
-    const bucketSize = Math.round(
-      calculateAuto.atLeast(50, moment.duration(1, 'minute'))!.asSeconds()
-    );
+    const bucketSize = calculateAuto.near(50, moment.duration(end - start))?.asSeconds();
 
     const histogramQuery = `${baseQuery} | STATS metric = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${bucketSize} seconds)`;
 
@@ -88,7 +86,7 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
       baseQuery,
       histogramQuery,
     };
-  }, [indexPatterns]);
+  }, [indexPatterns, start, end]);
 
   const discoverLink = useMemo(() => {
     if (!discoverLocator || !queries?.baseQuery) {
