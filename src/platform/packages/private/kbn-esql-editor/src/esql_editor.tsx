@@ -55,10 +55,11 @@ import {
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
-import type { ESQLEditorProps, ESQLEditorDeps } from './types';
+import type { ESQLEditorProps, ESQLEditorDeps, ControlsContext } from './types';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
+const DATEPICKER_WIDTH = 373;
 
 const triggerControl = async (
   queryString: string,
@@ -66,8 +67,8 @@ const triggerControl = async (
   position: monaco.Position | null | undefined,
   uiActions: ESQLEditorDeps['uiActions'],
   esqlVariables?: ESQLControlVariable[],
-  onSaveControl?: ESQLEditorProps['onSaveControl'],
-  onCancelControl?: ESQLEditorProps['onCancelControl']
+  onSaveControl?: ControlsContext['onSaveControl'],
+  onCancelControl?: ControlsContext['onCancelControl']
 ) => {
   await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
     queryString,
@@ -99,9 +100,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   hasOutline,
   displayDocumentationAsFlyout,
   disableAutoFocus,
-  onSaveControl,
-  onCancelControl,
-  supportsControls,
+  controlsContext,
   esqlVariables,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -221,7 +220,7 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
-    if (supportsControls) {
+    if (controlsContext?.supportsControls) {
       variablesService?.enableSuggestions();
 
       const variables = variablesService?.esqlVariables;
@@ -234,7 +233,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     } else {
       variablesService?.disableSuggestions();
     }
-  }, [variablesService, supportsControls, esqlVariables]);
+  }, [variablesService, controlsContext, esqlVariables]);
 
   const toggleHistory = useCallback((status: boolean) => {
     setIsHistoryOpen(status);
@@ -257,8 +256,12 @@ export const ESQLEditor = memo(function ESQLEditor({
       const editorLeft = editorCoords.left;
 
       // Calculate the absolute position of the popover
-      const absoluteTop = editorTop + (editorPosition?.top ?? 0) + 20;
-      const absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
+      const absoluteTop = editorTop + (editorPosition?.top ?? 0) + 25;
+      let absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
+      if (absoluteLeft > editorCoords.width) {
+        // date picker is out of the editor
+        absoluteLeft = absoluteLeft - DATEPICKER_WIDTH;
+      }
 
       setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
       datePickerOpenStatusRef.current = true;
@@ -287,8 +290,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       position,
       uiActions,
       esqlVariables,
-      onSaveControl,
-      onCancelControl
+      controlsContext?.onSaveControl,
+      controlsContext?.onCancelControl
     );
   });
 
@@ -300,8 +303,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       position,
       uiActions,
       esqlVariables,
-      onSaveControl,
-      onCancelControl
+      controlsContext?.onSaveControl,
+      controlsContext?.onCancelControl
     );
   });
 
@@ -313,8 +316,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       position,
       uiActions,
       esqlVariables,
-      onSaveControl,
-      onCancelControl
+      controlsContext?.onSaveControl,
+      controlsContext?.onCancelControl
     );
   });
 
@@ -326,8 +329,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       position,
       uiActions,
       esqlVariables,
-      onSaveControl,
-      onCancelControl
+      controlsContext?.onSaveControl,
+      controlsContext?.onCancelControl
     );
   });
 
@@ -406,7 +409,16 @@ export const ESQLEditor = memo(function ESQLEditor({
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
     const fn = memoize(
-      (...args: [{ esql: string }, ExpressionsStart, TimeRange, AbortController?]) => ({
+      (
+        ...args: [
+          { esql: string },
+          ExpressionsStart,
+          TimeRange,
+          AbortController?,
+          string?,
+          ESQLControlVariable[]?
+        ]
+      ) => ({
         timestamp: Date.now(),
         result: fetchFieldsFromESQL(...args),
       }),
@@ -446,7 +458,9 @@ export const ESQLEditor = memo(function ESQLEditor({
               esqlQuery,
               expressions,
               timeRange,
-              abortController
+              abortController,
+              undefined,
+              variablesService?.esqlVariables
             ).result;
             const columns: ESQLRealField[] =
               table?.columns.map((c) => {
@@ -478,8 +492,8 @@ export const ESQLEditor = memo(function ESQLEditor({
       },
       // @ts-expect-error To prevent circular type import, type defined here is partial of full client
       getFieldsMetadata: fieldsMetadata?.getClient(),
-      getVariablesByType: (type: ESQLVariableType) => {
-        return variablesService?.esqlVariables.filter((variable) => variable.type === type);
+      getVariables: () => {
+        return variablesService?.esqlVariables;
       },
       canSuggestVariables: () => {
         return variablesService?.areSuggestionsEnabled ?? false;
@@ -617,11 +631,6 @@ export const ESQLEditor = memo(function ESQLEditor({
   );
 
   const hoverProvider = useMemo(() => ESQLLang.getHoverProvider?.(esqlCallbacks), [esqlCallbacks]);
-
-  const codeActionProvider = useMemo(
-    () => ESQLLang.getCodeActionProvider?.(esqlCallbacks),
-    [esqlCallbacks]
-  );
 
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
     if (!editor1.current) {
@@ -770,7 +779,6 @@ export const ESQLEditor = memo(function ESQLEditor({
                       return hoverProvider?.provideHover(model, position, token);
                     },
                   }}
-                  codeActions={codeActionProvider}
                   onChange={onQueryUpdate}
                   editorDidMount={(editor) => {
                     editor1.current = editor;
@@ -884,6 +892,8 @@ export const ESQLEditor = memo(function ESQLEditor({
               borderRadius: theme.euiTheme.border.radius.small,
               position: 'absolute',
               overflow: 'auto',
+              zIndex: 1001,
+              border: theme.euiTheme.border.thin,
             }}
             ref={popoverRef}
             data-test-subj="ESQLEditor-timepicker-popover"

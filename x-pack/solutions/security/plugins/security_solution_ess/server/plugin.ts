@@ -7,7 +7,7 @@
 
 import type { Plugin, CoreSetup } from '@kbn/core/server';
 import { getProductProductFeaturesConfigurator } from './product_features';
-import { DEFAULT_PRODUCT_FEATURES } from './constants';
+import { DEFAULT_PRODUCT_FEATURES } from '../common/constants';
 
 import type {
   SecuritySolutionEssPluginSetup,

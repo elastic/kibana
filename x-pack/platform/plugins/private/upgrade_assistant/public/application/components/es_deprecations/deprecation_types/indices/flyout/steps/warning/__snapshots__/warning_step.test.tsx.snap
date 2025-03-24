@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WarningFlyoutStep renders 1`] = `
+<Fragment>
+  <EuiFlyoutBody />
+  <EuiFlyoutFooter>
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          flush="left"
+          iconType="arrowLeft"
+          onClick={[MockFunction]}
+        >
+          <MemoizedFormattedMessage
+            defaultMessage="Back"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.backButtonLabel"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButton
+          color="primary"
+          data-test-subj="startReindexingButton"
+          disabled={false}
+          fill={true}
+          onClick={[MockFunction]}
+        >
+          <MemoizedFormattedMessage
+            defaultMessage="Continue reindexing"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.reindex.continueButtonLabel"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
+</Fragment>
+`;

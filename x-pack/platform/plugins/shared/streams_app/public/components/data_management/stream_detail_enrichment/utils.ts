@@ -21,16 +21,19 @@ import {
   GrokFormState,
   ProcessorFormState,
   WithUIAttributes,
+  DateFormState,
 } from './types';
 import { ALWAYS_CONDITION } from '../../../util/condition';
 
-const defaultGrokProcessorFormState: GrokFormState = {
-  type: 'grok',
-  field: 'message',
-  patterns: [{ value: '' }],
-  pattern_definitions: {},
+const defaultDateProcessorFormState: DateFormState = {
+  type: 'date',
+  field: '',
+  formats: [],
+  locale: '',
+  target_field: '',
+  timezone: '',
+  output_format: '',
   ignore_failure: true,
-  ignore_missing: true,
   if: ALWAYS_CONDITION,
 };
 
@@ -43,16 +46,29 @@ const defaultDissectProcessorFormState: DissectFormState = {
   if: ALWAYS_CONDITION,
 };
 
+const defaultGrokProcessorFormState: GrokFormState = {
+  type: 'grok',
+  field: 'message',
+  patterns: [{ value: '' }],
+  pattern_definitions: {},
+  ignore_failure: true,
+  ignore_missing: true,
+  if: ALWAYS_CONDITION,
+};
+
 const defaultProcessorFormStateByType: Record<ProcessorType, ProcessorFormState> = {
+  date: defaultDateProcessorFormState,
   dissect: defaultDissectProcessorFormState,
   grok: defaultGrokProcessorFormState,
 };
 
-export const getDefaultFormState = (
-  type: ProcessorType,
+export const getDefaultFormStateByType = (type: ProcessorType) =>
+  defaultProcessorFormStateByType[type];
+
+export const getFormStateFrom = (
   processor?: ProcessorDefinitionWithUIAttributes
 ): ProcessorFormState => {
-  if (!processor) return defaultProcessorFormStateByType[type];
+  if (!processor) return defaultGrokProcessorFormState;
 
   if (isGrokProcessor(processor)) {
     const { grok } = processor;
@@ -73,7 +89,16 @@ export const getDefaultFormState = (
     });
   }
 
-  throw new Error(`Default state not found for unsupported processor type: ${type}`);
+  if (isDateProcessor(processor)) {
+    const { date } = processor;
+
+    return structuredClone({
+      ...date,
+      type: 'date',
+    });
+  }
+
+  throw new Error(`Form state for processor type "${processor.type}" is not implemented.`);
 };
 
 export const convertFormStateToProcessor = (formState: ProcessorFormState): ProcessorDefinition => {
@@ -107,6 +132,24 @@ export const convertFormStateToProcessor = (formState: ProcessorFormState): Proc
     };
   }
 
+  if (formState.type === 'date') {
+    const { field, formats, locale, ignore_failure, target_field, timezone, output_format } =
+      formState;
+
+    return {
+      date: {
+        if: formState.if,
+        field,
+        formats,
+        ignore_failure,
+        locale: isEmpty(locale) ? undefined : locale,
+        target_field: isEmpty(target_field) ? undefined : target_field,
+        timezone: isEmpty(timezone) ? undefined : timezone,
+        output_format: isEmpty(output_format) ? undefined : output_format,
+      },
+    };
+  }
+
   throw new Error('Cannot convert form state to processing: unknown type.');
 };
 
@@ -119,30 +162,28 @@ const createProcessorGuardByType =
   > =>
     processor.type === type;
 
-export const isGrokProcessor = createProcessorGuardByType('grok');
+export const isDateProcessor = createProcessorGuardByType('date');
 export const isDissectProcessor = createProcessorGuardByType('dissect');
+export const isGrokProcessor = createProcessorGuardByType('grok');
 
 const createId = htmlIdGenerator();
 const toUIDefinition = <TProcessorDefinition extends ProcessorDefinition>(
-  processor: TProcessorDefinition,
-  uiAttributes: Partial<Pick<WithUIAttributes<TProcessorDefinition>, 'status'>> = {}
+  processor: TProcessorDefinition
 ): ProcessorDefinitionWithUIAttributes => ({
   id: createId(),
-  status: 'saved',
   type: getProcessorType(processor),
-  ...uiAttributes,
   ...processor,
 });
 
 const toAPIDefinition = (processor: ProcessorDefinitionWithUIAttributes): ProcessorDefinition => {
-  const { id, status, type, ...processorConfig } = processor;
+  const { id, type, ...processorConfig } = processor;
   return processorConfig;
 };
 
 const toSimulateDefinition = (
   processor: ProcessorDefinitionWithUIAttributes
 ): ProcessorDefinitionWithId => {
-  const { status, type, ...processorConfig } = processor;
+  const { type, ...processorConfig } = processor;
   return processorConfig;
 };
 

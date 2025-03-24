@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import { Logger } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { Logger } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getEsErrorMessage } from '@kbn/alerting-plugin/server';
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
@@ -17,7 +17,7 @@ import {
   isGroupAggregation,
 } from '../../../common';
 
-import {
+import type {
   TimeSeriesQuery,
   TimeSeriesResult,
   TimeSeriesResultRow,
@@ -175,7 +175,7 @@ export function getResultFromEs({
   for (const groupBucket of groupBuckets) {
     if (resultLimit && result.results.length === resultLimit) break;
 
-    const groupName: string = `${groupBucket?.key}`;
+    const groupName = `${groupBucket?.key}`;
     const dateBuckets = groupBucket?.dateAgg?.buckets || [];
     const groupResult: TimeSeriesResultRow = {
       group: groupName,

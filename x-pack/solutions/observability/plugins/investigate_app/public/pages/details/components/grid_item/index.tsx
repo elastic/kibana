@@ -21,6 +21,8 @@ interface GridItemProps {
   loading: boolean;
 }
 
+export type { GridItemProps };
+
 const titleContainerClassName = css`
   overflow: hidden;
 `;

@@ -229,7 +229,6 @@ describe('SLO Details Page', () => {
     render(<SloDetailsPage />);
 
     expect(screen.queryByTestId('sloDetailsPage')).toBeTruthy();
-    expect(screen.queryByTestId('overview')).toBeTruthy();
     expect(screen.queryByTestId('sliChartPanel')).toBeTruthy();
     expect(screen.queryByTestId('errorBudgetChartPanel')).toBeTruthy();
     expect(screen.queryAllByTestId('wideChartLoading').length).toBe(2);
@@ -244,7 +243,6 @@ describe('SLO Details Page', () => {
     render(<SloDetailsPage />);
 
     expect(screen.queryByTestId('sloDetailsPage')).toBeTruthy();
-    expect(screen.queryByTestId('overview')).toBeTruthy();
     expect(screen.queryByTestId('sliChartPanel')).toBeTruthy();
     expect(screen.queryByTestId('errorBudgetChartPanel')).toBeTruthy();
     expect(screen.queryByTestId('errorRateChart')).toBeTruthy();

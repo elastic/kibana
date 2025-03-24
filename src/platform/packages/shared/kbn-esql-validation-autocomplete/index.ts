@@ -8,14 +8,7 @@
  */
 
 export type { SuggestionRawDefinition, ItemKind } from './src/autocomplete/types';
-export type { CodeAction } from './src/code_actions/types';
-export type {
-  FunctionDefinition,
-  CommandDefinition,
-  CommandOptionsDefinition,
-  CommandModeDefinition,
-  Literals,
-} from './src/definitions/types';
+export type { FunctionDefinition, CommandDefinition, Literals } from './src/definitions/types';
 export type { ESQLCallbacks } from './src/shared/types';
 
 /**
@@ -28,9 +21,6 @@ export { getAstContext } from './src/shared/context';
 export { validateQuery } from './src/validation/validation';
 // Autocomplete function
 export { suggest } from './src/autocomplete/autocomplete';
-// Quick fixes function
-export { getActions } from './src/code_actions/actions';
-
 /**
  * Some utility functions that can be useful to build more feature
  * for the ES|QL language
@@ -49,13 +39,11 @@ export {
   getFunctionDefinition,
   getCommandDefinition,
   getAllCommands,
-  getCommandOption,
   getColumnForASTNode as lookupColumn,
   shouldBeQuotedText,
   printFunctionSignature,
   checkFunctionArgMatchesDefinition as isEqualType,
   isSourceItem,
-  isSettingItem,
   isFunctionItem,
   isOptionItem,
   isColumnItem,
@@ -65,7 +53,6 @@ export {
   isAssignmentComplete,
   isSingleItem,
 } from './src/shared/helpers';
-export { ENRICH_MODES } from './src/definitions/settings';
 export { timeUnits } from './src/definitions/literals';
 export { aggFunctionDefinitions } from './src/definitions/generated/aggregation_functions';
 export { getFunctionSignatures } from './src/definitions/helpers';
@@ -75,7 +62,5 @@ export {
   getPolicyHelper,
   getSourcesHelper,
 } from './src/shared/resources_helpers';
-
-export { wrapAsEditorMessage } from './src/code_actions/utils';
 
 export { getRecommendedQueries } from './src/autocomplete/recommended_queries/templates';

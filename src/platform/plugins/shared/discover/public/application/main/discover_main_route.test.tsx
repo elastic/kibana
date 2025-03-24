@@ -7,22 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
-import { DiscoverMainRoute, MainRouteProps } from './discover_main_route';
+import type { MainRouteProps } from './discover_main_route';
+import { DiscoverMainRoute } from './discover_main_route';
 import { MemoryRouter } from 'react-router-dom';
 import { DiscoverMainApp } from './discover_main_app';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import {
-  createCustomizationService,
-  DiscoverCustomizationService,
-} from '../../customizations/customization_service';
+import type { DiscoverCustomizationService } from '../../customizations/customization_service';
+import { createCustomizationService } from '../../customizations/customization_service';
 import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { MainHistoryLocationState } from '../../../common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { MainHistoryLocationState } from '../../../common';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 let mockCustomizationService: DiscoverCustomizationService | undefined;
@@ -31,10 +31,7 @@ jest.mock('../../customizations', () => {
   const originalModule = jest.requireActual('../../customizations');
   return {
     ...originalModule,
-    useDiscoverCustomizationService: () => ({
-      customizationService: mockCustomizationService,
-      isInitialized: Boolean(mockCustomizationService),
-    }),
+    useDiscoverCustomizationService: () => mockCustomizationService,
   };
 });
 
