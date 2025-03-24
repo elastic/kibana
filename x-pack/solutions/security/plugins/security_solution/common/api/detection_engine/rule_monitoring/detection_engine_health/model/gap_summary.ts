@@ -6,7 +6,16 @@
  */
 
 export interface GapSummary {
+  /**
+   * The sum of unfilled gaps in milliseconds
+   */
   total_unfilled_duration_ms: number;
+  /**
+   * The sum of in progress gaps in milliseconds
+   */
   total_in_progress_duration_ms: number;
+  /**
+   * The sum of filled gaps in milliseconds
+   */
   total_filled_duration_ms: number;
 }
