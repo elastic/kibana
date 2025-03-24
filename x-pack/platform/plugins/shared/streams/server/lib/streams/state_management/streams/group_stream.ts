@@ -1,0 +1,167 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { isResponseError } from '@kbn/es-errors';
+import type { GroupStreamDefinition, StreamDefinition } from '@kbn/streams-schema';
+import {
+  isGroupStreamDefinition,
+  isUnwiredStreamDefinition,
+  isWiredStreamDefinition,
+} from '@kbn/streams-schema';
+import { cloneDeep } from 'lodash';
+import { StatusError } from '../../errors/status_error';
+import type { ElasticsearchAction } from '../execution_plan/types';
+import type { State } from '../state';
+import type { StateDependencies, StreamChange } from '../types';
+import type { StreamChangeStatus, ValidationResult } from './stream_active_record';
+import { StreamActiveRecord } from './stream_active_record';
+
+export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
+  constructor(definition: GroupStreamDefinition, dependencies: StateDependencies) {
+    super(definition, dependencies);
+    // What about the assets?
+  }
+
+  clone(): StreamActiveRecord<GroupStreamDefinition> {
+    return new GroupStream(cloneDeep(this._updated_definition), this.dependencies);
+  }
+
+  protected async doHandleUpsertChange(
+    definition: StreamDefinition,
+    desiredState: State,
+    startingState: State
+  ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
+    if (definition.name !== this.definition.name) {
+      return {
+        changeStatus: this.changeStatus,
+        cascadingChanges: [],
+      };
+    }
+
+    if (!isGroupStreamDefinition(definition)) {
+      throw new StatusError('Cannot change stream types', 400);
+    }
+
+    this._updated_definition = definition;
+
+    return { cascadingChanges: [], changeStatus: 'upserted' };
+  }
+
+  protected async doHandleDeleteChange(
+    target: string,
+    desiredState: State,
+    startingState: State
+  ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
+    if (target === this.definition.name) {
+      return { cascadingChanges: [], changeStatus: 'deleted' };
+    }
+    // remove streams from the group that got deleted themselves
+    if (
+      this.changeStatus !== 'deleted' &&
+      this._updated_definition.group.members.includes(target)
+    ) {
+      this._updated_definition = {
+        ...this._updated_definition,
+        group: {
+          ...this._updated_definition.group,
+          members: this._updated_definition.group.members.filter((member) => member !== target),
+        },
+      };
+      return { cascadingChanges: [], changeStatus: 'upserted' };
+    }
+
+    return { cascadingChanges: [], changeStatus: this.changeStatus };
+  }
+
+  protected async doValidate(desiredState: State, startingState: State): Promise<ValidationResult> {
+    if (this.isDeleted()) {
+      return { isValid: true, errors: [] };
+    }
+    const existsInStartingState = startingState.has(this.definition.name);
+
+    if (!existsInStartingState) {
+      // TODO in this check, make sure the existing data stream is not a stream-created one (if it is, state might be out of sync, but we can fix it)
+      // Check for data stream conflict
+      const dataStreamResult =
+        await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
+          name: this.definition.name,
+        });
+
+      if (dataStreamResult.data_streams.length !== 0) {
+        return {
+          isValid: false,
+          errors: [
+            `Cannot create wired stream "${this.definition.name}" due to conflict caused by existing data stream`,
+          ],
+        };
+      }
+
+      // Check for index conflict
+      await this.dependencies.scopedClusterClient.asCurrentUser.indices
+        .get({
+          index: this.definition.name,
+        })
+        .catch((error) => {
+          if (!(isResponseError(error) && error.statusCode === 404)) {
+            throw error;
+          }
+        });
+
+      return {
+        isValid: false,
+        errors: [
+          `Cannot create wired stream "${this.definition.name}" due to conflict caused by existing index`,
+        ],
+      };
+    }
+
+    // validate members
+    for (const member of this._updated_definition.group.members) {
+      const memberStream = desiredState.get(member);
+      if (!memberStream || memberStream.isDeleted()) {
+        return {
+          isValid: false,
+          errors: [`Member stream ${member} not found`],
+        };
+      }
+      if (
+        !isWiredStreamDefinition(memberStream.definition) &&
+        !isUnwiredStreamDefinition(memberStream.definition)
+      ) {
+        return {
+          isValid: false,
+          errors: [`Member stream ${member} is neither a wired nor an unwired stream`],
+        };
+      }
+    }
+    return { isValid: true, errors: [] };
+  }
+
+  protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
+    return [
+      {
+        type: 'upsert_dot_streams_document',
+        request: this._updated_definition,
+      },
+    ];
+  }
+
+  protected async doDetermineUpdateActions(): Promise<ElasticsearchAction[]> {
+    return this.doDetermineCreateActions();
+  }
+
+  protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {
+    return [
+      {
+        type: 'delete_dot_streams_document',
+        request: {
+          name: this._updated_definition.name,
+        },
+      },
+    ];
+  }
+}

@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { isUnwiredStreamDefinition, isWiredStreamDefinition } from '@kbn/streams-schema';
+import {
+  isGroupStreamDefinition,
+  isUnwiredStreamDefinition,
+  isWiredStreamDefinition,
+} from '@kbn/streams-schema';
 import type { StreamDefinition } from '@kbn/streams-schema';
 import type { StateDependencies } from '../types';
 import type { StreamActiveRecord } from './stream_active_record';
 import { UnwiredStream } from './unwired_stream';
 import { WiredStream } from './wired_stream';
+import { GroupStream } from './group_stream';
 
 // This should be the only thing that knows about the various stream types
 export function streamFromDefinition(
@@ -21,6 +26,8 @@ export function streamFromDefinition(
     return new WiredStream(definition, dependencies);
   } else if (isUnwiredStreamDefinition(definition)) {
     return new UnwiredStream(definition, dependencies);
+  } else if (isGroupStreamDefinition(definition)) {
+    return new GroupStream(definition, dependencies);
   } else {
     throw new Error('Unsupported stream type');
   }
