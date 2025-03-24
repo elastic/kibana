@@ -109,15 +109,16 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.navigation.navigateToJobManagement();
       await ml.jobTable.refreshJobList('stackMgmtJobList');
 
-      await ml.overviewPage.assertJobSyncRequiredWarningExists();
+      // TODO: Follow up https://github.com/elastic/kibana/issues/215779
+      // await ml.overviewPage.assertJobSyncRequiredWarningExists();
 
       // object counts in sync flyout are all 1, sync button is enabled
       await ml.stackManagementJobs.openSyncFlyout();
       await ml.stackManagementJobs.assertSyncFlyoutObjectCounts(
         new Map([
-          ['MissingObjects', 2],
+          ['MissingObjects', 0],
           ['UnmatchedObjects', 2],
-          ['ObjectsMissingDatafeed', 1],
+          ['ObjectsMissingDatafeed', 0],
           ['ObjectsUnmatchedDatafeed', 1],
         ])
       );

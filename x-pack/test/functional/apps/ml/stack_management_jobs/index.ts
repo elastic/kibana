@@ -34,8 +34,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./synchronize'));
-    // loadTestFile(require.resolve('./manage_spaces'));
-    // loadTestFile(require.resolve('./import_jobs'));
-    // loadTestFile(require.resolve('./export_jobs'));
+    loadTestFile(require.resolve('./manage_spaces'));
+    loadTestFile(require.resolve('./import_jobs'));
+    loadTestFile(require.resolve('./export_jobs'));
   });
 }

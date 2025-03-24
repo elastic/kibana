@@ -54,7 +54,6 @@ export function MachineLearningNavigationProvider({
         'anomaly_detection',
         'analytics',
         'trained_models',
-        'ad_settings',
       ]);
       await testSubjects.click(sectionId);
       await retry.tryForTime(60 * 1000, async () => {
