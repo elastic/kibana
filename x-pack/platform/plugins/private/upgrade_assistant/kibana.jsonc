@@ -1,9 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/upgrade-assistant-plugin",
-  "owner": [
-    "@elastic/kibana-core"
-  ],
+  "owner": "@elastic/kibana-management",
   "group": "platform",
   "visibility": "private",
   "plugin": {

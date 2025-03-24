@@ -1,16 +1,15 @@
 ---
-navigation_title: "Kibana"
+navigation_title: "Breaking changes"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/breaking-changes-summary.html
 ---
 
 # Kibana breaking changes [kibana-breaking-changes]
-Before you upgrade, carefully review the Kibana breaking changes and take the necessary steps to mitigate any issues. 
+Breaking changes can impact your Elastic applications, potentially disrupting normal operations. Before you upgrade, carefully review the Kibana breaking changes and take the necessary steps to mitigate any issues.
 
-If you are migrating from a version prior to version 9.0, you must first upgrade to the last 8.x version available. To learn how to upgrade, check out <uprade docs>.
+If you are migrating from a version prior to version 9.0, you must first upgrade to the last 8.x version available. To learn how to upgrade, check out [Upgrade](docs-content://deploy-manage/upgrade.md).
 
 % ## Next version [kibana-nextversion-breaking-changes]
-% **Release date:** Month day, year
 
 % Use the following template to add entries to this document.
 
@@ -38,7 +37,6 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 % Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
 
 ## 9.0.0 [kibana-900-breaking-changes]
-**Release date:** March 25, 2025
 
 ::::{dropdown} Removed legacy alerting endpoints
 * `POST /api/alerts/alert/{id?}` has been replaced by `POST /api/alerting/rule/{id?}`
