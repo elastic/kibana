@@ -7,37 +7,25 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-
-const selectSpaces = (): void => {
-  cy.get('[data-test-subj="addSpacePrivilegeButton"]').click();
-  cy.get('[data-test-subj="spaceSelectorComboBox"]').should('be.visible');
-
-  // select space
-  cy.get('[data-test-subj="spaceSelectorComboBox"]').click();
-  cy.get('[data-test-subj="spaceSelectorComboBox"]').type('Default');
-  cy.get('[data-test-subj="spaceSelectorComboBox"]').type('{enter}');
-
-  // expand security privileges
-  cy.get('[data-test-subj="featureCategory_securitySolution"]').should('be.visible');
-  cy.get('[data-test-subj="featureCategory_securitySolution"]').click();
-};
-
-const verifyNonExistentSubPrivilege = (privilege: string): void => {
-  cy.get(`[data-test-subj="featureCategory_securitySolution_${privilege}"]`).should('not.exist');
-};
+import { selectAllSpaces } from '../../../tasks/select_all_spaces';
+import { CUSTOM_ROLES_URL } from '../../../urls/navigation';
 
 describe('Custom role creation', { tags: '@serverless' }, () => {
   beforeEach(() => {
     login('admin');
-    visit('app/management/security/roles/edit');
+    visit(CUSTOM_ROLES_URL);
   });
 
   describe('Security privileges', () => {
     it('should not show `Timelines` and `Notes` sub-privilege', () => {
-      selectSpaces();
+      selectAllSpaces();
       // should not have timeline/notes sub-privileges
-      verifyNonExistentSubPrivilege('securitySolutionTimeline');
-      verifyNonExistentSubPrivilege('securitySolutionNotes');
+      cy.get(`[data-test-subj="featureCategory_securitySolution_securitySolutionTimeline"]`).should(
+        'not.exist'
+      );
+      cy.get(`[data-test-subj="featureCategory_securitySolution_securitySolutionNotes"]`).should(
+        'not.exist'
+      );
     });
   });
 });

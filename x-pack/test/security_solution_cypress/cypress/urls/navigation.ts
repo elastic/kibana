@@ -84,3 +84,6 @@ export const ENTITY_ANALYTICS_DASHBOARD_URL = '/app/security/entity_analytics';
 
 // Asset Inventory
 export const ASSET_INVENTORY_URL = '/app/security/asset_inventory';
+
+// Custom Role Creation
+export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';
