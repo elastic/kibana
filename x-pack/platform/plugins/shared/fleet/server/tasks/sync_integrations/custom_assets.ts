@@ -13,6 +13,8 @@ import type {
   IngestGetPipelineResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
+import { retryTransientEsErrors } from '../../services/epm/elasticsearch/retry';
+
 import type { CustomAssetsData, IntegrationsData, SyncIntegrationsData } from './model';
 
 const DELETED_ASSET_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -147,6 +149,119 @@ function updateDeletedAssets(
   return deletedAssets;
 }
 
+async function updateComponentTemplate(
+  customAsset: CustomAssetsData,
+  esClient: ElasticsearchClient,
+  abortController: AbortController,
+  logger: Logger
+) {
+  const customTemplates = await getComponentTemplate(esClient, customAsset.name, abortController);
+  const existingTemplate = customTemplates.component_templates?.find(
+    (template) => template.name === customAsset.name
+  );
+  if (customAsset.is_deleted) {
+    if (existingTemplate) {
+      logger.debug(`Deleting component template: ${customAsset.name}`);
+      return retryTransientEsErrors(
+        () =>
+          esClient.cluster.deleteComponentTemplate(
+            {
+              name: customAsset.name,
+            },
+            {
+              signal: abortController.signal,
+            }
+          ),
+        { logger }
+      );
+    } else {
+      return;
+    }
+  }
+  let shouldUpdateTemplate = false;
+  if (existingTemplate) {
+    shouldUpdateTemplate = !isEqual(
+      existingTemplate.component_template.template,
+      customAsset.template
+    );
+  } else {
+    shouldUpdateTemplate = true;
+  }
+
+  if (shouldUpdateTemplate) {
+    logger.debug(`Updating component template: ${customAsset.name}`);
+    return retryTransientEsErrors(
+      () =>
+        esClient.cluster.putComponentTemplate(
+          {
+            name: customAsset.name,
+            template: customAsset.template,
+          },
+          {
+            signal: abortController.signal,
+          }
+        ),
+      { logger }
+    );
+  }
+}
+
+async function updateIngestPipeline(
+  customAsset: CustomAssetsData,
+  esClient: ElasticsearchClient,
+  abortController: AbortController,
+  logger: Logger
+) {
+  const ingestPipelines = await getPipeline(esClient, customAsset.name, abortController);
+  const existingPipeline = ingestPipelines[customAsset.name];
+
+  if (customAsset.is_deleted) {
+    if (existingPipeline) {
+      logger.debug(`Deleting ingest pipeline: ${customAsset.name}`);
+      return retryTransientEsErrors(
+        () =>
+          esClient.ingest.deletePipeline(
+            {
+              id: customAsset.name,
+            },
+            {
+              signal: abortController.signal,
+            }
+          ),
+        { logger }
+      );
+    } else {
+      return;
+    }
+  }
+
+  let shouldUpdatePipeline = false;
+  if (existingPipeline) {
+    shouldUpdatePipeline =
+      (existingPipeline.version && existingPipeline.version < customAsset.pipeline.version) ||
+      (!existingPipeline.version && !isEqual(existingPipeline, customAsset.pipeline));
+  } else {
+    shouldUpdatePipeline = true;
+  }
+
+  if (shouldUpdatePipeline) {
+    logger.debug(`Updating ingest pipeline: ${customAsset.name}`);
+    return retryTransientEsErrors(
+      () =>
+        esClient.ingest.putPipeline(
+          {
+            id: customAsset.name,
+            ...customAsset.pipeline,
+          },
+          {
+            signal: abortController.signal,
+          }
+        ),
+      { logger }
+    );
+  }
+}
+
 export async function installCustomAsset(
   customAsset: CustomAssetsData,
   esClient: ElasticsearchClient,
@@ -154,87 +269,8 @@ export async function installCustomAsset(
   logger: Logger
 ) {
   if (customAsset.type === 'component_template') {
-    const customTemplates = await getComponentTemplate(esClient, customAsset.name, abortController);
-    const existingTemplate = customTemplates.component_templates?.find(
-      (template) => template.name === customAsset.name
-    );
-    if (customAsset.is_deleted) {
-      if (existingTemplate) {
-        logger.debug(`Deleting component template: ${customAsset.name}`);
-        return esClient.cluster.deleteComponentTemplate(
-          {
-            name: customAsset.name,
-          },
-          {
-            signal: abortController.signal,
-          }
-        );
-      } else {
-        return;
-      }
-    }
-    let shouldUpdateTemplate = false;
-    if (existingTemplate) {
-      shouldUpdateTemplate = !isEqual(
-        existingTemplate.component_template.template,
-        customAsset.template
-      );
-    } else {
-      shouldUpdateTemplate = true;
-    }
-
-    if (shouldUpdateTemplate) {
-      logger.debug(`Updating component template: ${customAsset.name}`);
-      return esClient.cluster.putComponentTemplate(
-        {
-          name: customAsset.name,
-          template: customAsset.template,
-        },
-        {
-          signal: abortController.signal,
-        }
-      );
-    }
+    return updateComponentTemplate(customAsset, esClient, abortController, logger);
   } else if (customAsset.type === 'ingest_pipeline') {
-    const ingestPipelines = await getPipeline(esClient, customAsset.name, abortController);
-    const existingPipeline = ingestPipelines[customAsset.name];
-
-    if (customAsset.is_deleted) {
-      if (existingPipeline) {
-        logger.debug(`Deleting ingest pipeline: ${customAsset.name}`);
-        return esClient.ingest.deletePipeline(
-          {
-            id: customAsset.name,
-          },
-          {
-            signal: abortController.signal,
-          }
-        );
-      } else {
-        return;
-      }
-    }
-
-    let shouldUpdatePipeline = false;
-    if (existingPipeline) {
-      shouldUpdatePipeline =
-        (existingPipeline.version && existingPipeline.version < customAsset.pipeline.version) ||
-        (!existingPipeline.version && !isEqual(existingPipeline, customAsset.pipeline));
-    } else {
-      shouldUpdatePipeline = true;
-    }
-
-    if (shouldUpdatePipeline) {
-      logger.debug(`Updating ingest pipeline: ${customAsset.name}`);
-      return esClient.ingest.putPipeline(
-        {
-          id: customAsset.name,
-          ...customAsset.pipeline,
-        },
-        {
-          signal: abortController.signal,
-        }
-      );
-    }
+    return updateIngestPipeline(customAsset, esClient, abortController, logger);
   }
 }
