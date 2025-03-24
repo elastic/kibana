@@ -82,6 +82,7 @@ const entityTypeByIdField = {
   'host.name': 'host',
   'user.name': 'user',
   'service.name': 'service',
+  'entity.id': 'generic',
 } as const;
 
 export const getImplicitEntityFields = (record: AssetCriticalityUpsertWithDeleted) => {

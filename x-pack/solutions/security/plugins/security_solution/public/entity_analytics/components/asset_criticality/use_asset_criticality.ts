@@ -84,6 +84,12 @@ export const useAssetCriticalityData = ({
         });
       }
 
+      console.log({
+        idField: params.idField,
+        idValue: params.idValue,
+        criticalityLevel: params.criticalityLevel,
+        refresh: 'wait_for',
+      });
       return createAssetCriticality({
         idField: params.idField,
         idValue: params.idValue,
@@ -92,9 +98,10 @@ export const useAssetCriticalityData = ({
       });
     },
     onSuccess: (data) => {
+      console.log({ data });
       const queryData = 'deleted' in data ? null : data;
       QC.setQueryData(QUERY_KEY, queryData);
-      onChange?.();
+      onChange?.(data);
     },
   });
 

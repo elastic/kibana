@@ -12,7 +12,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   EuiButtonIcon,
   EuiCopy,
@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useAssetCriticalityData } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { assetCriticalityOptions } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { ResponsiveDataCards } from './components/responsive_data_cards';
@@ -38,9 +39,33 @@ export const HeaderDataCards = ({
   sub_type: string;
   type: string;
 }) => {
+  const criticalityMutation = useAssetCriticalityData({
+    entity: {
+      name: id,
+      type,
+    },
+    // enabled: !!privileges.data?.has_read_permissions,
+    enabled: true,
+    onChange: (data) => {
+      console.log(data);
+    },
+  });
   const [selectValue, setSelectValue] = useState<CriticalityLevelWithUnassigned>(
-    criticality || 'unassigned'
+    criticalityMutation.query.data?.criticality_level || 'unassigned'
   );
+
+  useEffect(() => {
+    setSelectValue(criticalityMutation.query.data?.criticality_level);
+  }, [criticalityMutation.query.data?.criticality_level]);
+
+  const change = async (value) => {
+    const t = await criticalityMutation.mutation.mutate({
+      criticalityLevel: value,
+      idField: 'entity.id',
+      idValue: id,
+    });
+    console.log(t);
+  };
 
   const cards = useMemo(
     () => [
@@ -67,7 +92,10 @@ export const HeaderDataCards = ({
               hasDividers
               options={assetCriticalityOptions}
               valueOfSelected={selectValue}
-              onChange={(newValue) => setSelectValue(newValue)}
+              onChange={(newValue) => {
+                setSelectValue(newValue);
+                change(newValue);
+              }}
             />
           </div>
         ),
