@@ -28,6 +28,11 @@ jest.mock('../components/timeline', () => ({
 }));
 jest.mock('../../common/hooks/timeline/use_timeline_save_prompt');
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => jest.fn(),
+}));
+
 describe('TimelineWrapper', () => {
   const props = {
     onAppLeave: jest.fn(),

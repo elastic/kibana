@@ -8728,12 +8728,12 @@
   resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.5.0.tgz#5fda73aa125dfb5729f5dd7362df00b6dca23a24"
   integrity sha512-dRBJjnYhEa6XoF9BNf9sW4sHuXmigfBbbatA5djbRXRBDExrXsMydMpEWQqKYhd7XwdwFatuh2q+UkVbXriUKA==
 
-"@openfeature/launchdarkly-client-provider@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@openfeature/launchdarkly-client-provider/-/launchdarkly-client-provider-0.3.0.tgz#47ad29671529595314fdb9497d078be0a744e006"
-  integrity sha512-iFe27RbuUxv4hDGJDmWJnxs5gpzU2d1xTxrGu/8z0gcbtXUAaYM6s4kglf63V2QzWV/Grot6P6bwSLlqeSDwMw==
+"@openfeature/launchdarkly-client-provider@^0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@openfeature/launchdarkly-client-provider/-/launchdarkly-client-provider-0.3.2.tgz#0e4ca66da2a78ae70a5eae7143db88659f76af6f"
+  integrity sha512-wK/s4yBp5E+nBXJMVWRJOLqATOE1eReDkCHufjW6hJPy0rOJHTMaS52Tw5Qf2hZ3yGQOQos2iE9idm/QUZfsUQ==
   dependencies:
-    lodash.isempty "4.4.0"
+    lodash.isempty "^4.4.0"
 
 "@openfeature/server-sdk@^1.16.1":
   version "1.16.1"
@@ -23411,7 +23411,7 @@ lodash.isboolean@^3.0.3:
   resolved "https://registry.yarnpkg.com/lodash.isboolean/-/lodash.isboolean-3.0.3.tgz#6c2e171db2a257cd96802fd43b01b20d5f5870f6"
   integrity sha512-Bz5mupy2SVbPHURB98VAcw+aHh4vRV5IPNhILUCsOzRmsTmSQ17jIuqopAentWoehktxGd9e/hbIXq980/1QJg==
 
-lodash.isempty@4.4.0, lodash.isempty@^4.4.0:
+lodash.isempty@^4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/lodash.isempty/-/lodash.isempty-4.4.0.tgz#6f86cbedd8be4ec987be9aaf33c9684db1b31e7e"
   integrity sha1-b4bL7di+TsmHvpqvM8loTbGzHn4=
@@ -33545,10 +33545,10 @@ x-default-browser@^0.4.0:
   optionalDependencies:
     default-browser-id "^1.0.4"
 
-xml-crypto@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/xml-crypto/-/xml-crypto-6.0.0.tgz#9657ce63cbbaacc48b2c74a13d05cf0a9d339d47"
-  integrity sha512-L3RgnkaDrHaYcCnoENv4Idzt1ZRj5U1z1BDH98QdDTQfssScx8adgxhd9qwyYo+E3fXbQZjEQH7aiXHLVgxGvw==
+xml-crypto@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/xml-crypto/-/xml-crypto-6.0.1.tgz#81d224cf9f2cac9f15190bbb4ef93f53e1f8a8e8"
+  integrity sha512-v05aU7NS03z4jlZ0iZGRFeZsuKO1UfEbbYiaeRMiATBFs6Jq9+wqKquEMTn4UTrYZ9iGD8yz3KT4L9o2iF682w==
   dependencies:
     "@xmldom/is-dom-node" "^1.0.1"
     "@xmldom/xmldom" "^0.8.10"
