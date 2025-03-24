@@ -45,6 +45,7 @@ export type {
 } from './src/types';
 
 // re-export from Playwright
+
 export type { Locator, CDPSession } from 'playwright/test';
 export { mergeTests, test as playwrightTest } from 'playwright/test';
 
