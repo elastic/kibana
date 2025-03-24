@@ -491,7 +491,7 @@ export const postEvaluateRoute = (
                 logger.error(`evaluation error:\n ${JSON.stringify(err, null, 2)}`);
               })
               .finally(async () => {
-                //await prepareIndicesForAssistantGraph.cleanup();
+                // await prepareIndicesForAssistantGraph.cleanup();
               });
           });
 
