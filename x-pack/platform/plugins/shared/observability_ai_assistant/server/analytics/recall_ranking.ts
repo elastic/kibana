@@ -8,7 +8,7 @@
 import { RootSchema, EventTypeOpts } from '@kbn/core/server';
 
 interface ScoredDocument {
-  elserScore: number;
+  esScore: number;
   llmScore: number;
 }
 
@@ -21,7 +21,7 @@ const schema: RootSchema<RecallRanking> = {
     type: 'array',
     items: {
       properties: {
-        elserScore: {
+        esScore: {
           type: 'float',
           _meta: {
             description: 'The score produced by ELSER text_expansion',

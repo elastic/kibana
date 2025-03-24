@@ -74,7 +74,7 @@ export async function recallAndScore({
       scoredDocuments: suggestions.map((suggestion) => {
         const llmScore = llmScores.find((score) => score.id === suggestion.id);
         return {
-          elserScore: suggestion.esScore ?? -1,
+          esScore: suggestion.esScore ?? -1,
           llmScore: llmScore ? llmScore.llmScore : -1,
         };
       }),
