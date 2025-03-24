@@ -19,7 +19,6 @@ import type { DefineStepRule } from '../../../common/types';
 import type { FormHook, ValidationError } from '../../../../shared_imports';
 
 import * as i18n from './translations';
-import { DETECTION_RULES_CREATE_FORM_CONVERSATION_ID } from './translations';
 
 const getLanguageName = (language: string | undefined) => {
   let modifiedLanguage = language;
@@ -94,7 +93,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
   const chatTitle = useMemo(() => {
     const queryField = getFields().queryBar;
     const { query } = (queryField.value as DefineStepRule['queryBar']).query;
-    return `${DETECTION_RULES_CREATE_FORM_CONVERSATION_ID} - ${query ?? 'query'}`;
+    return `${i18n.DETECTION_RULES_CREATE_FORM_CONVERSATION_ID} - ${query ?? 'query'}`;
   }, [getFields]);
 
   if (!hasAssistantPrivilege) {
