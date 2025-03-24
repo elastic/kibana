@@ -215,7 +215,8 @@ export type BinaryExpressionOperator =
   | BinaryExpressionComparisonOperator
   | BinaryExpressionRegexOperator
   | BinaryExpressionRenameOperator
-  | BinaryExpressionWhereOperator;
+  | BinaryExpressionWhereOperator
+  | BinaryExpressionMatchOperator;
 
 export type BinaryExpressionArithmeticOperator = '+' | '-' | '*' | '/' | '%';
 export type BinaryExpressionAssignmentOperator = '=';
@@ -223,6 +224,7 @@ export type BinaryExpressionComparisonOperator = '==' | '=~' | '!=' | '<' | '<='
 export type BinaryExpressionRegexOperator = 'like' | 'not_like' | 'rlike' | 'not_rlike';
 export type BinaryExpressionRenameOperator = 'as';
 export type BinaryExpressionWhereOperator = 'where';
+export type BinaryExpressionMatchOperator = ':';
 
 // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
 export type InlineCastingType =
@@ -385,28 +387,51 @@ export interface ESQLStringLiteral extends ESQLAstBaseItem {
 }
 
 // @internal
-export interface ESQLParamLiteral<ParamType extends string = string> extends ESQLAstBaseItem {
+export interface ESQLParamLiteral<
+  ParamType extends string = string,
+  ParamKind extends ESQLParamKinds = ESQLParamKinds
+> extends ESQLAstBaseItem {
   type: 'literal';
   literalType: 'param';
+  paramKind: ParamKind;
   paramType: ParamType;
   value: string | number;
 }
+
+export type ESQLParamKinds = '?' | '??';
 
 /**
  * *Unnamed* parameter is not named, just a question mark "?".
  *
  * @internal
  */
-export type ESQLUnnamedParamLiteral = ESQLParamLiteral<'unnamed'>;
+export type ESQLUnnamedParamLiteral<ParamKind extends ESQLParamKinds = ESQLParamKinds> =
+  ESQLParamLiteral<'unnamed', ParamKind>;
 
 /**
  * *Named* parameter is a question mark followed by a name "?name".
  *
  * @internal
  */
-export interface ESQLNamedParamLiteral extends ESQLParamLiteral<'named'> {
+export interface ESQLNamedParamLiteral<ParamKind extends ESQLParamKinds = ESQLParamKinds>
+  extends ESQLParamLiteral<'named', ParamKind> {
   value: string;
 }
+
+/**
+ * *Positional* parameter is a question mark followed by a number "?1".
+ *
+ * @internal
+ */
+export interface ESQLPositionalParamLiteral<ParamKind extends ESQLParamKinds = ESQLParamKinds>
+  extends ESQLParamLiteral<'positional', ParamKind> {
+  value: number;
+}
+
+export type ESQLParam =
+  | ESQLUnnamedParamLiteral
+  | ESQLNamedParamLiteral
+  | ESQLPositionalParamLiteral;
 
 export interface ESQLIdentifier extends ESQLAstBaseItem {
   type: 'identifier';
@@ -416,19 +441,6 @@ export const isESQLNamedParamLiteral = (node: ESQLAstItem): node is ESQLNamedPar
   isESQLAstBaseItem(node) &&
   (node as ESQLNamedParamLiteral).literalType === 'param' &&
   (node as ESQLNamedParamLiteral).paramType === 'named';
-/**
- * *Positional* parameter is a question mark followed by a number "?1".
- *
- * @internal
- */
-export interface ESQLPositionalParamLiteral extends ESQLParamLiteral<'positional'> {
-  value: number;
-}
-
-export type ESQLParam =
-  | ESQLUnnamedParamLiteral
-  | ESQLNamedParamLiteral
-  | ESQLPositionalParamLiteral;
 
 export interface ESQLMessage {
   type: 'error' | 'warning';

@@ -39,6 +39,7 @@ import {
   ESQLBooleanLiteral,
   ESQLNullLiteral,
   BinaryExpressionOperator,
+  ESQLParamKinds,
 } from '../types';
 import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
@@ -454,9 +455,14 @@ export namespace Builder {
   };
 
   export namespace param {
-    export const unnamed = (fromParser?: Partial<AstNodeParserFields>): ESQLParam => {
+    export const unnamed = (
+      fromParser?: Partial<AstNodeParserFields>,
+      template?: Partial<Pick<ESQLParam, 'paramKind'>>
+    ): ESQLParam => {
       const node = {
         ...Builder.parserFields(fromParser),
+        paramKind: '?',
+        ...template,
         name: '',
         value: '',
         paramType: 'unnamed',
@@ -468,10 +474,15 @@ export namespace Builder {
     };
 
     export const named = (
-      template: Omit<AstNodeTemplate<ESQLNamedParamLiteral>, 'name' | 'literalType' | 'paramType'>,
+      template: Omit<
+        AstNodeTemplate<ESQLNamedParamLiteral>,
+        'name' | 'literalType' | 'paramType' | 'paramKind'
+      > &
+        Partial<Pick<ESQLNamedParamLiteral, 'paramKind'>>,
       fromParser?: Partial<AstNodeParserFields>
     ): ESQLNamedParamLiteral => {
       const node: ESQLNamedParamLiteral = {
+        paramKind: '?',
         ...template,
         ...Builder.parserFields(fromParser),
         name: '',
@@ -486,11 +497,13 @@ export namespace Builder {
     export const positional = (
       template: Omit<
         AstNodeTemplate<ESQLPositionalParamLiteral>,
-        'name' | 'literalType' | 'paramType'
-      >,
+        'name' | 'literalType' | 'paramType' | 'paramKind'
+      > &
+        Partial<Pick<ESQLPositionalParamLiteral, 'paramKind'>>,
       fromParser?: Partial<AstNodeParserFields>
     ): ESQLPositionalParamLiteral => {
       const node: ESQLPositionalParamLiteral = {
+        paramKind: '?',
         ...template,
         ...Builder.parserFields(fromParser),
         name: '',
@@ -507,18 +520,29 @@ export namespace Builder {
       options: Partial<ESQLParamLiteral> = {},
       fromParser?: Partial<AstNodeParserFields>
     ): ESQLParam => {
-      const value: string = name.startsWith('?') ? name.slice(1) : name;
+      let paramKind: ESQLParamKinds = options.paramKind ?? '?';
+
+      if (name.startsWith('??')) {
+        paramKind = '??';
+      } else if (name.startsWith('?')) {
+        paramKind = '?';
+      }
+
+      const value: string = name.startsWith('?') ? name.slice(paramKind === '?' ? 1 : 2) : name;
 
       if (!value) {
-        return Builder.param.unnamed(options);
+        return Builder.param.unnamed(options, { paramKind });
       }
 
       const isNumeric = !isNaN(Number(value)) && String(Number(value)) === value;
 
       if (isNumeric) {
-        return Builder.param.positional({ ...options, value: Number(value) }, fromParser);
+        return Builder.param.positional(
+          { ...options, paramKind, value: Number(value) },
+          fromParser
+        );
       } else {
-        return Builder.param.named({ ...options, value }, fromParser);
+        return Builder.param.named({ ...options, paramKind, value }, fromParser);
       }
     };
   }
