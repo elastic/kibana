@@ -34,7 +34,7 @@ rules:
   operation-4xx-response: off
   operation-2xx-response: off
  # Schema
-  spec: off
+  struct: off
   spec-strict-refs: off
  # Tags
   operation-tag-defined: off
