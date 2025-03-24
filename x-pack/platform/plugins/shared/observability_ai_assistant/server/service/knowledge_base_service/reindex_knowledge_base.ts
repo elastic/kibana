@@ -93,42 +93,6 @@ export async function reIndexKnowledgeBase({
   }
 }
 
-export async function reIndexKnowledgeBaseIfSemanticTextIsUnsupported({
-  logger,
-  esClient,
-}: {
-  logger: Logger;
-  esClient: { asInternalUser: ElasticsearchClient };
-}) {
-  const indexSettingsResponse = await esClient.asInternalUser.indices.getSettings({
-    index: resourceNames.writeIndexAlias.kb,
-  });
-
-  const results = Object.entries(indexSettingsResponse);
-  if (results.length === 0) {
-    logger.debug('No knowledge base indices found. Skipping re-indexing.');
-    return;
-  }
-
-  const [indexName, { settings }] = results[0];
-  const createdVersion = parseInt(settings?.index?.version?.created ?? '', 10);
-
-  // Check if the index was created before version 8.11
-  const versionThreshold = 8110000; // Version 8.11.0
-  if (createdVersion >= versionThreshold) {
-    logger.debug(
-      `Knowledge base index "${indexName}" was created in version ${createdVersion}, and does not require re-indexing. Semantic text field is already supported. Aborting`
-    );
-    return;
-  }
-
-  logger.info(
-    `Knowledge base index was created in ${createdVersion} and must be re-indexed in order to support semantic_text field. Re-indexing now...`
-  );
-
-  return reIndexKnowledgeBase({ logger, esClient });
-}
-
 export async function getCurrentWriteIndexName({
   logger,
   esClient,
@@ -160,19 +124,6 @@ export function isKnowledgeBaseIndexWriteBlocked(error: any) {
     error.message.includes(`cluster_block_exception`) &&
     error.message.includes(resourceNames.writeIndexAlias.kb)
   );
-}
-
-export function isSemanticTextUnsupportedError(error: Error) {
-  const semanticTextUnsupportedError =
-    'The [sparse_vector] field type is not supported on indices created on versions 8.0 to 8.10';
-
-  const isSemanticTextUnspported =
-    error instanceof EsErrors.ResponseError &&
-    (error.message.includes(semanticTextUnsupportedError) ||
-      // @ts-expect-error
-      error.meta?.body?.error?.caused_by?.reason.includes(semanticTextUnsupportedError));
-
-  return isSemanticTextUnspported;
 }
 
 function writeBlock({

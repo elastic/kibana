@@ -68,7 +68,7 @@ import { convertInferenceEventsToStreamingEvents } from './operators/convert_inf
 import { extractMessages } from './operators/extract_messages';
 import { getGeneratedTitle } from './operators/get_generated_title';
 import {
-  reIndexKnowledgeBaseAndPopulateSemanticTextField,
+  reIndexKnowledgeBaseAndPopulateMissingSemanticTextField,
   scheduleKbSemanticTextMigrationTask,
 } from '../task_manager_definitions/register_kb_semantic_text_migration_task';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
@@ -688,10 +688,15 @@ export class ObservabilityAIAssistantClient {
     // setup the knowledge base
     const res = await knowledgeBaseService.setup(esClient, modelId, taskType);
 
+    // re-index knowledge base if there are existing entries
+    const hasEntries = await knowledgeBaseService.hasEntries();
+    if (hasEntries) {
+      await reIndexKnowledgeBase({ logger, esClient });
+    }
+
     core
       .getStartServices()
       .then(async ([_, pluginsStart]) => {
-        await reIndexKnowledgeBase({ logger, esClient });
         await scheduleKbSemanticTextMigrationTask({
           taskManager: pluginsStart.taskManager,
           logger,
@@ -709,8 +714,8 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.reset(esClient);
   };
 
-  reIndexKnowledgeBaseAndPopulateSemanticTextField = () => {
-    return reIndexKnowledgeBaseAndPopulateSemanticTextField({
+  reIndexKnowledgeBaseAndPopulateMissingSemanticTextField = () => {
+    return reIndexKnowledgeBaseAndPopulateMissingSemanticTextField({
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
       config: this.dependencies.config,

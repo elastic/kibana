@@ -40,6 +40,10 @@ export const resourceNames = {
     conversations: getResourceName('index-template-conversations'),
     kb: getResourceName('index-template-kb'),
   },
+  concreteWriteIndexName: {
+    conversations: getResourceName('conversations-000001'),
+    kb: getResourceName('kb-000001'),
+  },
 };
 
 const createIndexAssetsOnce = once(

@@ -30,11 +30,11 @@ import {
 import { recallFromSearchConnectors } from './recall_from_search_connectors';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
+import { isKnowledgeBaseIndexWriteBlocked } from './reindex_knowledge_base';
 import {
-  isKnowledgeBaseIndexWriteBlocked,
+  scheduleKbSemanticTextMigrationTask,
   isSemanticTextUnsupportedError,
-} from './reindex_knowledge_base';
-import { scheduleKbSemanticTextMigrationTask } from '../task_manager_definitions/register_kb_semantic_text_migration_task';
+} from '../task_manager_definitions/register_kb_semantic_text_migration_task';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
@@ -342,6 +342,22 @@ export class KnowledgeBaseService {
       }
       throw error;
     }
+  };
+
+  hasEntries = async () => {
+    const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
+      index: resourceNames.indexPatterns.kb,
+      size: 0,
+      _source: false,
+      track_total_hits: 1,
+    });
+
+    const hitCount =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total?.value ?? 0;
+
+    return hitCount > 0;
   };
 
   getPersonalUserInstructionId = async ({
