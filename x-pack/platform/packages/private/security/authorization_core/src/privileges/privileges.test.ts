@@ -1115,7 +1115,7 @@ describe('features', () => {
       minimal_read: [...expectedReadPrivilegesFeatureC],
     });
 
-    // The feature A is being replaced and therefore only "inherits" UI capabilities from the dependency chain.
+    // The feature D is being replaced and therefore only "inherits" UI capabilities from the dependency chain.
     const expectedAllPrivilegesFeatureD = [
       // This is capability that is automatically included for all privileges.
       actions.login,
