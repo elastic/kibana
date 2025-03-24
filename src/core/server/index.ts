@@ -617,4 +617,5 @@ export type {
   PrivilegeSet,
   AllRequiredCondition,
   AnyRequiredCondition,
+  unwindNestedSecurityPrivileges,
 } from '@kbn/core-http-server';

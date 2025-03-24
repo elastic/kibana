@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { ReservedPrivilegesSet } from '@kbn/core/server';
+import { ReservedPrivilegesSet, unwindNestedSecurityPrivileges } from '@kbn/core/server';
 import type {
+  AllRequiredCondition,
+  AnyRequiredCondition,
   AuthzDisabled,
   AuthzEnabled,
   HttpServiceSetup,
@@ -112,35 +114,17 @@ export function initAPIAuthorization(
       // Operator privileges check should be only performed if the `operator_privileges` are enabled in config.
       const requiredPrivileges = await normalizeRequiredPrivileges(authz.requiredPrivileges);
 
-      const unwindNestedPrivileges = (
-        privileges: Array<string | Record<string, string[]>>
-      ): string[] =>
-        privileges.reduce<string[]>(
-          (acc: string[], privilege: string | Record<string, string[]>) => {
-            if (typeof privilege === 'object') {
-              if ('allOf' in privilege) {
-                acc.push(...privilege.allOf);
-              }
-
-              if ('anyOf' in privilege) {
-                acc.push(...privilege.anyOf);
-              }
-            } else if (typeof privilege === 'string') {
-              acc.push(privilege);
-            }
-
-            return acc;
-          },
-          []
-        );
-
       const { requestedPrivileges, requestedReservedPrivileges } = requiredPrivileges.reduce(
         (acc, privilegeEntry) => {
           const privileges =
             typeof privilegeEntry === 'object'
               ? [
-                  ...unwindNestedPrivileges(privilegeEntry.allRequired ?? []),
-                  ...unwindNestedPrivileges(privilegeEntry.anyRequired ?? []),
+                  ...unwindNestedSecurityPrivileges<AllRequiredCondition>(
+                    privilegeEntry.allRequired ?? []
+                  ),
+                  ...unwindNestedSecurityPrivileges<AnyRequiredCondition>(
+                    privilegeEntry.anyRequired ?? []
+                  ),
                 ]
               : [privilegeEntry];
 

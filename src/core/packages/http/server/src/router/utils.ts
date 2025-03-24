@@ -53,3 +53,22 @@ export function getResponseValidation(
   if (typeof value === 'function') value = value();
   return isFullValidatorContainer(value) ? value.response : undefined;
 }
+
+export const unwindNestedSecurityPrivileges = <T extends Array<string | Record<string, string[]>>>(
+  privileges: T
+): string[] =>
+  privileges.reduce((acc: string[], privilege) => {
+    if (typeof privilege === 'object') {
+      if ('allOf' in privilege) {
+        acc.push(...privilege.allOf);
+      }
+
+      if ('anyOf' in privilege) {
+        acc.push(...privilege.anyOf);
+      }
+    } else if (typeof privilege === 'string') {
+      acc.push(privilege);
+    }
+
+    return acc;
+  }, []);
