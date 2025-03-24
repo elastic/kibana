@@ -33,16 +33,7 @@ import { getTestFunctions } from './test_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';
 import {
-  byOption,
-  metadataOption,
-  asOption,
-  onOption,
-  withOption,
-  appendSeparatorOption,
-} from '../definitions/options';
-import {
   CommandDefinition,
-  CommandOptionsDefinition,
   FunctionParameter,
   FunctionDefinition,
   FunctionParameterType,
@@ -219,12 +210,6 @@ export function getCommandDefinition(name: string): CommandDefinition<string> {
 
 export function getAllCommands() {
   return Array.from(buildCommandLookup().values());
-}
-
-export function getCommandOption(optionName: CommandOptionsDefinition<string>['name']) {
-  return [byOption, metadataOption, asOption, onOption, withOption, appendSeparatorOption].find(
-    ({ name }) => name === optionName
-  );
 }
 
 function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {
