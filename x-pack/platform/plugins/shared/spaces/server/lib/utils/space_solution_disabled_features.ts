@@ -32,6 +32,7 @@ const enabledFeaturesPerSolution: Record<SolutionId, string[]> = {
   es: ['observabilityAIAssistant'],
   oblt: [],
   security: [],
+  chat: [],
 };
 
 /**
