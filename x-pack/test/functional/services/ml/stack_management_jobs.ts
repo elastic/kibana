@@ -315,18 +315,20 @@ export function MachineLearningStackManagementJobsProvider(
     },
 
     async assertJobIdsSkipped(expectedJobIds: string[]) {
-      const subj = await testSubjects.find('mlJobMgmtImportJobsCannotBeImportedCallout');
-      const skippedJobTitles = await subj.findAllByTagName('h5');
-      const actualJobIds = (
-        await Promise.all(skippedJobTitles.map((i) => i.parseDomContent()))
-      ).map((t) => t.html());
+      await retry.tryForTime(10 * 1000, async () => {
+        const subj = await testSubjects.find('mlJobMgmtImportJobsCannotBeImportedCallout');
+        const skippedJobTitles = await subj.findAllByTagName('h5');
+        const actualJobIds = (
+          await Promise.all(skippedJobTitles.map((i) => i.parseDomContent()))
+        ).map((t) => t.html());
 
-      expect(actualJobIds.sort()).to.eql(
-        expectedJobIds.sort(),
-        `Expected job ids to be '${JSON.stringify(expectedJobIds)}' (got '${JSON.stringify(
-          actualJobIds
-        )}')`
-      );
+        expect(actualJobIds.sort()).to.eql(
+          expectedJobIds.sort(),
+          `Expected job ids to be '${JSON.stringify(expectedJobIds)}' (got '${JSON.stringify(
+            actualJobIds
+          )}')`
+        );
+      });
     },
 
     async importJobs() {
@@ -538,11 +540,16 @@ export function MachineLearningStackManagementJobsProvider(
     ) {
       if (mlSavedObjectType === 'anomaly-detector') {
         await jobTable.filterWithSearchString(filter, expectedRowCount);
-        await jobTable.assertJobRowJobId(filter);
+        if (expectedRowCount > 0) {
+          await jobTable.assertJobRowJobId(filter);
+        }
       }
       if (mlSavedObjectType === 'data-frame-analytics') {
         await dataFrameAnalyticsTable.filterWithSearchString(filter, expectedRowCount);
-        await dataFrameAnalyticsTable.assertAnalyticsJobDisplayedInTable(filter, true);
+        await dataFrameAnalyticsTable.assertAnalyticsJobDisplayedInTable(
+          filter,
+          expectedRowCount > 0
+        );
       }
     },
   };
