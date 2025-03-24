@@ -16,22 +16,18 @@ import {
   isFunctionExpression,
   isWhereExpression,
   ESQLCommandMode,
+  ESQLCommandOption,
 } from '@kbn/esql-ast';
 import {
   isAssignment,
   isColumnItem,
   isFunctionItem,
+  isInlineCastItem,
+  isLiteralItem,
+  isOptionItem,
   isSingleItem,
   noCaseCompare,
 } from '../shared/helpers';
-import {
-  appendSeparatorOption,
-  asOption,
-  byOption,
-  metadataOption,
-  onOption,
-  withOption,
-} from './options';
 
 import { type CommandDefinition } from './types';
 import { ENRICH_MODES, checkAggExistence, checkFunctionContent } from './commands_helpers';
@@ -54,6 +50,7 @@ import { suggest as suggestForStats } from '../autocomplete/commands/stats';
 import { suggest as suggestForWhere } from '../autocomplete/commands/where';
 
 import { getMessageFromId } from '../validation/errors';
+import { METADATA_FIELDS } from '../shared/constants';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -147,6 +144,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Produces a row with one or more columns with values that you specify. This can be useful for testing.',
     }),
+    declaration: 'ROW column1 = value1[, ..., columnN = valueN]',
     examples: ['ROW a=1', 'ROW a=1, b=2'],
     signature: {
       multipleParams: true,
@@ -154,7 +152,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [{ name: 'assignment', type: 'any' }],
     },
     suggest: suggestForRow,
-    options: [],
   },
   {
     name: 'from',
@@ -162,21 +159,49 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Retrieves data from one or more data streams, indices, or aliases. In a query or subquery, you must use the from command first and it does not need a leading pipe. For example, to retrieve data from an index:',
     }),
-    examples: ['from logs', 'from logs-*', 'from logs_*, events-*'],
-    options: [metadataOption],
+    declaration: 'FROM index_pattern [METADATA fields]',
+    examples: ['FROM logs', 'FROM logs-*', 'FROM logs_*, events-*'],
     signature: {
       multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
     },
     suggest: suggestForFrom,
+    validate: (command: ESQLCommand) => {
+      const metadataStatement = command.args.find(
+        (arg) => isOptionItem(arg) && arg.name === 'metadata'
+      ) as ESQLCommandOption | undefined;
+
+      if (!metadataStatement) {
+        return [];
+      }
+
+      const messages: ESQLMessage[] = [];
+
+      const fields = metadataStatement.args.filter(isColumnItem);
+      for (const field of fields) {
+        if (!METADATA_FIELDS.includes(field.name)) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'unknownMetadataField',
+              values: {
+                value: field.name,
+                availableFields: Array.from(METADATA_FIELDS).join(', '),
+              },
+              locations: field.location,
+            })
+          );
+        }
+      }
+      return messages;
+    },
   },
   {
     name: 'show',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.showDoc', {
       defaultMessage: 'Returns information about the deployment and its capabilities',
     }),
+    declaration: 'SHOW item',
     examples: ['SHOW INFO'],
-    options: [],
     signature: {
       multipleParams: false,
       params: [{ name: 'functions', type: 'function' }],
@@ -195,16 +220,8 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         'The command returns only the fields in the aggregation, and you can use a wide range of statistical functions with the stats command. ' +
         'When you perform more than one aggregation, separate each aggregation with a comma.',
     }),
-    examples: [
-      'metrics index',
-      'metrics index, index2',
-      'metrics index avg = avg(a)',
-      'metrics index sum(b) by b',
-      'metrics index, index2 sum(b) by b % 2',
-      'metrics <sources> [ <aggregates> [ by <grouping> ]]',
-      'metrics src1, src2 agg1, agg2 by field1, field2',
-    ],
-    options: [],
+    declaration: '',
+    examples: ['METRICS index', 'METRICS index, index2'],
     signature: {
       multipleParams: true,
       params: [
@@ -220,12 +237,15 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Calculates aggregate statistics, such as average, count, and sum, over the incoming search results set. Similar to SQL aggregation, if the stats command is used without a BY clause, only one row is returned, which is the aggregation over the entire incoming search results set. When you use a BY clause, one row is returned for each distinct value in the field specified in the BY clause. The stats command returns only the fields in the aggregation, and you can use a wide range of statistical functions with the stats command. When you perform more than one aggregation, separate each aggregation with a comma.',
     }),
+    declaration: `STATS [column1 =] expression1 [WHERE boolean_expression1][,
+      ...,
+      [columnN =] expressionN [WHERE boolean_expressionN]]
+      [BY grouping_expression1[, ..., grouping_expressionN]]`,
     examples: ['… | stats avg = avg(a)', '… | stats sum(b) by b', '… | stats sum(b) by b % 2'],
     signature: {
       multipleParams: true,
       params: [{ name: 'expression', type: 'function', optional: true }],
     },
-    options: [byOption],
     validate: statsValidator,
     suggest: suggestForStats,
   },
@@ -239,12 +259,12 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
           'Calculates an aggregate result and merges that result back into the stream of input data. Without the optional `BY` clause this will produce a single result which is appended to each row. With a `BY` clause this will produce one result per grouping and merge the result into the stream based on matching group keys.',
       }
     ),
+    declaration: '',
     examples: ['… | EVAL bar = a * b | INLINESTATS m = MAX(bar) BY b'],
     signature: {
       multipleParams: true,
       params: [{ name: 'expression', type: 'function', optional: true }],
     },
-    options: [byOption],
     // Reusing the same validation logic as stats command
     validate: statsValidator,
     suggest: () => [],
@@ -256,17 +276,17 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Calculates an expression and puts the resulting value into a search results field.',
     }),
+    declaration: 'EVAL [column1 =] value1[, ..., [columnN =] valueN]',
     examples: [
-      '… | eval b * c',
-      '… | eval a = b * c',
-      '… | eval then = now() + 1 year + 2 weeks',
-      '… | eval a = b * c, d = e * f',
+      '… | EVAL b * c',
+      '… | EVAL a = b * c',
+      '… | EVAL then = NOW() + 1 year + 2 weeks',
+      '… | EVAL a = b * c, d = e * f',
     ],
     signature: {
       multipleParams: true,
       params: [{ name: 'expression', type: 'any' }],
     },
-    options: [],
     suggest: suggestForEval,
   },
   {
@@ -274,12 +294,12 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.renameDoc', {
       defaultMessage: 'Renames an old column to a new one',
     }),
-    examples: ['… | rename old as new', '… | rename old as new, a as b'],
+    declaration: 'RENAME old_name1 AS new_name1[, ..., old_nameN AS new_nameN]',
+    examples: ['… | RENAME old AS new', '… | RENAME old AS new, a AS b'],
     signature: {
       multipleParams: true,
       params: [{ name: 'renameClause', type: 'column' }],
     },
-    options: [asOption],
     suggest: suggestForRename,
   },
   {
@@ -288,12 +308,12 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Returns the first search results, in search order, based on the "limit" specified.',
     }),
-    examples: ['… | limit 100', '… | limit 0'],
+    declaration: 'LIMIT max_number_of_rows',
+    examples: ['… | LIMIT 100', '… | LIMIT 1'],
     signature: {
       multipleParams: false,
       params: [{ name: 'size', type: 'integer', constantOnly: true }],
     },
-    options: [],
     suggest: suggestForLimit,
   },
   {
@@ -302,9 +322,9 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Rearranges fields in the Results table by applying the keep clauses in fields',
     }),
-    examples: ['… | keep a', '… | keep a,b'],
+    declaration: 'KEEP column1[, ..., columnN]',
+    examples: ['… | KEEP a', '… | KEEP a, b'],
     suggest: suggestForKeep,
-    options: [],
     signature: {
       multipleParams: true,
       params: [{ name: 'column', type: 'column', wildcards: true }],
@@ -315,8 +335,8 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.dropDoc', {
       defaultMessage: 'Drops columns',
     }),
-    examples: ['… | drop a', '… | drop a,b'],
-    options: [],
+    declaration: 'DROP column1[, ..., columnN]',
+    examples: ['… | DROP a', '… | DROP a, b'],
     signature: {
       multipleParams: true,
       params: [{ name: 'column', type: 'column', wildcards: true }],
@@ -366,32 +386,32 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Sorts all results by the specified fields. By default, null values are treated as being larger than any other value. With an ascending sort order, null values are sorted last, and with a descending sort order, null values are sorted first. You can change that by providing NULLS FIRST or NULLS LAST',
     }),
+    declaration:
+      'SORT column1 [ASC/DESC][NULLS FIRST/NULLS LAST][, ..., columnN [ASC/DESC][NULLS FIRST/NULLS LAST]]',
     examples: [
-      '… | sort a desc, b nulls last, c asc nulls first',
-      '… | sort b nulls last',
-      '… | sort c asc nulls first',
-      '… | sort a - abs(b)',
+      '… | SORT a DESC, b NULLS LAST, c ASC NULLS FIRST',
+      '… | SORT b NULLS LAST',
+      '… | SORT c ASC NULLS FIRST',
+      '… | SORT a - abs(b)',
     ],
-    options: [],
     signature: {
       multipleParams: true,
       params: [{ name: 'expression', type: 'any' }],
     },
     suggest: suggestForSort,
   },
-
   {
     name: 'where',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.whereDoc', {
       defaultMessage:
         'Uses "predicate-expressions" to filter search results. A predicate expression, when evaluated, returns TRUE or FALSE. The where command only returns the results that evaluate to TRUE. For example, to filter results for a specific field value',
     }),
-    examples: ['… | where status_code == 200'],
+    declaration: 'WHERE expression',
+    examples: ['… | WHERE status_code == 200'],
     signature: {
       multipleParams: false,
       params: [{ name: 'expression', type: 'boolean' }],
     },
-    options: [],
     suggest: suggestForWhere,
   },
   {
@@ -400,8 +420,8 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
+    declaration: 'DISSECT input "pattern" [APPEND_SEPARATOR="<separator>"]',
     examples: ['… | DISSECT a "%{b} %{c}" APPEND_SEPARATOR = ":"'],
-    options: [appendSeparatorOption],
     signature: {
       multipleParams: false,
       params: [
@@ -410,6 +430,43 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       ],
     },
     suggest: suggestForDissect,
+    validate: (command: ESQLCommand) => {
+      const appendSeparatorClause = command.args.find((arg) => isOptionItem(arg)) as
+        | ESQLCommandOption
+        | undefined;
+
+      if (!appendSeparatorClause) {
+        return [];
+      }
+
+      if (appendSeparatorClause.name !== 'append_separator') {
+        return [
+          getMessageFromId({
+            messageId: 'unknownDissectKeyword',
+            values: { keyword: appendSeparatorClause.name },
+            locations: appendSeparatorClause.location,
+          }),
+        ];
+      }
+
+      const messages: ESQLMessage[] = [];
+      const [firstArg] = appendSeparatorClause.args;
+      if (
+        !Array.isArray(firstArg) &&
+        (!isLiteralItem(firstArg) || firstArg.literalType !== 'keyword')
+      ) {
+        const value =
+          'value' in firstArg && !isInlineCastItem(firstArg) ? firstArg.value : firstArg.name;
+        messages.push(
+          getMessageFromId({
+            messageId: 'wrongDissectOptionArgumentType',
+            values: { value: value ?? '' },
+            locations: firstArg.location,
+          })
+        );
+      }
+      return messages;
+    },
   },
   {
     name: 'grok',
@@ -417,8 +474,8 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
+    declaration: 'GROK input "pattern"',
     examples: ['… | GROK a "%{IP:b} %{NUMBER:c}"'],
-    options: [],
     signature: {
       multipleParams: false,
       params: [
@@ -433,8 +490,8 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.mvExpandDoc', {
       defaultMessage: 'Expands multivalued fields into one row per value, duplicating other fields',
     }),
-    examples: ['row a=[1,2,3] | mv_expand a'],
-    options: [],
+    declaration: 'MV_EXPAND column',
+    examples: ['ROW a=[1,2,3] | MV_EXPAND a'],
     preview: true,
     signature: {
       multipleParams: false,
@@ -448,12 +505,13 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Enrich table with another table. Before you can use enrich, you need to create and execute an enrich policy.',
     }),
+    declaration:
+      'ENRICH policy [ON match_field] [WITH [new_name1 = ]field1, [new_name2 = ]field2, ...]',
     examples: [
-      '… | enrich my-policy',
-      '… | enrich my-policy on pivotField',
-      '… | enrich my-policy on pivotField with a = enrichFieldA, b = enrichFieldB',
+      '… | ENRICH my-policy',
+      '… | ENRICH my-policy ON pivotField',
+      '… | ENRICH my-policy ON pivotField WITH a = enrichFieldA, b = enrichFieldB',
     ],
-    options: [onOption, withOption],
     signature: {
       multipleParams: false,
       params: [{ name: 'policyName', type: 'source', innerTypes: ['policy'] }],
@@ -489,9 +547,9 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
   {
     name: 'hidden_command',
     description: 'A test fixture to test hidden-ness',
+    declaration: '',
     hidden: true,
     examples: [],
-    options: [],
     signature: {
       params: [],
       multipleParams: false,
@@ -535,6 +593,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.joinDoc', {
       defaultMessage: 'Join table with another table.',
     }),
+    declaration: `LOOKUP JOIN <lookup_index> ON <field_name>`,
     preview: true,
     examples: [
       '… | LOOKUP JOIN lookup_index ON join_field',
@@ -547,7 +606,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
     },
-    options: [onOption],
     suggest: suggestForJoin,
   },
 ];
