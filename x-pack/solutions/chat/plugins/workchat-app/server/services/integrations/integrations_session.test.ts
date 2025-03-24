@@ -8,10 +8,10 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from '@kbn/zod';
 import { loggerMock } from '@kbn/logging-mocks';
+import { buildToolName } from '@kbn/wci-common';
 import { getClientForInternalServer } from '@kbn/wci-server';
-import { IntegrationToolInputSchema } from '../types';
-import { IntegrationWithMeta } from '../types';
-import { IntegrationsSession } from '../integrations_session';
+import { IntegrationWithMeta, IntegrationToolInputSchema } from './types';
+import { IntegrationsSession } from './integrations_session';
 
 describe('IntegrationsGateway', () => {
   describe('MCP servers with tools', () => {
@@ -70,8 +70,8 @@ describe('IntegrationsGateway', () => {
       const allTools = await integrationSession.getAllTools();
       expect(allTools.length).toBe(2);
       expect(allTools.map((tool) => tool.name)).toEqual([
-        'Test Server 1___add',
-        'Test Server 2___tool3',
+        buildToolName({ integrationId: 'Test Server 1', toolName: 'add' }),
+        buildToolName({ integrationId: 'Test Server 2', toolName: 'tool3' }),
       ]);
     });
 
@@ -81,10 +81,13 @@ describe('IntegrationsGateway', () => {
         integrations: await getIntegrations(),
       });
 
-      const result = await integrationSession.executeTool('Test Server 1___add', {
-        a: 1,
-        b: 2,
-      } as unknown as IntegrationToolInputSchema);
+      const result = await integrationSession.executeTool(
+        buildToolName({ integrationId: 'Test Server 1', toolName: 'add' }),
+        {
+          a: 1,
+          b: 2,
+        } as unknown as IntegrationToolInputSchema
+      );
       expect(result).toEqual({ content: [{ type: 'text', text: '3' }] });
     });
   });
