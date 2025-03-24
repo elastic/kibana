@@ -97,17 +97,15 @@ function createDeepLinks(
     getModelManagementDeepLink: (): AppDeepLink<LinkId> | null => {
       if (!mlCapabilities.isDFAEnabled && !mlCapabilities.isNLPEnabled) return null;
 
-      const deepLinks: Array<AppDeepLink<LinkId>> = [];
-
       if (!isServerless) {
-        deepLinks.push({
+        return {
           id: 'nodes',
           title: i18n.translate('xpack.ml.deepLink.nodes', {
             defaultMessage: 'Nodes',
           }),
           // TODO: Change redirect to management page once #213152 is resolved
           path: `/${ML_PAGES.NODES}`,
-        });
+        };
       }
       return null;
     },
