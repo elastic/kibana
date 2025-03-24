@@ -123,7 +123,7 @@ export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string
       kqlQuery,
       kqlMode,
     });
-  }, [esQueryConfig, dataProviders, sourcererDataView, browserFields, filters, kqlQuery, kqlMode]);
+  }, [esQueryConfig, dataProviders, indexPattern, browserFields, filters, kqlQuery, kqlMode]);
 
   useInvalidFilterQuery({
     id: timelineId,
