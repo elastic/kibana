@@ -21,7 +21,7 @@ import { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
-import { getApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
+import { getApiKeyManager as buildApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
 import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
 import { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
@@ -109,6 +109,16 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     const getAuditLogger = () => security?.audit.asScoped(request);
 
+    const getApiKeyManager = () =>
+      buildApiKeyManager({
+        core: coreStart,
+        logger: options.logger,
+        security: startPlugins.security,
+        encryptedSavedObjects: startPlugins.encryptedSavedObjects,
+        request,
+        namespace: getSpaceId(),
+      });
+
     // List of endpoint authz for the current request's user. Will be initialized the first
     // time it is requested (see `getEndpointAuthz()` below)
     let endpointAuthz: Immutable<EndpointAuthz>;
@@ -144,6 +154,8 @@ export class RequestContextFactory implements IRequestContextFactory {
       getAuditLogger,
 
       getDataViewsService: () => dataViewsService,
+
+      getApiKeyManager,
 
       getDetectionRulesClient: memoize(() => {
         const mlAuthz = buildMlAuthz({
@@ -258,14 +270,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           config: config.entityAnalytics.entityStore,
           experimentalFeatures: config.experimentalFeatures,
           telemetry: core.analytics,
-          apiKeyManager: getApiKeyManager({
-            core: coreStart,
-            logger,
-            security: startPlugins.security,
-            encryptedSavedObjects: startPlugins.encryptedSavedObjects,
-            request,
-            namespace: getSpaceId(),
-          }),
+          apiKeyManager: getApiKeyManager(),
           security: startPlugins.security,
           request,
         });
