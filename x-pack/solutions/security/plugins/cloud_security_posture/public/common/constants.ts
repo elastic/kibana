@@ -203,7 +203,7 @@ export const VULNERABILITY_GROUPING_OPTIONS = {
   RESOURCE_ID: VULNERABILITY_FIELDS.RESOURCE_ID,
   CLOUD_ACCOUNT_NAME: VULNERABILITY_FIELDS.CLOUD_ACCOUNT_NAME,
   CVE: VULNERABILITY_FIELDS.VULNERABILITY_ID,
-};
+} as const;
 
 /*
 The fields below are default columns of the Cloud Security Data Table that need to have keyword mapping.
