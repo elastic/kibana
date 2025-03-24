@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
 import { EuiDataGridCellValueElementProps, EuiSpacer } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
-import { HttpSetup } from '@kbn/core-http-browser';
+import { generateFilters } from '@kbn/data-plugin/public';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import {
   CVSScoreBadge,
@@ -18,6 +18,7 @@ import {
   getNormalizedSeverity,
 } from '@kbn/cloud-security-posture';
 import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
+import { HttpSetup } from '@kbn/core/public';
 import { CloudSecurityDataTable } from '../../components/cloud_security_data_table';
 import { useLatestVulnerabilitiesTable } from './hooks/use_latest_vulnerabilities_table';
 import { LATEST_VULNERABILITIES_TABLE } from './test_subjects';
@@ -27,6 +28,15 @@ import { ErrorCallout } from '../configurations/layout/error_callout';
 import { createDetectionRuleFromVulnerabilityFinding } from './utils/create_detection_rule_from_vulnerability';
 import { vulnerabilitiesTableFieldLabels } from './vulnerabilities_table_field_labels';
 import { FindingsMultiValueCellRender } from '../../components/findings_table_multi_value_cell_render';
+import { getMultiValueFieldAriaLabel } from './translations';
+import { FindingsBaseURLQuery } from '../../common/types';
+import { useKibana } from '../../common/hooks/use_kibana';
+import { useDataViewContext } from '../../common/contexts/data_view_context';
+import { usePersistedQuery } from '../../common/hooks/use_cloud_posture_data_table';
+import { useUrlQuery } from '../../common/hooks/use_url_query';
+import { ClickableBadge } from '../../common/component/clickable_badge';
+
+type URLQuery = FindingsBaseURLQuery & Record<string, any>;
 
 interface LatestVulnerabilitiesTableProps {
   groupSelectorComponent?: JSX.Element;
@@ -80,59 +90,6 @@ const title = i18n.translate('xpack.csp.findings.latestVulnerabilities.tableRowT
   defaultMessage: 'Vulnerabilities',
 });
 
-const customCellRenderer = (rows: DataTableRecord[]) => ({
-  'vulnerability.score.base': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
-    <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
-      {({ finding }) => (
-        <CVSScoreBadge
-          score={finding.vulnerability?.score?.base}
-          version={finding.vulnerability?.score?.version}
-        />
-      )}
-    </CspVulnerabilityFindingRenderer>
-  ),
-  'vulnerability.severity': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
-    <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
-      {({ finding }) => (
-        <SeverityStatusBadge severity={getNormalizedSeverity(finding.vulnerability.severity)} />
-      )}
-    </CspVulnerabilityFindingRenderer>
-  ),
-  'observer.vendor': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
-    <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
-      {({ finding }) => <>{getVendorName(finding) || '-'}</>}
-    </CspVulnerabilityFindingRenderer>
-  ),
-  'vulnerability.id': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
-    <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
-      {({ finding }) => (
-        <FindingsMultiValueCellRender finding={finding} multiValueField="vulnerability.id" />
-      )}
-    </CspVulnerabilityFindingRenderer>
-  ),
-  'package.name': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
-    <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
-      {({ finding }) => (
-        <FindingsMultiValueCellRender finding={finding} multiValueField="package.name" />
-      )}
-    </CspVulnerabilityFindingRenderer>
-  ),
-  'package.version': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
-    <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
-      {({ finding }) => (
-        <FindingsMultiValueCellRender finding={finding} multiValueField="package.version" />
-      )}
-    </CspVulnerabilityFindingRenderer>
-  ),
-  'package.fixed_version': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
-    <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
-      {({ finding }) => (
-        <FindingsMultiValueCellRender finding={finding} multiValueField="package.fixed_version" />
-      )}
-    </CspVulnerabilityFindingRenderer>
-  ),
-});
-
 export const LatestVulnerabilitiesTable = ({
   groupSelectorComponent,
   height,
@@ -150,6 +107,107 @@ export const LatestVulnerabilitiesTable = ({
 
     return async (http: HttpSetup) =>
       createDetectionRuleFromVulnerabilityFinding(http, vulnerabilityFinding);
+  };
+
+  const { data } = useKibana().services;
+  const { filterManager } = data.query;
+  const { dataView } = useDataViewContext();
+  const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
+  const { setUrlQuery } = useUrlQuery<URLQuery>(getPersistedDefaultQuery);
+
+  const onAddFilter = useCallback(
+    (clickedField: string, values: string | string[], operation: '+' | '-') => {
+      const newFilters = generateFilters(filterManager, clickedField, values, operation, dataView);
+      filterManager.addFilters(newFilters);
+      setUrlQuery({
+        filters: filterManager.getFilters(),
+      });
+    },
+    [dataView, filterManager, setUrlQuery]
+  );
+
+  const renderItem = useCallback(
+    (item: string, i: number, field: string) => (
+      <ClickableBadge
+        key={`${item}-${i}`}
+        item={item}
+        index={i}
+        onClickAriaLabel={getMultiValueFieldAriaLabel(item, i)}
+        onClick={() => onAddFilter(field, item, '+')}
+      />
+    ),
+    [onAddFilter]
+  );
+
+  const customCellRenderer = (tableRows: DataTableRecord[]) => {
+    return {
+      'vulnerability.score.base': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+        <CspVulnerabilityFindingRenderer row={tableRows[rowIndex]}>
+          {({ finding }) => (
+            <CVSScoreBadge
+              score={finding.vulnerability?.score?.base}
+              version={finding.vulnerability?.score?.version}
+            />
+          )}
+        </CspVulnerabilityFindingRenderer>
+      ),
+      'vulnerability.severity': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+        <CspVulnerabilityFindingRenderer row={tableRows[rowIndex]}>
+          {({ finding }) => (
+            <SeverityStatusBadge severity={getNormalizedSeverity(finding.vulnerability.severity)} />
+          )}
+        </CspVulnerabilityFindingRenderer>
+      ),
+      'observer.vendor': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+        <CspVulnerabilityFindingRenderer row={tableRows[rowIndex]}>
+          {({ finding }) => <>{getVendorName(finding) || '-'}</>}
+        </CspVulnerabilityFindingRenderer>
+      ),
+      'vulnerability.id': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+        <CspVulnerabilityFindingRenderer row={tableRows[rowIndex]}>
+          {({ finding }) => (
+            <FindingsMultiValueCellRender
+              finding={finding}
+              multiValueField="vulnerability.id"
+              renderItem={renderItem}
+            />
+          )}
+        </CspVulnerabilityFindingRenderer>
+      ),
+      'package.name': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+        <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
+          {({ finding }) => (
+            <FindingsMultiValueCellRender
+              finding={finding}
+              multiValueField="package.name"
+              renderItem={renderItem}
+            />
+          )}
+        </CspVulnerabilityFindingRenderer>
+      ),
+      'package.version': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+        <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
+          {({ finding }) => (
+            <FindingsMultiValueCellRender
+              finding={finding}
+              multiValueField="package.version"
+              renderItem={renderItem}
+            />
+          )}
+        </CspVulnerabilityFindingRenderer>
+      ),
+      'package.fixed_version': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+        <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
+          {({ finding }) => (
+            <FindingsMultiValueCellRender
+              finding={finding}
+              multiValueField="package.fixed_version"
+              renderItem={renderItem}
+            />
+          )}
+        </CspVulnerabilityFindingRenderer>
+      ),
+    };
   };
 
   return (

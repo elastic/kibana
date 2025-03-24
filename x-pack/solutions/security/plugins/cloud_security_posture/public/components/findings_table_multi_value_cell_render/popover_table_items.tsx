@@ -55,7 +55,7 @@ const PopoverTableItemsComponent = <T extends unknown>({
         gutterSize="s"
         css={css`
           max-height: 130px;
-          max-width: 490px;
+          max-width: 540px;
           overflow-y: auto;
         `}
       >
