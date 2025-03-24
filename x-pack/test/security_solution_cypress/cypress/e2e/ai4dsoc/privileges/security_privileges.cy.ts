@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  NOTES_SUB_PRIVILEGE,
+  TIMELINE_SUB_PRIVILEGE,
+} from '../../../screens/custom_roles/assign_to_space_flyout';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { selectAllSpaces } from '../../../tasks/select_all_spaces';
@@ -20,12 +24,8 @@ describe('Custom role creation', { tags: '@serverless' }, () => {
     it('should not show `Timelines` and `Notes` sub-privilege', () => {
       selectAllSpaces();
       // should not have timeline/notes sub-privileges
-      cy.get(`[data-test-subj="featureCategory_securitySolution_securitySolutionTimeline"]`).should(
-        'not.exist'
-      );
-      cy.get(`[data-test-subj="featureCategory_securitySolution_securitySolutionNotes"]`).should(
-        'not.exist'
-      );
+      cy.get(TIMELINE_SUB_PRIVILEGE).should('not.exist');
+      cy.get(NOTES_SUB_PRIVILEGE).should('not.exist');
     });
   });
 });
