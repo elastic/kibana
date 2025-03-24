@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/wci-index-source",
+  "name": "@kbn/workchat-app",
   "version": "1.0.0",
   "license": "Elastic License 2.0",
   "private": true,
