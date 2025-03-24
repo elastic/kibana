@@ -101,9 +101,6 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   ignoreFieldsRegexes: string[];
 }
 
-interface SecurityInstanceContext {
-  [x: string]: unknown;
-}
 type SecurityActionGroupId = 'default';
 
 export type SecurityExecutorOptions<
@@ -113,7 +110,7 @@ export type SecurityExecutorOptions<
   TParams,
   TState,
   AlertInstanceState,
-  SecurityInstanceContext,
+  AlertInstanceContext,
   WithoutReservedActionGroups<SecurityActionGroupId, never>
 > & {
   services: PersistenceServices;
@@ -126,7 +123,7 @@ export type SecurityAlertType<TParams extends RuleParams, TState extends RuleTyp
     TParams,
     TState,
     AlertInstanceState,
-    SecurityInstanceContext,
+    AlertInstanceContext,
     SecurityActionGroupId
   >,
   'executor'
