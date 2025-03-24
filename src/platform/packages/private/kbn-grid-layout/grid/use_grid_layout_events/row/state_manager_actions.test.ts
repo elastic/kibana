@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getGridLayoutStateManagerMock } from '../test_utils/mocks';
-import { getRowKeysInOrder } from '../utils/resolve_grid_row';
+import { getGridLayoutStateManagerMock } from '../../test_utils/mocks';
+import { getRowKeysInOrder } from '../../utils/resolve_grid_row';
 import { moveAction } from './row_state_manager_actions';
 
 describe('row state manager actions', () => {

@@ -135,7 +135,7 @@ export const DashboardGrid = ({
           gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
           rowHeight: DASHBOARD_GRID_HEIGHT,
           columnCount: DASHBOARD_GRID_COLUMN_COUNT,
-          dragTopOffset: DASHBOARD_DRAG_TOP_OFFSET,
+          keyboardDragTopLimit: DASHBOARD_DRAG_TOP_OFFSET,
         }}
         useCustomDragHandle={true}
         renderPanelContents={renderPanelContents}

@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const DASHBOARD_GRID_HEIGHT = 20;
-export const DASHBOARD_MARGIN_SIZE = 8;
-export const DASHBOARD_DRAG_TOP_OFFSET = 200;
+import { GridLayoutStateManager } from '../types';
+
+export const isLayoutInteractive = (gridLayoutStateManager: GridLayoutStateManager) => {
+  return (
+    gridLayoutStateManager.expandedPanelId$.value === undefined &&
+    gridLayoutStateManager.accessMode$.getValue() === 'EDIT'
+  );
+};

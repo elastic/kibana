@@ -27,7 +27,7 @@ export const useDragHandleApi = ({
 }): DragHandleApi => {
   const { useCustomDragHandle } = useGridLayoutContext();
 
-  const { startDrag, onBlur } = useGridLayoutPanelEvents({
+  const { startDrag } = useGridLayoutPanelEvents({
     interactionType: 'drag',
     panelId,
     rowId,
@@ -42,7 +42,6 @@ export const useDragHandleApi = ({
         handle.addEventListener('mousedown', startDrag, { passive: true });
         handle.addEventListener('touchstart', startDrag, { passive: true });
         handle.addEventListener('keydown', startDrag);
-        handle.addEventListener('blur', onBlur);
         handle.classList.add('kbnGridPanel__dragHandle');
       }
       removeEventListenersRef.current = () => {
@@ -54,7 +53,7 @@ export const useDragHandleApi = ({
         }
       };
     },
-    [startDrag, onBlur]
+    [startDrag]
   );
 
   useEffect(

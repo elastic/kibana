@@ -68,7 +68,7 @@ export const GridExample = ({
     gutterSize: DASHBOARD_MARGIN_SIZE,
     rowHeight: DASHBOARD_GRID_HEIGHT,
     columnCount: DASHBOARD_GRID_COLUMN_COUNT,
-    dragTopOffset: DASHBOARD_DRAG_TOP_OFFSET,
+    keyboardDragTopLimit: DASHBOARD_DRAG_TOP_OFFSET,
   });
 
   const mockDashboardApi = useMockDashboardApi({ savedState: savedState.current });

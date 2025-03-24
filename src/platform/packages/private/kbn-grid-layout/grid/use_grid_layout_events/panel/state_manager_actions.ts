@@ -10,12 +10,12 @@
 import { cloneDeep } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { MutableRefObject } from 'react';
-import { GridLayoutStateManager, GridPanelData } from '../types';
+import { GridLayoutStateManager, GridPanelData } from '../../types';
 import { getDragPreviewRect, getSensorOffsets, getResizePreviewRect } from './utils';
-import { resolveGridRow } from '../utils/resolve_grid_row';
-import { isGridDataEqual } from '../utils/equality_checks';
-import { PointerPosition, UserInteractionEvent } from './types';
-import { isKeyboardEvent } from './sensors';
+import { resolveGridRow } from '../../utils/resolve_grid_row';
+import { isGridDataEqual } from '../../utils/equality_checks';
+import { PointerPosition, UserInteractionEvent } from '../types';
+import { isKeyboardEvent } from '../sensors';
 
 export const startAction = (
   e: UserInteractionEvent,

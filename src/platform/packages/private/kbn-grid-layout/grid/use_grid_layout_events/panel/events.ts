@@ -8,9 +8,9 @@
  */
 
 import { useCallback, useRef } from 'react';
-import { GridPanelData, PanelInteractionEvent } from '../types';
-import { useGridLayoutContext } from '../use_grid_layout_context';
-import { commitAction, moveAction, startAction, cancelAction } from './panel_state_manager_actions';
+import { GridPanelData, PanelInteractionEvent } from '../../types';
+import { useGridLayoutContext } from '../../use_grid_layout_context';
+import { commitAction, moveAction, startAction, cancelAction } from './state_manager_actions';
 import {
   getSensorPosition,
   isMouseEvent,
@@ -19,10 +19,10 @@ import {
   startTouchInteraction,
   startKeyboardInteraction,
   isKeyboardEvent,
-} from './sensors';
-import { PointerPosition, UserInteractionEvent } from './types';
-import { getNextPositionForPanel } from './utils/keyboard_utils';
-import { isLayoutInteractive } from './utils';
+} from '../sensors';
+import { PointerPosition, UserInteractionEvent } from '../types';
+import { getNextKeyboardPositionForPanel } from './utils';
+import { isLayoutInteractive } from '../state_manager_selectors';
 /*
  * This hook sets up and manages drag/resize interaction logic for grid panels.
  * It initializes event handlers to start, move, and commit the interaction,
@@ -73,7 +73,7 @@ export const useGridLayoutPanelEvents = ({
       if (isMouseEvent(ev) || isTouchEvent(ev)) {
         pointerPixel.current = getSensorPosition(ev);
       } else if (isKeyboardEvent(ev)) {
-        pointerPixel.current = getNextPositionForPanel(
+        pointerPixel.current = getNextKeyboardPositionForPanel(
           ev,
           gridLayoutStateManager,
           pointerPixel.current
@@ -126,5 +126,5 @@ export const useGridLayoutPanelEvents = ({
     [gridLayoutStateManager, interactionType, onStart, onMove, onEnd, onBlur, onCancel]
   );
 
-  return { startDrag: startInteraction, onBlur: onEnd };
+  return { startDrag: startInteraction };
 };

@@ -37,9 +37,7 @@ export interface GridRowHeaderProps {
 export const GridRowHeader = React.memo(
   ({ rowId, toggleIsCollapsed, collapseButtonRef }: GridRowHeaderProps) => {
     const { gridLayoutStateManager } = useGridLayoutContext();
-    const { startDrag, onBlur } = useGridLayoutRowEvents({
-      rowId,
-    });
+    const { startDrag, onBlur } = useGridLayoutRowEvents({ rowId });
 
     const [isActive, setIsActive] = useState<boolean>(false);
     const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);

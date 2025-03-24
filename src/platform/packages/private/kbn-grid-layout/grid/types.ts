@@ -41,7 +41,7 @@ export interface GridSettings {
   gutterSize: number;
   rowHeight: number;
   columnCount: number;
-  dragTopOffset: number;
+  keyboardDragTopLimit: number;
 }
 
 /**

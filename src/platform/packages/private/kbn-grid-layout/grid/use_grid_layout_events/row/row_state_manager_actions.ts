@@ -11,10 +11,10 @@ import deepEqual from 'fast-deep-equal';
 import { cloneDeep, pick } from 'lodash';
 import { MutableRefObject } from 'react';
 
-import { GridLayoutStateManager } from '../types';
-import { getRowKeysInOrder } from '../utils/resolve_grid_row';
-import { getSensorPosition } from './sensors';
-import { PointerPosition, UserInteractionEvent } from './types';
+import { GridLayoutStateManager } from '../../types';
+import { getRowKeysInOrder } from '../../utils/resolve_grid_row';
+import { getSensorPosition } from '../sensors';
+import { PointerPosition, UserInteractionEvent } from '../types';
 
 export const startAction = (
   e: UserInteractionEvent,
