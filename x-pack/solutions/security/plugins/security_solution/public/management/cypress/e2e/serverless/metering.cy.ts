@@ -26,6 +26,7 @@ describe(
         kbnServerArgs: [
           `--xpack.securitySolutionServerless.usageReportingTaskInterval=1m`,
           `--xpack.securitySolutionServerless.usageApi.url=http://localhost:3623`,
+          `--logging.loggers=[{ "name": "plugins.securitySolutionServerless", "level": "debug" }]`,
         ],
       },
     },
