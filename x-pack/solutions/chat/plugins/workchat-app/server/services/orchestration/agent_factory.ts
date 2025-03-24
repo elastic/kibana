@@ -57,6 +57,6 @@ export class AgentFactory {
       chatModelOptions: {},
     });
 
-    return await createAgentRunner({ agent, chatModel, integrationsSession });
+    return await createAgentRunner({ agent, chatModel, integrationsSession, logger: this.logger });
   }
 }

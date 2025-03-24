@@ -7,6 +7,7 @@
 
 import { from, filter, shareReplay } from 'rxjs';
 import { StreamEvent } from '@langchain/core/tracers/log_stream';
+import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { Agent } from '../../../common/agents';
 import { IntegrationsSession } from '../integrations/integrations_session';
@@ -16,10 +17,12 @@ import { langchainToChatEvents, conversationEventsToMessages } from './utils';
 import type { AgentRunner, AgentRunResult } from './types';
 
 export const createAgentRunner = async ({
+  logger,
   agent,
   chatModel,
   integrationsSession,
 }: {
+  logger: Logger;
   agent: Agent;
   chatModel: InferenceChatModel;
   integrationsSession: IntegrationsSession;
@@ -54,10 +57,14 @@ export const createAgentRunner = async ({
 
       events$.subscribe({
         complete: () => {
-          integrationsSession.disconnect();
+          integrationsSession.disconnect().catch((err) => {
+            logger.warn(`Error disconnecting integrations: ${err.message}`);
+          });
         },
         error: () => {
-          integrationsSession.disconnect();
+          integrationsSession.disconnect().catch((err) => {
+            logger.warn(`Error disconnecting integrations: ${err.message}`);
+          });
         },
       });
 
