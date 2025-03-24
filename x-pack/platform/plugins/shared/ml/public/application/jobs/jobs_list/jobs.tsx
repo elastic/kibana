@@ -77,28 +77,31 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh, r
               defaultMessage="Anomaly Detection Jobs"
             />
           </EuiFlexItem>
-          <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <SuppliedConfigurationsButton />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <AnomalyDetectionSettingsButton />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <SynchronizeSavedObjectsButton refreshJobs={refreshList} />
-            </EuiFlexItem>
+          <EuiFlexItem grow={true} />
+          <EuiFlexItem grow={false} justifyContent="flexEnd">
+            <EuiFlexGroup direction="row" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <SuppliedConfigurationsButton />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <AnomalyDetectionSettingsButton />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <SynchronizeSavedObjectsButton refreshJobs={refreshList} />
+              </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <ExportJobsFlyout isDisabled={!canCreateJob} currentTab={'anomaly-detector'} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ImportJobsFlyout isDisabled={!canCreateJob} onImportComplete={refreshList} />
-            </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ExportJobsFlyout isDisabled={!canCreateJob} currentTab={'anomaly-detector'} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ImportJobsFlyout isDisabled={!canCreateJob} onImportComplete={refreshList} />
+              </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <NewJobButton size="m" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <NewJobButton size="m" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
       <HeaderMenuPortal>

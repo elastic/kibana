@@ -10,6 +10,7 @@ import React, { useState, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, type ListingPageUrlState } from '@kbn/ml-url-state';
+import { css } from '@emotion/react';
 import { DataFrameAnalyticsList } from './components/analytics_list';
 import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
@@ -67,13 +68,14 @@ export const Page: FC = () => {
   return (
     <>
       <MlPageHeader>
-        <EuiFlexGroup direction="row" gutterSize="s">
-          <EuiFlexItem grow={true}>
+        <EuiFlexGroup direction="row" gutterSize="s" wrap={true}>
+          <EuiFlexItem grow={true} css={css({ minWidth: '400px' })}>
             <FormattedMessage
               id="xpack.ml.dataframe.analyticsList.title"
               defaultMessage="Data Frame Analytics Jobs"
             />
           </EuiFlexItem>
+          <EuiFlexItem grow={true} />
           <EuiFlexItem grow={false} justifyContent="flexEnd">
             <EuiFlexGroup direction="row" gutterSize="s">
               <EuiFlexItem grow={false}>
