@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
+ *
+ * PKI Funcitonality added by Antonio Piazza @antman1p
  */
 
 import { schema } from '@kbn/config-schema';
@@ -32,6 +34,32 @@ export const ConfigSchema = schema.oneOf([
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.Other)]),
     apiUrl: schema.string(),
     defaultModel: schema.string(),
+    headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  }),
+  // Added PKI OpenAI schema
+  schema.object({
+    apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.PkiOpenAi)]),
+    apiUrl: schema.string(),
+    defaultModel: schema.string({ defaultValue: DEFAULT_OPENAI_MODEL }),
+    certPath: schema.string({
+      validate: (value) => {
+        if (!value.endsWith('.pem')) {
+          return 'Certificate path must end with .pem';
+        }
+      }
+    }),
+    keyPath: schema.string({
+      validate: (value) => {
+        if (!value.endsWith('.pem')) {
+          return 'Private key path must end with .pem';
+        }
+      }
+    }),
+    verificationMode: schema.oneOf([
+      schema.literal('full'),
+      schema.literal('certificate'),
+      schema.literal('none'),
+    ], { defaultValue: 'full' }),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
 ]);
