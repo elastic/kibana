@@ -335,7 +335,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               onSearch={handleOnSearch}
               placeholder={labels.searchPlaceholderInfo}
               hasPolicyFilter
-              policyList={policiesRequest.data?.items}
               defaultIncludedPolicies={includedPolicies}
             />
 

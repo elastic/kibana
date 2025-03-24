@@ -11,7 +11,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiButton } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import type { PolicySelectorMenuButtonProps } from '../policy_selector';
 import { PolicySelectorMenuButton } from '../policy_selector';
-import type { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 const GLOBAL_ENTRIES = i18n.translate(
@@ -31,7 +30,6 @@ export interface SearchExceptionsProps {
   defaultValue?: string;
   placeholder: string;
   hasPolicyFilter?: boolean;
-  policyList?: ImmutableArray<PolicyData>;
   defaultIncludedPolicies?: string;
   hideRefreshButton?: boolean;
   onSearch(
@@ -50,7 +48,6 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
     onSearch,
     placeholder,
     hasPolicyFilter,
-    policyList,
     defaultIncludedPolicies = '',
     hideRefreshButton = false,
   }) => {
@@ -142,7 +139,7 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
             data-test-subj="searchField"
           />
         </EuiFlexItem>
-        {canCreateArtifactsByPolicy && hasPolicyFilter && policyList ? (
+        {canCreateArtifactsByPolicy && hasPolicyFilter ? (
           <EuiFlexItem grow={false}>
             <PolicySelectorMenuButton
               selectedPolicyIds={includedPolicies}
