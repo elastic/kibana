@@ -81,12 +81,15 @@ export const ConnectToApiFlyout: React.FC<ConnectToApiFlyoutProps> = ({ onClose,
         <EuiSpacer />
         <EuiAccordion
           id="connectToIndexNewIndexAccordion"
-          buttonContent={i18n.translate(
-            'xpack.searchSynonyms.ConnectToApiFlyout.exampleButton.newIndex',
-            {
-              defaultMessage: 'Example with new index',
-            }
-          )}
+          buttonContent={
+            <EuiTitle size="xs">
+              <h3>
+                {i18n.translate('xpack.searchSynonyms.ConnectToApiFlyout.exampleButton.newIndex', {
+                  defaultMessage: 'Assigning to a new index',
+                })}
+              </h3>
+            </EuiTitle>
+          }
           initialIsOpen
         >
           <EuiSpacer size="m" />
@@ -99,12 +102,18 @@ export const ConnectToApiFlyout: React.FC<ConnectToApiFlyoutProps> = ({ onClose,
         <EuiSpacer size="l" />
         <EuiAccordion
           id="connectToIndexExistingIndexAccordion"
-          buttonContent={i18n.translate(
-            'xpack.searchSynonyms.ConnectToApiFlyout.exampleButton.existingIndex',
-            {
-              defaultMessage: 'Example with existing index',
-            }
-          )}
+          buttonContent={
+            <EuiTitle size="xs">
+              <h3>
+                {i18n.translate(
+                  'xpack.searchSynonyms.ConnectToApiFlyout.exampleButton.existingIndex',
+                  {
+                    defaultMessage: 'Assigning to an existing index',
+                  }
+                )}
+              </h3>
+            </EuiTitle>
+          }
           initialIsOpen
         >
           <EuiSpacer size="m" />
