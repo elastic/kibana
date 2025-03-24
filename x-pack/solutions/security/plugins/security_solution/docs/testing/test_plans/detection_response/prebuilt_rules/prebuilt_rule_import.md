@@ -89,6 +89,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - **This rule is already created**: a custom rule with the same `rule_id` has been already created and exists as an alerting rule saved object.
 - **This rule has a base version in the installed package**: package with prebuilt rules has been installed, and the rule's `rule_id` and `version` fields match one of the rule assets from this package.
 - **This rule has a base version in the latest package**: the rule's `rule_id` and `version` fields match one of the rule assets from the latest version of the package with prebuilt rules. It is likely assumed or stated explicitly that the latest package hasn't been installed yet.
+- **Rule should be updated**: the saved object of the rule should be updated by the Alerting Framework; in practice this means, for example, updating the `updated_at` and `updated_by` fields, which can be checked in tests.
 
 ## Requirements
 
