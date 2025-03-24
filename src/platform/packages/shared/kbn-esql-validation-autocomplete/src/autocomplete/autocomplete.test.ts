@@ -319,7 +319,7 @@ describe('autocomplete', () => {
 
     // FROM source METADATA
     recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
-    testSuggestions('FROM index1 M/', ['METADATA $0']);
+    testSuggestions('FROM index1 M/', ['METADATA ']);
 
     // FROM source METADATA field
     testSuggestions('FROM index1 METADATA _/', METADATA_FIELDS);
@@ -327,11 +327,12 @@ describe('autocomplete', () => {
     // EVAL argument
     testSuggestions('FROM index1 | EVAL b/', [
       'var0 = ',
-      ...getFieldNamesByType('any'),
+      ...getFieldNamesByType('any').map((name) => `${name} `),
       ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
     ]);
 
     testSuggestions('FROM index1 | EVAL var0 = f/', [
+      ...getFieldNamesByType('any').map((name) => `${name} `),
       ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
     ]);
 
@@ -569,7 +570,7 @@ describe('autocomplete', () => {
     testSuggestions('FROM a /', [
       attachTriggerCommand('| '),
       ',',
-      attachAsSnippet(attachTriggerCommand('METADATA $0')),
+      attachTriggerCommand('METADATA '),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
@@ -674,7 +675,6 @@ describe('autocomplete', () => {
           {
             text: 'foo$bar METADATA ',
             filterText: 'foo$bar',
-            asSnippet: false, // important because the text includes "$"
             command: TRIGGER_SUGGESTION_COMMAND,
             rangeToReplace: { start: 6, end: 13 },
           },
@@ -707,7 +707,7 @@ describe('autocomplete', () => {
 
     recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
     // FROM source METADATA
-    testSuggestions('FROM index1 M/', [attachAsSnippet(attachTriggerCommand('METADATA $0'))]);
+    testSuggestions('FROM index1 M/', [attachTriggerCommand('METADATA ')]);
 
     describe('ENRICH', () => {
       testSuggestions(
@@ -1008,10 +1008,6 @@ describe('autocomplete', () => {
       'AND $0',
       'NOT',
       'OR $0',
-      // pipe doesn't make sense here, but Monaco will filter it out.
-      // see https://github.com/elastic/kibana/issues/199401 for an explanation
-      // of why this happens
-      '| ',
     ]);
     testSuggestions('FROM a | WHERE doubleField IS N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 32 } },
@@ -1022,10 +1018,6 @@ describe('autocomplete', () => {
       'AND $0',
       'NOT',
       'OR $0',
-      // pipe doesn't make sense here, but Monaco will filter it out.
-      // see https://github.com/elastic/kibana/issues/199401 for an explanation
-      // of why this happens
-      '| ',
     ]);
     testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 35 } },
