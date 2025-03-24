@@ -173,13 +173,13 @@ export const functions = {
   -->
 
   ### MEDIAN
-  The value that is greater than half of all values and less than half of all values, also known as the 50% \`PERCENTILE\`.
+  The value that is greater than half of all values and less than half of all values, also known as the 50% [\`PERCENTILE\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-percentile).
 
   \`\`\` esql
   FROM employees
   | STATS MEDIAN(salary), PERCENTILE(salary, 50)
   \`\`\`
-  Note: Like \`PERCENTILE\`, \`MEDIAN\` is usually approximate.
+  Note: Like [\`PERCENTILE\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-percentile), \`MEDIAN\` is [usually approximate](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-percentile-approximate).
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -216,7 +216,7 @@ export const functions = {
   FROM employees
   | STATS MEDIAN(salary), MEDIAN_ABSOLUTE_DEVIATION(salary)
   \`\`\`
-  Note: Like \`PERCENTILE\`, \`MEDIAN_ABSOLUTE_DEVIATION\` is usually approximate.
+  Note: Like [\`PERCENTILE\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-percentile), \`MEDIAN_ABSOLUTE_DEVIATION\` is [usually approximate](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-percentile-approximate).
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -477,7 +477,7 @@ export const functions = {
   -->
 
   ### VALUES
-  Returns all values in a group as a multivalued field. The order of the returned values isn’t guaranteed. If you need the values returned in order use esql-mv_sort.
+  Returns all values in a group as a multivalued field. The order of the returned values isn’t guaranteed. If you need the values returned in order use [\`MV_SORT\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-mv_sort).
 
   \`\`\` esql
     FROM employees
