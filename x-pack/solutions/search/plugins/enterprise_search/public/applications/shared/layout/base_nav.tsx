@@ -133,6 +133,14 @@ export const buildBaseClassicNavItems = ({
         },
         id: 'synonyms',
       },
+      {
+        'data-test-subj': 'searchSideNav-QueryRules',
+        deepLink: {
+          link: 'searchQueryRules',
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'searchQueryRules',
+      },
     ],
     name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {
       defaultMessage: 'Relevance',

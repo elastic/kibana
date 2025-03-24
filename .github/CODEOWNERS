@@ -797,6 +797,7 @@ src/platform/packages/shared/kbn-scout @elastic/appex-qa
 src/platform/packages/private/kbn-scout-info @elastic/appex-qa
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 src/platform/packages/private/kbn-scout-reporting @elastic/appex-qa
+x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa
 examples/screenshot_mode_example @elastic/appex-sharedux
 src/platform/plugins/shared/screenshot_mode @elastic/appex-sharedux
 x-pack/examples/screenshotting_example @elastic/appex-sharedux
@@ -817,6 +818,7 @@ x-pack/solutions/search/plugins/search_inference_endpoints @elastic/search-kiban
 x-pack/solutions/search/plugins/search_solution/search_navigation @elastic/search-kibana
 x-pack/solutions/search/plugins/search_notebooks @elastic/search-kibana
 x-pack/solutions/search/plugins/search_playground @elastic/search-kibana
+x-pack/solutions/search/plugins/search_query_rules @elastic/search-kibana
 src/platform/packages/shared/kbn-search-response-warnings @elastic/kibana-data-discovery
 x-pack/solutions/search/packages/shared-ui @elastic/search-kibana
 x-pack/solutions/search/plugins/search_synonyms @elastic/search-kibana
@@ -1620,6 +1622,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /.ci/.storybook @elastic/kibana-operations
 
 # QA - Appex QA
+.buildkite/scout_ci_config.yml @elastic/appex-qa
 /x-pack/test/.gitignore @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/es/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/oblt/roles.yml @elastic/appex-qa
