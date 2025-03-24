@@ -90,7 +90,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('GET /internal/observability_ai_assistant/functions/recall', () => {
       it('produces unique scores for each doc', async () => {
         const entries = await recall('What happened during the database outage?');
-        const uniqueScores = uniq(entries.map(({ score }) => score));
+        const uniqueScores = uniq(entries.map(({ esScore }) => esScore));
         expect(uniqueScores.length).to.be.greaterThan(1);
         expect(uniqueScores.length).to.be(8);
       });
@@ -104,7 +104,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       it('returns entries in a consistent order', async () => {
         const entries = await recall('whales');
 
-        expect(entries.map(({ id, score }) => `${formatScore(score!)} - ${id}`)).to.eql([
+        expect(entries.map(({ id, esScore }) => `${formatScore(esScore!)} - ${id}`)).to.eql([
           'high - animal_whale_migration_patterns',
           'low - animal_elephants_social_structure',
           'low - technical_api_gateway_timeouts',
@@ -118,12 +118,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('returns the "Cheetah" entry from search connectors as the top result', async () => {
         const entries = await recall('Cheetah');
-        const { text, score } = first(entries)!;
+        const { text, esScore } = first(entries)!;
 
         // search connector entries have their entire doc stringified in `text` field
         const parsedDoc = JSON.parse(text) as { title: string; text: string };
         expect(parsedDoc.title).to.eql('The Life of a Cheetah');
-        expect(score).to.greaterThan(0.1);
+        expect(esScore).to.greaterThan(0.1);
       });
 
       it('returns different result order for different queries', async () => {

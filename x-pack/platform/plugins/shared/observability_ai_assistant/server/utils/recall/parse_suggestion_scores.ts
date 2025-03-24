@@ -7,7 +7,7 @@
 
 export function parseSuggestionScores(scoresAsString: string) {
   // make sure that spaces, semi-colons etc work as separators as well
-  const scores = scoresAsString
+  const llmScores = scoresAsString
     .replace(/[^0-9a-zA-Z\-_,]/g, ' ')
     .trim()
     .split(/\s+/)
@@ -16,9 +16,9 @@ export function parseSuggestionScores(scoresAsString: string) {
 
       return {
         id,
-        score: parseInt(score, 10),
+        llmScore: parseInt(score, 10),
       };
     });
 
-  return scores;
+  return llmScores;
 }
