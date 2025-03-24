@@ -62,7 +62,7 @@ function StaleAlert({
       // 1. The alert has been active for more than 5 days
       // 2. The alert has no cases associated with it
       // 3. The rule is snoozed with no notifications
-      if ((diffInDays >= 0 && numOfCases === 0) || rule?.isSnoozedUntil || rule?.muteAll) {
+      if (diffInDays >= 5 && numOfCases === 0 && (rule?.isSnoozedUntil || rule?.muteAll)) {
         trackEvent({
           app: 'alerts',
           metricType: METRIC_TYPE.LOADED,
