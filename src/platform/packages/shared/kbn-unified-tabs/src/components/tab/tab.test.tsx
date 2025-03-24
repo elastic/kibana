@@ -12,6 +12,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Tab } from './tab';
 import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../../constants';
+import { TabStatus } from '../../types';
+import { servicesMock } from '../../../__mocks__/services';
 
 const tabItem = {
   id: 'test-id',
@@ -27,6 +29,13 @@ const tabsSizeConfig = {
   regularTabMinWidth: MIN_TAB_WIDTH,
 };
 
+const previewQuery = {
+  query: {
+    esql: 'SELECT * FROM table',
+  },
+  status: TabStatus.SUCCESS,
+};
+
 describe('Tab', () => {
   it('renders tab', async () => {
     const onLabelEdited = jest.fn();
@@ -39,13 +48,17 @@ describe('Tab', () => {
         tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
+        services={servicesMock}
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
+        tabPreviewData={previewQuery}
       />
     );
 
-    expect(screen.getByText(tabItem.label)).toBeInTheDocument();
+    const tabButton = screen.getByTestId(tabButtonTestSubj);
+    expect(tabButton).toBeInTheDocument();
+    expect(tabButton).toHaveTextContent(tabItem.label);
 
     const tab = screen.getByRole('tab');
     expect(tab).toHaveAttribute('id', `tab-${tabItem.id}`);
@@ -54,7 +67,6 @@ describe('Tab', () => {
     expect(onSelect).toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
 
-    const tabButton = screen.getByTestId(tabButtonTestSubj);
     tabButton.click();
     expect(onSelect).toHaveBeenCalledTimes(2);
 
@@ -81,10 +93,12 @@ describe('Tab', () => {
         tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
+        services={servicesMock}
         getTabMenuItems={getTabMenuItems}
         onLabelEdited={jest.fn()}
         onSelect={jest.fn()}
         onClose={jest.fn()}
+        tabPreviewData={previewQuery}
       />
     );
 
@@ -110,14 +124,16 @@ describe('Tab', () => {
         tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
+        services={servicesMock}
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
+        tabPreviewData={previewQuery}
       />
     );
 
     expect(screen.queryByTestId(tabButtonTestSubj)).toBeInTheDocument();
-    await userEvent.dblClick(screen.getByText(tabItem.label));
+    await userEvent.dblClick(screen.getByTestId(tabButtonTestSubj));
     expect(onSelect).toHaveBeenCalled();
     expect(screen.queryByTestId(tabButtonTestSubj)).not.toBeInTheDocument();
 
@@ -143,14 +159,16 @@ describe('Tab', () => {
         tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
         isSelected={false}
+        services={servicesMock}
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
+        tabPreviewData={previewQuery}
       />
     );
 
     expect(screen.queryByTestId(tabButtonTestSubj)).toBeInTheDocument();
-    await userEvent.dblClick(screen.getByText(tabItem.label));
+    await userEvent.dblClick(screen.getByTestId(tabButtonTestSubj));
     expect(onSelect).toHaveBeenCalled();
     expect(screen.queryByTestId(tabButtonTestSubj)).not.toBeInTheDocument();
 
