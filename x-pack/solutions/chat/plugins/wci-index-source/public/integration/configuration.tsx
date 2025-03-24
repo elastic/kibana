@@ -109,8 +109,8 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
             </EuiCallOut>
           </EuiFormRow>
         ) : (
-          filterFieldsArray.fields.map((field, index) => (
-            <EuiPanel paddingSize="s" key={field.id} style={{ marginBottom: '8px' }}>
+          filterFieldsArray.fields.map((filterField, index) => (
+            <EuiPanel paddingSize="s" key={filterField.id} style={{ marginBottom: '8px' }}>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem>
                   <EuiFormRow label="Field name">
@@ -204,8 +204,8 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
             </EuiCallOut>
           </EuiFormRow>
         ) : (
-          contextFieldsArray.fields.map((field, index) => (
-            <EuiPanel paddingSize="s" key={field.id} style={{ marginBottom: '8px' }}>
+          contextFieldsArray.fields.map((contextField, index) => (
+            <EuiPanel paddingSize="s" key={contextField.id} style={{ marginBottom: '8px' }}>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem>
                   <EuiFormRow label="Field name">

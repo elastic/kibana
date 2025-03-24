@@ -10,8 +10,6 @@ import type { Integration } from '../integrations';
 
 export type IntegrationType = string;
 
-export interface ListIntegrationsPayload {}
-
 export interface ListIntegrationsResponse {
   integrations: Integration[];
 }
