@@ -181,7 +181,7 @@ And should bring the user to the rule edit page when clicked on
 
 #### **Scenario: User can bulk edit prebuilt rules from rules management page**
 
-**Automation**: 1 Cypress test for each bulk action type.
+**Automation**: a Cypress test for each bulk action type.
 
 ```Gherkin
 Given a space with N (where N > 1) prebuilt rules installed
@@ -201,9 +201,7 @@ And the update should be reflected on the rule details page
 ```Gherkin
 Given a Kibana installation running under an insufficient license
 When user navigates to the rule edit page of a prebuilt rule
-Then the Actions view of the rule edit page should be displayed
-And user should be able to edit rule actions
-And About, Definition and Schedule views should be disabled
+Then About, Definition and Schedule views should be disabled
 When user tries to access the disabled views
 Then they should see a message that editing is not allowed under the current license
 And required license name should be included in the message
