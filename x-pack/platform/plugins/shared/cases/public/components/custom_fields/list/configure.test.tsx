@@ -59,7 +59,7 @@ describe('Configure', () => {
     await userEvent.paste('Default value');
     await userEvent.selectOptions(
       await screen.findByTestId('list-custom-field-default-value'),
-      await screen.getByRole('option', { name: 'Default value' })
+      screen.getByRole('option', { name: 'Default value' })
     );
 
     await userEvent.click(await screen.findByTestId('form-test-component-submit-button'));

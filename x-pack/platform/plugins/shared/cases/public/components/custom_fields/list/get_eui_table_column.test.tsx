@@ -6,19 +6,13 @@
  */
 import React from 'react';
 
-import { screen } from '@testing-library/react';
+import { screen, render } from '@testing-library/react';
 
 import { CustomFieldTypes } from '../../../../common/types/domain';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import { getEuiTableColumn } from './get_eui_table_column';
 
 describe('getEuiTableColumn ', () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
-
     jest.clearAllMocks();
   });
 
@@ -41,7 +35,7 @@ describe('getEuiTableColumn ', () => {
 
     const column = getEuiTableColumn({ label: 'MockLabel', options });
 
-    appMockRender.render(<div>{column.render({ key, type: CustomFieldTypes.LIST, value })}</div>);
+    render(<div>{column.render({ key, type: CustomFieldTypes.LIST, value })}</div>);
 
     expect(screen.getByTestId(`list-custom-field-column-view-${key}`)).toBeInTheDocument();
     expect(screen.getByTestId(`list-custom-field-column-view-${key}`)).toHaveTextContent(

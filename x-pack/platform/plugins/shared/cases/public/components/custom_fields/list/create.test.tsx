@@ -104,7 +104,7 @@ describe('Create', () => {
 
     await userEvent.selectOptions(
       listCustomField,
-      await screen.getByRole('option', { name: 'Option 2' })
+      screen.getByRole('option', { name: 'Option 2' })
     );
 
     await userEvent.click(await screen.findByText('Submit'));

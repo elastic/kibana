@@ -231,7 +231,7 @@ describe('CaseFormFields', () => {
 
     await user.selectOptions(
       listCustomField,
-      await within(listCustomField).getByRole('option', { name: 'Option 2' })
+      within(listCustomField).getByRole('option', { name: 'Option 2' })
     );
 
     await user.click(await screen.findByText('Submit'));
