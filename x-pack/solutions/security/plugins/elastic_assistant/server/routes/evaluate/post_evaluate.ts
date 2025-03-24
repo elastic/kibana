@@ -490,9 +490,6 @@ export const postEvaluateRoute = (
               .catch((err) => {
                 logger.error(`evaluation error:\n ${JSON.stringify(err, null, 2)}`);
               })
-              .finally(async () => {
-                //await prepareIndicesForAssistantGraph.cleanup();
-              });
           });
 
           return response.ok({

@@ -13,9 +13,9 @@ describe('esql self healing validator utils', () => {
   it('with errors', () => {
     const query = 'FROM .logs\n| LIMIT 100';
     const message = `Here is the ESQL query to fetch 100 documents from the .logs index
-        \`\`\`esql
-        ${query}
-        \`\`\``;
+\`\`\`esql
+${query}
+\`\`\``;
 
     const validateEsqlResult: ValidateEsqlResult = {
       query,
@@ -32,8 +32,16 @@ describe('esql self healing validator utils', () => {
     expect(result.content).toContain(
       'The above query has the following errors that still need to be fixed'
     );
-    expect(result.content).toContain('1:10 Syntax error');
-    expect(result.content).toContain('Unknown index .logs');
+    expect(result.content).toEqual(`Here is the ESQL query to fetch 100 documents from the .logs index
+\`\`\`esql
+FROM .logs
+| LIMIT 100
+\`\`\`
+The above query has the following errors that still need to be fixed:
+1:10 Syntax error
+Unknown index .logs
+
+`);
   });
 
   it('without errors', () => {
