@@ -714,13 +714,14 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from a_index | dissect textField "%{firstWord}" option ', [
         "SyntaxError: mismatched input '<EOF>' expecting '='",
+        'Expected [APPEND_SEPARATOR] in [DISSECT] but found [option]',
       ]);
       testErrorsAndWarnings('from a_index | dissect textField "%{firstWord}" option = ', [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}",
-        'Invalid option for DISSECT: [option]',
+        'Expected [APPEND_SEPARATOR] in [DISSECT] but found [option]',
       ]);
       testErrorsAndWarnings('from a_index | dissect textField "%{firstWord}" option = 1', [
-        'Invalid option for DISSECT: [option]',
+        'Expected [APPEND_SEPARATOR] in [DISSECT] but found [option]',
       ]);
       testErrorsAndWarnings(
         'from a_index | dissect textField "%{firstWord}" append_separator = "-"',
@@ -728,11 +729,11 @@ describe('validation logic', () => {
       );
       testErrorsAndWarnings(
         'from a_index | dissect textField "%{firstWord}" ignore_missing = true',
-        ['Invalid option for DISSECT: [ignore_missing]']
+        ['Expected [APPEND_SEPARATOR] in [DISSECT] but found [ignore_missing]']
       );
       testErrorsAndWarnings(
         'from a_index | dissect textField "%{firstWord}" append_separator = true',
-        ['Invalid value for DISSECT append_separator: expected a string, but was [true]']
+        ['Invalid value for DISSECT APPEND_SEPARATOR: expected a string, but was [true]']
       );
       testErrorsAndWarnings('from a_index | dissect textField "%{firstWord}" | keep firstWord', []);
       // testErrorsAndWarnings('from a_index | dissect s* "%{a}"', [
