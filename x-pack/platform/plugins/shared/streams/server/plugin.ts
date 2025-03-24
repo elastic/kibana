@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import {
   CoreSetup,
   CoreStart,
@@ -14,18 +16,21 @@ import {
   PluginConfigDescriptor,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
+import { Dataset, createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { StreamsConfig, configSchema, exposeToBrowserConfig } from '../common/config';
+import { esqlRuleType } from './lib/rules/esql/register';
+import { AssetService } from './lib/streams/assets/asset_service';
+import { StreamsService } from './lib/streams/service';
+import { StreamsTelemetryService } from './lib/telemetry/service';
 import { streamsRouteRepository } from './routes';
+import { RouteHandlerScopedClients } from './routes/types';
 import {
   StreamsPluginSetupDependencies,
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
-import { AssetService } from './lib/streams/assets/asset_service';
-import { RouteHandlerScopedClients } from './routes/types';
-import { StreamsService } from './lib/streams/service';
-import { StreamsTelemetryService } from './lib/telemetry/service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -101,6 +106,27 @@ export class StreamsPlugin
       logger: this.logger,
       runDevModeChecks: this.isDev,
     });
+
+    const ruleDataClient = plugins.ruleRegistry.ruleDataService.initializeIndex({
+      feature: 'observability',
+      registrationContext: 'observability.streams',
+      dataset: Dataset.alerts,
+      componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
+      componentTemplates: [
+        {
+          name: 'mappings',
+          mappings: mappingFromFieldMap(technicalRuleFieldMap, false),
+        },
+      ],
+    });
+
+    const persistenceRuleTypeWrapper = createPersistenceRuleTypeWrapper({
+      ruleDataClient,
+      logger: this.logger,
+      formatAlert: undefined,
+    });
+
+    plugins.alerting.registerType(persistenceRuleTypeWrapper(esqlRuleType()));
 
     return {};
   }
