@@ -7,7 +7,7 @@
 
 import type { EntityAnalyticsPrivileges } from '../api/entity_analytics';
 
-interface MissingPrivileges {
+export interface MissingPrivileges {
   elasticsearch: {
     index: Array<{ indexName: string; privileges: string[] }>;
     cluster: string[];
