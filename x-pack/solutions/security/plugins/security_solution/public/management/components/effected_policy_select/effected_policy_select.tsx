@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import type { EuiButtonGroupOptionProps, EuiSelectableProps } from '@elastic/eui';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiButtonGroup,
@@ -63,35 +63,21 @@ const EffectivePolicyFormContainer = styled.div`
   }
 `;
 
-interface OptionPolicyData {
-  policy: PolicyData;
-}
-
 export interface EffectedPolicySelection {
   isGlobal: boolean;
   selected: PolicyData[];
 }
 
-export type EffectedPolicySelectProps = Omit<
-  EuiSelectableProps<OptionPolicyData>,
-  'onChange' | 'options' | 'children' | 'searchable' | 'isLoading' | 'isPreFiltered'
-> & {
+export interface EffectedPolicySelectProps {
   item: ExceptionListItemSchema | CreateExceptionListItemSchema;
   description?: string;
   onChange: (updatedItem: ExceptionListItemSchema | CreateExceptionListItemSchema) => void;
   disabled?: boolean;
-};
+  'data-test-subj'?: string;
+}
 
 export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
-  ({
-    item,
-    description,
-    onChange,
-    listProps,
-    disabled = false,
-    'data-test-subj': dataTestSubj,
-    ...otherSelectableProps
-  }) => {
+  ({ item, description, onChange, disabled = false, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isSpaceAwarenessEnabled = useIsExperimentalFeatureEnabled(
       'endpointManagementSpaceAwarenessEnabled'
