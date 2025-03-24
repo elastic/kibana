@@ -9,30 +9,37 @@ import React from 'react';
 
 import { EuiFlyoutBody, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataStreamMetadata } from '../../../../../../../../../common/types';
+import type {
+  DataStreamMetadata,
+  DataStreamResolutionType,
+} from '../../../../../../../../../common/types';
 
 interface Props {
-  meta: DataStreamMetadata;
+  meta?: DataStreamMetadata | null;
+  resolutionType?: DataStreamResolutionType;
 }
 
-export const ReindexingCompletedFlyoutStep: React.FunctionComponent<Props> = ({ meta }: Props) => {
+export const MigrationCompletedFlyoutStep: React.FunctionComponent<Props> = ({
+  meta,
+  resolutionType,
+}: Props) => {
   return (
     <>
       <EuiFlyoutBody>
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.acceptChangesTitle"
-              defaultMessage="Data Stream Reindexing Complete"
+              id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.acceptChangesTitle"
+              defaultMessage="Data Stream Migration Complete"
             />
           </h3>
         </EuiTitle>
         <EuiSpacer size="m" />
         <p>
           <FormattedMessage
-            id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.acceptChangesTitle"
-            defaultMessage="Success! {count, plural, =1 {# backing index} other {# backing indices}} successfully reindexed."
-            values={{ count: meta.indicesRequiringUpgradeCount }}
+            id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.acceptChangesTitle"
+            defaultMessage="Success! {count, plural, =0 {backing indices} =1 {# backing index} other {# backing indices}} successfully {resolutionType, select, reindex {reindexed} readonly {marked as read-only} other {migrated}}."
+            values={{ count: meta?.indicesRequiringUpgradeCount || 0, resolutionType }}
           />
         </p>
       </EuiFlyoutBody>

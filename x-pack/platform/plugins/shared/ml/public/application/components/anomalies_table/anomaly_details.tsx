@@ -40,14 +40,14 @@ import {
 
 interface Props {
   anomaly: MlAnomaliesTableRecordExtended;
-  examples: string[];
-  definition: CategoryDefinition;
   isAggregatedData: boolean;
-  filter: EntityCellFilter;
   influencersLimit: number;
-  influencerFilter: EntityCellFilter;
   tabIndex: number;
   job: ExplorerJob;
+  definition?: CategoryDefinition;
+  examples?: string[];
+  filter?: EntityCellFilter;
+  influencerFilter?: EntityCellFilter;
 }
 
 export const AnomalyDetails: FC<Props> = ({
@@ -117,10 +117,10 @@ export const AnomalyDetails: FC<Props> = ({
 const Contents: FC<{
   anomaly: MlAnomaliesTableRecordExtended;
   isAggregatedData: boolean;
-  filter: EntityCellFilter;
   influencersLimit: number;
-  influencerFilter: EntityCellFilter;
   job: ExplorerJob;
+  filter?: EntityCellFilter;
+  influencerFilter?: EntityCellFilter;
 }> = ({ anomaly, isAggregatedData, filter, influencersLimit, influencerFilter, job }) => {
   const {
     euiTheme: { colors },
@@ -185,7 +185,7 @@ const Description: FC<{ anomaly: MlAnomaliesTableRecordExtended }> = ({ anomaly 
 const Details: FC<{
   anomaly: MlAnomaliesTableRecordExtended;
   isAggregatedData: boolean;
-  filter: EntityCellFilter;
+  filter?: EntityCellFilter;
   job: ExplorerJob;
 }> = ({ anomaly, isAggregatedData, filter, job }) => {
   const isInterimResult = anomaly.source?.is_interim ?? false;
@@ -230,7 +230,7 @@ const Details: FC<{
 const Influencers: FC<{
   anomaly: MlAnomaliesTableRecordExtended;
   influencersLimit: number;
-  influencerFilter: EntityCellFilter;
+  influencerFilter?: EntityCellFilter;
 }> = ({ anomaly, influencersLimit, influencerFilter }) => {
   const [showAllInfluencers, setShowAllInfluencers] = useState(false);
   const toggleAllInfluencers = setShowAllInfluencers.bind(null, (prev) => !prev);
@@ -239,7 +239,7 @@ const Influencers: FC<{
   let listItems: Array<{ title: string; description: React.ReactElement }> = [];
   let othersCount = 0;
   let numToDisplay = 0;
-  if (anomalyInfluencers !== undefined) {
+  if (anomalyInfluencers !== undefined && influencerFilter !== undefined) {
     numToDisplay =
       showAllInfluencers === true
         ? anomalyInfluencers.length
@@ -302,7 +302,7 @@ const Influencers: FC<{
   return null;
 };
 
-const CategoryExamples: FC<{ definition: CategoryDefinition; examples: string[] }> = ({
+const CategoryExamples: FC<{ definition?: CategoryDefinition; examples: string[] }> = ({
   definition,
   examples,
 }) => {
