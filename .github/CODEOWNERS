@@ -981,7 +981,7 @@ x-pack/solutions/search/packages/kbn-search-api-keys-components @elastic/search-
 x-pack/solutions/search/packages/kbn-search-api-keys-server @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-index-documents @elastic/search-kibana
 x-pack/solutions/search/packages/shared-ui @elastic/search-kibana
-x-pack/solutions/search/packages/workchat/wci-common @elastic/search-kibana
+x-pack/solutions/chat/packages/wci-common @elastic/search-kibana
 x-pack/solutions/chat/packages/wci-server @elastic/search-kibana
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
 x-pack/solutions/search/plugins/search_assistant @elastic/search-kibana
