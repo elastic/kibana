@@ -16,6 +16,8 @@ import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks
 import { AlertsFiltersFormContextProvider } from '../contexts/alerts_filters_form_context';
 import { AlertsFilterByRuleTypes } from './alerts_filter_by_rule_types';
 import { InternalRuleType } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
+import { filterMetadata } from './alerts_filter_by_rule_types';
+import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
@@ -91,5 +93,18 @@ describe('AlertsFilterByRuleTypes', () => {
     const comboboxInput = screen.getByTestId('comboBoxSearchInput');
     expect(comboboxInput).toHaveAttribute('aria-invalid', 'true');
     expect(comboboxInput).toHaveAttribute('disabled');
+  });
+
+  it('should have the correct metadata', () => {
+    expect(filterMetadata.id).toEqual('ruleTypes');
+    expect(filterMetadata.component).toEqual(AlertsFilterByRuleTypes);
+    expect(filterMetadata.isEmpty(undefined)).toEqual(true);
+    expect(filterMetadata.isEmpty([])).toEqual(true);
+    expect(filterMetadata.isEmpty(['test-type'])).toEqual(false);
+    expect(filterMetadata.toEsQuery(['test-type'])).toEqual({
+      terms: {
+        [ALERT_RULE_TYPE_ID]: ['test-type'],
+      },
+    });
   });
 });

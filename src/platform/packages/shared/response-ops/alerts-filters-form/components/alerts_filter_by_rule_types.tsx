@@ -13,7 +13,8 @@ import { i18n } from '@kbn/i18n';
 import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
 import { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
 import { SetRequired } from 'type-fest';
-import { AlertsFilterComponentType } from '../types';
+import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { AlertsFilterComponentType, AlertsFilterMetadata } from '../types';
 import { useAlertsFiltersFormContext } from '../contexts/alerts_filters_form_context';
 import { RULE_TYPES_FILTER_LABEL } from '../translations';
 
@@ -23,6 +24,7 @@ import { RULE_TYPES_FILTER_LABEL } from '../translations';
 export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
   value,
   onChange,
+  isDisabled = false,
 }) => {
   const { ruleTypeIds, http } = useAlertsFiltersFormContext();
 
@@ -61,7 +63,7 @@ export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
   return (
     <EuiFormRow
       label={RULE_TYPES_FILTER_LABEL}
-      isDisabled={isError}
+      isDisabled={isDisabled || isError}
       isInvalid={isError}
       error={i18n.translate('alertsFiltersForm.ruleTypes.errorDescription', {
         defaultMessage: 'Cannot load available rule types',
@@ -71,7 +73,7 @@ export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
       <EuiComboBox
         isClearable
         isLoading={isLoading}
-        isDisabled={isError}
+        isDisabled={isDisabled || isError}
         isInvalid={isError}
         options={options}
         selectedOptions={selectedOptions}
@@ -82,8 +84,16 @@ export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
   );
 };
 
-export const filterMetadata = {
+export const filterMetadata: AlertsFilterMetadata<string[]> = {
   id: 'ruleTypes',
   displayName: RULE_TYPES_FILTER_LABEL,
   component: AlertsFilterByRuleTypes,
-} as const;
+  isEmpty: (value?: string[]) => !value?.length,
+  toEsQuery: (value: string[]) => {
+    return {
+      terms: {
+        [ALERT_RULE_TYPE_ID]: value,
+      },
+    };
+  },
+};

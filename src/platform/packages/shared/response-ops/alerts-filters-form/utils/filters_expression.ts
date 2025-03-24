@@ -6,17 +6,17 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { AlertsFiltersExpression, Filter, FlattenedExpressionItem } from '../types';
+import type { AlertsFiltersExpression, AlertsFilter, FlattenedExpressionItem } from '../types';
 
-const isFilter = (item?: AlertsFiltersExpression | Filter): item is Filter =>
+const isFilter = (item?: AlertsFiltersExpression | AlertsFilter): item is AlertsFilter =>
   item != null && !('operator' in item);
 
 /**
  * Traverses the expression tree in pre-order and returns a flat array of
  * { operator: ... } | { filter: ... } items
  */
-export const flattenFiltersExpression = (expression: AlertsFiltersExpression | Filter) => {
-  const traverse = (node: AlertsFiltersExpression | Filter): FlattenedExpressionItem[] => {
+export const flattenFiltersExpression = (expression: AlertsFiltersExpression | AlertsFilter) => {
+  const traverse = (node: AlertsFiltersExpression | AlertsFilter): FlattenedExpressionItem[] => {
     if ('operator' in node) {
       return node.operands
         .map((operand) => traverse(operand))
@@ -69,7 +69,7 @@ export const reconstructFiltersExpression = (flatExpression: FlattenedExpression
           // If the last operand is a filter, add it to the newly
           // created and group
           if (isFilter(currentNode.operands[currentNode.operands.length - 1])) {
-            operands.push(currentNode.operands.pop() as Filter);
+            operands.push(currentNode.operands.pop() as AlertsFilter);
           }
           // Nest 'and' inside 'or' for operator precedence
           const newNode: AlertsFiltersExpression = {

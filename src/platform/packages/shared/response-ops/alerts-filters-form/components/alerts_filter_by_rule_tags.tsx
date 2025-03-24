@@ -12,9 +12,10 @@ import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
+import { ALERT_RULE_TAGS } from '@kbn/rule-data-utils';
 import { RULE_TAGS_FILTER_LABEL } from '../translations';
 import { useAlertsFiltersFormContext } from '../contexts/alerts_filters_form_context';
-import { AlertsFilterComponentType } from '../types';
+import { AlertsFilterComponentType, AlertsFilterMetadata } from '../types';
 
 /**
  * Filters by one or more rule tags
@@ -22,6 +23,7 @@ import { AlertsFilterComponentType } from '../types';
 export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
   value,
   onChange,
+  isDisabled = false,
 }) => {
   const {
     ruleTypeIds,
@@ -61,7 +63,7 @@ export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
   return (
     <EuiFormRow
       label={RULE_TAGS_FILTER_LABEL}
-      isDisabled={isError}
+      isDisabled={isDisabled || isError}
       isInvalid={isError}
       error={i18n.translate('alertsFiltersForm.ruleTags.errorDescription', {
         defaultMessage: 'Cannot load available rule tags',
@@ -71,7 +73,7 @@ export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
       <EuiComboBox
         isClearable
         isLoading={isLoading}
-        isDisabled={isError}
+        isDisabled={isDisabled || isError}
         isInvalid={isError}
         options={options}
         selectedOptions={selectedOptions}
@@ -82,8 +84,16 @@ export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
   );
 };
 
-export const filterMetadata = {
+export const filterMetadata: AlertsFilterMetadata<string[]> = {
   id: 'ruleTags',
   displayName: RULE_TAGS_FILTER_LABEL,
   component: AlertsFilterByRuleTags,
-} as const;
+  isEmpty: (value?: string[]) => !value?.length,
+  toEsQuery: (value: string[]) => {
+    return {
+      terms: {
+        [ALERT_RULE_TAGS]: value,
+      },
+    };
+  },
+};

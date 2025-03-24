@@ -20,10 +20,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import {
   AlertsFiltersExpression,
   AlertsFiltersFormItemType,
-  Filter,
+  AlertsFilter,
   FlattenedExpressionItem,
 } from '../types';
 import { DELETE_OPERAND_LABEL } from '../translations';
@@ -41,6 +42,7 @@ import {
 export interface AlertsFiltersFormProps {
   value?: AlertsFiltersExpression;
   onChange: (newValue: AlertsFiltersExpression) => void;
+  isDisabled?: boolean;
 }
 
 const DEFAULT_VALUE: AlertsFiltersExpression = {
@@ -49,21 +51,30 @@ const DEFAULT_VALUE: AlertsFiltersExpression = {
 };
 
 /**
- * A form to manage a boolean expression of filters for alerts searches
+ * A form to build boolean expressions of filters for alerts searches
  */
-export const AlertsFiltersForm = ({ value = DEFAULT_VALUE, onChange }: AlertsFiltersFormProps) => {
+export const AlertsFiltersForm = ({
+  value = DEFAULT_VALUE,
+  onChange,
+  isDisabled = false,
+}: AlertsFiltersFormProps) => {
   // Intermediate flattened expression state
   const [flatExpression, setFlatExpression] = useState(flattenFiltersExpression(value));
   const [firstItem, ...otherItems] = flatExpression as [
     {
-      filter: Filter;
+      filter: AlertsFilter;
     },
     ...FlattenedExpressionItem[]
   ];
 
+  useDeepCompareEffect(() => {
+    // From tree to flat (using deep comparison to avoid infinite loops)
+    setFlatExpression(flattenFiltersExpression(value));
+  }, [value]);
+
   useEffect(() => {
     // From flat to tree
-    onChange?.(reconstructFiltersExpression(flatExpression));
+    onChange(reconstructFiltersExpression(flatExpression));
   }, [flatExpression, onChange]);
 
   const addOperand = useCallback((operator: AlertsFiltersExpression['operator']) => {
@@ -89,7 +100,7 @@ export const AlertsFiltersForm = ({ value = DEFAULT_VALUE, onChange }: AlertsFil
         if ('filter' in oldExpression[atIndex]) {
           oldExpression[atIndex] = {
             filter: {
-              ...(oldExpression[atIndex] as { filter: Filter }).filter,
+              ...(oldExpression[atIndex] as { filter: AlertsFilter }).filter,
               type: newType,
             },
           };
@@ -106,7 +117,7 @@ export const AlertsFiltersForm = ({ value = DEFAULT_VALUE, onChange }: AlertsFil
       if ('filter' in oldExpression[atIndex]) {
         oldExpression[atIndex] = {
           filter: {
-            ...(oldExpression[atIndex] as { filter: Filter }).filter,
+            ...(oldExpression[atIndex] as { filter: AlertsFilter }).filter,
             value: newValue,
           },
         };
@@ -124,6 +135,7 @@ export const AlertsFiltersForm = ({ value = DEFAULT_VALUE, onChange }: AlertsFil
           onTypeChange={(newType) => onFormItemTypeChange(0, newType)}
           value={firstItem.filter.value}
           onValueChange={(newValue) => onFormItemValueChange(0, newValue)}
+          isDisabled={isDisabled}
         />
       </EuiFlexItem>
       {Boolean(otherItems?.length) && (
@@ -142,6 +154,7 @@ export const AlertsFiltersForm = ({ value = DEFAULT_VALUE, onChange }: AlertsFil
                       onTypeChange={(newType) => onFormItemTypeChange(index, newType)}
                       value={item.filter.value}
                       onValueChange={(newValue) => onFormItemValueChange(index, newValue)}
+                      isDisabled={isDisabled}
                     />
                   )}
                 </EuiFlexItem>
@@ -167,6 +180,7 @@ export const AlertsFiltersForm = ({ value = DEFAULT_VALUE, onChange }: AlertsFil
               iconType="plusInCircle"
               size="xs"
               onClick={() => addOperand('or')}
+              isDisabled={isDisabled}
               data-test-subj={ADD_OR_OPERATION_BUTTON_SUBJ}
             >
               <FormattedMessage id="alertsFiltersForm.orOperator" defaultMessage="OR" />
@@ -177,6 +191,7 @@ export const AlertsFiltersForm = ({ value = DEFAULT_VALUE, onChange }: AlertsFil
               iconType="plusInCircle"
               size="xs"
               onClick={() => addOperand('and')}
+              isDisabled={isDisabled}
               data-test-subj={ADD_AND_OPERATION_BUTTON_SUBJ}
             >
               <FormattedMessage id="alertsFiltersForm.andOperator" defaultMessage="AND" />

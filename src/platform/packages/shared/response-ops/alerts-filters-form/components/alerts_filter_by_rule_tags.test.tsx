@@ -14,7 +14,8 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
 import { AlertsFiltersFormContextProvider } from '../contexts/alerts_filters_form_context';
-import { AlertsFilterByRuleTags } from './alerts_filter_by_rule_tags';
+import { AlertsFilterByRuleTags, filterMetadata } from './alerts_filter_by_rule_tags';
+import { ALERT_RULE_TAGS } from '@kbn/rule-data-utils';
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
@@ -75,5 +76,18 @@ describe('AlertsFilterByRuleTags', () => {
     const comboboxInput = screen.getByTestId('comboBoxSearchInput');
     expect(comboboxInput).toHaveAttribute('aria-invalid', 'true');
     expect(comboboxInput).toHaveAttribute('disabled');
+  });
+
+  it('should have the correct metadata', () => {
+    expect(filterMetadata.id).toEqual('ruleTags');
+    expect(filterMetadata.component).toEqual(AlertsFilterByRuleTags);
+    expect(filterMetadata.isEmpty(undefined)).toEqual(true);
+    expect(filterMetadata.isEmpty([])).toEqual(true);
+    expect(filterMetadata.isEmpty(['test-tag'])).toEqual(false);
+    expect(filterMetadata.toEsQuery(['test-tag'])).toEqual({
+      terms: {
+        [ALERT_RULE_TAGS]: ['test-tag'],
+      },
+    });
   });
 });

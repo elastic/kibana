@@ -12,7 +12,7 @@ import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_item';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { alertsFilters } from '../filters';
+import { alertsFiltersMetadata } from '../filters';
 import { AlertsFilterComponentType, AlertsFiltersFormItemType } from '../types';
 
 export interface AlertsFiltersFormItemProps<T> {
@@ -20,10 +20,11 @@ export interface AlertsFiltersFormItemProps<T> {
   onTypeChange: (newFilterType: AlertsFiltersFormItemType) => void;
   value?: T;
   onValueChange: (newFilterValue: T) => void;
+  isDisabled?: boolean;
 }
 
 const options: Array<EuiSuperSelectOption<AlertsFiltersFormItemType>> = Object.values(
-  alertsFilters
+  alertsFiltersMetadata
 ).map((filterMeta) => ({
   value: filterMeta.id,
   dropdownDisplay: filterMeta.displayName,
@@ -35,14 +36,15 @@ export const AlertsFiltersFormItem = <T,>({
   onTypeChange,
   value,
   onValueChange,
+  isDisabled = false,
 }: AlertsFiltersFormItemProps<T>) => {
   const filter = useMemo(() => {
     if (!type) {
       return null;
     }
-    const FilterComponent = alertsFilters[type].component as AlertsFilterComponentType<T>;
-    return <FilterComponent value={value} onChange={onValueChange} />;
-  }, [type, value, onValueChange]);
+    const FilterComponent = alertsFiltersMetadata[type].component as AlertsFilterComponentType<T>;
+    return <FilterComponent value={value} onChange={onValueChange} isDisabled={isDisabled} />;
+  }, [type, value, onValueChange, isDisabled]);
 
   return (
     <>
@@ -56,11 +58,13 @@ export const AlertsFiltersFormItem = <T,>({
           </EuiText>
         }
         fullWidth
+        isDisabled={isDisabled}
       >
         <EuiSuperSelect
           options={options}
           valueOfSelected={type}
           onChange={onTypeChange}
+          disabled={isDisabled}
           fullWidth
         />
       </EuiFormRow>

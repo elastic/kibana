@@ -10,7 +10,7 @@
 import { filterMetadata as ruleTagsFilterMetadata } from './components/alerts_filter_by_rule_tags';
 import { filterMetadata as ruleTypesFilterMetadata } from './components/alerts_filter_by_rule_types';
 
-export const alertsFilters = {
+export const alertsFiltersMetadata = {
   [ruleTagsFilterMetadata.id]: ruleTagsFilterMetadata,
   [ruleTypesFilterMetadata.id]: ruleTypesFilterMetadata,
 } as const;

@@ -10,4 +10,5 @@
 export const DELETE_OPERAND_BUTTON_SUBJ = 'deleteOperandButton';
 export const ADD_OR_OPERATION_BUTTON_SUBJ = 'addOrOperationButton';
 export const ADD_AND_OPERATION_BUTTON_SUBJ = 'addAndOperationButton';
+export const SOLUTION_SELECTOR_SUBJ = 'solutionSelector';
 export const FORM_ITEM_SUBJ = 'formItem';

@@ -10,26 +10,36 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ComponentType } from 'react';
-import type { alertsFilters } from './filters';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { alertsFiltersMetadata } from './filters';
 
 export type AlertsFilterComponentType<T> = ComponentType<{
   value?: T;
   onChange?: (newValue: T) => void;
+  isDisabled?: boolean;
 }>;
 
-export interface Filter {
+export interface AlertsFilter {
   type?: AlertsFiltersFormItemType;
   value?: unknown;
 }
 
 export interface AlertsFiltersExpression {
   operator: 'and' | 'or';
-  operands: Array<AlertsFiltersExpression | Filter>;
+  operands: Array<AlertsFiltersExpression | AlertsFilter>;
+}
+
+export interface AlertsFilterMetadata<T> {
+  id: string;
+  displayName: string;
+  component: AlertsFilterComponentType<T>;
+  isEmpty: (value?: T) => boolean;
+  toEsQuery: (value: T) => QueryDslQueryContainer;
 }
 
 export interface AlertsFiltersFormContextValue {
   /**
-   * Pre-selected rule type ids based
+   * Pre-selected rule type ids for authorization
    */
   ruleTypeIds: string[];
 
@@ -38,12 +48,12 @@ export interface AlertsFiltersFormContextValue {
   notifications: NotificationsStart;
 }
 
-export type AlertsFiltersFormItemType = keyof typeof alertsFilters;
+export type AlertsFiltersFormItemType = keyof typeof alertsFiltersMetadata;
 
 export type FlattenedExpressionItem =
   | {
       operator: AlertsFiltersExpression['operator'];
     }
   | {
-      filter: Filter;
+      filter: AlertsFilter;
     };

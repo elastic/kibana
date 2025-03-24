@@ -11,14 +11,15 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { alertsFilters } from '../filters';
+import { alertsFiltersMetadata } from '../filters';
 import { AlertsFiltersFormItem } from './alerts_filters_form_item';
 
 jest.mock('../filters', () => {
-  const original: { alertsFilters: typeof alertsFilters } = jest.requireActual('../filters');
+  const original: { alertsFiltersMetadata: typeof alertsFiltersMetadata } =
+    jest.requireActual('../filters');
   return {
-    alertsFilters: Object.fromEntries(
-      Object.entries(original.alertsFilters).map(([key, value]) => [
+    alertsFiltersMetadata: Object.fromEntries(
+      Object.entries(original.alertsFiltersMetadata).map(([key, value]) => [
         key,
         {
           ...value,
@@ -42,7 +43,7 @@ describe('AlertsFiltersFormItem', () => {
     );
 
     await userEvent.click(screen.getByRole('button'));
-    Object.values(alertsFilters).forEach((filterMeta) => {
+    Object.values(alertsFiltersMetadata).forEach((filterMeta) => {
       expect(screen.getByText(filterMeta.displayName)).toBeInTheDocument();
     });
   });
@@ -51,7 +52,7 @@ describe('AlertsFiltersFormItem', () => {
     render(
       <IntlProvider locale="en">
         <AlertsFiltersFormItem
-          type={alertsFilters.ruleTags.id}
+          type={alertsFiltersMetadata.ruleTags.id}
           onTypeChange={jest.fn()}
           onValueChange={jest.fn()}
         />
@@ -65,7 +66,7 @@ describe('AlertsFiltersFormItem', () => {
     render(
       <IntlProvider locale="en">
         <AlertsFiltersFormItem
-          type={alertsFilters.ruleTags.id}
+          type={alertsFiltersMetadata.ruleTags.id}
           onTypeChange={jest.fn()}
           value={['tag1']}
           onValueChange={jest.fn()}
