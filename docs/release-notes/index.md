@@ -15,7 +15,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % Release notes include only features, enhancements, and fixes. Add breaking changes, deprecations, and known issues to the applicable release notes sections. 
 
 % ## version.next [kibana-next-release-notes]
-% **Release date:** Month day, year
 
 % ### Features and enhancements [kibana-next-features-enhancements]
 % * 
@@ -24,7 +23,6 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % * 
 
 ## 9.0.0 [kibana-900-release-notes]
-**Release date:** March 25, 2025
 
 ### Features and enhancements [kibana-900-features-enhancements]
 

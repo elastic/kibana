@@ -28,7 +28,7 @@ const i18nTexts = {
     }
   ),
   manualCellTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.manualCellTooltipLabel',
+    'xpack.upgradeAssistant.esDeprecations.defaultDeprecation.manualCellTooltipLabel',
     {
       defaultMessage: 'This issue needs to be resolved manually.',
     }
