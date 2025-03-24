@@ -22,4 +22,3 @@ export { isSafeMethod } from './src/route';
 export { HapiResponseAdapter } from './src/response_adapter';
 export { kibanaResponseFactory, lifecycleResponseFactory, KibanaResponse } from './src/response';
 export { getWarningHeaderMessageFromRouteDeprecation } from './src/get_warning_header_message';
-export { unwindNestedSecurityPrivileges } from './src/security_route_config_validator';

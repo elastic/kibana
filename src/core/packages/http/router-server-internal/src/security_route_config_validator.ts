@@ -13,9 +13,8 @@ import type {
   RouteConfigOptions,
   AllRequiredCondition,
   AnyRequiredCondition,
-  unwindNestedSecurityPrivileges,
 } from '@kbn/core-http-server';
-import { ReservedPrivilegesSet } from '@kbn/core-http-server';
+import { ReservedPrivilegesSet, unwindNestedSecurityPrivileges } from '@kbn/core-http-server';
 import type { DeepPartial } from '@kbn/utility-types';
 
 const privilegeSetSchema = schema.object(
