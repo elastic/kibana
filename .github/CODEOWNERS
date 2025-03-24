@@ -620,7 +620,7 @@ src/platform/packages/shared/shared-ux/router/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/router/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/storybook/mock @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/table_persist @elastic/appex-sharedux
-src/platform/packages/* @kibana-core
+src/platform/packages/* @elastic/kibana-core
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
@@ -710,6 +710,7 @@ src/platform/plugins/shared/unified_search @elastic/kibana-presentation
 src/platform/plugins/shared/usage_collection @elastic/kibana-core
 src/platform/plugins/shared/vis_types/timeseries @elastic/kibana-visualizations
 src/platform/plugins/shared/visualizations @elastic/kibana-visualizations
+src/platform/plugins/* @elastic/kibana-core
 src/platform/test
 src/platform/test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
 src/platform/test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
@@ -852,7 +853,7 @@ x-pack/platform/packages/shared/security/form_components @elastic/kibana-securit
 x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_public @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_server @elastic/kibana-security
-x-pack/platform/packages/* @kibana-core
+x-pack/platform/packages/* @elastic/kibana-core
 x-pack/platform/plugins/private/banners @elastic/appex-sharedux
 x-pack/platform/plugins/private/canvas @elastic/kibana-presentation
 x-pack/platform/plugins/private/cloud_integrations/cloud_chat @elastic/kibana-core
@@ -936,7 +937,7 @@ x-pack/platform/plugins/shared/streams_app @elastic/streams-program-team
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/timelines @elastic/security-threat-hunting-investigations
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
-x-pack/platform/plugins/* @kibana-core
+x-pack/platform/plugins/* @elastic/kibana-core
 x-pack/solutions/chat/plugins/serverless_chat @elastic/search-kibana
 x-pack/solutions/observability/packages/alert-details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting-test-data @elastic/obs-ux-management-team
