@@ -240,7 +240,7 @@ export async function getUnmanagedElasticsearchAssetDetails({
     componentTemplates: componentTemplates.map((componentTemplate) => ({
       ...componentTemplate,
       used_by: allIndexTemplates
-        .filter((template) => template.index_template.composed_of.includes(template.name))
+        .filter((template) => template.index_template.composed_of.includes(componentTemplate.name))
         .map((template) => template.name),
     })),
     indexTemplate: indexTemplate!,

@@ -22,6 +22,8 @@ import {
   DatastreamFlyoutProps,
   IndexManagementPluginSetup,
   IndexManagementPluginStart,
+  IndexMappingProps,
+  IndexSettingProps,
   IndexTemplateFlyoutProps,
 } from '@kbn/index-management-shared-types';
 import {
@@ -171,257 +173,107 @@ export class IndexMgmtUIPlugin
     };
   }
 
-  public start(coreStart: CoreStart, plugins: StartDependencies): IndexManagementPluginStart {
+  private buildComponentDependencies(
+    core: CoreStart,
+    plugins: StartDependencies,
+    deps: { history: ScopedHistory<unknown> }
+  ) {
     const { fleet, usageCollection, cloud, share, console, ml, licensing } = plugins;
+    const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
+      core;
+    const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
+      application.capabilities.index_management;
+    const { url } = share;
+    const dependencies = {
+      core: {
+        fatalErrors,
+        getUrlForApp: application.getUrlForApp,
+        executionContext,
+        application,
+        http,
+        i18n: core.i18n,
+        theme: core.theme,
+        chrome: core.chrome,
+      },
+      plugins: {
+        usageCollection,
+        isFleetEnabled: Boolean(fleet),
+        share,
+        cloud,
+        console,
+        ml,
+        licensing,
+      },
+      services: {
+        extensionsService: this.extensionsService,
+      },
+      config: this.config,
+      history: deps.history,
+      canUseSyntheticSource: this.canUseSyntheticSource,
+      overlays: core.overlays,
+      privs: {
+        monitor: !!monitor,
+        manageEnrich: !!manageEnrich,
+        monitorEnrich: !!monitorEnrich,
+        manageIndexTemplates: !!manageIndexTemplates,
+      },
+      setBreadcrumbs: () => {},
+      uiSettings,
+      settings,
+      url,
+      docLinks,
+      kibanaVersion: this.kibanaVersion,
+      theme$: core.theme.theme$,
+    };
+    return { dependencies, core, usageCollection };
+  }
+
+  public start(coreStart: CoreStart, plugins: StartDependencies): IndexManagementPluginStart {
+    const { licensing } = plugins;
 
     this.capabilities$.next(coreStart.application.capabilities);
 
     this.licensingSubscription = licensing?.license$.subscribe((next) => {
       this.canUseSyntheticSource = next.hasAtLeast('enterprise');
     });
-
     return {
       extensionsService: this.extensionsService.setup(),
       getIndexMappingComponent: (deps: { history: ScopedHistory<unknown> }) => {
-        const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
-          coreStart;
-        const { url } = share;
-        const appDependencies = {
-          core: {
-            fatalErrors,
-            getUrlForApp: application.getUrlForApp,
-            executionContext,
-            application,
-            http,
-          },
-          plugins: {
-            usageCollection,
-            isFleetEnabled: Boolean(fleet),
-            share,
-            cloud,
-            console,
-            ml,
-            licensing,
-          },
-          services: {
-            extensionsService: this.extensionsService,
-          },
-          config: this.config,
-          history: deps.history,
-          setBreadcrumbs: undefined as any, // breadcrumbService.setBreadcrumbs,
-          uiSettings,
-          settings,
-          url,
-          docLinks,
-          kibanaVersion: this.kibanaVersion,
-          theme$: coreStart.theme.theme$,
-        };
-        return (props: any) => {
-          return IndexMapping({ dependencies: appDependencies, core: coreStart, ...props });
+        return (props: IndexMappingProps) => {
+          return IndexMapping({
+            ...this.buildComponentDependencies(coreStart, plugins, deps),
+            ...props,
+          });
         };
       },
       getIndexSettingsComponent: (deps: { history: ScopedHistory<unknown> }) => {
-        const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
-          coreStart;
-        const { url } = share;
-        const appDependencies = {
-          core: {
-            fatalErrors,
-            getUrlForApp: application.getUrlForApp,
-            executionContext,
-            application,
-            http,
-          },
-          plugins: {
-            usageCollection,
-            isFleetEnabled: Boolean(fleet),
-            share,
-            cloud,
-            console,
-            ml,
-            licensing,
-          },
-          services: {
-            extensionsService: this.extensionsService,
-          },
-          config: this.config,
-          history: deps.history,
-          setBreadcrumbs: undefined as any, // breadcrumbService.setBreadcrumbs,
-          uiSettings,
-          settings,
-          url,
-          docLinks,
-          kibanaVersion: this.kibanaVersion,
-          theme$: coreStart.theme.theme$,
-        };
-        return (props: any) => {
-          return IndexSettings({ dependencies: appDependencies, core: coreStart, ...props });
+        return (props: IndexSettingProps) => {
+          return IndexSettings({
+            ...this.buildComponentDependencies(coreStart, plugins, deps),
+            ...props,
+          });
         };
       },
       getComponentTemplateFlyoutComponent: (deps: { history: ScopedHistory<unknown> }) => {
-        const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
-          coreStart;
-        const { url } = share;
-        const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
-          application.capabilities.index_management;
-        const appDependencies = {
-          core: {
-            fatalErrors,
-            getUrlForApp: application.getUrlForApp,
-            executionContext,
-            application,
-            http,
-            i18n: coreStart.i18n,
-            theme: coreStart.theme,
-            chrome: coreStart.chrome,
-          },
-          plugins: {
-            usageCollection,
-            isFleetEnabled: Boolean(fleet),
-            share,
-            cloud,
-            console,
-            ml,
-            licensing,
-          },
-          services: {
-            extensionsService: this.extensionsService,
-          },
-          canUseSyntheticSource: this.canUseSyntheticSource,
-          overlays: coreStart.overlays,
-          config: this.config,
-          history: deps.history,
-          setBreadcrumbs: undefined as any, // breadcrumbService.setBreadcrumbs,
-          uiSettings,
-          settings,
-          url,
-          docLinks,
-          kibanaVersion: this.kibanaVersion,
-          theme$: coreStart.theme.theme$,
-          privs: {
-            monitor: !!monitor,
-            manageEnrich: !!manageEnrich,
-            monitorEnrich: !!monitorEnrich,
-            manageIndexTemplates: !!manageIndexTemplates,
-          },
-        };
         return (props: ComponentTemplateFlyoutProps) => {
           return ComponentTemplateFlyout({
-            dependencies: appDependencies,
-            core: coreStart,
-            usageCollection,
+            ...this.buildComponentDependencies(coreStart, plugins, deps),
             ...props,
           });
         };
       },
       getIndexTemplateFlyoutComponent: (deps: { history: ScopedHistory<unknown> }) => {
-        const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
-          coreStart;
-        const { url } = share;
-        const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
-          application.capabilities.index_management;
-        const appDependencies = {
-          core: {
-            fatalErrors,
-            getUrlForApp: application.getUrlForApp,
-            executionContext,
-            application,
-            http,
-            i18n: coreStart.i18n,
-            theme: coreStart.theme,
-            chrome: coreStart.chrome,
-          },
-          plugins: {
-            usageCollection,
-            isFleetEnabled: Boolean(fleet),
-            share,
-            cloud,
-            console,
-            ml,
-            licensing,
-          },
-          services: {
-            extensionsService: this.extensionsService,
-          },
-          canUseSyntheticSource: this.canUseSyntheticSource,
-          overlays: coreStart.overlays,
-          config: this.config,
-          history: deps.history,
-          setBreadcrumbs: undefined as any, // breadcrumbService.setBreadcrumbs,
-          uiSettings,
-          settings,
-          url,
-          docLinks,
-          kibanaVersion: this.kibanaVersion,
-          theme$: coreStart.theme.theme$,
-          privs: {
-            monitor: !!monitor,
-            manageEnrich: !!manageEnrich,
-            monitorEnrich: !!monitorEnrich,
-            manageIndexTemplates: !!manageIndexTemplates,
-          },
-        };
         return (props: IndexTemplateFlyoutProps) => {
           return IndexTemplateFlyout({
-            dependencies: appDependencies,
-            core: coreStart,
-            usageCollection,
+            ...this.buildComponentDependencies(coreStart, plugins, deps),
             ...props,
           });
         };
       },
       getDatastreamFlyoutComponent: (deps: { history: ScopedHistory<unknown> }) => {
-        const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
-          coreStart;
-        const { url } = share;
-        const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
-          application.capabilities.index_management;
-        const appDependencies = {
-          core: {
-            fatalErrors,
-            getUrlForApp: application.getUrlForApp,
-            executionContext,
-            application,
-            http,
-            i18n: coreStart.i18n,
-            theme: coreStart.theme,
-            chrome: coreStart.chrome,
-          },
-          plugins: {
-            usageCollection,
-            isFleetEnabled: Boolean(fleet),
-            share,
-            cloud,
-            console,
-            ml,
-            licensing,
-          },
-          services: {
-            extensionsService: this.extensionsService,
-          },
-          canUseSyntheticSource: this.canUseSyntheticSource,
-          overlays: coreStart.overlays,
-          config: this.config,
-          history: deps.history,
-          setBreadcrumbs: undefined as any, // breadcrumbService.setBreadcrumbs,
-          uiSettings,
-          settings,
-          url,
-          docLinks,
-          kibanaVersion: this.kibanaVersion,
-          theme$: coreStart.theme.theme$,
-          privs: {
-            monitor: !!monitor,
-            manageEnrich: !!manageEnrich,
-            monitorEnrich: !!monitorEnrich,
-            manageIndexTemplates: !!manageIndexTemplates,
-          },
-        };
         return (props: DatastreamFlyoutProps) => {
           return DataStreamFlyout({
-            dependencies: appDependencies,
-            core: coreStart,
-            usageCollection,
+            ...this.buildComponentDependencies(coreStart, plugins, deps),
             ...props,
           });
         };
