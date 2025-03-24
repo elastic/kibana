@@ -10,6 +10,7 @@ import {
   buildEventEnrichmentRawResponseMock,
 } from '../../../../../../common/search_strategy/security_solution/cti/index.mock';
 import { parseEventEnrichmentResponse } from './response';
+import type { IEsSearchResponse } from '@kbn/search-types';
 
 describe('parseEventEnrichmentResponse', () => {
   it('includes an accurate inspect response', async () => {
@@ -100,5 +101,17 @@ describe('parseEventEnrichmentResponse', () => {
         'matched.index': ['filebeat-8.0.0-2021.05.28-000001'],
       }),
     ]);
+  });
+
+  it('returns an empty array when no hits', async () => {
+    const options = buildEventEnrichmentRequestOptionsMock();
+    const response = {
+      rawResponse: {
+        hits: {},
+      },
+    } as IEsSearchResponse;
+    const parsedResponse = await parseEventEnrichmentResponse(options, response);
+
+    expect(parsedResponse.enrichments).toEqual([]);
   });
 });

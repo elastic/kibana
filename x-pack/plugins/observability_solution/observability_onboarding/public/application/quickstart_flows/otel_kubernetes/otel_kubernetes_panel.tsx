@@ -59,7 +59,7 @@ kubectl create secret generic elastic-secret-otel \\
   --namespace ${namespace} \\
   --from-literal=elastic_endpoint='${data.elasticsearchUrl}' \\
   --from-literal=elastic_api_key='${data.apiKeyEncoded}'
-helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
+helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace ${namespace} \\
   --values '${OTEL_KUBE_STACK_VALUES_FILE_URL}' \\
   --version '${OTEL_KUBE_STACK_VERSION}'`
