@@ -119,7 +119,8 @@ export type ReactQueryHookRenderer<
    * query response state value to be true
    */
   waitForHook?: WaitForReactHookState,
-  options?: RenderHookOptions<TProps>
+  options?: RenderHookOptions<TProps>,
+  timeout?: number
 ) => Promise<TResult>;
 
 export interface UserPrivilegesMockSetter {
@@ -334,12 +335,13 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
      * If defined (default is `isSuccess`), the renderer will wait for the given react query to be truthy
      */
     waitForHook: WaitForReactHookState = 'isSuccess',
-    options: RenderHookOptions<TProps> = {}
+    options: RenderHookOptions<TProps> = {},
+    timeout = 1000
   ) => {
     const { result: hookResult } = renderHook<TResult, TProps>(hookFn, options);
 
     if (waitForHook) {
-      await waitFor(() => expect(hookResult.current[waitForHook]).toBe(true));
+      await waitFor(() => expect(hookResult.current[waitForHook]).toBe(true), { timeout });
     }
 
     return hookResult.current;
