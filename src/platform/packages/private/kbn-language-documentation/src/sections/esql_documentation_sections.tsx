@@ -416,7 +416,7 @@ ROW language_code = 1
 | LOOKUP JOIN languages ON language_code
 \`\`\`
 
-An index that is used in \`LOOKUP JOIN\` needs to be in lookup mode. To create a lookup index, set the index mode to lookup.
+An index that is used in \`LOOKUP JOIN\` needs to be in lookup mode. This [index mode](https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules.html#_static_index_settings) needs to be set when the index is created.
 
 \`\`\` esql
 PUT languages
