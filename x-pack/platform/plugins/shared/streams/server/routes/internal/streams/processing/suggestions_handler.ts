@@ -49,7 +49,10 @@ export const handleProcessingSuggestion = async (
   };
 };
 
-type SimulationWithPattern = ReturnType<typeof simulateProcessing> & { pattern: string };
+type SimulationWithPattern = ReturnType<typeof simulateProcessing> & {
+  pattern: string;
+  success_rate: number;
+};
 
 export function extractAndGroupPatterns(samples: FlattenRecord[], field: string) {
   const evalPattern = (sample: string) => {
@@ -156,7 +159,7 @@ async function processPattern(
     } as const,
     input: `Logs:
         ${sample.exampleValues.join('\n')}
-        Given the raw messages coming from one data source, help us do the following: 
+        Given the raw messages coming from one data source, help us do the following:
         1. Name the log source based on logs format.
         2. Write a parsing rule for Elastic ingest pipeline to extract structured fields from the raw message.
         Make sure that the parsing rule is unique per log source. When in doubt, suggest multiple patterns, one generic one matching the general case and more specific ones.

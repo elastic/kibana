@@ -18,7 +18,6 @@ import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnitsToSuggest } from '../definitions/literals';
 import {
   FunctionDefinition,
-  CommandOptionsDefinition,
   FunctionParameterType,
   FunctionDefinitionTypes,
 } from '../definitions/types';
@@ -365,28 +364,6 @@ export const buildPoliciesDefinitions = (
     sortText: 'D',
     command: TRIGGER_SUGGESTION_COMMAND,
   }));
-
-/** @deprecated — options will be removed */
-export const buildOptionDefinition = (
-  option: CommandOptionsDefinition,
-  isAssignType: boolean = false
-) => {
-  const completeItem: SuggestionRawDefinition = {
-    label: option.name.toUpperCase(),
-    text: option.name.toUpperCase(),
-    kind: 'Reference',
-    detail: option.description,
-    sortText: '1',
-  };
-  if (isAssignType || option.signature.params.length) {
-    completeItem.text = isAssignType
-      ? `${option.name.toUpperCase()} = $0`
-      : `${option.name.toUpperCase()} $0`;
-    completeItem.asSnippet = true;
-    completeItem.command = TRIGGER_SUGGESTION_COMMAND;
-  }
-  return completeItem;
-};
 
 export function getUnitDuration(unit: number = 1) {
   const filteredTimeLiteral = timeUnitsToSuggest.filter(({ name }) => {

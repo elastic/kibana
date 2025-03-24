@@ -12,8 +12,8 @@ import { ESQLCommand, mutate, LeafPrinter } from '@kbn/esql-ast';
 import type { ESQLAstJoinCommand } from '@kbn/esql-ast';
 import type { ESQLCallbacks } from '../../../shared/types';
 import {
-  CommandBaseDefinition,
   CommandDefinition,
+  CommandSuggestFunction,
   CommandSuggestParams,
   CommandTypeDefinition,
 } from '../../../definitions/types';
@@ -96,7 +96,7 @@ const suggestFields = async (
   return [...intersection, ...union];
 };
 
-export const suggest: CommandBaseDefinition<'join'>['suggest'] = async ({
+export const suggest: CommandSuggestFunction<'join'> = async ({
   innerText,
   command,
   getColumnsByType,

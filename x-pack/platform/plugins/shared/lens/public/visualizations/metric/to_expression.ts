@@ -27,7 +27,7 @@ import { showingBar } from './metric_visualization';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor } from './visualization';
 import { MetricVisualizationState } from './types';
 import { metricStateDefaults } from './constants';
-import { isMetricNumericType } from './helpers';
+import { getAccessorType } from '../../shared_components';
 
 // TODO - deduplicate with gauges?
 function computePaletteParams(
@@ -105,7 +105,7 @@ export const toExpression = (
   const datasource = datasourceLayers[state.layerId];
   const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
-  const isMetricNumeric = isMetricNumericType(datasource, state.metricAccessor);
+  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
   const maxPossibleTiles =
     // if there's a collapse function, no need to calculate since we're dealing with a single tile
     state.breakdownByAccessor && !state.collapseFn
