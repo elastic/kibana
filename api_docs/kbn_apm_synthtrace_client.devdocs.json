@@ -2422,6 +2422,39 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace-client",
+        "id": "def-common.setIdGeneratorStrategy",
+        "type": "Function",
+        "tags": [],
+        "label": "setIdGeneratorStrategy",
+        "description": [],
+        "signature": [
+          "(strategy: IdGeneratorStrategyType) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/utils/generate_id.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.setIdGeneratorStrategy.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "strategy",
+            "description": [],
+            "signature": [
+              "IdGeneratorStrategyType"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/utils/generate_id.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace-client",
         "id": "def-common.timerange",
         "type": "Function",
         "tags": [],

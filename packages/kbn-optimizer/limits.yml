@@ -5,6 +5,7 @@ pageLoadAssetSize:
   aiops: 32733
   alerting: 106936
   apm: 64385
+  apmSourcesAccess: 16765
   automaticImport: 25433
   banners: 17946
   canvas: 29355
@@ -38,6 +39,7 @@ pageLoadAssetSize:
   discoverEnhanced: 42730
   discoverShared: 17111
   embeddable: 24000
+  embeddableAlertsTable: 19615
   embeddableEnhanced: 22107
   enterpriseSearch: 66810
   entityManager: 17175
@@ -144,12 +146,14 @@ pageLoadAssetSize:
   searchNotebooks: 18942
   searchPlayground: 19325
   searchprofiler: 67080
+  searchQueryRules: 19708
   searchSynonyms: 20262
   security: 81771
   securitySolution: 98429
   securitySolutionEss: 31781
   securitySolutionServerless: 62488
   serverless: 16573
+  serverlessChat: 22715
   serverlessObservability: 68747
   serverlessSearch: 72995
   sessionView: 77750

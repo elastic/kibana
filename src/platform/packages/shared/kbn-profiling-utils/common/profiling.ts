@@ -42,6 +42,7 @@ export enum FrameType {
   Root = 0x100,
   ProcessName = 0x101,
   ThreadName = 0x102,
+  ExecutableName = 0x103,
 }
 
 const frameTypeDescriptions = {
@@ -59,8 +60,9 @@ const frameTypeDescriptions = {
   [FrameType.ErrorFlag]: 'ErrorFlag',
   [FrameType.Error]: 'Error',
   [FrameType.Root]: 'Root',
-  [FrameType.ProcessName]: 'Process', // Due to OTEL semconv issues, "process name" is currently more correct than "executable name"
+  [FrameType.ProcessName]: 'Process',
   [FrameType.ThreadName]: 'Thread',
+  [FrameType.ExecutableName]: 'Executable',
 };
 
 export function isErrorFrame(ft: FrameType): boolean {
