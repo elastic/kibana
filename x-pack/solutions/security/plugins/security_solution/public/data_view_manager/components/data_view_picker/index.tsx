@@ -25,7 +25,6 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
   const {
     services: { dataViewEditor, data, dataViewFieldEditor, fieldFormats },
   } = useKibana();
-
   const closeDataViewEditor = useRef<() => void | undefined>();
   const closeFieldEditor = useRef<() => void | undefined>();
 
@@ -99,7 +98,7 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
 
   const { adhocDataViews: adhocDataViewSpecs, dataViews } = useSelector(sharedStateSelector);
 
-  const managedDataViews = useMemo(() => {
+  const savedDataViews = useMemo(() => {
     const managed: DataViewListItem[] = dataViews.map((spec) => ({
       id: spec.id ?? '',
       title: spec.title ?? '',
@@ -122,7 +121,7 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
       onAddField={handleAddField}
       onDataViewCreated={createNewDataView}
       adHocDataViews={adhocDataViews}
-      savedDataViews={managedDataViews}
+      savedDataViews={savedDataViews}
     />
   );
 });
