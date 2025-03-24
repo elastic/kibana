@@ -23,8 +23,8 @@ const initialBadgeLimit = 3;
 const maxBadgeContainerHeight = undefined;
 
 const HeaderTags = ({
-  tags,
-  labels,
+  tags = [],
+  labels = {},
 }: {
   tags: GenericEntityRecord['tags'];
   labels: GenericEntityRecord['labels'];
@@ -66,7 +66,7 @@ const HeaderTags = ({
           </>
         ),
       })),
-    [labels, euiTheme.colors.disabledText, euiTheme.border.thick, euiTheme.size.xs]
+    [labels, euiTheme.colors.textDisabled, euiTheme.border.thick, euiTheme.size.xs]
   );
 
   const allBadges = [...(tagBadges || []), ...(labelBadges || [])];
