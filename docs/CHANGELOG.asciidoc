@@ -11,10 +11,12 @@
 Review important information about the {kib} 8.x releases.
 
 * <<release-notes-8.18.0>>
+* <<release-notes-8.17.4>>
 * <<release-notes-8.17.3>>
 * <<release-notes-8.17.2>>
 * <<release-notes-8.17.1>>
 * <<release-notes-8.17.0>>
+* <<release-notes-8.16.6>>
 * <<release-notes-8.16.5>>
 * <<release-notes-8.16.4>>
 * <<release-notes-8.16.3>>
@@ -89,6 +91,7 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
 
 [[release-notes-8.18.0]]
 == {kib} 8.18.0
@@ -363,6 +366,26 @@ Machine Learning::
 * AiOps: Fixes Log Rate Analysis embeddable error on the Alerts page ({kibana-pull}203093[#203093]).
 * Initializes saved objects on trained model page load ({kibana-pull}201426[#201426]).
 
+[[release-notes-8.17.4]]
+== {kib} 8.17.4
+
+The 8.17.4 release includes the following fixes.
+
+[float]
+[[fixes-v8.17.4]]
+=== Fixes
+Dashboards and Visualizations::
+* Prevents unnecessary re-render when switching between View and Edit modes ({kibana-pull}213902[#213902]).
+* Fixes an issue with the handling of the `viewMode` check in *Lens* ({kibana-pull}213887[#213887]).
+* Adds `event-annotation-group` to saved object privileges for dashboards ({kibana-pull}212926[#212926]).
+Elastic Observability Solution::
+* Makes {kib} retrieval namespace-specific ({kibana-pull}213505[#213505]).
+* Fixes an error with the `retrieve-elastic-doc` function being unavailable ({kibana-pull}212676[#212676]).
+Elastic Security solution::
+For the Elastic Security 8.17.4 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Management::
+* Adds support for rollup data views that reference aliases ({kibana-pull}212592[#212592]).
+
 [[release-notes-8.17.3]]
 == {kib} 8.17.3
 The 8.17.3 release includes the following bug fixes.
@@ -585,10 +608,41 @@ Machine Learning::
 Kibana platform::
 * Fixes an issue with the global search field that could open the wrong page when pressing "Enter" while results were not yet fully loaded ({kibana-pull}197750[#197750]).
 
+[[release-notes-8.16.6]]
+== {kib} 8.16.6
+
+The 8.16.6 release includes the following enhancements and fixes.
+
+[float]
+[[enhancement-v8.16.6]]
+=== Enhancements
+Elastic Observability Solution::
+* Splits up the top dependencies API for improved speed and response size ({kibana-pull}211441[#211441]).
+
+[float]
+[[fixes-v8.16.6]]
+=== Fixes
+Alerting::
+* Fixes a bug with ServiceNow where users could not create the connector from the UI form using OAuth ({kibana-pull}213658[#213658]).
+Data ingestion and Fleet::
+* Fixes an issue with the Agent binary download field being blank when a policy uses the default download source ({kibana-pull}214360[#214360]).
+Elastic Observability Solution::
+* Passes telemetry.sdk* data when loading a dashboard ({kibana-pull}214356[#214356]).
+* Fixes missing summary data in error sample ({kibana-pull}213430[#213430]).
+* Fixes service maps not building paths when the trace's root transaction has a `parent.id` ({kibana-pull}212998[#212998]).
+* Fixes span links with OTel data ({kibana-pull}212806[#212806]).
+Elastic Security solution::
+For the Elastic Security 8.16.6 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana security::
+* Fixes structured log flow to handle multiple types of structured logs ({kibana-pull}212611[#212611]).
+Management::
+* Fixes error when opening a rollup data view in Discover ({kibana-pull}214656[#214656]).
+
+
 [[release-notes-8.16.5]]
 == {kib} 8.16.5
 
-The 8.16.5 release includes the following bug fixes.
+The 8.16.5 release includes the following enhancements and bug fixes.
 
 [float]
 [[enhancement-v8.16.5]]
