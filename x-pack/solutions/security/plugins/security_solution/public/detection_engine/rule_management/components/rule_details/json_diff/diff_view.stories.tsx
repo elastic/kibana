@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import type { DiffViewProps } from './diff_view';
 import { DiffView } from './diff_view';
 import { DiffMethod } from './mark_edits';
@@ -39,7 +39,7 @@ export default {
   },
 };
 
-const Template: Story<DiffViewProps> = ({ oldSource, newSource, diffMethod, zip }) => {
+const Template: StoryFn<DiffViewProps> = ({ oldSource, newSource, diffMethod, zip }) => {
   return (
     <DiffView
       oldSource={oldSource}

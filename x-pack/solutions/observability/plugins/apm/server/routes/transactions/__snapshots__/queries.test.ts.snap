@@ -33,6 +33,7 @@ Object {
     "http.response.status_code",
     "http.request.method",
     "user_agent.name",
+    "user_agent.version",
   ],
   "query": Object {
     "bool": Object {

@@ -154,15 +154,17 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           }
         ),
       };
-    case 'unknownOption':
+    case 'unknownDissectKeyword':
       return {
-        message: i18n.translate('kbn-esql-validation-autocomplete.esql.validation.unknownOption', {
-          defaultMessage: 'Invalid option for {command}: [{option}]',
-          values: {
-            command: out.command,
-            option: out.option,
-          },
-        }),
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.unknownDissectKeyword',
+          {
+            defaultMessage: 'Expected [APPEND_SEPARATOR] in [DISSECT] but found [{keyword}]',
+            values: {
+              keyword: out.keyword,
+            },
+          }
+        ),
       };
     case 'unsupportedFunctionForCommand':
       return {
@@ -294,21 +296,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         ),
         type: 'warning',
       };
-    case 'unsupportedSetting':
-      return {
-        message: i18n.translate(
-          'kbn-esql-validation-autocomplete.esql.validation.unsupportedSetting',
-          {
-            defaultMessage: 'Unsupported setting [{setting}], expected [{expected}]',
-            values: {
-              setting: out.setting,
-              expected: out.expected,
-            },
-          }
-        ),
-        type: 'error',
-      };
-    case 'unsupportedSettingCommandValue':
+    case 'unsupportedMode':
       return {
         message: i18n.translate(
           'kbn-esql-validation-autocomplete.esql.validation.unsupportedSettingValue',
@@ -386,7 +374,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           'kbn-esql-validation-autocomplete.esql.validation.wrongDissectOptionArgumentType',
           {
             defaultMessage:
-              'Invalid value for DISSECT append_separator: expected a string, but was [{value}]',
+              'Invalid value for DISSECT APPEND_SEPARATOR: expected a string, but was [{value}]',
             values: {
               value: out.value,
             },

@@ -1,26 +1,42 @@
 ---
-navigation_title: "Kibana"
+navigation_title: "Breaking changes"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/breaking-changes-summary.html
 ---
 
 # Kibana breaking changes [kibana-breaking-changes]
-Before you upgrade, carefully review the Kibana breaking changes and take the necessary steps to mitigate any issues. 
+Breaking changes can impact your Elastic applications, potentially disrupting normal operations. Before you upgrade, carefully review the Kibana breaking changes and take the necessary steps to mitigate any issues.
 
-If you are migrating from a version prior to version 9.0, you must first upgrade to the last 8.x version available. To learn how to upgrade, check out <uprade docs>.
+If you are migrating from a version prior to version 9.0, you must first upgrade to the last 8.x version available. To learn how to upgrade, check out [Upgrade](docs-content://deploy-manage/upgrade.md).
 
 % ## Next version [kibana-nextversion-breaking-changes]
-% **Release date:** Month day, year
 
+% Use the following template to add entries to this document.
+
+% TEMPLATE START
+% $$$kibana-PR_NUMBER$$$
 % ::::{dropdown} Title of breaking change 
 % Description of the breaking change.
-% For more information, check [PR #](PR link).
 % **Impact**<br> Impact of the breaking change.
-% **Action**<br> Steps for mitigating deprecation impact.
+% **Action**<br> Steps for mitigating impact.
+% View [PR #](PR link).
 % ::::
+% TEMPLATE END
+
+% 1. Copy and edit the template in the right area section of this file. Most recent entries should be at the top of the section. 
+% 2. Edit the anchor ID ($$$kibana-PR_NUMBER$$$) of the template with the correct PR number to give the entry a unique URL. 
+% 3. Don't hardcode the link to the new entry. Instead, make it available through the doc link service files:
+%   - {kib-repo}blob/{branch}/src/platform/packages/shared/kbn-doc-links/src/get_doc_links.ts
+%   - {kib-repo}blob/{branch}/src/platform/packages/shared/kbn-doc-links/src/types.ts
+% 
+% The entry in the main links file should look like this:
+% 
+% id: `${KIBANA_DOCS}breaking-changes.html#kibana-PR_NUMBER`
+% 
+% 4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
+% Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
 
 ## 9.0.0 [kibana-900-breaking-changes]
-**Release date:** March 25, 2025
 
 ::::{dropdown} Removed legacy alerting endpoints
 * `POST /api/alerts/alert/{id?}` has been replaced by `POST /api/alerting/rule/{id?}`
@@ -61,19 +77,21 @@ All `v1` Kibana security HTTP endpoints have been removed.
 
 `GET /api/security/v1/logout` has been replaced by `GET /api/security/logout` `GET /api/security/v1/oidc/implicit` has been replaced by `GET /api/security/oidc/implicit` `GET /api/security/v1/oidc` has been replaced by GET `/api/security/oidc/callback` `POST /api/security/v1/oidc` has been replaced by POST `/api/security/oidc/initiate_login` `POST /api/security/v1/saml` has been replaced by POST `/api/security/saml/callback` `GET /api/security/v1/me` has been removed with no replacement.
 
-For more information, check [#199656](https://github.com/elastic/kibana/pull/199656).
-
 **Impact**<br> Any HTTP API calls to the `v1` Kibana security endpoints will fail with a 404 status code starting from version 9.0.0. Third party OIDC and SAML identity providers configured with `v1` endpoints will no longer work.
 
 **Action**<br> Update any OIDC and SAML identity providers to reference the corresponding replacement endpoint listed above. Remove references to the `/api/security/v1/me` endpoint from any automations, applications, tooling, and scripts.
+
+View [#199656](https://github.com/elastic/kibana/pull/199656).
 ::::
 
 :::{dropdown} Access to all internal APIs is blocked
-Access to internal Kibana HTTP APIs is restricted from version 9.0.0. This is to ensure that HTTP API integrations with Kibana avoid unexpected breaking changes. Refer to [#193792](https://github.com/elastic/kibana/pull/193792).
+Access to internal Kibana HTTP APIs is restricted from version 9.0.0. This is to ensure that HTTP API integrations with Kibana avoid unexpected breaking changes.
 
 **Impact**<br> Any HTTP API calls to internal Kibana endpoints will fail with a 400 status code starting from version 9.0.0.
 
 **Action**<br> **Do not integrate with internal HTTP APIs**. They may change or be removed without notice, and lead to unexpected behaviors. If you would like some capability to be exposed over an HTTP API, [create an issue](https://github.com/elastic/kibana/issues/new/choose). We would love to discuss your use case.
+
+View [#193792](https://github.com/elastic/kibana/pull/193792).
 ::::
 
 :::{dropdown} Remove original user and host risk scoring and all associated UIs
@@ -107,16 +125,20 @@ In 9.0.0, the `xpack.reporting.roles.*` settings will be ignored.
 
 **Impact**<br> The built-in `reporting_user` role is no longer deprecated and provides access to reporting features using Kibana feature privileges. This means that users that do not have privileges to use reporting will not see reporting features in the Kibana UI.
 
-**Action**<br> Use Kibana feature privileges to control access to reporting features. For more information, see [#200834](https://github.com/elastic/kibana/pull/200834).
+**Action**<br> Use Kibana feature privileges to control access to reporting features.
 
 * The `reporting_user` role is still supported, but gives full access to all reporting features. We recommend creating custom roles with minimal privileges in **Stack Management > Roles**.
 * The `xpack.reporting.roles.allow` setting is no longer supported. If you have a `xpack.reporting.roles.allow` value in your `kibana.yml`, you should remove this setting and assign privileges to reporting features using Kibana feature privileges.
+
+View [#200834](https://github.com/elastic/kibana/pull/200834).
 ::::
 
 :::{dropdown} Saved query privileges have been reworked
-Saved query privileges have been reworked to rely solely on a single global `savedQueryManagement` privilege, and eliminate app-specific overrides (e.g. implicit access with `all` privilege for Discover, Dashboard, Maps, and Visualize apps). This change simplifies the security model and ensures consistency in the saved query management UI across Kibana, but results in different handling of saved query privileges for new user roles, and minor breaking changes to the existing management UX. For more information, check [#202863](https://github.com/elastic/kibana/pull/202863). 
+Saved query privileges have been reworked to rely solely on a single global `savedQueryManagement` privilege, and eliminate app-specific overrides (e.g. implicit access with `all` privilege for Discover, Dashboard, Maps, and Visualize apps). This change simplifies the security model and ensures consistency in the saved query management UI across Kibana, but results in different handling of saved query privileges for new user roles, and minor breaking changes to the existing management UX.
 
 **Impact**<br> The `savedQueryManagement` feature privilege now globally controls access to saved query management for all new user roles. Regardless of privileges for Discover, Dashboard, Maps, or Visualize, new user roles follow this behaviour: . If `savedQueryManagement` is `none`, the user cannot see or access the saved query management UI or APIs. . If `savedQueryManagement` is `read`, the user can load queries from the UI and access read APIs, but cannot save queries from the UI or make changes to queries through APIs. . If `savedQueryManagement` is `all`, the user can both load and save queries from the UI and through APIs. 
 
 **Action**<br> Existing user roles that were previously implicitly granted access to saved queries through the dashboard, discover, visualize, or maps feature privileges will retain that access to prevent breaking changes. While no action is required for existing roles, it’s still advisable to audit relevant roles and re-save them to migrate to the latest privileges model. For new roles, ensure that the savedQueryManagement privilege is set as needed.
+
+View [#202863](https://github.com/elastic/kibana/pull/202863).
 ::::

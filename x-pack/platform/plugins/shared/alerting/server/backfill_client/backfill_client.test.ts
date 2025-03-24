@@ -65,6 +65,7 @@ const mockRuleType: jest.Mocked<UntypedNormalizedRuleType> = {
   executor: jest.fn(),
   category: 'test',
   producer: 'alerts',
+  solution: 'stack',
   validate: {
     params: { validate: (params) => params },
   },
@@ -1768,6 +1769,7 @@ describe('BackfillClient', () => {
         },
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -2039,6 +2041,7 @@ describe('BackfillClient', () => {
         },
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },

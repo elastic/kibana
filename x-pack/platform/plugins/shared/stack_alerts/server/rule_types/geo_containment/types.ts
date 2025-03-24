@@ -13,6 +13,7 @@ import type {
   AlertInstanceContext,
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
+import type { StackAlertType } from '../types';
 import type { ActionGroupId, RecoveryActionGroupId } from './constants';
 
 export interface BoundariesRequestMeta {
@@ -82,5 +83,6 @@ export type GeoContainmentRuleType = RuleType<
   GeoContainmentAlertInstanceState,
   GeoContainmentAlertInstanceContext,
   typeof ActionGroupId,
-  typeof RecoveryActionGroupId
+  typeof RecoveryActionGroupId,
+  StackAlertType
 >;

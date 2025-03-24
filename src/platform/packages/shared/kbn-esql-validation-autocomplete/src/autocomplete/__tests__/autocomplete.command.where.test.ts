@@ -257,7 +257,6 @@ describe('WHERE <expression>', () => {
         'IS NULL',
         'NOT',
         'OR $0',
-        '| ',
       ]);
 
       await assertSuggestions('from index | WHERE keywordField IS NOT /', [
@@ -269,7 +268,6 @@ describe('WHERE <expression>', () => {
         'IS NULL',
         'NOT',
         'OR $0',
-        '| ',
       ]);
     });
 

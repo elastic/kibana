@@ -25,7 +25,7 @@ import type { DownloadSourceBase } from '../../../../../../../common/types';
 
 import { confirmUpdate } from './confirm_update';
 
-export interface DownlaodSourceFormInputsType {
+export interface DownloadSourceFormInputsType {
   nameInput: ReturnType<typeof useInput>;
   defaultDownloadSourceInput: ReturnType<typeof useSwitchInput>;
   hostInput: ReturnType<typeof useInput>;
