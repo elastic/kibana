@@ -74,7 +74,8 @@ describe('measureInteraction', () => {
           customMetrics: eventData.customMetrics,
           meta: {
             queryRangeSecs: 900,
-            queryOffsetSecs: 0,
+            queryFromOffsetSecs: -900,
+            queryToOffsetSecs: 0,
             isInitialLoad: true,
           },
         },
@@ -102,7 +103,8 @@ describe('measureInteraction', () => {
           customMetrics: undefined,
           meta: {
             queryRangeSecs: 1800,
-            queryOffsetSecs: 0,
+            queryFromOffsetSecs: -1800,
+            queryToOffsetSecs: 0,
             isInitialLoad: true,
           },
         },
@@ -130,7 +132,8 @@ describe('measureInteraction', () => {
           customMetrics: undefined,
           meta: {
             queryRangeSecs: 86400,
-            queryOffsetSecs: -1800,
+            queryFromOffsetSecs: -88200,
+            queryToOffsetSecs: -1800,
             isInitialLoad: true,
           },
         },
@@ -159,7 +162,8 @@ describe('measureInteraction', () => {
           customMetrics: undefined,
           meta: {
             queryRangeSecs: 86400,
-            queryOffsetSecs: 1800,
+            queryFromOffsetSecs: -84600,
+            queryToOffsetSecs: 1800,
             isInitialLoad: true,
           },
         },
@@ -198,7 +202,8 @@ describe('measureInteraction', () => {
           customMetrics: undefined,
           meta: {
             queryRangeSecs: 86400,
-            queryOffsetSecs: 1800,
+            queryFromOffsetSecs: -84600,
+            queryToOffsetSecs: 1800,
             isInitialLoad: false,
           },
         },

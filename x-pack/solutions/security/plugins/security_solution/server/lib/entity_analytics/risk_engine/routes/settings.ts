@@ -55,6 +55,9 @@ export const riskEngineSettingsRoute = (router: EntityAnalyticsRoutesDeps['route
           return response.ok({
             body: {
               range: result.range,
+              includeClosedAlerts:
+                Array.isArray(result?.excludeAlertStatuses) &&
+                !result.excludeAlertStatuses.includes('closed'),
             },
           });
         } catch (e) {

@@ -207,6 +207,53 @@
           },
           {
             "parentPluginId": "@kbn/observability-synthetics-test-data",
+            "id": "def-common.SyntheticsRunner.reloadTestFiles",
+            "type": "Function",
+            "tags": [],
+            "label": "reloadTestFiles",
+            "description": [],
+            "signature": [
+              "(results: JourneyResults, onlyOnFailure?: boolean) => Promise<void>"
+            ],
+            "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/observability-synthetics-test-data",
+                "id": "def-common.SyntheticsRunner.reloadTestFiles.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "results",
+                "description": [],
+                "signature": [
+                  "JourneyResults"
+                ],
+                "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/observability-synthetics-test-data",
+                "id": "def-common.SyntheticsRunner.reloadTestFiles.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "onlyOnFailure",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/observability-synthetics-test-data",
             "id": "def-common.SyntheticsRunner.loadTestData",
             "type": "Function",
             "tags": [],
@@ -308,9 +355,7 @@
             "label": "assertResults",
             "description": [],
             "signature": [
-              "(results: { [x: string]: ",
-              "JourneyResult",
-              "; }) => void"
+              "(results: JourneyResults) => void"
             ],
             "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
             "deprecated": false,
@@ -324,9 +369,7 @@
                 "label": "results",
                 "description": [],
                 "signature": [
-                  "{ [x: string]: ",
-                  "JourneyResult",
-                  "; }"
+                  "JourneyResults"
                 ],
                 "path": "x-pack/solutions/observability/packages/synthetics-test-data/src/e2e/helpers/synthetics_runner.ts",
                 "deprecated": false,
