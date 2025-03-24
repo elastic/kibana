@@ -46,14 +46,16 @@ export async function ensurePackageKibanaAssetsInstalled({
         pkgVersion: installationInfo.version,
       });
     } else {
-      console.log(pkgName, rest.spaceIds, kibanaAssetsSpaces);
-      if (rest.spaceIds.every((spaceId) => kibanaAssetsSpaces.includes(spaceId))) {
+      const missingSpaceIds = rest.spaceIds.filter(
+        (spaceId) => !kibanaAssetsSpaces.includes(spaceId)
+      );
+      if (!missingSpaceIds.length) {
         return;
       }
       await sendInstallKibanaAssetsForRq({
         pkgName: installationInfo.name,
         pkgVersion: installationInfo.version,
-        spaceIds: rest.spaceIds,
+        spaceIds: missingSpaceIds,
       });
     }
     toasts.addSuccess(

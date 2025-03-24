@@ -119,9 +119,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
       setIsLoading(true);
       try {
         const dataToSend = pickAgentPolicyKeysToSend(agentPolicy);
-        let ensureInstalledInSpacesParams:
-          | undefined
-          | { packages: Array<{ pkgName: string; pkgVersion: string }>; spaceIds: string[] };
+        await sendUpdateAgentPolicyForRq(agentPolicy.id, pickAgentPolicyKeysToSend(agentPolicy));
 
         if (
           dataToSend.space_ids &&
@@ -139,17 +137,9 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
               ) ?? [],
             'pkgName'
           );
-          ensureInstalledInSpacesParams = {
-            packages,
-            spaceIds: dataToSend.space_ids,
-          };
-        }
-        await sendUpdateAgentPolicyForRq(agentPolicy.id, pickAgentPolicyKeysToSend(agentPolicy));
-
-        if (ensureInstalledInSpacesParams) {
-          for (const { pkgName, pkgVersion } of ensureInstalledInSpacesParams.packages) {
+          for (const { pkgName, pkgVersion } of packages) {
             await ensurePackageKibanaAssetsInstalled({
-              spaceIds: ensureInstalledInSpacesParams.spaceIds,
+              spaceIds: dataToSend.space_ids,
               pkgName,
               pkgVersion,
               toasts: notifications.toasts,
