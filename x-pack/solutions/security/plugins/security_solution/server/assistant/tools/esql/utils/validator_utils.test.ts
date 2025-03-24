@@ -32,7 +32,8 @@ ${query}
     expect(result.content).toContain(
       'The above query has the following errors that still need to be fixed'
     );
-    expect(result.content).toEqual(`Here is the ESQL query to fetch 100 documents from the .logs index
+    expect(result.content)
+      .toEqual(`Here is the ESQL query to fetch 100 documents from the .logs index
 \`\`\`esql
 FROM .logs
 | LIMIT 100

@@ -489,7 +489,7 @@ export const postEvaluateRoute = (
               })
               .catch((err) => {
                 logger.error(`evaluation error:\n ${JSON.stringify(err, null, 2)}`);
-              })
+              });
           });
 
           return response.ok({
