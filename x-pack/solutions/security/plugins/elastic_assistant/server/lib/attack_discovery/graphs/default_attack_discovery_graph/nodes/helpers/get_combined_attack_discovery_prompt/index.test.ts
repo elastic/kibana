@@ -48,12 +48,23 @@ alert2
 """
 
 
-Continue exactly where you left off in the JSON output below, generating only the additional JSON output when it's required to complete your work. The additional JSON output MUST ALWAYS follow these rules:
-1) it MUST conform to the schema above, because it will be checked against the JSON schema
-2) it MUST escape all JSON special characters (i.e. backslashes, double quotes, newlines, tabs, carriage returns, backspaces, and form feeds), because it will be parsed as JSON
-3) it MUST NOT repeat any the previous output, because that would prevent partial results from being combined
-4) it MUST NOT restart from the beginning, because that would prevent partial results from being combined
-5) it MUST NOT be prefixed or suffixed with additional text outside of the JSON, because that would prevent it from being combined and parsed as JSON:
+
+Continue your JSON analysis from exactly where you left off. Generate only the additional content needed to complete the response.
+
+FORMAT REQUIREMENTS:
+1. Maintain strict JSON validity:
+   - Use double quotes for all strings
+   - Properly escape special characters (\" for quotes, \\ for backslashes, \n for newlines)
+   - Avoid all control characters (ASCII 0-31)
+   - Keep text fields under 500 characters
+
+2. Output rules:
+   - Do not repeat any previously generated content
+   - Do not include explanatory text outside the JSON
+   - Do not restart from the beginning
+   - Conform exactly to the JSON schema defined earlier
+
+Your continuation should seamlessly connect with the previous output to form a complete, valid JSON document.
 
 
 """
