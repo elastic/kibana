@@ -26,6 +26,7 @@ import type {
   UpdateExceptionListItemSchema,
   ExceptionListSchema,
   EntriesArray,
+  EntriesArrayOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ListOperatorTypeEnum,
@@ -298,7 +299,8 @@ export const lowercaseHashValues = (
  */
 export const getFileCodeSignature = (
   alertData: Flattened<Ecs>
-): EntriesArray | undefined => {
+//) : MatchAndNestedEntriesArray | undefined => {
+) : EntriesArrayOrUndefined => {
   const { file } = alertData;
   const codeSignature = file && file.Ext && file.Ext.code_signature;
 
@@ -329,7 +331,7 @@ export const getFileCodeSignature = (
  */
 export const getProcessCodeSignature = (
   alertData: Flattened<Ecs>
-): EntriesArray | undefined => {
+): EntriesArrayOrUndefined => {
   const { process } = alertData;
   const codeSignature = process && process.Ext && process.Ext.code_signature;
   if (codeSignature) {
@@ -359,7 +361,7 @@ export const getProcessCodeSignature = (
  */
 export const getDllCodeSignature = (
   alertData: Flattened<Ecs>
-): EntriesArray | undefined => {
+): EntriesArrayOrUndefined => {
   const { dll } = alertData;
   const codeSignature = dll && dll.Ext && dll.Ext.code_signature;
   if (codeSignature) {
@@ -388,9 +390,9 @@ export const getDllCodeSignature = (
 export const getCodeSignatureValue = (
   codeSignature: Flattened<CodeSignature> | Flattened<CodeSignature[]> | undefined,
   field: string
-): EntriesArray | undefined => {
+): Array<EntryNested> | undefined => {
   if (Array.isArray(codeSignature) && codeSignature.length > 0) {
-    const codeSignatureEntries: EntriesArray = [];
+    const codeSignatureEntries: Array<EntryNested> = [];
     return codeSignature.reduce((acc, signature) => {
       if (signature?.trusted === 'true') {
         acc.push({
@@ -443,23 +445,18 @@ export const getCodeSignatureValue = (
   }
 };
 
-// helper type to filter empty-valued exception entries
-interface ExceptionEntry {
-  value?: string;
-  entries?: ExceptionEntry[];
-}
-
 /**
  * Takes an array of Entries and filter out the ones with empty values.
  * It will also filter out empty values for nested entries.
  */
-function filterEmptyExceptionEntries<T extends ExceptionEntry>(entries: T[]): T[] {
-  const finalEntries: T[] = [];
+
+function filterEmptyExceptionEntries(entries: EntriesArray): EntriesArray {
+  const finalEntries: EntriesArray = [];
   for (const entry of entries) {
-    if (entry?.entries !== undefined) {
-      entry.entries = entry.entries.filter((el) => el.value !== undefined && el.value.length > 0);
+    if ("entries" in entry && entry.entries !== undefined) {
+      entry.entries = entry.entries.filter((el) => "value" in el && el.value !== undefined && el.value.length > 0);
       finalEntries.push(entry);
-    } else if (entry?.value !== undefined && entry.value.length > 0) {
+    } else if ("value" in entry && entry.value !== undefined && entry.value.length > 0) {
       finalEntries.push(entry);
     }
   }
@@ -510,10 +507,10 @@ export const getPrepopulatedEndpointException = ({
     },
   ];
   const entriesToAdd = () => {
-    if (isLinux) {
-      return addIdToEntries(filterEmptyExceptionEntries(commonFields));
-    } else {
+    if (!isLinux && fileCodeSignature !== undefined) {
       return addIdToEntries(filterEmptyExceptionEntries(commonFields.concat(fileCodeSignature)));
+    } else {
+      return addIdToEntries(filterEmptyExceptionEntries(commonFields));
     }
   };
 
@@ -546,12 +543,7 @@ export const getPrepopulatedRansomwareException = ({
   const ransomwareFeature = Ransomware?.feature ?? '';
   const isLinux = host?.os?.name === 'Linux';
 
-  const commonFields: Array<{
-    field: string;
-    operator: 'excluded' | 'included';
-    type: 'match';
-    value: string;
-  }> = [
+  const commonFields: EntriesArray = [
     {
       field: 'process.executable',
       operator: 'included',
@@ -579,10 +571,10 @@ export const getPrepopulatedRansomwareException = ({
   ];
 
   const entriesToAdd = () => {
-    if (isLinux) {
-      return addIdToEntries(filterEmptyExceptionEntries(commonFields));
-    } else {
+    if (!isLinux && processCodeSignature !== undefined) {
       return addIdToEntries(filterEmptyExceptionEntries(commonFields.concat(processCodeSignature)));
+    } else {
+      return addIdToEntries(filterEmptyExceptionEntries(commonFields));
     }
   };
 
@@ -708,12 +700,7 @@ export const getPrepopulatedBehaviorException = ({
   const processCodeSignature = getProcessCodeSignature(alertEcsData);
   const dllCodeSignature = getDllCodeSignature(alertEcsData);
   const isLinux = host?.os?.name === 'Linux';
-  const commonFields: Array<{
-    field: string;
-    operator: 'excluded' | 'included';
-    type: 'match';
-    value: string;
-  }> = [
+  const commonFields: EntriesArray = [
     {
       field: 'rule.id',
       operator: 'included' as const,
@@ -813,12 +800,10 @@ export const getPrepopulatedBehaviorException = ({
   ];
 
   const entriesToAdd = () => {
-    if (isLinux) {
-      return addIdToEntries(filterEmptyExceptionEntries(commonFields));
+    if (!isLinux && processCodeSignature !== undefined && dllCodeSignature !== undefined) {
+      return addIdToEntries(filterEmptyExceptionEntries(commonFields.concat(processCodeSignature, dllCodeSignature)));
     } else {
-      return addIdToEntries(
-        filterEmptyExceptionEntries(commonFields.concat(processCodeSignature, dllCodeSignature))
-      );
+      return addIdToEntries(filterEmptyExceptionEntries(commonFields));
     }
   };
 
