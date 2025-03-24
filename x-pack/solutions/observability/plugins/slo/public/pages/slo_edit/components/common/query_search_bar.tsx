@@ -159,7 +159,6 @@ export const QuerySearchBar = memo(
                   onClearSavedQuery={() => {}}
                   filters={kqlQuerySchema.is(field.value) ? [] : field.value?.filters ?? []}
                   allowSavingQueries={true}
-                  showSavedQueryControls={true}
                 />
               </div>
             </EuiFormRow>
