@@ -9,9 +9,10 @@ import {
   SPACE_SELECTOR_COMBO_BOX,
   SECURITY_PRIVILEGE,
 } from '../screens/custom_roles/assign_to_space_flyout';
+import { ASSIGN_TO_SPACE_BUTTON } from '../screens/custom_roles/custom_role_page';
 
 export const selectAllSpaces = (): void => {
-  cy.get('[data-test-subj="addSpacePrivilegeButton"]').click();
+  cy.get(ASSIGN_TO_SPACE_BUTTON).click();
 
   // select all spaces
   cy.get(SPACE_SELECTOR_COMBO_BOX).click();
