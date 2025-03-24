@@ -147,6 +147,8 @@
             "section": "def-public.ObservabilityLogsAIAssistantFeatureRenderDeps",
             "text": "ObservabilityLogsAIAssistantFeatureRenderDeps"
           },
+          ") => JSX.Element) | undefined; renderStreamsField?: ((deps: ",
+          "StreamsFeatureRenderDeps",
           ") => JSX.Element) | undefined; } & React.RefAttributes<{}>>"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/lazy_doc_viewer_logs_overview.tsx",
@@ -313,6 +315,8 @@
             "section": "def-public.ObservabilityLogsAIAssistantFeatureRenderDeps",
             "text": "ObservabilityLogsAIAssistantFeatureRenderDeps"
           },
+          ") => JSX.Element) | undefined; renderStreamsField?: ((deps: ",
+          "StreamsFeatureRenderDeps",
           ") => JSX.Element) | undefined; }"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview/logs_overview.tsx",

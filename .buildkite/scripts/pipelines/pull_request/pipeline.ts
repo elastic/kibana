@@ -263,6 +263,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/ai_assistant.yml')
       );
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution/ai4dsoc.yml'));
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/automatic_import.yml')
       );
@@ -448,6 +449,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/solutions\/observability\/packages\/kbn-scout-oblt/,
         /^x-pack\/solutions\/observability\/plugins\/apm/,
         /^x-pack\/solutions\/observability\/plugins\/observability_onboarding/,
+        /^x-pack\/solutions\/security\/packages\/kbn-scout-security/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:scout-ui-tests')
     ) {

@@ -17,8 +17,12 @@ import {
   customFieldsConfigurationMock,
   templatesConfigurationMock,
 } from '../../containers/mock';
-import { TestProviders, createAppMockRenderer, noCasesSettingsPermission } from '../../common/mock';
-import type { AppMockRenderer } from '../../common/mock';
+import {
+  TestProviders,
+  noCasesSettingsPermission,
+  renderWithTestingProviders,
+} from '../../common/mock';
+
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 
@@ -575,12 +579,13 @@ describe('ConfigureCases', () => {
       await waitFor(() => {
         wrapper.update();
         expect(wrapper.find('[data-test-subj="add-connector-flyout"]').exists()).toBe(true);
-        expect(getAddConnectorFlyoutMock).toHaveBeenCalledWith(
-          expect.objectContaining({
-            featureId: 'cases',
-          })
-        );
       });
+
+      expect(getAddConnectorFlyoutMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          featureId: 'cases',
+        })
+      );
     });
 
     test('it show the edit flyout when pressing the update connector button', async () => {
@@ -610,10 +615,11 @@ describe('ConfigureCases', () => {
       await waitFor(() => {
         wrapper.update();
         expect(wrapper.find('[data-test-subj="edit-connector-flyout"]').exists()).toBe(true);
-        expect(getEditConnectorFlyoutMock).toHaveBeenCalledWith(
-          expect.objectContaining({ connector: connectors[1] })
-        );
       });
+
+      expect(getEditConnectorFlyoutMock).toHaveBeenCalledWith(
+        expect.objectContaining({ connector: connectors[1] })
+      );
 
       expect(
         wrapper.find('[data-test-subj="case-configure-action-bottom-bar"]').exists()
@@ -622,12 +628,11 @@ describe('ConfigureCases', () => {
   });
 
   describe('custom fields', () => {
-    let appMockRender: AppMockRenderer;
     let persistCaseConfigure: jest.Mock;
 
     beforeEach(() => {
       jest.clearAllMocks();
-      appMockRender = createAppMockRenderer();
+
       persistCaseConfigure = jest.fn();
       usePersistConfigurationMock.mockImplementation(() => ({
         ...usePersistConfigurationMockResponse,
@@ -636,7 +641,7 @@ describe('ConfigureCases', () => {
     });
 
     it('renders custom field group when no custom fields available', () => {
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
     });
@@ -659,7 +664,7 @@ describe('ConfigureCases', () => {
         },
       }));
 
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       expect(
         screen.getByTestId(`custom-field-${customFieldsMock[0].key}-${customFieldsMock[0].type}`)
@@ -675,7 +680,7 @@ describe('ConfigureCases', () => {
         },
       }));
 
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       const list = screen.getByTestId('custom-fields-list');
 
@@ -695,7 +700,7 @@ describe('ConfigureCases', () => {
         },
       }));
 
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       const list = screen.getByTestId('custom-fields-list');
 
@@ -750,7 +755,7 @@ describe('ConfigureCases', () => {
         },
       }));
 
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       const list = await screen.findByTestId('custom-fields-list');
 
@@ -805,7 +810,7 @@ describe('ConfigureCases', () => {
         },
       }));
 
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       await userEvent.click(await screen.findByTestId(`add-custom-field`));
 
@@ -883,7 +888,7 @@ describe('ConfigureCases', () => {
         },
       }));
 
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       const list = screen.getByTestId('custom-fields-list');
 
@@ -929,7 +934,7 @@ describe('ConfigureCases', () => {
     });
 
     it('opens fly out for when click on add field', async () => {
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       await userEvent.click(screen.getByTestId('add-custom-field'));
 
@@ -941,7 +946,7 @@ describe('ConfigureCases', () => {
     });
 
     it('closes fly out for when click on cancel', async () => {
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       await userEvent.click(screen.getByTestId('add-custom-field'));
 
@@ -954,7 +959,7 @@ describe('ConfigureCases', () => {
     });
 
     it('closes fly out for when click on save field', async () => {
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       await userEvent.click(screen.getByTestId('add-custom-field'));
 
@@ -995,12 +1000,11 @@ describe('ConfigureCases', () => {
   });
 
   describe('templates', () => {
-    let appMockRender: AppMockRenderer;
     const persistCaseConfigure = jest.fn();
 
     beforeEach(() => {
       jest.clearAllMocks();
-      appMockRender = createAppMockRenderer();
+
       usePersistConfigurationMock.mockImplementation(() => ({
         ...usePersistConfigurationMockResponse,
         mutate: persistCaseConfigure,
@@ -1009,14 +1013,14 @@ describe('ConfigureCases', () => {
     });
 
     it('should render template section', async () => {
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       expect(await screen.findByTestId('templates-form-group')).toBeInTheDocument();
       expect(await screen.findByTestId('add-template')).toBeInTheDocument();
     });
 
     it('should render template form in flyout', async () => {
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       expect(await screen.findByTestId('templates-form-group')).toBeInTheDocument();
 
@@ -1030,7 +1034,7 @@ describe('ConfigureCases', () => {
     });
 
     it('should add template', async () => {
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       expect(await screen.findByTestId('templates-form-group')).toBeInTheDocument();
 
@@ -1119,7 +1123,7 @@ describe('ConfigureCases', () => {
         },
       }));
 
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       const list = screen.getByTestId('templates-list');
 
@@ -1162,7 +1166,7 @@ describe('ConfigureCases', () => {
         },
       }));
 
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       const list = screen.getByTestId('templates-list');
 
@@ -1220,12 +1224,11 @@ describe('ConfigureCases', () => {
   });
 
   describe('observable types', () => {
-    let appMockRender: AppMockRenderer;
     const persistCaseConfigure = jest.fn();
 
     beforeEach(() => {
       jest.clearAllMocks();
-      appMockRender = createAppMockRenderer();
+
       usePersistConfigurationMock.mockImplementation(() => ({
         ...usePersistConfigurationMockResponse,
         mutate: persistCaseConfigure,
@@ -1234,14 +1237,14 @@ describe('ConfigureCases', () => {
     });
 
     it('should render observable types section', async () => {
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       expect(await screen.findByTestId('observable-types-form-group')).toBeInTheDocument();
       expect(await screen.findByTestId('add-observable-type')).toBeInTheDocument();
     });
 
     it('opens fly out for when click on add observable type', async () => {
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       await userEvent.click(screen.getByTestId('add-observable-type'));
 
@@ -1249,7 +1252,7 @@ describe('ConfigureCases', () => {
     });
 
     it('closes fly out for when click on cancel', async () => {
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       await userEvent.click(screen.getByTestId('add-observable-type'));
 
@@ -1262,7 +1265,7 @@ describe('ConfigureCases', () => {
     });
 
     it('closes fly out and updates the data when click on save', async () => {
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       await userEvent.click(screen.getByTestId('add-observable-type'));
 
@@ -1294,7 +1297,7 @@ describe('ConfigureCases', () => {
         },
       }));
 
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       const list = screen.getByTestId('observable-types-list');
 
@@ -1342,7 +1345,7 @@ describe('ConfigureCases', () => {
         },
       }));
 
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       const list = screen.getByTestId('observable-types-list');
 
@@ -1374,13 +1377,12 @@ describe('ConfigureCases', () => {
   });
 
   describe('rendering with license limitations', () => {
-    let appMockRender: AppMockRenderer;
     let persistCaseConfigure: jest.Mock;
     beforeEach(() => {
       // Default setup
       jest.clearAllMocks();
       useGetConnectorsMock.mockImplementation(() => ({ useConnectorsResponse }));
-      appMockRender = createAppMockRenderer();
+
       persistCaseConfigure = jest.fn();
       usePersistConfigurationMock.mockImplementation(() => ({
         ...usePersistConfigurationMockResponse,
@@ -1396,18 +1398,18 @@ describe('ConfigureCases', () => {
     });
 
     it('should not render connectors and closure options', () => {
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
       expect(screen.queryByTestId('dropdown-connectors')).not.toBeInTheDocument();
       expect(screen.queryByTestId('closure-options-radio-group')).not.toBeInTheDocument();
     });
 
     it('should render custom field section', () => {
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
       expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
     });
 
     it('should not render observable types section', async () => {
-      appMockRender.render(<ConfigureCases />);
+      renderWithTestingProviders(<ConfigureCases />);
 
       expect(screen.queryByTestId('observable-types-form-group')).not.toBeInTheDocument();
       expect(screen.queryByTestId('add-observable-type')).not.toBeInTheDocument();

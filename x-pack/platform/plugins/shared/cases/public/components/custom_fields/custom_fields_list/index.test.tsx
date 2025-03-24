@@ -9,14 +9,12 @@ import React from 'react';
 import { screen, within, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import { customFieldsConfigurationMock } from '../../../containers/mock';
 import { CustomFieldsList } from '.';
+import { renderWithTestingProviders } from '../../../common/mock';
 
 describe('CustomFieldsList', () => {
   let user: UserEvent;
-  let appMockRender: AppMockRenderer;
 
   const props = {
     customFields: customFieldsConfigurationMock,
@@ -39,17 +37,16 @@ describe('CustomFieldsList', () => {
     });
 
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders correctly', () => {
-    appMockRender.render(<CustomFieldsList {...props} />);
+    renderWithTestingProviders(<CustomFieldsList {...props} />);
 
     expect(screen.getByTestId('custom-fields-list')).toBeInTheDocument();
   });
 
   it('shows CustomFieldsList correctly', async () => {
-    appMockRender.render(<CustomFieldsList {...props} />);
+    renderWithTestingProviders(<CustomFieldsList {...props} />);
 
     expect(await screen.findByTestId('custom-fields-list')).toBeInTheDocument();
 
@@ -77,7 +74,7 @@ describe('CustomFieldsList', () => {
   });
 
   it('shows single CustomFieldsList correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <CustomFieldsList {...{ ...props, customFields: [customFieldsConfigurationMock[0]] }} />
     );
 
@@ -100,7 +97,7 @@ describe('CustomFieldsList', () => {
   });
 
   it('does not show any panel when custom fields', () => {
-    appMockRender.render(<CustomFieldsList {...{ ...props, customFields: [] }} />);
+    renderWithTestingProviders(<CustomFieldsList {...{ ...props, customFields: [] }} />);
 
     expect(screen.queryAllByTestId(`custom-field-`, { exact: false })).toHaveLength(0);
   });
@@ -111,7 +108,7 @@ describe('CustomFieldsList', () => {
     });
 
     it('shows confirmation modal when deleting a field ', async () => {
-      appMockRender.render(<CustomFieldsList {...props} />);
+      renderWithTestingProviders(<CustomFieldsList {...props} />);
 
       const list = await screen.findByTestId('custom-fields-list');
 
@@ -125,7 +122,7 @@ describe('CustomFieldsList', () => {
     });
 
     it('calls onDeleteCustomField when confirm', async () => {
-      appMockRender.render(<CustomFieldsList {...props} />);
+      renderWithTestingProviders(<CustomFieldsList {...props} />);
 
       const list = await screen.findByTestId('custom-fields-list');
 
@@ -141,14 +138,13 @@ describe('CustomFieldsList', () => {
 
       await waitFor(() => {
         expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
-        expect(props.onDeleteCustomField).toHaveBeenCalledWith(
-          customFieldsConfigurationMock[0].key
-        );
       });
+
+      expect(props.onDeleteCustomField).toHaveBeenCalledWith(customFieldsConfigurationMock[0].key);
     });
 
     it('does not call onDeleteCustomField when cancel', async () => {
-      appMockRender.render(<CustomFieldsList {...props} />);
+      renderWithTestingProviders(<CustomFieldsList {...props} />);
 
       const list = await screen.findByTestId('custom-fields-list');
 
@@ -164,8 +160,9 @@ describe('CustomFieldsList', () => {
 
       await waitFor(() => {
         expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
-        expect(props.onDeleteCustomField).not.toHaveBeenCalledWith();
       });
+
+      expect(props.onDeleteCustomField).not.toHaveBeenCalledWith();
     });
   });
 
@@ -175,7 +172,7 @@ describe('CustomFieldsList', () => {
     });
 
     it('calls onEditCustomField correctly', async () => {
-      appMockRender.render(<CustomFieldsList {...props} />);
+      renderWithTestingProviders(<CustomFieldsList {...props} />);
 
       const list = await screen.findByTestId('custom-fields-list');
 
