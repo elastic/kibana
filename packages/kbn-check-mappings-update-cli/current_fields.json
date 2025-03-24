@@ -1195,6 +1195,7 @@
     "created_by",
     "description",
     "integration_id",
+    "name",
     "type",
     "updated_at"
   ],
