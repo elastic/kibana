@@ -26,6 +26,7 @@ import { VulnerabilityFindingFlyout } from './vulnerabilities_finding_flyout/vul
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { createDetectionRuleFromVulnerabilityFinding } from './utils/create_detection_rule_from_vulnerability';
 import { vulnerabilitiesTableFieldLabels } from './vulnerabilities_table_field_labels';
+import { FindingsMultiValueCellRender } from '../../components/findings_table_multi_value_cell_render';
 
 interface LatestVulnerabilitiesTableProps {
   groupSelectorComponent?: JSX.Element;
@@ -104,42 +105,30 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
   ),
   'vulnerability.id': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
     <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
-      {({ finding }) => {
-        if (Array.isArray(finding.vulnerability?.id)) {
-          return <>{finding.vulnerability.id.join(', ')}</>;
-        }
-        return <>{finding.vulnerability?.id || '-'}</>;
-      }}
+      {({ finding }) => (
+        <FindingsMultiValueCellRender finding={finding} multiValueField="vulnerability.id" />
+      )}
     </CspVulnerabilityFindingRenderer>
   ),
   'package.name': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
     <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
-      {({ finding }) => {
-        if (Array.isArray(finding.package.name)) {
-          return <>{finding.package.name.join(', ')}</>;
-        }
-        return <>{finding.package.name || '-'}</>;
-      }}
+      {({ finding }) => (
+        <FindingsMultiValueCellRender finding={finding} multiValueField="package.name" />
+      )}
     </CspVulnerabilityFindingRenderer>
   ),
   'package.version': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
     <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
-      {({ finding }) => {
-        if (Array.isArray(finding.package.version)) {
-          return <>{finding.package.version.join(', ')}</>;
-        }
-        return <>{finding.package.version || '-'}</>;
-      }}
+      {({ finding }) => (
+        <FindingsMultiValueCellRender finding={finding} multiValueField="package.version" />
+      )}
     </CspVulnerabilityFindingRenderer>
   ),
   'package.fixed_version': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
     <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
-      {({ finding }) => {
-        if (Array.isArray(finding.package.fixed_version)) {
-          return <>{finding.package.fixed_version.join(', ')}</>;
-        }
-        return <>{finding.package.fixed_version || '-'}</>;
-      }}
+      {({ finding }) => (
+        <FindingsMultiValueCellRender finding={finding} multiValueField="package.fixed_version" />
+      )}
     </CspVulnerabilityFindingRenderer>
   ),
 });

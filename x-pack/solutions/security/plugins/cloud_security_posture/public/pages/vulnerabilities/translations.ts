@@ -84,3 +84,15 @@ export const GROUPING_LABELS = {
 export const groupingTitle = i18n.translate('xpack.csp.vulnerabilities.groupBy', {
   defaultMessage: 'Group vulnerabilities by',
 });
+
+export const getMultiValueFieldAriaLabel = (value: string | number, index: number) =>
+  i18n.translate('xpack.csp.vulnerabilities.multiValueField', {
+    values: { value, index },
+    defaultMessage: `Field value '{value}', element index {index}`,
+  });
+
+export const getShowMoreAriaLabel = (field: string, number: number) =>
+  i18n.translate('xpack.csp.vulnerabilities.multiValueField.showMore', {
+    defaultMessage: 'Field {field} has {number, plural, one {# item} other {#i tems}}',
+    values: { field, number },
+  });
