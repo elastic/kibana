@@ -105,7 +105,9 @@ import { Builder } from '../builder';
 import { getPosition } from './helpers';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
-  const fromContexts = ctx.getTypedRuleContexts(IndexPatternContext);
+  const fromContexts = ctx
+    .indexPatternAndMetadataFields()
+    .getTypedRuleContexts(IndexPatternContext);
   return fromContexts.map((sourceCtx) => createSource(sourceCtx));
 }
 
