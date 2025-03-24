@@ -36,7 +36,7 @@ import {
   createCustomThresholdExecutor,
   CustomThresholdLocators,
 } from './custom_threshold_executor';
-import { CUSTOM_THRESHOLD_AAD_FIELDS, FIRED_ACTION, NO_DATA_ACTION } from './constants';
+import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { ObservabilityConfig } from '../../..';
 import { CustomThresholdAlert } from './types';
 

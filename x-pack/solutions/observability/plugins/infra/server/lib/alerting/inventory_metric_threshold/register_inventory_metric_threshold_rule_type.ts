@@ -41,7 +41,6 @@ import {
   WARNING_ACTIONS,
 } from './inventory_metric_threshold_executor';
 import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
-import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
 const groupActionVariableDescription = i18n.translate(
   'xpack.infra.inventory.alerting.groupActionVariableDescription',

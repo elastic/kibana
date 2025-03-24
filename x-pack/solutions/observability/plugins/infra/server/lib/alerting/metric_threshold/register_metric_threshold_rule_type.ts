@@ -43,7 +43,6 @@ import {
   NO_DATA_ACTIONS,
 } from './metric_threshold_executor';
 import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
-import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
 export function registerMetricThresholdRuleType(
   alertingPlugin: AlertingServerSetup,
