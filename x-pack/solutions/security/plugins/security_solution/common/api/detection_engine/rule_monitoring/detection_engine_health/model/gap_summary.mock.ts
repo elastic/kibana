@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GapSummary } from './get_gaps_summary_for_rule';
+import type { GapSummary } from './gap_summary';
 
 export const getEmptyGapSummary = (): GapSummary => ({
   total_unfilled_duration_ms: 0,

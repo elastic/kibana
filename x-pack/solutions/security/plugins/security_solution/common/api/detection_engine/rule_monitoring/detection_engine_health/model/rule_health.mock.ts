@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getEmptyGapSummary } from '../../../../../../server/lib/detection_engine/rule_monitoring/logic/detection_engine_health/gaps/get_gaps_summary_for_rule.mock';
 import { getRulesSchemaMock } from '../../../model/rule_schema/mocks';
+import { getEmptyGapSummary } from './gap_summary.mock';
 import { healthStatsMock } from './health_stats.mock';
 import type { RuleHealthSnapshot } from './rule_health';
 
