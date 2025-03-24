@@ -507,10 +507,10 @@ export function MachineLearningStackManagementJobsProvider(
 
     async parseTable(mlSavedObjectType: MlSavedObjectType) {
       if (mlSavedObjectType === 'anomaly-detector') {
-        return await jobTable.parseJobTable();
+        return await jobTable.parseJobTable('stackMgmtJobList');
       }
       if (mlSavedObjectType === 'data-frame-analytics') {
-        return await dataFrameAnalyticsTable.parseAnalyticsTable();
+        return await dataFrameAnalyticsTable.parseAnalyticsTable('stackMgmtJobList');
       }
     },
     async getIdsFromTables(mlSavedObjectType: MlSavedObjectType) {

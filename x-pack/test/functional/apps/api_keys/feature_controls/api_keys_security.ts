@@ -38,7 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const sections = await managementMenu.getSections();
 
         const sectionIds = sections.map((section) => section.sectionId);
-        expect(sectionIds).to.eql(['data', 'insightsAndAlerting', 'kibana']);
+        expect(sectionIds).to.eql(['data', 'insightsAndAlerting', 'ml', 'kibana']);
 
         const dataSection = sections.find((section) => section.sectionId === 'data');
         expect(dataSection?.sectionLinks).to.eql(['data_quality']);
