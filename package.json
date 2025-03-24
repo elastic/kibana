@@ -1566,6 +1566,7 @@
     "@storybook/addon-a11y": "^8.6.3",
     "@storybook/addon-actions": "^8.6.3",
     "@storybook/addon-essentials": "^8.6.3",
+    "@storybook/addon-jest": "8.6.3",
     "@storybook/addon-styling-webpack": "^1.0.1",
     "@storybook/addon-webpack5-compiler-babel": "^3.0.5",
     "@storybook/blocks": "^8.6.3",
