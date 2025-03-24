@@ -57,7 +57,7 @@ export const sloKeys = {
     page: number;
     perPage: number;
     includeOutdatedOnly: boolean;
-  }) => [...sloKeys.all, 'definitions', params],
+  }) => [...sloKeys.allDefinitions(), params],
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
   health: (list: Array<{ sloId: string; sloInstanceId: string }>) =>
     [...sloKeys.all, 'health', list] as const,
@@ -87,7 +87,6 @@ export const sloKeys = {
     excludeStale?: boolean;
     remoteName?: string;
   }) => [...sloKeys.all, 'fetch_slo_groupings', params] as const,
-  managementAll: ['slo', 'management'] as const,
 };
 
 export type SloKeys = typeof sloKeys;
