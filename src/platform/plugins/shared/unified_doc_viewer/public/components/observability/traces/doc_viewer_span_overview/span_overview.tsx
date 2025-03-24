@@ -16,7 +16,7 @@ import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { TransactionProvider } from './hooks/use_transaction';
 import { spanFields } from './resources/fields';
 import { getSpanFieldConfiguration } from './resources/get_span_field_configuration';
-import { SpanSummary } from './sub_components/span_summary';
+import { SpanSummaryField } from './sub_components/span_summary_field';
 export type SpanOverviewProps = DocViewRenderProps & {
   transactionIndexPattern: string;
 };
@@ -56,7 +56,7 @@ export function SpanOverview({
             const fieldConfiguration = getSpanFieldConfiguration(parsedDoc)[fieldId];
 
             return (
-              <SpanSummary
+              <SpanSummaryField
                 key={fieldId}
                 fieldId={fieldId}
                 fieldConfiguration={fieldConfiguration}

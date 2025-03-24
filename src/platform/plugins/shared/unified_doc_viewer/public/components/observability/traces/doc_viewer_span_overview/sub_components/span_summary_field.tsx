@@ -13,12 +13,12 @@ import React, { useState, useEffect } from 'react';
 import { FieldWithActions } from '../../components/field_with_actions/field_with_actions';
 import { useTransactionContext } from '../hooks/use_transaction';
 import { FieldConfiguration } from '../../resources/get_field_configuration';
-export interface SpanSummaryProps {
+export interface SpanSummaryFieldProps {
   fieldId: string;
   fieldConfiguration: FieldConfiguration;
 }
 
-export function SpanSummary({ fieldConfiguration, fieldId }: SpanSummaryProps) {
+export function SpanSummaryField({ fieldConfiguration, fieldId }: SpanSummaryFieldProps) {
   const { transaction, loading } = useTransactionContext();
   const [fieldValue, setFieldValue] = useState(fieldConfiguration.value);
   const isTransactionNameField = fieldId === TRANSACTION_NAME_FIELD;
