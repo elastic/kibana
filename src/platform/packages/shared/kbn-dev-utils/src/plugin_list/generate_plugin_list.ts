@@ -7,80 +7,66 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
-
+import { relative, resolve } from 'path';
 import normalizePath from 'normalize-path';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { Plugins } from './discover_plugins';
+import type { Plugin, Plugins } from './discover_plugins';
 
-const sortPlugins = (plugins: Plugins) => plugins.sort((a, b) => a.id.localeCompare(b.id));
+function markdownEscape(snippet: string): string {
+  return snippet.replaceAll('\n', ' ').replaceAll('|', '\\|');
+}
 
-function* printPlugins(plugins: Plugins, includes: string[]) {
-  for (const plugin of sortPlugins(plugins)) {
-    const path = normalizePath(plugin.relativeReadmePath || plugin.relativeDir);
-    yield '';
+function getLinkAndDescription(plugin: Plugin): { link: string; description: string } {
+  const path = normalizePath(plugin.relativeReadmePath || plugin.relativeDir);
+  const link = plugin.readmeAsciidocAnchor
+    ? `[${plugin.id}](${plugin.readmeAsciidocAnchor}.md)`
+    : `[${plugin.id}](https://github.com/elastic/kibana/blob/main/${path})`;
 
-    if (plugin.readmeAsciidocAnchor) {
-      yield `|<<${plugin.readmeAsciidocAnchor}>>`;
+  const description =
+    plugin.relativeReadmePath && plugin.readmeSnippet
+      ? markdownEscape(plugin.readmeSnippet)
+      : 'WARNING: Missing or empty README.';
 
-      includes.push(`include::{kibana-root}/${path}[leveloffset=+1]`);
-    } else {
-      yield `|{kib-repo}blob/{branch}/${path}[${plugin.id}]`;
-    }
-
-    yield plugin.relativeReadmePath === undefined
-      ? '|WARNING: Missing README.'
-      : `|${plugin.readmeSnippet}`;
-
-    yield '';
-  }
+  return { link, description };
 }
 
 export function generatePluginList(ossPlugins: Plugins, xpackPlugins: Plugins) {
-  const includes: string[] = [];
+  return `---
+mapped_pages:
+  - https://www.elastic.co/guide/en/kibana/current/plugin-list.html
+---
 
-  return `////
-
-NOTE:
-  This is an automatically generated file. Please do not edit directly. Instead, run the
-  following from within the kibana repository:
-
-    node scripts/build_plugin_list_docs
-
-  You can update the template within ${normalizePath(
-    Path.relative(REPO_ROOT, Path.resolve(__dirname, __filename))
+% This is an automatically generated file. Please do not edit directly.
+% Instead, run the following from within the kibana repository:
+%
+%  node scripts/build_plugin_list_docs
+%
+% You can update the template within ${normalizePath(
+    relative(REPO_ROOT, resolve(__dirname, __filename))
   )}
 
-////
+# List of Kibana plugins [plugin-list]
 
-[[plugin-list]]
-== List of {kib} plugins
 
-[discrete]
-=== src/plugins
+## src/plugins [_srcplugins]
 
-[%header,cols=2*]
-|===
-|Name
-|Description
+| Name | Description |
+| --- | --- |
+${ossPlugins
+  .sort((a, b) => a.id.localeCompare(b.id))
+  .map(getLinkAndDescription)
+  .map(({ link, description }) => `| ${link} | ${description} |`)
+  .join('\n')}
 
-${Array.from(printPlugins(ossPlugins, includes)).join('\n')}
+## x-pack/plugins [_x_packplugins]
 
-|===
-
-[discrete]
-=== x-pack/plugins
-
-[%header,cols=2*]
-|===
-|Name
-|Description
-
-${Array.from(printPlugins(xpackPlugins, includes)).join('\n')}
-
-|===
-
-${Array.from(includes).join('\n')}
+| Name | Description |
+| --- | --- |
+${xpackPlugins
+  .sort((a, b) => a.id.localeCompare(b.id))
+  .map(getLinkAndDescription)
+  .map(({ link, description }) => `| ${link} | ${description} |`)
+  .join('\n')}
 `;
 }
