@@ -15,6 +15,7 @@ import type {
   ClusterHealthSnapshot,
   RuleHealthParameters,
   RuleHealthSnapshot,
+  RuleHealthStats,
   SpaceHealthParameters,
   SpaceHealthSnapshot,
 } from '../../../../../../common/api/detection_engine/rule_monitoring';
@@ -51,7 +52,7 @@ export const createDetectionEngineHealthClient = (
             ruleId: args.rule_id,
             interval: args.interval,
           });
-          const statsOverInterval = {
+          const statsOverInterval: RuleHealthStats = {
             ...statsBasedOnEventLog.stats_over_interval,
             gap_summary: gapsSummary,
           };
