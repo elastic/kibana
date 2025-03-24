@@ -46,3 +46,4 @@ xpack.cloudSecurityPosture.enabled: false
 xpack.securitySolution.enabled: false
 xpack.securitySolutionEss.enabled: false
 xpack.securitySolutionServerless.enabled: false
+xpack.spaces.maxSpaces: 1
