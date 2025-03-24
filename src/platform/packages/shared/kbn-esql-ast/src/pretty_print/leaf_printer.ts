@@ -127,12 +127,14 @@ export const LeafPrinter = {
   },
 
   param: (node: ESQLParamLiteral) => {
+    const paramKind = node.paramKind || '?';
+
     switch (node.paramType) {
       case 'named':
       case 'positional':
-        return '?' + node.value;
+        return paramKind + node.value;
       default:
-        return '?';
+        return paramKind;
     }
   },
 
