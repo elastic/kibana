@@ -8,7 +8,13 @@ import React from 'react';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 
-export function StreamsAppPageBody({ children }: { children: React.ReactNode }) {
+export function StreamsAppPageBody({
+  children,
+  background,
+}: {
+  children: React.ReactNode;
+  background: boolean;
+}) {
   const theme = useEuiTheme().euiTheme;
   return (
     <EuiPanel
@@ -19,6 +25,7 @@ export function StreamsAppPageBody({ children }: { children: React.ReactNode }) 
         border-radius: 0px;
         display: flex;
         overflow-y: auto;
+        ${!background ? `background-color: transparent;` : ''}
       `}
       paddingSize="l"
     >

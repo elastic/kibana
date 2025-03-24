@@ -64,6 +64,10 @@ export class OpsMetricsCollector implements MetricsCollector<OpsMetrics> {
     };
   }
 
+  public registerMetrics() {
+    this.processCollector.registerMetrics();
+  }
+
   public reset() {
     this.processCollector.reset();
     this.osCollector.reset();
