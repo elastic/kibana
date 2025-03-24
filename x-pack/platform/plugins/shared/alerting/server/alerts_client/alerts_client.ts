@@ -14,7 +14,7 @@ import {
   ALERT_UUID,
   ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
-import { chunk, flatMap, get, isEmpty, keys, difference } from 'lodash';
+import { chunk, flatMap, get, isEmpty, keys } from 'lodash';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
@@ -422,16 +422,17 @@ export class AlertsClient<
     const currentTime = this.startedAtString ?? new Date().toISOString();
     const esClient = await this.options.elasticsearchClientPromise;
 
+    const { rawActiveAlerts, rawRecoveredAlerts } = this.getRawAlertInstancesForState();
+
     const activeAlerts = this.legacyAlertsClient.getProcessedAlerts('active');
     const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recovered');
-    const { rawRecoveredAlerts } = this.getRawAlertInstancesForState();
 
     // TODO - Lifecycle alerts set some other fields based on alert status
     // Example: workflow status - default to 'open' if not set
     // event action: new alert = 'new', active alert: 'active', otherwise 'close'
 
     const activeAlertsToIndex: Array<Alert & AlertData> = [];
-    for (const id of keys(activeAlerts)) {
+    for (const id of keys(rawActiveAlerts)) {
       // See if there's an existing active alert document
       const alert = activeAlerts[id];
       if (alert) {
@@ -496,48 +497,37 @@ export class AlertsClient<
     }
 
     const recoveredAlertsToIndex: Array<Alert & AlertData> = [];
-    const legacyRecoveredAlertIds = difference(keys(rawRecoveredAlerts), keys(recoveredAlerts));
-
-    for (const id of keys(recoveredAlerts)) {
+    for (const id of keys(rawRecoveredAlerts)) {
+      // See if there's an existing alert document
+      // If there is not, log an error because there should be
       if (Object.hasOwn(this.fetchedAlerts.data, id)) {
         const alert = recoveredAlerts[id];
-        if (alert) {
-          recoveredAlertsToIndex.push(
-            buildRecoveredAlert<
-              AlertData,
-              LegacyState,
-              LegacyContext,
-              ActionGroupIds,
-              RecoveryActionGroupId
-            >({
-              alert: this.fetchedAlerts.data[id],
-              legacyAlert: alert,
-              rule: this.rule,
-              runTimestamp: this.runTimestampString,
-              timestamp: currentTime,
-              payload: this.reportedAlerts[id],
-              recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
-              kibanaVersion: this.options.kibanaVersion,
-            })
-          );
-        }
-      }
-    }
-
-    for (const id of legacyRecoveredAlertIds) {
-      if (Object.hasOwn(this.fetchedAlerts.data, id)) {
-        const legacyRawAlert = rawRecoveredAlerts[id];
-        if (legacyRawAlert) {
-          recoveredAlertsToIndex.push(
-            buildUpdatedRecoveredAlert<AlertData>({
-              alert: this.fetchedAlerts.data[id],
-              legacyRawAlert,
-              runTimestamp: this.runTimestampString,
-              timestamp: currentTime,
-              rule: this.rule,
-            })
-          );
-        }
+        recoveredAlertsToIndex.push(
+          alert
+            ? buildRecoveredAlert<
+                AlertData,
+                LegacyState,
+                LegacyContext,
+                ActionGroupIds,
+                RecoveryActionGroupId
+              >({
+                alert: this.fetchedAlerts.data[id],
+                legacyAlert: alert,
+                rule: this.rule,
+                runTimestamp: this.runTimestampString,
+                timestamp: currentTime,
+                payload: this.reportedAlerts[id],
+                recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
+                kibanaVersion: this.options.kibanaVersion,
+              })
+            : buildUpdatedRecoveredAlert<AlertData>({
+                alert: this.fetchedAlerts.data[id],
+                legacyRawAlert: rawRecoveredAlerts[id],
+                runTimestamp: this.runTimestampString,
+                timestamp: currentTime,
+                rule: this.rule,
+              })
+        );
       }
     }
 
