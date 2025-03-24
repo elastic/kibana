@@ -3946,6 +3946,9 @@
       "integration_id": {
         "type": "keyword"
       },
+      "name": {
+        "type": "keyword"
+      },
       "type": {
         "type": "keyword"
       },
