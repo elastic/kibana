@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReindexWarning } from '../../../common/types';
+import { IndexWarning } from '../../../common/types';
 import { versionService } from '../version';
 import { FlatSettings } from './types';
 export interface ParsedIndexName {
@@ -65,7 +65,7 @@ export const generateNewIndexName = (indexName: string): string => {
 
 export const getDeprecatedSettingWarning = (
   flatSettings: FlatSettings
-): ReindexWarning | undefined => {
+): IndexWarning | undefined => {
   const { settings } = flatSettings;
 
   const deprecatedSettingsInUse = Object.keys(settings || {}).filter((setting) => {
@@ -88,6 +88,7 @@ export const getDeprecatedSettingWarning = (
 
   if (deprecatedSettingsInUse.length) {
     return {
+      flow: 'all',
       warningType: 'indexSetting',
       meta: {
         deprecatedSettings: deprecatedSettingsInUse,
@@ -100,8 +101,8 @@ export const getDeprecatedSettingWarning = (
  * Returns an array of warnings that should be displayed to user before reindexing begins.
  * @param flatSettings
  */
-export const getReindexWarnings = (flatSettings: FlatSettings): ReindexWarning[] => {
-  const warnings = [] as ReindexWarning[];
+export const getReindexWarnings = (flatSettings: FlatSettings): IndexWarning[] => {
+  const warnings = [] as IndexWarning[];
 
   if (versionService.getMajorVersion() === 8) {
     const deprecatedSettingWarning = getDeprecatedSettingWarning(flatSettings);

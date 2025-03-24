@@ -883,7 +883,7 @@ x-pack/platform/plugins/private/snapshot_restore @elastic/kibana-management
 x-pack/platform/plugins/private/telemetry_collection_xpack @elastic/kibana-core
 x-pack/platform/plugins/private/transform @elastic/ml-ui
 x-pack/platform/plugins/private/translations @elastic/kibana-localization
-x-pack/platform/plugins/private/upgrade_assistant @elastic/kibana-core
+x-pack/platform/plugins/private/upgrade_assistant @elastic/kibana-management
 x-pack/platform/plugins/private/watcher @elastic/kibana-management
 x-pack/platform/plugins/shared/actions @elastic/response-ops
 x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
