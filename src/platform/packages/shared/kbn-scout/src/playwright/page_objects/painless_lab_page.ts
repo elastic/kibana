@@ -1,0 +1,57 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { ScoutPage } from '..';
+
+const DEFAULT_LOADING_TIMEOUT = 10_000;
+
+export class PainlessLab {
+  constructor(private readonly page: ScoutPage) {}
+
+  async goto() {
+    return this.page.gotoApp('dev_tools', { hash: 'painless_lab' });
+  }
+
+  async waitForRenderComplete() {
+    // wait for page to be rendered
+    return await this.page.testSubj
+      .locator('painless_lab')
+      .waitFor({ timeout: DEFAULT_LOADING_TIMEOUT });
+  }
+
+  async getCodeEditorValue(nthIndex: string = 0) {
+    let values: string[] = [];
+    values = await page.evaluate(
+      () =>
+        // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
+        window
+          .MonacoEnvironment!.monaco!.editor.getModels()
+          .map((model: any) => model.getValue()) as string[]
+    );
+    return values[nthIndex] as string;
+  }
+
+  async setCodeEditorValue(value: string, nthIndex?: number = 0) {
+    await page.evaluate(
+      ([editorIndex, codeEditorValue]) => {
+        // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
+        const editor = window.MonacoEnvironment!.monaco!.editor;
+        const textModels = editor.getModels();
+
+        if (editorIndex) {
+          textModels[editorIndex].setValue(codeEditorValue);
+        } else {
+          // when specific model instance is unknown, update all models returned
+          textModels.forEach((model) => model.setValue(codeEditorValue));
+        }
+      },
+      [nthIndex, value]
+    );
+  }
+}
