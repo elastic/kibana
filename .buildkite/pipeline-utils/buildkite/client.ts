@@ -175,7 +175,6 @@ export class BuildkiteClient {
       headers: {
         Authorization: `Bearer ${BUILDKITE_TOKEN}`,
       },
-      allowAbsoluteUrls: false,
     });
 
     this.exec = config.exec ?? execSync;
