@@ -40,5 +40,7 @@ export class ProductInterceptPublicPlugin implements Plugin {
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.prompter?.stop();
+  }
 }
