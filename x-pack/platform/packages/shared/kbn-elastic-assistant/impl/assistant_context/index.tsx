@@ -47,10 +47,6 @@ import { ModalSettingsTabs } from '../assistant/settings/types';
 import { AssistantNavLink } from './assistant_nav_link';
 
 export type SelectedConversation = { id: string } | { title: string };
-export interface LastConversation {
-  id: string;
-  title?: string;
-}
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;

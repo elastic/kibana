@@ -11,7 +11,11 @@ import {
   LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
   LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY,
 } from '../../assistant_context/constants';
-import { LastConversation, SelectedConversation } from '../../assistant_context';
+import { SelectedConversation } from '../../assistant_context';
+export interface LastConversation {
+  id: string;
+  title?: string;
+}
 
 export const useAssistantLastConversation = ({
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,

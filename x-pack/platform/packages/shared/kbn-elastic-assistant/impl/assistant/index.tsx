@@ -37,7 +37,7 @@ import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { getDefaultConnector } from './helpers';
 
-import { LastConversation, useAssistantContext } from '../assistant_context';
+import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
@@ -65,7 +65,6 @@ const CommentContainer = styled('span')`
 
 export interface Props {
   chatHistoryVisible?: boolean;
-  lastConversation?: LastConversation;
   onCloseFlyout?: () => void;
   promptContextId?: string;
   setChatHistoryVisible?: Dispatch<SetStateAction<boolean>>;
@@ -78,7 +77,6 @@ export interface Props {
  */
 const AssistantComponent: React.FC<Props> = ({
   chatHistoryVisible,
-  lastConversation,
   onCloseFlyout,
   promptContextId = '',
   setChatHistoryVisible,
@@ -134,6 +132,8 @@ const AssistantComponent: React.FC<Props> = ({
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
   const spaceId = useAssistantSpaceId();
   const { getLastConversation, setLastConversation } = useAssistantLastConversation({ spaceId });
+  const lastConversation = useMemo(() => getLastConversation(), [getLastConversation]);
+
   const {
     currentConversation,
     currentSystemPrompt,
@@ -151,7 +151,7 @@ const AssistantComponent: React.FC<Props> = ({
     defaultConnector,
     spaceId,
     refetchCurrentUserConversations,
-    lastConversation: lastConversation ?? getLastConversation(lastConversation),
+    lastConversation,
     mayUpdateConversations:
       isFetchedConnectors && isFetchedCurrentUserConversations && isFetchedPrompts,
     setLastConversation,

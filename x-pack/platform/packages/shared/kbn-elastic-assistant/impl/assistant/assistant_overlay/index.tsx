@@ -12,13 +12,13 @@ import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
 import { createGlobalStyle } from 'styled-components';
-import {
-  LastConversation,
-  ShowAssistantOverlayProps,
-  useAssistantContext,
-} from '../../assistant_context';
+import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
 import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
-import { useAssistantLastConversation, useAssistantSpaceId } from '../use_space_aware_context';
+import {
+  useAssistantLastConversation,
+  useAssistantSpaceId,
+  type LastConversation,
+} from '../use_space_aware_context';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -139,7 +139,6 @@ export const AssistantOverlay = React.memo(() => {
         hideCloseButton
       >
         <Assistant
-          lastConversation={lastConversation}
           promptContextId={promptContextId}
           onCloseFlyout={handleCloseModal}
           chatHistoryVisible={chatHistoryVisible}

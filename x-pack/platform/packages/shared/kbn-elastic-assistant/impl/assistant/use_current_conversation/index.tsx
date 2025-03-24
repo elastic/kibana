@@ -14,13 +14,13 @@ import {
 } from '@tanstack/react-query';
 import { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { LastConversation } from '../../assistant_context';
 import { FetchConversationsResponse } from '../api';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { getDefaultNewSystemPrompt, getDefaultSystemPrompt } from '../use_conversation/helpers';
 import { useConversation } from '../use_conversation';
 import { sleep } from '../helpers';
 import { Conversation } from '../../..';
+import type { LastConversation } from '../use_space_aware_context';
 
 export interface Props {
   allSystemPrompts: PromptResponse[];
