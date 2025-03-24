@@ -75,7 +75,12 @@ export type HasData<T extends keyof ObservabilityHasDataResponse> = (
 
 export type ObservabilityFetchDataPlugins = Exclude<
   ObservabilityApp,
-  'observability-overview' | 'fleet' | 'synthetics' | 'profiling' | 'observability-onboarding' | 'alerts'
+  | 'observability-overview'
+  | 'fleet'
+  | 'synthetics'
+  | 'profiling'
+  | 'observability-onboarding'
+  | 'alerts'
 >;
 
 export interface DataHandler<
