@@ -29,6 +29,12 @@ export function registerMigrateDataStreamRoutes({
   router.get(
     {
       path: `${BASE_PATH}/{dataStreamName}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on elasticsearch for authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Get data stream status`,
@@ -131,6 +137,12 @@ export function registerMigrateDataStreamRoutes({
   router.get(
     {
       path: `${BASE_PATH}/{dataStreamName}/metadata`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on elasticsearch for authorization',
+        },
+      },
       options: {
         access: 'public',
         summary: `Get data stream metadata`,

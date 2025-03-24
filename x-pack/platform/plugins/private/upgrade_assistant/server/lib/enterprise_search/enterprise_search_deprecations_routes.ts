@@ -13,6 +13,12 @@ export function registerEnterpriseSearchDeprecationRoutes({ router }: RouteDepen
   router.post(
     {
       path: '/internal/enterprise_search/deprecations/set_enterprise_search_indices_read_only',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on elasticsearch for authorization',
+        },
+      },
       validate: {},
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
