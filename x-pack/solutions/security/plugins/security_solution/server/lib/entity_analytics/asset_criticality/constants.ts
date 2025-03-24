@@ -46,6 +46,12 @@ export const assetCriticalityFieldMap: FieldMap = {
     array: false,
     required: true,
   },
+  'generic.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'generic.asset.criticality': assetCriticalityMapping,
   'host.name': {
     type: 'keyword',
     array: false,

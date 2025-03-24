@@ -39,7 +39,7 @@ export const HeaderDataCards = ({
   sub_type: string;
   type: string;
 }) => {
-  const criticalityMutation = useAssetCriticalityData({
+  const assetCriticalityData = useAssetCriticalityData({
     entity: {
       name: id,
       type,
@@ -47,19 +47,22 @@ export const HeaderDataCards = ({
     // enabled: !!privileges.data?.has_read_permissions,
     enabled: true,
     onChange: (data) => {
-      console.log(data);
+      console.log('data', data);
     },
   });
+
+  console.log('qyest resut', assetCriticalityData.query.data);
+
   const [selectValue, setSelectValue] = useState<CriticalityLevelWithUnassigned>(
-    criticalityMutation.query.data?.criticality_level || 'unassigned'
+    assetCriticalityData.query.data?.criticality_level || 'unassigned'
   );
 
   useEffect(() => {
-    setSelectValue(criticalityMutation.query.data?.criticality_level);
-  }, [criticalityMutation.query.data?.criticality_level]);
+    setSelectValue(assetCriticalityData.query.data?.criticality_level);
+  }, [assetCriticalityData.query.data?.criticality_level]);
 
   const change = async (value) => {
-    const t = await criticalityMutation.mutation.mutate({
+    const t = await assetCriticalityData.mutation.mutate({
       criticalityLevel: value,
       idField: 'entity.id',
       idValue: id,
