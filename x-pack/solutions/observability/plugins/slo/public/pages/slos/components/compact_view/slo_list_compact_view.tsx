@@ -32,6 +32,7 @@ import { SloStateBadge, SloStatusBadge } from '../../../../components/slo/slo_ba
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_badges/slo_active_alerts_badge';
 import { sloKeys } from '../../../../hooks/query_key_factory';
 import { useCloneSlo } from '../../../../hooks/use_clone_slo';
+import { useCloneRemoteSlo } from '../../../../hooks/use_clone_remote_slo';
 import { useDisableSlo } from '../../../../hooks/use_disable_slo';
 import { useEnableSlo } from '../../../../hooks/use_enable_slo';
 import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
@@ -150,6 +151,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     });
 
   const navigateToClone = useCloneSlo();
+  const navigateToRemoteClone = useCloneRemoteSlo();
 
   const isRemote = (slo: SLOWithSummaryResponse) => !!slo.remote;
   const hasRemoteKibanaUrl = (slo: SLOWithSummaryResponse) =>
@@ -299,7 +301,11 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       enabled: (slo: SLOWithSummaryResponse) =>
         (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
       onClick: (slo: SLOWithSummaryResponse) => {
-        navigateToClone(slo);
+        if (slo.remote) {
+          navigateToRemoteClone(slo);
+        } else {
+          navigateToClone(slo);
+        }
       },
     },
     {

@@ -29,6 +29,7 @@ import { usePermissions } from '../../../hooks/use_permissions';
 import { useResetSlo } from '../../../hooks/use_reset_slo';
 import { useEnableSlo } from '../../../hooks/use_enable_slo';
 import { useDisableSlo } from '../../../hooks/use_disable_slo';
+import { useCloneSlo } from '../../../hooks/use_clone_slo';
 import { sloPaths } from '../../../../common';
 import { paths } from '../../../../common/locators/paths';
 import { SloManagementSearchBar } from './slo_management_search_bar';
@@ -107,6 +108,8 @@ export function SloManagementTable() {
     setSloToDisable(undefined);
   };
 
+  const navigateToClone = useCloneSlo();
+
   const actions: Array<DefaultItemAction<SLODefinitionResponse>> = [
     {
       type: 'icon',
@@ -118,9 +121,23 @@ export function SloManagementTable() {
         defaultMessage: 'Edit',
       }),
       'data-test-subj': 'sloActionsEdit',
-      enabled: (slo) => !!permissions?.hasAllWriteRequested,
+      enabled: () => !!permissions?.hasAllWriteRequested,
       onClick: (slo: SLODefinitionResponse) => {
         navigateToUrl(http.basePath.prepend(paths.sloEdit(slo.id)));
+      },
+    },
+    {
+      type: 'icon',
+      icon: 'copy',
+      name: i18n.translate('xpack.slo.item.actions.clone', {
+        defaultMessage: 'Clone',
+      }),
+      description: i18n.translate('xpack.slo.item.actions.clone', {
+        defaultMessage: 'Clone',
+      }),
+      'data-test-subj': 'sloActionsClone',
+      onClick: (slo: SLODefinitionResponse) => {
+        navigateToClone(slo);
       },
     },
     {
@@ -169,6 +186,7 @@ export function SloManagementTable() {
         setSloToDelete(slo);
       },
     },
+
     {
       type: 'icon',
       icon: 'refresh',
