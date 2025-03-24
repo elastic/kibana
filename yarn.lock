@@ -15560,7 +15560,7 @@ crypto-browserify@^3.11.0:
     randombytes "^2.0.0"
     randomfill "^1.0.3"
 
-crypto-js@^4.2.0:
+crypto-js@^4.1.1, crypto-js@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/crypto-js/-/crypto-js-4.2.0.tgz#4d931639ecdfd12ff80e8186dba6af2c2e856631"
   integrity sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==
@@ -25454,10 +25454,12 @@ pixelmatch@5.3.0, pixelmatch@^5.3.0:
   dependencies:
     pngjs "^6.0.0"
 
-pkce-challenge@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/pkce-challenge/-/pkce-challenge-4.1.0.tgz#95027d7750c3c0f21676a345b48f481786f9acdb"
-  integrity sha512-ZBmhE1C9LcPoH9XZSdwiPtbPHZROwAnMy+kIFQVrnMCxY4Cudlz3gBOpzilgc0jOgRaiT3sIWfpMomW2ar2orQ==
+pkce-challenge@3.1.0, pkce-challenge@^4.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/pkce-challenge/-/pkce-challenge-3.1.0.tgz#c974ee934e62c501f09da817964e75db201ee8bf"
+  integrity sha512-bQ/0XPZZ7eX+cdAkd61uYWpfMhakH3NeteUF1R8GNa+LMqX8QFAkbCLqq+AYAns1/ueACBu/BMWhrlKGrdvGZg==
+  dependencies:
+    crypto-js "^4.1.1"
 
 pkg-dir@^3.0.0:
   version "3.0.0"
