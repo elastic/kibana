@@ -27,7 +27,10 @@ const tlsMonitorTypes = [MonitorTypeEnum.HTTP, MonitorTypeEnum.TCP];
 export const TLSRuleComponent: React.FC<{
   ruleParams: TLSRuleParamsProps['ruleParams'];
   setRuleParams: TLSRuleParamsProps['setRuleParams'];
-}> = ({ ruleParams, setRuleParams }) => {
+  // This is needed for the intermediate release process -> https://docs.google.com/document/d/1mU5jlIfCKyXdDPtEzAz1xTpFXFCWxqdO5ldYRVO_hgM/edit?tab=t.0#heading=h.2b1v1tr0ep8m
+  // After the next serverless release the commit containing these changes can be reverted
+  showMonitorFilters?: boolean;
+}> = ({ ruleParams, setRuleParams, showMonitorFilters = false }) => {
   const dispatch = useDispatch();
 
   const { settings } = useSelector(selectDynamicSettings);
@@ -56,19 +59,23 @@ export const TLSRuleComponent: React.FC<{
 
   return (
     <>
-      <AlertSearchBar
-        kqlQuery={ruleParams.kqlQuery ?? ''}
-        onChange={onFiltersChange}
-        filtersForSuggestions={filtersForSuggestions}
-      />
-      <EuiSpacer size="m" />
-      <FieldFilters
-        ruleParams={ruleParams}
-        setRuleParams={setRuleParams}
-        filters={{ monitorTypes: tlsMonitorTypes }}
-      />
-      <TLSRuleViz ruleParams={ruleParams} />
-      <EuiSpacer size="m" />
+      {showMonitorFilters ? (
+        <>
+          <AlertSearchBar
+            kqlQuery={ruleParams.kqlQuery ?? ''}
+            onChange={onFiltersChange}
+            filtersForSuggestions={filtersForSuggestions}
+          />
+          <EuiSpacer size="m" />
+          <FieldFilters
+            ruleParams={ruleParams}
+            setRuleParams={setRuleParams}
+            filters={{ monitorTypes: tlsMonitorTypes }}
+          />
+          <TLSRuleViz ruleParams={ruleParams} />
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
       <AlertTlsCondition
         ageThreshold={
           ruleParams.certAgeThreshold ??

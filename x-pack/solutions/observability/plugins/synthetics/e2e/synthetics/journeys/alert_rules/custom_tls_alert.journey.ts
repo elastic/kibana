@@ -62,7 +62,9 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
     await expect(page.getByTestId('addRuleFlyoutTitle')).toBeVisible();
   });
 
-  step('Should filter monitors using the KQL filter bar', async () => {
+  // This is needed for the intermediate release process -> https://docs.google.com/document/d/1mU5jlIfCKyXdDPtEzAz1xTpFXFCWxqdO5ldYRVO_hgM/edit?tab=t.0#heading=h.2b1v1tr0ep8m
+  // After the next serverless release the commit containing these changes can be reverted
+  step.skip('Should filter monitors using the KQL filter bar', async () => {
     // Using the KQL filter to search for a monitor type of "tcp", 0 existing monitors should be found because the type of the test monitor is 'http'
     await page.fill('[data-test-subj="queryInput"]', `monitor.type: "tcp" `);
     await page.keyboard.press('Enter');
@@ -75,7 +77,9 @@ journey(`CustomTLSAlert`, async ({ page, params }) => {
     await page.keyboard.press('Enter');
   });
 
-  step('Should filter monitors by type', async () => {
+  // This is needed for the intermediate release process -> https://docs.google.com/document/d/1mU5jlIfCKyXdDPtEzAz1xTpFXFCWxqdO5ldYRVO_hgM/edit?tab=t.0#heading=h.2b1v1tr0ep8m
+  // After the next serverless release the commit containing these changes can be reverted
+  step.skip('Should filter monitors by type', async () => {
     await page.getByRole('button', { name: 'Type All' }).click();
     await page.getByTestId('comboBoxInput').click();
     await page.getByRole('option', { name: 'http' }).click();
