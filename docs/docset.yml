@@ -55,3 +55,4 @@ subs:
   anomaly-job:   "anomaly detection job"
   observability:   "Observability"
   kib-repo:   "https://github.com/elastic/kibana/"
+  kib-pull: "https://github.com/elastic/kibana/pull/"
