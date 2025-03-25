@@ -45,3 +45,21 @@ export function asDecimalOrInteger(value: Maybe<number>, threshold = 10) {
   }
   return asDecimal(value);
 }
+
+export function asPercent(
+  numerator: Maybe<number>,
+  denominator: number | undefined,
+  fallbackResult = NOT_AVAILABLE_LABEL
+) {
+  if (numerator === null || numerator === undefined || !denominator || !isFinite(numerator)) {
+    return fallbackResult;
+  }
+
+  const decimal = numerator / denominator;
+
+  if (Math.abs(decimal) >= 0.1 || decimal === 0) {
+    return numeral(decimal).format('0%');
+  }
+
+  return numeral(decimal).format('0.0%');
+}
