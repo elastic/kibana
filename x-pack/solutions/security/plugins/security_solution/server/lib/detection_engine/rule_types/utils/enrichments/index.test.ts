@@ -15,6 +15,8 @@ import { isIndexExist } from './utils/is_index_exist';
 import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 
+import { allowedExperimentalValues } from '../../../../../../common';
+
 jest.mock('./search_enrichments', () => ({
   searchEnrichments: jest.fn(),
 }));
@@ -237,6 +239,7 @@ describe('enrichEvents', () => {
         createAlert('2', createEntity('host', 'user name 1')),
       ],
       spaceId: 'default',
+      experimentalFeatures: allowedExperimentalValues,
     });
 
     expect(enrichedEvents).toEqual([
