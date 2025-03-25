@@ -25,7 +25,7 @@ import {
 import { walk, Walker } from './walker';
 
 test('can walk all functions', () => {
-  const { root } = parse('METRICS index a(b(c(foo)))');
+  const { root } = parse('METRICS index | EVAL a(b(c(foo)))');
   const functions: string[] = [];
 
   walk(root, {
@@ -36,7 +36,7 @@ test('can walk all functions', () => {
 });
 
 test('can find assignment expression', () => {
-  const query = 'METRICS source var0 = bucket(bytes, 1 hour)';
+  const query = 'METRICS source | STATS var0 = bucket(bytes, 1 hour)';
   const { root } = parse(query);
   const functions: ESQLFunction[] = [];
 
