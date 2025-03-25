@@ -60,7 +60,7 @@ interface EventHandlers {
 }
 export interface NonSerializableInstancesState {
   inspectorAdapters: Adapters;
-  cancelRequestCallbacks: Map<string, () => void>;
+  cancelRequestCallbacks: Map<symbol, () => void>;
   eventHandlers: Record<string, any>;
   chartsPaletteServiceGetColor: (() => string) | null;
   onMapMove?: () => void;
