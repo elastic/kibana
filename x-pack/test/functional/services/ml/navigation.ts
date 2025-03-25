@@ -155,8 +155,12 @@ export function MachineLearningNavigationProvider({
       await this.assertTabEnabled('~mlMainTab & ~dataVisualizer', expectedValue);
     },
 
-    async assertSettingsTabEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('ad_settings', expectedValue);
+    async assertADSettingsTabExists(shouldExist: boolean) {
+      if (shouldExist) {
+        await testSubjects.existOrFail('ad_settings');
+      } else {
+        await testSubjects.missingOrFail('ad_settings');
+      }
     },
 
     async navigateToStackManagement({ expectMlLink = true }: { expectMlLink?: boolean } = {}) {

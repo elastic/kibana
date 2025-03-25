@@ -30,9 +30,6 @@ export default function ({ getService }) {
 
       await ml.testExecution.logTestStep('should display the enabled "Data Visualizer" tab');
       await ml.navigation.assertDataVisualizerTabEnabled(true);
-
-      await ml.testExecution.logTestStep('should display the enabled "Settings" tab');
-      await ml.navigation.assertSettingsTabEnabled(true);
     });
   });
 }

@@ -76,8 +76,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             );
             await ml.navigation.assertAnomalyDetectionTabEnabled(true);
             await ml.navigation.assertDataFrameAnalyticsTabEnabled(true);
-            await ml.navigation.assertSettingsTabEnabled(true);
             await ml.navigation.assertTrainedModelsNavItemEnabled(true);
+            await ml.navigation.assertADSettingsTabExists(false);
           });
 
           it('should display elements on Stack Management ML Overview page correctly', async () => {

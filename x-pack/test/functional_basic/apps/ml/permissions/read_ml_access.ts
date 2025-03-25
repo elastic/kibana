@@ -74,9 +74,6 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('should display the enabled "Data Visualizer" tab');
           await ml.navigation.assertDataVisualizerTabEnabled(true);
-
-          await ml.testExecution.logTestStep('should display the disabled "Settings" tab');
-          await ml.navigation.assertSettingsTabEnabled(false);
         });
 
         it('should display elements on Data Visualizer home page correctly', async () => {
