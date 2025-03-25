@@ -74,7 +74,7 @@ as uiSettings within the code.
 
 
 |{kib-repo}blob/{branch}/src/plugins/data_view_management[dataViewManagement]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/plugins/data_views/README.mdx[dataViews]
@@ -107,7 +107,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 
 
 |{kib-repo}blob/{branch}/src/plugins/esql_datagrid/README.md[esqlDataGrid]
-|Contains a Discover-like table specifically for ES|QL queries:
+|Contains a Discover-like table specifically for ES\|QL queries:
 
 
 |{kib-repo}blob/{branch}/src/plugins/es_ui_shared/README.md[esUiShared]
@@ -127,11 +127,11 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 
 
 |{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_gauge[expressionGauge]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_heatmap[expressionHeatmap]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/plugins/expression_image/README.md[expressionImage]
@@ -388,11 +388,11 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_types/gauge[visTypeGauge]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_types/heatmap[visTypeHeatmap]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_type_markdown/README.md[visTypeMarkdown]
@@ -400,11 +400,11 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_types/metric[visTypeMetric]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_types/pie[visTypePie]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_types/table/README.md[visTypeTable]
@@ -412,7 +412,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_types/tagcloud[visTypeTagcloud]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_types/timelion/README.md[visTypeTimelion]
@@ -420,23 +420,23 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_types/timeseries[visTypeTimeseries]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_types/vega[visTypeVega]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_types/vislib[visTypeVislib]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/plugins/vis_types/xy[visTypeXy]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/plugins/visualizations[visualizations]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |===
@@ -467,7 +467,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/apm_data_access[apmDataAccess]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/banners/README.md[banners]
@@ -597,7 +597,7 @@ activities.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[fleet]
@@ -658,11 +658,11 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/investigate/README.md[investigate]
-|undefined
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/investigate_app/README.md[investigateApp]
-|undefined
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/kubernetes_security/README.md[kubernetesSecurity]
@@ -703,7 +703,7 @@ using the CURL scripts in the scripts folder.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/logstash[logstash]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/maps/README.md[maps]
@@ -772,7 +772,7 @@ Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/profiling_data_access[profilingDataAccess]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/remote_clusters/README.md[remoteClusters]
@@ -859,7 +859,7 @@ This plugin is only enabled when the application is built for serverless project
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/serverless/README.mdx[serverless]
-|
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/serverless_observability/README.mdx[serverlessObservability]
