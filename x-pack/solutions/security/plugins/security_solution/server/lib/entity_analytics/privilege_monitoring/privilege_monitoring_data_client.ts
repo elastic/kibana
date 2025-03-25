@@ -61,12 +61,6 @@ export class PrivilegeMonitoringDataClient {
     });
   }
 
-  private async enable() {
-    /**
-     * TODO: fill this in
-     */
-  }
-
   async init(): Promise<InitMonitoringEngineResponse> {
     if (!this.opts.taskManager) {
       throw new Error('Task Manager is not available');

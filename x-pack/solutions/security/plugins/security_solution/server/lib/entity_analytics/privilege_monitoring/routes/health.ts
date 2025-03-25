@@ -37,17 +37,6 @@ export const healthCheckPrivilegeMonitoringRoute = (
       async (context, request, response): Promise<IKibanaResponse<PrivMonHealthResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
-        const { featureFlags } = await context.core;
-        const isFlagEnabled = await featureFlags.getBooleanValue(
-          'EntityAnalyticsPrivilegeMonitoring',
-          false
-        );
-        if (!isFlagEnabled) {
-          return siemResponse.error({
-            statusCode: 404,
-          });
-        }
-
         try {
           return response.ok({ body: { ok: true } });
         } catch (e) {

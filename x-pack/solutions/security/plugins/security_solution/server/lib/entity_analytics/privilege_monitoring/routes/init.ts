@@ -42,17 +42,6 @@ export const initPrivilegeMonitoringEngineRoute = (
         const siemResponse = buildSiemResponse(response);
         const secSol = await context.securitySolution;
 
-        const { featureFlags } = await context.core;
-        const isFlagEnabled = await featureFlags.getBooleanValue(
-          'EntityAnalyticsPrivilegeMonitoring',
-          false
-        );
-        if (!isFlagEnabled) {
-          return siemResponse.error({
-            statusCode: 404,
-          });
-        }
-
         try {
           const body = await secSol.getPrivilegeMonitoringDataClient().init();
           return response.ok({ body });
