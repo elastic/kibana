@@ -574,7 +574,10 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
             command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
             timeout_in_minutes: 60,
             agents: {
-              machineType: 'n2-highcpu-8',
+              image: 'family/kibana-ubuntu-2004',
+              imageProject: 'elastic-images-prod',
+              provider: 'gcp',
+              machineType: 'n1-standard-8',
               preemptible: true,
             },
             env: {
