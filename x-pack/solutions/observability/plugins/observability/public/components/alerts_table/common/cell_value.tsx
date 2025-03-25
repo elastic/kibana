@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import {
   ALERT_DURATION,
@@ -25,7 +25,12 @@ import {
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
-import { ObsAlertActionProps } from '../../alert_actions/alert_actions';
+import {
+  RELATED_ACTIONS_COL,
+  RELATED_ALERT_REASON,
+  RELATION_COL,
+} from '../../../pages/alert_details/components/related_alerts/get_related_columns';
+import { RelationCol } from '../../../pages/alert_details/components/related_alerts/relation_col';
 import { paths } from '../../../../common/locators/paths';
 import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSeverityBadge } from '../../alert_severity_badge';
@@ -34,6 +39,7 @@ import { parseAlert } from '../../../pages/alerts/helpers/parse_alert';
 import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
 import { GetObservabilityAlertsTableProp } from '../types';
+import AlertActions from '../../alert_actions/alert_actions';
 
 export const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   // can be updated when working on https://github.com/elastic/kibana/issues/140819
@@ -54,10 +60,7 @@ export const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   return '--';
 };
 
-export type AlertCellRenderers = Record<
-  string,
-  (value: string, props: ObsAlertActionProps) => ReactNode
->;
+export type AlertCellRenderers = Record<string, (value: string) => ReactNode>;
 
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
@@ -72,7 +75,7 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
     openAlertInFlyout,
     observabilityRuleTypeRegistry,
     services: { http },
-    extraCellRenderers,
+    parentAlert,
   } = props;
 
   const cellRenderers: AlertCellRenderers = {
@@ -127,10 +130,19 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
         />
       );
     },
-    ...(extraCellRenderers ?? {}),
+    [RELATION_COL]: (value) => {
+      return <RelationCol alert={alert} parentAlert={parentAlert!} />;
+    },
+    [RELATED_ALERT_REASON]: (value) => {
+      const val = getAlertFieldValue(alert, ALERT_REASON);
+      return <EuiText size="s">{val}</EuiText>;
+    },
+    [RELATED_ACTIONS_COL]: (val) => {
+      return <AlertActions {...props} />;
+    },
   };
 
   const val = getAlertFieldValue(alert, columnId);
 
-  return cellRenderers[columnId] ? cellRenderers[columnId](val, props) : <>{val}</>;
+  return cellRenderers[columnId] ? cellRenderers[columnId](val) : <>{val}</>;
 };

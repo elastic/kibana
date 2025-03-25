@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/types';
-import { relatedAlertsRowRenderer } from './related_alerts_cell';
 import { getRelatedColumns } from './get_related_columns';
 import { useBuildRelatedAlertsQuery } from '../../hooks/related_alerts/use_build_related_alerts_query';
 import { AlertData } from '../../../../hooks/use_fetch_alert_detail';
@@ -82,7 +81,6 @@ export function RelatedAlertsTable({ alertData }: Props) {
         additionalContext={{
           observabilityRuleTypeRegistry,
           config,
-          extraCellRenderers: relatedAlertsRowRenderer,
           parentAlert: alert,
         }}
         renderCellValue={AlertsTableCellValue}

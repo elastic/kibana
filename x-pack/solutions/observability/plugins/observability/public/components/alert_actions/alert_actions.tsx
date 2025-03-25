@@ -21,29 +21,27 @@ import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import type { AlertActionsProps } from '@kbn/response-ops-alerts-table/types';
 import { useKibana } from '../../utils/kibana_react';
 import { useCaseActions } from './use_case_actions';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
-import { ObservabilityAlertsTableContext, observabilityFeatureId } from '../..';
+import {
+  GetObservabilityAlertsTableProp,
+  ObservabilityAlertsTableContext,
+  observabilityFeatureId,
+} from '../..';
 import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
 
-export type ObsAlertActionProps = Pick<
-  AlertActionsProps,
-  'alert' | 'openAlertInFlyout' | 'tableId' | 'refresh'
-> &
-  ObservabilityAlertsTableContext;
-
-export function AlertActions({
+export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> = ({
   observabilityRuleTypeRegistry,
   alert,
   tableId,
   refresh,
   openAlertInFlyout,
   parentAlert,
-}: ObsAlertActionProps) {
+  ...rest
+}) => {
   const services = useKibana().services;
 
   const {
@@ -128,7 +126,8 @@ export function AlertActions({
       : []),
     useMemo(
       () => (
-        <DefaultAlertActions
+        <DefaultAlertActions<ObservabilityAlertsTableContext>
+          observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
           key="defaultRowActions"
           onActionExecuted={closeActionsPopover}
           isAlertDetailsEnabled={true}
@@ -144,9 +143,18 @@ export function AlertActions({
           refresh={refresh}
           alert={alert}
           openAlertInFlyout={openAlertInFlyout}
+          {...rest}
         />
       ),
-      [alert, closeActionsPopover, openAlertInFlyout, refresh, tableId]
+      [
+        alert,
+        closeActionsPopover,
+        observabilityRuleTypeRegistry,
+        openAlertInFlyout,
+        refresh,
+        rest,
+        tableId,
+      ]
     ),
   ];
 
@@ -236,7 +244,7 @@ export function AlertActions({
       </EuiFlexItem>
     </>
   );
-}
+};
 
 // Default export used for lazy loading
 // eslint-disable-next-line import/no-default-export
