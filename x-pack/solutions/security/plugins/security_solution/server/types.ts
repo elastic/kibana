@@ -57,7 +57,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;
   getAuditLogger: () => AuditLogger | undefined;
   getDataViewsService: () => DataViewsService;
-  getApiKeyManager: () => ApiKeyManager;
+  getEntityStoreApiKeyManager: () => ApiKeyManager;
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
   getRiskEngineDataClient: () => RiskEngineDataClient;

@@ -109,7 +109,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     const getAuditLogger = () => security?.audit.asScoped(request);
 
-    const getApiKeyManager = () =>
+    const getEntityStoreApiKeyManager = () =>
       buildApiKeyManager({
         core: coreStart,
         logger: options.logger,
@@ -155,7 +155,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getDataViewsService: () => dataViewsService,
 
-      getApiKeyManager,
+      getEntityStoreApiKeyManager,
 
       getDetectionRulesClient: memoize(() => {
         const mlAuthz = buildMlAuthz({
@@ -270,7 +270,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           config: config.entityAnalytics.entityStore,
           experimentalFeatures: config.experimentalFeatures,
           telemetry: core.analytics,
-          apiKeyManager: getApiKeyManager(),
+          apiKeyManager: getEntityStoreApiKeyManager(),
           security: startPlugins.security,
           request,
         });

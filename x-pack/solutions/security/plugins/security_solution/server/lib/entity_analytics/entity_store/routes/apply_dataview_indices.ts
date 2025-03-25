@@ -58,7 +58,7 @@ export const applyDataViewIndicesEntityEngineRoute = (
             });
           }
 
-          const apiKeyManager = secSol.getApiKeyManager();
+          const apiKeyManager = secSol.getEntityStoreApiKeyManager();
           await apiKeyManager.generate();
 
           if (errors.length === 0) {
