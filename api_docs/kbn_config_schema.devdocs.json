@@ -8922,7 +8922,7 @@
               {
                 "parentPluginId": "@kbn/config-schema",
                 "id": "def-common.schema.mapOf.$3",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [],
@@ -10018,7 +10018,7 @@
               {
                 "parentPluginId": "@kbn/config-schema",
                 "id": "def-common.schema.recordOf.$3",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [],

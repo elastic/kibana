@@ -2,6 +2,9 @@
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/logging-settings.html
   - https://github.com/elastic/cloud/blob/master/docs/cloud-enterprise/ce-kibana-logging-settings.asciidoc
+applies_to:
+  deployment:
+    self: all
 ---
 
 # Logging settings [logging-settings]
