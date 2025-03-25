@@ -8,16 +8,16 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import userEvent from '@testing-library/user-event';
 import { render, screen, waitFor } from '@testing-library/react';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { MetricVis, MetricVisComponentProps } from './metric_vis';
-import { Metric, MetricElementEvent, MetricWNumber, MetricWTrend, Settings } from '@elastic/charts';
+import { MetricWTrend } from '@elastic/charts';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import type { CoreSetup } from '@kbn/core/public';
 import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
-import { DimensionsVisParam, MetricVisParam } from '../../common';
+import { MetricVisParam } from '../../common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { PaletteOutput } from '@kbn/coloring';
@@ -213,17 +213,19 @@ const table: Datatable = {
   ],
 };
 
-const defaultProps = {
-  renderComplete: jest.fn(),
-  fireEvent: jest.fn(),
-  filterable: true,
-  theme: {
-    theme$: of({
-      darkMode: false,
-      name: 'amsterdam',
-    }),
-  } as CoreSetup['theme'],
-} as Pick<MetricVisComponentProps, 'renderComplete' | 'fireEvent' | 'filterable' | 'theme'>;
+function getDefaultProps() {
+  return {
+    renderComplete: jest.fn(),
+    fireEvent: jest.fn(),
+    filterable: true,
+    theme: {
+      theme$: of({
+        darkMode: false,
+        name: 'amsterdam',
+      }),
+    } as CoreSetup['theme'],
+  } as Pick<MetricVisComponentProps, 'renderComplete' | 'fireEvent' | 'filterable' | 'theme'>;
+}
 
 type RenderChartPropsType = Partial<Omit<MetricVisComponentProps, 'config'>> &
   Pick<MetricVisComponentProps, 'config'>;
@@ -251,18 +253,20 @@ describe('MetricVisComponent', function () {
   }
 
   async function renderChart(props: RenderChartPropsType) {
-    const result = render(<MetricVis {...defaultProps} data={table} {...props} />);
+    const defaultProps = getDefaultProps();
+    const allProps = { ...defaultProps, data: table, ...props };
+    const result = render(<MetricVis {...allProps} />);
     // quick lifecycle check (this comes from the willRender callback)
-    expect(defaultProps.fireEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'chartSize' })
-    );
+    expect(allProps.fireEvent).toHaveBeenCalledWith(expect.objectContaining({ name: 'chartSize' }));
     // wait for render complete callback
     await waitForChartToRender(defaultProps.renderComplete);
     return {
       ...result,
+      props: allProps,
       rerender: async (newProps: Partial<RenderChartPropsType>) => {
-        result.rerender(<MetricVis {...defaultProps} data={table} {...props} {...newProps} />);
-        await waitForChartToRender(defaultProps.renderComplete);
+        result.rerender(<MetricVis {...allProps} {...newProps} />);
+        await waitForChartToRender(allProps.renderComplete);
+        return { props: { ...allProps, ...newProps } };
       },
     };
   }
@@ -730,100 +734,103 @@ describe('MetricVisComponent', function () {
     });
   });
 
-  it.skip('should constrain dimensions in edit mode', () => {
-    const getDimensionsRequest = (multipleTiles: boolean) => {
-      const fireEvent = jest.fn();
-      const wrapper = shallow(
-        <MetricVis
-          data={table}
-          config={{
-            metric: {
-              ...defaultMetricParams,
-            },
-            dimensions: {
-              metric: basePriceColumnId,
-              breakdownBy: multipleTiles ? dayOfWeekColumnId : undefined,
-            },
-          }}
-          {...defaultProps}
-          fireEvent={fireEvent}
-        />
-      );
+  it('should constrain dimensions in edit mode', async () => {
+    // single tile
+    const { rerender, props } = await renderChart({
+      config: {
+        metric: {
+          ...defaultMetricParams,
+        },
+        dimensions: {
+          metric: basePriceColumnId,
+          breakdownBy: undefined,
+        },
+      },
+    });
 
-      wrapper.find(Settings).props().onWillRender!();
-
-      return fireEvent.mock.calls[0][0].data;
-    };
-
-    expect(getDimensionsRequest(false)).toMatchInlineSnapshot(`
-      Object {
-        "maxDimensions": Object {
-          "x": Object {
-            "unit": "pixels",
-            "value": 300,
+    expect(props.fireEvent).toHaveBeenLastCalledWith({
+      name: 'chartSize',
+      data: {
+        maxDimensions: {
+          x: {
+            unit: 'pixels',
+            value: 300,
           },
-          "y": Object {
-            "unit": "pixels",
-            "value": 300,
+          y: {
+            unit: 'pixels',
+            value: 300,
           },
         },
-      }
-    `);
+      },
+    });
 
-    expect(getDimensionsRequest(true)).toMatchInlineSnapshot(`
-      Object {
-        "maxDimensions": Object {
-          "x": Object {
-            "unit": "pixels",
-            "value": 1000,
+    // multiple tiles
+    const { props: newProps } = await rerender({
+      config: {
+        metric: {
+          ...defaultMetricParams,
+        },
+        dimensions: {
+          metric: basePriceColumnId,
+          breakdownBy: dayOfWeekColumnId,
+        },
+      },
+    });
+
+    expect(newProps.fireEvent).toHaveBeenLastCalledWith({
+      name: 'chartSize',
+      data: {
+        maxDimensions: {
+          x: {
+            unit: 'pixels',
+            value: 1000,
           },
-          "y": Object {
-            "unit": "pixels",
-            "value": 400,
+          y: {
+            unit: 'pixels',
+            value: 400,
           },
         },
-      }
-    `);
+      },
+    });
   });
 
-  describe.skip('filter events', () => {
-    const fireEventSpy = jest.fn();
+  describe('filter events', () => {
+    const fireFilter = async ({
+      filterable,
+      breakdown,
+    }: {
+      filterable: boolean;
+      breakdown?: boolean;
+    }) => {
+      // make it work with Jest fake timers
+      const user = userEvent.setup({ delay: null });
+      const { props } = await renderChart({
+        config: {
+          metric: {
+            ...defaultMetricParams,
+          },
+          dimensions: {
+            metric: basePriceColumnId,
+            breakdownBy: breakdown ? dayOfWeekColumnId : undefined,
+          },
+        },
+        filterable,
+      });
 
-    afterEach(() => fireEventSpy.mockClear());
-
-    const fireFilter = (event: MetricElementEvent, filterable: boolean, breakdown?: boolean) => {
-      const component = shallow(
-        <MetricVis
-          config={{
-            metric: {
-              ...defaultMetricParams,
-            },
-            dimensions: {
-              metric: basePriceColumnId,
-              breakdownBy: breakdown ? dayOfWeekColumnId : undefined,
-            },
-          }}
-          data={table}
-          {...defaultProps}
-          filterable={filterable}
-          fireEvent={fireEventSpy}
-        />
-      );
-
-      component.find(Settings).props().onElementClick!([event]);
+      if (filterable) {
+        const els = screen.getAllByRole('button');
+        await user.click(els[els.length - 1]); // always click the latest element
+      } else {
+        // just shallow check that the metric is there
+        expect(screen.getAllByTitle('Median products.base_price').length).toBeGreaterThan(0);
+        expect(screen.queryByRole('button')).not.toBeInTheDocument();
+      }
+      return props;
     };
 
-    test('without breakdown', () => {
-      const event: MetricElementEvent = {
-        type: 'metricElementEvent',
-        rowIndex: 0,
-        columnIndex: 0,
-      };
-
-      fireFilter(event, true, false);
-
-      expect(fireEventSpy).toHaveBeenCalledTimes(1);
-      expect(fireEventSpy).toHaveBeenCalledWith({
+    test('without breakdown', async () => {
+      const { fireEvent } = await fireFilter({ filterable: true });
+      expect(fireEvent).toHaveBeenLastCalledWith({
         name: 'filter',
         data: {
           data: [
@@ -838,17 +845,10 @@ describe('MetricVisComponent', function () {
       });
     });
 
-    test('with breakdown', () => {
-      const event: MetricElementEvent = {
-        type: 'metricElementEvent',
-        rowIndex: 1,
-        columnIndex: 0,
-      };
+    test('with breakdown', async () => {
+      const { fireEvent } = await fireFilter({ filterable: true, breakdown: true });
 
-      fireFilter(event, true, true);
-
-      expect(fireEventSpy).toHaveBeenCalledTimes(1);
-      expect(fireEventSpy).toHaveBeenCalledWith({
+      expect(fireEvent).toHaveBeenLastCalledWith({
         name: 'filter',
         data: {
           data: [
@@ -863,111 +863,77 @@ describe('MetricVisComponent', function () {
       });
     });
 
-    it('should do nothing if primary metric is not filterable', () => {
-      const props = {
-        ...defaultProps,
-        filterable: false,
-      };
-      const metricComponent = shallow(
-        <MetricVis
-          config={{
-            metric: {
-              ...defaultMetricParams,
-            },
-            dimensions: {
-              metric: basePriceColumnId,
-            },
-          }}
-          data={table}
-          {...props}
-        />
+    it('should do nothing if primary metric is not filterable', async () => {
+      const { fireEvent } = await fireFilter({ filterable: false });
+      expect(fireEvent).not.toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          name: 'filter',
+        })
       );
-
-      expect(metricComponent.find(Settings).props().onElementClick).toBeUndefined();
     });
   });
 
-  describe.skip('coloring', () => {
+  describe('coloring', () => {
     afterEach(() => mockGetColorForValue.mockClear());
 
     describe('by palette', () => {
-      const colorFromPalette = 'color-from-palette';
+      const colorFromPalette = faker.color.rgb();
       mockGetColorForValue.mockReturnValue(colorFromPalette);
 
-      it('should fetch color from palette if provided', () => {
-        const component = shallow(
-          <MetricVis
-            config={{
-              dimensions: {
-                metric: basePriceColumnId,
-              },
-              metric: {
-                ...defaultMetricParams,
-                // should be overridden
-                color: 'static-color',
-                palette: {
-                  type: 'palette',
-                  name: 'default',
-                  params: {
-                    colors: [],
-                    gradient: true,
-                    stops: [],
-                    range: 'number',
-                    rangeMin: 2,
-                    rangeMax: 10,
-                  },
+      it('should fetch color from palette if provided', async () => {
+        await renderChart({
+          config: {
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+            metric: {
+              ...defaultMetricParams,
+              // should be overridden
+              color: 'static-color',
+              palette: {
+                type: 'palette',
+                name: 'default',
+                params: {
+                  colors: [],
+                  gradient: true,
+                  stops: [],
+                  range: 'number',
+                  rangeMin: 2,
+                  rangeMax: 10,
                 },
               },
-            }}
-            data={table}
-            {...defaultProps}
-          />
-        );
+            },
+          },
+        });
 
-        const [[datum]] = component.find(Metric).props().data!;
-
-        expect(datum!.color).toBe(colorFromPalette);
-        expect(mockGetColorForValue.mock.calls).toMatchInlineSnapshot(`
-          Array [
-            Array [
-              28.984375,
-              Object {
-                "colors": Array [],
-                "gradient": true,
-                "range": "number",
-                "rangeMax": 10,
-                "rangeMin": 2,
-                "stops": Array [],
-              },
-              Object {
-                "max": 57.96875,
-                "min": 0,
-              },
-            ],
-          ]
-        `);
+        expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: colorFromPalette });
       });
 
       describe('percent-based', () => {
-        const renderWithPalette = (
+        const renderWithPalette = async (
           palette: PaletteOutput<CustomPaletteState>,
           dimensions: MetricVisComponentProps['config']['dimensions']
         ) =>
-          shallow(
-            <MetricVis
-              config={{
-                dimensions,
-                metric: {
-                  ...defaultMetricParams,
-                  palette,
-                },
-              }}
-              data={table}
-              {...defaultProps}
-            />
-          );
+          await renderChart({
+            config: {
+              dimensions,
+              metric: {
+                ...defaultMetricParams,
+                palette,
+              },
+            },
+          });
 
-        const dimensionsAndExpectedBounds = [
+        const dimensionsAndExpectedBounds: Array<
+          [
+            string,
+            {
+              metric: string;
+              max?: string;
+              breakdownBy?: string;
+            }
+          ]
+        > = [
           [
             'breakdown-by and max',
             {
@@ -982,11 +948,10 @@ describe('MetricVisComponent', function () {
 
         it.each(dimensionsAndExpectedBounds)(
           'should set correct data bounds with %s dimension',
-          // @ts-expect-error
-          (label, dimensions) => {
+          async (_label, dimensions) => {
             mockGetColorForValue.mockClear();
 
-            renderWithPalette(
+            await renderWithPalette(
               {
                 type: 'palette',
                 name: 'default',
@@ -1000,7 +965,7 @@ describe('MetricVisComponent', function () {
                   rangeMax: 10,
                 },
               },
-              dimensions as DimensionsVisParam
+              dimensions
             );
 
             expect(
@@ -1015,63 +980,53 @@ describe('MetricVisComponent', function () {
     });
 
     describe('by static color', () => {
-      it('uses static color if no palette', () => {
-        const staticColor = 'static-color';
+      it('uses static color if no palette', async () => {
+        const staticColor = faker.color.rgb();
 
-        const component = shallow(
-          <MetricVis
-            config={{
-              dimensions: {
-                metric: basePriceColumnId,
-              },
-              metric: {
-                ...defaultMetricParams,
-                color: staticColor,
-                palette: undefined,
-              },
-            }}
-            data={table}
-            {...defaultProps}
-          />
-        );
+        await renderChart({
+          config: {
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+            metric: {
+              ...defaultMetricParams,
+              color: staticColor,
+              palette: undefined,
+            },
+          },
+        });
 
-        const [[datum]] = component.find(Metric).props().data!;
-
-        expect(datum!.color).toBe(staticColor);
+        expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: staticColor });
         expect(mockGetColorForValue).not.toHaveBeenCalled();
       });
 
-      it('defaults if no static color', () => {
-        const component = shallow(
-          <MetricVis
-            config={{
-              dimensions: {
-                metric: basePriceColumnId,
-              },
-              metric: {
-                ...defaultMetricParams,
-                color: undefined,
-                palette: undefined,
-              },
-            }}
-            data={table}
-            {...defaultProps}
-          />
-        );
-
-        const [[datum]] = component.find(Metric).props().data!;
-
-        expect(datum!.color).toBe(euiThemeVars.euiColorEmptyShade);
+      it('defaults if no static color', async () => {
+        await renderChart({
+          config: {
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+            metric: {
+              ...defaultMetricParams,
+              color: undefined,
+              palette: undefined,
+            },
+          },
+        });
+        expect(screen.getByRole('figure')).toHaveStyle({
+          backgroundColor: euiThemeVars.euiColorEmptyShade,
+        });
         expect(mockGetColorForValue).not.toHaveBeenCalled();
       });
     });
   });
 
-  describe.skip('metric value formatting', () => {
+  describe('metric value formatting', () => {
     function nonNullable<T>(v: T): v is NonNullable<T> {
       return v != null;
     }
-    const getFormattedMetrics = (
+
+    const getFormattedMetrics = async (
       value: number | string,
       secondaryValue: number | string | undefined,
       fieldFormatter: SerializedFieldFormat<SerializableRecord> | undefined
@@ -1086,38 +1041,27 @@ describe('MetricVisComponent', function () {
         },
       };
 
-      const component = shallow(
-        <MetricVis
-          config={config}
-          data={{
-            type: 'datatable',
-            columns: [
-              {
-                id: '1',
-                name: '',
-                meta: { type: 'number', params: fieldFormatter },
-              },
-              secondaryValue
-                ? {
-                    id: '2',
-                    name: '',
-                    meta: { type: 'number', params: fieldFormatter },
-                  }
-                : undefined,
-            ].filter(nonNullable) as DatatableColumn[],
-            rows: [{ '1': value, '2': secondaryValue }],
-          }}
-          {...defaultProps}
-        />
-      );
-
-      const {
-        value: primaryMetric,
-        valueFormatter,
-        extra,
-      } = component.find(Metric).props().data?.[0][0]! as MetricWNumber;
-
-      return { primary: valueFormatter(primaryMetric), secondary: extra?.props.children[1] };
+      await renderChart({
+        data: {
+          type: 'datatable',
+          columns: [
+            {
+              id: '1',
+              name: '',
+              meta: { type: 'number', params: fieldFormatter },
+            },
+            secondaryValue
+              ? {
+                  id: '2',
+                  name: '',
+                  meta: { type: 'number', params: fieldFormatter },
+                }
+              : undefined,
+          ].filter(nonNullable) as DatatableColumn[],
+          rows: [{ '1': value, '2': secondaryValue }],
+        },
+        config,
+      });
     };
 
     it.each`
@@ -1127,8 +1071,8 @@ describe('MetricVisComponent', function () {
       ${'percent'}  | ${'0%'} | ${'0%'}
     `(
       'applies $id custom field format pattern when passed over',
-      ({ id, pattern, finalPattern }) => {
-        getFormattedMetrics(394.2393, 983123.984, { id, params: { pattern } });
+      async ({ id, pattern, finalPattern }) => {
+        await getFormattedMetrics(394.2393, 983123.984, { id, params: { pattern } });
         expect(mockDeserialize).toHaveBeenCalledTimes(2);
         expect(mockDeserialize).toHaveBeenCalledWith({ id, params: { pattern: finalPattern } });
       }
@@ -1140,16 +1084,16 @@ describe('MetricVisComponent', function () {
       ${'percent'}
     `(
       'does not apply the metric compact format if user customized default settings pattern for $id',
-      ({ id }) => {
+      async ({ id }) => {
         mockIsOverridden.mockReturnValueOnce(true);
-        getFormattedMetrics(394.2393, 983123.984, { id });
+        await getFormattedMetrics(394.2393, 983123.984, { id });
         expect(mockDeserialize).toHaveBeenCalledTimes(2);
         expect(mockDeserialize).toHaveBeenCalledWith({ id });
       }
     );
 
-    it('applies a custom duration configuration to the formatter', () => {
-      getFormattedMetrics(394.2393, 983123.984, { id: 'duration' });
+    it('applies a custom duration configuration to the formatter', async () => {
+      await getFormattedMetrics(394.2393, 983123.984, { id: 'duration' });
       expect(mockDeserialize).toHaveBeenCalledTimes(2);
       expect(mockDeserialize).toHaveBeenCalledWith({
         id: 'duration',
@@ -1157,8 +1101,8 @@ describe('MetricVisComponent', function () {
       });
     });
 
-    it('does not override duration custom configuration when set', () => {
-      getFormattedMetrics(394.2393, 983123.984, {
+    it('does not override duration custom configuration when set', async () => {
+      await getFormattedMetrics(394.2393, 983123.984, {
         id: 'duration',
         params: { useShortSuffix: false },
       });
@@ -1169,8 +1113,8 @@ describe('MetricVisComponent', function () {
       });
     });
 
-    it('does not override duration configuration at visualization level when set', () => {
-      getFormattedMetrics(394.2393, 983123.984, {
+    it('does not override duration configuration at visualization level when set', async () => {
+      await getFormattedMetrics(394.2393, 983123.984, {
         id: 'duration',
         params: { formatOverride: true, outputFormat: 'asSeconds' },
       });
@@ -1181,8 +1125,8 @@ describe('MetricVisComponent', function () {
       });
     });
 
-    it('does not tweak bytes format when passed', () => {
-      getFormattedMetrics(394.2393, 983123.984, {
+    it('does not tweak bytes format when passed', async () => {
+      await getFormattedMetrics(394.2393, 983123.984, {
         id: 'bytes',
       });
       expect(mockDeserialize).toHaveBeenCalledTimes(2);
@@ -1191,8 +1135,8 @@ describe('MetricVisComponent', function () {
       });
     });
 
-    it('does not tweak bit format when passed', () => {
-      getFormattedMetrics(394.2393, 983123.984, {
+    it('does not tweak bit format when passed', async () => {
+      await getFormattedMetrics(394.2393, 983123.984, {
         id: 'bytes',
         params: { pattern: '0.0bitd' },
       });
@@ -1203,51 +1147,47 @@ describe('MetricVisComponent', function () {
       });
     });
 
-    it('does not tweak legacy bits format when passed', () => {
+    it('does not tweak legacy bits format when passed', async () => {
       const legacyBitFormat = {
         id: 'number',
         params: { pattern: `0,0bitd` },
       };
-      getFormattedMetrics(394.2393, 983123.984, legacyBitFormat);
+      await getFormattedMetrics(394.2393, 983123.984, legacyBitFormat);
       expect(mockDeserialize).toHaveBeenCalledTimes(2);
       expect(mockDeserialize).toHaveBeenCalledWith(legacyBitFormat);
     });
 
-    it('calls the formatter only once when no secondary value is passed', () => {
-      getFormattedMetrics(394.2393, undefined, { id: 'number' });
+    it('calls the formatter only once when no secondary value is passed', async () => {
+      await getFormattedMetrics(394.2393, undefined, { id: 'number' });
       expect(mockDeserialize).toHaveBeenCalledTimes(1);
     });
 
-    it('still call the numeric formatter when no format is passed', () => {
-      const { primary, secondary } = getFormattedMetrics(394.2393, 983123.984, undefined);
+    it('still call the numeric formatter when no format is passed', async () => {
+      await getFormattedMetrics(394.2393, 983123.984, undefined);
       expect(mockDeserialize).toHaveBeenCalledTimes(2);
       expect(mockDeserialize).toHaveBeenCalledWith({ id: 'number' });
-      expect(primary).toBe('number-394.2393');
-      expect(secondary).toBe('number-983123.984');
+      expect(screen.getByTitle('number-394.2393')).toBeInTheDocument();
+      expect(screen.getByText('number-983123.984')).toBeInTheDocument();
     });
   });
 
-  describe.skip('overrides', () => {
-    it('should apply overrides to the settings component', () => {
-      const component = shallow(
-        <MetricVis
-          config={{
-            metric: {
-              ...defaultMetricParams,
-            },
-            dimensions: {
-              metric: basePriceColumnId,
-            },
-          }}
-          data={table}
-          {...defaultProps}
-          overrides={{ settings: { onBrushEnd: 'ignore', ariaUseDefaultSummary: true } }}
-        />
-      );
+  describe('overrides', () => {
+    it('should apply overrides to the settings component', async () => {
+      const color = faker.color.rgb();
+      await renderChart({
+        config: {
+          metric: {
+            ...defaultMetricParams,
+          },
+          dimensions: {
+            metric: basePriceColumnId,
+          },
+        },
+        overrides: { settings: { theme: { metric: { border: color } } } },
+      });
+      screen.debug();
 
-      const settingsComponent = component.find(Settings);
-      expect(settingsComponent.prop('onBrushEnd')).toBeUndefined();
-      expect(settingsComponent.prop('ariaUseDefaultSummary')).toEqual(true);
+      expect(screen.getByRole('figure')).toHaveStyle({ borderColor: color });
     });
   });
 });

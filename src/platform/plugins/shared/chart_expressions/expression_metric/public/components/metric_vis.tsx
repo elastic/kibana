@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -121,7 +121,10 @@ export const MetricVis = ({
   const chartBaseTheme = getThemeService().useChartsBaseTheme();
 
   const primaryMetricColumn = getColumnByAccessor(config.dimensions.metric, data.columns)!;
-  const formatPrimaryMetric = getMetricFormatter(config.dimensions.metric, data.columns);
+  const formatPrimaryMetric = useMemo(
+    () => getMetricFormatter(config.dimensions.metric, data.columns),
+    [config.dimensions.metric, data.columns]
+  );
 
   let breakdownByColumn: DatatableColumn | undefined;
   let formatBreakdownValue: FieldFormatConvertFunction;
