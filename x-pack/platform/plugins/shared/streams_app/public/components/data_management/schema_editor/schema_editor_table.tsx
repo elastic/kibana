@@ -90,7 +90,10 @@ export function FieldsTable({
 }
 
 const createCellRenderer =
-  (fields: SchemaField[], stream: IngestStreamDefinition): EuiDataGridCellProps['renderCellValue'] =>
+  (
+    fields: SchemaField[],
+    stream: IngestStreamDefinition
+  ): EuiDataGridCellProps['renderCellValue'] =>
   ({ rowIndex, columnId }) => {
     const field = fields[rowIndex];
     if (!field) return null;
