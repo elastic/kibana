@@ -7,6 +7,7 @@
 
 export * from './src/types';
 export * from './src/constants/navigation';
+export * from './src/constants/detection_engine';
 export type { NavFilter } from './src/utils/query_utils';
 export { showErrorToast } from './src/utils/show_error_toast';
 export { encodeQuery, decodeQuery } from './src/utils/query_utils';
@@ -19,3 +20,4 @@ export {
 export { getSeverityText } from './src/utils/get_vulnerability_text';
 export { getVulnerabilityStats, hasVulnerabilitiesData } from './src/utils/vulnerability_helpers';
 export { CVSScoreBadge, SeverityStatusBadge } from './src/components/vulnerability_badges';
+export { CISBenchmarkIcon } from './src/components/cis_benchmark_icon';

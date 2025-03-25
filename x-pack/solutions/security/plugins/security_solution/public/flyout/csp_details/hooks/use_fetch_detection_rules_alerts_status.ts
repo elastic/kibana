@@ -11,7 +11,7 @@ import { DETECTION_ENGINE_ALERTS_KEY } from '@kbn/cloud-security-posture';
 import {
   DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION,
   GET_DETECTION_RULE_ALERTS_STATUS_PATH,
-} from '../../../common/constants';
+} from '@kbn/cloud-security-posture-common';
 
 interface AlertStatus {
   acknowledged: number;

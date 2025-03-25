@@ -18,13 +18,13 @@ import { GenericBuckets, GroupPanelRenderer, GroupStatsItem, RawBucket } from '@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
+import { CISBenchmarkIcon } from '@kbn/cloud-security-posture';
 import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
 import {
   firstNonNullValue,
   LoadingGroup,
   NullGroup,
 } from '../../../components/cloud_security_grouping';
-import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 import { FindingsGroupingAggregation } from './use_grouped_findings';
 import { NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT } from './constants';

@@ -13,7 +13,7 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { ToastsStart } from '@kbn/core/public';
+import { ToastsStart, CoreStart } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -80,3 +80,8 @@ export type LatestFindingsResponse = IKibanaSearchResponse<
 export interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
+
+export type CloudSecurityPostureStartServices = Pick<
+  CoreStart,
+  'notifications' | 'analytics' | 'i18n' | 'theme'
+>;
