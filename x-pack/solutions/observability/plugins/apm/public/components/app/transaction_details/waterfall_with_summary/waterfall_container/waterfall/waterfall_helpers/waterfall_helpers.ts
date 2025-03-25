@@ -7,7 +7,7 @@
 
 import { euiPaletteColorBlind } from '@elastic/eui';
 import type { Dictionary } from 'lodash';
-import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
+import { first, flatten, groupBy, isEmpty, keyBy, sortBy, uniq } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isOpenTelemetryAgentName } from '../../../../../../../../common/agent_name';
 import type { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
@@ -46,6 +46,7 @@ export interface IWaterfall {
   childrenByParentId: Record<string | number, IWaterfallSpanOrTransaction[]>;
   getErrorCount: (parentId: string) => number;
   legends: IWaterfallLegend[];
+  colorBy: WaterfallLegendType;
   errorItems: IWaterfallError[];
   exceedsMax: boolean;
   totalErrorsCount: number;
@@ -264,7 +265,7 @@ function getRootWaterfallTransaction(
   }
 }
 
-function getLegends(waterfallItems: IWaterfallItem[]) {
+function getLegendsAndColorBy(waterfallItems: IWaterfallItem[]) {
   const onlyBaseSpanItems = waterfallItems.filter(
     (item) => item.docType === 'span' || item.docType === 'transaction'
   ) as IWaterfallSpanOrTransaction[];
@@ -285,7 +286,37 @@ function getLegends(waterfallItems: IWaterfallItem[]) {
     }
   );
 
-  return legends;
+  const serviceLegends = legends.filter(({ type }) => type === WaterfallLegendType.ServiceName);
+  const serviceColorsMap = serviceLegends.reduce((colorMap, legend) => {
+    return {
+      ...colorMap,
+      [legend.value!]: legend.color,
+    };
+  }, {} as Record<string, string>);
+
+  // only color by span type if there are only events for one service
+  const colorBy =
+    serviceLegends.length > 1 ? WaterfallLegendType.ServiceName : WaterfallLegendType.SpanType;
+
+  const displayedLegends = legends.filter((legend) => legend.type === colorBy);
+  const legendsByValue = keyBy(displayedLegends, 'value');
+
+  // mutate items rather than rebuilding both items and childrenByParentId
+  waterfallItems.forEach((item) => {
+    let color = '';
+    if ('legendValues' in item) {
+      color = legendsByValue[item.legendValues[colorBy]].color;
+    }
+
+    if (!color) {
+      // fall back to service color if there's no span.type, e.g. for transactions
+      color = serviceColorsMap[item.doc.service.name];
+    }
+
+    item.color = color;
+  });
+
+  return { legends, colorBy };
 }
 
 const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
@@ -469,13 +500,14 @@ export function reparentOrphanItems(
   }, []);
 }
 
-export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
+export function getWaterfall(apiResponse: TraceAPIResponse, displayLimit?: number): IWaterfall {
   const { traceItems, entryTransaction } = apiResponse;
   if (isEmpty(traceItems.traceDocs) || !entryTransaction) {
     return {
       duration: 0,
       items: [],
       legends: [],
+      colorBy: WaterfallLegendType.ServiceName,
       errorItems: [],
       childrenByParentId: {},
       getErrorCount: () => 0,
@@ -504,13 +536,14 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     reparentOrphanItems(orphanItemsIds, reparentSpans(waterfallItems), entryWaterfallTransaction)
   );
 
-  const items = getOrderedWaterfallItems(childrenByParentId, entryWaterfallTransaction);
+  const orderedItems = getOrderedWaterfallItems(childrenByParentId, entryWaterfallTransaction);
+  const items = displayLimit ? orderedItems.slice(0, displayLimit) : orderedItems;
   const errorItems = getWaterfallErrors(traceItems.errorDocs, items, entryWaterfallTransaction);
 
   const rootWaterfallTransaction = getRootWaterfallTransaction(childrenByParentId);
 
   const duration = getWaterfallDuration(items);
-  const legends = getLegends(items);
+  const { legends, colorBy } = getLegendsAndColorBy(items);
 
   return {
     entryWaterfallTransaction,
@@ -519,6 +552,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     duration,
     items,
     legends,
+    colorBy,
     errorItems,
     childrenByParentId: getChildrenGroupedByParentId(items),
     getErrorCount: (parentId: string) => errorCountByParentId[parentId] ?? 0,

@@ -122,7 +122,7 @@ interface IWaterfallItemProps {
     width: number;
     color: string;
   }>;
-  onClick: (flyoutDetailTab: string) => unknown;
+  onClick?: (flyoutDetailTab: string) => unknown;
 }
 
 function PrefixIcon({ item }: { item: IWaterfallSpanOrTransaction }) {
@@ -257,8 +257,10 @@ export function WaterfallItem({
       isSelected={isSelected}
       hasToggle={hasToggle}
       onClick={(e: React.MouseEvent) => {
-        e.stopPropagation();
-        onClick(waterfallItemFlyoutTab);
+        if (onClick) {
+          e.stopPropagation();
+          onClick(waterfallItemFlyoutTab);
+        }
       }}
     >
       <ItemBar // using inline styles instead of props to avoid generating a css class for each item

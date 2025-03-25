@@ -37,7 +37,7 @@ interface AccordionWaterfallProps {
   waterfallItemId?: string;
   waterfall: IWaterfall;
   timelineMargins: Margins;
-  onClickWaterfallItem: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
+  onClickWaterfallItem?: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
   showCriticalPath: boolean;
   maxLevelOpen: number;
 }
@@ -167,9 +167,11 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
     updateTreeNode({ ...node, expanded: !node.expanded });
   };
 
-  const onWaterfallItemClick = (flyoutDetailTab: string) => {
-    onClickWaterfallItem(node.item, flyoutDetailTab);
-  };
+  const onWaterfallItemClick = onClickWaterfallItem
+    ? (flyoutDetailTab: string) => {
+        onClickWaterfallItem(node.item, flyoutDetailTab);
+      }
+    : undefined;
 
   const hasError = node.item.doc.event?.outcome === 'failure';
 
