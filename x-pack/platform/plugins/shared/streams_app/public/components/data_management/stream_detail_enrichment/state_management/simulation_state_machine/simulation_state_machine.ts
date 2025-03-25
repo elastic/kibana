@@ -202,10 +202,10 @@ export const simulationMachine = setup({
 
     idle: {
       on: {
-        'streamEnrichment.fields.map': {
+        'simulation.fields.map': {
           actions: [{ type: 'mapField', params: ({ event }) => event }],
         },
-        'streamEnrichment.fields.unmap': {
+        'simulation.fields.unmap': {
           actions: [{ type: 'unmapField', params: ({ event }) => event }],
         },
       },

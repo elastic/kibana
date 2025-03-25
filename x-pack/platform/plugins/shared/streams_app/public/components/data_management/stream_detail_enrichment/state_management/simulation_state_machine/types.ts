@@ -36,14 +36,14 @@ export interface SimulationInput {
 
 export type SimulationEvent =
   | DateRangeToParentEvent
-  | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
-  | { type: 'simulation.reset' }
   | { type: 'processors.add'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.cancel'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.change'; processors: ProcessorDefinitionWithUIAttributes[] }
   | { type: 'processor.delete'; processors: ProcessorDefinitionWithUIAttributes[] }
-  | { type: 'streamEnrichment.fields.map'; field: MappedSchemaField }
-  | { type: 'streamEnrichment.fields.unmap'; fieldName: string };
+  | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
+  | { type: 'simulation.fields.map'; field: MappedSchemaField }
+  | { type: 'simulation.fields.unmap'; fieldName: string }
+  | { type: 'simulation.reset' };
 
 export interface SimulationContext {
   dateRangeRef: DateRangeActorRef;

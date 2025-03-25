@@ -53,10 +53,10 @@ export const useStreamEnrichmentEvents = () => {
         service.send({ type: 'simulation.changePreviewDocsFilter', filter });
       },
       mapField: (field: SchemaField) => {
-        service.send({ type: 'streamEnrichment.fields.map', field: field as MappedSchemaField });
+        service.send({ type: 'simulation.fields.map', field: field as MappedSchemaField });
       },
       unmapField: (fieldName: string) => {
-        service.send({ type: 'streamEnrichment.fields.unmap', fieldName });
+        service.send({ type: 'simulation.fields.unmap', fieldName });
       },
     }),
     [service]

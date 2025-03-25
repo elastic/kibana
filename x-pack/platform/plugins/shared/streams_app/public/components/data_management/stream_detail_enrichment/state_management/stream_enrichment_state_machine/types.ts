@@ -40,7 +40,7 @@ export type StreamEnrichmentEvent =
   | { type: 'simulation.viewDataPreview' }
   | { type: 'simulation.viewDetectedFields' }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
-  | { type: 'streamEnrichment.fields.map'; field: MappedSchemaField }
-  | { type: 'streamEnrichment.fields.unmap'; fieldName: string }
+  | { type: 'simulation.fields.map'; field: MappedSchemaField }
+  | { type: 'simulation.fields.unmap'; fieldName: string }
   | { type: 'processors.add'; processor: ProcessorDefinitionWithUIAttributes }
   | { type: 'processors.reorder'; processorsRefs: ProcessorActorRef[] };
