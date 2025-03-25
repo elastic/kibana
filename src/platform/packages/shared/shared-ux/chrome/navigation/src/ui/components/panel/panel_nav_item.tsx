@@ -25,7 +25,7 @@ interface Props {
 export const PanelNavItem: FC<Props> = ({ item, parentIsAccordion }) => {
   const { navigateToUrl } = useServices();
   const { close: closePanel } = usePanel();
-  const { id, icon, deepLink, openInNewTab } = item;
+  const { id, icon, deepLink, openInNewTab, isElasticInternalLink } = item;
   const href = deepLink?.url ?? item.href;
   const { euiTheme } = useEuiTheme();
 
@@ -56,6 +56,7 @@ export const PanelNavItem: FC<Props> = ({ item, parentIsAccordion }) => {
       size="s"
       data-test-subj={`panelNavItem panelNavItem-id-${item.id}`}
       href={href}
+      external={!isElasticInternalLink}
       iconType={icon}
       onClick={onClick}
       target={openInNewTab ? '_blank' : undefined}

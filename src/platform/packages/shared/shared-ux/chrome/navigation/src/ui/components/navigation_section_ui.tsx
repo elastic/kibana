@@ -118,7 +118,7 @@ const serializeNavNode = (
   const serialized: ChromeProjectNavigationNode = {
     ...navNode,
   };
-
+  serialized.isElasticInternalLink = serialized.isElasticInternalLink ?? true;
   serialized.renderAs = getRenderAs(serialized, { isSideNavCollapsed });
   serialized.spaceBefore = getSpaceBefore(serialized, {
     isSideNavCollapsed,
@@ -387,7 +387,7 @@ function nodeToEuiCollapsibleNavProps(
     _navNode,
     deps
   );
-  const { id, path, href, renderAs, isCollapsible, spaceBefore } = navNode;
+  const { id, path, href, renderAs, isCollapsible, spaceBefore, isElasticInternalLink } = navNode;
 
   if (navNode.renderItem) {
     // Leave the rendering to the consumer
@@ -429,7 +429,9 @@ function nodeToEuiCollapsibleNavProps(
       // Render as an accordion or a link (handled by EUI) depending if
       // "items" is undefined or not. If it is undefined --> a link, otherwise an
       // accordion is rendered.
-      ...(subItems ? { items: subItems, isCollapsible } : { href, linkProps }),
+      ...(subItems
+        ? { items: subItems, isCollapsible }
+        : { href, ...linkProps, external: !isElasticInternalLink }),
     },
   ];
 

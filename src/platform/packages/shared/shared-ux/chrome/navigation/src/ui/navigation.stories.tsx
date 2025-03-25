@@ -108,6 +108,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
           title: 'Item 01',
           href: '/app/kibana',
           icon: 'iInCircle',
+          isElasticInternalLink: false,
         },
         {
           id: 'item02',
@@ -190,6 +191,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
                       title: 'Item 17',
                       href: '/app/kibana',
                       icon: 'iInCircle',
+                      isElasticInternalLink: false,
                     },
                     {
                       id: 'sub2',
