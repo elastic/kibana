@@ -195,6 +195,8 @@ export const ActionTypeForm = ({
 
   const { fields: alertFields } = useRuleTypeAlertFields(http, ruleTypeId, useAlertTemplateFields);
 
+  const { ruleTypesState } = useLoadRuleTypesQuery({ filteredRuleTypes: [] });
+
   const templateFields = useMemo(
     () => (useAlertTemplateFields ? alertFields : availableActionVariables),
     [alertFields, availableActionVariables, useAlertTemplateFields]
@@ -413,8 +415,6 @@ export const ActionTypeForm = ({
     selectedActionGroup &&
     setActionGroupIdByIndex &&
     !actionItem.frequency?.summary;
-
-  const { ruleTypesState } = useLoadRuleTypesQuery({ filteredRuleTypes: [] });
 
   const ruleType = ruleTypeId ? ruleTypesState.data.get(ruleTypeId) : null;
 
