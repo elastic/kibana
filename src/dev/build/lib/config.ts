@@ -27,25 +27,10 @@ import {
   ALL_PLATFORMS,
   SERVERLESS_PLATFORMS,
 } from './platform';
-
-interface Options {
-  isRelease: boolean;
-  targetAllPlatforms: boolean;
-  targetServerlessPlatforms: boolean;
-  versionQualifier?: string;
-  dockerContextUseLocalArtifact: boolean | null;
-  dockerCrossCompile: boolean;
-  dockerNamespace: string | null;
-  dockerTag: string | null;
-  dockerTagQualifier: string | null;
-  dockerPush: boolean;
-  withExamplePlugins: boolean;
-  withTestPlugins: boolean;
-  downloadFreshNode: boolean;
-}
+import { BuildOptions } from '../build_distributables';
 
 export class Config {
-  static async create(opts: Options) {
+  static async create(opts: BuildOptions) {
     const nodeVersion = kibanaPackageJson.engines?.node;
     if (!nodeVersion) {
       throw new Error('missing node version in package.json');
