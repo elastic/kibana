@@ -7,12 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import {
-  deleteKnowledgeBaseModel,
-  importTinyElserModel,
-  TINY_ELSER,
-  setupKnowledgeBase,
-} from '../utils/knowledge_base';
+import { deleteKnowledgeBaseModel, TINY_ELSER, setupKnowledgeBase } from '../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const ml = getService('ml');
@@ -25,8 +20,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('returns model info when successful', async () => {
-      await importTinyElserModel(ml);
-      const res = await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      const res = await setupKnowledgeBase({ observabilityAIAssistantAPIClient, ml });
 
       expect(res.body.service_settings.model_id).to.be('pt_tiny_elser');
       expect(res.body.inference_id).to.be('obs_ai_assistant_kb_inference');
@@ -35,7 +29,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('returns error message if model is not deployed', async () => {
-      const res = await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      const res = await setupKnowledgeBase({
+        observabilityAIAssistantAPIClient,
+        ml,
+        shouldDeployModel: false,
+      });
+
       expect(res.status).to.be(500);
 
       // @ts-expect-error

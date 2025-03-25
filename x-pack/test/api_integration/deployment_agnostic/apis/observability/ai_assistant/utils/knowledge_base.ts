@@ -11,6 +11,7 @@ import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-pl
 import { ToolingLog } from '@kbn/tooling-log';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
 import { MachineLearningProvider } from '../../../../../services/ml';
@@ -34,9 +35,15 @@ export async function importTinyElserModel(ml: ReturnType<typeof MachineLearning
   await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
 }
 
-export async function setupKnowledgeBase(
-  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient
-) {
+export async function setupKnowledgeBase({
+  observabilityAIAssistantAPIClient,
+  ml,
+}: {
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
+  ml: ReturnType<typeof MachineLearningProvider>;
+}) {
+  await importTinyElserModel(ml);
+
   const { status, body } = await observabilityAIAssistantAPIClient.admin({
     endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
     params: {
@@ -88,16 +95,15 @@ export async function deleteKnowledgeBaseModel({
   await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
   await ml.api.deleteTrainedModelES(TINY_ELSER.id);
   await ml.testResources.cleanMLSavedObjects();
+
   if (shouldDeleteInferenceEndpoint) {
     await deleteInferenceEndpoint({ es });
   }
 }
 
 export async function clearKnowledgeBase(es: Client) {
-  const KB_INDEX = '.kibana-observability-ai-assistant-kb-*';
-
   return es.deleteByQuery({
-    index: KB_INDEX,
+    index: resourceNames.indexPatterns.kb,
     conflicts: 'proceed',
     query: { match_all: {} },
     refresh: true,
@@ -123,8 +129,7 @@ export async function addSampleDocsToInternalKb(
   const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  await importTinyElserModel(ml);
-  await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+  await setupKnowledgeBase({ observabilityAIAssistantAPIClient, ml });
   await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
 
   await observabilityAIAssistantAPIClient.editor({

@@ -14,7 +14,6 @@ import pRetry from 'p-retry';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   clearKnowledgeBase,
-  importTinyElserModel,
   deleteKnowledgeBaseModel,
   setupKnowledgeBase,
   waitForKnowledgeBaseReady,
@@ -36,8 +35,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('Knowledge base user instructions', function () {
     before(async () => {
-      await importTinyElserModel(ml);
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      await setupKnowledgeBase({ observabilityAIAssistantAPIClient, ml });
       await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
     });
 
@@ -118,7 +116,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      it('"secondaryEditor" can retrieve their own private instructions and the public instruction', async () => {
+      it('"admin" can retrieve their own private instructions and the public instruction', async () => {
         await retry.try(async () => {
           const res = await observabilityAIAssistantAPIClient.admin({
             endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',

@@ -13,7 +13,6 @@ import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from '../../../../default_configs/sta
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteKnowledgeBaseModel,
-  importTinyElserModel,
   setupKnowledgeBase,
   waitForKnowledgeBaseReady,
 } from '../utils/knowledge_base';
@@ -36,8 +35,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       log.debug(`Unzipping ${zipFilePath} to ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`);
       new AdmZip(zipFilePath).extractAllTo(path.dirname(AI_ASSISTANT_SNAPSHOT_REPO_PATH), true);
 
-      await importTinyElserModel(ml);
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      await setupKnowledgeBase({ observabilityAIAssistantAPIClient, ml });
       await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
     });
 

@@ -15,7 +15,6 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_pr
 import { invokeChatCompleteWithFunctionRequest } from '../../utils/conversation';
 import {
   clearKnowledgeBase,
-  importTinyElserModel,
   deleteKnowledgeBaseModel,
   setupKnowledgeBase,
   waitForKnowledgeBaseReady,
@@ -35,8 +34,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let connectorId: string;
 
     before(async () => {
-      await importTinyElserModel(ml);
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      await setupKnowledgeBase({ observabilityAIAssistantAPIClient, ml });
       await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
 
       proxy = await createLlmProxy(log);
