@@ -17,8 +17,6 @@ import {
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
-  const log = getService('log');
-  const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('/internal/observability_ai_assistant/kb/status', function () {
