@@ -59,6 +59,8 @@ import {
   PackagePolicyValidationError,
 } from '../errors';
 
+import { PackagePolicySchema } from '../types/models/package_policy';
+
 import { mapPackagePolicySavedObjectToPackagePolicy } from './package_policies';
 
 import {
@@ -3292,11 +3294,13 @@ describe('Package policy service', () => {
     beforeEach(() => {
       context = xpackMocks.createRequestHandlerContext();
       request = httpServerMock.createKibanaRequest();
+      appContextService.start(createAppContextStartContractMock());
     });
 
     afterEach(() => {
       jest.clearAllMocks();
       callbackCallingOrder.length = 0;
+      appContextService.stop();
     });
 
     it('should call external callbacks in expected order', async () => {
@@ -3348,6 +3352,46 @@ describe('Package policy service', () => {
       expect((callbackTwo as jest.Mock).mock.calls[0][0].inputs[0].config.one.value).toEqual(
         'inserted by callbackOne'
       );
+    });
+
+    it('should not throw validation error on callback', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const callback: CombinedExternalCallback = jest.fn(async (ds) => {
+        PackagePolicySchema.validate(ds);
+        return ds;
+      });
+
+      appContextService.addExternalCallback('packagePolicyPostUpdate', callback);
+
+      const packagePolicy = {
+        ...newPackagePolicy,
+        id: 'test',
+        revision: 1,
+        updated_at: '',
+        updated_by: '',
+        created_at: '',
+        created_by: '',
+        elasticsearch: {
+          index_template: {
+            mappings: {
+              dynamic_templates: {},
+            },
+          },
+        } as any,
+      };
+
+      await packagePolicyService.runExternalCallbacks(
+        'packagePolicyPostUpdate',
+        packagePolicy,
+        soClient,
+        esClient,
+        coreMock.createCustomRequestHandlerContext(context),
+        request
+      );
+
+      expect(callback).toHaveBeenCalled();
     });
 
     describe('with a callback that throws an exception', () => {
