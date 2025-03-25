@@ -353,8 +353,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detections[\/\\]components[\/\\]status[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detections[\/\\]components[\/\\]value_lists_management_flyout[\/\\]reference_error_modal[\/\\]reference_error_modal.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detections[\/\\]components[\/\\]value_lists_management_flyout[\/\\]table_helpers.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detections[\/\\]pages[\/\\]detection_engine[\/\\]detection_engine.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detections[\/\\]pages[\/\\]detection_engine[\/\\]rules[\/\\]helpers.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]asset_criticality[\/\\]asset_criticality_selector.stories.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]asset_criticality_file_uploader[\/\\]asset_criticality_file_uploader.stories.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]entity_analytics[\/\\]components[\/\\]risk_score_onboarding[\/\\]use_risk_score_toast_content.tsx/,
