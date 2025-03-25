@@ -12,14 +12,11 @@ import {
   clearKnowledgeBase,
   deleteKnowledgeBaseModel,
   setupKnowledgeBase,
-  waitForKnowledgeBaseReady,
 } from '../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
-  const log = getService('log');
-  const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   async function getEntries({
@@ -49,8 +46,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('Knowledge base', function () {
     before(async () => {
-      await setupKnowledgeBase({ observabilityAIAssistantAPIClient, ml });
-      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+      await setupKnowledgeBase(getService);
     });
 
     after(async () => {

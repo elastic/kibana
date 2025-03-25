@@ -13,6 +13,7 @@ import {
   deleteKnowledgeBaseModel,
   addSampleDocsToInternalKb,
   addSampleDocsToCustomIndex,
+  setupKnowledgeBase,
 } from '../../utils/knowledge_base';
 
 const customSearchConnectorIndex = 'animals_kb';
@@ -70,6 +71,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('recall', function () {
     before(async () => {
+      await setupKnowledgeBase(getService);
       await addSampleDocsToInternalKb(getService, sampleDocsForInternalKb);
       await addSampleDocsToCustomIndex(
         getService,

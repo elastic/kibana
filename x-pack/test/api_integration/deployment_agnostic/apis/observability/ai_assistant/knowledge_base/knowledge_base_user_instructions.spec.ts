@@ -16,7 +16,6 @@ import {
   clearKnowledgeBase,
   deleteKnowledgeBaseModel,
   setupKnowledgeBase,
-  waitForKnowledgeBaseReady,
 } from '../utils/knowledge_base';
 import {
   LlmProxy,
@@ -35,8 +34,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('Knowledge base user instructions', function () {
     before(async () => {
-      await setupKnowledgeBase({ observabilityAIAssistantAPIClient, ml });
-      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+      await setupKnowledgeBase(getService);
     });
 
     after(async () => {

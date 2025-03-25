@@ -15,7 +15,6 @@ import {
   deleteKnowledgeBaseModel,
   clearKnowledgeBase,
   setupKnowledgeBase,
-  waitForKnowledgeBaseReady,
 } from '../utils/knowledge_base';
 
 interface InferenceChunk {
@@ -71,8 +70,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     before(async () => {
       await clearKnowledgeBase(es);
       await esArchiver.load(archive);
-      await setupKnowledgeBase({ observabilityAIAssistantAPIClient, ml });
-      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+      await setupKnowledgeBase(getService);
     });
 
     after(async () => {

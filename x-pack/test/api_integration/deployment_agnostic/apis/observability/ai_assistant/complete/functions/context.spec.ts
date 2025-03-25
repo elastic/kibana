@@ -26,6 +26,7 @@ import {
   addSampleDocsToInternalKb,
   clearKnowledgeBase,
   deleteKnowledgeBaseModel,
+  setupKnowledgeBase,
 } from '../../utils/knowledge_base';
 import { chatComplete } from '../../utils/conversation';
 
@@ -84,7 +85,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
         port: llmProxy.getPort(),
       });
-
+      await setupKnowledgeBase(getService);
       await addSampleDocsToInternalKb(getService, sampleDocsForInternalKb);
 
       ({ getDocuments } = llmProxy.interceptScoreToolChoice(log));

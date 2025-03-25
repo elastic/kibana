@@ -35,15 +35,19 @@ export async function importTinyElserModel(ml: ReturnType<typeof MachineLearning
   await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
 }
 
-export async function setupKnowledgeBase({
-  observabilityAIAssistantAPIClient,
-  ml,
-  shouldDeployModel = true,
-}: {
-  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
-  ml: ReturnType<typeof MachineLearningProvider>;
-  shouldDeployModel?: boolean;
-}) {
+export async function setupKnowledgeBase(
+  getService: DeploymentAgnosticFtrProviderContext['getService'],
+  {
+    shouldDeployModel = true,
+  }: {
+    shouldDeployModel?: boolean;
+  } = {}
+) {
+  const log = getService('log');
+  const ml = getService('ml');
+  const retry = getService('retry');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+
   if (shouldDeployModel) {
     await importTinyElserModel(ml);
   }
@@ -56,6 +60,10 @@ export async function setupKnowledgeBase({
       },
     },
   });
+
+  if (shouldDeployModel) {
+    await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+  }
 
   return { status, body };
 }
@@ -128,13 +136,7 @@ export async function addSampleDocsToInternalKb(
   getService: DeploymentAgnosticFtrProviderContext['getService'],
   sampleDocs: Array<Instruction & { title: string }>
 ) {
-  const log = getService('log');
-  const ml = getService('ml');
-  const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
-
-  await setupKnowledgeBase({ observabilityAIAssistantAPIClient, ml });
-  await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
 
   await observabilityAIAssistantAPIClient.editor({
     endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',

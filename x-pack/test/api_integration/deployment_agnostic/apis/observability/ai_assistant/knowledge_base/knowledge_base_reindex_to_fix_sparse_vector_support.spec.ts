@@ -11,11 +11,7 @@ import AdmZip from 'adm-zip';
 import path from 'path';
 import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from '../../../../default_configs/stateful.config.base';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import {
-  deleteKnowledgeBaseModel,
-  setupKnowledgeBase,
-  waitForKnowledgeBaseReady,
-} from '../utils/knowledge_base';
+import { deleteKnowledgeBaseModel, setupKnowledgeBase } from '../utils/knowledge_base';
 import { createOrUpdateIndexAssets, deleteWriteIndices } from '../utils/index_assets';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -35,8 +31,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       log.debug(`Unzipping ${zipFilePath} to ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`);
       new AdmZip(zipFilePath).extractAllTo(path.dirname(AI_ASSISTANT_SNAPSHOT_REPO_PATH), true);
 
-      await setupKnowledgeBase({ observabilityAIAssistantAPIClient, ml });
-      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+      await setupKnowledgeBase(getService);
     });
 
     beforeEach(async () => {
