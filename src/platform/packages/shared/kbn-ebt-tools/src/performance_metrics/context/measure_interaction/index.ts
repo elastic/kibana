@@ -18,7 +18,8 @@ import { DescriptionWithPrefix } from '../types';
 
 interface PerformanceMeta {
   queryRangeSecs?: number;
-  queryOffsetSecs?: number;
+  queryFromOffsetSecs?: number;
+  queryToOffsetSecs?: number;
   isInitialLoad?: boolean;
   description?: DescriptionWithPrefix;
 }
@@ -46,7 +47,9 @@ export function measureInteraction(pathname: string) {
         });
 
         performanceMeta.queryRangeSecs = getTimeDifferenceInSeconds(dateRangesInEpoch);
-        performanceMeta.queryOffsetSecs =
+        performanceMeta.queryFromOffsetSecs =
+          rangeFrom === 'now' ? 0 : getOffsetFromNowInSeconds(dateRangesInEpoch.startDate);
+        performanceMeta.queryToOffsetSecs =
           rangeTo === 'now' ? 0 : getOffsetFromNowInSeconds(dateRangesInEpoch.endDate);
       }
 

@@ -14,13 +14,6 @@ export const PAGE_TITLE = i18n.translate(
   }
 );
 
-export const BACK_TO_RULES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.backToRulesButton',
-  {
-    defaultMessage: 'Rules',
-  }
-);
-
 export const ENABLE_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.enableRuleLabel',
   {
@@ -34,6 +27,10 @@ export const UNKNOWN = i18n.translate(
     defaultMessage: 'Unknown',
   }
 );
+
+export const ALERTS_TAB = i18n.translate('xpack.securitySolution.detectionEngine.alertTitle', {
+  defaultMessage: 'Alerts',
+});
 
 export const EXCEPTIONS_TAB = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExceptionsTab',

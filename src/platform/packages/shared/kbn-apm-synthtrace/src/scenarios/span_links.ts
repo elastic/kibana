@@ -20,7 +20,7 @@ function generateExternalSpanLinks() {
   // randomly creates external span links 0 - 10
   return Array(Math.floor(Math.random() * 11))
     .fill(0)
-    .map(() => ({ span: { id: generateLongId() }, trace: { id: generateShortId() } }));
+    .map(() => ({ span: { id: generateShortId() }, trace: { id: generateLongId() } }));
 }
 
 function getSpanLinksFromEvents(events: ApmFields[]) {
