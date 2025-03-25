@@ -30,7 +30,7 @@ interface Props {
   regenerateMessage: () => void;
   setIsStreaming: (isStreaming: boolean) => void;
   transformMessage: (message: string) => ContentMessage;
-  role: MessageRole
+  messageRole: MessageRole
 }
 
 export const StreamComment = ({
@@ -47,7 +47,7 @@ export const StreamComment = ({
   regenerateMessage,
   setIsStreaming,
   transformMessage,
-  role
+  messageRole
 }: Props) => {
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
     refetchCurrentConversation,
@@ -117,7 +117,7 @@ export const StreamComment = ({
           contentReferences={contentReferences}
           index={index}
           contentReferencesVisible={contentReferencesVisible}
-          contentReferencesDisabled={role === 'user'}
+          contentReferencesDisabled={messageRole === 'user'}
           loading={isAnythingLoading}
         />
       }

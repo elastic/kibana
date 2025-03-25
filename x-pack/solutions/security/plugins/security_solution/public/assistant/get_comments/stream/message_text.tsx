@@ -192,7 +192,7 @@ export function MessageText({
         contentReferencesVisible,
         contentReferencesDisabled,
       }),
-    [contentReferences, contentReferencesVisible]
+    [contentReferences, contentReferencesVisible, contentReferencesDisabled]
   );
 
   return (
