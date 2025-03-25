@@ -13,7 +13,6 @@ import type {
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
 import type { DataStreams, IlmPolicies, IlmsStats, IndicesStats } from '../indices.metadata.types';
 import type { NodeIngestPipelinesStats } from '../ingest_pipelines_stats.types';
-import { SiemMigrationsEventTypes } from './types';
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
