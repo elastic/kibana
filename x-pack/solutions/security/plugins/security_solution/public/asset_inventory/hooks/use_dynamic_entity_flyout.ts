@@ -43,7 +43,7 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
     contextId,
   }: InventoryFlyoutProps) => {
     // User, Host, and Service entity flyouts rely on entity name to fetch required data
-    if (['user', 'host', 'service'].includes(entityType) && !entityName) {
+    if (entityType && ['user', 'host', 'service'].includes(entityType) && !entityName) {
       notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.securitySolution.assetInventory.openFlyout.missingEntityNameTitle',

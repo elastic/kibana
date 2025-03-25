@@ -10,12 +10,12 @@ import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-ty
 import type { estypes } from '@elastic/elasticsearch';
 import { lastValueFrom } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { ASSET_INVENTORY_INDEX_PATTERN } from '../../../../asset_inventory/constants';
 import type { GenericEntityRecord } from '../../../../asset_inventory/types/generic_entity_record';
 import { useKibana } from '../../../../common/lib/kibana';
 
 type GenericEntityRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 type GenericEntityResponse = IKibanaSearchResponse<estypes.SearchResponse<GenericEntityRecord>>;
-type GenericEntityHit = estypes.SearchHit<GenericEntityRecord> | undefined;
 
 const fetchGenericEntity = async (
   dataService: DataPublicPluginStart,

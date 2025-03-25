@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 import { EuiCode, EuiCodeBlock, EuiInMemoryTable, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { getFlattenedObject } from '@kbn/std';
@@ -91,19 +91,22 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({ document, tableStorage
     }
   }, [storageKey]);
 
-  const togglePin = (fieldKey: string) => {
-    if (!storageKey) return;
+  const togglePin = useCallback(
+    (fieldKey: string) => {
+      if (!storageKey) return;
 
-    setPinnedFields((prev) => {
-      const updatedPinned = prev.includes(fieldKey)
-        ? prev.filter((key) => key !== fieldKey) // remove pin
-        : [...prev, fieldKey]; // add pin
+      setPinnedFields((prev) => {
+        const updatedPinned = prev.includes(fieldKey)
+          ? prev.filter((key) => key !== fieldKey) // remove pin
+          : [...prev, fieldKey]; // add pin
 
-      localStorage.setItem(storageKey, JSON.stringify(updatedPinned));
+        localStorage.setItem(storageKey, JSON.stringify(updatedPinned));
 
-      return updatedPinned;
-    });
-  };
+        return updatedPinned;
+      });
+    },
+    [setPinnedFields]
+  );
 
   const sortedItems = getSortedFlattenedItems(document, pinnedFields);
 
@@ -135,7 +138,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({ document, tableStorage
           defaultMessage: 'Field',
         }),
         width: '25%',
-        render: (fieldName: keyof typeof EcsFlat | string, flattenedItem) => {
+        render: (fieldName: keyof typeof EcsFlat | string, flattenedItem: FlattenedItem) => {
           let dataType: string = typeof flattenedItem.value;
           if (isValidEcsField(fieldName)) {
             dataType = EcsFlat[fieldName].type;
