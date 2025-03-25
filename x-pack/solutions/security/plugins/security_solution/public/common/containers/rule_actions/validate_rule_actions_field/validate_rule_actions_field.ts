@@ -76,11 +76,11 @@ export const validateRuleActionsField =
  * @param defaultValidationTimeout
  */
 export const debouncedValidateRuleActionsField =
-  (
+  <I extends FormData>(
     actionTypeRegistry: ActionTypeRegistryContract,
     defaultValidationTimeout = DEFAULT_VALIDATION_TIMEOUT
   ) =>
-  (data: ValidationFuncArg<FormData, RuleAction[]>): ValidationResponsePromise => {
+  (data: ValidationFuncArg<I, RuleAction[]>): ValidationResponsePromise => {
     let isCanceled = false;
     const promise: ValidationCancelablePromise = new Promise((resolve) => {
       setTimeout(() => {
