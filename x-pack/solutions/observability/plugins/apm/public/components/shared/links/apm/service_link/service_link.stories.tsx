@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Story } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import type { ComponentProps, ComponentType } from 'react';
 import React from 'react';
 import { ServiceLink } from '.';
@@ -27,50 +27,59 @@ export default {
   ],
 };
 
-export const Example: Story<Args> = (args) => {
-  return <ServiceLink {...args} />;
-};
-Example.args = {
-  agentName: 'java',
-  query: {
-    environment: 'ENVIRONMENT_ALL',
-    kuery: '',
-    rangeFrom: 'now-15m',
-    rangeTo: 'now',
-    serviceGroup: '',
-    comparisonEnabled: false,
+export const Example: StoryObj<Args> = {
+  render: (args) => {
+    return <ServiceLink {...args} />;
   },
-  serviceName: 'opbeans-java',
+
+  args: {
+    agentName: 'java',
+    query: {
+      environment: 'ENVIRONMENT_ALL',
+      kuery: '',
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      serviceGroup: '',
+      comparisonEnabled: false,
+    },
+    serviceName: 'opbeans-java',
+  },
 };
 
-export const AndroidAgent: Story<Args> = (args) => {
-  return <ServiceLink {...args} />;
-};
-AndroidAgent.args = {
-  agentName: 'android/java',
-  query: {
-    environment: 'ENVIRONMENT_ALL',
-    kuery: '',
-    rangeFrom: 'now-15m',
-    rangeTo: 'now',
-    serviceGroup: '',
-    comparisonEnabled: false,
+export const AndroidAgent: StoryObj<Args> = {
+  render: (args) => {
+    return <ServiceLink {...args} />;
   },
-  serviceName: 'opbeans-android',
+
+  args: {
+    agentName: 'android/java',
+    query: {
+      environment: 'ENVIRONMENT_ALL',
+      kuery: '',
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      serviceGroup: '',
+      comparisonEnabled: false,
+    },
+    serviceName: 'opbeans-android',
+  },
 };
 
-export const IOSAgent: Story<Args> = (args) => {
-  return <ServiceLink {...args} />;
-};
-IOSAgent.args = {
-  agentName: 'iOS/swift',
-  query: {
-    environment: 'ENVIRONMENT_ALL',
-    kuery: '',
-    rangeFrom: 'now-15m',
-    rangeTo: 'now',
-    serviceGroup: '',
-    comparisonEnabled: false,
+export const IOSAgent: StoryObj<Args> = {
+  render: (args) => {
+    return <ServiceLink {...args} />;
   },
-  serviceName: 'opbeans-swift',
+
+  args: {
+    agentName: 'iOS/swift',
+    query: {
+      environment: 'ENVIRONMENT_ALL',
+      kuery: '',
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
+      serviceGroup: '',
+      comparisonEnabled: false,
+    },
+    serviceName: 'opbeans-swift',
+  },
 };

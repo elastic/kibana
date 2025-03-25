@@ -31,10 +31,14 @@ const createSAMLResponseSchema = schema.object({
   roles: schema.arrayOf(schema.string()),
 });
 
+// BOOKMARK - List of Kibana project types
 const projectToAlias = new Map<string, string>([
   ['observability', 'oblt'],
   ['security', 'security'],
   ['search', 'es'],
+  // TODO add new 'chat' solution
+  // https://elastic.slack.com/archives/C04HT4P1YS3/p1741690997400059
+  // https://github.com/elastic/kibana/issues/213469
 ]);
 
 const readServerlessRoles = (projectType: string) => {

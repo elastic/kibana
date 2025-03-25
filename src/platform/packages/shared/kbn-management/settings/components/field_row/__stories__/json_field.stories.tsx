@@ -9,5 +9,9 @@
 
 import { getFieldRowStory, getStory } from './common';
 
-export default getStory('JSON Row', 'A setting with a JSON value.');
+const Story = getStory('JSON Row', 'A setting with a JSON value.');
 export const JSONRow = getFieldRowStory('json' as const);
+
+export default {
+  ...Story,
+};

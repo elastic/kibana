@@ -112,7 +112,8 @@ update_step_progress() {
     --header "x-elastic-internal-origin: Kibana" \
     --data "$data" \
     --output /dev/null \
-    --no-progress-meter \
+    --silent \
+    --show-error \
     --fail
 }
 
@@ -288,7 +289,8 @@ install_integrations() {
     --header "kbn-xsrf: true" \
     --header "x-elastic-internal-origin: Kibana" \
     --data "$(echo -e "$install_integrations_api_body_string")" \
-    --no-progress-meter \
+    --silent \
+    --show-error \
     --fail \
     --output "$elastic_agent_tmp_config_path"
 

@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
+import type { Meta } from '@storybook/react';
 import { elasticLogo } from '@kbn/expression-utils';
 import { getImageRenderer } from '../image_renderer';
 import { ImageMode } from '../../../common';
@@ -31,6 +31,11 @@ const Renderer = () => {
   );
 };
 
-storiesOf('renderers/image', module).add('default', (_, props) => {
-  return <Renderer />;
-});
+export default {
+  title: 'renderers/image',
+  render: (_, props) => {
+    return <Renderer />;
+  },
+
+  name: 'default',
+} as Meta;
