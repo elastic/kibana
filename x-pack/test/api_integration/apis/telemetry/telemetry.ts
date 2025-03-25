@@ -183,8 +183,6 @@ export default function ({ getService }: FtrProviderContext) {
         ] as TelemetrySchemaObject[];
         const plugins = schemas.reduce((acc, schema) => deepmerge(acc, schema));
 
-        throw new Error('Dead; xoxo');
-
         try {
           assertTelemetryPayload({ root, plugins }, localXPack);
           monitoring.forEach((stats) => {
