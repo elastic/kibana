@@ -13,7 +13,7 @@ import { css } from '@emotion/react';
 import illustration from '../../common/images/illustration_product_no_results_magnifying_glass.svg';
 import { DOCS_URL, TEST_SUBJ_EMPTY_STATE } from '../constants';
 
-export const EmptyState = ({ onResetFilters }: { onResetFilters: () => void }) => {
+export const AssetInventoryEmptyState = ({ onResetFilters }: { onResetFilters: () => void }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
