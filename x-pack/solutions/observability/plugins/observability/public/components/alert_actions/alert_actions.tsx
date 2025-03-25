@@ -124,6 +124,7 @@ export function AlertActions({
     useMemo(
       () => (
         <DefaultAlertActions
+          useDefaultContext={true}
           key="defaultRowActions"
           onActionExecuted={closeActionsPopover}
           isAlertDetailsEnabled={true}

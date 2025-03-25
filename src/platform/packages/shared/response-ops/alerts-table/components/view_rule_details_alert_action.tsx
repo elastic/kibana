@@ -11,7 +11,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import { useAlertsTableContext } from '../contexts/alerts_table_context';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { AdditionalContext, AlertActionsProps } from '../types';
 import { typedMemo } from '../utils/react';
 
@@ -24,16 +25,12 @@ export const ViewRuleDetailsAlertAction = typedMemo(
     resolveRulePagePath,
     tableId,
   }: Pick<AlertActionsProps<AC>, 'alert' | 'resolveRulePagePath' | 'tableId'>) => {
-    const {
-      services: {
-        http: {
-          basePath: { prepend },
-        },
-      },
-    } = useAlertsTableContext();
+    const { http } = useKibana<{
+      http: HttpStart;
+    }>().services;
     const ruleId = (alert[ALERT_RULE_UUID]?.[0] as string) ?? null;
     const pagePath = ruleId && tableId && resolveRulePagePath?.(ruleId, tableId);
-    const linkToRule = pagePath ? prepend(pagePath) : null;
+    const linkToRule = pagePath ? http.basePath.prepend(pagePath) : null;
 
     if (!linkToRule) {
       return null;
