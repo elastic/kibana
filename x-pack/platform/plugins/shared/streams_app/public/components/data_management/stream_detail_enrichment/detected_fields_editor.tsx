@@ -9,14 +9,14 @@ import React from 'react';
 import { useEuiTheme, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { WiredStreamGetResponse } from '@kbn/streams-schema';
+import { IngestStreamGetResponse, isWiredStreamGetResponse } from '@kbn/streams-schema';
 import { AssetImage } from '../../asset_image';
 import { SchemaEditor } from '../schema_editor';
 import { SchemaField } from '../schema_editor/types';
 import { useStreamEnrichmentEvents } from './state_management/stream_enrichment_state_machine';
 
 interface DetectedFieldsEditorProps {
-  definition: WiredStreamGetResponse;
+  definition: IngestStreamGetResponse;
   detectedFields: SchemaField[];
 }
 
@@ -47,6 +47,8 @@ export const DetectedFieldsEditor = ({ definition, detectedFields }: DetectedFie
     );
   }
 
+  const hasTableActions = isWiredStreamGetResponse(definition);
+
   return (
     <>
       <EuiText
@@ -68,7 +70,7 @@ export const DetectedFieldsEditor = ({ definition, detectedFields }: DetectedFie
         stream={definition.stream}
         onFieldUnmap={unmapField}
         onFieldUpdate={mapField}
-        withTableActions
+        withTableActions={hasTableActions}
       />
     </>
   );

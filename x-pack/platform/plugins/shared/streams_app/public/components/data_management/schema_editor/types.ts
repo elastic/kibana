@@ -8,7 +8,7 @@
 import {
   FieldDefinitionConfig,
   FieldDefinitionConfigAdvancedParameters,
-  WiredStreamDefinition,
+  IngestStreamDefinition,
 } from '@kbn/streams-schema';
 import { TableColumnName } from './constants';
 
@@ -42,7 +42,7 @@ export interface SchemaEditorProps {
   onFieldUnmap: (fieldName: SchemaField['name']) => void;
   onFieldUpdate: (field: SchemaField) => void;
   onRefreshData?: () => void;
-  stream: WiredStreamDefinition;
+  stream: IngestStreamDefinition;
   withControls?: boolean;
   withFieldSimulation?: boolean;
   withTableActions?: boolean;
