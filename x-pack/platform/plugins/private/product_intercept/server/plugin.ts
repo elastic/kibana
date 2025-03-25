@@ -19,54 +19,47 @@ import {
   type PluginInitializerContext,
   type Logger,
 } from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { ProductInterceptTriggerCore, type ProductInterceptTriggerCoreInitDeps } from './core';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import { ProductInterceptTriggerCore } from './core';
 import type { ConfigSchema } from '../common/config';
 
-type ProductInterceptServerPluginSetup = Pick<
-  ProductInterceptTriggerCoreInitDeps,
-  'taskManager' | 'cloud'
->;
-
-interface ProductInterceptServerPluginStart {
-  taskManager: TaskManagerStartContract;
+interface ProductInterceptServerPluginSetup {
+  cloud: CloudSetup;
 }
 
 /**
  * @internal
  */
 export class ProductInterceptServerPlugin
-  implements
-    Plugin<object, object, ProductInterceptServerPluginSetup, ProductInterceptServerPluginStart>
+  implements Plugin<object, object, ProductInterceptServerPluginSetup, never>
 {
   private readonly logger: Logger;
   private readonly config: ConfigSchema;
-  private productInterceptDialogCore?: ProductInterceptTriggerCore;
+  private readonly productInterceptCore?: ProductInterceptTriggerCore;
 
   constructor(private initContext: PluginInitializerContext<unknown>) {
     this.logger = initContext.logger.get();
     this.config = initContext.config.get<ConfigSchema>();
+
+    if (this.config.enabled) {
+      this.productInterceptCore = new ProductInterceptTriggerCore();
+    }
   }
 
-  public setup(core: CoreSetup, { taskManager, cloud }: ProductInterceptServerPluginSetup) {
-    if (this.config.enabled) {
-      this.productInterceptDialogCore = new ProductInterceptTriggerCore(this.initContext, {
-        core,
-        cloud,
-        logger: this.logger,
-        taskManager,
-      });
-    }
+  public setup(core: CoreSetup, { cloud }: ProductInterceptServerPluginSetup) {
+    this.productInterceptCore?.setup(core, this.logger, {
+      isServerless: this.initContext.env.packageInfo.buildFlavor === 'serverless',
+      kibanaVersion: this.initContext.env.packageInfo.version,
+      isCloudDeployment: cloud.isCloudEnabled,
+    });
 
     return {};
   }
 
-  public start(core: CoreStart, { taskManager }: ProductInterceptServerPluginStart) {
-    void (async () => {
-      await this.productInterceptDialogCore?.init({
-        taskManager,
-      });
-    })();
+  public async start(core: CoreStart) {
+    await this.productInterceptCore?.start(core).catch((err) => {
+      this.logger.error(err);
+    });
 
     return {};
   }

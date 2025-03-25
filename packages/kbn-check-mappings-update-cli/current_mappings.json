@@ -2484,6 +2484,20 @@
       }
     }
   },
+  "intercept_trigger": {
+    "dynamic": false,
+    "properties": {
+      "firstRegisteredAt": {
+        "type": "date"
+      },
+      "installedOn": {
+        "type": "keyword"
+      },
+      "triggerInterval": {
+        "type": "text"
+      }
+    }
+  },
   "inventory-view": {
     "dynamic": false,
     "properties": {}

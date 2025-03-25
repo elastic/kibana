@@ -9,7 +9,7 @@
     "id": "productIntercept",
     "browser": true,
     "server": true,
-    "requiredPlugins": ["taskManager", "cloud"],
+    "requiredPlugins": ["cloud"],
     "requiredBundles": []
   }
 }

@@ -49,12 +49,15 @@ export class ProductInterceptPrompter {
     http
       .get<{
         triggerIntervalInMs: number;
-        runs: number;
-        firstRegisteredAt: ReturnType<(typeof Date)['prototype']['toISOString']>;
+        registeredAt: ReturnType<Date['toISOString']>;
       }>(TRIGGER_API_ENDPOINT)
       .then((response) => {
         if (typeof response !== 'undefined') {
           let timerId: ReturnType<typeof setTimeout> | null = null;
+
+          const runs = Math.floor(
+            (Date.now() - Date.parse(response.registeredAt)) / response.triggerIntervalInMs
+          );
 
           this.userProfileSubscription = Rx.combineLatest([
             userProfile.getEnabled$(),
@@ -66,11 +69,11 @@ export class ProductInterceptPrompter {
             // we exclude anonymous users at the moment
             if (
               enabled &&
-              response.runs >= (profileData?.userSettings?.lastInteractedInterceptId ?? 0) &&
+              runs >= (profileData?.userSettings?.lastInteractedInterceptId ?? 0) &&
               !timerId
             ) {
               timerId = setTimeout(() => {
-                const interceptId = response.runs;
+                const interceptId = runs;
                 this.registerIntercept(interceptId, notifications.intercepts, eventReporter);
               }, response.triggerIntervalInMs);
             }
