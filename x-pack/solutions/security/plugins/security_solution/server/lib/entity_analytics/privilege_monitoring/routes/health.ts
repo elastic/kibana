@@ -19,7 +19,7 @@ export const healthCheckPrivilegeMonitoringRoute = (
   config: EntityAnalyticsRoutesDeps['config']
 ) => {
   router.versioned
-    .post({
+    .get({
       access: 'public',
       path: '/api/entity_analytics/monitoring/privileges/health',
       security: {
