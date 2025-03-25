@@ -179,12 +179,8 @@ export default ({ getService }: FtrProviderContext) => {
           })
         ).toBeTruthy();
 
-        expect(
-          events.some((ev) => {
-            return (ev as any).index_failed_due_to_version_conflict === 1;
-          })
-        ).toBeTruthy();
-
+        // index_failed_due_to_version_conflict not available in 8.16, only
+        // assert `index_failed`
         expect(
           events.some((ev) => {
             return (ev as any).index_failed === 1;
