@@ -7938,6 +7938,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/wc-index-schema-builder@link:x-pack/solutions/chat/packages/wc-index-schema-builder":
+  version "0.0.0"
+  uid ""
+
 "@kbn/wci-browser@link:x-pack/solutions/chat/packages/wci-browser":
   version "0.0.0"
   uid ""
