@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLink } from '@elastic/eui';
+import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import React from 'react';
 import {
   ALERT_DURATION,
@@ -21,9 +21,11 @@ import {
   ALERT_RULE_CATEGORY,
   ALERT_START,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_RULE_UUID,
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
+import { paths } from '../../../../common/locators/paths';
 import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSeverityBadge } from '../../alert_severity_badge';
 import { AlertStatusIndicator } from '../../alert_status_indicator';
@@ -62,6 +64,7 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
   alert,
   openAlertInFlyout,
   observabilityRuleTypeRegistry,
+  services: { http },
 }) => {
   const value = getAlertFieldValue(alert, columnId);
 
@@ -98,7 +101,23 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
       );
     case ALERT_RULE_NAME:
       const ruleCategory = getAlertFieldValue(alert, ALERT_RULE_CATEGORY);
-      return <CellTooltip value={value} tooltipContent={ruleCategory} />;
+      const ruleId = getAlertFieldValue(alert, ALERT_RULE_UUID);
+      const ruleLink = ruleId ? http.basePath.prepend(paths.observability.ruleDetails(ruleId)) : '';
+      return (
+        <CellTooltip
+          value={
+            <EuiButtonEmpty
+              flush="left"
+              data-test-subj="o11yColumnsButton"
+              size="s"
+              href={ruleLink}
+            >
+              {value}
+            </EuiButtonEmpty>
+          }
+          tooltipContent={ruleCategory}
+        />
+      );
     default:
       return <>{value}</>;
   }

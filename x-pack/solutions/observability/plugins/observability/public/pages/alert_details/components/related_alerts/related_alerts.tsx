@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { EuiLoadingChart } from '@elastic/eui';
+import { EuiLoadingChart, EuiSpacer } from '@elastic/eui';
 import { QueryClient } from '@tanstack/react-query';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
+import { RelatedAlertsTable } from './related_alerts_table';
 import { RelatedAlertsView } from './related_alerts_view';
 import { AlertData } from '../../../../hooks/use_fetch_alert_detail';
 
@@ -25,8 +26,12 @@ export function RelatedAlerts({ alertData }: Props) {
   }
 
   return (
-    <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
-      <RelatedAlertsView alertData={alertData} />
-    </QueryClientProvider>
+    <>
+      <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
+        <RelatedAlertsView alertData={alertData} />
+      </QueryClientProvider>
+      <EuiSpacer />
+      <RelatedAlertsTable alertData={alertData} />
+    </>
   );
 }
