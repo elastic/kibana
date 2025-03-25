@@ -140,5 +140,5 @@ export const initRoutes = (
 
   registerWorkflowInsightsRoutes(router, config, endpointContext);
 
-  registerAssetInventoryRoutes({ router, config, logger, getStartServices });
+  registerAssetInventoryRoutes({ router, logger });
 };
