@@ -803,7 +803,7 @@ describe('MetricVisComponent', function () {
       breakdown?: boolean;
     }) => {
       // make it work with Jest fake timers
-      const user = userEvent.setup({ delay: null });
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const { props } = await renderChart({
         config: {
           metric: {
