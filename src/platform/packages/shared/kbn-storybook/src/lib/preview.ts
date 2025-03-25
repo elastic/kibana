@@ -17,6 +17,28 @@ window.jest = jest;
 const preview: Preview = {
   decorators,
   initialGlobals: { euiTheme: 'v8.light' },
+  globalTypes: {
+    euiTheme: {
+      description: 'Change the EUI theme',
+      toolbar: {
+        title: 'Theme',
+        icon: 'paintbrush',
+        dynamicTitle: true,
+        items: [
+          {
+            value: 'v8.light',
+            icon: 'hearthollow',
+            title: 'Light',
+          },
+          {
+            value: 'v8.dark',
+            icon: 'heart',
+            title: 'Dark',
+          },
+        ],
+      },
+    },
+  },
 };
 
 // eslint-disable-next-line import/no-default-export
