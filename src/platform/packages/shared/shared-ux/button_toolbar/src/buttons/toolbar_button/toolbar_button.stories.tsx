@@ -47,16 +47,18 @@ const argTypes = {
 
 type Params = Record<keyof typeof argTypes, any>;
 
-export const ToolbarButton = ({ buttonStyle, buttonType, iconSide }: Params) => {
-  return (
-    <Component
-      as={buttonStyle}
-      label="Toolbar button"
-      iconType="lensApp"
-      type={buttonType}
-      iconSide={iconSide}
-    />
-  );
-};
+export const ToolbarButton = {
+  render: ({ buttonStyle, buttonType, iconSide }: Params) => {
+    return (
+      <Component
+        as={buttonStyle}
+        label="Toolbar button"
+        iconType="lensApp"
+        type={buttonType}
+        iconSide={iconSide}
+      />
+    );
+  },
 
-ToolbarButton.argTypes = argTypes;
+  argTypes,
+};

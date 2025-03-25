@@ -26,6 +26,12 @@ export const fillGapByIdRoute = (
   router.post(
     {
       path: `${INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         query: fillGapByIdQuerySchemaV1,
       },

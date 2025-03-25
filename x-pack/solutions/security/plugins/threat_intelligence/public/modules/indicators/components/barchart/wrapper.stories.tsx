@@ -9,7 +9,7 @@ import moment from 'moment';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { of } from 'rxjs';
-import { Story } from '@storybook/react';
+import { StoryObj } from '@storybook/react';
 import { TimeRange } from '@kbn/es-query';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { IUiSettingsClient } from '@kbn/core/public';
@@ -108,98 +108,104 @@ const mockOnFieldChange = function (value: EuiComboBoxOptionOption<string>): voi
   window.alert(value.label);
 };
 
-export const Default: Story<void> = () => {
-  return (
-    <StoryProvidersComponent
-      kibana={{
-        data: dataServiceMock,
-        uiSettings: uiSettingsMock,
-        timelines: timelinesMock,
-        settings: { client: uiSettingsMock, globalClient: uiSettingsMock },
-      }}
-    >
-      <IndicatorsBarChartWrapper
-        dateRange={{ min: moment(), max: moment() }}
-        timeRange={mockTimeRange}
-        series={[]}
-        field={mockField}
-        onFieldChange={mockOnFieldChange}
-      />
-    </StoryProvidersComponent>
-  );
+export const Default: StoryObj = {
+  render: () => {
+    return (
+      <StoryProvidersComponent
+        kibana={{
+          data: dataServiceMock,
+          uiSettings: uiSettingsMock,
+          timelines: timelinesMock,
+          settings: { client: uiSettingsMock, globalClient: uiSettingsMock },
+        }}
+      >
+        <IndicatorsBarChartWrapper
+          dateRange={{ min: moment(), max: moment() }}
+          timeRange={mockTimeRange}
+          series={[]}
+          field={mockField}
+          onFieldChange={mockOnFieldChange}
+        />
+      </StoryProvidersComponent>
+    );
+  },
+
+  decorators: [(story) => <MemoryRouter>{story()}</MemoryRouter>],
 };
 
-Default.decorators = [(story) => <MemoryRouter>{story()}</MemoryRouter>];
+export const InitialLoad: StoryObj = {
+  render: () => {
+    return (
+      <StoryProvidersComponent
+        kibana={{
+          data: dataServiceMock,
+          uiSettings: uiSettingsMock,
+          timelines: timelinesMock,
+          settings: { client: uiSettingsMock, globalClient: uiSettingsMock },
+        }}
+      >
+        <IndicatorsBarChartWrapper
+          dateRange={{ min: moment(), max: moment() }}
+          timeRange={mockTimeRange}
+          series={[]}
+          isLoading={true}
+          isFetching={false}
+          field={mockField}
+          onFieldChange={mockOnFieldChange}
+        />
+      </StoryProvidersComponent>
+    );
+  },
 
-export const InitialLoad: Story<void> = () => {
-  return (
-    <StoryProvidersComponent
-      kibana={{
-        data: dataServiceMock,
-        uiSettings: uiSettingsMock,
-        timelines: timelinesMock,
-        settings: { client: uiSettingsMock, globalClient: uiSettingsMock },
-      }}
-    >
-      <IndicatorsBarChartWrapper
-        dateRange={{ min: moment(), max: moment() }}
-        timeRange={mockTimeRange}
-        series={[]}
-        isLoading={true}
-        isFetching={false}
-        field={mockField}
-        onFieldChange={mockOnFieldChange}
-      />
-    </StoryProvidersComponent>
-  );
+  decorators: [(story) => <MemoryRouter>{story()}</MemoryRouter>],
 };
 
-InitialLoad.decorators = [(story) => <MemoryRouter>{story()}</MemoryRouter>];
+export const UpdatingData: StoryObj = {
+  render: () => {
+    const mockIndicators: ChartSeries[] = [
+      {
+        x: '1 Jan 2022 06:00:00 GMT',
+        y: 0,
+        g: '[Filebeat] AbuseCH Malware',
+      },
+      {
+        x: '1 Jan 2022 06:00:00 GMT',
+        y: 0,
+        g: '[Filebeat] AbuseCH MalwareBazaar',
+      },
+      {
+        x: '1 Jan 2022 12:00:00 GMT',
+        y: 25,
+        g: '[Filebeat] AbuseCH Malware',
+      },
+      {
+        x: '1 Jan 2022 18:00:00 GMT',
+        y: 15,
+        g: '[Filebeat] AbuseCH MalwareBazaar',
+      },
+    ];
 
-export const UpdatingData: Story<void> = () => {
-  const mockIndicators: ChartSeries[] = [
-    {
-      x: '1 Jan 2022 06:00:00 GMT',
-      y: 0,
-      g: '[Filebeat] AbuseCH Malware',
-    },
-    {
-      x: '1 Jan 2022 06:00:00 GMT',
-      y: 0,
-      g: '[Filebeat] AbuseCH MalwareBazaar',
-    },
-    {
-      x: '1 Jan 2022 12:00:00 GMT',
-      y: 25,
-      g: '[Filebeat] AbuseCH Malware',
-    },
-    {
-      x: '1 Jan 2022 18:00:00 GMT',
-      y: 15,
-      g: '[Filebeat] AbuseCH MalwareBazaar',
-    },
-  ];
+    return (
+      <StoryProvidersComponent
+        kibana={{
+          data: dataServiceMock,
+          uiSettings: uiSettingsMock,
+          settings: { client: uiSettingsMock, globalClient: uiSettingsMock },
+          timelines: timelinesMock,
+        }}
+      >
+        <IndicatorsBarChartWrapper
+          dateRange={{ min: moment(), max: moment() }}
+          timeRange={mockTimeRange}
+          series={mockIndicators}
+          isLoading={false}
+          isFetching={true}
+          field={mockField}
+          onFieldChange={mockOnFieldChange}
+        />
+      </StoryProvidersComponent>
+    );
+  },
 
-  return (
-    <StoryProvidersComponent
-      kibana={{
-        data: dataServiceMock,
-        uiSettings: uiSettingsMock,
-        settings: { client: uiSettingsMock, globalClient: uiSettingsMock },
-        timelines: timelinesMock,
-      }}
-    >
-      <IndicatorsBarChartWrapper
-        dateRange={{ min: moment(), max: moment() }}
-        timeRange={mockTimeRange}
-        series={mockIndicators}
-        isLoading={false}
-        isFetching={true}
-        field={mockField}
-        onFieldChange={mockOnFieldChange}
-      />
-    </StoryProvidersComponent>
-  );
+  decorators: [(story) => <MemoryRouter>{story()}</MemoryRouter>],
 };
-
-UpdatingData.decorators = [(story) => <MemoryRouter>{story()}</MemoryRouter>];

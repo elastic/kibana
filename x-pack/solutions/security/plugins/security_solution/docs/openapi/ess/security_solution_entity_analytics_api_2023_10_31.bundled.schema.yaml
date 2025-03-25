@@ -366,6 +366,8 @@ paths:
                   succeeded:
                     type: boolean
           description: Successful response
+        '400':
+          description: Invalid request
       summary: Initialize the Entity Store
       tags:
         - Security Entity Analytics API
@@ -501,6 +503,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/EngineDescriptor'
           description: Successful response
+        '400':
+          description: Invalid request
       summary: Initialize an Entity Engine
       tags:
         - Security Entity Analytics API
@@ -1299,7 +1303,8 @@ components:
     Interval:
       description: >-
         Interval in which enrich policy runs. For example, `"1h"` means the rule
-        runs every hour.
+        runs every hour. Must be less than or equal to half the duration of the
+        lookback period,
       example: 1h
       pattern: ^[1-9]\d*[smh]$
       type: string
