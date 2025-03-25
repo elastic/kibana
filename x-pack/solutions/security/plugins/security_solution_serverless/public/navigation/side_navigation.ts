@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
-import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { type Services } from '../common/services';
 
 const PROJECT_TYPE_TITLE = i18n.translate(

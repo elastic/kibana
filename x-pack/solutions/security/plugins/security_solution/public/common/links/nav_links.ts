@@ -47,17 +47,12 @@ export const updateNavLinks = (isSolutionNavEnabled: boolean, core: CoreStart) =
     currentSubscription.unsubscribe();
   }
   if (isSolutionNavEnabled) {
-    // import solution nav links only when solution nav is enabled
-    lazySolutionNavLinks().then((createSolutionNavLinks$) => {
-      currentSubscription = createSolutionNavLinks$(internalNavLinks$, core).subscribe((links) => {
-        navLinksUpdater$.next(links);
-      });
-    });
-  } else {
-    currentSubscription = internalNavLinks$.subscribe((links) => {
-      navLinksUpdater$.next(links);
-    });
+    return;
   }
+
+  currentSubscription = internalNavLinks$.subscribe((links) => {
+    navLinksUpdater$.next(links);
+  });
 };
 
 // includes internal security links only

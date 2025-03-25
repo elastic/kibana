@@ -37,9 +37,6 @@ const startMock = (): PluginStart => ({
   getUpselling: () => upselling,
   setOnboardingSettings: onboardingService.setSettings.bind(onboardingService),
   setIsSolutionNavigationEnabled: jest.fn(),
-  getSolutionNavigation: jest.fn(async () => ({
-    navigationTree$: of({ body: [], footer: [] }),
-  })),
 });
 
 export const securitySolutionMock = {
