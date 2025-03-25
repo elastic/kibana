@@ -32,8 +32,6 @@ const { REPO_ROOT } = require('@kbn/repo-info');
       `${REPO_ROOT}/x-pack/platform/plugins/shared/osquery/docs/openapi/serverless/*.schema.yaml`,
     ],
     outputFilePath: `${REPO_ROOT}/oas_docs/output/kibana.serverless.yaml`,
-    options: {
-      prototypeDocument: `${REPO_ROOT}/oas_docs/kibana.info.serverless.yaml`,
-    },
+    options: {},
   });
 })();
