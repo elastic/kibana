@@ -27,7 +27,7 @@ exports[`ManageData render 1`] = `
       size="m"
     />
     <EuiFlexGroup
-      className="kbnOverviewDataManage__content"
+      css={[Function]}
       wrap={true}
     >
       <EuiFlexItem
