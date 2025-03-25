@@ -9,3 +9,8 @@ export interface SpanLink {
   trace: { id: string };
   span: { id: string };
 }
+
+export interface RawOtelSpanLink {
+  span_id: Array<string | undefined>;
+  trace_id: Array<string | undefined>;
+}
