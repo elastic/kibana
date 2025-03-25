@@ -15,7 +15,6 @@ import {
 } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
-import pRetry from 'p-retry';
 import {
   SyntheticsPluginsSetupDependencies,
   SyntheticsPluginsStartDependencies,
@@ -78,9 +77,7 @@ export class Plugin implements PluginType {
 
     this.syntheticsService = new SyntheticsService(this.server);
 
-    pRetry(() => {
-      this.syntheticsService?.setup(plugins.taskManager);
-    }).catch(() => {});
+    this.syntheticsService.setup(plugins.taskManager).catch(() => {});
 
     this.syntheticsMonitorClient = new SyntheticsMonitorClient(this.syntheticsService, this.server);
 
@@ -113,9 +110,7 @@ export class Plugin implements PluginType {
 
     this.syntheticsService?.start(pluginsStart.taskManager);
 
-    pRetry(() => {
-      this.telemetryEventsSender.start(pluginsStart.telemetry, coreStart);
-    }).catch(() => {});
+    this.telemetryEventsSender.start(pluginsStart.telemetry, coreStart).catch(() => {});
   }
 
   public stop() {}
