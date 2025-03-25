@@ -49,6 +49,7 @@ const testProps = {
   transformMessage: jest.fn(),
   contentReferences: undefined,
   contentReferencesVisible: true,
+  messageRole: 'assistant' as const,
 };
 
 const mockReader = jest.fn() as unknown as ReadableStreamDefaultReader<Uint8Array>;
