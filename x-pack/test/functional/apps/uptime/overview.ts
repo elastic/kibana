@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export const UPTIME_HEARTBEAT_DATA = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
+const DEFAULT_NAVIGATION_SEARCH = `dateRangeEnd=2019-09-11T19:40:08.078Z&dateRangeStart=2019-09-10T12:40:08.078Z`;
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime, common } = getPageObjects(['uptime', 'common']);
@@ -17,29 +18,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const testSubjects = getService('testSubjects');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/57737
-  describe.skip('overview page', function () {
-    const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
-    const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
-
+  describe('overview page', function () {
     before(async () => {
       await esArchiver.loadIfNeeded(UPTIME_HEARTBEAT_DATA);
     });
 
     beforeEach(async () => {
-      await uptime.goToRoot();
-      await uptime.setDateRange(DEFAULT_DATE_START, DEFAULT_DATE_END);
+      await common.navigateToApp('uptime', {
+        search: DEFAULT_NAVIGATION_SEARCH,
+      });
 
       await uptime.resetFilters();
     });
 
-    it('loads and displays uptime data based on date range', async () => {
-      await uptime.goToUptimeOverviewAndLoadData(
-        DEFAULT_DATE_START,
-        DEFAULT_DATE_END,
-        'monitor-page-link-0000-intermittent'
-      );
-    });
+    it('loads and displays uptime data based on date range', () =>
+      uptime.pageHasExpectedIds(['0000-intermittent']));
 
     it('applies filters for multiple fields', async () => {
       await uptime.selectFilterItems({
@@ -62,38 +55,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('pagination is cleared when filter criteria changes', async () => {
-      await uptime.changePage('next');
-      await retry.try(async () => {
-        await uptime.pageHasExpectedIds([
-          '0010-down',
-          '0011-up',
-          '0012-up',
-          '0013-up',
-          '0014-up',
-          '0015-intermittent',
-          '0016-up',
-          '0017-up',
-          '0018-up',
-          '0019-up',
-        ]);
+      await common.navigateToApp('uptime', {
+        search: `${DEFAULT_NAVIGATION_SEARCH}&pagination={"cursorDirection":"AFTER","sortOrder":"ASC","cursorKey":{"monitor_id":"0009-up"}}`,
       });
+      await uptime.pageHasExpectedIds([
+        '0010-down',
+        '0011-up',
+        '0012-up',
+        '0013-up',
+        '0014-up',
+        '0015-intermittent',
+        '0016-up',
+        '0017-up',
+        '0018-up',
+        '0019-up',
+      ]);
       // there should now be pagination data in the URL
       await uptime.pageUrlContains('pagination');
       await uptime.setStatusFilter('up');
-      await retry.try(async () => {
-        await uptime.pageHasExpectedIds([
-          '0000-intermittent',
-          '0001-up',
-          '0002-up',
-          '0003-up',
-          '0004-up',
-          '0005-up',
-          '0006-up',
-          '0007-up',
-          '0008-up',
-          '0009-up',
-        ]);
-      });
+      await uptime.pageHasExpectedIds([
+        '0000-intermittent',
+        '0001-up',
+        '0002-up',
+        '0003-up',
+        '0004-up',
+        '0005-up',
+        '0006-up',
+        '0007-up',
+        '0008-up',
+        '0009-up',
+      ]);
       // ensure that pagination is removed from the URL
       await uptime.pageUrlContains('pagination', false);
     });

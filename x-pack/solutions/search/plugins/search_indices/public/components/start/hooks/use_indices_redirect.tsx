@@ -32,7 +32,7 @@ export const useIndicesRedirect = (indicesStatus?: IndicesStatusResponse) => {
       return;
     }
     if (lastStatus === undefined && indicesStatus.indexNames.length > 0) {
-      application.navigateToApp('management', { deepLinkId: 'index_management' });
+      application.navigateToApp('elasticsearchIndexManagement');
       setHasDoneRedirect(true);
       return;
     }
@@ -42,7 +42,7 @@ export const useIndicesRedirect = (indicesStatus?: IndicesStatusResponse) => {
       usageTracker.click(AnalyticsEvents.startCreateIndexCreatedRedirect);
       return;
     }
-    application.navigateToApp('management', { deepLinkId: 'index_management' });
+    application.navigateToApp('elasticsearchIndexManagement');
     setHasDoneRedirect(true);
   }, [
     application,
