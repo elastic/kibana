@@ -229,8 +229,8 @@ export class AddEditMonitorAPI {
     try {
       // we do this async, so we don't block the user, error handling will be done on the UI via separate api
       const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
-      pRetry(() => {
-        defaultAlertService.setupDefaultAlerts();
+      pRetry(async () => {
+        await defaultAlertService.setupDefaultAlerts();
       })
         .then(() => {
           server.logger.debug(`Successfully created default alert for monitor: ${name}`);
