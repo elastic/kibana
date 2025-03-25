@@ -68,6 +68,9 @@ async function getState(
   });
   jest.spyOn(nextState.dataState, 'fetch');
   await nextState.internalState.dispatch(internalStateActions.loadDataViewList());
+  nextState.internalState.dispatch(
+    internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
+  );
   if (savedSearch) {
     jest.spyOn(discoverServiceMock.savedSearch, 'get').mockImplementation(() => {
       nextState.savedSearchState.set(copySavedSearch(savedSearch));
@@ -260,7 +263,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -453,7 +456,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: undefined,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -481,7 +484,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: undefined,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -522,7 +525,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: undefined,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -547,7 +550,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: undefined,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -572,7 +575,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: undefined,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -608,7 +611,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: 'the-saved-search-id',
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -634,7 +637,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -664,7 +667,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -695,7 +698,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -726,7 +729,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -744,7 +747,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: undefined,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -760,7 +763,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: undefined,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -783,7 +786,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: undefined,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -799,7 +802,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -834,7 +837,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -861,7 +864,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: 'the-saved-search-id-with-timefield',
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -888,7 +891,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: {
@@ -918,7 +921,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: undefined,
           dataViewSpec: dataViewSpecMock,
           defaultUrlState: undefined,
@@ -941,7 +944,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -961,7 +964,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -980,7 +983,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchAdHoc.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -1003,7 +1006,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMockWithESQL.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -1048,7 +1051,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -1083,7 +1086,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -1108,7 +1111,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -1138,7 +1141,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -1172,7 +1175,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -1193,7 +1196,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -1204,7 +1207,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: undefined,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -1218,7 +1221,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -1239,7 +1242,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
@@ -1291,7 +1294,7 @@ describe('Discover state', () => {
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
-          mainRouteInitializationState: { hasESData: true, hasUserDataView: true },
+
           discoverSessionId: savedSearchMock.id,
           dataViewSpec: undefined,
           defaultUrlState: undefined,
