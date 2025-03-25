@@ -409,7 +409,7 @@ export function GrokAiSuggestions() {
     );
   }
 
-  if (!isAiEnabled || !definition) {
+  if (!isAiEnabled) {
     return null;
   }
 

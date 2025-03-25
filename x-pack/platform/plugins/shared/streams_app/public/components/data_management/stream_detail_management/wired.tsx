@@ -25,7 +25,7 @@ export function WiredStreamDetailManagement({
   definition,
   refreshDefinition,
 }: {
-  definition?: WiredStreamGetResponse;
+  definition: WiredStreamGetResponse;
   refreshDefinition: () => void;
 }) {
   const {

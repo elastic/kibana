@@ -20,7 +20,7 @@ export interface StreamDetailContextProviderProps {
 }
 
 export interface StreamDetailContextValue {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
   loading: boolean;
   refresh: () => void;
 }
@@ -59,9 +59,14 @@ export function StreamDetailContextProvider({
   );
 
   const context = React.useMemo(
-    () => ({ definition, loading, refresh }),
+    // useMemo cannot be used conditionally after the definition narrowing, the assertion is to narrow correctly the context value
+    () => ({ definition, loading, refresh } as StreamDetailContextValue),
     [definition, loading, refresh]
   );
+
+  if (!definition) {
+    return null;
+  }
 
   return <StreamDetailContext.Provider value={context}>{children}</StreamDetailContext.Provider>;
 }
