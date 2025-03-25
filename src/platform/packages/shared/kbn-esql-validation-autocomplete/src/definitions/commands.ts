@@ -468,7 +468,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         messages.push(
           getMessageFromId({
             messageId: 'wrongDissectOptionArgumentType',
-            values: { value: value ?? '' },
+            values: { value: (value as string | number) ?? '' },
             locations: firstArg.location,
           })
         );
