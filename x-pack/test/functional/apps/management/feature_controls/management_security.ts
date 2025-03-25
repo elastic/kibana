@@ -78,7 +78,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'cases',
           'triggersActionsConnectors',
           'reporting',
-          'jobsListLink',
           'maintenanceWindows',
         ]);
         const kibanaSection = sections.find((section) => section.sectionId === 'kibana');

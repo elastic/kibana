@@ -73,13 +73,6 @@ export function MachineLearningNavigationProvider({
       });
     },
 
-    async navigateToStackManagementViaAppsMenu() {
-      await retry.tryForTime(60 * 1000, async () => {
-        await appsMenu.clickLink('Stack Management');
-        await testSubjects.existOrFail('jobsListLink', { timeout: 2000 });
-      });
-    },
-
     async navigateToAlertsAndAction() {
       await PageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
