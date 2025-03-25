@@ -15,7 +15,14 @@ import {
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { UseCspOptions } from '../types';
 
-const MISCONFIGURATIONS_SOURCE_FIELDS = ['result.*', 'rule.*', 'resource.*'];
+const MISCONFIGURATIONS_SOURCE_FIELDS = [
+  'result.*',
+  'rule.*',
+  'resource.*',
+  '@timestamp',
+  'observer',
+  'data_stream.*',
+];
 interface AggregationBucket {
   doc_count?: number;
 }
@@ -173,6 +180,39 @@ export const getVulnerabilitiesQuery = ({ query, sort }: UseCspOptions, isPrevie
 });
 
 const buildVulnerabilityFindingsQueryWithFilters = (query: UseCspOptions['query']) => {
+  return {
+    ...query,
+    bool: {
+      ...query?.bool,
+      filter: [
+        ...(query?.bool?.filter ?? []),
+        {
+          range: {
+            '@timestamp': {
+              gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+              lte: 'now',
+            },
+          },
+        },
+      ],
+    },
+  };
+};
+
+export const buildGetMisconfigurationsFindingsQuery = (
+  { query, sort }: UseCspOptions,
+  isPreview = false
+) => {
+  return {
+    index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+    size: 1,
+    ignore_unavailable: true,
+    query: buildGetMisconfigurationsFindingsQueryWithFilters(query),
+    _source: MISCONFIGURATIONS_SOURCE_FIELDS,
+  };
+};
+
+const buildGetMisconfigurationsFindingsQueryWithFilters = (query: UseCspOptions['query']) => {
   return {
     ...query,
     bool: {

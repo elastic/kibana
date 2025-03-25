@@ -12,6 +12,7 @@ import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import type { FleetSetup } from '@kbn/fleet-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { CspRouterProps } from './application/csp_router';
 import type { CloudSecurityPosturePageId } from './common/navigation/types';
 
@@ -39,6 +40,13 @@ export interface CspClientPluginSetupDeps {
   usageCollection?: UsageCollectionSetup;
 }
 
+export interface UseOnCloseParams {
+  /**
+   * Function to call when the event is dispatched
+   */
+  callback: (id: string) => void;
+}
+
 /**
  * Methods exposed from the security solution to the cloud security posture application.
  */
@@ -50,6 +58,8 @@ export interface CspSecuritySolutionContext {
     pageName: CloudSecurityPosturePageId;
     state?: Record<string, string | undefined>;
   }>;
+  useExpandableFlyoutApi?: () => ExpandableFlyoutApi;
+  useOnExpandableFlyoutClose?: ({ callback }: UseOnCloseParams) => void;
 }
 
 export type CloudSecurityPostureStartServices = Pick<

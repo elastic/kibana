@@ -14,32 +14,33 @@ import {
   mockFindingsHit,
   mockWizFinding,
 } from '../../../common/mock/cloud_security_posture/__mock__/findings';
+import { useGetMisconfigurationFindings } from '@kbn/cloud-security-posture/src/hooks/use_get_misconfiguration_finding';
 
-const onPaginate = jest.fn();
-
-const TestComponent = ({ ...overrideProps }) => (
+const TestComponent = () => (
   <TestProvider>
-    <FindingsRuleFlyout
-      onClose={jest.fn}
-      flyoutIndex={0}
-      findingsCount={2}
-      onPaginate={onPaginate}
-      finding={mockFindingsHit}
-      {...overrideProps}
-    />
+    <FindingsRuleFlyout ruleId={'rule_id_test'} resourceId={'resource_id_test'} />
   </TestProvider>
 );
 
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_get_misconfiguration_finding', () => ({
+  useGetMisconfigurationFindings: jest.fn(),
+}));
+
 describe('<FindingsFlyout/>', () => {
   describe('Overview Tab', () => {
-    it('details and remediation accordions are open', () => {
-      const { getAllByRole } = render(<TestComponent />);
+    it('should render loading state when finding data is not available', async () => {
+      (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({ data: undefined });
 
-      getAllByRole('button', { expanded: true, name: 'Details' });
-      getAllByRole('button', { expanded: true, name: 'Remediation' });
+      const { getByTestId } = render(<TestComponent />);
+
+      getByTestId('findingsFlyoutLoadingTest');
     });
 
-    it('displays text details summary info', () => {
+    it('should render the flyout with available data', async () => {
+      (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({
+        data: { result: { hits: [{ _source: mockFindingsHit }] } },
+      });
+
       const { getAllByText, getByText } = render(<TestComponent />);
 
       getAllByText(mockFindingsHit.rule.name);
@@ -53,12 +54,18 @@ describe('<FindingsFlyout/>', () => {
     });
 
     it('displays missing info callout when data source is not CSP', () => {
-      const { getByText } = render(<TestComponent finding={mockWizFinding} />);
+      (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({
+        data: { result: { hits: [{ _source: mockWizFinding }] } },
+      });
+      const { getByText } = render(<TestComponent />);
       getByText('Some fields not provided by Wiz');
     });
 
     it('does not display missing info callout when data source is CSP', () => {
-      const { queryByText } = render(<TestComponent finding={mockFindingsHit} />);
+      (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({
+        data: { result: { hits: [{ _source: mockFindingsHit }] } },
+      });
+      const { queryByText } = render(<TestComponent />);
       const missingInfoCallout = queryByText('Some fields not provided by Wiz');
       expect(missingInfoCallout).toBeNull();
     });
@@ -78,14 +85,20 @@ describe('<FindingsFlyout/>', () => {
     });
 
     it('displays missing info callout when data source is not CSP', async () => {
-      const { getByText } = render(<TestComponent finding={mockWizFinding} />);
+      (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({
+        data: { result: { hits: [{ _source: mockWizFinding }] } },
+      });
+      const { getByText } = render(<TestComponent />);
       await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
 
       getByText('Some fields not provided by Wiz');
     });
 
     it('does not display missing info callout when data source is CSP', async () => {
-      const { queryByText } = render(<TestComponent finding={mockFindingsHit} />);
+      (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({
+        data: { result: { hits: [{ _source: mockFindingsHit }] } },
+      });
+      const { queryByText } = render(<TestComponent />);
       await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
 
       const missingInfoCallout = queryByText('Some fields not provided by Wiz');
@@ -95,6 +108,9 @@ describe('<FindingsFlyout/>', () => {
 
   describe('Table Tab', () => {
     it('displays resource name and id', async () => {
+      (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({
+        data: { result: { hits: [{ _source: mockFindingsHit }] } },
+      });
       const { getAllByText } = render(<TestComponent />);
       await userEvent.click(screen.getByTestId('findings_flyout_tab_table'));
 
@@ -103,7 +119,10 @@ describe('<FindingsFlyout/>', () => {
     });
 
     it('does not display missing info callout for 3Ps', async () => {
-      const { queryByText } = render(<TestComponent finding={mockWizFinding} />);
+      (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({
+        data: { result: { hits: [{ _source: mockWizFinding }] } },
+      });
+      const { queryByText } = render(<TestComponent />);
       await userEvent.click(screen.getByTestId('findings_flyout_tab_table'));
 
       const missingInfoCallout = queryByText('Some fields not provided by Wiz');
@@ -113,27 +132,14 @@ describe('<FindingsFlyout/>', () => {
 
   describe('JSON Tab', () => {
     it('does not display missing info callout for 3Ps', async () => {
-      const { queryByText } = render(<TestComponent finding={mockWizFinding} />);
+      (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({
+        data: { result: { hits: [{ _source: mockWizFinding }] } },
+      });
+      const { queryByText } = render(<TestComponent />);
       await userEvent.click(screen.getByTestId('findings_flyout_tab_json'));
 
       const missingInfoCallout = queryByText('Some fields not provided by Wiz');
       expect(missingInfoCallout).toBeNull();
     });
-  });
-
-  it('should allow pagination with next', async () => {
-    const { getByTestId } = render(<TestComponent />);
-
-    await userEvent.click(getByTestId('pagination-button-next'));
-
-    expect(onPaginate).toHaveBeenCalledWith(1);
-  });
-
-  it('should allow pagination with previous', async () => {
-    const { getByTestId } = render(<TestComponent flyoutIndex={1} />);
-
-    await userEvent.click(getByTestId('pagination-button-previous'));
-
-    expect(onPaginate).toHaveBeenCalledWith(0);
   });
 });

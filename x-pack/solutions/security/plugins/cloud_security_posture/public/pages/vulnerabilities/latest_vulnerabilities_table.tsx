@@ -14,7 +14,6 @@ import { HttpSetup } from '@kbn/core-http-browser';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import { CVSScoreBadge, SeverityStatusBadge } from '@kbn/cloud-security-posture';
 import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
-import { CloudSecurityDataTable } from '../../components/cloud_security_data_table';
 import { useLatestVulnerabilitiesTable } from './hooks/use_latest_vulnerabilities_table';
 import { LATEST_VULNERABILITIES_TABLE } from './test_subjects';
 import { getDefaultQuery, defaultColumns } from './constants';
@@ -22,6 +21,7 @@ import { VulnerabilityFindingFlyout } from './vulnerabilities_finding_flyout/vul
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { createDetectionRuleFromVulnerabilityFinding } from './utils/create_detection_rule_from_vulnerability';
 import { vulnerabilitiesTableFieldLabels } from './vulnerabilities_table_field_labels';
+import { VulnerabilityCloudSecurityDataTable } from '../../components/cloud_security_data_table/vulnerability_cloud_security_data_table';
 
 interface LatestVulnerabilitiesTableProps {
   groupSelectorComponent?: JSX.Element;
@@ -123,7 +123,7 @@ export const LatestVulnerabilitiesTable = ({
           <ErrorCallout error={error} />
         </>
       ) : (
-        <CloudSecurityDataTable
+        <VulnerabilityCloudSecurityDataTable
           data-test-subj={LATEST_VULNERABILITIES_TABLE}
           isLoading={isFetching}
           defaultColumns={defaultColumns}

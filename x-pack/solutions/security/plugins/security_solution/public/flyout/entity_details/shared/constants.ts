@@ -10,6 +10,7 @@ import { EntityType } from '../../../../common/entity_analytics/types';
 import type { HostPanelExpandableFlyoutProps } from '../host_right';
 import type { ServicePanelExpandableFlyoutProps } from '../service_right';
 import type { UserPanelExpandableFlyoutProps } from '../user_right';
+import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from '../../csp_details/findings_flyout/findings_flyout';
 
 export const ONE_WEEK_IN_HOURS = 24 * 7;
 
@@ -30,6 +31,8 @@ export const UserPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-panel';
 export const ServicePanelKey: ServicePanelExpandableFlyoutProps['key'] = 'service-panel';
 export const UniversalEntityPanelKey: UniversalEntityPanelExpandableFlyoutProps['key'] =
   'universal-entity-panel';
+export const MisconfigurationFindingsPanelKey: FindingsMisconfigurationPanelExpandableFlyoutProps['key'] =
+  'findings-misconfiguration-panel';
 
 export const EntityPanelKeyByType: Record<EntityType, string | undefined> = {
   [EntityType.host]: HostPanelKey,
