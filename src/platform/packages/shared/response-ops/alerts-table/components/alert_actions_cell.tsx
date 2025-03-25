@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -15,8 +17,8 @@ import {
 
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
-import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
+import { DefaultAlertActions } from './default_alert_actions';
+import type { GetAlertsTableProp } from '../types';
 
 const actionsToolTip = i18n.translate('xpack.triggersActionsUI.alertsTable.moreActionsTextLabel', {
   defaultMessage: 'More actions',
