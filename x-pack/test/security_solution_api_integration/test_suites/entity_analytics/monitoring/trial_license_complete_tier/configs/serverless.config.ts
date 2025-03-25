@@ -9,7 +9,7 @@ import { createTestConfig } from '../../../../../config/serverless/config.base';
 
 export default createTestConfig({
   kbnTestServerArgs: [
-    '--coreApp.allowDynamicConfigOverrides=true',
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify(['privilegeMonitoringEnabled'])}`,
     `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
       { product_line: 'security', product_tier: 'complete' },
       { product_line: 'endpoint', product_tier: 'complete' },

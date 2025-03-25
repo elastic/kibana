@@ -17,7 +17,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        '--coreApp.allowDynamicConfigOverrides=true',
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'privilegeMonitoringEnabled',
+        ])}`,
       ],
     },
     testFiles: [require.resolve('..')],
