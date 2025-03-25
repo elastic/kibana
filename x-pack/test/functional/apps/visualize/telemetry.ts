@@ -23,8 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/207045
-  describe.skip('smoke telemetry tests', function () {
+  describe('smoke telemetry tests', function () {
     let uiCounterEvents: UiCounterEvent[] = [];
 
     before(async function () {
