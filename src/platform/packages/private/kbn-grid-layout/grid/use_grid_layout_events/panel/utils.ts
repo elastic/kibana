@@ -62,14 +62,7 @@ export function getSensorOffsets(e: UserInteractionEvent, { top, left, right, bo
   };
 }
 
-export const isLayoutInteractive = (gridLayoutStateManager: GridLayoutStateManager) => {
-  return (
-    gridLayoutStateManager.expandedPanelId$.value === undefined &&
-    gridLayoutStateManager.accessMode$.getValue() === 'EDIT'
-  );
-};
-
-const OFFSET_BOTTOM = 8; // Aesthetic bottom margin
+const KEYBOARD_DRAG_BOTTOM_LIMIT = 8; // The offset from the bottom of the page to ensure the dragged handle doesn't look 'glued' to the page
 
 const updateClientY = (currentY: number, stepY: number, isCloseToEdge: boolean, type = 'drag') => {
   if (isCloseToEdge && type === 'resize') {
@@ -108,7 +101,8 @@ export const getNextKeyboardPositionForPanel = (
     case KeyboardCode.Right: {
       // The distance between the handle and the right edge of the panel to ensure the panel stays within the grid boundaries
       const panelHandleDiff = panelPosition.right - handlePosition.clientX;
-      const maxRight = (gridPosition?.right || window.innerWidth) - gutterSize - panelHandleDiff;
+      const gridPositionRight = (gridPosition?.right || window.innerWidth) - gutterSize;
+      const maxRight = type === 'drag' ? gridPositionRight - panelHandleDiff : gridPositionRight;
 
       return {
         ...handlePosition,
@@ -117,7 +111,8 @@ export const getNextKeyboardPositionForPanel = (
     }
     case KeyboardCode.Left:
       const panelHandleDiff = panelPosition.left - handlePosition.clientX;
-      const maxLeft = (gridPosition?.left || 0) + gutterSize + panelHandleDiff;
+      const gridPositionLeft = (gridPosition?.left || 0) + gutterSize;
+      const maxLeft = type === 'drag' ? gridPositionLeft - panelHandleDiff : gridPositionLeft;
 
       return {
         ...handlePosition,
@@ -131,7 +126,8 @@ export const getNextKeyboardPositionForPanel = (
       // if we're at the end of the scroll of the page, the dragged handle can go down even more so we can reorder with the last row
       const bottomMaxPosition = bottomOfPageReached
         ? panelPosition.bottom + stepY - (panelPosition.bottom - panelPosition.top) * 0.5
-        : panelPosition.bottom + stepY + OFFSET_BOTTOM;
+        : panelPosition.bottom + stepY + KEYBOARD_DRAG_BOTTOM_LIMIT;
+
       const isCloseToBottom = bottomMaxPosition > window.innerHeight;
 
       return {

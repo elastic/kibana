@@ -50,8 +50,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
       .kbnGridPanel__dragHandle,
       .kbnGridPanel__resizeHandle {
         touch-action: none; // prevent scrolling on touch devices
-        scroll-margin-top: ${gridLayoutStateManager.runtimeSettings$.value
-          .keyboardDragTopLimit}px !important;
+        scroll-margin-top: ${gridLayoutStateManager.runtimeSettings$.value.keyboardDragTopLimit}px;
       }
     `;
   }, [gridLayoutStateManager, rowId, panelId]);

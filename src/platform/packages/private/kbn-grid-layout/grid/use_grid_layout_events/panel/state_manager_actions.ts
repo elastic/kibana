@@ -37,9 +37,7 @@ export const startAction = (
     sensorOffsets: getSensorOffsets(e, panelRect),
   });
 
-  gridLayoutStateManager.proposedGridLayout$.next(
-    cloneDeep(gridLayoutStateManager.gridLayout$.value)
-  );
+  gridLayoutStateManager.proposedGridLayout$.next(gridLayoutStateManager.gridLayout$.value);
 };
 
 export const moveAction = (
@@ -90,7 +88,7 @@ export const moveAction = (
   // find the grid that the preview rect is over
   const lastRowId = interactionEvent.targetRow;
   const targetRowId = (() => {
-    // temporary blocking of moving with keyboard between sections till we have a better way to handle keyboard events between rows
+    // TODO: temporary blocking of moving with keyboard between sections till we have a better way to handle keyboard events between rows
     if (isResize || isKeyboardEvent(e)) return lastRowId;
     const previewBottom = previewRect.top + rowHeight;
 

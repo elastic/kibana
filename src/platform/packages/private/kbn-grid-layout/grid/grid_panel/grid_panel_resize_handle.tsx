@@ -48,7 +48,7 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     height: euiTheme.size.l,
     zIndex: euiTheme.levels.toast,
     touchAction: 'none',
-    scrollMarginBottom: euiTheme.size.l,
+    scrollMarginBottom: euiTheme.size.s,
     '&:hover, &:focus': {
       cursor: 'se-resize',
     },
