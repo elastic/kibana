@@ -3191,11 +3191,13 @@ describe('Package policy service', () => {
     beforeEach(() => {
       context = xpackMocks.createRequestHandlerContext();
       request = httpServerMock.createKibanaRequest();
+      appContextService.start(createAppContextStartContractMock());
     });
 
     afterEach(() => {
       jest.clearAllMocks();
       callbackCallingOrder.length = 0;
+      appContextService.stop();
     });
 
     it('should call external callbacks in expected order', async () => {
