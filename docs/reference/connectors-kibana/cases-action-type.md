@@ -16,7 +16,7 @@ To use this connector you must have `All` {{kib}} privileges for the **Cases** f
 
 You cannot manage this connector in **{{stack-manage-app}} > {{connectors-ui}}** or by using APIs. You also cannot create a Cases [preconfigured connector](/reference/connectors-kibana/pre-configured-connectors.md). It is available only when you’re creating a rule in {{kib}}. For example:
 
-:::{image} ../../images/cases-action.png
+:::{image} ../images/cases-action.png
 :alt: Add a cases action while creating a rule in {{kib}} {{rules-ui}}
 :class: screenshot
 :::
