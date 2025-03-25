@@ -72,8 +72,8 @@ export default function ({ getService }: FtrProviderContext) {
               'overview',
               'mlStackManagementOverviewPage'
             );
-            await ml.navigation.assertAnomalyDetectionTabEnabled(true);
-            await ml.navigation.assertDataFrameAnalyticsTabEnabled(true);
+            await ml.navigation.assertAnomalyDetectionNavItemEnabled(true);
+            await ml.navigation.assertDataFrameAnalyticsNavItemEnabled(true);
             await ml.navigation.assertTrainedModelsNavItemEnabled(true);
             await ml.navigation.assertADSettingsTabExists(false);
           });
@@ -107,8 +107,8 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.navigation.navigateToOverview();
             await ml.testExecution.logTestStep('should show the anomaly detection card');
             await ml.overviewPage.assertADCardExists();
-            await ml.overviewPage.assertADManageJobsButtonExists();
-            await ml.overviewPage.assertADJobButtonEnabled('manageJobsButton', true);
+            await ml.overviewPage.assertADCreateJobButtonExists();
+            await ml.overviewPage.assertADJobButtonEnabled('mlCreateNewJobButton', true);
             await ml.testExecution.logTestStep('should show the data frame analytics card');
             await ml.overviewPage.assertDFAEmptyStateExists();
             await ml.overviewPage.assertDFACreateJobButtonExists();

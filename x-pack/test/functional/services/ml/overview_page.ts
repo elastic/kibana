@@ -25,8 +25,12 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
       });
     },
 
-    async assertADCreateJobButtonExists() {
-      await testSubjects.existOrFail('mlCreateNewJobButton');
+    async assertADCreateJobButtonExists(expectExists: boolean = true) {
+      if (expectExists) {
+        await testSubjects.existOrFail('mlCreateNewJobButton');
+      } else {
+        await testSubjects.missingOrFail('mlCreateNewJobButton');
+      }
     },
 
     async assertADManageJobsButtonExists(expectExists: boolean = true) {
@@ -83,8 +87,12 @@ export function MachineLearningOverviewPageProvider({ getService }: FtrProviderC
       await testSubjects.existOrFail('mlDataVisualizerCardDataDriftData');
     },
 
-    async assertDFACreateJobButtonExists() {
-      await testSubjects.existOrFail('mlAnalyticsCreateFirstButton');
+    async assertDFACreateJobButtonExists(expectExists: boolean = true) {
+      if (expectExists) {
+        await testSubjects.existOrFail('mlAnalyticsCreateFirstButton');
+      } else {
+        await testSubjects.missingOrFail('mlAnalyticsCreateFirstButton');
+      }
     },
 
     async assertAnomalyDetectionPanelExists() {

@@ -221,12 +221,12 @@ export const OverviewPage: FC = () => {
                 <EuiFlexItem>
                   <EuiFlexGroup gutterSize="m">
                     {isADEnabled ? (
-                      <EuiFlexItem>
+                      <EuiFlexItem data-test-subj="mlOverviewAnomalyDetectionCard">
                         <AnomalyDetectionOverviewCard />
                       </EuiFlexItem>
                     ) : null}
                     {isDFAEnabled ? (
-                      <EuiFlexItem>
+                      <EuiFlexItem data-test-subj="mlOverviewCardDataFrameAnalytics">
                         <DataFrameAnalyticsOverviewCard />
                       </EuiFlexItem>
                     ) : null}

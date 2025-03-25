@@ -66,8 +66,7 @@ export const AnomalyDetectionOverviewCard: FC = () => {
     });
   }, [mlManagementLocator]);
 
-  const showEmptyState =
-    !isLoading && !hasADJobs && canCreateJob && !disableCreateAnomalyDetectionJob;
+  const showEmptyState = !isLoading && !hasADJobs;
 
   const availableActions = useMemo(() => {
     const actions: React.ReactNode[] = [];

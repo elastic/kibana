@@ -123,8 +123,9 @@ export function MachineLearningNavigationProvider({
       await this.assertTabEnabled('~mlMainTab & ~overview', expectedValue);
     },
 
-    async assertAnomalyDetectionTabEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('anomaly_detection', expectedValue);
+    async assertAnomalyDetectionTabsEnabled(expectedValue: boolean) {
+      await this.assertAnomalyExplorerNavItemEnabled(expectedValue);
+      await this.assertSingleMetricViewerNavItemEnabled(expectedValue);
     },
 
     async assertAnomalyExplorerNavItemEnabled(expectedValue: boolean) {
@@ -135,8 +136,9 @@ export function MachineLearningNavigationProvider({
       await this.assertTabEnabled('~mlMainTab & ~singleMetricViewer', expectedValue);
     },
 
-    async assertDataFrameAnalyticsTabEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('analytics', expectedValue);
+    async assertDataFrameAnalyticsTabsEnabled(expectedValue: boolean) {
+      await this.assertDataFrameAnalyticsResultsExplorerTabEnabled(expectedValue);
+      await this.assertDataFrameAnalyticsMapTabEnabled(expectedValue);
     },
 
     async assertDataFrameAnalyticsResultsExplorerTabEnabled(expectedValue: boolean) {
@@ -145,6 +147,14 @@ export function MachineLearningNavigationProvider({
 
     async assertDataFrameAnalyticsMapTabEnabled(expectedValue: boolean) {
       await this.assertTabEnabled('~mlMainTab & ~dataFrameAnalyticsMap', expectedValue);
+    },
+
+    async assertAnomalyDetectionNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('anomaly_detection', expectedValue);
+    },
+
+    async assertDataFrameAnalyticsNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('analytics', expectedValue);
     },
 
     async assertTrainedModelsNavItemEnabled(expectedValue: boolean) {
@@ -198,14 +208,12 @@ export function MachineLearningNavigationProvider({
       });
     },
 
-    // @todo: verify if this needs to be replaced?
     async navigateToNotificationsTab() {
-      await testSubjects.click('mlManagementOverviewPageTabs notifications');
-    },
-
-    // @todo: verify if this needs to be replaced?
-    async navigateToMemoryUsage() {
-      await this.navigateToArea('~mlMainTab & ~nodesOverview', 'mlPageMemoryUsage');
+      await this.navigateToStackManagementMlSection('overview', 'mlStackManagementOverviewPage');
+      await retry.tryForTime(5 * 1000, async () => {
+        await testSubjects.click('mlManagementOverviewPageTabs notifications');
+        await testSubjects.existOrFail('mlNotificationsTable loaded');
+      });
     },
 
     async navigateToAnomalyDetection() {
@@ -310,7 +318,12 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToSettings(spaceId?: string) {
-      await this.navigateToStackManagementMlSection('ad_settings', 'mlPageSettings', spaceId);
+      await this.navigateToJobManagement(spaceId);
+      await testSubjects.existOrFail('mlAnomalyDetectionSettingsButton');
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.click('mlAnomalyDetectionSettingsButton');
+        await testSubjects.existOrFail('mlPageSettings');
+      });
     },
 
     async navigateToStackManagementInsuficientLicensePage() {

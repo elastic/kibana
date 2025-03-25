@@ -74,8 +74,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               'overview',
               'mlStackManagementOverviewPage'
             );
-            await ml.navigation.assertAnomalyDetectionTabEnabled(true);
-            await ml.navigation.assertDataFrameAnalyticsTabEnabled(true);
+            await ml.navigation.assertAnomalyDetectionNavItemEnabled(true);
+            await ml.navigation.assertDataFrameAnalyticsNavItemEnabled(true);
             await ml.navigation.assertTrainedModelsNavItemEnabled(true);
             await ml.navigation.assertADSettingsTabExists(false);
           });
