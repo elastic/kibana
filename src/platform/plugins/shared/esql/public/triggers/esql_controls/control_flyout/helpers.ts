@@ -107,9 +107,8 @@ export const validateVariableName = (variableName: string, prefix: '??' | '?') =
     // variable name can only contain letters, numbers, underscores and questionmarks
     .replace(/[^a-zA-Z0-9_?]/g, '');
 
-  // Ensure the variable name always starts with prefix
-  if (!text.startsWith(prefix)) {
-    text = `${prefix}${text.replace(/^\?+/, '')}`;
+  if (!text.startsWith('?')) {
+    text = `?${text}`;
   }
 
   // Remove unnecessary leading underscores

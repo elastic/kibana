@@ -99,11 +99,6 @@ describe('helpers', () => {
       expect(variable).toBe('?my_variable');
     });
 
-    it('should add ?? questionarks if they dont exist', () => {
-      const variable = validateVariableName('my_variable', '??');
-      expect(variable).toBe('??my_variable');
-    });
-
     it('should remove the _ after the ? prefix', () => {
       const variable = validateVariableName('?_my_variable', '?');
       expect(variable).toBe('?my_variable');
