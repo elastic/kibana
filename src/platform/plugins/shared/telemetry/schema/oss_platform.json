@@ -2491,6 +2491,7 @@
             }
           }
         },
+        "enterpriseSearchAnalytics": {
           "properties": {
             "appId": {
               "type": "keyword",
