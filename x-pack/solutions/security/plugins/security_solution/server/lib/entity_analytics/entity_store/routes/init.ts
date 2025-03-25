@@ -59,30 +59,30 @@ export const initEntityEngineRoute = (
         const { getSpaceId, getAppClient, getDataViewsService } = await context.securitySolution;
         const entityStoreClient = secSol.getEntityStoreDataClient();
 
-        const securitySolutionIndices = await buildIndexPatterns(
-          getSpaceId(),
-          getAppClient(),
-          getDataViewsService()
-        );
-
-        const privileges = await entityStoreClient.getEntityStoreInitPrivileges(
-          securitySolutionIndices
-        );
-
-        if (!privileges.has_all_required) {
-          const missingPrivilegesMsg = getMissingPrivilegesErrorMessage(
-            getAllMissingPrivileges(privileges)
+        try {
+          const securitySolutionIndices = await buildIndexPatterns(
+            getSpaceId(),
+            getAppClient(),
+            getDataViewsService()
           );
 
-          return siemResponse.error({
-            statusCode: 403,
-            body: `User does not have the required privileges to initialize the entity engine\n${missingPrivilegesMsg}`,
-          });
-        }
+          const privileges = await entityStoreClient.getEntityStoreInitPrivileges(
+            securitySolutionIndices
+          );
 
-        await checkAndInitAssetCriticalityResources(context, logger);
+          if (!privileges.has_all_required) {
+            const missingPrivilegesMsg = getMissingPrivilegesErrorMessage(
+              getAllMissingPrivileges(privileges)
+            );
 
-        try {
+            return siemResponse.error({
+              statusCode: 403,
+              body: `User does not have the required privileges to initialize the entity engine\n${missingPrivilegesMsg}`,
+            });
+          }
+
+          await checkAndInitAssetCriticalityResources(context, logger);
+
           const body: InitEntityEngineResponse = await entityStoreClient.init(
             EntityType[request.params.entityType],
             request.body,
