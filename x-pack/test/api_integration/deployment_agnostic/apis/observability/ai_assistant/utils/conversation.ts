@@ -163,12 +163,6 @@ export function getConversationCreatedEvent(body: Readable | string) {
     (event) => event.type === StreamingChatResponseEventType.ConversationCreate
   ) as ConversationCreateEvent;
 
-  if (!conversationCreatedEvent) {
-    throw new Error(
-      `No conversation created event found: ${JSON.stringify(decodedEvents, null, 2)}`
-    );
-  }
-
   return conversationCreatedEvent;
 }
 
