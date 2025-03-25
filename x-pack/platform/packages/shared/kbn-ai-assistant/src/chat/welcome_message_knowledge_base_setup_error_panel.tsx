@@ -128,7 +128,7 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
                 <EuiLink
                   data-test-subj="observabilityAiAssistantWelcomeMessageTrainedModelsLink"
                   external
-                  href={http?.basePath.prepend('/app/ml/trained_models')}
+                  href={http?.basePath.prepend('/app/management/ml/trained_models')}
                   target="_blank"
                 >
                   {i18n.translate('xpack.aiAssistant.welcomeMessage.trainedModelsLinkLabel', {
