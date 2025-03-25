@@ -9177,20 +9177,6 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
-"@puppeteer/browsers@2.7.0":
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/@puppeteer/browsers/-/browsers-2.7.0.tgz#dad70b30458f4e0855b2f402055f408823cc67c5"
-  integrity sha512-bO61XnTuopsz9kvtfqhVbH6LTM1koxK0IlBR+yuVrM2LB7mk8+5o1w18l5zqd5cs8xlf+ntgambqRqGifMDjog==
-  dependencies:
-    debug "^4.4.0"
-    extract-zip "^2.0.1"
-    progress "^2.0.3"
-    proxy-agent "^6.5.0"
-    semver "^7.6.3"
-    tar-fs "^3.0.6"
-    unbzip2-stream "^1.4.3"
-    yargs "^17.7.2"
-
 "@puppeteer/browsers@2.8.0":
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/@puppeteer/browsers/-/browsers-2.8.0.tgz#9d592933cbefc66c37823770844b8cbac52607dd"
@@ -14124,7 +14110,7 @@ buffer@^4.3.0:
     ieee754 "^1.1.4"
     isarray "^1.0.0"
 
-buffer@^5.2.1, buffer@^5.5.0, buffer@^5.7.1:
+buffer@^5.5.0, buffer@^5.7.1:
   version "5.7.1"
   resolved "https://registry.yarnpkg.com/buffer/-/buffer-5.7.1.tgz#ba62e7c13133053582197160851a8f648e99eed0"
   integrity sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==
@@ -14593,14 +14579,6 @@ chromedriver@^134.0.0:
     proxy-agent "^6.4.0"
     proxy-from-env "^1.1.0"
     tcp-port-used "^1.0.2"
-
-chromium-bidi@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/chromium-bidi/-/chromium-bidi-1.1.0.tgz#45e7d050ef512393424b6faa32a0ba67b2194040"
-  integrity sha512-HislCEczCuamWm3+55Lig9XKmMF13K+BGKum9rwtDAzgUAHT4h5jNwhDmD4U20VoVUG8ujnv9UZ89qiIf5uF8w==
-  dependencies:
-    mitt "3.0.1"
-    zod "3.24.1"
 
 chromium-bidi@2.1.2:
   version "2.1.2"
@@ -16672,11 +16650,6 @@ detective@^5.0.2:
     acorn-node "^1.6.1"
     defined "^1.0.0"
     minimist "^1.1.1"
-
-devtools-protocol@0.0.1380148:
-  version "0.0.1380148"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1380148.tgz#7dcdad06515135b244ff05878ca8019e041c1c55"
-  integrity sha512-1CJABgqLxbYxVI+uJY/UDUHJtJ0KZTSjNYJYKqd9FRoXT33WDakDHNxRapMEgzeJ/C3rcs01+avshMnPmKQbvA==
 
 devtools-protocol@0.0.1413902:
   version "0.0.1413902"
@@ -23403,7 +23376,7 @@ minizlib@^3.0.1:
     minipass "^7.0.4"
     rimraf "^5.0.5"
 
-mitt@3.0.1, mitt@^3.0.1:
+mitt@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/mitt/-/mitt-3.0.1.tgz#ea36cf0cc30403601ae074c8f77b7092cdab36d1"
   integrity sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==
@@ -26028,19 +26001,7 @@ punycode@^2.1.0, punycode@^2.1.1:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
 
-puppeteer-core@24.1.1:
-  version "24.1.1"
-  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-24.1.1.tgz#cbf5a888168559e66319c0418f877a553c8ed2fa"
-  integrity sha512-7FF3gq6bpIsbq3I8mfbodXh3DCzXagoz3l2eGv1cXooYU4g0P4mcHQVHuBD4iSZPXNg8WjzlP5kmRwK9UvwF0A==
-  dependencies:
-    "@puppeteer/browsers" "2.7.0"
-    chromium-bidi "1.1.0"
-    debug "^4.4.0"
-    devtools-protocol "0.0.1380148"
-    typed-query-selector "^2.12.0"
-    ws "^8.18.0"
-
-puppeteer-core@^24.3.0:
+puppeteer-core@24.4.0, puppeteer-core@^24.3.0:
   version "24.4.0"
   resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-24.4.0.tgz#a301c58344fe939b487704593681ea9f913fe6f8"
   integrity sha512-eFw66gCnWo0X8Hyf9KxxJtms7a61NJVMiSaWfItsFPzFBsjsWdmcNlBdsA1WVwln6neoHhsG+uTVesKmTREn/g==
@@ -26052,16 +26013,16 @@ puppeteer-core@^24.3.0:
     typed-query-selector "^2.12.0"
     ws "^8.18.1"
 
-puppeteer@24.1.1:
-  version "24.1.1"
-  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-24.1.1.tgz#dadcfbe05b25a54aee7061325631145db568890b"
-  integrity sha512-fuhceZ5HZuDXVuaMIRxUuDHfCJLmK0pXh8FlzVQ0/+OApStevxZhU5kAVeYFOEqeCF5OoAyZjcWbdQK27xW/9A==
+puppeteer@24.4.0:
+  version "24.4.0"
+  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-24.4.0.tgz#fb45a67e72f4e6e34db8f404ef61cdd42099e6e6"
+  integrity sha512-E4JhJzjS8AAI+6N/b+Utwarhz6zWl3+MR725fal+s3UlOlX2eWdsvYYU+Q5bXMjs9eZEGkNQroLkn7j11s2k1Q==
   dependencies:
-    "@puppeteer/browsers" "2.7.0"
-    chromium-bidi "1.1.0"
+    "@puppeteer/browsers" "2.8.0"
+    chromium-bidi "2.1.2"
     cosmiconfig "^9.0.0"
-    devtools-protocol "0.0.1380148"
-    puppeteer-core "24.1.1"
+    devtools-protocol "0.0.1413902"
+    puppeteer-core "24.4.0"
     typed-query-selector "^2.12.0"
 
 pure-rand@^6.0.0:
@@ -30335,14 +30296,6 @@ unbox-primitive@^1.0.2:
     has-symbols "^1.0.3"
     which-boxed-primitive "^1.0.2"
 
-unbzip2-stream@^1.4.3:
-  version "1.4.3"
-  resolved "https://registry.yarnpkg.com/unbzip2-stream/-/unbzip2-stream-1.4.3.tgz#b0da04c4371311df771cdc215e87f2130991ace7"
-  integrity sha512-mlExGW4w71ebDJviH16lQLtZS32VKqsSfk80GCfUlwT/4/hNRFsoscrF/c++9xinkMzECL1uL9DDwXqFWkruPg==
-  dependencies:
-    buffer "^5.2.1"
-    through "^2.3.8"
-
 unc-path-regex@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/unc-path-regex/-/unc-path-regex-0.1.2.tgz#e73dd3d7b0d7c5ed86fbac6b0ae7d8c6a69d50fa"
@@ -32223,15 +32176,15 @@ zod-to-json-schema@^3.22.3, zod-to-json-schema@^3.22.4, zod-to-json-schema@^3.22
   resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.24.1.tgz#f08c6725091aadabffa820ba8d50c7ab527f227a"
   integrity sha512-3h08nf3Vw3Wl3PK+q3ow/lIil81IT2Oa7YpQyUUDsEWbXveMesdfK1xBd2RhCkynwZndAxixji/7SYJJowr62w==
 
-zod@3.24.1, zod@^3.24.1:
-  version "3.24.1"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-3.24.1.tgz#27445c912738c8ad1e9de1bea0359fa44d9d35ee"
-  integrity sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==
-
 zod@^3.22.3, zod@^3.22.4, zod@^3.23.8:
   version "3.23.8"
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.23.8.tgz#e37b957b5d52079769fb8097099b592f0ef4067d"
   integrity sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==
+
+zod@^3.24.1:
+  version "3.24.1"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-3.24.1.tgz#27445c912738c8ad1e9de1bea0359fa44d9d35ee"
+  integrity sha512-muH7gBL9sI1nciMZV67X5fTKKBLtwpZ5VBp1vsOQzj1MhrBZ4wlVCm3gedKZWLp0Oyel8sIGfeiz54Su+OVT+A==
 
 zustand@^4.4.0:
   version "4.5.5"
