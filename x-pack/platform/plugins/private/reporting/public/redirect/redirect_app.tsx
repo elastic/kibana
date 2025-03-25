@@ -77,6 +77,7 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
     <div
       css={({ euiTheme }: UseEuiTheme) =>
         css({
+          // Create some padding above and below the page so that the errors (if any) display nicely.
           margin: `${euiTheme.size.xxl} auto`,
         })
       }
