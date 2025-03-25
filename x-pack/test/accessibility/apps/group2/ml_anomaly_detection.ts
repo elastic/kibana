@@ -54,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('anomaly detection settings page', async () => {
-          await ml.navigation.navigateToSettings();
+          await ml.navigation.navigateToADSettings();
           await a11y.testAppSnapshot();
         });
       });
@@ -614,7 +614,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('anomaly detection settings page', async () => {
           await ml.navigation.navigateToMl();
-          await ml.navigation.navigateToSettings();
+          await ml.navigation.navigateToADSettings();
           await a11y.testAppSnapshot();
         });
 
@@ -629,7 +629,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('anomaly detection filter list management page', async () => {
-          await ml.navigation.navigateToSettings();
+          await ml.navigation.navigateToADSettings();
           await ml.settings.navigateToFilterListsManagement();
           await a11y.testAppSnapshot();
         });

@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('creates new calendar that applies to all jobs', async () => {
       await ml.testExecution.logTestStep('calendar creation loads the calendar management page');
-      await ml.navigation.navigateToStackManagementMlSection('ad_settings', 'mlPageSettings');
+      await ml.navigation.navigateToADSettings();
       await ml.settings.navigateToCalendarManagement();
 
       await ml.testExecution.logTestStep('calendar creation loads the new calendar edit page');
@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('creates new calendar that applies to specific jobs', async () => {
       await ml.testExecution.logTestStep('calendar creation loads the calendar management page');
-      await ml.navigation.navigateToStackManagementMlSection('ad_settings', 'mlPageSettings');
+      await ml.navigation.navigateToADSettings();
       await ml.settings.navigateToCalendarManagement();
 
       await ml.testExecution.logTestStep('calendar creation loads the new calendar edit page');
@@ -107,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
       await createSingleGroupJobs();
 
       await ml.testExecution.logTestStep('calendar creation loads the calendar management page');
-      await ml.navigation.navigateToStackManagementMlSection('ad_settings', 'mlPageSettings');
+      await ml.navigation.navigateToADSettings();
       await ml.settings.navigateToCalendarManagement();
 
       await ml.testExecution.logTestStep('calendar creation loads the new calendar edit page');

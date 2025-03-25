@@ -310,21 +310,12 @@ export function MachineLearningNavigationProvider({
       await this.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list', spaceId);
     },
 
-    async navigateToSettings(spaceId?: string) {
+    async navigateToADSettings(spaceId?: string) {
       await this.navigateToJobManagement(spaceId);
       await testSubjects.existOrFail('mlAnomalyDetectionSettingsButton');
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.click('mlAnomalyDetectionSettingsButton');
         await testSubjects.existOrFail('mlPageSettings');
-      });
-    },
-
-    async navigateToStackManagementInsuficientLicensePage() {
-      // clicks the jobsListLink and loads the jobs list page
-      await testSubjects.click('jobsListLink');
-      await retry.tryForTime(60 * 1000, async () => {
-        // verify that the overall page is present
-        await testSubjects.existOrFail('mlPageInsufficientLicense');
       });
     },
 

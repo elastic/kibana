@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('updates jobs, groups and events', async () => {
       await ml.testExecution.logTestStep('calendar edit loads the calendar management page');
-      await ml.navigation.navigateToStackManagementMlSection('ad_settings', 'mlPageSettings');
+      await ml.navigation.navigateToADSettings();
       await ml.settings.navigateToCalendarManagement();
 
       await ml.testExecution.logTestStep('calendar edit opens existing calendar');

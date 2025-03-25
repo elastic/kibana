@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobManagement.assertCreateNewJobButtonExists();
 
       await ml.testExecution.logTestStep('loads the settings page');
-      await ml.navigation.navigateToSettings();
+      await ml.navigation.navigateToADSettings();
       await ml.settings.assertManageCalendarsLinkExists();
       await ml.settings.assertCreateCalendarLinkExists();
       await ml.settings.assertManageFilterListsLinkExists();

@@ -407,7 +407,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
           it('should display elements on Settings home page correctly', async () => {
             await ml.testExecution.logTestStep('should load the settings page');
-            await ml.navigation.navigateToSettings();
+            await ml.navigation.navigateToADSettings();
             await ml.testExecution.logTestStep(
               'should display enabled calendar management and disabled calendar create links'
             );

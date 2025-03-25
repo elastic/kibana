@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import moment from 'moment';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const timepickerFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
@@ -32,6 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
+      await ml.api.cleanMlIndices();
+      await ml.testResources.cleanMLSavedObjects();
 
       // Prepare jobs to generate notifications
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
@@ -103,9 +104,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.notifications.table.waitForTableToLoad();
 
       await PageObjects.timePicker.pauseAutoRefresh();
-      const fromTime = moment().subtract(1, 'week').format(timepickerFormat);
-      const toTime = moment().format(timepickerFormat);
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      // const fromTime = moment().subtract(1, 'week').format(timepickerFormat);
+      // const toTime = moment().format(timepickerFormat);
+      // await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
       await ml.notifications.table.waitForTableToLoad();
 

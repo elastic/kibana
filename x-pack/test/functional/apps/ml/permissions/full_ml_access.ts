@@ -405,7 +405,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
           it('should display elements on Settings home page correctly', async () => {
             await ml.testExecution.logTestStep('should load the settings page');
-            await ml.navigation.navigateToSettings();
+            await ml.navigation.navigateToADSettings();
             await ml.testExecution.logTestStep('should display enabled calendar controls');
             await ml.settings.assertManageCalendarsLinkExists();
             await ml.settings.assertManageCalendarsLinkEnabled(true);
@@ -445,7 +445,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
           it('should display elements on Filter Lists management page correctly', async () => {
             await ml.testExecution.logTestStep('should load the filter list management page');
-            await ml.navigation.navigateToSettings();
+            await ml.navigation.navigateToADSettings();
             await ml.settings.navigateToFilterListsManagement();
             await ml.testExecution.logTestStep('should display enabled create filter list button');
             await ml.settingsFilterList.assertCreateFilterListButtonEnabled(true);

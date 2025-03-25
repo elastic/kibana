@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('deletes multiple calendars', async () => {
       await ml.testExecution.logTestStep('calendar delete loads the calendar list management page');
-      await ml.navigation.navigateToStackManagementMlSection('ad_settings', 'mlPageSettings');
+      await ml.navigation.navigateToADSettings();
       await ml.settings.navigateToCalendarManagement();
 
       await ml.testExecution.logTestStep('calendar delete selects multiple calendars for deletion');
