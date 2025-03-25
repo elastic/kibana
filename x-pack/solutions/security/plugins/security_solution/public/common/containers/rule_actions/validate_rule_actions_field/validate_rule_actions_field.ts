@@ -13,14 +13,13 @@ import type {
   ValidationResponsePromise,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type {
-  ActionTypeRegistryContract,
   RuleAction,
+  ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { validateActionFilterQuery } from '@kbn/triggers-actions-ui-plugin/public';
-import type { RuleActionsFormData } from '../../../../../detection_engine/rule_management_ui/components/rules_table/bulk_actions/forms/rule_actions_form';
-import type { ActionsStepRule } from '../../../../../detection_engine/common/types';
-import type { ERROR_CODE, ValidationFunc } from '../../../../../shared_imports';
-import { getActionTypeName, validateActionParams, validateMustache } from './utils';
+
+import type { FormData, ValidationFunc, ERROR_CODE } from '../../../../shared_imports';
+import { getActionTypeName, validateMustache, validateActionParams } from './utils';
 
 export const DEFAULT_VALIDATION_TIMEOUT = 100;
 
@@ -37,8 +36,10 @@ export const validateSingleAction = async (
 
 export const validateRuleActionsField =
   (actionTypeRegistry: ActionTypeRegistryContract) =>
-  async (...data: Parameters<ValidationFunc>): ValidationResponsePromise<ERROR_CODE> => {
-    const [{ value, path }] = data as [{ value: RuleAction[]; path: string }];
+  async (
+    ...data: Parameters<ValidationFunc<FormData, string, RuleAction[]>>
+  ): ValidationResponsePromise<ERROR_CODE> => {
+    const [{ value, path }] = data;
 
     const errors = [];
     for (const actionItem of value) {
@@ -75,11 +76,11 @@ export const validateRuleActionsField =
  * @param defaultValidationTimeout
  */
 export const debouncedValidateRuleActionsField =
-  (
+  <I extends FormData>(
     actionTypeRegistry: ActionTypeRegistryContract,
     defaultValidationTimeout = DEFAULT_VALIDATION_TIMEOUT
   ) =>
-  (data: ValidationFuncArg<ActionsStepRule | RuleActionsFormData>): ValidationResponsePromise => {
+  (data: ValidationFuncArg<I, RuleAction[]>): ValidationResponsePromise => {
     let isCanceled = false;
     const promise: ValidationCancelablePromise = new Promise((resolve) => {
       setTimeout(() => {

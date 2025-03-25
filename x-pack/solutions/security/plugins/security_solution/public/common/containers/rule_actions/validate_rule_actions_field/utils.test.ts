@@ -8,7 +8,7 @@
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { getActionTypeName, validateMustache, validateActionParams } from './utils';
 
-describe('stepRuleActions utils', () => {
+describe('RuleActions utils', () => {
   describe('getActionTypeName', () => {
     it('should return capitalized action type name', () => {
       expect(getActionTypeName('.slack')).toEqual('Slack');
