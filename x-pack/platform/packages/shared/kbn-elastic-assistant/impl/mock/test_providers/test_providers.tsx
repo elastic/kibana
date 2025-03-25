@@ -92,6 +92,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
             }}
             userProfileService={jest.fn() as unknown as UserProfileService}
             chrome={chrome}
+            spaceId="default"
           >
             {children}
           </AssistantProvider>

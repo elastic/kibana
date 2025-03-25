@@ -19,7 +19,11 @@ import {
   tlsRuleParamsSchema,
   type TLSRuleParams,
 } from '@kbn/response-ops-rule-params/synthetics_tls';
-import { getAlertDetailsUrl, observabilityPaths } from '@kbn/observability-plugin/common';
+import {
+  getAlertDetailsUrl,
+  observabilityFeatureId,
+  observabilityPaths,
+} from '@kbn/observability-plugin/common';
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
@@ -52,6 +56,7 @@ export const registerSyntheticsTLSCheckRule = (
     id: SYNTHETICS_ALERT_RULE_TYPES.TLS,
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'uptime',
+    solution: observabilityFeatureId,
     name: TLS_CERTIFICATE.name,
     validate: {
       params: tlsRuleParamsSchema,

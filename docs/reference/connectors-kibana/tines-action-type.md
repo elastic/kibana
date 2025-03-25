@@ -14,7 +14,7 @@ The Tines connector uses Tines’s [Webhook actions](https://www.tines.com/docs/
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
 
-:::{image} ../../images/tines-connector.png
+:::{image} ../images/tines-connector.png
 :alt: Tines connector
 :class: screenshot
 :::
@@ -38,7 +38,7 @@ API Token
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../../images/tines-params-test.png
+:::{image} ../images/tines-params-test.png
 :alt: Tines params test
 :class: screenshot
 :::
@@ -52,7 +52,7 @@ It is possible that requests to the Tines API to get the stories and webhooks fo
 
 When the webhook URL is defined, the connector will use it directly when an action runs, and the story and webhook selectors will be disabled and ignored. To re-enable the story and webhook selectors, remove the webhook URL value.
 
-:::{image} ../../images/tines-webhook-url-fallback.png
+:::{image} ../images/tines-webhook-url-fallback.png
 :alt: Tines Webhook URL fallback
 :class: screenshot
 :::
@@ -62,7 +62,7 @@ When the webhook URL is defined, the connector will use it directly when an acti
 
 In order to simplify the integration with Elastic, Tines offers a set of pre-defined Elastic stories in the Story library. They can be found by searching for "Elastic" in the [Tines Story library](https://www.tines.com/story-library?s=elastic):
 
-:::{image} ../../images/tines_elastic_stories.png
+:::{image} ../images/tines_elastic_stories.png
 :alt: Tines Elastic stories
 :class: screenshot
 :::

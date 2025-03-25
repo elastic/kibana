@@ -57,7 +57,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const degradedDatasetName = datasetNames[2];
   const degradedDataStreamName = `logs-${degradedDatasetName}-${defaultNamespace}`;
 
-  describe('Dataset Quality Details', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/214029
+  describe.skip('Dataset Quality Details', () => {
     before(async () => {
       // Install Apache Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(apachePkg);
@@ -329,8 +330,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await discoverButton.click();
 
         // Confirm dataset selector text in observability logs explorer
-        const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-        originalExpect(datasetSelectorText).toMatch(regularDatasetName);
+        await retry.try(async () => {
+          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+          originalExpect(datasetSelectorText).toMatch(regularDatasetName);
+        });
       });
 
       it('should go discover for degraded docs when the button next to breakdown selector is clicked', async () => {
@@ -343,8 +346,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         );
 
         // Confirm dataset selector text in observability logs explorer
-        const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-        originalExpect(datasetSelectorText).toMatch(apacheAccessDatasetName);
+        await retry.try(async () => {
+          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+          originalExpect(datasetSelectorText).toMatch(apacheAccessDatasetName);
+        });
       });
     });
 

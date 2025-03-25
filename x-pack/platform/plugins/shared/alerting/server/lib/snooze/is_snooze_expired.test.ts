@@ -8,7 +8,7 @@
 import sinon from 'sinon';
 import { Frequency } from '@kbn/rrule';
 import { isSnoozeExpired } from './is_snooze_expired';
-import { RRuleRecord } from '../../types';
+import type { RRuleRecord } from '../../types';
 
 const DATE_9999 = '9999-12-31T12:34:56.789Z';
 const DATE_1970 = '1970-01-01T00:00:00.000Z';

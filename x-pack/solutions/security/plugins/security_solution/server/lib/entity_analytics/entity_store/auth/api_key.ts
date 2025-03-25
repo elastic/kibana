@@ -15,7 +15,7 @@ import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-obje
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
 import type { EntityDiscoveryAPIKey } from '@kbn/entityManager-plugin/server/lib/auth/api_key/api_key';
 import { getSpaceAwareEntityDiscoverySavedObjectId } from '@kbn/entityManager-plugin/server/lib/auth/api_key/saved_object';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers, SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 export interface ApiKeyManager {
   generate: () => Promise<void>;
@@ -56,6 +56,7 @@ export const getApiKeyManager = ({
       );
 
       const soClient = core.savedObjects.getScopedClient(request, {
+        excludedExtensions: [SECURITY_EXTENSION_ID],
         includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
       });
 

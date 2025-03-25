@@ -64,6 +64,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
       }}
       userProfileService={mockUserProfileService}
       chrome={chrome}
+      spaceId="default"
     >
       {children}
     </AssistantProvider>

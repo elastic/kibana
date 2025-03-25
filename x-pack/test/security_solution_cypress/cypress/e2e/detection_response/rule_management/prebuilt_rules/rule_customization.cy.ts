@@ -65,15 +65,6 @@ describe(
   'Detection rules, Prebuilt Rules Customization workflow',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'prebuiltRulesCustomizationEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
 
   () => {

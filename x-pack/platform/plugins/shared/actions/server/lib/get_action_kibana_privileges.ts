@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ActionsClientContext } from '../actions_client';
-import { ActionExecutionSourceType } from './action_execution_source';
-import { ExecuteOptions } from './action_executor';
+import type { ActionsClientContext } from '../actions_client';
+import type { ActionExecutionSourceType } from './action_execution_source';
+import type { ExecuteOptions } from './action_executor';
 
 export function getActionKibanaPrivileges(
   context: ActionsClientContext,

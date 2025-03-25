@@ -14,7 +14,7 @@ import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
+import type { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
 
 const rulesClient = rulesClientMock.create();
 

@@ -7,15 +7,15 @@
 
 import Boom from '@hapi/boom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { RawRule } from '../../../../types';
+import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RulesClientContext } from '../../../../rules_client/types';
+import type { RulesClientContext } from '../../../../rules_client/types';
 import { untrackRuleAlerts, migrateLegacyActions } from '../../../../rules_client/lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { DeleteRuleParams } from './types';
+import type { DeleteRuleParams } from './types';
 import { deleteRuleParamsSchema } from './schemas';
 import { deleteRuleSo, getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
 

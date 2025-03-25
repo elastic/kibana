@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ConnectorExecuteResponseV1 } from '../../../../../../common/routes/connector/response';
-import { ActionTypeExecutorResult } from '../../../../../types';
+import type { ConnectorExecuteResponseV1 } from '../../../../../../common/routes/connector/response';
+import type { ActionTypeExecutorResult } from '../../../../../types';
 
 export const transformExecuteConnectorResponse = ({
   actionId,

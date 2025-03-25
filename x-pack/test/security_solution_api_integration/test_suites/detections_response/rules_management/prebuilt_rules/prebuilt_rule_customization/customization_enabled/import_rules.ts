@@ -271,7 +271,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(importedRule).toMatchObject({
           rule_id: rule.rule_id,
           version: 9999,
-          rule_source: { type: 'external', is_customized: true },
+          rule_source: { type: 'external', is_customized: false },
           immutable: true,
         });
       });

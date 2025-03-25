@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { act, waitFor } from '@testing-library/react';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+import { act, waitFor, screen } from '@testing-library/react';
+
+import { renderWithTestingProviders } from '../../../common/mock';
 import { EditAssigneesSelectable } from './edit_assignees_selectable';
 import { basicCase } from '../../../containers/mock';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
@@ -19,7 +19,6 @@ jest.mock('../../../containers/user_profiles/api');
 
 describe('EditAssigneesSelectable', () => {
   let user: UserEvent;
-  let appMock: AppMockRenderer;
 
   /**
    * Case has the following tags: Damaged Raccoon
@@ -62,46 +61,46 @@ describe('EditAssigneesSelectable', () => {
     user = userEvent.setup({
       advanceTimers: jest.advanceTimersByTime,
     });
-    appMock = createAppMockRenderer();
+
     jest.clearAllMocks();
   });
 
   it('renders correctly', async () => {
-    const result = appMock.render(<EditAssigneesSelectable {...props} />);
+    renderWithTestingProviders(<EditAssigneesSelectable {...props} />);
 
     await waitFor(() => {
-      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    expect(result.getByPlaceholderText('Find a user')).toBeInTheDocument();
-    expect(result.getByText('Selected: 1')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Find a user')).toBeInTheDocument();
+    expect(screen.getByText('Selected: 1')).toBeInTheDocument();
 
     for (const userProfile of userProfiles) {
       // @ts-ignore: full name exists
-      expect(result.getByText(userProfile.user.full_name)).toBeInTheDocument();
+      expect(screen.getByText(userProfile.user.full_name)).toBeInTheDocument();
     }
   });
 
   it('renders the selected assignees label correctly', async () => {
-    const result = appMock.render(<EditAssigneesSelectable {...propsMultipleCases} />);
+    renderWithTestingProviders(<EditAssigneesSelectable {...propsMultipleCases} />);
 
     await waitFor(() => {
-      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    expect(result.getByText('Selected: 2')).toBeInTheDocument();
+    expect(screen.getByText('Selected: 2')).toBeInTheDocument();
 
     for (const userProfile of userProfilesMap.values()) {
       // @ts-ignore: full name exists
-      expect(result.getByText(userProfile.user.full_name)).toBeInTheDocument();
+      expect(screen.getByText(userProfile.user.full_name)).toBeInTheDocument();
     }
   });
 
   it('renders the assignees icons correctly', async () => {
-    const result = appMock.render(<EditAssigneesSelectable {...propsMultipleCases} />);
+    renderWithTestingProviders(<EditAssigneesSelectable {...propsMultipleCases} />);
 
     await waitFor(() => {
-      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
     for (const [uid, icon] of [
@@ -110,20 +109,20 @@ describe('EditAssigneesSelectable', () => {
       [userProfiles[2].uid, 'empty'],
     ]) {
       const iconDataTestSubj = `cases-actions-assignees-edit-selectable-assignee-${uid}-icon-${icon}`;
-      expect(result.getByTestId(iconDataTestSubj)).toBeInTheDocument();
+      expect(screen.getByTestId(iconDataTestSubj)).toBeInTheDocument();
     }
   });
 
   it('selects and unselects correctly assignees with one case', async () => {
-    const result = appMock.render(<EditAssigneesSelectable {...props} />);
+    renderWithTestingProviders(<EditAssigneesSelectable {...props} />);
 
     await waitFor(() => {
-      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
     for (const userProfile of userProfiles) {
       // @ts-ignore: full name exists
-      await user.click(result.getByText(userProfile.user.full_name));
+      await user.click(screen.getByText(userProfile.user.full_name));
     }
 
     expect(props.onChangeAssignees).toBeCalledTimes(3);
@@ -137,15 +136,15 @@ describe('EditAssigneesSelectable', () => {
   });
 
   it('selects and unselects correctly assignees with multiple cases', async () => {
-    const result = appMock.render(<EditAssigneesSelectable {...propsMultipleCases} />);
+    renderWithTestingProviders(<EditAssigneesSelectable {...propsMultipleCases} />);
 
     await waitFor(() => {
-      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
     for (const userProfile of userProfiles) {
       // @ts-ignore: full name exists
-      await user.click(result.getByText(userProfile.user.full_name));
+      await user.click(screen.getByText(userProfile.user.full_name));
     }
 
     expect(propsMultipleCases.onChangeAssignees).toBeCalledTimes(3);
@@ -159,15 +158,15 @@ describe('EditAssigneesSelectable', () => {
   });
 
   it('renders the icons correctly after selecting and deselecting assignees', async () => {
-    const result = appMock.render(<EditAssigneesSelectable {...propsMultipleCases} />);
+    renderWithTestingProviders(<EditAssigneesSelectable {...propsMultipleCases} />);
 
     await waitFor(() => {
-      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
     for (const userProfile of userProfiles) {
       // @ts-ignore: full name exists
-      await user.click(result.getByText(userProfile.user.full_name));
+      await user.click(screen.getByText(userProfile.user.full_name));
     }
 
     for (const [uid, icon] of [
@@ -176,7 +175,7 @@ describe('EditAssigneesSelectable', () => {
       [userProfiles[2].uid, 'check'],
     ]) {
       const iconDataTestSubj = `cases-actions-assignees-edit-selectable-assignee-${uid}-icon-${icon}`;
-      expect(result.getByTestId(iconDataTestSubj)).toBeInTheDocument();
+      expect(screen.getByTestId(iconDataTestSubj)).toBeInTheDocument();
     }
 
     expect(propsMultipleCases.onChangeAssignees).toBeCalledTimes(3);
@@ -194,13 +193,13 @@ describe('EditAssigneesSelectable', () => {
     const reversedUserProfiles = [...userProfiles].reverse();
     spyOnBulkGetUserProfiles.mockResolvedValueOnce(reversedUserProfiles);
 
-    const result = appMock.render(<EditAssigneesSelectable {...props} />);
+    renderWithTestingProviders(<EditAssigneesSelectable {...props} />);
 
     await waitFor(() => {
-      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    const allUsersInView = result.getAllByRole('option');
+    const allUsersInView = screen.getAllByRole('option');
     expect(allUsersInView.length).toBe(3);
 
     expect(allUsersInView[0].textContent?.includes('Damaged Raccoon')).toBe(true);
@@ -213,23 +212,23 @@ describe('EditAssigneesSelectable', () => {
     const searchedUserDataTestSubj =
       'cases-actions-assignees-edit-selectable-assignee-u_IbBVXpDtrjOByJ-syBdr425fLGqwpzY_xdQqCFAFXLI_0';
 
-    const result = appMock.render(<EditAssigneesSelectable {...props} />);
+    renderWithTestingProviders(<EditAssigneesSelectable {...props} />);
 
     await waitFor(() => {
-      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    await user.type(result.getByPlaceholderText('Find a user'), 's');
+    await user.type(screen.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
       jest.advanceTimersByTime(1000);
     });
 
     await waitFor(() => {
-      expect(result.getByTestId(searchedUserDataTestSubj));
+      expect(screen.getByTestId(searchedUserDataTestSubj));
     });
 
-    const searchResults = result.getAllByRole('option');
+    const searchResults = screen.getAllByRole('option');
 
     expect(searchResults.length).toBe(2);
     expect(searchResults[0].textContent?.includes('Physical Dinosaur')).toBe(true);
@@ -241,50 +240,50 @@ describe('EditAssigneesSelectable', () => {
     const searchedUserDataTestSubj =
       'cases-actions-assignees-edit-selectable-assignee-u_IbBVXpDtrjOByJ-syBdr425fLGqwpzY_xdQqCFAFXLI_0';
 
-    const result = appMock.render(<EditAssigneesSelectable {...props} />);
+    renderWithTestingProviders(<EditAssigneesSelectable {...props} />);
 
     await waitFor(() => {
-      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    await user.type(result.getByPlaceholderText('Find a user'), 's');
+    await user.type(screen.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
       jest.advanceTimersByTime(1000);
     });
 
     await waitFor(() => {
-      expect(result.getByTestId(searchedUserDataTestSubj));
+      expect(screen.getByTestId(searchedUserDataTestSubj));
     });
 
     // selects
-    await user.click(result.getByTestId(searchedUserDataTestSubj));
+    await user.click(screen.getByTestId(searchedUserDataTestSubj));
     // deselect
-    await user.click(result.getByTestId(searchedUserDataTestSubj));
+    await user.click(screen.getByTestId(searchedUserDataTestSubj));
     // clear search results
-    await user.click(result.getByTestId('clearSearchButton'));
+    await user.click(screen.getByTestId('clearSearchButton'));
 
     await waitFor(() => {
-      expect(result.getByText('Damaged Raccoon'));
+      expect(screen.getByText('Damaged Raccoon'));
     });
 
-    expect(result.queryByTestId(searchedUserDataTestSubj)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(searchedUserDataTestSubj)).not.toBeInTheDocument();
   });
 
   it('does not show the same user in search results if it is already in the initial user profile mapping', async () => {
-    const result = appMock.render(<EditAssigneesSelectable {...props} />);
+    renderWithTestingProviders(<EditAssigneesSelectable {...props} />);
 
     await waitFor(() => {
-      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    await user.type(result.getByPlaceholderText('Find a user'), 's');
+    await user.type(screen.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
       jest.advanceTimersByTime(1000);
     });
 
-    const searchResults = result.getAllByTestId(
+    const searchResults = screen.getAllByTestId(
       // Physical Dinosaur
       'cases-actions-assignees-edit-selectable-assignee-u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0-icon-empty'
     );
@@ -297,23 +296,23 @@ describe('EditAssigneesSelectable', () => {
     const searchedUserDataTestSubj =
       'cases-actions-assignees-edit-selectable-assignee-u_IbBVXpDtrjOByJ-syBdr425fLGqwpzY_xdQqCFAFXLI_0';
 
-    const result = appMock.render(<EditAssigneesSelectable {...props} />);
+    renderWithTestingProviders(<EditAssigneesSelectable {...props} />);
 
     await waitFor(() => {
-      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    await user.type(result.getByPlaceholderText('Find a user'), 's');
+    await user.type(screen.getByPlaceholderText('Find a user'), 's');
 
     act(() => {
       jest.advanceTimersByTime(1000);
     });
 
     await waitFor(() => {
-      expect(result.getByTestId(searchedUserDataTestSubj));
+      expect(screen.getByTestId(searchedUserDataTestSubj));
     });
 
-    await user.click(result.getByTestId(searchedUserDataTestSubj));
+    await user.click(screen.getByTestId(searchedUserDataTestSubj));
     expect(props.onChangeAssignees).toBeCalledWith({
       selectedItems: [
         'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
@@ -324,20 +323,20 @@ describe('EditAssigneesSelectable', () => {
   });
 
   it('shows deselected users from the initial user profile mapping', async () => {
-    const result = appMock.render(<EditAssigneesSelectable {...props} />);
+    renderWithTestingProviders(<EditAssigneesSelectable {...props} />);
 
     await waitFor(() => {
-      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
     // @ts-ignore: full name exists
-    await user.click(result.getByText(userProfiles[0].user.full_name));
+    await user.click(screen.getByText(userProfiles[0].user.full_name));
 
     // @ts-ignore: full name exists
-    expect(result.getByText(userProfiles[0].user.full_name)).toBeInTheDocument();
+    expect(screen.getByText(userProfiles[0].user.full_name)).toBeInTheDocument();
     // ensures that the icon is set to empty
     expect(
-      result.getByTestId(
+      screen.getByTestId(
         'cases-actions-assignees-edit-selectable-assignee-u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0-icon-empty'
       )
     ).toBeInTheDocument();
@@ -353,10 +352,10 @@ describe('EditAssigneesSelectable', () => {
     const searchedUserDataTestSubj =
       'cases-actions-assignees-edit-selectable-assignee-u_IbBVXpDtrjOByJ-syBdr425fLGqwpzY_xdQqCFAFXLI_0';
 
-    const result = appMock.render(<EditAssigneesSelectable {...props} />);
+    renderWithTestingProviders(<EditAssigneesSelectable {...props} />);
 
     await waitFor(() => {
-      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
     act(() => {
@@ -364,20 +363,20 @@ describe('EditAssigneesSelectable', () => {
     });
 
     await waitFor(() => {
-      expect(result.getByText('Damaged Raccoon'));
+      expect(screen.getByText('Damaged Raccoon'));
     });
 
-    expect(result.queryByTestId(searchedUserDataTestSubj)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(searchedUserDataTestSubj)).not.toBeInTheDocument();
   });
 
   it('shows the no matching component', async () => {
-    const result = appMock.render(<EditAssigneesSelectable {...props} />);
+    renderWithTestingProviders(<EditAssigneesSelectable {...props} />);
 
     await waitFor(() => {
-      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    await user.type(result.getByPlaceholderText('Find a user'), 'not-exists');
+    await user.type(screen.getByPlaceholderText('Find a user'), 'not-exists');
 
     act(() => {
       jest.advanceTimersByTime(1000);
@@ -385,42 +384,42 @@ describe('EditAssigneesSelectable', () => {
 
     await waitFor(() => {
       expect(
-        result.getAllByTestId('case-user-profiles-assignees-popover-no-matches')[0]
+        screen.getAllByTestId('case-user-profiles-assignees-popover-no-matches')[0]
       ).toBeInTheDocument();
     });
   });
 
   it('shows unknown users', async () => {
     const selectedCases = [{ ...basicCase, assignees: [{ uid: '123' }, { uid: '456' }] }];
-    const result = appMock.render(
+    renderWithTestingProviders(
       <EditAssigneesSelectable {...props} selectedCases={selectedCases} />
     );
 
     await waitFor(() => {
-      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
     await waitFor(() => {
-      const unknownUsers = result.getAllByText('Unknown');
+      const unknownUsers = screen.getAllByText('Unknown');
       expect(unknownUsers.length).toBe(2);
     });
   });
 
   it('selects unknown users', async () => {
     const selectedCases = [{ ...basicCase, assignees: [{ uid: '123' }] }, basicCase];
-    const result = appMock.render(
+    renderWithTestingProviders(
       <EditAssigneesSelectable {...props} selectedCases={selectedCases} />
     );
 
     await waitFor(() => {
-      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
     await waitFor(() => {
-      expect(result.getByText('Unknown')).toBeInTheDocument();
+      expect(screen.getByText('Unknown')).toBeInTheDocument();
     });
 
-    await user.click(result.getByText('Unknown'));
+    await user.click(screen.getByText('Unknown'));
 
     expect(props.onChangeAssignees).toBeCalledWith({
       selectedItems: ['123'],
@@ -430,15 +429,15 @@ describe('EditAssigneesSelectable', () => {
 
   it('deselects unknown users', async () => {
     const selectedCases = [{ ...basicCase, assignees: [{ uid: '123' }] }];
-    const result = appMock.render(
+    renderWithTestingProviders(
       <EditAssigneesSelectable {...props} selectedCases={selectedCases} />
     );
 
     await waitFor(() => {
-      expect(result.getByText('Unknown')).toBeInTheDocument();
+      expect(screen.getByText('Unknown')).toBeInTheDocument();
     });
 
-    await user.click(result.getByText('Unknown'));
+    await user.click(screen.getByText('Unknown'));
 
     expect(props.onChangeAssignees).toBeCalledWith({
       selectedItems: [],
@@ -447,14 +446,14 @@ describe('EditAssigneesSelectable', () => {
   });
 
   it('remove all assignees', async () => {
-    const result = appMock.render(<EditAssigneesSelectable {...propsMultipleCases} />);
+    renderWithTestingProviders(<EditAssigneesSelectable {...propsMultipleCases} />);
 
     await waitFor(() => {
-      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    expect(result.getByRole('button', { name: 'Remove all assignees' })).toBeInTheDocument();
-    await user.click(result.getByRole('button', { name: 'Remove all assignees' }));
+    expect(screen.getByRole('button', { name: 'Remove all assignees' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Remove all assignees' }));
 
     expect(propsMultipleCases.onChangeAssignees).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeAssignees).toBeCalledWith({
@@ -468,15 +467,15 @@ describe('EditAssigneesSelectable', () => {
 
   it('renders even with no assignee set yet', async () => {
     const selectedCases = [{ ...basicCase, assignees: [] }];
-    const result = appMock.render(
+    renderWithTestingProviders(
       <EditAssigneesSelectable {...props} selectedCases={selectedCases} />
     );
 
     await waitFor(() => {
-      expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
+      expect(screen.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    expect(result.getByPlaceholderText('Find a user')).toBeInTheDocument();
-    expect(result.getByText('Selected: 0')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Find a user')).toBeInTheDocument();
+    expect(screen.getByText('Selected: 0')).toBeInTheDocument();
   });
 });

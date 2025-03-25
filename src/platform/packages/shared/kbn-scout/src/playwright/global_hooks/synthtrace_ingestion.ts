@@ -65,6 +65,9 @@ const getSynthtraceClient = (
   }
 };
 
+/**
+ * @deprecated Use `globalSetupHook` and synthtrace fixtures instead
+ */
 export async function ingestSynthtraceDataHook(config: FullConfig, data: SynthtraceIngestionData) {
   const log = getLogger();
 

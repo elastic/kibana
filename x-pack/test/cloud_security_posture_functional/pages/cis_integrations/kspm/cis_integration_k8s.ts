@@ -7,17 +7,23 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { policiesSavedObjects } from '../constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
   const { getPageObjects, getService } = providerContext;
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
   const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
   const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
 
   describe('Test adding Cloud Security Posture Integrations KSPM K8S', function () {
     this.tags(['cloud_security_posture_cis_integration_kspm_k8s']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
+
+    before(async () => {
+      await kibanaServer.savedObjects.clean({ types: policiesSavedObjects });
+    });
 
     beforeEach(async () => {
       cisIntegration = pageObjects.cisAddIntegration;

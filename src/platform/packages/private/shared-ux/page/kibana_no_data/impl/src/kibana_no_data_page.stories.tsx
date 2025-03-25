@@ -29,30 +29,34 @@ export default {
 
 const mock = new KibanaNoDataPageStorybookMock();
 
-export const Kibana = (params: KibanaNoDataPageStorybookParams) => {
-  return (
-    <KibanaNoDataPageProvider {...mock.getServices(params)}>
-      <Component {...mock.getProps(params)} />
-    </KibanaNoDataPageProvider>
-  );
+export const Kibana = {
+  render: (params: KibanaNoDataPageStorybookParams) => {
+    return (
+      <KibanaNoDataPageProvider {...mock.getServices(params)}>
+        <Component {...mock.getProps(params)} />
+      </KibanaNoDataPageProvider>
+    );
+  },
+
+  argTypes: mock.getArgumentTypes(),
 };
 
-Kibana.argTypes = mock.getArgumentTypes();
+export const LoadingState = {
+  render: (params: KibanaNoDataPageStorybookParams) => {
+    // Simulate loading with a Promise that doesn't resolve.
+    const dataCheck = () => new Promise<boolean>((resolve, reject) => {});
 
-export const LoadingState = (params: KibanaNoDataPageStorybookParams) => {
-  // Simulate loading with a Promise that doesn't resolve.
-  const dataCheck = () => new Promise<boolean>((resolve, reject) => {});
+    const services = {
+      ...mock.getServices(params),
+      hasESData: dataCheck,
+      hasUserDataView: dataCheck,
+      hasDataView: dataCheck,
+    };
 
-  const services = {
-    ...mock.getServices(params),
-    hasESData: dataCheck,
-    hasUserDataView: dataCheck,
-    hasDataView: dataCheck,
-  };
-
-  return (
-    <KibanaNoDataPageProvider {...services}>
-      <Component {...mock.getProps(params)} />
-    </KibanaNoDataPageProvider>
-  );
+    return (
+      <KibanaNoDataPageProvider {...services}>
+        <Component {...mock.getProps(params)} />
+      </KibanaNoDataPageProvider>
+    );
+  },
 };

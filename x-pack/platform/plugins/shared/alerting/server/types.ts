@@ -11,11 +11,11 @@ import type {
   SavedObjectReference,
   IUiSettingsClient,
 } from '@kbn/core/server';
-import { z } from '@kbn/zod';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import { LicenseType } from '@kbn/licensing-plugin/server';
-import {
+import type { z } from '@kbn/zod';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type {
   IScopedClusterClient,
   SavedObjectAttributes,
   SavedObjectsClientContract,
@@ -23,22 +23,22 @@ import {
 } from '@kbn/core/server';
 import type { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { SharePluginStart } from '@kbn/share-plugin/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
-import { Alert } from '@kbn/alerts-as-data-utils';
-import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
-import { AlertsHealth } from '@kbn/alerting-types';
-import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
-import { AlertingServerSetup, AlertingServerStart } from './plugin';
-import { RulesClient } from './rules_client';
-import {
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
+import type { AlertsHealth } from '@kbn/alerting-types';
+import type { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
+import type { AlertingServerSetup, AlertingServerStart } from './plugin';
+import type { RulesClient } from './rules_client';
+import type {
   RulesSettingsClient,
   RulesSettingsFlappingClient,
   RulesSettingsQueryDelayClient,
 } from './rules_settings';
-import { MaintenanceWindowClient } from './maintenance_window_client';
+import type { MaintenanceWindowClient } from './maintenance_window_client';
 export * from '../common';
-import {
+import type {
   Rule,
   RuleTypeParams,
   RuleTypeState,
@@ -51,10 +51,10 @@ import {
   SanitizedRule,
   RuleAlertData,
 } from '../common';
-import { PublicAlertFactory } from './alert/create_alert_factory';
-import { RulesSettingsFlappingProperties } from '../common/rules_settings';
-import { PublicAlertsClient } from './alerts_client/types';
-import { GetTimeRangeResult } from './lib/get_time_range';
+import type { PublicAlertFactory } from './alert/create_alert_factory';
+import type { RulesSettingsFlappingProperties } from '../common/rules_settings';
+import type { PublicAlertsClient } from './alerts_client/types';
+import type { GetTimeRangeResult } from './lib/get_time_range';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -265,6 +265,8 @@ export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
   formatAlert?: FormatAlert<AlertData>;
 }
 
+export type RuleTypeSolution = 'observability' | 'security' | 'stack';
+
 export interface RuleType<
   Params extends RuleTypeParams = never,
   ExtractedParams extends RuleTypeParams = never,
@@ -308,6 +310,7 @@ export interface RuleType<
   >;
   category: string;
   producer: string;
+  solution: RuleTypeSolution;
   actionVariables?: {
     context?: ActionVariable[];
     state?: ActionVariable[];

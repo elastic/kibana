@@ -166,7 +166,7 @@
         "label": "AssistantProvider",
         "description": [],
         "signature": [
-          "({ actionTypeRegistry, alertsIndexPattern, assistantAvailability, assistantTelemetry, augmentMessageCodeBlocks, docLinks, basePath, basePromptContexts, children, getComments, http, inferenceEnabled, navigateToApp, nameSpace, productDocBase, title, toasts, currentAppId, userProfileService, chrome, }: ",
+          "({ actionTypeRegistry, alertsIndexPattern, assistantAvailability, assistantTelemetry, augmentMessageCodeBlocks, docLinks, basePath, basePromptContexts, children, getComments, http, inferenceEnabled, navigateToApp, nameSpace, productDocBase, spaceId, title, toasts, currentAppId, userProfileService, chrome, }: ",
           "AssistantProviderProps",
           ") => React.JSX.Element"
         ],
@@ -179,7 +179,7 @@
             "id": "def-public.AssistantProvider.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  actionTypeRegistry,\n  alertsIndexPattern,\n  assistantAvailability,\n  assistantTelemetry,\n  augmentMessageCodeBlocks,\n  docLinks,\n  basePath,\n  basePromptContexts = [],\n  children,\n  getComments,\n  http,\n  inferenceEnabled = false,\n  navigateToApp,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  productDocBase,\n  title = DEFAULT_ASSISTANT_TITLE,\n  toasts,\n  currentAppId,\n  userProfileService,\n  chrome,\n}",
+            "label": "{\n  actionTypeRegistry,\n  alertsIndexPattern,\n  assistantAvailability,\n  assistantTelemetry,\n  augmentMessageCodeBlocks,\n  docLinks,\n  basePath,\n  basePromptContexts = [],\n  children,\n  getComments,\n  http,\n  inferenceEnabled = false,\n  navigateToApp,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  productDocBase,\n  spaceId,\n  title = DEFAULT_ASSISTANT_TITLE,\n  toasts,\n  currentAppId,\n  userProfileService,\n  chrome,\n}",
             "description": [],
             "signature": [
               "AssistantProviderProps"

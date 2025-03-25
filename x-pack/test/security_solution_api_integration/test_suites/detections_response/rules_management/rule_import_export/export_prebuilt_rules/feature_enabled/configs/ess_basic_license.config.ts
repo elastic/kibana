@@ -21,15 +21,5 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
   };
 
-  testConfig.kbnTestServer.serverArgs = testConfig.kbnTestServer.serverArgs.map((arg: string) => {
-    // Override the default value of `--xpack.securitySolution.enableExperimental` to enable the prebuilt rules customization feature
-    if (arg.includes('--xpack.securitySolution.enableExperimental')) {
-      return `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-        'prebuiltRulesCustomizationEnabled',
-      ])}`;
-    }
-    return arg;
-  });
-
   return testConfig;
 }

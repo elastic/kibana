@@ -21,6 +21,7 @@ export async function recallAndScore({
   chat,
   analytics,
   userPrompt,
+  userMessageFunctionName,
   context,
   messages,
   logger,
@@ -30,6 +31,7 @@ export async function recallAndScore({
   chat: FunctionCallChatFunction;
   analytics: AnalyticsServiceStart;
   userPrompt: string;
+  userMessageFunctionName?: string;
   context: string;
   messages: Message[];
   logger: Logger;
@@ -62,17 +64,16 @@ export async function recallAndScore({
       logger,
       messages,
       userPrompt,
+      userMessageFunctionName,
       context,
       signal,
       chat,
     });
 
     analytics.reportEvent<RecallRanking>(recallRankingEventType, {
-      prompt: queries.map((query) => query.text).join('\n\n'),
       scoredDocuments: suggestions.map((suggestion) => {
         const llmScore = scores.find((score) => score.id === suggestion.id);
         return {
-          content: suggestion.text,
           elserScore: suggestion.score ?? -1,
           llmScore: llmScore ? llmScore.score : -1,
         };

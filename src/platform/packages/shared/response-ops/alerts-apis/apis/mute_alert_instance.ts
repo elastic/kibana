@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { BASE_ALERTING_API_PATH } from '../constants';
 
 export interface MuteAlertInstanceParams {
