@@ -67,6 +67,7 @@ const createStartMock = () => {
     getFrameworkHealth: jest.fn(),
     scheduleAlertDeletion: jest.fn(),
     previewAlertDeletion: jest.fn(),
+    getLastRunAlertDeletion: jest.fn(),
   };
   return mock;
 };

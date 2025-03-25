@@ -7,6 +7,7 @@
 const createAlertDeletionClientMock = () => {
   return jest.fn().mockImplementation(() => {
     return {
+      getLastRun: jest.fn(),
       previewTask: jest.fn(),
       scheduleTask: jest.fn(),
     };
