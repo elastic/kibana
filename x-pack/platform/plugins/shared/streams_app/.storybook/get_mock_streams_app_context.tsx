@@ -17,6 +17,7 @@ import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/publ
 import { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 import { StreamsTelemetryService } from '../public/telemetry/service';
 
@@ -43,6 +44,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
         fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
         licensing: {} as unknown as LicensingPluginStart,
         discoverShared: {} as unknown as DiscoverSharedPublicStart,
+        observabilityAIAssistant: {} as unknown as ObservabilityAIAssistantPublicStart,
       },
     },
     services: {

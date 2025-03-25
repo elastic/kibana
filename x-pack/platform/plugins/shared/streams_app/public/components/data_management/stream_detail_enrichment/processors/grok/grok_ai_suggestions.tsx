@@ -29,6 +29,7 @@ import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
 import { useAbortController, useBoolean } from '@kbn/react-hooks';
 import useObservable from 'react-use/lib/useObservable';
+import { isEmpty } from 'lodash';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
@@ -126,15 +127,16 @@ const RefreshButton = ({
   );
 };
 
-function useAiEnabled() {
+function useAIFeatures() {
   const { dependencies, core } = useKibana();
   const { observabilityAIAssistant, licensing } = dependencies.start;
 
-  const aiAssistantEnabled = observabilityAIAssistant?.service.isEnabled();
+  const aiAssistantEnabled = observabilityAIAssistant.service.isEnabled();
 
-  const genAiConnectors = observabilityAIAssistant?.useGenAIConnectors();
+  const genAiConnectors = observabilityAIAssistant.useGenAIConnectors();
 
-  const aiEnabled = aiAssistantEnabled && (genAiConnectors?.connectors || []).length > 0;
+  const aiEnabled =
+    aiAssistantEnabled && genAiConnectors.connectors && !isEmpty(genAiConnectors.connectors);
 
   const currentLicense = useObservable(licensing.license$);
 
@@ -144,15 +146,16 @@ function useAiEnabled() {
   return {
     enabled: aiEnabled,
     couldBeEnabled,
+    genAiConnectors,
   };
 }
 
 function InnerGrokAiSuggestions({
   previewDocuments,
-  definition,
+  genAiConnectors,
 }: {
   previewDocuments: FlattenRecord[];
-  definition: IngestStreamGetResponse;
+  genAiConnectors: UseGenAIConnectorsResult;
 }) {
   const {
     dependencies,
@@ -160,13 +163,12 @@ function InnerGrokAiSuggestions({
   } = useKibana();
   const {
     streams: { streamsRepositoryClient },
-    observabilityAIAssistant,
   } = dependencies.start;
 
+  const { definition } = useStreamDetail();
   const fieldValue = useWatch<ProcessorFormState, 'field'>({ name: 'field' });
   const form = useFormContext<GrokFormState>();
 
-  const genAiConnectors = observabilityAIAssistant?.useGenAIConnectors();
   const currentConnector = genAiConnectors?.selectedConnector;
 
   const [isLoadingSuggestions, setSuggestionsLoading] = useState(false);
@@ -377,8 +379,7 @@ export function GrokAiSuggestions() {
   const {
     core: { http },
   } = useKibana();
-  const { enabled: isAiEnabled, couldBeEnabled } = useAiEnabled();
-  const { definition } = useStreamDetail();
+  const { enabled: isAiEnabled, couldBeEnabled, genAiConnectors } = useAIFeatures();
   const previewDocuments = useSimulatorSelector((state) => state.context.previewDocuments);
 
   if (!isAiEnabled && couldBeEnabled) {
@@ -400,9 +401,7 @@ export function GrokAiSuggestions() {
         >
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.aiAssistantNotEnabled',
-            {
-              defaultMessage: 'Enable AI Assistant features',
-            }
+            { defaultMessage: 'Enable AI Assistant features' }
           )}
         </EuiLink>
       </EuiToolTip>
@@ -413,5 +412,7 @@ export function GrokAiSuggestions() {
     return null;
   }
 
-  return <InnerGrokAiSuggestions definition={definition} previewDocuments={previewDocuments} />;
+  return (
+    <InnerGrokAiSuggestions previewDocuments={previewDocuments} genAiConnectors={genAiConnectors} />
+  );
 }
