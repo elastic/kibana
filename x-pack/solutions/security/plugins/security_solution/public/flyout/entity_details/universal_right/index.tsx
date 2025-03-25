@@ -12,10 +12,25 @@ import {
   UNIVERSAL_ENTITY_FLYOUT_OPENED,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useGetGenericEntity } from './hooks/use_get_generic_entity';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UniversalEntityFlyoutHeader } from './header';
 import { UniversalEntityFlyoutContent } from './content';
+
+export const isCommonError = (error: unknown): error is CommonError => {
+  if (
+    !(error as any)?.body ||
+    !(error as any)?.body?.error ||
+    !(error as any)?.body?.message ||
+    !(error as any)?.body?.statusCode
+  ) {
+    return false;
+  }
+
+  return true;
+};
 
 export interface UniversalEntityPanelProps {
   entityDocId: string;
@@ -37,8 +52,46 @@ export const UniversalEntityPanel = ({ entityDocId }: UniversalEntityPanelProps)
     }
   }, [getGenericEntity.data?._id]);
 
-  if (!getGenericEntity.isSuccess) {
-    return <>loading</>;
+  if (getGenericEntity.isLoading) {
+    return (
+      <>
+        <EuiLoadingSpinner size="m" style={{ position: 'absolute', inset: '50%' }} />
+      </>
+    );
+  }
+
+  if (!getGenericEntity.data || getGenericEntity.isError) {
+    return (
+      <>
+        <EuiEmptyPrompt
+          color="danger"
+          iconType="warning"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.securitySolution.universalEntityFlyout.errorTitle"
+                defaultMessage="Unable to load entity"
+              />
+            </h2>
+          }
+          body={
+            isCommonError(getGenericEntity.error) ? (
+              <p>
+                <FormattedMessage
+                  id="xpack.securitySolution.universalEntityFlyout.errorBody"
+                  defaultMessage="{error} {statusCode}: {body}"
+                  values={{
+                    error: error.body.error,
+                    statusCode: error.body.statusCode,
+                    body: error.body.message,
+                  }}
+                />
+              </p>
+            ) : undefined
+          }
+        />
+      </>
+    );
   }
 
   const source = getGenericEntity.data._source;

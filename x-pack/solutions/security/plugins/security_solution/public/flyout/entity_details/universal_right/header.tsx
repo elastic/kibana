@@ -142,7 +142,7 @@ export const UniversalEntityFlyoutHeader = ({
           <HeaderDataCards
             id={entity.id}
             type={entity.type}
-            sub_type={entity.sub_type}
+            subType={entity.sub_type}
             criticality={source.asset.criticality}
           />
         </>

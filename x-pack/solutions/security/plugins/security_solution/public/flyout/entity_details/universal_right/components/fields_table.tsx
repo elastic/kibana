@@ -154,7 +154,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({ document, tableStorage
         ),
       },
     ],
-    [pinnedFields]
+    [pinnedFields, storageKey, togglePin]
   );
 
   return (

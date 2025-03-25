@@ -30,12 +30,12 @@ import { ResponsiveDataCards } from './components/responsive_data_cards';
 export const HeaderDataCards = ({
   criticality,
   id,
-  sub_type,
+  subType,
   type,
 }: {
   criticality?: CriticalityLevelWithUnassigned;
   id: string;
-  sub_type: string;
+  subType: string;
   type: string;
 }) => {
   const [selectValue, setSelectValue] = useState<CriticalityLevelWithUnassigned>(
@@ -87,15 +87,6 @@ export const HeaderDataCards = ({
       },
       {
         title: i18n.translate(
-          'xpack.securitySolution.universalEntityFlyout.flyoutHeader.headerDataBoxes.subtypeLabel',
-          {
-            defaultMessage: 'Sub Type',
-          }
-        ),
-        description: <EuiTextTruncate text={sub_type || ''} />,
-      },
-      {
-        title: i18n.translate(
           'xpack.securitySolution.universalEntityFlyout.flyoutHeader.headerDataBoxes.typeLabel',
           {
             defaultMessage: 'Type',
@@ -103,8 +94,17 @@ export const HeaderDataCards = ({
         ),
         description: <EuiTextTruncate text={type || ''} />,
       },
+      {
+        title: i18n.translate(
+          'xpack.securitySolution.universalEntityFlyout.flyoutHeader.headerDataBoxes.subtypeLabel',
+          {
+            defaultMessage: 'Sub Type',
+          }
+        ),
+        description: <EuiTextTruncate text={subType || ''} />,
+      },
     ],
-    [selectValue, id, sub_type, type]
+    [selectValue, id, subType, type]
   );
 
   return <ResponsiveDataCards cards={cards} collapseWidth={750} />;
