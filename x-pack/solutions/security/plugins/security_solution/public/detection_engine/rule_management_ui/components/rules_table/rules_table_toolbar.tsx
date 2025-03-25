@@ -16,7 +16,7 @@ import * as i18n from './translations';
 import { getPromptContextFromDetectionRules } from '../../../../assistant/helpers';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import * as i18nAssistant from '../../../../detections/pages/detection_engine/rules/translations';
+import * as i18nAssistant from '../../../common/translations';
 
 export enum AllRulesTabs {
   management = 'management',

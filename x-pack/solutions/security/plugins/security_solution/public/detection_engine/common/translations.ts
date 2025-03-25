@@ -604,6 +604,13 @@ export const LACK_OF_KIBANA_SECURITY_PRIVILEGES = i18n.translate(
   }
 );
 
+export const ML_RULES_DISABLED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mlRulesDisabledMessageTitle',
+  {
+    defaultMessage: 'ML rules require Platinum License and ML Admin Permissions',
+  }
+);
+
 export const DUPLICATE_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleDescription',
   {

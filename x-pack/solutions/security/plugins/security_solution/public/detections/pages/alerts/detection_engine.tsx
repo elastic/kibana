@@ -10,13 +10,13 @@
 // TODO: Refactor code - component can be broken apart
 import {
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiWindowEvent,
-  EuiHorizontalRule,
-  EuiFlexItem,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
