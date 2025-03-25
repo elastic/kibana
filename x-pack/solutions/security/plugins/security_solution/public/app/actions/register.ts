@@ -53,7 +53,7 @@ export const registerUIActions = async (
   registerDiscoverCellActions(store, services);
   registerCellActions(store, history, services);
   // TODO: Remove discover histogram actions when timeline esql tab is extracted from discover
-  registerDiscoverHistogramActions(store, history, coreSetup, services);
+  await registerDiscoverHistogramActions(store, history, coreSetup, services);
 };
 
 const registerLensEmbeddableActions = (store: SecurityAppStore, services: StartServices) => {
