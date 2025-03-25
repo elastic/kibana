@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { omit, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
