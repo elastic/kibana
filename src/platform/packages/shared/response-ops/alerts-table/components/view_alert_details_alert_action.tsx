@@ -11,10 +11,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { HttpStart } from '@kbn/core-http-browser';
-import { typedMemo } from '../utils/react';
+import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import type { AdditionalContext, AlertActionsProps } from '../types';
+import { typedMemo } from '../utils/react';
 
 /**
  * Alerts table row action to open the selected alert detail page
@@ -27,21 +26,17 @@ export const ViewAlertDetailsAlertAction = typedMemo(
     isAlertDetailsEnabled,
     resolveAlertPagePath,
     tableId,
-  }: Pick<
-    AlertActionsProps<AC>,
-    | 'alert'
-    | 'openAlertInFlyout'
-    | 'onActionExecuted'
-    | 'isAlertDetailsEnabled'
-    | 'resolveAlertPagePath'
-    | 'tableId'
-  >) => {
-    const { http } = useKibana<{
-      http: HttpStart;
-    }>().services;
+  }: AlertActionsProps<AC>) => {
+    const {
+      services: {
+        http: {
+          basePath: { prepend },
+        },
+      },
+    } = useAlertsTableContext();
     const alertId = (alert[ALERT_UUID]?.[0] as string) ?? null;
     const pagePath = alertId && tableId && resolveAlertPagePath?.(alertId, tableId);
-    const linkToAlert = pagePath ? http.basePath.prepend(pagePath) : null;
+    const linkToAlert = pagePath ? prepend(pagePath) : null;
 
     if (isAlertDetailsEnabled && linkToAlert) {
       return (

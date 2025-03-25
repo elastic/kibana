@@ -38,15 +38,7 @@ const PAGINATION_LABEL = i18n.translate(
 export const AlertsFlyout = <AC extends AdditionalContext>({
   alert,
   ...renderContext
-}: Omit<
-  RenderContext<AC>,
-  | 'oldAlertsData'
-  | 'ecsAlertsData'
-  | 'dataGridRef'
-  | 'browserFields'
-  | 'bulkActionsStore'
-  | 'openAlertInFlyout'
-> & {
+}: RenderContext<AC> & {
   alert: Alert;
   flyoutIndex: number;
   isLoading: boolean;

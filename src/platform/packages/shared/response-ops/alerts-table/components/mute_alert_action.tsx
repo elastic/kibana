@@ -13,13 +13,11 @@ import { i18n } from '@kbn/i18n';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { useMuteAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_mute_alert_instance';
 import { useUnmuteAlertInstance } from '@kbn/response-ops-alerts-apis/hooks/use_unmute_alert_instance';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import { typedMemo } from '../utils/react';
-import { useAlertMutedState } from '../hooks/use_alert_muted_state';
-import { MUTE, UNMUTE } from '../translations';
 import type { AdditionalContext, AlertActionsProps } from '../types';
+import { MUTE, UNMUTE } from '../translations';
+import { useAlertMutedState } from '../hooks/use_alert_muted_state';
+import { typedMemo } from '../utils/react';
+import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
 /**
  * Alerts table row action to mute/unmute the selected alert
@@ -29,11 +27,10 @@ export const MuteAlertAction = typedMemo(
     alert,
     refresh,
     onActionExecuted,
-  }: Pick<AlertActionsProps<AC>, 'alert' | 'refresh' | 'onActionExecuted'>) => {
-    const { http, notifications } = useKibana<{
-      http: HttpStart;
-      notifications: NotificationsStart;
-    }>().services;
+  }: AlertActionsProps<AC>) => {
+    const {
+      services: { http, notifications },
+    } = useAlertsTableContext();
     const { isMuted, ruleId, rule, alertInstanceId } = useAlertMutedState(alert);
     const { mutateAsync: muteAlert } = useMuteAlertInstance({ http, notifications });
     const { mutateAsync: unmuteAlert } = useUnmuteAlertInstance({ http, notifications });

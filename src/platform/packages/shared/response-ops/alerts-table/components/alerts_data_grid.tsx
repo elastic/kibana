@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, lazy, Suspense, useCallback, useMemo } from 'react';
 import {
   EuiDataGrid,
   EuiDataGridControlColumn,
@@ -28,11 +28,13 @@ import { AdditionalContext, AlertsDataGridProps, CellActionsOptions } from '../t
 import { useGetToolbarVisibility } from '../hooks/use_toolbar_visibility';
 import { InspectButtonContainer } from './alerts_query_inspector';
 import { typedMemo } from '../utils/react';
-import { AlertsFlyout } from './alerts_flyout';
+import type { AlertsFlyout as AlertsFlyoutType } from './alerts_flyout';
 import { useBulkActions } from '../hooks/use_bulk_actions';
 import { useSorting } from '../hooks/use_sorting';
 import { CellPopoverHost } from './cell_popover_host';
 import { NonVirtualizedGridBody } from './non_virtualized_grid_body';
+
+const AlertsFlyout = lazy(() => import('./alerts_flyout')) as typeof AlertsFlyoutType;
 
 const defaultGridStyle: EuiDataGridStyle = {
   border: 'none',
@@ -334,16 +336,18 @@ export const AlertsDataGrid = typedMemo(
     return (
       <InspectButtonContainer>
         <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
-          {flyoutAlertIndex > -1 && (
-            <AlertsFlyout<AC>
-              {...renderContext}
-              alert={alerts[flyoutAlertIndex]}
-              alertsCount={alertsCount}
-              onClose={handleFlyoutClose}
-              flyoutIndex={flyoutAlertIndex + pageIndex * pageSize}
-              onPaginate={onPaginateFlyout}
-            />
-          )}
+          <Suspense fallback={null}>
+            {flyoutAlertIndex > -1 && (
+              <AlertsFlyout<AC>
+                {...renderContext}
+                alert={alerts[flyoutAlertIndex]}
+                alertsCount={alertsCount}
+                onClose={handleFlyoutClose}
+                flyoutIndex={flyoutAlertIndex + pageIndex * pageSize}
+                onPaginate={onPaginateFlyout}
+              />
+            )}
+          </Suspense>
           {alertsCount > 0 && (
             <EuiDataGrid
               {...euiDataGridProps}

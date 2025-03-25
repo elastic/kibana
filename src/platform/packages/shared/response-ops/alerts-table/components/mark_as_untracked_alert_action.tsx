@@ -11,12 +11,10 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { AdditionalContext, AlertActionsProps } from '../types';
 import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 import { typedMemo } from '../utils/react';
+import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
 /**
  * Alerts table row action to mark the selected alert as untracked
@@ -26,11 +24,10 @@ export const MarkAsUntrackedAlertAction = typedMemo(
     alert,
     refresh,
     onActionExecuted,
-  }: Pick<AlertActionsProps<AC>, 'alert' | 'refresh' | 'onActionExecuted'>) => {
-    const { http, notifications } = useKibana<{
-      http: HttpStart;
-      notifications: NotificationsStart;
-    }>().services;
+  }: AlertActionsProps<AC>) => {
+    const {
+      services: { http, notifications },
+    } = useAlertsTableContext();
     const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts({ http, notifications });
     const isAlertActive = useMemo(() => alert[ALERT_STATUS]?.[0] === ALERT_STATUS_ACTIVE, [alert]);
 
