@@ -7,14 +7,8 @@
 
 import { renderHook } from '@testing-library/react';
 import { useFetchIntegrations } from './use_fetch_integrations';
-import { useKibana } from '../../../common/lib/kibana';
-import {
-  installationStatuses,
-  useGetPackagesQuery,
-  useGetSettingsQuery,
-} from '@kbn/fleet-plugin/public';
+import { installationStatuses, useGetPackagesQuery } from '@kbn/fleet-plugin/public';
 
-jest.mock('../../../common/lib/kibana');
 jest.mock('@kbn/fleet-plugin/public');
 
 describe('useFetchIntegrations', () => {
@@ -23,20 +17,6 @@ describe('useFetchIntegrations', () => {
   });
 
   it('should return isLoading true', () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        fleet: {
-          authz: {
-            fleet: {
-              readSettings: true,
-            },
-          },
-        },
-      },
-    });
-    (useGetSettingsQuery as jest.Mock).mockReturnValue({
-      isFetchedAfterMount: true,
-    });
     (useGetPackagesQuery as jest.Mock).mockReturnValue({
       data: [],
       isLoading: true,
@@ -44,26 +24,12 @@ describe('useFetchIntegrations', () => {
 
     const { result } = renderHook(() => useFetchIntegrations());
 
-    expect(result.current.availablePackage).toHaveLength(0);
+    expect(result.current.availablePackages).toHaveLength(0);
     expect(result.current.installedPackages).toHaveLength(0);
     expect(result.current.isLoading).toBe(true);
   });
 
-  it('should return availablePackage and installedPackages', () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        fleet: {
-          authz: {
-            fleet: {
-              readSettings: true,
-            },
-          },
-        },
-      },
-    });
-    (useGetSettingsQuery as jest.Mock).mockReturnValue({
-      isFetchedAfterMount: true,
-    });
+  it('should return availablePackages and installedPackages', () => {
     (useGetPackagesQuery as jest.Mock).mockReturnValue({
       data: {
         items: [
@@ -87,8 +53,8 @@ describe('useFetchIntegrations', () => {
 
     const { result } = renderHook(() => useFetchIntegrations());
 
-    expect(result.current.availablePackage).toHaveLength(1);
-    expect(result.current.availablePackage[0].name).toBe('microsoft_sentinel');
+    expect(result.current.availablePackages).toHaveLength(1);
+    expect(result.current.availablePackages[0].name).toBe('microsoft_sentinel');
 
     expect(result.current.installedPackages).toHaveLength(2);
     expect(result.current.installedPackages[0].name).toBe('splunk');
