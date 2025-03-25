@@ -14,14 +14,15 @@ import classNames from 'classnames';
 import { css } from '@emotion/css';
 
 import { useNavigation as useServices } from '../../../services';
-import { NavItemLabel } from './panel_nav_item_label';
+import { SubItemTitle } from '../subitem_title';
 import { usePanel } from './context';
 
 interface Props {
   item: ChromeProjectNavigationNode;
+  parentIsAccordion?: boolean;
 }
 
-export const PanelNavItem: FC<Props> = ({ item }) => {
+export const PanelNavItem: FC<Props> = ({ item, parentIsAccordion }) => {
   const { navigateToUrl } = useServices();
   const { close: closePanel } = usePanel();
   const { id, icon, deepLink, openInNewTab } = item;
@@ -42,7 +43,7 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
   return (
     <EuiListGroupItem
       key={id}
-      label={<NavItemLabel item={item} />}
+      label={parentIsAccordion ? <SubItemTitle item={item} /> : item.title}
       wrapText
       className={classNames(
         'sideNavPanelLink',

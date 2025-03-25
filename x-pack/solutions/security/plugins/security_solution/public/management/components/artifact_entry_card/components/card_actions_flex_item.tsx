@@ -10,11 +10,9 @@ import React, { memo, useMemo } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE } from '../../../common/translations';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import {
-  MANAGEMENT_OF_GLOBAL_ARTIFACT_NOT_ALLOWED_MESSAGE,
-  MANAGEMENT_OF_SHARED_PER_POLICY_ARTIFACT_NOT_ALLOWED_MESSAGE,
-} from './translations';
+import { MANAGEMENT_OF_SHARED_PER_POLICY_ARTIFACT_NOT_ALLOWED_MESSAGE } from './translations';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { isArtifactGlobal } from '../../../../../common/endpoint/service/artifacts';
@@ -52,7 +50,7 @@ export const CardActionsFlexItem = memo<CardActionsFlexItemProps>(
       if (isGlobal) {
         return {
           isDisabled: true,
-          disabledTooltip: MANAGEMENT_OF_GLOBAL_ARTIFACT_NOT_ALLOWED_MESSAGE,
+          disabledTooltip: NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE,
         };
       }
 
