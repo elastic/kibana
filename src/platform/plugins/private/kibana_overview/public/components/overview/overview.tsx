@@ -309,9 +309,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         bottomBorder
         paddingSize="xl"
         css={css({
-          '.kbnOverviewSupplements--noNews': {
+          '.kbnOverviewSupplements--noNews h2': {
             [minBreakpointM]: {
-              h2: { textAlign: 'center' },
+              textAlign: 'center',
             },
           },
         })}
@@ -408,10 +408,6 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
               <EuiFlexGroup
                 css={css({
                   flexDirection: 'column',
-                  '&, & > *': {
-                    marginBottom: '0 !important',
-                    marginTop: '0 !important',
-                  },
                 })}
               >
                 <EuiFlexItem>
