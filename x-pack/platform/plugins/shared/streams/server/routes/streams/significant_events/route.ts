@@ -12,6 +12,9 @@ import { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
 import { createServerRoute } from '../../create_server_route';
+import { Asset } from '../../../../common';
+import { QueryAsset } from '../../../../common/assets';
+import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 
 const stringToDate = z.string().transform((arg) => new Date(arg));
 
@@ -50,12 +53,16 @@ export const readSignificantEventsRoute = createServerRoute({
     const { name } = params.path;
     const { from, to, bucketSize } = params.query;
 
-    const assetLinks = await assetClient.getAssetLinks(name, ['query']);
-    if (isEmpty(assetLinks)) {
+    function isQuery(asset: Asset): asset is QueryAsset {
+      return asset[ASSET_TYPE] === 'query';
+    }
+
+    const assetQueries = (await assetClient.getAssets(name)).filter(isQuery);
+    if (isEmpty(assetQueries)) {
       return [];
     }
 
-    const searchRequests = assetLinks.flatMap((asset) => {
+    const searchRequests = assetQueries.flatMap((asset) => {
       return [
         { index: name },
         {
@@ -102,7 +109,7 @@ export const readSignificantEventsRoute = createServerRoute({
     >({ searches: searchRequests });
 
     const significantEvents = response.responses.map((queryResponse, queryIndex) => {
-      const query = assetLinks[queryIndex];
+      const query = assetQueries[queryIndex];
       if ('error' in queryResponse) {
         return {
           id: query.query.id,
