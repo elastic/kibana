@@ -84,7 +84,7 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
   }
 
   const renderChildren = useCallback(
-    (parentIsAccordion?: boolean) => {
+    ({ parentIsAccordion } = { parentIsAccordion: false }) => {
       if (!filteredChildren) return null;
 
       return filteredChildren.map((item, i) => {
@@ -119,7 +119,7 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
         >
           <>
             {!firstChildIsGroup && <EuiSpacer size="s" />}
-            {renderChildren(true)}
+            {renderChildren({ parentIsAccordion: true })}
           </>
         </EuiAccordion>
         {appendHorizontalRule && <EuiHorizontalRule margin="xs" />}
