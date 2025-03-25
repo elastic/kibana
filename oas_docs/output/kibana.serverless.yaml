@@ -37,8 +37,6 @@ info:
     label: Feedback
     url: https://github.com/elastic/docs-content/issues/new?assignees=&labels=feedback%2Ccommunity&projects=&template=api-feedback.yaml&title=%5BFeedback%5D%3A+
 servers:
-  - url: http://localhost:5622
-  - url: /
   - url: https://{kibana_url}
     variables:
       kibana_url:
@@ -47,6 +45,12 @@ security:
   - apiKeyAuth: []
 tags:
   - name: alerting
+    description: |
+      Alerting enables you to define rules, which detect complex conditions within your data. When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule.  Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
+    externalDocs:
+      description: Alerting documentation
+      url: https://www.elastic.co/docs/current/serverless/rules
+    x-displayName: Alerting
   - description: |
       Adjust APM agent configuration without need to redeploy your application.
     name: APM agent configuration
