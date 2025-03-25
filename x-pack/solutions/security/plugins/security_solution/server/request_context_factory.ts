@@ -21,7 +21,7 @@ import { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
-import { getApiKeyManager as buildApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
+import { getApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
 import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
 import { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
@@ -110,7 +110,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     const getAuditLogger = () => security?.audit.asScoped(request);
 
     const getEntityStoreApiKeyManager = () =>
-      buildApiKeyManager({
+      getApiKeyManager({
         core: coreStart,
         logger: options.logger,
         security: startPlugins.security,
