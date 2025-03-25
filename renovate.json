@@ -3231,11 +3231,33 @@
       "enabled": true
     },
     {
+      "groupName": "chromedriver",
+      "matchDepNames": [
+        "chromedriver"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "/.*/"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true,
+      "matchUpdateTypes": [
+        "major",
+        "minor"
+      ]
+    },
+    {
       "groupName": "ftr",
       "matchDepNames": [
         "@types/chromedriver",
         "@types/selenium-webdriver",
-        "chromedriver",
         "geckodriver",
         "ms-chromium-edge-driver",
         "selenium-webdriver"

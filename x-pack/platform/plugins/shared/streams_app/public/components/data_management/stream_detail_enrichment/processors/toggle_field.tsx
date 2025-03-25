@@ -11,9 +11,11 @@ import { EuiFormRow, EuiFormRowProps, EuiSwitch, htmlIdGenerator } from '@elasti
 import { ProcessorFormState } from '../types';
 
 type ExtractBooleanFields<TInput> = NonNullable<
-  {
-    [K in keyof TInput]: boolean extends TInput[K] ? K : never;
-  }[keyof TInput]
+  TInput extends Record<string, unknown>
+    ? {
+        [K in keyof TInput]: boolean extends TInput[K] ? K : never;
+      }[keyof TInput]
+    : never
 >;
 
 interface ToggleFieldProps {

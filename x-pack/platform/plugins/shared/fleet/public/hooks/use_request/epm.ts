@@ -209,6 +209,9 @@ export const useGetPackageVerificationKeyId = () => {
   };
 };
 
+/**
+ * @deprecated use sendGetPackageInfoByKeyForRq instead
+ */
 export const sendGetPackageInfoByKey = (
   pkgName: string,
   pkgVersion?: string,
@@ -219,6 +222,23 @@ export const sendGetPackageInfoByKey = (
   }
 ) => {
   return sendRequest<GetInfoResponse>({
+    path: epmRouteService.getInfoPath(pkgName, pkgVersion),
+    method: 'get',
+    version: API_VERSIONS.public.v1,
+    query: options,
+  });
+};
+
+export const sendGetPackageInfoByKeyForRq = (
+  pkgName: string,
+  pkgVersion?: string,
+  options?: {
+    ignoreUnverified?: boolean;
+    prerelease?: boolean;
+    full?: boolean;
+  }
+) => {
+  return sendRequestForRq<GetInfoResponse>({
     path: epmRouteService.getInfoPath(pkgName, pkgVersion),
     method: 'get',
     version: API_VERSIONS.public.v1,
@@ -319,6 +339,7 @@ interface UpdatePackageArgs {
 interface InstallKibanaAssetsArgs {
   pkgName: string;
   pkgVersion: string;
+  spaceIds?: string[];
 }
 
 export const useUpdatePackageMutation = () => {
@@ -338,16 +359,24 @@ export const useInstallKibanaAssetsMutation = () => {
 
   return useMutation<any, RequestError, InstallKibanaAssetsArgs>({
     mutationFn: ({ pkgName, pkgVersion }: InstallKibanaAssetsArgs) =>
-      sendRequestForRq({
-        path: epmRouteService.getInstallKibanaAssetsPath(pkgName, pkgVersion),
-        method: 'post',
-        version: API_VERSIONS.public.v1,
-      }),
+      sendInstallKibanaAssetsForRq({ pkgName, pkgVersion }),
     onSuccess: (data, { pkgName, pkgVersion }) => {
       return queryClient.invalidateQueries([pkgName, pkgVersion]);
     },
   });
 };
+
+export const sendInstallKibanaAssetsForRq = ({
+  pkgName,
+  pkgVersion,
+  spaceIds,
+}: InstallKibanaAssetsArgs) =>
+  sendRequestForRq({
+    path: epmRouteService.getInstallKibanaAssetsPath(pkgName, pkgVersion),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: spaceIds ? { space_ids: spaceIds } : undefined,
+  });
 
 export const sendUpdatePackage = (
   pkgName: string,
