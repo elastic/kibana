@@ -18,6 +18,7 @@ import {
   ConversationResponse,
   newContentReferencesStore,
   pruneContentReferences,
+  ChatCompleteRequestQuery,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
@@ -60,6 +61,7 @@ export const chatCompleteRoute = (
         validate: {
           request: {
             body: buildRouteValidationWithZod(ChatCompleteProps),
+            query: buildRouteValidationWithZod(ChatCompleteRequestQuery),
           },
         },
       },
@@ -182,7 +184,9 @@ export const chatCompleteRoute = (
             ? existingConversationId ?? newConversation?.id
             : undefined;
 
-          const contentReferencesStore = newContentReferencesStore();
+          const contentReferencesStore = newContentReferencesStore({
+            disabled: request.query.content_references_disabled,
+          });
 
           const onLlmResponse = async (
             content: string,

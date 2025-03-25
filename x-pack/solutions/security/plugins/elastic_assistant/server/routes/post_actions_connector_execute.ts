@@ -17,6 +17,7 @@ import {
   Message,
   Replacements,
   pruneContentReferences,
+  ExecuteConnectorRequestQuery,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
@@ -55,6 +56,7 @@ export const postActionsConnectorExecuteRoute = (
             params: schema.object({
               connectorId: schema.string(),
             }),
+            query: buildRouteValidationWithZod(ExecuteConnectorRequestQuery),
           },
         },
       },
@@ -114,7 +116,9 @@ export const postActionsConnectorExecuteRoute = (
             await assistantContext.getAIAssistantConversationsDataClient();
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
 
-          const contentReferencesStore = newContentReferencesStore();
+          const contentReferencesStore = newContentReferencesStore({
+            disabled: request.query.content_references_disabled,
+          });
 
           onLlmResponse = async (
             content: string,

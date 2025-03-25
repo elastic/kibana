@@ -15,6 +15,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { BooleanFromString } from '@kbn/zod-helpers';
 
 import { NonEmptyString } from '../common_attributes.gen';
 
@@ -65,6 +66,15 @@ export const ChatCompleteProps = z.object({
   persist: z.boolean(),
   messages: z.array(ChatMessage),
 });
+
+export type ChatCompleteRequestQuery = z.infer<typeof ChatCompleteRequestQuery>;
+export const ChatCompleteRequestQuery = z.object({
+  /**
+   * If true, the response will not include content references.
+   */
+  content_references_disabled: BooleanFromString.optional().default(false),
+});
+export type ChatCompleteRequestQueryInput = z.input<typeof ChatCompleteRequestQuery>;
 
 export type ChatCompleteRequestBody = z.infer<typeof ChatCompleteRequestBody>;
 export const ChatCompleteRequestBody = ChatCompleteProps;
