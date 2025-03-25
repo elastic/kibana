@@ -24,7 +24,7 @@ const schema: RootSchema<RecallRanking> = {
         esScore: {
           type: 'float',
           _meta: {
-            description: 'The score produced by ELSER text_expansion',
+            description: 'The score produced by Elasticsearch',
           },
         },
         llmScore: {
