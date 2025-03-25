@@ -22,7 +22,10 @@ import {
   MonitorFields,
   type SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
-import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
+import {
+  ALLOWED_SCHEDULES_IN_SECONDS,
+  DEFAULT_FIELDS,
+} from '../../../../common/constants/monitor_defaults';
 import { DEFAULT_COMMON_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { formatKibanaNamespace } from '../../formatters/private_formatters';
 
@@ -165,6 +168,14 @@ export const getMonitorSchedule = (
       };
     }
     if (schedule.includes('s')) {
+      if (!ALLOWED_SCHEDULES_IN_SECONDS.includes(schedule)) {
+        throw new InvalidScheduleError(
+          i18n.translate('xpack.synthetics.projectMonitorApi.validation.invalidSchedule', {
+            defaultMessage: 'Invalid schedule. Allowed schedules in seconds are {allowedSchedules}',
+            values: { allowedSchedules: ALLOWED_SCHEDULES_IN_SECONDS.join(', ') },
+          })
+        );
+      }
       return {
         number: schedule.replace('s', ''),
         unit: ScheduleUnit.SECONDS,
@@ -254,6 +265,13 @@ export class InvalidLocationError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'InvalidLocationError';
+  }
+}
+
+export class InvalidScheduleError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidScheduleError';
   }
 }
 
