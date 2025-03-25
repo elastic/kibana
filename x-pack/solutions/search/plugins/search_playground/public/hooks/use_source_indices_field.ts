@@ -20,6 +20,11 @@ export const useSourceIndicesFields = () => {
   } = useController({
     name: ChatFormFields.indices,
   });
+  const {
+    field: { onChange: onUserQueryChange },
+  } = useController({
+    name: ChatFormFields.userElasticsearchQuery,
+  });
   const { fields, isLoading: isFieldsLoading } = useIndicesFields(selectedIndices);
 
   const addIndex = useCallback(
@@ -43,9 +48,10 @@ export const useSourceIndicesFields = () => {
   const setIndices = useCallback(
     (indices: IndexName[]) => {
       onIndicesChange(indices);
+      onUserQueryChange(undefined);
       usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, indices.length);
     },
-    [onIndicesChange, usageTracker]
+    [onIndicesChange, onUserQueryChange, usageTracker]
   );
 
   return {

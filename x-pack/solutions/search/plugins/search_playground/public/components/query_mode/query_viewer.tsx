@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiBadge,
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSplitPanel,
@@ -18,25 +19,59 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
+import { monaco as monacoEditor } from '@kbn/monaco';
 
-import { useController } from 'react-hook-form';
+import { Controller, useController, useFormContext } from 'react-hook-form';
 import { ChatForm, ChatFormFields } from '../../types';
 import { FullHeight, QueryViewTitlePanel } from './styles';
+import { formatElasticsearchQueryString } from '../../utils/user_query';
 
 export const ElasticsearchQueryViewer = ({
   executeQuery,
+  executeQueryDisabled,
   isLoading,
 }: {
   executeQuery: Function;
+  executeQueryDisabled: boolean;
   isLoading: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { control } = useFormContext<ChatForm>();
   const {
     field: { value: elasticsearchQuery },
   } = useController<ChatForm, ChatFormFields.elasticsearchQuery>({
     name: ChatFormFields.elasticsearchQuery,
   });
-  const query = useMemo(() => JSON.stringify(elasticsearchQuery, null, 2), [elasticsearchQuery]);
+  const {
+    field: { value: userElasticsearchQuery },
+  } = useController<ChatForm, ChatFormFields.userElasticsearchQuery>({
+    name: ChatFormFields.userElasticsearchQuery,
+  });
+  const {
+    field: { value: userElasticsearchQueryValidations },
+  } = useController<ChatForm, ChatFormFields.userElasticsearchQueryValidations>({
+    name: ChatFormFields.userElasticsearchQueryValidations,
+  });
+  const generatedEsQuery = useMemo(
+    () => formatElasticsearchQueryString(elasticsearchQuery),
+    [elasticsearchQuery]
+  );
+  const editorMounted = useCallback((editor: monacoEditor.editor.IStandaloneCodeEditor) => {
+    monacoEditor.languages.json.jsonDefaults.setDiagnosticsOptions({
+      validate: true,
+      schemas: [
+        {
+          uri: editor.getModel()?.uri.toString() ?? '', // TODO: probably a better option for this
+          fileMatch: ['*'],
+          schema: {
+            type: 'object',
+            properties: {}, // TODO: load _search JSON schema
+          },
+        },
+      ],
+    });
+  }, []);
+
   return (
     <EuiSplitPanel.Outer grow hasBorder css={FullHeight}>
       <EuiSplitPanel.Inner grow={false} css={QueryViewTitlePanel(euiTheme)}>
@@ -51,12 +86,21 @@ export const ElasticsearchQueryViewer = ({
                   />
                 </h5>
               </EuiText>
-              <EuiBadge>
-                <FormattedMessage
-                  id="xpack.searchPlayground.viewQuery.elasticGenerated.badge"
-                  defaultMessage="Elastic-generated"
-                />
-              </EuiBadge>
+              {userElasticsearchQueryValidations?.isUserCustomized ? (
+                <EuiBadge color="primary">
+                  <FormattedMessage
+                    id="xpack.searchPlayground.viewQuery.userCustomized.badge"
+                    defaultMessage="User-customized"
+                  />
+                </EuiBadge>
+              ) : (
+                <EuiBadge>
+                  <FormattedMessage
+                    id="xpack.searchPlayground.viewQuery.elasticGenerated.badge"
+                    defaultMessage="Elastic-generated"
+                  />
+                </EuiBadge>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -69,6 +113,7 @@ export const ElasticsearchQueryViewer = ({
               data-test-subj="RunElasticsearchQueryButton"
               onClick={() => executeQuery()}
               isLoading={isLoading}
+              disabled={executeQueryDisabled}
               aria-label={i18n.translate('xpack.searchPlayground.viewQuery.runQuery.ariaLabel', {
                 defaultMessage: 'Run the elasticsearch query to view results.',
               })}
@@ -81,18 +126,42 @@ export const ElasticsearchQueryViewer = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
+      {userElasticsearchQueryValidations?.isUserCustomized &&
+      (userElasticsearchQueryValidations?.userQueryErrors?.length ?? 0) > 0 ? (
+        <EuiSplitPanel.Inner grow={false}>
+          <EuiCallOut
+            color="danger"
+            iconType="error"
+            title={i18n.translate('xpack.searchPlayground.viewQuery.invalidQuery.title', {
+              defaultMessage: 'User-customized Query is invalid',
+            })}
+            size="s"
+          >
+            {userElasticsearchQueryValidations.userQueryErrors!.map((error, errorIndex) => (
+              <p key={`user.query.error.${errorIndex}`}>{error}</p>
+            ))}
+          </EuiCallOut>
+        </EuiSplitPanel.Inner>
+      ) : null}
       <EuiSplitPanel.Inner paddingSize="none">
-        <CodeEditor
-          dataTestSubj="ViewElasticsearchQueryResult"
-          languageId="json"
-          value={query}
-          options={{
-            automaticLayout: true,
-            readOnly: true,
-          }}
-          enableFindAction
-          fullWidth
-          isCopyable
+        <Controller
+          control={control}
+          name={ChatFormFields.userElasticsearchQuery}
+          render={({ field }) => (
+            <CodeEditor
+              dataTestSubj="ViewElasticsearchQueryResult"
+              languageId="json"
+              {...field}
+              value={userElasticsearchQuery ?? generatedEsQuery}
+              options={{
+                automaticLayout: true,
+              }}
+              editorDidMount={editorMounted}
+              enableFindAction
+              fullWidth
+              isCopyable
+            />
+          )}
         />
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>

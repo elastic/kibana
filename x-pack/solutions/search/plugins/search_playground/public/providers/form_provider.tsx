@@ -7,13 +7,16 @@
 import { FormProvider as ReactHookFormProvider, useForm } from 'react-hook-form';
 import React, { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useDebounceFn } from '@kbn/react-hooks';
 import { useIndicesValidation } from '../hooks/use_indices_validation';
 import { useLoadFieldsByIndices } from '../hooks/use_load_fields_by_indices';
+import { useUserQueryValidations } from '../hooks/use_user_query_validations';
 import { ChatForm, ChatFormFields } from '../types';
 import { useLLMsModels } from '../hooks/use_llms_models';
 
 type PartialChatForm = Partial<ChatForm>;
 export const LOCAL_STORAGE_KEY = 'search_playground_session';
+export const LOCAL_STORAGE_DEBOUNCE_OPTIONS = { wait: 500 };
 
 const DEFAULT_FORM_VALUES: PartialChatForm = {
   prompt: 'You are an assistant for question-answering tasks.',
@@ -21,6 +24,8 @@ const DEFAULT_FORM_VALUES: PartialChatForm = {
   source_fields: {},
   indices: [],
   summarization_model: undefined,
+  [ChatFormFields.userElasticsearchQuery]: undefined,
+  [ChatFormFields.userElasticsearchQueryValidations]: undefined,
 };
 
 const getLocalSession = (storage: Storage): PartialChatForm => {
@@ -39,7 +44,12 @@ const getLocalSession = (storage: Storage): PartialChatForm => {
 
 const setLocalSession = (formState: PartialChatForm, storage: Storage) => {
   // omit question and search_query from the session state
-  const { question, search_query: searchQuery, ...state } = formState;
+  const {
+    question,
+    search_query: _searchQuery,
+    [ChatFormFields.userElasticsearchQueryValidations]: _queryValidations,
+    ...state
+  } = formState;
 
   storage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
 };
@@ -59,7 +69,7 @@ export const FormProvider: React.FC<React.PropsWithChildren<FormProviderProps>> 
 
     return index ? [index] : null;
   }, [searchParams]);
-  const sessionState = useMemo(() => getLocalSession(storage), [storage]);
+  const sessionState: PartialChatForm = useMemo(() => getLocalSession(storage), [storage]);
   const form = useForm<ChatForm>({
     defaultValues: {
       ...sessionState,
@@ -75,13 +85,19 @@ export const FormProvider: React.FC<React.PropsWithChildren<FormProviderProps>> 
     setValue: form.setValue,
     getValues: form.getValues,
   });
+  useUserQueryValidations({
+    watch: form.watch,
+    setValue: form.setValue,
+    getValues: form.getValues,
+  });
 
+  const setLocalSessionDebounce = useDebounceFn(setLocalSession, LOCAL_STORAGE_DEBOUNCE_OPTIONS);
   useEffect(() => {
     const subscription = form.watch((values) =>
-      setLocalSession(values as Partial<ChatForm>, storage)
+      setLocalSessionDebounce.run(values as PartialChatForm, storage)
     );
     return () => subscription.unsubscribe();
-  }, [form, storage]);
+  }, [form, storage, setLocalSessionDebounce]);
 
   useEffect(() => {
     const defaultModel = models.find((model) => !model.disabled);

@@ -33,6 +33,7 @@ const isQueryFieldSelected = (
 };
 
 export interface QueryFieldsPanelProps {
+  disabled: boolean;
   index: string;
   indexFields: QuerySourceFields;
   updateFields: (index: string, fieldName: string, checked: boolean) => void;
@@ -40,6 +41,7 @@ export interface QueryFieldsPanelProps {
 }
 
 export const QueryFieldsPanel = ({
+  disabled,
   index,
   indexFields,
   updateFields,
@@ -107,7 +109,8 @@ export const QueryFieldsPanel = ({
                   <EuiSwitch
                     showLabel={false}
                     label={field.name}
-                    checked={checked}
+                    disabled={disabled}
+                    checked={disabled ? false : checked}
                     onChange={(e) => updateFields(index, field.name, e.target.checked)}
                     compressed
                     data-test-subj={`field-${field.name}-${checked}`}
