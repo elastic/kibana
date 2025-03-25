@@ -10,6 +10,7 @@ import type { GetPackagePoliciesResponse } from '@kbn/fleet-plugin/common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useMemo } from 'react';
 import { chunk } from 'lodash';
+import type { PolicyData } from '../../../../../common/endpoint/types';
 import type { PolicySelectorProps } from '..';
 import { useFetchIntegrationPolicyList } from '../../../hooks/policy/use_fetch_integration_policy_list';
 import { useBulkFetchFleetIntegrationPolicies } from '../../../hooks/policy/use_bulk_fetch_fleet_integration_policies';
@@ -41,7 +42,7 @@ export const useFetchPolicyData = (
     return selectedPoliciesPagination[queryOptions.page - 1] ? queryOptions.page : 1;
   }, [queryOptions.page, selectedPoliciesPagination]);
 
-  const fetchListResult = useFetchIntegrationPolicyList(queryOptions, {
+  const fetchListResult = useFetchIntegrationPolicyList<PolicyData>(queryOptions, {
     keepPreviousData: true,
     enabled: mode === 'full-list',
   });

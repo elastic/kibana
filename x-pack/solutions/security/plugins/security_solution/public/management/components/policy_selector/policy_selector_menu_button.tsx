@@ -13,6 +13,10 @@ import { PolicySelector } from './policy_selector';
 
 export type PolicySelectorMenuButtonProps = PolicySelectorProps;
 
+/**
+ * A policy selector button - user is shown the list of policies when they click on the button.
+ * Count of selections are reflected on the button.
+ */
 export const PolicySelectorMenuButton = memo<PolicySelectorMenuButtonProps>((props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [countOfPolicies, setCountOfPolicies] = useState(0);

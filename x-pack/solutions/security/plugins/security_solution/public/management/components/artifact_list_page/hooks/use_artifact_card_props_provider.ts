@@ -50,13 +50,13 @@ export const useArtifactCardPropsProvider = ({
     return items.map((item) => getPolicyIdsFromArtifact(item)).flat();
   }, [items]);
 
-  const { data: policyData, error } = useBulkFetchFleetIntegrationPolicies(
+  const { data: policyData, error } = useBulkFetchFleetIntegrationPolicies<PolicyData>(
     { ids: itemsPolicyIds },
     { enabled: itemsPolicyIds.length > 0 }
   );
 
   const policies: ArtifactEntryCardProps['policies'] = useEndpointPoliciesToArtifactPolicies(
-    policyData?.items as PolicyData[]
+    policyData?.items
   );
 
   const artifactCardPropsPerItem = useMemo(() => {
