@@ -18,7 +18,12 @@ import {
 } from '@kbn/deeplinks-observability';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
+import { safeDecode } from '@kbn/rison';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
+import type { DiscoverAppState } from '@kbn/discover-plugin/public';
+import type { DiscoverGlobalState } from '@kbn/discover-plugin/public/application/main/state_management/discover_global_state_container';
+import type { Filter } from '@kbn/es-query';
+import { type DataViewDataSource } from '@kbn/discover-plugin/common/data_sources';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -47,7 +52,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
   useReadOnlyBadge(!uiCapabilities?.logs?.save);
-
   const routes = getLogsAppRoutes();
 
   return (
@@ -77,9 +81,35 @@ export const LogsPageContent: React.FunctionComponent = () => {
         <Route
           path="/stream"
           exact
-          render={() => {
-            share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID)?.navigate({});
+          render={({ location }) => {
+            const searchParams = new URLSearchParams(location.search);
+            const g = searchParams.get('_g') || '';
+            const a = searchParams.get('_a') || '';
 
+            const gState = (safeDecode(g) || {}) as unknown as DiscoverGlobalState;
+            const aState = (safeDecode(a) || {}) as unknown as DiscoverAppState;
+
+            const dataViewId =
+              aState.dataSource?.type === 'dataView'
+                ? (aState.dataSource as DataViewDataSource).dataViewId
+                : '';
+
+            const locatorParams = {
+              dataViewId,
+              timeRange: gState.time || { from: 'now-15d', to: 'now' },
+              filters: [
+                ...(Array.isArray(gState.filters) ? gState.filters : []),
+                ...(Array.isArray(aState.filters) ? aState.filters : []),
+              ] as Filter[],
+              query:
+                aState.query && typeof aState.query === 'object'
+                  ? aState.query
+                  : { language: 'kuery', query: '' },
+              columns: Array.isArray(aState.columns) ? aState.columns : [],
+              sort: Array.isArray(aState.sort) ? aState.sort : [['@timestamp', 'desc']],
+            };
+
+            share.url.locators.get(DISCOVER_APP_LOCATOR)?.navigate(locatorParams);
             return null;
           }}
         />

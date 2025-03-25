@@ -8,6 +8,7 @@
  */
 
 import type { QueryState } from '@kbn/data-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 export interface DiscoverGlobalStateContainer {
@@ -25,3 +26,15 @@ export const getDiscoverGlobalStateContainer = (
     await stateStorage.set(GLOBAL_STATE_URL_KEY, state, { replace: true });
   },
 });
+
+export interface DiscoverGlobalState {
+  filters: Filter[];
+  refreshInterval: {
+    pause: boolean;
+    value: number;
+  };
+  time: {
+    from: string;
+    to: string;
+  };
+}
