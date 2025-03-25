@@ -27,8 +27,14 @@ import { useCaseActions } from './use_case_actions';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
-import { observabilityFeatureId, ObservabilityRuleTypeRegistry } from '../..';
+import { ObservabilityAlertsTableContext, observabilityFeatureId } from '../..';
 import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
+
+export type ObsAlertActionProps = Pick<
+  AlertActionsProps,
+  'alert' | 'openAlertInFlyout' | 'tableId' | 'refresh'
+> &
+  ObservabilityAlertsTableContext;
 
 export function AlertActions({
   observabilityRuleTypeRegistry,
@@ -36,9 +42,8 @@ export function AlertActions({
   tableId,
   refresh,
   openAlertInFlyout,
-}: Pick<AlertActionsProps, 'alert' | 'openAlertInFlyout' | 'tableId' | 'refresh'> & {
-  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
-}) {
+  parentAlert,
+}: ObsAlertActionProps) {
   const services = useKibana().services;
 
   const {
@@ -124,7 +129,6 @@ export function AlertActions({
     useMemo(
       () => (
         <DefaultAlertActions
-          useDefaultContext={true}
           key="defaultRowActions"
           onActionExecuted={closeActionsPopover}
           isAlertDetailsEnabled={true}
@@ -157,24 +161,27 @@ export function AlertActions({
 
   const onExpandEvent = () => {
     const parsedAlert = parseAlert(observabilityRuleTypeRegistry)(alert);
-
     openAlertInFlyout?.(parsedAlert.fields[ALERT_UUID]);
   };
 
+  const hideViewInApp = isInApp || viewInAppUrl === '' || parentAlert;
+
   return (
     <>
-      <EuiFlexItem>
-        <EuiToolTip data-test-subj="expand-event-tool-tip" content={VIEW_DETAILS}>
-          <EuiButtonIcon
-            data-test-subj="expand-event"
-            iconType="expand"
-            onClick={onExpandEvent}
-            size="s"
-            color="text"
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-      {viewInAppUrl !== '' && !isInApp ? (
+      {!parentAlert && (
+        <EuiFlexItem>
+          <EuiToolTip data-test-subj="expand-event-tool-tip" content={VIEW_DETAILS}>
+            <EuiButtonIcon
+              data-test-subj="expand-event"
+              iconType="expand"
+              onClick={onExpandEvent}
+              size="s"
+              color="text"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      {!hideViewInApp && (
         <EuiFlexItem>
           <EuiToolTip
             content={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
@@ -194,7 +201,7 @@ export function AlertActions({
             />
           </EuiToolTip>
         </EuiFlexItem>
-      ) : null}
+      )}
 
       <EuiFlexItem
         css={{

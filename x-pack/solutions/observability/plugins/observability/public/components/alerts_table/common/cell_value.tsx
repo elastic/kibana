@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
-import React from 'react';
+import { EuiLink } from '@elastic/eui';
+import React, { ReactNode } from 'react';
 import {
   ALERT_DURATION,
   ALERT_SEVERITY,
@@ -25,6 +25,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
+import { ObsAlertActionProps } from '../../alert_actions/alert_actions';
 import { paths } from '../../../../common/locators/paths';
 import { asDuration } from '../../../../common/utils/formatters';
 import { AlertSeverityBadge } from '../../alert_severity_badge';
@@ -32,9 +33,9 @@ import { AlertStatusIndicator } from '../../alert_status_indicator';
 import { parseAlert } from '../../../pages/alerts/helpers/parse_alert';
 import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
-import type { GetObservabilityAlertsTableProp } from '../types';
+import { GetObservabilityAlertsTableProp } from '../types';
 
-const getAlertFieldValue = (alert: Alert, fieldName: string) => {
+export const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   // can be updated when working on https://github.com/elastic/kibana/issues/140819
   const rawValue = alert[fieldName];
   const value = Array.isArray(rawValue) ? rawValue.join() : rawValue;
@@ -53,41 +54,52 @@ const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   return '--';
 };
 
+export type AlertCellRenderers = Record<
+  string,
+  (value: string, props: ObsAlertActionProps) => ReactNode
+>;
+
 /**
  * This implementation of `EuiDataGrid`'s `renderCellValue`
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
 // eslint-disable-next-line react/function-component-definition
-export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellValue'> = ({
-  columnId,
-  alert,
-  openAlertInFlyout,
-  observabilityRuleTypeRegistry,
-  services: { http },
-}) => {
-  const value = getAlertFieldValue(alert, columnId);
+export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellValue'> = (props) => {
+  const {
+    columnId,
+    alert,
+    openAlertInFlyout,
+    observabilityRuleTypeRegistry,
+    services: { http },
+    extraCellRenderers,
+  } = props;
 
-  switch (columnId) {
-    case ALERT_STATUS:
+  const cellRenderers: AlertCellRenderers = {
+    [ALERT_STATUS]: (value) => {
       if (value !== ALERT_STATUS_ACTIVE && value !== ALERT_STATUS_RECOVERED) {
         // NOTE: This should only be needed to narrow down the type.
         // Status should be either "active" or "recovered".
         return null;
       }
       return <AlertStatusIndicator alertStatus={value} />;
-    case TIMESTAMP:
-    case ALERT_START:
-    case ALERT_RULE_EXECUTION_TIMESTAMP:
-      return <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />;
-    case ALERT_DURATION:
-      return <>{asDuration(Number(value))}</>;
-    case ALERT_SEVERITY:
-      return <AlertSeverityBadge severityLevel={value ?? undefined} />;
-    case ALERT_EVALUATION_VALUE:
+    },
+    [TIMESTAMP]: (value) => (
+      <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
+    ),
+    [ALERT_START]: (value) => (
+      <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
+    ),
+    [ALERT_RULE_EXECUTION_TIMESTAMP]: (value) => (
+      <TimestampTooltip time={new Date(value ?? '').getTime()} timeUnit="milliseconds" />
+    ),
+    [ALERT_DURATION]: (value) => <>{asDuration(Number(value))}</>,
+    [ALERT_SEVERITY]: (value) => <AlertSeverityBadge severityLevel={value ?? undefined} />,
+    [ALERT_EVALUATION_VALUE]: (value) => {
       const multipleValues = getAlertFieldValue(alert, ALERT_EVALUATION_VALUES);
       return <>{multipleValues ?? value}</>;
-    case ALERT_REASON:
+    },
+    [ALERT_REASON]: (value) => {
       if (!observabilityRuleTypeRegistry) return <>{value}</>;
       const parsedAlert = parseAlert(observabilityRuleTypeRegistry)(alert);
       return (
@@ -99,26 +111,26 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
           {parsedAlert.reason}
         </EuiLink>
       );
-    case ALERT_RULE_NAME:
+    },
+    [ALERT_RULE_NAME]: (value) => {
       const ruleCategory = getAlertFieldValue(alert, ALERT_RULE_CATEGORY);
       const ruleId = getAlertFieldValue(alert, ALERT_RULE_UUID);
       const ruleLink = ruleId ? http.basePath.prepend(paths.observability.ruleDetails(ruleId)) : '';
       return (
         <CellTooltip
           value={
-            <EuiButtonEmpty
-              flush="left"
-              data-test-subj="o11yColumnsButton"
-              size="s"
-              href={ruleLink}
-            >
+            <EuiLink data-test-subj="o11yColumnsButton" href={ruleLink}>
               {value}
-            </EuiButtonEmpty>
+            </EuiLink>
           }
           tooltipContent={ruleCategory}
         />
       );
-    default:
-      return <>{value}</>;
-  }
+    },
+    ...(extraCellRenderers ?? {}),
+  };
+
+  const val = getAlertFieldValue(alert, columnId);
+
+  return cellRenderers[columnId] ? cellRenderers[columnId](val, props) : <>{val}</>;
 };
