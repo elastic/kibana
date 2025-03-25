@@ -24,7 +24,7 @@ const fetchGenericEntity = async (
   return lastValueFrom(
     dataService.search.search<GenericEntityRequest, GenericEntityResponse>({
       params: {
-        index: 'ASSET_INVENTORY_INDEX_PATTERN',
+        index: ASSET_INVENTORY_INDEX_PATTERN,
         query: {
           term: { _id: docId },
         },
