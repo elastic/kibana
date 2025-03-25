@@ -11,6 +11,8 @@ import { TooltipInfo, XYChartSeriesIdentifier } from '@elastic/charts';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import React, { FC } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { CommonXYDataLayerConfig } from '../../../common';
 import {
   DatatablesWithFormatInfo,
@@ -128,7 +130,13 @@ export const Tooltip: FC<Props> = ({
   return (
     <div className="detailedTooltip">
       {renderEndzoneTooltip && (
-        <div className="detailedTooltip__header">
+        <div
+          css={({ euiTheme }: UseEuiTheme) => css`
+            > :last-child {
+              margin-bottom: ${euiTheme.size.s};
+            }
+          `}
+        >
           <EndzoneTooltipHeader />
         </div>
       )}
