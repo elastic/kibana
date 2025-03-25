@@ -41,11 +41,11 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
 
       case 'JSXElement':
         // Determining whether node is of form `<FormattedMessage defaultMessage="message" />`
-        const name: TSESTree.JSXTagNameExpression = currentNode.openingElement.name;
+        const jsxOpeningElement: TSESTree.JSXTagNameExpression = currentNode.openingElement.name;
         const attributes: Array<TSESTree.JSXAttribute | TSESTree.JSXSpreadAttribute> =
           currentNode.openingElement.attributes;
 
-        if (!('name' in name) || name.name !== 'FormattedMessage') {
+        if (!('name' in jsxOpeningElement) || jsxOpeningElement.name !== 'FormattedMessage') {
           return '';
         }
 

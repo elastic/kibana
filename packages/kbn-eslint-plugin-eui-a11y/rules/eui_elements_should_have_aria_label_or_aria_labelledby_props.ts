@@ -8,7 +8,8 @@
  */
 
 import type { Rule } from 'eslint';
-import { AST_NODE_TYPES, TSESTree, TSNode } from '@typescript-eslint/typescript-estree';
+import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
+import { Node } from 'estree';
 
 import { checkNodeForExistingAriaLabelProp } from '../helpers/check_node_for_existing_data_test_subj_prop';
 import { getIntentFromNode } from '../helpers/get_intent_from_node';
@@ -21,7 +22,7 @@ export const EUI_ELEMENTS = [
   'EuiSelectWithWidth',
 ];
 
-export const EuiElementsShouldHaveA11yProps: Rule.RuleModule = {
+export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
     fixable: 'code',
@@ -43,15 +44,11 @@ export const EuiElementsShouldHaveA11yProps: Rule.RuleModule = {
           return;
         }
 
-        const hasDataTestSubjProp = checkNodeForExistingAriaLabelProp(parent, () =>
-          // @ts-expect-error upgrade typescript v5.1.6
-          sourceCode.getScope(node as TSNode)
+        const hasAriaLabelProp = checkNodeForExistingAriaLabelProp(parent, () =>
+          sourceCode.getScope(node as Node)
         );
 
-        if (hasDataTestSubjProp) {
-          // JSXOpeningElement already has a prop for data-test-subj. Bail.
-          return;
-        }
+        if (hasAriaLabelProp) return; // JSXOpeningElement already has a prop for aria-label. Bail.
 
         // Start building the suggestion.
 

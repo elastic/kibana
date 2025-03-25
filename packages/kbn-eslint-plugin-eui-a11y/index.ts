@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiElementsShouldHaveA11yProps } from './rules/eui_elements_should_have_a11y_props';
+import { EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps } from './rules/eui_elements_should_have_aria_label_or_aria_labelledby_props';
 
 /**
  * Custom ESLint rules, add `'@kbn/eslint-plugin-eui-a11y'` to your eslint config to use them
  * @internal
  */
 export const rules = {
-  eui_elements_should_have_a11y_props: EuiElementsShouldHaveA11yProps,
+  eui_elements_should_have_aria_label_or_aria_labelledby_props:
+    EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps,
 };

@@ -10,14 +10,15 @@
 import type { Scope } from 'eslint';
 import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
 
-const PROP_NAME = 'aria-label';
+const PROP_NAMES = ['aria-label', 'aria-labelledby'];
 
 export function checkNodeForExistingAriaLabelProp(
   node: TSESTree.JSXOpeningElement,
   getScope: () => Scope.Scope
 ): boolean {
   const hasProp = node.attributes.find(
-    (attr) => attr.type === AST_NODE_TYPES.JSXAttribute && attr.name.name === PROP_NAME
+    (attr) =>
+      attr.type === AST_NODE_TYPES.JSXAttribute && PROP_NAMES.includes(String(attr.name.name))
   );
 
   if (hasProp) {
@@ -43,7 +44,7 @@ export function checkNodeForExistingAriaLabelProp(
   return variable && variable.defs.length > 0
     ? variable.defs[0].node.init?.properties?.find((property: TSESTree.Property) => {
         if ('value' in property.key) {
-          return property.key.value === PROP_NAME;
+          return PROP_NAMES.includes(String(property.key.value));
         }
         return false;
       })

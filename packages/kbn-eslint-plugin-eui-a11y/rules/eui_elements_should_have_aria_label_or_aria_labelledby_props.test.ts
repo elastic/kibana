@@ -8,7 +8,7 @@
  */
 
 import { RuleTester } from 'eslint';
-import { EuiElementsShouldHaveA11yProps } from './eui_elements_should_have_a11y_props';
+import { EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps } from './eui_elements_should_have_aria_label_or_aria_labelledby_props';
 
 const tsTester = [
   '@typescript-eslint/parser',
@@ -49,23 +49,29 @@ const EUI_ELEMENTS = [
 
 for (const [name, tester] of [tsTester, babelTester]) {
   describe(name, () => {
-    tester.run('@kbn/eui_elements_should_have_a11y_props', EuiElementsShouldHaveA11yProps, {
-      valid: EUI_ELEMENTS.map((element) => ({
-        filename: 'foo.tsx',
-        code: `<${element[0]} aria-label="foo" />`,
-      })),
+    tester.run(
+      '@kbn/eui_elements_should_have_a11y_props',
+      EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps,
+      {
+        valid: EUI_ELEMENTS.map((element) => ({
+          filename: 'foo.tsx',
+          code: `<${element[0]} aria-label="foo" />`,
+        })),
 
-      invalid: EUI_ELEMENTS.map((element) => ({
-        filename: 'foo.tsx',
-        code: `<${element[0]}>Value Thing hello</${element[0]}>`,
-        errors: [
-          {
-            line: 1,
-            message: `<${element[0]}> should have a \`aria-label\` for a11y. Use the autofix suggestion or add your own.`,
-          },
-        ],
-        output: `<${element[0]} aria-label="Value Thing hello ${element[1]}">Value Thing hello</${element[0]}>`,
-      })),
-    });
+        invalid: EUI_ELEMENTS.map((element) => {
+          return {
+            filename: 'foo.tsx',
+            code: `<${element[0]}>Value Thing hello</${element[0]}>`,
+            errors: [
+              {
+                line: 1,
+                message: `<${element[0]}> should have a \`aria-label\` for a11y. Use the autofix suggestion or add your own.`,
+              },
+            ],
+            output: `<${element[0]} aria-label="Value Thing hello ${element[1]}">Value Thing hello</${element[0]}>`,
+          };
+        }),
+      }
+    );
   });
 }
