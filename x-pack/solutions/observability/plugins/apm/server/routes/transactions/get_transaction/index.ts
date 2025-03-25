@@ -34,6 +34,7 @@ import {
   URL_SCHEME,
   SERVER_ADDRESS,
   SERVER_PORT,
+  USER_AGENT_VERSION,
 } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -79,6 +80,7 @@ export async function getTransaction({
     URL_SCHEME,
     SERVER_ADDRESS,
     SERVER_PORT,
+    USER_AGENT_VERSION,
   ] as const);
 
   const resp = await apmEventClient.search('get_transaction', {
