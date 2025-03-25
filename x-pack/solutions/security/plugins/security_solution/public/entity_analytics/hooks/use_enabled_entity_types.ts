@@ -7,9 +7,10 @@
 
 import { useMemo } from 'react';
 import { getEntityAnalyticsEntityTypes } from '../../../common/entity_analytics/utils';
+import { EntityType } from '../../../common/entity_analytics/types';
 
 export const useStoreEntityTypes = () => {
-  return useMemo(() => getEntityAnalyticsEntityTypes(), []);
+  return useMemo(() => Object.values(EntityType), []);
 };
 
 export const useRiskEngineEntityTypes = () => {

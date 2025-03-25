@@ -7,10 +7,6 @@
 
 import { EntityType } from './types';
 
-const DISABLED_ENTITY_TYPES = [EntityType.generic];
+const ENTITY_ANALYTICS_ENTITY_TYPES = [EntityType.host, EntityType.user, EntityType.service];
 
-export const getEntityAnalyticsEntityTypes = (): EntityType[] => {
-  return Object.values(EntityType).filter(
-    (entityType) => DISABLED_ENTITY_TYPES.indexOf(entityType) === -1
-  );
-};
+export const getEntityAnalyticsEntityTypes = (): EntityType[] => ENTITY_ANALYTICS_ENTITY_TYPES;

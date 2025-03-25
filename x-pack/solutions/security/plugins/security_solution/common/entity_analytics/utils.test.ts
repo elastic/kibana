@@ -8,8 +8,8 @@ import { getEntityAnalyticsEntityTypes } from './utils';
 import { EntityType } from './types';
 
 describe('utils', () => {
-  describe('getAllEntityTypes', () => {
-    it('should return all entity types', () => {
+  describe('getEntityAnalyticsEntityTypes', () => {
+    it('should return all Entity Analytics entity types', () => {
       const entityTypes = getEntityAnalyticsEntityTypes();
       expect(entityTypes).toEqual([EntityType.host, EntityType.user, EntityType.service]);
     });

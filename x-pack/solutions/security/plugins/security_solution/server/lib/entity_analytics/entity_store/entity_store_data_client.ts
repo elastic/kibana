@@ -27,7 +27,6 @@ import type { EntityDefinition } from '@kbn/entities-schema';
 import type { estypes } from '@elastic/elasticsearch';
 import { getAllMissingPrivileges } from '../../../../common/entity_analytics/privileges';
 import { merge } from '../../../../common/utils/objects/merge';
-import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { ExperimentalFeatures } from '../../../../common';
 import type {
@@ -241,7 +240,7 @@ export class EntityStoreDataClient {
     const run = <T>(fn: () => Promise<T>) =>
       new Promise<T>((resolve) => setTimeout(() => fn().then(resolve), 0));
 
-    const enabledEntityTypes = getEntityAnalyticsEntityTypes();
+    const enabledEntityTypes = Object.values(EntityType);
 
     // When entityTypes param is defined it only enables the engines that are provided
     const enginesTypes = requestBodyOverrides.entityTypes
