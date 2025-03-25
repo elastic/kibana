@@ -7,14 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { SavedObjectLinksAttributes } from './saved_objects/schema/v1';
 import { CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksStorage } from './content_management';
 import { linksSavedObjectType } from './saved_objects';
 import { embeddableMigrationDefinition } from './content_management/cm_services';
-import { SavedObjectLinksAttributes } from './saved_objects/schema/v1';
+import { inject, extract } from './references';
 
 export class LinksServerPlugin implements Plugin<object, object> {
   private readonly logger: Logger;
@@ -44,6 +51,8 @@ export class LinksServerPlugin implements Plugin<object, object> {
     plugins.embeddable.registerEmbeddableFactory({
       id: CONTENT_ID,
       version: LATEST_VERSION,
+      inject,
+      extract,
       getEmbeddableMigrationDefinition: () => embeddableMigrationDefinition,
     });
 

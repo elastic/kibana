@@ -8,11 +8,20 @@
  */
 
 import { flow } from 'lodash';
-import { SavedDashboardPanel } from '../../../../dashboard_saved_object';
-import { DashboardAttributes } from '../../types';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
+import type { SavedDashboardPanel } from '../../../../dashboard_saved_object';
+import type { DashboardAttributes } from '../../types';
+import { getReferencesForPanelId } from '../../../../../common';
 
-export function transformPanelsOut(panelsJSON: string): DashboardAttributes['panels'] {
-  return flow(JSON.parse, transformPanelsProperties)(panelsJSON);
+export function transformPanelsOut(
+  panelsJSON: string,
+  embeddable: EmbeddableStart,
+  references?: SavedObjectReference[]
+): DashboardAttributes['panels'] {
+  return flow(JSON.parse, transformPanelsProperties, (panels: DashboardAttributes['panels']) =>
+    injectPanelReferences(embeddable, references, panels)
+  )(panelsJSON);
 }
 
 function transformPanelsProperties(panels: SavedDashboardPanel[]) {
@@ -28,4 +37,24 @@ function transformPanelsProperties(panels: SavedDashboardPanel[]) {
       version,
     })
   );
+}
+
+function injectPanelReferences(
+  embeddable: EmbeddableStart,
+  references: SavedObjectReference[] = [],
+  panels: DashboardAttributes['panels']
+) {
+  const injectedPanels = panels.map((panel) => {
+    if (!panel.panelIndex) return panel;
+    const panelReferences = getReferencesForPanelId(panel.panelIndex, references);
+    const { type: embeddableType, ...injectedPanelConfig } = embeddable.inject(
+      { type: panel.type, ...panel.panelConfig },
+      panelReferences
+    );
+    return {
+      ...panel,
+      panelConfig: injectedPanelConfig,
+    };
+  });
+  return injectedPanels;
 }

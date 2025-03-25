@@ -13,17 +13,13 @@ import type {
   Version,
 } from '@kbn/object-versioning';
 
-import { cmServiceDefinition as cmV1 } from './v1/cm_services';
-import { cmServiceDefinition as cmV2 } from './v2/cm_services';
+import { serviceDefinition as cmV1 } from './v1/cm_services';
 import { embeddableVersionableObject as embeddableV1 } from './v1/cm_services';
-import { embeddableVersionableObject as embeddableV2 } from './v2/cm_services';
 
 export const cmServicesDefinition: { [version: Version]: ServicesDefinition } = {
   1: cmV1,
-  2: cmV2,
 };
 
 export const embeddableMigrationDefinition: ObjectMigrationDefinition = {
   1: embeddableV1,
-  2: embeddableV2,
 };

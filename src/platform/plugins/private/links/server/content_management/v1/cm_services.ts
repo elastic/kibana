@@ -8,20 +8,34 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type {
-  ContentManagementServicesDefinition as ServicesDefinition,
-  VersionableObject,
-} from '@kbn/object-versioning';
 import {
-  savedObjectSchema,
   createResultSchema,
   updateOptionsSchema,
   createOptionsSchemas,
   objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
-import { savedObjectLinksAttributesSchema } from '../../saved_objects/schema/v1';
+import type {
+  ContentManagementServicesDefinition as ServicesDefinition,
+  VersionableObject,
+} from '@kbn/object-versioning';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { LinksByValueSerializedState } from './types';
 
-const linksSavedObjectSchema = savedObjectSchema(savedObjectLinksAttributesSchema);
+import {
+  SavedObjectLinksAttributes,
+  dashboardLinkSchema as dashboardLinkSchemaV1,
+  externalLinkSchema,
+  savedObjectLinksAttributesSchema as linksAttributesSchemaV1,
+} from '../../saved_objects/schema/v1';
+
+const dashboardLinkSchema = dashboardLinkSchemaV1.extends({
+  destinationRefName: schema.string({ meta: { deprecated: true } }),
+  destination: schema.string(),
+});
+
+export const linksAttributesSchema = linksAttributesSchemaV1.extends({
+  links: schema.arrayOf(schema.oneOf([dashboardLinkSchema, externalLinkSchema])),
+});
 
 const searchOptionsSchema = schema.maybe(
   schema.object(
@@ -41,13 +55,11 @@ const linksUpdateOptionsSchema = schema.object({
   references: updateOptionsSchema.references,
 });
 
-// Content management service definition.
-// We need it for BWC support between different versions of the content
-export const cmServiceDefinition: ServicesDefinition = {
+export const serviceDefinition: ServicesDefinition = {
   get: {
     out: {
       result: {
-        schema: objectTypeToGetResultSchema(linksSavedObjectSchema),
+        schema: objectTypeToGetResultSchema(linksAttributesSchema),
       },
     },
   },
@@ -57,16 +69,12 @@ export const cmServiceDefinition: ServicesDefinition = {
         schema: linksCreateOptionsSchema,
       },
       data: {
-        schema: savedObjectLinksAttributesSchema,
-        up: (attributes) => {
-          // TODO inject references...
-          return attributes;
-        },
+        schema: linksAttributesSchema,
       },
     },
     out: {
       result: {
-        schema: createResultSchema(linksSavedObjectSchema),
+        schema: createResultSchema(linksAttributesSchema),
       },
     },
   },
@@ -76,7 +84,7 @@ export const cmServiceDefinition: ServicesDefinition = {
         schema: linksUpdateOptionsSchema, // same schema as "create"
       },
       data: {
-        schema: savedObjectLinksAttributesSchema,
+        schema: linksAttributesSchema,
       },
     },
   },
@@ -90,16 +98,17 @@ export const cmServiceDefinition: ServicesDefinition = {
   mSearch: {
     out: {
       result: {
-        schema: linksSavedObjectSchema,
+        schema: linksAttributesSchema,
       },
     },
   },
 };
 
-export const embeddableVersionableObject: VersionableObject = {
-  schema: savedObjectLinksAttributesSchema,
-  up: (attributes) => {
-    // TODO inject references...
-    return attributes;
-  },
+export const embeddableVersionableObject: VersionableObject<
+  unknown,
+  unknown,
+  LinksByValueSerializedState,
+  { attributes: SavedObjectLinksAttributes; references?: SavedObjectReference[] }
+> = {
+  schema: linksAttributesSchema,
 };

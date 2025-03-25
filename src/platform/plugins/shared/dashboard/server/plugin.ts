@@ -70,6 +70,8 @@ export class DashboardPlugin
       storage: new DashboardStorage({
         throwOnResultValidationError: this.initializerContext.env.mode.dev,
         logger: this.logger.get('storage'),
+        // TODO this should be EmbeddableStart from core.getStartServices
+        embeddable: plugins.embeddable,
       }),
       version: {
         latest: LATEST_VERSION,

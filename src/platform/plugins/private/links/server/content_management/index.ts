@@ -8,6 +8,7 @@
  */
 
 export type {
+  LinksAttributes,
   LinksByValueSerializedState,
   LinksByReferenceSerializedState,
   LinksSerializedState,

@@ -27,7 +27,7 @@ export type {
   DashboardOptions,
 } from './types';
 export {
-  serviceDefinition,
+  getServiceDefinition,
   dashboardAttributesSchema,
   dashboardGetResultSchema,
   dashboardCreateResultSchema,

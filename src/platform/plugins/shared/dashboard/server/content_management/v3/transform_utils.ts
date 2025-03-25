@@ -10,6 +10,7 @@
 import { pick } from 'lodash';
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import type {
   DashboardAttributes,
   DashboardGetOut,
@@ -34,7 +35,9 @@ import {
 } from './transforms';
 
 export function dashboardAttributesOut(
-  attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>
+  attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
+  embeddable: EmbeddableStart,
+  references?: SavedObjectReference[]
 ): DashboardAttributes | Partial<DashboardAttributes> {
   const {
     controlGroupInput,
@@ -57,7 +60,7 @@ export function dashboardAttributesOut(
       kibanaSavedObjectMeta: transformSearchSourceOut(kibanaSavedObjectMeta),
     }),
     ...(optionsJSON && { options: transformOptionsOut(optionsJSON) }),
-    ...(panelsJSON && { panels: transformPanelsOut(panelsJSON) }),
+    ...(panelsJSON && { panels: transformPanelsOut(panelsJSON, embeddable, references) }),
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
@@ -69,7 +72,11 @@ export function dashboardAttributesOut(
   };
 }
 
-export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['GetOut'] => {
+export const getResultV3ToV2 = (
+  embeddable: EmbeddableStart,
+  references: SavedObjectReference[] = [],
+  result: DashboardGetOut
+): DashboardCrudTypesV2['GetOut'] => {
   const { meta, item } = result;
   const { attributes, ...rest } = item;
   const {
@@ -95,7 +102,7 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
       kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),
     }),
     ...(options && { optionsJSON: JSON.stringify(options) }),
-    panelsJSON: panels ? transformPanelsIn(panels) : '[]',
+    panelsJSON: panels ? transformPanelsIn(panels, embeddable, references) : '[]',
     refreshInterval,
     ...(timeFrom && { timeFrom }),
     timeRestore,
@@ -113,7 +120,9 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
 };
 
 export const itemAttrsToSavedObjectAttrs = (
-  attributes: DashboardAttributes
+  attributes: DashboardAttributes,
+  embeddable: EmbeddableStart,
+  references?: SavedObjectReference[]
 ): ItemAttrsToSavedObjectAttrsReturn => {
   try {
     const { controlGroupInput, kibanaSavedObjectMeta, options, panels, ...rest } = attributes;
@@ -126,7 +135,7 @@ export const itemAttrsToSavedObjectAttrs = (
         optionsJSON: JSON.stringify(options),
       }),
       ...(panels && {
-        panelsJSON: transformPanelsIn(panels),
+        panelsJSON: transformPanelsIn(panels, embeddable, references),
       }),
       ...(kibanaSavedObjectMeta && {
         kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),
@@ -155,12 +164,14 @@ export interface SavedObjectToItemOptions {
 
 export function savedObjectToItem(
   savedObject: SavedObject<DashboardSavedObjectAttributes>,
+  embeddable: EmbeddableStart,
   partial: false,
   opts?: SavedObjectToItemOptions
 ): SavedObjectToItemReturn<DashboardItem>;
 
 export function savedObjectToItem(
   savedObject: PartialSavedObject<DashboardSavedObjectAttributes>,
+  embeddable: EmbeddableStart,
   partial: true,
   opts?: SavedObjectToItemOptions
 ): SavedObjectToItemReturn<PartialDashboardItem>;
@@ -169,6 +180,7 @@ export function savedObjectToItem(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
     | PartialSavedObject<DashboardSavedObjectAttributes>,
+  embeddable: EmbeddableStart,
   partial: boolean /* partial arg is used to enforce the correct savedObject type */,
   { allowedAttributes, allowedReferences }: SavedObjectToItemOptions = {}
 ): SavedObjectToItemReturn<DashboardItem | PartialDashboardItem> {
@@ -189,8 +201,8 @@ export function savedObjectToItem(
 
   try {
     const attributesOut = allowedAttributes
-      ? pick(dashboardAttributesOut(attributes), allowedAttributes)
-      : dashboardAttributesOut(attributes);
+      ? pick(dashboardAttributesOut(attributes, embeddable, references), allowedAttributes)
+      : dashboardAttributesOut(attributes, embeddable, references);
 
     // if includeReferences is provided, only include references of those types
     const referencesOut = allowedReferences

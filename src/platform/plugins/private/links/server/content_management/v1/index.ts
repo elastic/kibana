@@ -8,13 +8,8 @@
  */
 
 export type {
+  LinksAttributes,
   LinksByValueSerializedState,
   LinksByReferenceSerializedState,
   LinksSerializedState,
 } from './types';
-
-export {
-  dashboardLinkSchema,
-  externalLinkSchema,
-  savedObjectLinksAttributesSchema,
-} from '../../saved_objects/schema/v1';

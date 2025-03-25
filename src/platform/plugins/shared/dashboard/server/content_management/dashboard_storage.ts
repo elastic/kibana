@@ -9,14 +9,19 @@
 
 import Boom from '@hapi/boom';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
-import { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 
-import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
-import { StorageContext } from '@kbn/content-management-plugin/server';
+import type {
+  CreateResult,
+  DeleteResult,
+  SearchQuery,
+} from '@kbn/content-management-plugin/common';
+import type { StorageContext } from '@kbn/content-management-plugin/server';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
-import { cmServicesDefinition } from './cm_services';
-import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
+import { getCmServicesDefinition } from './cm_services';
+import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { itemAttrsToSavedObjectAttrs, savedObjectToItem } from './latest';
 import type {
   DashboardAttributes,
@@ -60,19 +65,23 @@ export class DashboardStorage {
   constructor({
     logger,
     throwOnResultValidationError,
+    embeddable,
   }: {
     logger: Logger;
     throwOnResultValidationError: boolean;
+    embeddable: EmbeddableStart;
   }) {
     this.logger = logger;
     this.throwOnResultValidationError = throwOnResultValidationError ?? false;
+    this.embeddable = embeddable;
   }
 
   private logger: Logger;
   private throwOnResultValidationError: boolean;
+  private embeddable: EmbeddableStart;
 
   async get(ctx: StorageContext, id: string): Promise<DashboardGetOut> {
-    const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+    const transforms = ctx.utils.getTransforms(getCmServicesDefinition(this.embeddable));
     const soClient = await savedObjectClientFromRequest(ctx);
 
     // Save data in DB
@@ -83,7 +92,7 @@ export class DashboardStorage {
       outcome,
     } = await soClient.resolve<DashboardSavedObjectAttributes>(DASHBOARD_SAVED_OBJECT_TYPE, id);
 
-    const { item, error: itemError } = savedObjectToItem(savedObject, false);
+    const { item, error: itemError } = savedObjectToItem(savedObject, this.embeddable, false);
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
@@ -126,7 +135,7 @@ export class DashboardStorage {
     data: DashboardAttributes,
     options: DashboardCreateOptions
   ): Promise<DashboardCreateOut> {
-    const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+    const transforms = ctx.utils.getTransforms(getCmServicesDefinition(this.embeddable));
     const soClient = await savedObjectClientFromRequest(ctx);
 
     // Validate input (data & options) & UP transform them to the latest version
@@ -146,8 +155,11 @@ export class DashboardStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, error: attributesError } =
-      itemAttrsToSavedObjectAttrs(dataToLatest);
+    const { attributes: soAttributes, error: attributesError } = itemAttrsToSavedObjectAttrs(
+      dataToLatest,
+      this.embeddable,
+      optionsToLatest?.references
+    );
     if (attributesError) {
       throw Boom.badRequest(`Invalid data. ${attributesError.message}`);
     }
@@ -159,7 +171,7 @@ export class DashboardStorage {
       optionsToLatest
     );
 
-    const { item, error: itemError } = savedObjectToItem(savedObject, false);
+    const { item, error: itemError } = savedObjectToItem(savedObject, this.embeddable, false);
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
@@ -195,7 +207,7 @@ export class DashboardStorage {
     data: DashboardAttributes,
     options: DashboardUpdateOptions
   ): Promise<DashboardUpdateOut> {
-    const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+    const transforms = ctx.utils.getTransforms(getCmServicesDefinition(this.embeddable));
     const soClient = await savedObjectClientFromRequest(ctx);
 
     // Validate input (data & options) & UP transform them to the latest version
@@ -215,8 +227,11 @@ export class DashboardStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, error: attributesError } =
-      itemAttrsToSavedObjectAttrs(dataToLatest);
+    const { attributes: soAttributes, error: attributesError } = itemAttrsToSavedObjectAttrs(
+      dataToLatest,
+      this.embeddable,
+      optionsToLatest?.references
+    );
     if (attributesError) {
       throw Boom.badRequest(`Invalid data. ${attributesError.message}`);
     }
@@ -229,7 +244,7 @@ export class DashboardStorage {
       optionsToLatest
     );
 
-    const { item, error: itemError } = savedObjectToItem(partialSavedObject, true);
+    const { item, error: itemError } = savedObjectToItem(partialSavedObject, this.embeddable, true);
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
@@ -276,7 +291,7 @@ export class DashboardStorage {
     query: SearchQuery,
     options: DashboardSearchOptions
   ): Promise<DashboardSearchOut> {
-    const transforms = ctx.utils.getTransforms(cmServicesDefinition);
+    const transforms = ctx.utils.getTransforms(getCmServicesDefinition(this.embeddable));
     const soClient = await savedObjectClientFromRequest(ctx);
 
     // Validate and UP transform the options
@@ -293,7 +308,7 @@ export class DashboardStorage {
     const soResponse = await soClient.find<DashboardSavedObjectAttributes>(soQuery);
     const hits = soResponse.saved_objects
       .map((so) => {
-        const { item } = savedObjectToItem(so, false, {
+        const { item } = savedObjectToItem(so, this.embeddable, false, {
           allowedAttributes: soQuery.fields,
           allowedReferences: optionsToLatest?.includeReferences,
         });
