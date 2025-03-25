@@ -203,3 +203,5 @@ export type {
 } from './types';
 
 export { ElasticsearchAssetType } from './types';
+
+export { FleetError } from './errors';
