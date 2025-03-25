@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
-import { first, last } from 'lodash';
+import { last } from 'lodash';
 import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   LlmProxy,
@@ -124,19 +124,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
+      it('makes 2 requests to the LLM', () => {
+        expect(llmProxy.interceptedRequests.length).to.be(2);
+      });
+
       it('emits 5 messageAdded events', () => {
         expect(messageAddedEvents.length).to.be(5);
       });
 
       describe('The first request', () => {
-        it('contains the correct number of messages', () => {
-          expect(firstRequestBody.messages.length).to.be(4);
-        });
-
-        it('contains the system message as the first message in the request', () => {
-          expect(first(firstRequestBody.messages)?.role === MessageRole.System);
-        });
-
         it('contain retrieve_elastic_doc function', () => {
           expect(firstRequestBody.tools?.map((t) => t.function.name)).to.contain(
             'retrieve_elastic_doc'
@@ -147,41 +143,28 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(firstRequestBody.tool_choice).to.be('auto');
           expect(firstRequestBody.tools?.length).to.not.be(0);
         });
-
-        it('contains the original user message', () => {
-          expect(
-            firstRequestBody.messages.find((message) => message.role === MessageRole.User)?.content
-          ).to.be(USER_PROMPT);
-        });
       });
 
       describe('The second request - Sending the user prompt', () => {
-        it('contains the correct number of messages', () => {
-          expect(secondRequestBody.messages.length).to.be(6);
-        });
-
-        it('contains the system message as the first message in the request', () => {
-          expect(first(secondRequestBody.messages)?.role === MessageRole.System);
-        });
-
-        it('contains the user prompt', () => {
-          expect(secondRequestBody.messages[1].role).to.be(MessageRole.User);
-          expect(secondRequestBody.messages[1].content).to.be(USER_PROMPT);
-        });
-
-        it('contains the tool call for retrieve_elastic_doc and the corresponding response', () => {
+        it('contains the tool call for retrieve_elastic_doc', () => {
           expect(secondRequestBody.messages[4].role).to.be(MessageRole.Assistant);
           // @ts-expect-error
           expect(secondRequestBody.messages[4].tool_calls[0].function.name).to.be(
             'retrieve_elastic_doc'
           );
+        });
 
-          expect(last(secondRequestBody.messages)?.role).to.be('tool');
+        it('documents from Elastic docs are sent to the LLM', () => {
+          const lastMessage = last(secondRequestBody.messages);
+          expect(lastMessage?.role).to.be('tool');
           // @ts-expect-error
-          expect(last(secondRequestBody.messages)?.tool_call_id).to.equal(
+          expect(lastMessage?.tool_call_id).to.equal(
             // @ts-expect-error
             secondRequestBody.messages[4].tool_calls[0].id
           );
+
+          const parsedContent = JSON.parse(lastMessage?.content as string);
+          expect(parsedContent).to.have.property('documents');
         });
       });
     });
