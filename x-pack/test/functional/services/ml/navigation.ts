@@ -272,6 +272,7 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToDataVisualizer() {
+      await this.navigateToMl();
       await this.navigateToArea('~mlMainTab & ~dataVisualizer', 'mlPageDataVisualizerSelector');
     },
 
