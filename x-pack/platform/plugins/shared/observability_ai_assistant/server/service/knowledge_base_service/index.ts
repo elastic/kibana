@@ -193,7 +193,7 @@ export class KnowledgeBaseService {
 
     const sortedEntries = orderBy(
       documentsFromKb.concat(documentsFromConnectors),
-      'score',
+      'esScore',
       'desc'
     ).slice(0, limit.size ?? 20);
 
