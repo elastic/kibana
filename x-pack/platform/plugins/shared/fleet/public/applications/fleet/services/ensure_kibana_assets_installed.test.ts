@@ -7,14 +7,11 @@
 
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 
-import {
-  sendGetPackageInfoByKeyForRq,
-  sendInstallKibanaAssetsForRq,
-} from '../../../../../../hooks';
+import { sendGetPackageInfoByKeyForRq, sendInstallKibanaAssetsForRq } from '../../../hooks';
 
 import { ensurePackageKibanaAssetsInstalled } from './ensure_kibana_assets_installed';
 
-jest.mock('../../../../../../hooks');
+jest.mock('../../../hooks');
 
 describe('ensurePackageKibanaAssetsInstalled', () => {
   beforeEach(() => {
@@ -43,6 +40,35 @@ describe('ensurePackageKibanaAssetsInstalled', () => {
     expect(sendInstallKibanaAssetsForRq).toBeCalledWith({
       pkgName: 'nginx',
       pkgVersion: '1.25.1',
+    });
+
+    expect(toasts.addSuccess).toBeCalled();
+  });
+
+  it('install assets in multiple space if not installed', async () => {
+    jest.mocked(sendGetPackageInfoByKeyForRq).mockResolvedValue({
+      item: {
+        installationInfo: {
+          name: 'nginx',
+          version: '1.25.1',
+          installed_kibana_space_id: 'default',
+        },
+      },
+    } as any);
+
+    const toasts = toastsServiceMock.createStartContract();
+
+    await ensurePackageKibanaAssetsInstalled({
+      spaceIds: ['default', 'test1', 'test2'],
+      pkgName: 'nginx',
+      pkgVersion: '1.25.1',
+      toasts,
+    });
+
+    expect(sendInstallKibanaAssetsForRq).toBeCalledWith({
+      pkgName: 'nginx',
+      pkgVersion: '1.25.1',
+      spaceIds: ['test1', 'test2'],
     });
 
     expect(toasts.addSuccess).toBeCalled();
