@@ -3277,7 +3277,7 @@
             }
           }
         },
-        "enterpriseSearchsearch": {
+        "enterpriseSearchElasticsearch": {
           "properties": {
             "appId": {
               "type": "keyword",
