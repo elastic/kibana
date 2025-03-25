@@ -33,16 +33,7 @@ import { getTestFunctions } from './test_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';
 import {
-  byOption,
-  metadataOption,
-  asOption,
-  onOption,
-  withOption,
-  appendSeparatorOption,
-} from '../definitions/options';
-import {
   CommandDefinition,
-  CommandOptionsDefinition,
   FunctionParameter,
   FunctionDefinition,
   FunctionParameterType,
@@ -204,9 +195,6 @@ function buildCommandLookup(): Map<string, CommandDefinition<string>> {
   if (!commandLookups) {
     commandLookups = commandDefinitions.reduce((memo, def) => {
       memo.set(def.name, def);
-      if (def.alias) {
-        memo.set(def.alias, def);
-      }
       return memo;
     }, new Map<string, CommandDefinition<string>>());
   }
@@ -219,12 +207,6 @@ export function getCommandDefinition(name: string): CommandDefinition<string> {
 
 export function getAllCommands() {
   return Array.from(buildCommandLookup().values());
-}
-
-export function getCommandOption(optionName: CommandOptionsDefinition<string>['name']) {
-  return [byOption, metadataOption, asOption, onOption, withOption, appendSeparatorOption].find(
-    ({ name }) => name === optionName
-  );
 }
 
 function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {

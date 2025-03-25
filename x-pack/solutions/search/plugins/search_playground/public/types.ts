@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-import {
+import type {
   HealthStatus,
   IndexName,
   IndicesStatsIndexMetadataState,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import React from 'react';
+import type {
+  ReactNode,
+  ChangeEvent,
+  FormEvent,
+  Dispatch as ReactDispatch,
+  SetStateAction as ReactSetStateAction,
+} from 'react';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
@@ -28,7 +34,7 @@ import type {
   UserConfiguredActionConnector,
 } from '@kbn/alerts-ui-shared/src/common/types';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ChatRequestData, MessageRole, LLMs } from '../common/types';
 
 export * from '../common/types';
@@ -93,7 +99,7 @@ export interface ChatForm {
 
 export interface Message {
   id: string;
-  content: string | React.ReactNode;
+  content: string | ReactNode;
   createdAt?: Date;
   annotations?: Annotation[];
   role: MessageRole;
@@ -205,14 +211,9 @@ export interface UseChatHelpers {
   stop: () => void;
   setMessages: (messages: Message[]) => void;
   input: string;
-  setInput: React.Dispatch<React.SetStateAction<string>>;
-  handleInputChange: (
-    e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>
-  ) => void;
-  handleSubmit: (
-    e: React.FormEvent<HTMLFormElement>,
-    chatRequestOptions?: ChatRequestOptions
-  ) => void;
+  setInput: ReactDispatch<ReactSetStateAction<string>>;
+  handleInputChange: (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => void;
+  handleSubmit: (e: FormEvent<HTMLFormElement>, chatRequestOptions?: ChatRequestOptions) => void;
   isLoading: boolean;
 }
 

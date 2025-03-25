@@ -148,7 +148,7 @@ import { registerDeployAgentPoliciesTask } from './services/agent_policies/deplo
 import { DeleteUnenrolledAgentsTask } from './tasks/delete_unenrolled_agents_task';
 import { registerBumpAgentPoliciesTask } from './services/agent_policies/bump_agent_policies_task';
 import { UpgradeAgentlessDeploymentsTask } from './tasks/upgrade_agentless_deployment';
-import { SyncIntegrationsTask } from './tasks/sync_integrations_task';
+import { SyncIntegrationsTask } from './tasks/sync_integrations/sync_integrations_task';
 import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task';
 
 export interface FleetSetupDeps {
