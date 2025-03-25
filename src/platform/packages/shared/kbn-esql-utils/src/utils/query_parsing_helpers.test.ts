@@ -150,7 +150,7 @@ describe('esql query helpers', () => {
     });
 
     it('should return true for metrics with aggregations', () => {
-      expect(hasTransformationalCommand('metrics a var = avg(b)')).toBeTruthy();
+      expect(hasTransformationalCommand('metrics a | stats var = avg(b)')).toBeTruthy();
     });
   });
 
