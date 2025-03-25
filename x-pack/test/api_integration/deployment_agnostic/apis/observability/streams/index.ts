@@ -19,5 +19,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./root_stream'));
     loadTestFile(require.resolve('./group_streams'));
     loadTestFile(require.resolve('./lifecycle'));
+    loadTestFile(require.resolve('./discover'));
   });
 }
