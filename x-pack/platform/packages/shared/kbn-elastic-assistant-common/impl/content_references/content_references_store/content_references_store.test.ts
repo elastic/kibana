@@ -9,9 +9,7 @@ import { newContentReferencesStore } from './content_references_store';
 import { securityAlertsPageReference } from '../references';
 
 describe('newContentReferencesStore', () => {
-
   it('adds multiple content reference', async () => {
-
     const contentReferencesStore = newContentReferencesStore();
 
     const alertsPageReference1 = contentReferencesStore.add((p) =>
@@ -36,12 +34,12 @@ describe('newContentReferencesStore', () => {
 
   it('disabled content reference store', async () => {
     const contentReferencesStore = newContentReferencesStore({
-      disabled: true
+      disabled: true,
     });
     const alertsPageReference1 = contentReferencesStore.add((p) =>
       securityAlertsPageReference(p.id)
     );
-    
+
     const store = contentReferencesStore.getStore();
 
     const keys = Object.keys(store);
