@@ -38,11 +38,15 @@ export async function importTinyElserModel(ml: ReturnType<typeof MachineLearning
 export async function setupKnowledgeBase({
   observabilityAIAssistantAPIClient,
   ml,
+  shouldDeployModel = true,
 }: {
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
   ml: ReturnType<typeof MachineLearningProvider>;
+  shouldDeployModel?: boolean;
 }) {
-  await importTinyElserModel(ml);
+  if (shouldDeployModel) {
+    await importTinyElserModel(ml);
+  }
 
   const { status, body } = await observabilityAIAssistantAPIClient.admin({
     endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
