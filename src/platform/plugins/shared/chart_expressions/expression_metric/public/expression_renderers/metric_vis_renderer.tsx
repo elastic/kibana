@@ -63,13 +63,6 @@ export const getMetricVisRenderer = (
         unmountComponentAtNode(domNode);
       });
 
-      const filterable = visData.rows.length
-        ? await metricFilterable(
-            visConfig.dimensions,
-            visData,
-            handlers.hasCompatibleActions?.bind(handlers)
-          )
-        : false;
       const renderComplete = () => {
         const executionContext = handlers.getExecutionContext();
         const containerType = extractContainerType(executionContext);
@@ -84,7 +77,18 @@ export const getMetricVisRenderer = (
         handlers.done();
       };
 
-      const { MetricVis } = await import('../components/metric_vis');
+      // run concurrently
+      const [filterable, { MetricVis }] = await Promise.all([
+        visData.rows.length
+          ? metricFilterable(
+              visConfig.dimensions,
+              visData,
+              handlers.hasCompatibleActions?.bind(handlers)
+            )
+          : false,
+        import('../components/metric_vis'),
+      ]);
+
       render(
         <KibanaRenderContextProvider {...core}>
           <div
