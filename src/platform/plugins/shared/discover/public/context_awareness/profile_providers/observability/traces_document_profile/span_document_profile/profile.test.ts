@@ -19,7 +19,7 @@ import { applicationMock } from '../__mocks__/application_mock';
 import { DEFAULT_ALLOWED_TRACES_BASE_PATTERNS } from '@kbn/discover-utils/src';
 
 describe('spanDocumentProfileProvider', () => {
-  const ROOT_CONTEXT = ({
+  const getRootContext = ({
     profileId,
   }: {
     profileId: string;
@@ -57,7 +57,7 @@ describe('spanDocumentProfileProvider', () => {
     it('matches records with the correct index pattern, data stream type and the correct processor event', () => {
       expect(
         spanDocumentProfileProvider.resolve({
-          rootContext: ROOT_CONTEXT({ profileId }),
+          rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
           record: buildMockRecord(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS[0], {
             'data_stream.type': ['traces'],
@@ -70,7 +70,7 @@ describe('spanDocumentProfileProvider', () => {
     it('does not match records with neither characteristic', () => {
       expect(
         spanDocumentProfileProvider.resolve({
-          rootContext: ROOT_CONTEXT({ profileId }),
+          rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
           record: buildMockRecord('another-index'),
         })
@@ -91,7 +91,7 @@ describe('spanDocumentProfileProvider', () => {
     it('does not match records with the correct data stream type and the correct processor event', () => {
       expect(
         spanDocumentProfileProvider.resolve({
-          rootContext: ROOT_CONTEXT({ profileId }),
+          rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
           record: buildMockRecord(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS[0], {
             'data_stream.type': ['traces'],
