@@ -10,13 +10,9 @@
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataSourceContext, RootContext } from '../../../../profiles';
 import { DataSourceCategory, DocumentType, SolutionType } from '../../../../profiles';
-import { createContextAwarenessMocks } from '../../../../__mocks__';
 import { createObservabilityTracesTransactionDocumentProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
-import type { ProfileProviderServices } from '../../../profile_provider_services';
-import { applicationMock } from '../__mocks__/application_mock';
-import { DEFAULT_ALLOWED_TRACES_BASE_PATTERNS } from '@kbn/discover-utils/src';
 
 describe('transactionDocumentProfileProvider', () => {
   const getRootContext = ({
@@ -46,19 +42,15 @@ describe('transactionDocumentProfileProvider', () => {
 
   describe('when root profile is observability', () => {
     const profileId = OBSERVABILITY_ROOT_PROFILE_ID;
-    const mockServices: ProfileProviderServices = {
-      ...createContextAwarenessMocks().profileProviderServices,
-    };
-
     const transactionDocumentProfileProvider =
-      createObservabilityTracesTransactionDocumentProfileProvider(mockServices);
+      createObservabilityTracesTransactionDocumentProfileProvider();
 
-    it('matches records with the correct index pattern, data stream type and the correct processor event', () => {
+    it('matches records with the correct data stream type and the correct processor event', () => {
       expect(
         transactionDocumentProfileProvider.resolve({
           rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildMockRecord(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS[0], {
+          record: buildMockRecord('index', {
             'data_stream.type': ['traces'],
             'processor.event': ['transaction'],
           }),
@@ -79,20 +71,15 @@ describe('transactionDocumentProfileProvider', () => {
 
   describe('when root profile is NOT observability', () => {
     const profileId = 'another-profile';
-    const mockServices: ProfileProviderServices = {
-      ...createContextAwarenessMocks().profileProviderServices,
-      ...applicationMock({}),
-    };
-
     const transactionDocumentProfileProvider =
-      createObservabilityTracesTransactionDocumentProfileProvider(mockServices);
+      createObservabilityTracesTransactionDocumentProfileProvider();
 
     it('does not match records with the correct data stream type and the correct processor event', () => {
       expect(
         transactionDocumentProfileProvider.resolve({
           rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildMockRecord(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS[0], {
+          record: buildMockRecord('index', {
             'data_stream.type': ['traces'],
             'processor.event': ['transaction'],
           }),
