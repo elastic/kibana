@@ -109,6 +109,7 @@ export const readSignificantEventsRoute = createServerRoute({
           title: query.query.title,
           kql: query.query.kql,
           occurrences: [],
+          change_points: {},
         };
       }
 
