@@ -64,17 +64,26 @@ describe('validation', () => {
 
         test('uses created @timestamp field', async () => {});
 
-        test('allows custom ON field', async () => {
+        test('allows manual input for ON field', async () => {
           const { expectErrors } = await setup();
 
-          await expectErrors('FROM index | CHANGE_POINT value ON order_date', []);
+          await expectErrors('FROM index | CHANGE_POINT longField ON keywordField', []);
         });
 
-        test('allows lookup index alias', async () => {
+        test('allows renaming for change point type and pValue columns', async () => {
           const { expectErrors } = await setup();
+          await expectErrors(
+            'FROM index | STATS field = AVG(longField) BY @timestamp=BUCKET(@timestamp, 8 hours) | CHANGE_POINT field ON @timestamp AS changePointType, pValue',
+            []
+          );
+        });
 
-          await expectErrors('FROM index | CHANGE_POINT join_index_alias_1 ON stringField', []);
-          await expectErrors('FROM index | CHANGE_POINT join_index_alias_2 ON stringField', []);
+        test('doesn not allow renaming for change point type only', async () => {
+          const { expectErrors } = await setup();
+          await expectErrors(
+            'FROM index | STATS field = AVG(longField) BY @timestamp=BUCKET(@timestamp, 8 hours) | CHANGE_POINT field ON @timestamp AS changePointType',
+            [`SyntaxError: mismatched input '<EOF>' expecting ','`]
+          );
         });
       });
     });

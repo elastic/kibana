@@ -626,13 +626,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     ],
     signature: {
       multipleParams: false,
-      params: [
-        // Common validation for innerTypes mixing up params.
-        // { name: 'value', type: 'column', innerTypes: [...numericTypes] },
-        // { name: 'on', type: 'option', innerTypes: ['any'] },
-        { name: 'value', type: 'column' },
-        { name: 'on', type: 'option' },
-      ],
+      params: [],
     },
     validate: (command: ESQLCommand, references) => {
       const messages: ESQLMessage[] = [];
@@ -688,6 +682,17 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       }
 
       // validate AS
+      const asArg = command.args.find((arg) => isOptionItem(arg) && arg.name === 'as');
+      if (asArg && isOptionItem(asArg)) {
+        // populate variable references to prevent the common check from failing with unknown column
+        asArg.args.forEach((arg, index) => {
+          if (isColumnItem(arg)) {
+            references.variables.set(arg.name, [
+              { name: arg.name, location: arg.location, type: index === 0 ? 'keyword' : 'long' },
+            ]);
+          }
+        });
+      }
 
       return messages;
     },
