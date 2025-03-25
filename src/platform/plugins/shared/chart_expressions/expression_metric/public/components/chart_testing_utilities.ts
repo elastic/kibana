@@ -42,39 +42,3 @@ export function cleanChartMocks() {
     global.ResizeObserver = roPrevious;
   }
 }
-
-/**
- * This is a minimum set of settings override required by Elastic Charts in order to work with RTL
- * for some reason this is only required in a jsdom/jest environment and not in a real browser
- */
-export function getChartOverridesFix() {
-  return {
-    settings: {
-      theme: {
-        scales: {
-          barsPadding: 0,
-        },
-        chartPaddings: {
-          top: 0,
-          right: 0,
-          left: 0,
-          bottom: 0,
-        },
-        colors: {
-          defaultVizColor: '#FFF',
-        },
-        chartMargins: {
-          left: 0,
-          right: 0,
-          top: 0,
-          bottom: 0,
-        },
-        heatmap: {
-          xAxisLabel: {
-            rotation: 0,
-          },
-        },
-      },
-    },
-  };
-}
