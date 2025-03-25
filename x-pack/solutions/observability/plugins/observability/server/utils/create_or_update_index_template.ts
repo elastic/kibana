@@ -50,6 +50,8 @@ export async function createOrUpdateIndexTemplate({
       }
     );
   } catch (e) {
-    logger.error(`Could not create index template: '${indexTemplate.name}'. Error: ${e.message}.`);
+    logger.error(`Could not create index template: '${indexTemplate.name}'. Error: ${e.message}.`, {
+      error: e,
+    });
   }
 }
