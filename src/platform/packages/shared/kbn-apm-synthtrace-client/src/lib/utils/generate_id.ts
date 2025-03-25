@@ -34,10 +34,10 @@ function generateRandomId(length: number = LONG_ID_LENGTH) {
   const randomFactor = Math.floor(Math.random() * UNIQUE_ID_MAX_SEQ);
   const randomHex = (randomFactor * Date.now() * seq).toString(16);
 
-  const generatedId =
-    randomHex.length < length
-      ? `${randomHex}${String(seq).padStart(length - randomHex.length, '0')}`
-      : randomHex.substring(0, length);
+  const generatedId = `${randomHex}${String(seq).padStart(
+    length - randomHex.length,
+    '0'
+  )}`.substring(0, length);
 
   if (generatedId.length > length) {
     throw new Error(`generated id is longer than ${length} characters: ${generatedId.length}`);
