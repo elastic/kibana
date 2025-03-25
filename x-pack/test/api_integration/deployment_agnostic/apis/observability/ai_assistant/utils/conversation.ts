@@ -84,11 +84,13 @@ export async function chatComplete({
   userPrompt,
   screenContexts = [],
   connectorId,
+  persist = false,
   observabilityAIAssistantAPIClient,
 }: {
   userPrompt: string;
   screenContexts?: ObservabilityAIAssistantScreenContextRequest[];
   connectorId: string;
+  persist?: boolean;
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
 }) {
   const { status, body } = await observabilityAIAssistantAPIClient.editor({
@@ -105,7 +107,7 @@ export async function chatComplete({
           },
         ],
         connectorId,
-        persist: false,
+        persist,
         screenContexts,
         scopes: ['observability' as const],
       },
@@ -113,9 +115,10 @@ export async function chatComplete({
   });
 
   expect(status).to.be(200);
+  const messageEvents = decodeEvents(body);
   const messageAddedEvents = getMessageAddedEvents(body);
-
-  return { messageAddedEvents, body, status };
+  const conversationCreateEvent = getConversationCreatedEvent(body);
+  return { messageAddedEvents, conversationCreateEvent, messageEvents, status };
 }
 
 // order of instructions can vary, so we sort to compare them
@@ -159,12 +162,6 @@ export function getConversationCreatedEvent(body: Readable | string) {
   const conversationCreatedEvent = decodedEvents.find(
     (event) => event.type === StreamingChatResponseEventType.ConversationCreate
   ) as ConversationCreateEvent;
-
-  if (!conversationCreatedEvent) {
-    throw new Error(
-      `No conversation created event found: ${JSON.stringify(decodedEvents, null, 2)}`
-    );
-  }
 
   return conversationCreatedEvent;
 }
