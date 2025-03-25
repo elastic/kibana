@@ -558,6 +558,10 @@ Plugin server-side only. Plugin has three main functions:
 |This plugin implements (only) server APIs for the Elastic AI Assistant.
 
 
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/embeddable_alerts_table/README.md[embeddableAlertsTable]
+|Embeddable wrapper for the alerts table
+
+
 |<<enhanced-embeddables-plugin>>
 |Enhances Embeddables by registering a custom factory provider. The enhanced factory provider
 adds dynamic actions to every embeddables state, in order to support drilldowns.
