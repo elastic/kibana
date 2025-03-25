@@ -253,7 +253,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       // sometimes we would hit max signals on the good shard
       // and never search the shard with the bad runtime field
-      // by changing the agent.type to be packetbeat
+      // by changing the logic to be "and" broken == 1
       // we ensure that both shards are searched
       // which I believe was the cause of the test being flakey.
       const rule: EqlRuleCreateProps = {
