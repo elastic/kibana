@@ -5,10 +5,10 @@
  * 2.0.
  */
 import type { VulnSeverity } from '@kbn/cloud-security-posture-common';
-import { VALID_SEVERITIES } from '@kbn/cloud-security-posture-common';
+import { VULNERABILITIES_SEVERITY } from '@kbn/cloud-security-posture-common';
 
 const isVulnSeverity = (severity: string): severity is VulnSeverity =>
-  VALID_SEVERITIES.some((validSeverity) => validSeverity === severity);
+  severity in VULNERABILITIES_SEVERITY;
 
 export const getNormalizedSeverity = (severity?: string): string | undefined => {
   if (!severity) {

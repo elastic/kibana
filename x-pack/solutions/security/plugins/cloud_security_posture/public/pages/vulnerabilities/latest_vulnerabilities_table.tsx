@@ -33,18 +33,20 @@ interface LatestVulnerabilitiesTableProps {
   nonPersistedFilters?: Filter[];
 }
 /**
- * Type Guard for checking if the given source is a CspVulnerabilityFinding
+ * Type Guard for checking if the given source has a vulnerability object
+ * Since id might be empty with the introduction of 3rd party vulnerabilities
+ * we need another to check to know if finding can be displayed in the flyout
  */
-const isCspVulnerabilityFinding = (
+const isVulnerabilityFinding = (
   source: Record<string, any> | undefined
 ): source is CspVulnerabilityFinding => {
-  return source?.vulnerability?.id !== undefined;
+  return 'vulnerability' in (source ?? {});
 };
 
 const getCspVulnerabilityFinding = (
   source: Record<string, any> | undefined
 ): CspVulnerabilityFinding | false => {
-  return isCspVulnerabilityFinding(source) && (source as CspVulnerabilityFinding);
+  return isVulnerabilityFinding(source) && source;
 };
 
 /**
@@ -107,6 +109,36 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
           return <>{finding.vulnerability.id.join(', ')}</>;
         }
         return <>{finding.vulnerability?.id || '-'}</>;
+      }}
+    </CspVulnerabilityFindingRenderer>
+  ),
+  'package.name': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+    <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
+      {({ finding }) => {
+        if (Array.isArray(finding.package.name)) {
+          return <>{finding.package.name.join(', ')}</>;
+        }
+        return <>{finding.package.name || '-'}</>;
+      }}
+    </CspVulnerabilityFindingRenderer>
+  ),
+  'package.version': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+    <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
+      {({ finding }) => {
+        if (Array.isArray(finding.package.version)) {
+          return <>{finding.package.version.join(', ')}</>;
+        }
+        return <>{finding.package.version || '-'}</>;
+      }}
+    </CspVulnerabilityFindingRenderer>
+  ),
+  'package.fixed_version': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
+    <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
+      {({ finding }) => {
+        if (Array.isArray(finding.package.fixed_version)) {
+          return <>{finding.package.fixed_version.join(', ')}</>;
+        }
+        return <>{finding.package.fixed_version || '-'}</>;
       }}
     </CspVulnerabilityFindingRenderer>
   ),
