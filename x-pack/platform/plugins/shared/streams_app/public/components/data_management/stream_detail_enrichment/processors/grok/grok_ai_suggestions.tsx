@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useWatch, useFormContext } from 'react-hook-form';
-import { FlattenRecord, IngestStreamGetResponse } from '@kbn/streams-schema';
+import { FlattenRecord } from '@kbn/streams-schema';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
 import { useAbortController, useBoolean } from '@kbn/react-hooks';
