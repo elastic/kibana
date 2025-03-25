@@ -113,7 +113,7 @@ interface GetPluginDependencies {
 const getPluginDependencies = ({
   contentReferences,
   contentReferencesVisible,
-  contentReferencesDisabled
+  contentReferencesDisabled,
 }: GetPluginDependencies) => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 
@@ -166,7 +166,7 @@ const getPluginDependencies = ({
       loadingCursorPlugin,
       customCodeBlockLanguagePlugin,
       ...parsingPlugins,
-      ...(!contentReferencesDisabled?[contentReferenceParser({ contentReferences })]:[]),
+      ...(!contentReferencesDisabled ? [contentReferenceParser({ contentReferences })] : []),
     ],
     processingPluginList: processingPlugins,
   };
