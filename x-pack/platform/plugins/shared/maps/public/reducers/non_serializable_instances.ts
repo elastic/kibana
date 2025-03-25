@@ -16,6 +16,48 @@ const SET_EVENT_HANDLERS = 'SET_EVENT_HANDLERS';
 const SET_CHARTS_PALETTE_SERVICE_GET_COLOR = 'SET_CHARTS_PALETTE_SERVICE_GET_COLOR';
 const SET_ON_MAP_MOVE = 'SET_ON_MAP_MOVE';
 
+export interface NonSerializableState {
+  inspectorAdapters: Adapters;
+  cancelRequestCallbacks: Map<symbol, () => {}>; // key is request token, value is cancel callback
+  eventHandlers: Partial<EventHandlers>;
+  chartsPaletteServiceGetColor: (value: string) => string | null;
+  onMapMove?: (lat: number, lon: number, zoom: number) => void;
+}
+
+export interface ResultMeta {
+  featuresCount?: number;
+}
+
+interface EventHandlers {
+  /**
+   * Take action on data load.
+   */
+  onDataLoad: ({ layerId, dataId }: { layerId: string; dataId: string }) => void;
+  /**
+   * Take action on data load end.
+   */
+  onDataLoadEnd: ({
+    layerId,
+    dataId,
+    resultMeta,
+  }: {
+    layerId: string;
+    dataId: string;
+    resultMeta: ResultMeta;
+  }) => void;
+  /**
+   * Take action on data load error.
+   */
+  onDataLoadError: ({
+    layerId,
+    dataId,
+    errorMessage,
+  }: {
+    layerId: string;
+    dataId: string;
+    errorMessage: string;
+  }) => void;
+}
 export interface NonSerializableInstancesState {
   inspectorAdapters: Adapters;
   cancelRequestCallbacks: Map<string, () => void>;
@@ -26,13 +68,13 @@ export interface NonSerializableInstancesState {
 
 export interface RegisterCancelCallbackAction {
   type: 'REGISTER_CANCEL_CALLBACK';
-  requestToken: string;
+  requestToken: symbol;
   callback: () => void;
 }
 
 export interface UnregisterCancelCallbackAction {
   type: 'UNREGISTER_CANCEL_CALLBACK';
-  requestToken: string;
+  requestToken: symbol;
 }
 
 export interface SetEventHandlersAction {
@@ -143,7 +185,7 @@ export function getOnMapMove(state: { nonSerializableInstances: NonSerializableI
 
 // Actions
 export const registerCancelCallback = (
-  requestToken: string,
+  requestToken: symbol,
   callback: () => void
 ): RegisterCancelCallbackAction => {
   return {
@@ -153,14 +195,14 @@ export const registerCancelCallback = (
   };
 };
 
-export const unregisterCancelCallback = (requestToken: string): UnregisterCancelCallbackAction => {
+export const unregisterCancelCallback = (requestToken: symbol): UnregisterCancelCallbackAction => {
   return {
     type: UNREGISTER_CANCEL_CALLBACK,
     requestToken,
   };
 };
 
-export const cancelRequest = (requestToken: string) => {
+export const cancelRequest = (requestToken: symbol) => {
   return (dispatch: any, getState: any) => {
     if (!requestToken) {
       return;
