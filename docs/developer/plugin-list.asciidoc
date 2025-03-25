@@ -860,6 +860,10 @@ detailed information on how Elasticsearch executed the search request. People us
 to understand why a search request might be slow.
 
 
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_query_rules/README.md[searchQueryRules]
+|A plugin to manage Query Rules in Elasticsearch through Query Rules API
+
+
 |{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_synonyms/README.md[searchSynonyms]
 |A plugin to manage synonyms in Elasticsearch through Synonyms APIs through Kibana.
 
