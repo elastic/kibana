@@ -25,8 +25,7 @@ export const defineSimpleStringStreamRoute = (router: IRouter, logger: Logger) =
       security: {
         authz: {
           enabled: false,
-          reason:
-            'This route  route is opted out of authorization as it is a developer example endpoint.',
+          reason: 'This route is opted out of authorization as it is a developer example endpoint.',
         },
       },
     })
