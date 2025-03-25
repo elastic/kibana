@@ -14,6 +14,7 @@ import { RegenerateResponseButton } from './buttons/regenerate_response_button';
 import { MessagePanel } from './message_panel';
 import { MessageText } from './message_text';
 import type { StreamingOrFinalContentReferences } from '../content_reference/components/content_reference_component_factory';
+import { MessageRole } from '@kbn/elastic-assistant-common/impl/schemas';
 
 interface Props {
   abortStream: () => void;
@@ -29,6 +30,7 @@ interface Props {
   regenerateMessage: () => void;
   setIsStreaming: (isStreaming: boolean) => void;
   transformMessage: (message: string) => ContentMessage;
+  role: MessageRole
 }
 
 export const StreamComment = ({
@@ -45,6 +47,7 @@ export const StreamComment = ({
   regenerateMessage,
   setIsStreaming,
   transformMessage,
+  role
 }: Props) => {
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
     refetchCurrentConversation,
@@ -114,6 +117,7 @@ export const StreamComment = ({
           contentReferences={contentReferences}
           index={index}
           contentReferencesVisible={contentReferencesVisible}
+          contentReferencesDisabled={role === 'user'}
           loading={isAnythingLoading}
         />
       }
