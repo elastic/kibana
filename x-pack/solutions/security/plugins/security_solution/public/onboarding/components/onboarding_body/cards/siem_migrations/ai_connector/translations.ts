@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const AI_CONNECTOR_CARD_TITLE = i18n.translate(
   'xpack.securitySolution.onboarding.aiConnector.title',
   {
-    defaultMessage: 'Configure AI Provider',
+    defaultMessage: 'Configure AI provider',
   }
 );
 
@@ -29,7 +29,7 @@ export const AI_CONNECTOR_CARD_DESCRIPTION_INFERENCE_CONNECTOR = i18n.translate(
 
 export const LLM_MATRIX_LINK = i18n.translate(
   'xpack.securitySolution.onboarding.aiConnector.llmMatrixLink',
-  { defaultMessage: 'LLM performance matrix' }
+  { defaultMessage: 'model performance' }
 );
 
 export const AI_POWERED_MIGRATIONS_LINK = i18n.translate(

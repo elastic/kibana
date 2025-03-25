@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import { EuiExpression, EuiToken, EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
   CONDITION_OS,
@@ -52,16 +52,16 @@ const OPERATOR_TYPE_LABELS_EXCLUDED = Object.freeze({
 });
 
 const EuiFlexGroupNested = styled(EuiFlexGroup)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeXL};
+  margin-left: ${({ theme }) => theme.euiTheme.size.xl};
 `;
 
 const EuiFlexItemNested = styled(EuiFlexItem)`
-  margin-bottom: 6px !important;
-  margin-top: 6px !important;
+  margin-bottom: ${({ theme }) => theme.euiTheme.size.s} !important;
+  margin-top: ${({ theme }) => theme.euiTheme.size.s} !important;
 `;
 
 const StyledCondition = styled('span')`
-  margin-right: 6px;
+  margin-right: ${({ theme }) => theme.euiTheme.size.s};
 `;
 
 export type CriteriaConditionsProps = Pick<ArtifactInfo, 'os' | 'entries'> &

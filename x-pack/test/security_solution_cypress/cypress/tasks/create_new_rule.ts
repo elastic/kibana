@@ -159,6 +159,7 @@ import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
 import { COMBO_BOX_OPTION, TOOLTIP } from '../screens/common';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
+import { fillComboBox } from './eui_form_interactions';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click();
@@ -463,7 +464,7 @@ export const removeAlertsIndex = () => {
 export const fillDefineCustomRule = (rule: QueryRuleCreateProps) => {
   if (rule.data_view_id !== undefined) {
     cy.get(DATA_VIEW_OPTION).click();
-    cy.get(DATA_VIEW_COMBO_BOX).type(`${rule.data_view_id}{enter}`);
+    fillComboBox({ parentSelector: DATA_VIEW_COMBO_BOX, options: rule.data_view_id });
   }
   cy.get(CUSTOM_QUERY_INPUT)
     .first()
@@ -978,27 +979,17 @@ export const openSuppressionFieldsTooltipAndCheckLicense = () => {
 };
 
 /**
- * intercepts /internal/bsearch request that contains esqlQuery and adds alias to it
+ * intercepts esql_async request that contains esqlQuery and adds alias to it
  */
 export const interceptEsqlQueryFieldsRequest = (
   esqlQuery: string,
   alias: string = 'esqlQueryFields'
 ) => {
-  const isServerless = Cypress.env('IS_SERVERLESS');
-  // bfetch is disabled in serverless, so we need to watch another request
-  if (isServerless) {
-    cy.intercept('POST', '/internal/search/esql_async', (req) => {
-      if (req.body?.params?.query?.includes?.(esqlQuery)) {
-        req.alias = alias;
-      }
-    });
-  } else {
-    cy.intercept('POST', '/internal/search?*', (req) => {
-      if (req.body?.batch?.[0]?.request?.params?.query?.includes?.(esqlQuery)) {
-        req.alias = alias;
-      }
-    });
-  }
+  cy.intercept('POST', '/internal/search/esql_async', (req) => {
+    if (req.body?.params?.query?.includes?.(esqlQuery)) {
+      req.alias = alias;
+    }
+  });
 };
 
 export const checkLoadQueryDynamically = () => {

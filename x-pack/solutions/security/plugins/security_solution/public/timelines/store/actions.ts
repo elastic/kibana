@@ -244,12 +244,6 @@ export const updateItemsPerPageOptions = actionCreator<{
   itemsPerPageOptions: number[];
 }>('UPDATE_ITEMS_PER_PAGE_OPTIONS');
 
-export const applyDeltaToColumnWidth = actionCreator<{
-  id: string;
-  columnId: string;
-  delta: number;
-}>('APPLY_DELTA_TO_COLUMN_WIDTH');
-
 export const clearEventsLoading = actionCreator<{
   id: string;
 }>('CLEAR_TGRID_EVENTS_LOADING');

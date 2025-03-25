@@ -49,7 +49,7 @@ export const ElasticsearchStartPage = () => {
       grow={false}
       solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
-      <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
+      <KibanaPageTemplate.Section alignment="top" restrictWidth={false} grow>
         {isInitialLoading && <EuiLoadingLogo />}
         {hasIndicesStatusFetchError && <LoadIndicesStatusError error={indicesFetchError} />}
         {!isInitialLoading && !hasIndicesStatusFetchError && (

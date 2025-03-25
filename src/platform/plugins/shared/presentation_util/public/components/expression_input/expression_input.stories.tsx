@@ -90,12 +90,14 @@ export default {
   ],
 } as Meta;
 
-export const Example = ({ isCompact }: { isCompact: boolean }) => (
-  <ExpressionInput
-    expression="markdown"
-    height={300}
-    onChange={action('onChange')}
-    expressionFunctions={[sampleFunctionDef as any]}
-    {...{ isCompact }}
-  />
-);
+export const Example = {
+  render: ({ isCompact }: { isCompact: boolean }) => (
+    <ExpressionInput
+      expression="markdown"
+      height={300}
+      onChange={action('onChange')}
+      expressionFunctions={[sampleFunctionDef as any]}
+      {...{ isCompact }}
+    />
+  ),
+};

@@ -120,7 +120,6 @@ const ConnectorsComponent: React.FC<Props> = ({
                   selectedConnector={selectedConnector.id}
                   isLoading={isLoading}
                   onChange={onChangeConnector}
-                  data-test-subj="case-connectors-dropdown"
                 />
               ) : (
                 <EuiText data-test-subj="configure-case-connector-permissions-error-msg" size="s">

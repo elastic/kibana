@@ -123,7 +123,7 @@ export const createCustomThresholdExecutor = ({
           )
         : [];
 
-    const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
+    const initialSearchSource = await searchSourceClient.createLazy(params.searchConfiguration);
     const dataView = initialSearchSource.getField('index')!;
     const { id: dataViewId, timeFieldName } = dataView;
     const dataViewIndexPattern = dataView.getIndexPattern();

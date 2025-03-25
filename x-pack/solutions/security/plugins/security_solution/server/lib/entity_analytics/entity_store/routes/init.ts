@@ -19,6 +19,7 @@ import {
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { checkAndInitAssetCriticalityResources } from '../../asset_criticality/check_and_init_asset_criticality_resources';
+import { buildInitRequestBodyValidation } from './validation';
 
 export const initEntityEngineRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -41,7 +42,7 @@ export const initEntityEngineRoute = (
         validate: {
           request: {
             params: buildRouteValidationWithZod(InitEntityEngineRequestParams),
-            body: buildRouteValidationWithZod(InitEntityEngineRequestBody),
+            body: buildInitRequestBodyValidation(InitEntityEngineRequestBody),
           },
         },
       },

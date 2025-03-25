@@ -112,7 +112,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     maxAgentPoliciesWithInactivityTimeout !== undefined &&
     totalAgentPoliciesWithInactivityTimeout > (maxAgentPoliciesWithInactivityTimeout ?? 0);
   const { dataDownloadSourceOptions, isLoading: isLoadingDownloadSources } =
-    useDownloadSourcesOptions(agentPolicy);
+    useDownloadSourcesOptions();
 
   const { fleetServerHostsOptions, isLoading: isLoadingFleetServerHostsOption } =
     useFleetServerHostsOptions(agentPolicy);
