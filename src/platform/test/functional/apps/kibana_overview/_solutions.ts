@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('contains Security and Observability solutions', async () => {
-      const solutionCards = await find.allByCssSelector('.kbnOverviewMore__item');
+      const solutionCards = await find.allByCssSelector('[data-test-subj="kbnOverviewItem"]');
       expect(solutionCards.length >= 2).to.be(true);
 
       const imageSrcs = [];

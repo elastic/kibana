@@ -9,7 +9,16 @@
 
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiTitle,
+  UseEuiTheme,
+  useEuiMinBreakpoint,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -27,6 +36,7 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => {
   const {
     services: { application },
   } = useKibana<CoreStart>();
+  const minBreakpointM = useEuiMinBreakpoint('m');
   return (
     <>
       {features.length > 1 ? <EuiHorizontalRule margin="xl" aria-hidden="true" /> : null}
@@ -47,7 +57,18 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => {
 
           <EuiSpacer size="m" />
 
-          <EuiFlexGroup className="kbnOverviewDataManage__content" wrap>
+          <EuiFlexGroup
+            wrap
+            css={({ euiTheme }: UseEuiTheme) =>
+              css({
+                '.kbnOverviewDataManage__item:not(:only-child)': {
+                  [minBreakpointM]: {
+                    flex: `0 0 calc(50% - ${euiTheme.size.l})`,
+                  },
+                },
+              })
+            }
+          >
             {features.map((feature) => (
               <EuiFlexItem className="kbnOverviewDataManage__item" key={feature.id}>
                 <RedirectAppLinks
