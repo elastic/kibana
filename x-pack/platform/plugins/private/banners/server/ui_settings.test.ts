@@ -13,7 +13,7 @@ const createConfig = (parts: Partial<BannersConfigType> = {}): BannersConfigType
   placement: 'disabled',
   backgroundColor: '#0000',
   textColor: '#FFFFFF',
-  linkColor: '#61A2FF',
+  linkColor: '#0B64DD',
   textContent: 'some global banner text',
   disableSpaceBanners: false,
   ...parts,
@@ -52,7 +52,7 @@ describe('registerSettings', () => {
       placement: 'top',
       backgroundColor: '#FF00CC',
       textColor: '#AAFFEE',
-      linkColor: '#61A2FF',
+      linkColor: '#0B64DD',
       textContent: 'Some text',
     });
 

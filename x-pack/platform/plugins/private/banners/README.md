@@ -40,6 +40,6 @@ xpack.banners:
   placement: 'top'
   textContent: 'Production environment - Proceed with **special levels** of caution'
   textColor: '#FF0000'
-  linkColor: '#61A2FF'
+  linkColor: '#0B64DD'
   backgroundColor: '#CC2211'
 ```

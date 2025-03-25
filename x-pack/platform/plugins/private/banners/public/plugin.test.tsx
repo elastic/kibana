@@ -17,7 +17,7 @@ const createBannerConfig = (parts: Partial<BannerConfiguration> = {}): BannerCon
   placement: 'disabled',
   textContent: 'foo',
   textColor: '#FFFFFF',
-  linkColor: '#61A2FF',
+  linkColor: '#0B64DD',
   backgroundColor: '#000000',
   ...parts,
 });

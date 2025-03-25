@@ -391,7 +391,7 @@ Banners are disabled by default. You need to manually configure them in order to
 :   The color for the banner text. Defaults to `#8A6A0A`.
 
 `xpack.banners.linkColor`
-:   The color for the banner link text. Defaults to `#61A2FF`.
+:   The color for the banner link text. Defaults to `#0B64DD`.
 
 `xpack.banners.backgroundColor`
 :   The color of the banner background. Defaults to `#FFF9E8`.

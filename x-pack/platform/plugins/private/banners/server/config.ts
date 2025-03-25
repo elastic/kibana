@@ -29,7 +29,7 @@ const configSchema = schema.object({
         return `must be an hex color`;
       }
     },
-    defaultValue: '#61A2FF',
+    defaultValue: '#0B64DD',
   }),
   backgroundColor: schema.string({
     validate: (color) => {
