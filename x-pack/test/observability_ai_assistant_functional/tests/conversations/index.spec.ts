@@ -160,6 +160,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
             );
             await testSubjects.setValue(ui.pages.createConnectorFlyout.apiKeyInput, 'myApiKey');
 
+            await testSubjects.clickWhenNotDisabled(ui.pages.createConnectorFlyout.saveButton);
+
             await retry.waitFor('Connector created toast', async () => {
               const count = await toasts.getCount();
               return count > 0;
