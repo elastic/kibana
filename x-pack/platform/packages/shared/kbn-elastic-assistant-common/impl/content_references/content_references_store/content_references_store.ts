@@ -11,18 +11,20 @@ import { ContentReferencesStore } from '../types';
 const CONTENT_REFERENCE_ID_ALPHABET =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-type Options = {
+interface Options {
   disabled?: boolean;
 }
 
 /**
  * Creates a new ContentReferencesStore used for storing references (also known as citations)
  */
-export const newContentReferencesStore: (options?: Options) => ContentReferencesStore = (options?: Options) => {
+export const newContentReferencesStore: (options?: Options) => ContentReferencesStore = (
+  options?: Options
+) => {
   const store = new Map<string, ContentReference>();
 
   const add: ContentReferencesStore['add'] = (creator) => {
-    if(options?.disabled){
+    if (options?.disabled) {
       return undefined;
     }
     const entry = creator({ id: generateUnsecureId() });
