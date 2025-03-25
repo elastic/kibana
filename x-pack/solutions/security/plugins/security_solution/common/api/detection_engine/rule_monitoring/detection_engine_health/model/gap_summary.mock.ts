@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { SecuritySolutionPluginRouter } from '../../types';
+import type { GapSummary } from './gap_summary';
 
-export interface AssetInventoryRoutesDeps {
-  router: SecuritySolutionPluginRouter;
-  logger: Logger;
-}
+export const getEmptyGapSummary = (): GapSummary => ({
+  total_unfilled_duration_ms: 0,
+  total_in_progress_duration_ms: 0,
+  total_filled_duration_ms: 0,
+});
