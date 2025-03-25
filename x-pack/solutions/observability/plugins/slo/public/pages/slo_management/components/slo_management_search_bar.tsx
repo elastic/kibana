@@ -7,68 +7,110 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiButton } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldSearch,
+  EuiButton,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+} from '@elastic/eui';
+import { useFetchSLOSuggestions } from '../../slo_edit/hooks/use_fetch_suggestions';
 
 interface Props {
   initialSearch?: string;
+  filters: {
+    search: string;
+    tags: Array<EuiComboBoxOptionOption>;
+  };
+  setFilters: Function;
   onRefresh: () => void;
-  onSearch: (search: string) => void;
 }
 
-export function SloManagementSearchBar({ onSearch, onRefresh, initialSearch = '' }: Props) {
-  const [tempSearch, setTempSearch] = useState<string>(initialSearch);
+export function SloManagementSearchBar({
+  initialSearch = '',
+  filters,
+  setFilters,
+  onRefresh,
+}: Props) {
   const [search, setSearch] = useState<string>(initialSearch);
-  const refreshOrUpdateSearch = () => {
-    if (tempSearch !== search) {
-      setSearch(tempSearch);
-      onSearch(tempSearch);
-    } else {
-      onRefresh();
-    }
+  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption>>(
+    filters.tags
+  );
+
+  const { suggestions } = useFetchSLOSuggestions();
+
+  const refreshSearch = () => {
+    console.log(selectedOptions);
+    setFilters({
+      search,
+      tags: [...selectedOptions],
+    });
+    onRefresh();
   };
 
-  const handleClick = (event: React.ChangeEvent<HTMLInputElement>) =>
-    setTempSearch(event.target.value);
+  const handleFieldChange = (event: React.ChangeEvent<HTMLInputElement>) =>
+    setSearch(event.target.value);
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
-      refreshOrUpdateSearch();
+      refreshSearch();
     }
   };
 
+  const searchCanBeUpdated =
+    filters.search !== search ||
+    filters?.tags?.length !== selectedOptions?.length ||
+    filters?.tags.some((el, index) => selectedOptions[index] !== el);
+
   return (
     <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem>
+      <EuiFlexItem grow={10}>
         <EuiFieldSearch
           data-test-subj="o11ySloDefinitionsFieldSearch"
           fullWidth
-          value={tempSearch}
-          onChange={handleClick}
+          value={search}
+          onChange={handleFieldChange}
           onKeyDown={handleKeyPress}
         />
       </EuiFlexItem>
+      <EuiFlexItem grow={4}>
+        <EuiComboBox
+          aria-label="Accessible screen reader label"
+          placeholder={i18n.translate('xpack.slo.sloDefinitions.filterByTag', {
+            defaultMessage: 'Filter tags',
+          })}
+          fullWidth
+          options={suggestions?.tags ?? []}
+          selectedOptions={selectedOptions}
+          onChange={(newOptions) => {
+            setSelectedOptions(newOptions);
+          }}
+          isClearable={true}
+          data-test-subj="demoComboBox"
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={0}>
-        {search === tempSearch && (
-          <EuiButton
-            data-test-subj="o11ySloDefinitionsRefreshButton"
-            iconType="refresh"
-            onClick={refreshOrUpdateSearch}
-          >
-            {i18n.translate('xpack.slo.sloDefinitions.refreshButtonLabel', {
-              defaultMessage: 'Refresh',
-            })}
-          </EuiButton>
-        )}
-        {search !== tempSearch && (
+        {searchCanBeUpdated ? (
           <EuiButton
             data-test-subj="o11ySloDefinitionsUpdateButton"
             iconType="kqlFunction"
             color="success"
             fill
-            onClick={refreshOrUpdateSearch}
+            onClick={refreshSearch}
           >
             {i18n.translate('xpack.slo.sloDefinitions.updateButtonLabel', {
               defaultMessage: 'Update',
+            })}
+          </EuiButton>
+        ) : (
+          <EuiButton
+            data-test-subj="o11ySloDefinitionsRefreshButton"
+            iconType="refresh"
+            onClick={refreshSearch}
+          >
+            {i18n.translate('xpack.slo.sloDefinitions.refreshButtonLabel', {
+              defaultMessage: 'Refresh',
             })}
           </EuiButton>
         )}

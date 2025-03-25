@@ -7,41 +7,19 @@
 
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { useKibana } from '../../hooks/use_kibana';
-import { useLicense } from '../../hooks/use_license';
-import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SloManagementContent } from './components/slo_management_content';
-import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 
 export function SloManagementPage() {
   const {
-    application: { navigateToUrl },
     http: { basePath },
     serverless,
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
-  const { data: permissions } = usePermissions();
-  const { hasAtLeast } = useLicense();
-  const {
-    isLoading,
-    isError,
-    data: { total } = { total: 0 },
-  } = useFetchSloDefinitions({ perPage: 0 });
-
-  useEffect(() => {
-    if (
-      hasAtLeast('platinum') === false ||
-      permissions?.hasAllReadRequested === false ||
-      (!isLoading && total === 0) ||
-      isError
-    ) {
-      navigateToUrl(basePath.prepend(paths.slosWelcome));
-    }
-  }, [basePath, hasAtLeast, isError, isLoading, navigateToUrl, total, permissions]);
 
   useBreadcrumbs(
     [

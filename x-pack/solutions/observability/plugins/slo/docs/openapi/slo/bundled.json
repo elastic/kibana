@@ -723,6 +723,15 @@
             "example": true
           },
           {
+            "name": "tags",
+            "in": "query",
+            "description": "Specify which SLO tags to query by (comma-separated list)",
+            "schema": {
+              "type": "string"
+            },
+            "example": true
+          },
+          {
             "name": "search",
             "in": "query",
             "description": "Filters the SLOs by name",

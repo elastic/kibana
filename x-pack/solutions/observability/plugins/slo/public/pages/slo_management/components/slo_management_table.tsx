@@ -11,6 +11,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -39,10 +40,18 @@ import { SloEnableConfirmationModal } from '../../../components/slo/enable_confi
 import { SloDisableConfirmationModal } from '../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
 import { SLO_MODEL_VERSION } from '../../../../common/constants';
 
+interface SearchFilters {
+  search: string;
+  tags: Array<EuiComboBoxOptionOption>;
+}
+
 export function SloManagementTable() {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState<SearchFilters>({
+    search: '',
+    tags: [],
+  });
   const { services } = useKibana();
 
   const {
@@ -51,9 +60,10 @@ export function SloManagementTable() {
   } = services;
 
   const { isLoading, isError, data, refetch } = useFetchSloDefinitions({
-    name: search,
+    name: filters.search,
     page: pageIndex + 1,
     perPage: pageSize,
+    tags: filters.tags.map((tag) => String(tag.value)),
   });
 
   const { data: permissions } = usePermissions();
@@ -298,10 +308,17 @@ export function SloManagementTable() {
     showPerPageOptions: true,
   };
 
+  console.log(filters);
+
   return (
     <>
       <EuiPanel hasBorder={true}>
-        <SloManagementSearchBar initialSearch={search} onRefresh={refetch} onSearch={setSearch} />
+        <SloManagementSearchBar
+          initialSearch={filters.search}
+          filters={filters}
+          setFilters={setFilters}
+          onRefresh={refetch}
+        />
         <EuiSpacer size="m" />
         {!isError && (
           <EuiBasicTable<SLODefinitionResponse>

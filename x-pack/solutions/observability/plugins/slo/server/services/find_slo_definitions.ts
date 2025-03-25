@@ -23,7 +23,8 @@ export class FindSLODefinitions {
 
   public async execute(params: FindSLODefinitionsParams): Promise<FindSLODefinitionsResponse> {
     const result = await this.repository.search(params.search ?? '', toPagination(params), {
-      includeOutdatedOnly: params.includeOutdatedOnly === true ? true : false,
+      includeOutdatedOnly: params.includeOutdatedOnly === true,
+      tags: params.tags,
     });
     return findSloDefinitionsResponseSchema.encode(result);
   }

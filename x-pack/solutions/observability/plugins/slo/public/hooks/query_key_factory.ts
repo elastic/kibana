@@ -57,6 +57,7 @@ export const sloKeys = {
     page: number;
     perPage: number;
     includeOutdatedOnly: boolean;
+    tagString: string;
   }) => [...sloKeys.allDefinitions(), params],
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
   health: (list: Array<{ sloId: string; sloInstanceId: string }>) =>
