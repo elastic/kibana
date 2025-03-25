@@ -150,7 +150,6 @@ export const useCurrentConversation = ({
         ) {
           retries++;
           await sleep(2000);
-          console.log('useCurrentConversation---retrying', cConversationId, retries);
           updatedConversation = await getConversation(cConversationId);
         }
 
