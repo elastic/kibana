@@ -188,3 +188,13 @@ export async function addSampleDocsToCustomIndex(
     'observability:aiAssistantSearchConnectorIndexPattern': customSearchConnectorIndex,
   });
 }
+
+export async function getKbIndices(es: Client) {
+  const res = await es.cat.indices({
+    index: resourceNames.indexPatterns.kb,
+    format: 'json',
+    h: 'index',
+  });
+
+  return res.map(({ index }) => index!);
+}

@@ -12,7 +12,7 @@ import path from 'path';
 import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from '../../../../default_configs/stateful.config.base';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { deleteKnowledgeBaseModel, setupKnowledgeBase } from '../utils/knowledge_base';
-import { createOrUpdateIndexAssets, deleteWriteIndices } from '../utils/index_assets';
+import { createOrUpdateIndexAssets, restoreIndexAssets } from '../utils/index_assets';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -35,13 +35,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     beforeEach(async () => {
-      await deleteWriteIndices(es);
+      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
       await restoreKbSnapshot();
       await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
     });
 
     after(async () => {
-      await deleteWriteIndices(es);
+      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
       await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
       await deleteKnowledgeBaseModel({ ml, es });
     });

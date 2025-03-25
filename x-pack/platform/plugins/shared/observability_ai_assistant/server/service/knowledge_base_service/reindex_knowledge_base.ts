@@ -20,23 +20,21 @@ export async function reIndexKnowledgeBase({
   esClient: { asInternalUser: ElasticsearchClient };
 }): Promise<void> {
   try {
-    const { currentWriteIndexName, nextWriteIndexName } = await getCurrentWriteIndexName({
-      logger,
-      esClient,
-    });
+    const { currentWriteIndexName, nextWriteIndexName } = await getCurrentAndNextWriteIndexName(
+      esClient
+    );
 
     if (!currentWriteIndexName || !nextWriteIndexName) {
       logger.debug('No knowledge base indices found. Skipping re-indexing.');
       return;
     }
 
-    logger.info('Re-indexing knowledge base starting...');
-
-    // Create next index
-    logger.debug(`Creating new KB index "${nextWriteIndexName}"...`);
-    // await esClient.asInternalUser.indices.delete({ index: nextWriteIndexName }, { ignore: [404] }); // cleanup if it already exists
+    logger.info(
+      `Re-indexing knowledge base from "${currentWriteIndexName}" to "${nextWriteIndexName}"...`
+    );
 
     try {
+      logger.debug(`Creating new KB index "${nextWriteIndexName}"...`);
       await esClient.asInternalUser.indices.create({ index: nextWriteIndexName });
     } catch (error) {
       if (
@@ -55,6 +53,7 @@ export async function reIndexKnowledgeBase({
       `Re-indexing knowledge base from ${currentWriteIndexName} to index "${nextWriteIndexName}"...`
     );
     await writeBlock({ esClient, index: currentWriteIndexName, isBlock: true });
+
     const reindexResponse = await esClient.asInternalUser.reindex({
       source: { index: currentWriteIndexName },
       dest: { index: nextWriteIndexName },
@@ -93,25 +92,30 @@ export async function reIndexKnowledgeBase({
   }
 }
 
-export async function getCurrentWriteIndexName({
-  logger,
-  esClient,
-}: {
-  logger: Logger;
-  esClient: { asInternalUser: ElasticsearchClient };
+export async function getCurrentAndNextWriteIndexName(esClient: {
+  asInternalUser: ElasticsearchClient;
 }) {
-  const res = await esClient.asInternalUser.cat.indices({
-    index: resourceNames.writeIndexAlias.kb,
-    format: 'json',
-    h: ['index'],
-  });
+  const response = await esClient.asInternalUser.indices.getAlias(
+    { name: resourceNames.writeIndexAlias.kb },
+    { ignore: [404] }
+  );
 
-  const currentWriteIndexName = res[0]?.index;
+  const currentWriteIndexName = Object.keys(response)[0];
   if (!currentWriteIndexName) {
     return { currentWriteIndexName: undefined, nextWriteIndexName: undefined };
   }
 
-  const latestIndexNumber = last(currentWriteIndexName.split('-'))!;
+  const latestIndexNumber = last(currentWriteIndexName.split('-'));
+  if (!latestIndexNumber) {
+    return { currentWriteIndexName: undefined, nextWriteIndexName: undefined };
+  }
+
+  // sequence number must be a six digit zero padded number like 000008 or 002201
+  const isSequenceNumberValid = /^\d{6}$/.test(latestIndexNumber);
+  if (!isSequenceNumberValid) {
+    return { currentWriteIndexName: undefined, nextWriteIndexName: undefined };
+  }
+
   const nextIndexSequenceNumber = (parseInt(latestIndexNumber, 10) + 1).toString().padStart(6, '0');
   const nextWriteIndexName = `${resourceNames.writeIndexAlias.kb}-${nextIndexSequenceNumber}`;
 

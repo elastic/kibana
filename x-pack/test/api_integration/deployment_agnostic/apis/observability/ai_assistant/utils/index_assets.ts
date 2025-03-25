@@ -19,13 +19,15 @@ export async function createOrUpdateIndexAssets(
   expect(status).to.be(200);
 }
 
-export async function deleteWriteIndices(es: Client) {
+async function deleteWriteIndices(es: Client) {
   const response = await es.indices.get({ index: Object.values(resourceNames.indexPatterns) });
   const indicesToDelete = Object.keys(response);
-  await es.indices.delete({ index: indicesToDelete, ignore_unavailable: true });
+  if (indicesToDelete.length > 0) {
+    await es.indices.delete({ index: indicesToDelete, ignore_unavailable: true });
+  }
 }
 
-export async function deleteIndexAssets(
+export async function restoreIndexAssets(
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient,
   es: Client
 ) {

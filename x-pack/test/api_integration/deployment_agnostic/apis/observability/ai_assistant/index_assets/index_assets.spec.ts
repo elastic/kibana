@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { createOrUpdateIndexAssets, deleteIndexAssets } from '../utils/index_assets';
+import { createOrUpdateIndexAssets, restoreIndexAssets } from '../utils/index_assets';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -16,7 +16,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('index assets: creating mappings, templates, aliases and write indices', () => {
     before(async () => {
-      await deleteIndexAssets(observabilityAIAssistantAPIClient, es);
+      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
     });
 
     for (const componentTemplateName of Object.values(resourceNames.componentTemplate)) {
@@ -53,8 +53,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       expect(indices).to.have.length(2);
 
-      expect(indices.map(({ index }) => index)).to.eql(
-        Object.values(resourceNames.concreteWriteIndexName)
+      expect(indices.map(({ index }) => index).sort()).to.eql(
+        Object.values(resourceNames.concreteWriteIndexName).sort()
       );
     });
   });
