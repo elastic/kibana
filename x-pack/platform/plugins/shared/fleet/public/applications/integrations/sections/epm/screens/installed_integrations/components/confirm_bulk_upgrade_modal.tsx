@@ -77,7 +77,7 @@ export const ConfirmBulkUpgradeModal: React.FunctionComponent<{
           label={
             <FormattedMessage
               id="xpack.fleet.installedIntegrations.bulkUpgradeModal.policiesSwitchLabel"
-              defaultMessage="Keep integration policies up to date automatically"
+              defaultMessage="Upgrade integration policies"
             />
           }
         />

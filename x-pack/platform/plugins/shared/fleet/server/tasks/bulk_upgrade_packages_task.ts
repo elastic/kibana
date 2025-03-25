@@ -19,9 +19,9 @@ import { installPackage } from '../services/epm/packages';
 import { appContextService, packagePolicyService } from '../services';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
 
-const TASK_TYPE = 'fleet:packages-bulk-upgrade';
-const TASK_TITLE = 'Fleet packages bulk upgrade';
-const TASK_TIMEOUT = '5m';
+const TASK_TYPE = 'fleet:packages-bulk-operations';
+const TASK_TITLE = 'Fleet packages bulk operations';
+const TASK_TIMEOUT = '10m';
 
 interface BulkUpgradeTaskParams {
   packages: Array<{ name: string; version?: string }>;

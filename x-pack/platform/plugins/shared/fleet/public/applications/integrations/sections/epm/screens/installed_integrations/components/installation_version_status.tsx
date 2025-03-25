@@ -33,7 +33,7 @@ const InstalledVersionStatus: React.FunctionComponent<{
       <EuiFlexItem grow={false}>
         <EuiIcon size="m" type="checkInCircleFilled" color="success" />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{item.version}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{item.installationInfo?.version ?? item.version}</EuiFlexItem>
     </EuiFlexGroup>
   );
 });
