@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -17,15 +16,20 @@ import {
   type ThunkAction,
   type ThunkDispatch,
 } from '@reduxjs/toolkit';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import type { RuntimeStateManager } from './runtime_state';
-import type { DiscoverInternalState, InternalStateDataRequestParams } from './types';
+import {
+  LoadingStatus,
+  type DiscoverInternalState,
+  type InternalStateDataRequestParams,
+} from './types';
 
 const initialState: DiscoverInternalState = {
   dataViewId: undefined,
   isDataViewLoading: false,
   defaultProfileAdHocDataViewIds: [],
-  savedDataViews: [],
   expandedDoc: undefined,
   dataRequestParams: {},
   overriddenVisContextAfterInvalidation: undefined,
@@ -35,6 +39,18 @@ const initialState: DiscoverInternalState = {
     columns: false,
     rowHeight: false,
     breakdownField: false,
+  },
+  documentsRequest: {
+    loadingStatus: LoadingStatus.Uninitialized,
+    result: [],
+  },
+  totalHitsRequest: {
+    loadingStatus: LoadingStatus.Uninitialized,
+    result: 0,
+  },
+  chartRequest: {
+    loadingStatus: LoadingStatus.Uninitialized,
+    result: {},
   },
 };
 
@@ -56,10 +72,6 @@ export const internalStateSlice = createSlice({
 
     setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {
       state.defaultProfileAdHocDataViewIds = action.payload;
-    },
-
-    setSavedDataViews: (state, action: PayloadAction<DataViewListItem[]>) => {
-      state.savedDataViews = action.payload;
     },
 
     setExpandedDoc: (state, action: PayloadAction<DataTableRecord | undefined>) => {
@@ -105,9 +117,11 @@ export const internalStateSlice = createSlice({
   },
 });
 
-interface InternalStateThunkDependencies {
+export interface InternalStateThunkDependencies {
   services: DiscoverServices;
+  customizationContext: DiscoverCustomizationContext;
   runtimeStateManager: RuntimeStateManager;
+  urlStateStorage: IKbnUrlStateStorage;
 }
 
 export const createInternalStateStore = (options: InternalStateThunkDependencies) =>

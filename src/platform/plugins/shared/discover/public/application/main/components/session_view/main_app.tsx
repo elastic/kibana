@@ -9,17 +9,17 @@
 
 import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { useUrlTracking } from './hooks/use_url_tracking';
-import type { DiscoverStateContainer } from './state_management/discover_state';
-import { DiscoverLayout } from './components/layout';
-import { setBreadcrumbs } from '../../utils/breadcrumbs';
-import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias_match_redirect';
-import { useSavedSearchInitial } from './state_management/discover_state_provider';
-import { useAdHocDataViews } from './hooks/use_adhoc_data_views';
-import { useEsqlMode } from './hooks/use_esql_mode';
-import { addLog } from '../../utils/add_log';
+import { useUrlTracking } from '../../hooks/use_url_tracking';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
+import { DiscoverLayout } from '../layout';
+import { setBreadcrumbs } from '../../../../utils/breadcrumbs';
+import { addHelpMenuToAppChrome } from '../../../../components/help_menu/help_menu_util';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { useSavedSearchAliasMatchRedirect } from '../../../../hooks/saved_search_alias_match_redirect';
+import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
+import { useAdHocDataViews } from '../../hooks/use_adhoc_data_views';
+import { useEsqlMode } from '../../hooks/use_esql_mode';
+import { addLog } from '../../../../utils/add_log';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -65,6 +65,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    * SavedSearch dependent initializing
    */
   useEffect(() => {
+    // TODO: This can be moved to Discover session initialization, some of the logic is already duplicated
     if (stateContainer.customizationContext.displayMode === 'standalone') {
       const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
       chrome.docTitle.change(`Discover${pageTitleSuffix}`);
@@ -78,6 +79,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     stateContainer.customizationContext.displayMode,
   ]);
 
+  // TODO: Move this higher up in the component tree
   useEffect(() => {
     addHelpMenuToAppChrome(chrome, docLinks);
   }, [chrome, docLinks]);
@@ -89,6 +91,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     };
   }, [data.search.session]);
 
+  // TODO: Move this higher up in the component tree
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
   return (

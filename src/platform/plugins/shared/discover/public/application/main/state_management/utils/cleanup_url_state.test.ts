@@ -110,6 +110,9 @@ describe('cleanupUrlState', () => {
       } as AppStateUrl;
       expect(cleanupUrlState(state, services.uiSettings)).toMatchInlineSnapshot(`
         Object {
+          "dataSource": Object {
+            "type": "esql",
+          },
           "query": Object {
             "esql": "from test",
           },
