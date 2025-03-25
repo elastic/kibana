@@ -9,7 +9,6 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { DATASTREAM_TYPE_FIELD, getFieldValue, PROCESSOR_EVENT_FIELD } from '@kbn/discover-utils';
-import { castArray } from 'lodash';
 import type { DocumentProfileProvider } from '../../../../profiles';
 import { DocumentType } from '../../../../profiles';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
@@ -35,7 +34,6 @@ export const createObservabilityTracesSpanDocumentProfileProvider = ({
 
     const isSpanRecord = getIsSpanRecord({
       record,
-      isTracesIndexPattern: tracesContextService.isTracesIndexPattern,
     });
 
     if (!isSpanRecord) {
@@ -51,15 +49,8 @@ export const createObservabilityTracesSpanDocumentProfileProvider = ({
   },
 });
 
-const getIsSpanRecord = ({
-  record,
-  isTracesIndexPattern,
-}: {
-  record: DataTableRecord;
-  isTracesIndexPattern: ProfileProviderServices['tracesContextService']['isTracesIndexPattern'];
-}) => {
-  const recordIndex = castArray(record.flattened._index);
-  return isSpanDocument(record) && isTracesIndexPattern(recordIndex);
+const getIsSpanRecord = ({ record }: { record: DataTableRecord }) => {
+  return isSpanDocument(record);
 };
 
 const isSpanDocument = (record: DataTableRecord) => {

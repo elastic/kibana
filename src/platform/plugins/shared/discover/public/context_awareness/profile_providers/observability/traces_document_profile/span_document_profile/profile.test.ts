@@ -16,7 +16,6 @@ import type { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import { applicationMock } from '../__mocks__/application_mock';
-import { DEFAULT_ALLOWED_TRACES_BASE_PATTERNS } from '@kbn/discover-utils/src';
 
 describe('spanDocumentProfileProvider', () => {
   const getRootContext = ({
@@ -54,12 +53,12 @@ describe('spanDocumentProfileProvider', () => {
     const spanDocumentProfileProvider =
       createObservabilityTracesSpanDocumentProfileProvider(mockServices);
 
-    it('matches records with the correct index pattern, data stream type and the correct processor event', () => {
+    it('matches records with the correct data stream type and the correct processor event', () => {
       expect(
         spanDocumentProfileProvider.resolve({
           rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildMockRecord(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS[0], {
+          record: buildMockRecord('index', {
             'data_stream.type': ['traces'],
             'processor.event': ['span'],
           }),
@@ -93,7 +92,7 @@ describe('spanDocumentProfileProvider', () => {
         spanDocumentProfileProvider.resolve({
           rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildMockRecord(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS[0], {
+          record: buildMockRecord('index', {
             'data_stream.type': ['traces'],
             'processor.event': ['span'],
           }),
