@@ -141,8 +141,8 @@ export function Detail() {
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
-  /**  Users from Security and Ob Solution onboarding page will have onboardingLink and onboardingAppId in the query params
-   ** to redirect back to the onboarding page after adding an integration
+  /** Users from Security and Observability Solution onboarding pages will have returnAppId and returnPath
+   ** in the query params to redirect back to the onboarding page after adding an integration
    */
   const returnAppId = useMemo(() => queryParams.get('returnAppId'), [queryParams]);
   const returnPath = useMemo(() => queryParams.get('returnPath'), [queryParams]);
@@ -418,8 +418,8 @@ export function Detail() {
         isAgentlessIntegration: isAgentlessIntegration(packageInfo || undefined),
       });
 
-      /** Users from Security and Ob Solution onboarding page will have onboardingLink and onboardingAppId in the query params
-       ** to redirect back to the onboarding page after adding an integration
+      /** Users from Security and Observability Solution onboarding pages will have returnAppId and returnPath
+       ** in the query params to redirect back to the onboarding page after adding an integration
        */
       const navigateOptions: InstallPkgRouteOptions =
         returnAppId && returnPath
