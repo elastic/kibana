@@ -6,14 +6,15 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useSources } from './use_get_sources';
+import { useSources } from './use_sources';
 import { useKibana } from '../../../common/lib/kibana';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
-import type { RulesQueryResponse } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
+import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
 import { FILTER_KEY } from '../../components/alert_summary/search_bar/sources_filter_button';
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../detection_engine/rule_management/api/hooks/use_find_rules_query');
 
 describe('useSources', () => {
   beforeEach(() => {
@@ -32,6 +33,18 @@ describe('useSources', () => {
         },
       },
     });
+    (useFindRulesQuery as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: {
+        rules: [
+          {
+            related_integrations: [{ package: 'splunk' }],
+            name: 'SplunkRuleName',
+          },
+        ],
+        total: 0,
+      },
+    });
 
     const packages: PackageListItem[] = [
       {
@@ -42,26 +55,20 @@ describe('useSources', () => {
         version: '',
       },
     ];
-    const ruleResponse = {
-      rules: [
+
+    const { result } = renderHook(() => useSources({ packages }));
+
+    expect(result.current).toEqual({
+      isLoading: false,
+      sources: [
         {
-          related_integrations: [{ package: 'splunk' }],
-          name: 'SplunkRuleName',
+          checked: 'on',
+          'data-test-subj': 'alert-summary-source-option-Splunk',
+          key: 'SplunkRuleName',
+          label: 'Splunk',
         },
       ],
-      total: 0,
-    } as unknown as RulesQueryResponse;
-
-    const { result } = renderHook(() => useSources({ packages, ruleResponse }));
-
-    expect(result.current).toEqual([
-      {
-        checked: 'on',
-        'data-test-subj': 'alert-summary-source-option-Splunk',
-        key: 'SplunkRuleName',
-        label: 'Splunk',
-      },
-    ]);
+    });
   });
 
   it('should return an un-checked source', () => {
@@ -88,41 +95,16 @@ describe('useSources', () => {
         },
       },
     });
-
-    const packages: PackageListItem[] = [
-      {
-        id: 'splunk',
-        name: 'splunk',
-        status: installationStatuses.Installed,
-        title: 'Splunk',
-        version: '',
-      },
-    ];
-    const ruleResponse = {
-      rules: [
-        {
-          related_integrations: [{ package: 'splunk' }],
-          name: 'SplunkRuleName',
-        },
-      ],
-      total: 0,
-    } as unknown as RulesQueryResponse;
-
-    const { result } = renderHook(() => useSources({ packages, ruleResponse }));
-
-    expect(result.current).toEqual([
-      {
-        'data-test-subj': 'alert-summary-source-option-Splunk',
-        key: 'SplunkRuleName',
-        label: 'Splunk',
-      },
-    ]);
-  });
-
-  it('should not return a source if no rule match', () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        data: { query: { filterManager: { getFilters: jest.fn().mockReturnValue([]) } } },
+    (useFindRulesQuery as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: {
+        rules: [
+          {
+            related_integrations: [{ package: 'splunk' }],
+            name: 'SplunkRuleName',
+          },
+        ],
+        total: 0,
       },
     });
 
@@ -135,10 +117,76 @@ describe('useSources', () => {
         version: '',
       },
     ];
-    const ruleResponse = undefined;
 
-    const { result } = renderHook(() => useSources({ packages, ruleResponse }));
+    const { result } = renderHook(() => useSources({ packages }));
 
-    expect(result.current).toHaveLength(0);
+    expect(result.current).toEqual({
+      isLoading: false,
+      sources: [
+        {
+          'data-test-subj': 'alert-summary-source-option-Splunk',
+          key: 'SplunkRuleName',
+          label: 'Splunk',
+        },
+      ],
+    });
+  });
+
+  it('should not return a source if no rule match', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        data: { query: { filterManager: { getFilters: jest.fn().mockReturnValue([]) } } },
+      },
+    });
+    (useFindRulesQuery as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: undefined,
+    });
+
+    const packages: PackageListItem[] = [
+      {
+        id: 'splunk',
+        name: 'splunk',
+        status: installationStatuses.Installed,
+        title: 'Splunk',
+        version: '',
+      },
+    ];
+
+    const { result } = renderHook(() => useSources({ packages }));
+
+    expect(result.current).toEqual({
+      isLoading: false,
+      sources: [],
+    });
+  });
+
+  it('should return isLoading true if rules are loading', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        data: { query: { filterManager: { getFilters: jest.fn().mockReturnValue([]) } } },
+      },
+    });
+    (useFindRulesQuery as jest.Mock).mockReturnValue({
+      isLoading: true,
+      data: undefined,
+    });
+
+    const packages: PackageListItem[] = [
+      {
+        id: 'splunk',
+        name: 'splunk',
+        status: installationStatuses.Installed,
+        title: 'Splunk',
+        version: '',
+      },
+    ];
+
+    const { result } = renderHook(() => useSources({ packages }));
+
+    expect(result.current).toEqual({
+      isLoading: true,
+      sources: [],
+    });
   });
 });

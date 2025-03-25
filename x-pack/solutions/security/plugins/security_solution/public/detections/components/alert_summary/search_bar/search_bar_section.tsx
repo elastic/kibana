@@ -9,8 +9,7 @@ import React, { memo, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonRectangle } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
-import { useSources } from '../../../hooks/alert_summary/use_get_sources';
-import { useFindRulesQuery } from '../../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
+import { useSources } from '../../../hooks/alert_summary/use_sources';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SourceFilterButton } from './sources_filter_button';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -40,8 +39,7 @@ export interface SearchBarSectionProps {
  * This means that deselecting a source is equivalent to filtering out by the rule for that integration.
  */
 export const SearchBarSection = memo(({ dataView, packages }: SearchBarSectionProps) => {
-  const { data, isLoading } = useFindRulesQuery({});
-  const sources = useSources({ packages, ruleResponse: data });
+  const { isLoading, sources } = useSources({ packages });
 
   const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
 

@@ -11,7 +11,7 @@ import type {
   EuiSelectableOption,
   EuiSelectableOptionCheckedType,
 } from '@elastic/eui/src/components/selectable/selectable_option';
-import type { RulesQueryResponse } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
+import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
 import { filterExistsInFiltersArray } from '../../utils/filter';
 import { useKibana } from '../../../common/lib/kibana';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
@@ -24,32 +24,42 @@ export interface UseSourcesParams {
    * List of installed AI for SOC integrations
    */
   packages: PackageListItem[];
+}
+
+export interface UseSourcesResult {
   /**
-   * All rules
+   * True while rules are being fetched
    */
-  ruleResponse: RulesQueryResponse | undefined;
+  isLoading: boolean;
+  /**
+   * List of sources ready to be consumed by the SourceFilterButton component
+   */
+  sources: EuiSelectableOption[];
 }
 
 /**
  * Combining installed packages and rules to create an interface that the SourceFilterButton can take as input (as EuiSelectableOption).
- * If there is not match between a package and the rules, the source is not returned.
+ * If there is no match between a package and the rules, the source is not returned.
  * If a filter exists (we assume that this filter is negated) we do not mark the source as checked for the EuiFilterButton.
  */
-export const useSources = ({ packages, ruleResponse }: UseSourcesParams): EuiSelectableOption[] => {
+export const useSources = ({ packages }: UseSourcesParams): UseSourcesResult => {
+  // Fetch all rules. For the AI for SOC effort, there should only be one rule per integration (which means for now 5-6 rules total)
+  const { data, isLoading } = useFindRulesQuery({});
+
   const {
     data: {
       query: { filterManager },
     },
   } = useKibana().services;
 
-  // There can be existing filters coming from the url
+  // There can be existing rules filtered out, coming when parsing the url
   const currentFilters = filterManager.getFilters();
 
-  return useMemo(() => {
+  const sources = useMemo(() => {
     const result: EuiSelectableOption[] = [];
 
     packages.forEach((p: PackageListItem) => {
-      const matchingRule = (ruleResponse?.rules || []).find((r: RuleResponse) =>
+      const matchingRule = (data?.rules || []).find((r: RuleResponse) =>
         r.related_integrations.map((ri) => ri.package).includes(p.name)
       );
 
@@ -69,5 +79,13 @@ export const useSources = ({ packages, ruleResponse }: UseSourcesParams): EuiSel
     });
 
     return result;
-  }, [currentFilters, packages, ruleResponse]);
+  }, [currentFilters, data, packages]);
+
+  return useMemo(
+    () => ({
+      isLoading,
+      sources,
+    }),
+    [isLoading, sources]
+  );
 };

@@ -14,20 +14,18 @@ import {
   SearchBarSection,
   SOURCE_BUTTON_LOADING_TEST_ID,
 } from './search_bar_section';
-import { useFindRulesQuery } from '../../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { SOURCE_BUTTON_TEST_ID } from './sources_filter_button';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useSources } from '../../../hooks/alert_summary/use_get_sources';
+import { useSources } from '../../../hooks/alert_summary/use_sources';
 
 jest.mock('../../../../common/components/search_bar', () => ({
   // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID
   SiemSearchBar: () => <div data-test-subj={'alert-summary-search-bar'} />,
 }));
-jest.mock('../../../../detection_engine/rule_management/api/hooks/use_find_rules_query');
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../hooks/alert_summary/use_get_sources');
+jest.mock('../../../hooks/alert_summary/use_sources');
 
 const dataView: DataView = createStubDataView({ spec: {} });
 const packages: PackageListItem[] = [
@@ -42,10 +40,10 @@ const packages: PackageListItem[] = [
 
 describe('<SearchBarSection />', () => {
   it('should render all components', () => {
-    (useFindRulesQuery as jest.Mock).mockReturnValue({
+    (useSources as jest.Mock).mockReturnValue({
       isLoading: false,
+      sources: [],
     });
-    (useSources as jest.Mock).mockReturnValue([]);
     (useKibana as jest.Mock).mockReturnValue({
       services: { data: { query: { filterManager: jest.fn() } } },
     });
@@ -60,10 +58,10 @@ describe('<SearchBarSection />', () => {
   });
 
   it('should render a loading skeleton for the source button while fetching rules', () => {
-    (useFindRulesQuery as jest.Mock).mockReturnValue({
+    (useSources as jest.Mock).mockReturnValue({
       isLoading: true,
+      sources: [],
     });
-    (useSources as jest.Mock).mockReturnValue([]);
 
     const { getByTestId, queryByTestId } = render(
       <SearchBarSection dataView={dataView} packages={packages} />
