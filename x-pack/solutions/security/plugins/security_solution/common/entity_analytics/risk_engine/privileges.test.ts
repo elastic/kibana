@@ -15,6 +15,7 @@ describe('getMissingRiskEnginePrivileges', () => {
         cluster: {
           manage_index_templates: false,
           manage_transform: false,
+          manage_ingest_pipelines: false,
         },
         index: {
           'risk-score.risk-score-*': {
@@ -28,7 +29,7 @@ describe('getMissingRiskEnginePrivileges', () => {
     const missingPrivileges = getMissingRiskEnginePrivileges(noClusterPrivileges);
 
     expect(missingPrivileges).toEqual({
-      clusterPrivileges: ['manage_index_templates', 'manage_transform'],
+      clusterPrivileges: ['manage_index_templates', 'manage_transform', 'manage_ingest_pipelines'],
       indexPrivileges: [],
     });
   });
@@ -39,6 +40,7 @@ describe('getMissingRiskEnginePrivileges', () => {
         cluster: {
           manage_index_templates: true,
           manage_transform: true,
+          manage_ingest_pipelines: true,
         },
         index: {
           'risk-score.risk-score-*': {
