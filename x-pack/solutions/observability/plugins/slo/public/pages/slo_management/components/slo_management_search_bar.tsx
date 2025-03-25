@@ -21,7 +21,7 @@ interface Props {
   initialSearch?: string;
   filters: {
     search: string;
-    tags: Array<EuiComboBoxOptionOption>;
+    tags: EuiComboBoxOptionOption[];
   };
   setFilters: Function;
   onRefresh: () => void;
@@ -34,14 +34,11 @@ export function SloManagementSearchBar({
   onRefresh,
 }: Props) {
   const [search, setSearch] = useState<string>(initialSearch);
-  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption>>(
-    filters.tags
-  );
+  const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>(filters.tags);
 
   const { suggestions } = useFetchSLOSuggestions();
 
   const refreshSearch = () => {
-    console.log(selectedOptions);
     setFilters({
       search,
       tags: [...selectedOptions],
@@ -76,7 +73,9 @@ export function SloManagementSearchBar({
       </EuiFlexItem>
       <EuiFlexItem grow={4}>
         <EuiComboBox
-          aria-label="Accessible screen reader label"
+          aria-label={i18n.translate('xpack.slo.sloDefinitions.filterByTag', {
+            defaultMessage: 'Filter tags',
+          })}
           placeholder={i18n.translate('xpack.slo.sloDefinitions.filterByTag', {
             defaultMessage: 'Filter tags',
           })}

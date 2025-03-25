@@ -21,7 +21,7 @@ export interface UseFetchSloDefinitionsResponse {
 interface SLODefinitionParams {
   name?: string;
   includeOutdatedOnly?: boolean;
-  tags?: Array<string>;
+  tags?: string[];
   page?: number;
   perPage?: number;
 }
@@ -35,8 +35,7 @@ export function useFetchSloDefinitions({
 }: SLODefinitionParams): UseFetchSloDefinitionsResponse {
   const { sloClient } = usePluginContext();
   const search = name.endsWith('*') ? name : `${name}*`;
-
-  let tagString = tags.filter((tag) => !!tag).join();
+  const tagString = tags.filter((tag) => !!tag).join();
 
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({
     queryKey: sloKeys.definitions({ search, page, perPage, includeOutdatedOnly, tagString }),

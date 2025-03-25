@@ -42,7 +42,7 @@ import { SLO_MODEL_VERSION } from '../../../../common/constants';
 
 interface SearchFilters {
   search: string;
-  tags: Array<EuiComboBoxOptionOption>;
+  tags: EuiComboBoxOptionOption[];
 }
 
 export function SloManagementTable() {
@@ -307,8 +307,6 @@ export function SloManagementTable() {
     pageSizeOptions: [10, 25, 50, 100],
     showPerPageOptions: true,
   };
-
-  console.log(filters);
 
   return (
     <>
