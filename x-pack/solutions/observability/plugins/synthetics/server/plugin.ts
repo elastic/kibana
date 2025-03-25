@@ -78,8 +78,8 @@ export class Plugin implements PluginType {
 
     this.syntheticsService = new SyntheticsService(this.server);
 
-    pRetry(async () => {
-      await this.syntheticsService?.setup(plugins.taskManager);
+    pRetry(() => {
+      this.syntheticsService?.setup(plugins.taskManager);
     }).catch(() => {});
 
     this.syntheticsMonitorClient = new SyntheticsMonitorClient(this.syntheticsService, this.server);
@@ -113,8 +113,8 @@ export class Plugin implements PluginType {
 
     this.syntheticsService?.start(pluginsStart.taskManager);
 
-    pRetry(async () => {
-      await this.telemetryEventsSender.start(pluginsStart.telemetry, coreStart);
+    pRetry(() => {
+      this.telemetryEventsSender.start(pluginsStart.telemetry, coreStart);
     }).catch(() => {});
   }
 
