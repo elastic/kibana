@@ -12,9 +12,9 @@ import {
   RuleTypeParams,
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
+import { Alert, legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { Alert } from '@kbn/alerts-as-data-utils';
 import { getRuleExecutor } from './executor';
 import { ALERT_ACTION, EsqlRuleParams, esqlRuleParams } from './types';
 
@@ -50,5 +50,12 @@ export function esqlRuleType(): RuleType<
     isExportable: false,
     actionVariables: {},
     executor: getRuleExecutor(),
+    alerts: {
+      context: 'observability.streams',
+      mappings: { fieldMap: { ...legacyExperimentalFieldMap } },
+      useEcs: true,
+      useLegacyAlerts: false,
+      shouldWrite: true,
+    },
   };
 }

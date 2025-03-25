@@ -17,7 +17,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 interface FetchedDocument {
   fields: estypes.SearchHit['fields'];
-  _source?: SignalSource;
+  _source?: unknown;
   _index: estypes.SearchHit['_index'];
   _version: estypes.SearchHit['_version'];
 }
@@ -46,6 +46,7 @@ export const fetchSourceDocuments = async ({
   const response = await esClient.search<unknown>({
     index,
     ignore_unavailable: true,
+    size: ids.length,
     query: {
       bool: {
         filter: [

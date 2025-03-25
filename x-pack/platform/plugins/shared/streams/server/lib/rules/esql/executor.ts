@@ -77,6 +77,8 @@ export const getRuleExecutor = () =>
       };
     });
 
+    console.dir(syntheticHits, { depth: 10 });
+
     // TODO: insert synthetics hits into alert
 
     return { state: {} };
