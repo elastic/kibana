@@ -14,6 +14,7 @@ import {
   stopChild,
   and,
   ActorRefFrom,
+  raise,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import {
@@ -211,7 +212,10 @@ export const streamEnrichmentMachine = setup({
                 },
                 'stream.update': {
                   guard: 'canUpdateStream',
-                  actions: [{ type: 'sendResetEventToSimulator' }],
+                  actions: [
+                    { type: 'sendResetEventToSimulator' },
+                    raise({ type: 'simulation.viewDataPreview' }),
+                  ],
                   target: 'updating',
                 },
               },
