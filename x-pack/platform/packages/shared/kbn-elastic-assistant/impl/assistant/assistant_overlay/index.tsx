@@ -139,6 +139,7 @@ export const AssistantOverlay = React.memo(() => {
         hideCloseButton
       >
         <Assistant
+          lastConversation={lastConversation}
           promptContextId={promptContextId}
           onCloseFlyout={handleCloseModal}
           chatHistoryVisible={chatHistoryVisible}

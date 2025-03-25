@@ -53,7 +53,11 @@ import {
   conversationContainsAnonymizedValues,
   conversationContainsContentReferences,
 } from './conversations/utils';
-import { useAssistantLastConversation, useAssistantSpaceId } from './use_space_aware_context';
+import {
+  LastConversation,
+  useAssistantLastConversation,
+  useAssistantSpaceId,
+} from './use_space_aware_context';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
@@ -65,6 +69,7 @@ const CommentContainer = styled('span')`
 
 export interface Props {
   chatHistoryVisible?: boolean;
+  lastConversation?: LastConversation;
   onCloseFlyout?: () => void;
   promptContextId?: string;
   setChatHistoryVisible?: Dispatch<SetStateAction<boolean>>;
@@ -77,6 +82,7 @@ export interface Props {
  */
 const AssistantComponent: React.FC<Props> = ({
   chatHistoryVisible,
+  lastConversation,
   onCloseFlyout,
   promptContextId = '',
   setChatHistoryVisible,
@@ -132,7 +138,6 @@ const AssistantComponent: React.FC<Props> = ({
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
   const spaceId = useAssistantSpaceId();
   const { getLastConversation, setLastConversation } = useAssistantLastConversation({ spaceId });
-  const lastConversation = useMemo(() => getLastConversation(), [getLastConversation]);
 
   const {
     currentConversation,
@@ -151,7 +156,7 @@ const AssistantComponent: React.FC<Props> = ({
     defaultConnector,
     spaceId,
     refetchCurrentUserConversations,
-    lastConversation,
+    lastConversation: lastConversation ?? getLastConversation(lastConversation),
     mayUpdateConversations:
       isFetchedConnectors && isFetchedCurrentUserConversations && isFetchedPrompts,
     setLastConversation,

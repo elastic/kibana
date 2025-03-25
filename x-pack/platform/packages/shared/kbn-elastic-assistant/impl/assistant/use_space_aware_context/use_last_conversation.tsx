@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { BehaviorSubject } from 'rxjs';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
   LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
@@ -17,6 +18,8 @@ export interface LastConversation {
   title?: string;
 }
 
+const lastConversationSubject$ = new BehaviorSubject<LastConversation | null>(null);
+const localStorageLastConversationIdSubject$ = new BehaviorSubject<string | null>(null);
 export const useAssistantLastConversation = ({
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   spaceId,
@@ -25,7 +28,7 @@ export const useAssistantLastConversation = ({
   spaceId: string;
 }): {
   getLastConversation: (selectedConversation?: SelectedConversation) => LastConversation;
-  setLastConversation: React.Dispatch<React.SetStateAction<LastConversation | undefined>>;
+  setLastConversation: (lastConversation: LastConversation) => void;
 } => {
   // Legacy fallback: used only if the new storage value is not yet set
   const [localStorageLastConversationId] = useLocalStorage<string>(
@@ -37,15 +40,30 @@ export const useAssistantLastConversation = ({
       `${nameSpace}.${LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY}.${spaceId}`
     );
 
+  // Sync BehaviorSubject when localStorage changes
+  useEffect(() => {
+    if (lastConversationSubject$.getValue() !== localStorageLastConversation) {
+      lastConversationSubject$.next(localStorageLastConversation || null);
+    }
+
+    if (localStorageLastConversationIdSubject$.getValue() !== localStorageLastConversationId) {
+      localStorageLastConversationIdSubject$.next(localStorageLastConversationId || null);
+    }
+  }, [localStorageLastConversation, localStorageLastConversationId]);
+
   const getLastConversation = useCallback(
     (selectedConversation?: SelectedConversation): LastConversation => {
       let nextConversation: LastConversation = { id: '' };
+      const localStorageLastConversationValue = lastConversationSubject$.getValue();
+      const localStorageLastConversationIdValue = localStorageLastConversationIdSubject$.getValue();
+
       // Type guard to check if selectedConversation has a 'title'
       if (selectedConversation && 'title' in selectedConversation) {
         nextConversation = {
           id: '',
           title: selectedConversation.title,
         };
+
         return nextConversation;
       }
 
@@ -56,34 +74,39 @@ export const useAssistantLastConversation = ({
       }
 
       // Check if localStorageLastConversation has a 'title'
-      if (localStorageLastConversation && 'title' in localStorageLastConversation) {
+      if (localStorageLastConversationValue && 'title' in localStorageLastConversationValue) {
         nextConversation = {
           id: '',
-          title: localStorageLastConversation.title,
+          title: localStorageLastConversationValue.title,
         };
         return nextConversation;
       }
 
       // If localStorageLastConversation, return it
-      if (localStorageLastConversation && 'id' in localStorageLastConversation) {
-        nextConversation = localStorageLastConversation;
+      if (localStorageLastConversationValue && 'id' in localStorageLastConversationValue) {
+        nextConversation = localStorageLastConversationValue;
         return nextConversation;
       }
 
       // If localStorageLastConversationId exists, use it as 'id'
-      if (localStorageLastConversationId) {
-        nextConversation = { id: localStorageLastConversationId };
+      if (localStorageLastConversationIdValue) {
+        nextConversation = { id: localStorageLastConversationIdValue };
         return nextConversation;
       }
 
       // Default to an empty 'id'
       return nextConversation;
     },
-    [localStorageLastConversation, localStorageLastConversationId]
+    []
   );
+
+  const setLastConversation = (newConversation: LastConversation) => {
+    setLocalStorageLastConversation(newConversation); // Save to localStorage
+    lastConversationSubject$.next(newConversation); // Emit latest value
+  };
 
   return {
     getLastConversation,
-    setLastConversation: setLocalStorageLastConversation,
+    setLastConversation,
   };
 };
