@@ -41,7 +41,7 @@ export function NewRoutingStreamEntry({
           />
         </EuiFormRow>
         <ConditionEditor
-          readonly={false}
+          isNew
           condition={child.if}
           onConditionChange={(condition) => {
             onChildChange({
