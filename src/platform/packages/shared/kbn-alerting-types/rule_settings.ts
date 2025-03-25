@@ -35,11 +35,13 @@ export interface RulesSettingsQueryDelayProperties {
 export type RulesSettingsQueryDelay = RulesSettingsQueryDelayProperties &
   RulesSettingsModificationMetadata;
 
+// TODO: Should this still be here as a RuleSetting?
 export interface RulesSettingsAlertDeletionProperties {
   isActiveAlertsDeletionEnabled: boolean;
   isInactiveAlertsDeletionEnabled: boolean;
   activeAlertsDeletionThreshold: number;
   inactiveAlertsDeletionThreshold: number;
+  categoryIds?: string[] | null;
 }
 
 export type RulesSettingsAlertDeletion = RulesSettingsAlertDeletionProperties &
