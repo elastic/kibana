@@ -68,10 +68,6 @@ export interface SearchAlertsParams {
    * The page size to fetch
    */
   pageSize: number;
-  /**
-   * Force using the default context, otherwise use the AlertQueryContext
-   */
-  useDefaultContext?: boolean;
 }
 
 export interface SearchAlertsResult {
