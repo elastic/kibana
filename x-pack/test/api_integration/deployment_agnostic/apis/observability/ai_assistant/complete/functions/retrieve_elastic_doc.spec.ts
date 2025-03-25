@@ -154,7 +154,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           );
         });
 
-        it('documents from Elastic docs are sent to the LLM', () => {
+        it('sends Elastic product docs to the LLM', () => {
           const lastMessage = last(secondRequestBody.messages);
           expect(lastMessage?.role).to.be('tool');
           // @ts-expect-error
