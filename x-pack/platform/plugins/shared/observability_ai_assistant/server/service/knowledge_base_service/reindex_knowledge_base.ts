@@ -100,7 +100,12 @@ export async function getCurrentAndNextWriteIndexName(esClient: {
     { ignore: [404] }
   );
 
-  const currentWriteIndexName = Object.keys(response)[0];
+  // const currentWriteIndexName = Object.keys(response)[0];
+
+  const currentWriteIndexName = Object.entries(response).find(
+    ([index, aliasInfo]) => aliasInfo.aliases[resourceNames.writeIndexAlias.kb]?.is_write_index
+  )?.[0];
+
   if (!currentWriteIndexName) {
     return { currentWriteIndexName: undefined, nextWriteIndexName: undefined };
   }

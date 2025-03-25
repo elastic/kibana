@@ -30,7 +30,7 @@ describe('getCurrentWriteIndexName', () => {
     });
   });
 
-  it('should handle empty indices list', async () => {
+  it('should return empty when the alias does not exist', async () => {
     esClient.asInternalUser.indices.getAlias = jest.fn().mockResolvedValue({});
 
     expect(await getCurrentAndNextWriteIndexName(esClient)).toEqual({
@@ -39,37 +39,47 @@ describe('getCurrentWriteIndexName', () => {
     });
   });
 
-  describe('when the index name is not in the expected format', () => {
-    it('handles when missing sequence number', async () => {
-      esClient.asInternalUser.indices.getAlias = getMockedResponse(
-        '.kibana-observability-ai-assistant-kb'
-      );
+  it('should return empty when the sequence number is missing', async () => {
+    esClient.asInternalUser.indices.getAlias = getMockedResponse(
+      '.kibana-observability-ai-assistant-kb'
+    );
 
-      expect(await getCurrentAndNextWriteIndexName(esClient)).toEqual({
-        currentWriteIndexName: undefined,
-        nextWriteIndexName: undefined,
-      });
+    expect(await getCurrentAndNextWriteIndexName(esClient)).toEqual({
+      currentWriteIndexName: undefined,
+      nextWriteIndexName: undefined,
     });
+  });
 
-    it('handles when sequence number is not a number', async () => {
-      esClient.asInternalUser.indices.getAlias = getMockedResponse(
-        '.kibana-observability-ai-assistant-kb-foobar'
-      );
+  it('should return empty when the sequence number is not a number', async () => {
+    esClient.asInternalUser.indices.getAlias = getMockedResponse(
+      '.kibana-observability-ai-assistant-kb-foobar'
+    );
 
-      expect(await getCurrentAndNextWriteIndexName(esClient)).toEqual({
-        currentWriteIndexName: undefined,
-        nextWriteIndexName: undefined,
-      });
+    expect(await getCurrentAndNextWriteIndexName(esClient)).toEqual({
+      currentWriteIndexName: undefined,
+      nextWriteIndexName: undefined,
+    });
+  });
+
+  it('should return empty when the index is not a write index', async () => {
+    esClient.asInternalUser.indices.getAlias = getMockedResponse(
+      '.kibana-observability-ai-assistant-kb-000008',
+      false
+    );
+
+    expect(await getCurrentAndNextWriteIndexName(esClient)).toEqual({
+      currentWriteIndexName: undefined,
+      nextWriteIndexName: undefined,
     });
   });
 });
 
-function getMockedResponse(indexName: string) {
+function getMockedResponse(indexName: string, isWriteIndex = true) {
   return jest.fn().mockResolvedValue({
     [indexName]: {
       aliases: {
         '.kibana-observability-ai-assistant-kb': {
-          is_write_index: true,
+          is_write_index: isWriteIndex,
         },
       },
     },
