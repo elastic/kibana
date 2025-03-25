@@ -203,6 +203,7 @@ export const simulationMachine = setup({
     idle: {
       on: {
         'simulation.fields.map': {
+          target: 'assertingSimulationRequirements',
           actions: [{ type: 'mapField', params: ({ event }) => event }],
         },
         'simulation.fields.unmap': {
@@ -279,6 +280,7 @@ export const simulationMachine = setup({
           streamName: context.streamName,
           documents: context.samples,
           processors: context.processors,
+          detectedFields: context.detectedSchemaFields,
         }),
         onDone: {
           target: 'idle',

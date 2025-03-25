@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { Condition, UnaryOperator, getProcessorConfig } from '@kbn/streams-schema';
+import { Condition, FieldDefinition, UnaryOperator, getProcessorConfig } from '@kbn/streams-schema';
 import { isEmpty, uniq } from 'lodash';
 import { ALWAYS_CONDITION } from '../../../../../util/condition';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { PreviewDocsFilterOption } from './preview_docs_filter';
 import { DetectedField, Simulation } from './types';
-import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
+import { MappedSchemaField, SchemaField, isSchemaFieldTyped } from '../../../schema_editor/types';
+import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 
 export function composeSamplingCondition(
   processors: ProcessorDefinitionWithUIAttributes[]
@@ -136,4 +137,16 @@ export function unmapField(schemaFields: SchemaField[], fieldName: string): Sche
 
     return { ...field, status: 'unmapped' };
   });
+}
+
+export function getMappedSchemaFields(fields: SchemaField[]) {
+  return fields.filter(isSchemaFieldTyped).filter((field) => field.status === 'mapped');
+}
+
+export function convertToFieldDefinition(fields: MappedSchemaField[]): FieldDefinition {
+  return fields.reduce(
+    (mappedFields, field) =>
+      Object.assign(mappedFields, { [field.name]: convertToFieldDefinitionConfig(field) }),
+    {}
+  );
 }

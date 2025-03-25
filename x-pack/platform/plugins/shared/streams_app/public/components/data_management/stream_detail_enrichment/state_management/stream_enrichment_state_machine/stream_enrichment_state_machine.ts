@@ -41,7 +41,7 @@ import {
   createSimulationMachineImplementations,
 } from '../simulation_state_machine';
 import { processorMachine, ProcessorActorRef } from '../processor_state_machine';
-import { getConfiguredProcessors, getMappedFields, getStagedProcessors } from './utils';
+import { getConfiguredProcessors, getStagedProcessors, getUpsertWiredFields } from './utils';
 
 const createId = htmlIdGenerator();
 
@@ -223,7 +223,7 @@ export const streamEnrichmentMachine = setup({
                 input: ({ context }) => ({
                   definition: context.definition,
                   processors: getConfiguredProcessors(context),
-                  fields: getMappedFields(context),
+                  fields: getUpsertWiredFields(context),
                 }),
                 onDone: {
                   target: 'idle',

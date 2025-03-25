@@ -7,8 +7,7 @@
 
 import { FieldDefinition, isWiredStreamGetResponse } from '@kbn/streams-schema';
 import { StreamEnrichmentContext } from './types';
-import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
-import { isSchemaFieldTyped } from '../../../schema_editor/types';
+import { convertToFieldDefinition, getMappedSchemaFields } from '../simulation_state_machine';
 
 export function getStagedProcessors(context: StreamEnrichmentContext) {
   return context.processorsRefs
@@ -24,22 +23,22 @@ export function getConfiguredProcessors(context: StreamEnrichmentContext) {
     .map((proc) => proc.context.processor);
 }
 
-export function getMappedFields(context: StreamEnrichmentContext): FieldDefinition | undefined {
+export function getUpsertWiredFields(
+  context: StreamEnrichmentContext
+): FieldDefinition | undefined {
   if (!isWiredStreamGetResponse(context.definition) || !context.simulatorRef) {
     return undefined;
   }
 
   const originalFieldDefinition = context.definition.stream.ingest.wired.fields;
 
-  const simulationMappedFieldDefinition: FieldDefinition = context.simulatorRef
-    .getSnapshot()
-    .context.detectedSchemaFields.filter(isSchemaFieldTyped)
-    .filter((field) => field.status === 'mapped' && !originalFieldDefinition[field.name])
-    .reduce(
-      (mappedFields, field) =>
-        Object.assign(mappedFields, { [field.name]: convertToFieldDefinitionConfig(field) }),
-      {}
-    );
+  const { detectedSchemaFields } = context.simulatorRef.getSnapshot().context;
+
+  const mappedSchemaFields = getMappedSchemaFields(detectedSchemaFields).filter(
+    (field) => !originalFieldDefinition[field.name]
+  );
+
+  const simulationMappedFieldDefinition = convertToFieldDefinition(mappedSchemaFields);
 
   return { ...originalFieldDefinition, ...simulationMappedFieldDefinition };
 }
