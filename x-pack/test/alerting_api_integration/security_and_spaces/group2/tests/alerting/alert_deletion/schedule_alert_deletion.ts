@@ -17,7 +17,6 @@ import {
   GlobalReadAtSpace1,
   Space1,
   Space1AllAtSpace1,
-  Superuser,
   SuperuserAtSpace1,
 } from '../../../../scenarios';
 import { getUrlPrefix, getEventLog, ObjectRemover } from '../../../../../common/lib';
@@ -98,7 +97,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
     });
   };
 
-  describe('alert deletion', () => {
+  describe('schedule alert deletion', () => {
     before(async () => {
       // We're in a non-default space, so we need a detection rule to run and generate alerts
       // in order to create the space-specific alerts index
@@ -174,10 +173,13 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         query: { match_all: {} },
         conflicts: 'proceed',
       });
-      await es.deleteByQuery({
-        index: '.kibana-event-log*',
-        query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
-        conflicts: 'proceed',
+      await retry.try(async () => {
+        const results = await es.deleteByQuery({
+          index: '.kibana-event-log*',
+          query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
+          conflicts: 'proceed',
+        });
+        expect((results?.deleted ?? 0) > 0).to.eql(true);
       });
     });
 
@@ -192,295 +194,17 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
       Space1AllAtSpace1,
     ] /* UserAtSpaceScenarios*/) {
       describe(scenario.id, () => {
-        it('should return the correct number of alerts to delete when previewing', async () => {
-          const previewDeleteAllCategoryActiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: false,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
-            });
-
-          const previewDeleteAllCategoryInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertsDeletionEnabled: false,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
-            });
-
-          const previewDeleteAllCategoryActiveAndInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
-            });
-
-          const previewDeleteObservabilityActiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: false,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
-              categoryIds: ['observability'],
-            });
-
-          const previewDeleteObservabilityInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertsDeletionEnabled: false,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
-              categoryIds: ['observability'],
-            });
-
-          const previewDeleteObservabilityActiveAndInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
-              categoryIds: ['observability'],
-            });
-
-          const previewDeleteSecurityActiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: false,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
-              categoryIds: ['securitySolution'],
-            });
-
-          const previewDeleteSecurityInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertsDeletionEnabled: false,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
-              categoryIds: ['securitySolution'],
-            });
-
-          const previewDeleteSecurityActiveAndInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
-              categoryIds: ['securitySolution'],
-            });
-
-          const previewDeleteManagementActiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: false,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
-              categoryIds: ['management'],
-            });
-
-          const previewDeleteManagementInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertsDeletionEnabled: false,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
-              categoryIds: ['management'],
-            });
-
-          const previewDeleteManagementActiveAndInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
-              categoryIds: ['management'],
-            });
-
-          const previewDeleteMultiCategoryActiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: false,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
-              categoryIds: ['observability', 'management'],
-            });
-
-          const previewDeleteMultiCategoryInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertsDeletionEnabled: false,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
-              categoryIds: ['observability', 'securitySolution'],
-            });
-
-          const previewDeleteMultiCategoryActiveAndInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
-              categoryIds: ['securitySolution', 'management'],
-            });
-
-          switch (scenario.id) {
-            // case 'no_kibana_privileges at space1':
-            // case 'space_1_all at space2':
-            // case 'space_1_all_with_restricted_fixture at space1':
-            // case 'space_1_all_alerts_none_actions at space1':
-            //   // when preview route is available, expect a forbidden error
-            //   // current test route does not gate on rules settings permissions
-            //   break;
-            case 'global_read at space1':
-            case 'superuser at space1':
-            case 'space_1_all at space1':
-              expect(previewDeleteAllCategoryActiveAlerts.status).to.eql(200);
-              expect(previewDeleteAllCategoryActiveAlerts.body.numAlertsDeleted).to.eql(
-                activeStackAlertsOlderThan90.length +
-                  activeO11yAlertsOlderThan90.length +
-                  activeSecurityAlertsOlderThan90.length
-              );
-
-              expect(previewDeleteAllCategoryInactiveAlerts.status).to.eql(200);
-              expect(previewDeleteAllCategoryInactiveAlerts.body.numAlertsDeleted).to.eql(
-                inactiveStackAlertsOlderThan90.length +
-                  inactiveO11yAlertsOlderThan90.length +
-                  inactiveSecurityAlertsOlderThan90.length
-              );
-
-              expect(previewDeleteAllCategoryActiveAndInactiveAlerts.status).to.eql(200);
-              expect(previewDeleteAllCategoryActiveAndInactiveAlerts.body.numAlertsDeleted).to.eql(
-                activeStackAlertsOlderThan90.length +
-                  activeO11yAlertsOlderThan90.length +
-                  activeSecurityAlertsOlderThan90.length +
-                  inactiveStackAlertsOlderThan90.length +
-                  inactiveO11yAlertsOlderThan90.length +
-                  inactiveSecurityAlertsOlderThan90.length
-              );
-
-              expect(previewDeleteObservabilityActiveAlerts.status).to.eql(200);
-              expect(previewDeleteObservabilityActiveAlerts.body.numAlertsDeleted).to.eql(
-                activeO11yAlertsOlderThan90.length
-              );
-
-              expect(previewDeleteObservabilityInactiveAlerts.status).to.eql(200);
-              expect(previewDeleteObservabilityInactiveAlerts.body.numAlertsDeleted).to.eql(
-                inactiveO11yAlertsOlderThan90.length
-              );
-
-              expect(previewDeleteObservabilityActiveAndInactiveAlerts.status).to.eql(200);
-              expect(
-                previewDeleteObservabilityActiveAndInactiveAlerts.body.numAlertsDeleted
-              ).to.eql(activeO11yAlertsOlderThan90.length + inactiveO11yAlertsOlderThan90.length);
-
-              expect(previewDeleteSecurityActiveAlerts.status).to.eql(200);
-              expect(previewDeleteSecurityActiveAlerts.body.numAlertsDeleted).to.eql(
-                activeSecurityAlertsOlderThan90.length
-              );
-
-              expect(previewDeleteSecurityInactiveAlerts.status).to.eql(200);
-              expect(previewDeleteSecurityInactiveAlerts.body.numAlertsDeleted).to.eql(
-                inactiveSecurityAlertsOlderThan90.length
-              );
-
-              expect(previewDeleteSecurityActiveAndInactiveAlerts.status).to.eql(200);
-              expect(previewDeleteSecurityActiveAndInactiveAlerts.body.numAlertsDeleted).to.eql(
-                activeSecurityAlertsOlderThan90.length + inactiveSecurityAlertsOlderThan90.length
-              );
-
-              expect(previewDeleteManagementActiveAlerts.status).to.eql(200);
-              expect(previewDeleteManagementActiveAlerts.body.numAlertsDeleted).to.eql(
-                activeStackAlertsOlderThan90.length
-              );
-
-              expect(previewDeleteManagementInactiveAlerts.status).to.eql(200);
-              expect(previewDeleteManagementInactiveAlerts.body.numAlertsDeleted).to.eql(
-                inactiveStackAlertsOlderThan90.length
-              );
-
-              expect(previewDeleteManagementActiveAndInactiveAlerts.status).to.eql(200);
-              expect(previewDeleteManagementActiveAndInactiveAlerts.body.numAlertsDeleted).to.eql(
-                activeStackAlertsOlderThan90.length + inactiveStackAlertsOlderThan90.length
-              );
-
-              expect(previewDeleteMultiCategoryActiveAlerts.status).to.eql(200);
-              expect(previewDeleteMultiCategoryActiveAlerts.body.numAlertsDeleted).to.eql(
-                activeStackAlertsOlderThan90.length + activeO11yAlertsOlderThan90.length
-              );
-
-              expect(previewDeleteMultiCategoryInactiveAlerts.status).to.eql(200);
-              expect(previewDeleteMultiCategoryInactiveAlerts.body.numAlertsDeleted).to.eql(
-                inactiveO11yAlertsOlderThan90.length + inactiveSecurityAlertsOlderThan90.length
-              );
-
-              expect(previewDeleteMultiCategoryActiveAndInactiveAlerts.status).to.eql(200);
-              expect(
-                previewDeleteMultiCategoryActiveAndInactiveAlerts.body.numAlertsDeleted
-              ).to.eql(
-                activeStackAlertsOlderThan90.length +
-                  activeSecurityAlertsOlderThan90.length +
-                  inactiveStackAlertsOlderThan90.length +
-                  inactiveSecurityAlertsOlderThan90.length
-              );
-              break;
-            default:
-              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-          }
-        });
-
         it('should delete the correct of alerts - all category active alerts', async () => {
-          // update the alert deletion rules setting
-          await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
-            )
-            .set('kbn-xsrf', 'foo')
-            .auth(Superuser.username, Superuser.password)
-            .send({
-              is_active_alerts_deletion_enabled: true,
-              is_inactive_alerts_deletion_enabled: false,
-              active_alerts_deletion_threshold: 90,
-              inactive_alerts_deletion_threshold: 90,
-            })
-            .expect(200);
-
           // schedule the task
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
             .set('kbn-xsrf', 'foo')
-            .send({});
+            .send({
+              isActiveAlertsDeletionEnabled: true,
+              isInactiveAlertsDeletionEnabled: false,
+              activeAlertsDeletionThreshold: 90,
+              inactiveAlertsDeletionThreshold: 90,
+            });
 
           switch (scenario.id) {
             // case 'no_kibana_privileges at space1':
@@ -525,26 +249,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - all category inactive alerts', async () => {
-          // update the alert deletion rules setting
-          await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
-            )
-            .set('kbn-xsrf', 'foo')
-            .auth(Superuser.username, Superuser.password)
-            .send({
-              is_active_alerts_deletion_enabled: false,
-              is_inactive_alerts_deletion_enabled: true,
-              active_alerts_deletion_threshold: 90,
-              inactive_alerts_deletion_threshold: 90,
-            })
-            .expect(200);
-
           // schedule the task
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
             .set('kbn-xsrf', 'foo')
-            .send({});
+            .send({
+              isActiveAlertsDeletionEnabled: false,
+              isInactiveAlertsDeletionEnabled: true,
+              activeAlertsDeletionThreshold: 90,
+              inactiveAlertsDeletionThreshold: 90,
+            });
 
           switch (scenario.id) {
             // case 'no_kibana_privileges at space1':
@@ -588,26 +302,16 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - all category active and inactive alerts', async () => {
-          // update the alert deletion rules setting
-          await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
-            )
-            .set('kbn-xsrf', 'foo')
-            .auth(Superuser.username, Superuser.password)
-            .send({
-              is_active_alerts_deletion_enabled: true,
-              is_inactive_alerts_deletion_enabled: true,
-              active_alerts_deletion_threshold: 90,
-              inactive_alerts_deletion_threshold: 90,
-            })
-            .expect(200);
-
           // schedule the task
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
             .set('kbn-xsrf', 'foo')
-            .send({});
+            .send({
+              isActiveAlertsDeletionEnabled: true,
+              isInactiveAlertsDeletionEnabled: true,
+              activeAlertsDeletionThreshold: 90,
+              inactiveAlertsDeletionThreshold: 90,
+            });
 
           switch (scenario.id) {
             // case 'no_kibana_privileges at space1':
@@ -651,27 +355,17 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - observability active alerts', async () => {
-          // update the alert deletion rules setting
-          await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
-            )
-            .set('kbn-xsrf', 'foo')
-            .auth(Superuser.username, Superuser.password)
-            .send({
-              is_active_alerts_deletion_enabled: true,
-              is_inactive_alerts_deletion_enabled: false,
-              active_alerts_deletion_threshold: 90,
-              inactive_alerts_deletion_threshold: 90,
-              category_ids: ['observability'],
-            })
-            .expect(200);
-
           // schedule the task
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
             .set('kbn-xsrf', 'foo')
-            .send({});
+            .send({
+              isActiveAlertsDeletionEnabled: true,
+              isInactiveAlertsDeletionEnabled: false,
+              activeAlertsDeletionThreshold: 90,
+              inactiveAlertsDeletionThreshold: 90,
+              categoryIds: ['observability'],
+            });
 
           switch (scenario.id) {
             // case 'no_kibana_privileges at space1':
@@ -713,27 +407,17 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - observability inactive alerts', async () => {
-          // update the alert deletion rules setting
-          await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
-            )
-            .set('kbn-xsrf', 'foo')
-            .auth(Superuser.username, Superuser.password)
-            .send({
-              is_active_alerts_deletion_enabled: false,
-              is_inactive_alerts_deletion_enabled: true,
-              active_alerts_deletion_threshold: 90,
-              inactive_alerts_deletion_threshold: 90,
-              category_ids: ['observability'],
-            })
-            .expect(200);
-
           // schedule the task
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
             .set('kbn-xsrf', 'foo')
-            .send({});
+            .send({
+              isActiveAlertsDeletionEnabled: false,
+              isInactiveAlertsDeletionEnabled: true,
+              activeAlertsDeletionThreshold: 90,
+              inactiveAlertsDeletionThreshold: 90,
+              categoryIds: ['observability'],
+            });
 
           switch (scenario.id) {
             // case 'no_kibana_privileges at space1':
@@ -775,27 +459,17 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - observability active and inactive alerts', async () => {
-          // update the alert deletion rules setting
-          await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
-            )
-            .set('kbn-xsrf', 'foo')
-            .auth(Superuser.username, Superuser.password)
-            .send({
-              is_active_alerts_deletion_enabled: true,
-              is_inactive_alerts_deletion_enabled: true,
-              active_alerts_deletion_threshold: 90,
-              inactive_alerts_deletion_threshold: 90,
-              category_ids: ['observability'],
-            })
-            .expect(200);
-
           // schedule the task
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
             .set('kbn-xsrf', 'foo')
-            .send({});
+            .send({
+              isActiveAlertsDeletionEnabled: true,
+              isInactiveAlertsDeletionEnabled: true,
+              activeAlertsDeletionThreshold: 90,
+              inactiveAlertsDeletionThreshold: 90,
+              categoryIds: ['observability'],
+            });
 
           switch (scenario.id) {
             // case 'no_kibana_privileges at space1':
@@ -839,27 +513,17 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - security active alerts', async () => {
-          // update the alert deletion rules setting
-          await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
-            )
-            .set('kbn-xsrf', 'foo')
-            .auth(Superuser.username, Superuser.password)
-            .send({
-              is_active_alerts_deletion_enabled: true,
-              is_inactive_alerts_deletion_enabled: false,
-              active_alerts_deletion_threshold: 90,
-              inactive_alerts_deletion_threshold: 90,
-              category_ids: ['securitySolution'],
-            })
-            .expect(200);
-
           // schedule the task
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
             .set('kbn-xsrf', 'foo')
-            .send({});
+            .send({
+              isActiveAlertsDeletionEnabled: true,
+              isInactiveAlertsDeletionEnabled: false,
+              activeAlertsDeletionThreshold: 90,
+              inactiveAlertsDeletionThreshold: 90,
+              categoryIds: ['securitySolution'],
+            });
 
           switch (scenario.id) {
             // case 'no_kibana_privileges at space1':
@@ -900,27 +564,18 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
           }
         });
 
-        it('should delete the correct of alerts - security inactive alerts', async () => {
-          await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
-            )
-            .set('kbn-xsrf', 'foo')
-            .auth(Superuser.username, Superuser.password)
-            .send({
-              is_active_alerts_deletion_enabled: false,
-              is_inactive_alerts_deletion_enabled: true,
-              active_alerts_deletion_threshold: 90,
-              inactive_alerts_deletion_threshold: 90,
-              category_ids: ['securitySolution'],
-            })
-            .expect(200);
-
+        it('testtest should delete the correct of alerts - security inactive alerts', async () => {
           // schedule the task
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
             .set('kbn-xsrf', 'foo')
-            .send({});
+            .send({
+              isActiveAlertsDeletionEnabled: false,
+              isInactiveAlertsDeletionEnabled: true,
+              activeAlertsDeletionThreshold: 90,
+              inactiveAlertsDeletionThreshold: 90,
+              categoryIds: ['securitySolution'],
+            });
 
           switch (scenario.id) {
             // case 'no_kibana_privileges at space1':
@@ -962,27 +617,17 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - security active and inactive alerts', async () => {
-          // update the alert deletion rules setting
-          await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
-            )
-            .set('kbn-xsrf', 'foo')
-            .auth(Superuser.username, Superuser.password)
-            .send({
-              is_active_alerts_deletion_enabled: true,
-              is_inactive_alerts_deletion_enabled: true,
-              active_alerts_deletion_threshold: 90,
-              inactive_alerts_deletion_threshold: 90,
-              category_ids: ['securitySolution'],
-            })
-            .expect(200);
-
           // schedule the task
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
             .set('kbn-xsrf', 'foo')
-            .send({});
+            .send({
+              isActiveAlertsDeletionEnabled: true,
+              isInactiveAlertsDeletionEnabled: true,
+              activeAlertsDeletionThreshold: 90,
+              inactiveAlertsDeletionThreshold: 90,
+              categoryIds: ['securitySolution'],
+            });
 
           switch (scenario.id) {
             // case 'no_kibana_privileges at space1':
@@ -1026,26 +671,17 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - management active alerts', async () => {
-          await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
-            )
-            .set('kbn-xsrf', 'foo')
-            .auth(Superuser.username, Superuser.password)
-            .send({
-              is_active_alerts_deletion_enabled: true,
-              is_inactive_alerts_deletion_enabled: false,
-              active_alerts_deletion_threshold: 90,
-              inactive_alerts_deletion_threshold: 90,
-              category_ids: ['management'],
-            })
-            .expect(200);
-
           // schedule the task
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
             .set('kbn-xsrf', 'foo')
-            .send({});
+            .send({
+              isActiveAlertsDeletionEnabled: true,
+              isInactiveAlertsDeletionEnabled: false,
+              activeAlertsDeletionThreshold: 90,
+              inactiveAlertsDeletionThreshold: 90,
+              categoryIds: ['management'],
+            });
 
           switch (scenario.id) {
             // case 'no_kibana_privileges at space1':
@@ -1087,27 +723,17 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - management inactive alerts', async () => {
-          // update the alert deletion rules setting
-          await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
-            )
-            .set('kbn-xsrf', 'foo')
-            .auth(Superuser.username, Superuser.password)
-            .send({
-              is_active_alerts_deletion_enabled: false,
-              is_inactive_alerts_deletion_enabled: true,
-              active_alerts_deletion_threshold: 90,
-              inactive_alerts_deletion_threshold: 90,
-              category_ids: ['management'],
-            })
-            .expect(200);
-
           // schedule the task
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
             .set('kbn-xsrf', 'foo')
-            .send({});
+            .send({
+              isActiveAlertsDeletionEnabled: false,
+              isInactiveAlertsDeletionEnabled: true,
+              activeAlertsDeletionThreshold: 90,
+              inactiveAlertsDeletionThreshold: 90,
+              categoryIds: ['management'],
+            });
 
           switch (scenario.id) {
             // case 'no_kibana_privileges at space1':
@@ -1149,27 +775,17 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - management active and inactive alerts', async () => {
-          // update the alert deletion rules setting
-          await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
-            )
-            .set('kbn-xsrf', 'foo')
-            .auth(Superuser.username, Superuser.password)
-            .send({
-              is_active_alerts_deletion_enabled: true,
-              is_inactive_alerts_deletion_enabled: true,
-              active_alerts_deletion_threshold: 90,
-              inactive_alerts_deletion_threshold: 90,
-              category_ids: ['management'],
-            })
-            .expect(200);
-
           // schedule the task
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
             .set('kbn-xsrf', 'foo')
-            .send({});
+            .send({
+              isActiveAlertsDeletionEnabled: true,
+              isInactiveAlertsDeletionEnabled: true,
+              activeAlertsDeletionThreshold: 90,
+              inactiveAlertsDeletionThreshold: 90,
+              categoryIds: ['management'],
+            });
 
           switch (scenario.id) {
             // case 'no_kibana_privileges at space1':
@@ -1213,26 +829,17 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - multi-category active alerts', async () => {
-          await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
-            )
-            .set('kbn-xsrf', 'foo')
-            .auth(Superuser.username, Superuser.password)
-            .send({
-              is_active_alerts_deletion_enabled: true,
-              is_inactive_alerts_deletion_enabled: false,
-              active_alerts_deletion_threshold: 90,
-              inactive_alerts_deletion_threshold: 90,
-              category_ids: ['observability', 'management'],
-            })
-            .expect(200);
-
           // schedule the task
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
             .set('kbn-xsrf', 'foo')
-            .send({});
+            .send({
+              isActiveAlertsDeletionEnabled: true,
+              isInactiveAlertsDeletionEnabled: false,
+              activeAlertsDeletionThreshold: 90,
+              inactiveAlertsDeletionThreshold: 90,
+              categoryIds: ['observability', 'management'],
+            });
 
           switch (scenario.id) {
             // case 'no_kibana_privileges at space1':
@@ -1276,26 +883,17 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - multi-category inactive alerts', async () => {
-          await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
-            )
-            .set('kbn-xsrf', 'foo')
-            .auth(Superuser.username, Superuser.password)
-            .send({
-              is_active_alerts_deletion_enabled: false,
-              is_inactive_alerts_deletion_enabled: true,
-              active_alerts_deletion_threshold: 90,
-              inactive_alerts_deletion_threshold: 90,
-              category_ids: ['observability', 'securitySolution'],
-            })
-            .expect(200);
-
           // schedule the task
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
             .set('kbn-xsrf', 'foo')
-            .send({});
+            .send({
+              isActiveAlertsDeletionEnabled: false,
+              isInactiveAlertsDeletionEnabled: true,
+              activeAlertsDeletionThreshold: 90,
+              inactiveAlertsDeletionThreshold: 90,
+              categoryIds: ['observability', 'securitySolution'],
+            });
 
           switch (scenario.id) {
             // case 'no_kibana_privileges at space1':
@@ -1339,27 +937,17 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         it('should delete the correct of alerts - multi-category active and inactive alerts', async () => {
-          // update the alert deletion rules setting
-          await supertestWithoutAuth
-            .post(
-              `${getUrlPrefix(scenario.space.id)}/internal/alerting/rules/settings/_alert_deletion`
-            )
-            .set('kbn-xsrf', 'foo')
-            .auth(Superuser.username, Superuser.password)
-            .send({
-              is_active_alerts_deletion_enabled: true,
-              is_inactive_alerts_deletion_enabled: true,
-              active_alerts_deletion_threshold: 90,
-              inactive_alerts_deletion_threshold: 90,
-              category_ids: ['management', 'securitySolution'],
-            })
-            .expect(200);
-
           // schedule the task
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
             .set('kbn-xsrf', 'foo')
-            .send({});
+            .send({
+              isActiveAlertsDeletionEnabled: true,
+              isInactiveAlertsDeletionEnabled: true,
+              activeAlertsDeletionThreshold: 90,
+              inactiveAlertsDeletionThreshold: 90,
+              categoryIds: ['securitySolution', 'management'],
+            });
 
           switch (scenario.id) {
             // case 'no_kibana_privileges at space1':
@@ -1413,43 +1001,20 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
         await es.bulk({ refresh: 'wait_for', operations });
 
-        // set alert deletion settings in space 1
-        await supertestWithoutAuth
-          .post(`${getUrlPrefix(Space1.id)}/internal/alerting/rules/settings/_alert_deletion`)
-          .set('kbn-xsrf', 'foo')
-          .auth(Superuser.username, Superuser.password)
-          .send({
-            is_active_alerts_deletion_enabled: false,
-            is_inactive_alerts_deletion_enabled: true,
-            active_alerts_deletion_threshold: 90,
-            inactive_alerts_deletion_threshold: 90,
-          })
-          .expect(200);
-
-        // set alert deletion settings in default space
-        await supertestWithoutAuth
-          .post(`${getUrlPrefix('default')}/internal/alerting/rules/settings/_alert_deletion`)
-          .set('kbn-xsrf', 'foo')
-          .auth(Superuser.username, Superuser.password)
-          .send({
-            is_active_alerts_deletion_enabled: false,
-            is_inactive_alerts_deletion_enabled: true,
-            active_alerts_deletion_threshold: 90,
-            inactive_alerts_deletion_threshold: 90,
-            category_ids: ['observability'],
-          })
-          .expect(200);
-
         // schedule the task
         await supertest
           .post(`${getUrlPrefix(Space1.id)}/api/alerts_fixture/schedule_alert_deletion`)
           .set('kbn-xsrf', 'foo')
           .send({
+            isActiveAlertsDeletionEnabled: false,
+            isInactiveAlertsDeletionEnabled: true,
+            activeAlertsDeletionThreshold: 90,
+            inactiveAlertsDeletionThreshold: 90,
             spaceIds: [Space1.id, 'default'],
           })
           .expect(200);
 
-        const expectedAlertsSpace1 = [
+        const expectedAlerts = [
           ...inactiveStackAlertsNewerThan90,
           ...activeStackAlertsOlderThan90,
           ...activeStackAlertsNewerThan90,
@@ -1461,31 +1026,15 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
           ...activeSecurityAlertsNewerThan90,
         ];
 
-        const deletedAlertsSpace1 = [
+        const deletedAlerts = [
           ...inactiveStackAlertsOlderThan90,
           ...inactiveO11yAlertsOlderThan90,
           ...inactiveSecurityAlertsOlderThan90,
         ];
 
-        const expectedAlertsDefault = [
-          ...inactiveStackAlertsOlderThan90,
-          ...inactiveStackAlertsNewerThan90,
-          ...activeStackAlertsOlderThan90,
-          ...activeStackAlertsNewerThan90,
-          ...inactiveO11yAlertsNewerThan90,
-          ...activeO11yAlertsOlderThan90,
-          ...activeO11yAlertsNewerThan90,
-          ...inactiveSecurityAlertsOlderThan90,
-          ...inactiveSecurityAlertsNewerThan90,
-          ...activeSecurityAlertsOlderThan90,
-          ...activeSecurityAlertsNewerThan90,
-        ];
-
-        const deletedAlertsDefault = inactiveO11yAlertsOlderThan90;
-
         const expectedAlertIds = [
-          ...expectedAlertsDefault.map((a) => a.default.id),
-          ...expectedAlertsSpace1.map((a) => a.space1.id),
+          ...expectedAlerts.map((a) => a.default.id),
+          ...expectedAlerts.map((a) => a.space1.id),
         ];
 
         // wait for the task to complete
@@ -1503,7 +1052,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
           );
           expect(defaultSpaceEventLog).not.to.be(undefined);
           expect(defaultSpaceEventLog?._source?.kibana?.alert?.deletion?.num_deleted).to.eql(
-            deletedAlertsDefault.length
+            deletedAlerts.length
           );
 
           const space1SpaceEventLog = results.hits.hits.find(
@@ -1511,7 +1060,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
           );
           expect(space1SpaceEventLog).not.to.be(undefined);
           expect(space1SpaceEventLog?._source?.kibana?.alert?.deletion?.num_deleted).to.eql(
-            deletedAlertsSpace1.length
+            deletedAlerts.length
           );
         });
 

@@ -810,11 +810,14 @@ export function defineRoutes(
     {
       path: '/api/alerts_fixture/schedule_alert_deletion',
       validate: {
-        body: schema.maybe(
-          schema.object({
-            spaceIds: schema.maybe(schema.arrayOf(schema.string())),
-          })
-        ),
+        body: schema.object({
+          isActiveAlertsDeletionEnabled: schema.boolean(),
+          isInactiveAlertsDeletionEnabled: schema.boolean(),
+          activeAlertsDeletionThreshold: schema.number(),
+          inactiveAlertsDeletionThreshold: schema.number(),
+          categoryIds: schema.maybe(schema.arrayOf(schema.string())),
+          spaceIds: schema.maybe(schema.arrayOf(schema.string())),
+        }),
       },
     },
     async (
@@ -830,7 +833,17 @@ export function defineRoutes(
           const currentSpaceId = spaces ? spaces.spacesService.getSpaceId(req) : 'default';
           spaceIds = [currentSpaceId];
         }
-        const result = await alerting.scheduleAlertDeletion(req, spaceIds);
+        const result = await alerting.scheduleAlertDeletion(
+          req,
+          {
+            isActiveAlertsDeletionEnabled: req.body.isActiveAlertsDeletionEnabled,
+            isInactiveAlertsDeletionEnabled: req.body.isInactiveAlertsDeletionEnabled,
+            activeAlertsDeletionThreshold: req.body.activeAlertsDeletionThreshold,
+            inactiveAlertsDeletionThreshold: req.body.inactiveAlertsDeletionThreshold,
+            categoryIds: req.body.categoryIds,
+          },
+          spaceIds
+        );
         return res.ok({
           body: { result },
         });

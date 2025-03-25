@@ -10,7 +10,8 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function alertDeletionTests({ loadTestFile }: FtrProviderContext) {
   describe('alert deletion', () => {
-    loadTestFile(require.resolve('./alert_deletion'));
+    loadTestFile(require.resolve('./preview_alert_deletion'));
+    loadTestFile(require.resolve('./schedule_alert_deletion'));
     loadTestFile(require.resolve('./task_state'));
   });
 }

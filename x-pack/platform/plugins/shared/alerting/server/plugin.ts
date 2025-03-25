@@ -69,7 +69,7 @@ import type {
   RuleAlertData,
   RulesSettingsAlertDeletionProperties,
 } from './types';
-import { ALERTING_FEATURE_ID, RULES_SETTINGS_SAVED_OBJECT_TYPE } from './types';
+import { ALERTING_FEATURE_ID } from './types';
 import { defineRoutes } from './routes';
 import type {
   AlertInstanceContext,
@@ -181,7 +181,11 @@ export interface AlertingServerStart {
     request: KibanaRequest
   ): Promise<PublicMethodsOf<AlertingAuthorization>>;
   getFrameworkHealth: () => Promise<AlertsHealth>;
-  scheduleAlertDeletion(req: KibanaRequest, spaceIds: string[]): Promise<void>;
+  scheduleAlertDeletion(
+    req: KibanaRequest,
+    settings: RulesSettingsAlertDeletionProperties,
+    spaceIds: string[]
+  ): Promise<void>;
   previewAlertDeletion(
     settings: RulesSettingsAlertDeletionProperties,
     spaceId: string
@@ -359,17 +363,9 @@ export class AlertingPlugin {
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
       eventLogger: this.eventLogger,
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
-      internalSavedObjectsRepositoryPromise: core
-        .getStartServices()
-        .then(([{ savedObjects }]) =>
-          savedObjects.createInternalRepository([RULES_SETTINGS_SAVED_OBJECT_TYPE])
-        ),
       logger: this.logger,
       ruleTypeRegistry: this.ruleTypeRegistry!,
       securityService: core.getStartServices().then(([{ security }]) => security),
-      spacesStartPromise: core
-        .getStartServices()
-        .then(([_, alertingStart]) => alertingStart.spaces),
       taskManagerSetup: plugins.taskManager,
       taskManagerStartPromise,
     });
@@ -684,8 +680,11 @@ export class AlertingPlugin {
         await getHealth(core.savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE])),
 
       // remove when we have real routes
-      scheduleAlertDeletion: async (req: KibanaRequest, spaceIds: string[]) =>
-        await this.alertDeletionClient!.scheduleTask(req, spaceIds),
+      scheduleAlertDeletion: async (
+        req: KibanaRequest,
+        settings: RulesSettingsAlertDeletionProperties,
+        spaceIds: string[]
+      ) => await this.alertDeletionClient!.scheduleTask(req, settings, spaceIds),
       previewAlertDeletion: async (
         settings: RulesSettingsAlertDeletionProperties,
         spaceId: string

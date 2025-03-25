@@ -7,18 +7,16 @@
 
 import type {
   ElasticsearchClient,
-  ISavedObjectsRepository,
   KibanaRequest,
   Logger,
   SecurityServiceStart,
 } from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES, SavedObjectsUtils } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { millisToNanos } from '@kbn/event-log-plugin/server';
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, SPACE_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
@@ -31,21 +29,11 @@ import type {
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { GetAlertIndicesAlias } from '../lib';
-import {
-  AlertAuditAction,
-  alertAuditEvent,
-  alertAuditSystemEvent,
-  spaceIdToNamespace,
-} from '../lib';
+import { AlertAuditAction, alertAuditEvent, alertAuditSystemEvent } from '../lib';
 import type {
   RuleTypeRegistry,
-  RulesSettings,
   RulesSettingsAlertDeletion,
   RulesSettingsAlertDeletionProperties,
-} from '../types';
-import {
-  RULES_SETTINGS_ALERT_DELETION_SAVED_OBJECT_ID,
-  RULES_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../types';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 
@@ -64,11 +52,9 @@ interface ConstructorOpts {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   eventLogger: IEventLogger;
   getAlertIndicesAlias: GetAlertIndicesAlias;
-  internalSavedObjectsRepositoryPromise: Promise<ISavedObjectsRepository>;
   logger: Logger;
   ruleTypeRegistry: RuleTypeRegistry;
   securityService: Promise<SecurityServiceStart>;
-  spacesStartPromise: Promise<SpacesPluginStart | undefined>;
   taskManagerSetup: TaskManagerSetupContract;
   taskManagerStartPromise: Promise<TaskManagerStartContract>;
 }
@@ -86,9 +72,7 @@ export class AlertDeletionClient {
   private readonly auditService?: AuditServiceSetup;
   private readonly getAlertIndicesAlias: GetAlertIndicesAlias;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
-  private readonly internalSavedObjectsRepositoryPromise: Promise<ISavedObjectsRepository>;
   private readonly securityService: Promise<SecurityServiceStart>;
-  private readonly spacesPluginStartPromise: Promise<SpacesPluginStart | undefined>;
   private readonly taskManagerStartPromise: Promise<TaskManagerStartContract>;
 
   constructor(opts: ConstructorOpts) {
@@ -97,10 +81,8 @@ export class AlertDeletionClient {
     this.eventLogger = opts.eventLogger;
     this.getAlertIndicesAlias = opts.getAlertIndicesAlias;
     this.ruleTypeRegistry = opts.ruleTypeRegistry;
-    this.internalSavedObjectsRepositoryPromise = opts.internalSavedObjectsRepositoryPromise;
     this.logger = opts.logger.get(ALERT_DELETION_TASK_TYPE);
     this.securityService = opts.securityService;
-    this.spacesPluginStartPromise = opts.spacesStartPromise;
     this.taskManagerStartPromise = opts.taskManagerStartPromise;
 
     // Registers the task that handles alert deletion
@@ -124,7 +106,11 @@ export class AlertDeletionClient {
     });
   }
 
-  public async scheduleTask(request: KibanaRequest, spaceIds: string[]) {
+  public async scheduleTask(
+    request: KibanaRequest,
+    settings: RulesSettingsAlertDeletionProperties,
+    spaceIds: string[]
+  ) {
     try {
       const taskManager = await this.taskManagerStartPromise;
       await taskManager.ensureScheduled({
@@ -132,7 +118,7 @@ export class AlertDeletionClient {
         taskType: ALERT_DELETION_TASK_TYPE,
         scope: ['alerting'],
         state: {},
-        params: { spaceIds },
+        params: { settings, spaceIds },
       });
 
       const securityService = await this.securityService;
@@ -224,43 +210,17 @@ export class AlertDeletionClient {
   ) => {
     const runDate = new Date();
     try {
-      const internalSavedObjectsRepository = await this.internalSavedObjectsRepositoryPromise;
-      const spaces = await this.spacesPluginStartPromise;
+      const settings = taskInstance.params.settings;
       const spaceIds = taskInstance.params.spaceIds;
-      const namespaces = spaceIds.map((spaceId: string) => spaceIdToNamespace(spaces, spaceId));
 
-      // Query for rules settings in the specified spaces; create a point in time finder for efficient
-      // pagination in case there are a lot of spaces
-      const results = await internalSavedObjectsRepository.bulkGet<RulesSettings>(
-        namespaces.map((namespace?: string) => ({
-          id: RULES_SETTINGS_ALERT_DELETION_SAVED_OBJECT_ID,
-          type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
-          ...(namespace ? { namespaces: [namespace] } : {}),
-        }))
-      );
+      if (!spaceIds || spaceIds.length === 0 || !settings) {
+        throw new Error(`Invalid task parameters: ${JSON.stringify(taskInstance.params)}`);
+      }
 
-      for (const result of results.saved_objects) {
-        if (result.error) {
-          this.logger.error(
-            `Error encountered while fetching rules settings: ${result.error.message}`
-          );
-          this.logFailedDeletion(runDate, 0, taskInstance.params.spaceIds, result.error.message);
-          continue;
-        }
-
-        const namespace =
-          result.namespaces && result.namespaces.length > 0 ? result.namespaces[0] : undefined;
-        const spaceId = SavedObjectsUtils.namespaceIdToString(namespace);
-
-        if (!result.attributes.alertDeletion) {
-          this.logger.error(`Undefined alert deletion rules settings for space "${spaceId}}"`);
-          this.logFailedDeletion(runDate, 0, [spaceId], 'Undefined alert deletion rules settings');
-          continue;
-        }
-
+      for (const spaceId of spaceIds) {
         try {
           const { numAlertsDeleted, errors } = await this.deleteAlertsForSpace(
-            result.attributes.alertDeletion,
+            settings,
             spaceId,
             abortController
           );

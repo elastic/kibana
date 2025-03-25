@@ -105,25 +105,17 @@ export default function alertDeletionTaskStateTests({ getService }: FtrProviderC
         refresh: true,
       });
 
-      // update the alert deletion rules setting
-      await supertestWithoutAuth
-        .post(`${getUrlPrefix(Space1.id)}/internal/alerting/rules/settings/_alert_deletion`)
-        .set('kbn-xsrf', 'foo')
-        .auth(Superuser.username, Superuser.password)
-        .send({
-          is_active_alerts_deletion_enabled: true,
-          is_inactive_alerts_deletion_enabled: false,
-          active_alerts_deletion_threshold: 1,
-          inactive_alerts_deletion_threshold: 90,
-        })
-        .expect(200);
-
       // schedule the task
       await supertestWithoutAuth
         .post(`${getUrlPrefix(Space1.id)}/api/alerts_fixture/schedule_alert_deletion`)
         .set('kbn-xsrf', 'foo')
         .auth(Superuser.username, Superuser.password)
-        .send({})
+        .send({
+          isActiveAlertsDeletionEnabled: true,
+          isInactiveAlertsDeletionEnabled: false,
+          activeAlertsDeletionThreshold: 1,
+          inactiveAlertsDeletionThreshold: 90,
+        })
         .expect(200);
 
       // wait for the task to complete

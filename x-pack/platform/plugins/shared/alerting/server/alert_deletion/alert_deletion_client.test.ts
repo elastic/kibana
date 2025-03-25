@@ -10,8 +10,7 @@ import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { AlertDeletionClient } from './alert_deletion_client';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
-import { elasticsearchServiceMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../types';
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, SPACE_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
@@ -36,13 +35,11 @@ const fakeRequest = {
 
 const auditService = securityServiceMock.createStart().audit;
 const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const eventLogger = eventLoggerMock.create();
 const getAlertIndicesAliasMock = jest.fn();
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const securityServiceStart = securityServiceMock.createStart();
-const spacesStart = spacesMock.createStart();
 const taskManagerSetup = taskManagerMock.createSetup();
 const taskManagerStart = taskManagerMock.createStart();
 
@@ -215,7 +212,15 @@ const alertDeletionTaskInstance = {
   startedAt: null,
   retryAt: null,
   state: {},
-  params: { spaceIds: ['default', 'space-1', 'another-space'] },
+  params: {
+    settings: {
+      isActiveAlertsDeletionEnabled: false,
+      isInactiveAlertsDeletionEnabled: true,
+      activeAlertsDeletionThreshold: 1,
+      inactiveAlertsDeletionThreshold: 30,
+    },
+    spaceIds: ['default', 'space-1', 'another-space'],
+  },
   ownerId: null,
 };
 
@@ -233,59 +238,11 @@ describe('AlertDeletionClient', () => {
       elasticsearchClientPromise: Promise.resolve(esClient),
       eventLogger,
       getAlertIndicesAlias: getAlertIndicesAliasMock,
-      internalSavedObjectsRepositoryPromise: Promise.resolve(internalSavedObjectsRepository),
       logger,
       ruleTypeRegistry,
       securityService: Promise.resolve(securityServiceStart),
-      spacesStartPromise: Promise.resolve(spacesStart),
       taskManagerSetup,
       taskManagerStartPromise: Promise.resolve(taskManagerStart),
-    });
-    internalSavedObjectsRepository.bulkGet.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'alert-deletion-settings',
-          type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
-          attributes: {
-            alertDeletion: {
-              isActiveAlertsDeletionEnabled: false,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 1,
-              inactiveAlertsDeletionThreshold: 30,
-            },
-          },
-          references: [],
-        },
-        {
-          id: 'space-1:alert-deletion-settings',
-          type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
-          attributes: {
-            alertDeletion: {
-              isActiveAlertsDeletionEnabled: false,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 1,
-              inactiveAlertsDeletionThreshold: 30,
-              categoryIds: ['securitySolution'],
-            },
-          },
-          references: [],
-          namespaces: ['space-1'],
-        },
-        {
-          id: 'another-space:alert-deletion-settings',
-          type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
-          attributes: {
-            alertDeletion: {
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 30,
-            },
-          },
-          references: [],
-          namespaces: ['another-space'],
-        },
-      ],
     });
   });
 
@@ -302,15 +259,32 @@ describe('AlertDeletionClient', () => {
   });
 
   describe('scheduleTask', () => {
-    test('should schedule ad hoc task with given space ID', async () => {
+    test('should schedule ad hoc task with given settings and space IDs', async () => {
       const auditLog = auditService.withoutRequest;
       auditService.asScoped = jest.fn(() => auditLog);
 
-      await alertDeletionClient.scheduleTask(fakeRequest, ['space-1', 'default']);
+      await alertDeletionClient.scheduleTask(
+        fakeRequest,
+        {
+          isActiveAlertsDeletionEnabled: false,
+          isInactiveAlertsDeletionEnabled: true,
+          activeAlertsDeletionThreshold: 1,
+          inactiveAlertsDeletionThreshold: 30,
+        },
+        ['space-1', 'default']
+      );
       expect(taskManagerStart.ensureScheduled).toHaveBeenCalledWith({
         id: `Alerting-alert-deletion`,
         taskType: 'alert-deletion',
-        params: { spaceIds: ['space-1', 'default'] },
+        params: {
+          settings: {
+            isActiveAlertsDeletionEnabled: false,
+            isInactiveAlertsDeletionEnabled: true,
+            activeAlertsDeletionThreshold: 1,
+            inactiveAlertsDeletionThreshold: 30,
+          },
+          spaceIds: ['space-1', 'default'],
+        },
         state: {},
         scope: ['alerting'],
       });
@@ -330,7 +304,16 @@ describe('AlertDeletionClient', () => {
       auditService.asScoped = jest.fn(() => auditLog);
       taskManagerStart.ensureScheduled.mockRejectedValueOnce(new Error('Failed to schedule task'));
       await expect(
-        alertDeletionClient.scheduleTask(fakeRequest, ['space-1'])
+        alertDeletionClient.scheduleTask(
+          fakeRequest,
+          {
+            isActiveAlertsDeletionEnabled: false,
+            isInactiveAlertsDeletionEnabled: true,
+            activeAlertsDeletionThreshold: 1,
+            inactiveAlertsDeletionThreshold: 30,
+          },
+          ['space-1']
+        )
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failed to schedule task"`);
       expect(logger.error).toHaveBeenCalledWith(
         'Error scheduling alert deletion task: Failed to schedule task'
@@ -506,8 +489,7 @@ describe('AlertDeletionClient', () => {
   });
 
   describe('runTask', () => {
-    test('should look up rules settings and issue queries for each space setting', async () => {
-      // search for setting 1, inactive alert > 30 days
+    test('should use task params settings and issue queries for each space', async () => {
       esClient.openPointInTime.mockResolvedValueOnce({
         id: 'pit1',
         _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
@@ -525,7 +507,6 @@ describe('AlertDeletionClient', () => {
         id: 'pit2',
         _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
       });
-      // search for setting 2, inactive alert > 30 days
       esClient.search.mockResolvedValueOnce({
         took: 10,
         timed_out: false,
@@ -539,7 +520,6 @@ describe('AlertDeletionClient', () => {
         id: 'pit3',
         _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
       });
-      // search for setting 3, active alert > 90 days
       esClient.search.mockResolvedValueOnce({
         took: 10,
         timed_out: false,
@@ -550,20 +530,6 @@ describe('AlertDeletionClient', () => {
             getMockAlert({ id: 'mno', ruleId: '1' }),
             getMockAlert({ id: 'pqr', ruleId: '3' }),
           ],
-        },
-      });
-      esClient.openPointInTime.mockResolvedValueOnce({
-        id: 'pit4',
-        _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
-      });
-      // search for setting 3, inactive alert > 30 days
-      esClient.search.mockResolvedValueOnce({
-        took: 10,
-        timed_out: false,
-        _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
-        hits: {
-          total: { relation: 'eq', value: 2 },
-          hits: [getMockAlert({ id: 'ghi' }), getMockAlert({ id: 'jkl' })],
         },
       });
       esClient.bulk.mockResolvedValueOnce({
@@ -581,11 +547,6 @@ describe('AlertDeletionClient', () => {
         took: 10,
         items: [getDeletedResponse('mno'), getDeletedResponse('pqr')],
       });
-      esClient.bulk.mockResolvedValueOnce({
-        errors: false,
-        took: 10,
-        items: [getDeletedResponse('ghi'), getDeletedResponse('jkl')],
-      });
 
       getAlertIndicesAliasMock.mockReturnValueOnce(['index1', 'index2']);
       getAlertIndicesAliasMock.mockReturnValueOnce(['alert-index-1']);
@@ -594,12 +555,11 @@ describe('AlertDeletionClient', () => {
       // @ts-ignore - accessing private function for testing
       await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController());
 
-      expect(ruleTypeRegistry.getAllTypes).toHaveBeenCalledTimes(2);
-      expect(ruleTypeRegistry.getAllTypesForCategories).toHaveBeenCalledTimes(1);
-      expect(ruleTypeRegistry.getAllTypesForCategories).toHaveBeenCalledWith(['securitySolution']);
+      expect(ruleTypeRegistry.getAllTypes).toHaveBeenCalledTimes(3);
+      expect(ruleTypeRegistry.getAllTypesForCategories).toHaveBeenCalledTimes(0);
 
-      // 3 inactive alert queries, 1 active alert query
-      expect(esClient.openPointInTime).toHaveBeenCalledTimes(4);
+      // 3 inactive alert queries
+      expect(esClient.openPointInTime).toHaveBeenCalledTimes(3);
       expect(esClient.openPointInTime).toHaveBeenNthCalledWith(1, {
         keep_alive: '1m',
         index: ['index1', 'index2'],
@@ -615,13 +575,8 @@ describe('AlertDeletionClient', () => {
         index: ['index1', 'index2', 'alert-index-3'],
         ignore_unavailable: true,
       });
-      expect(esClient.openPointInTime).toHaveBeenNthCalledWith(4, {
-        keep_alive: '1m',
-        index: ['index1', 'index2', 'alert-index-3'],
-        ignore_unavailable: true,
-      });
 
-      expect(esClient.search).toHaveBeenCalledTimes(4);
+      expect(esClient.search).toHaveBeenCalledTimes(3);
       expect(esClient.search).toHaveBeenNthCalledWith(
         1,
         {
@@ -647,7 +602,7 @@ describe('AlertDeletionClient', () => {
       expect(esClient.search).toHaveBeenNthCalledWith(
         3,
         {
-          query: activeAlertsQuery(90, 'another-space'),
+          query: inactiveAlertsQuery(30, 'another-space'),
           size: 1000,
           sort: [{ [TIMESTAMP]: 'asc' }],
           pit: { id: 'pit3', keep_alive: '1m' },
@@ -655,20 +610,9 @@ describe('AlertDeletionClient', () => {
         },
         { signal: expect.any(AbortSignal) }
       );
-      expect(esClient.search).toHaveBeenNthCalledWith(
-        4,
-        {
-          query: inactiveAlertsQuery(30, 'another-space'),
-          size: 1000,
-          sort: [{ [TIMESTAMP]: 'asc' }],
-          pit: { id: 'pit4', keep_alive: '1m' },
-          _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
-        },
-        { signal: expect.any(AbortSignal) }
-      );
 
       // bulk delete based on search results
-      expect(esClient.bulk).toHaveBeenCalledTimes(4);
+      expect(esClient.bulk).toHaveBeenCalledTimes(3);
       expect(esClient.bulk).toHaveBeenNthCalledWith(
         1,
         {
@@ -699,19 +643,9 @@ describe('AlertDeletionClient', () => {
         },
         { signal: expect.any(AbortSignal) }
       );
-      expect(esClient.bulk).toHaveBeenNthCalledWith(
-        4,
-        {
-          operations: [
-            { delete: { _index: '.internal.alerts-test.alerts-default-000001', _id: 'ghi' } },
-            { delete: { _index: '.internal.alerts-test.alerts-default-000001', _id: 'jkl' } },
-          ],
-        },
-        { signal: expect.any(AbortSignal) }
-      );
 
-      expect(auditService.withoutRequest.log).toHaveBeenCalledTimes(8);
-      ['abc', 'def', 'xyz', 'rst', 'mno', 'pqr', 'ghi', 'jkl'].forEach((id) => {
+      expect(auditService.withoutRequest.log).toHaveBeenCalledTimes(6);
+      ['abc', 'def', 'xyz', 'rst', 'mno', 'pqr'].forEach((id) => {
         expect(auditService.withoutRequest.log).toHaveBeenCalledWith({
           message: `System has deleted alert [id=${id}]`,
           event: {
@@ -723,14 +657,7 @@ describe('AlertDeletionClient', () => {
         });
       });
 
-      expect(esClient.closePointInTime).toHaveBeenCalledTimes(4);
-
-      // bulk task state update for active alert setting
-      expect(taskManagerStart.bulkUpdateState).toHaveBeenCalledTimes(1);
-      expect(taskManagerStart.bulkUpdateState).toHaveBeenCalledWith(
-        ['1', '3'],
-        expect.any(Function)
-      );
+      expect(esClient.closePointInTime).toHaveBeenCalledTimes(3);
 
       expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
       expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
@@ -769,32 +696,15 @@ describe('AlertDeletionClient', () => {
           end: expect.any(String),
           duration: expect.any(String),
         },
-        message: 'Alert deletion task deleted 4 alerts',
+        message: 'Alert deletion task deleted 2 alerts',
         kibana: {
-          alert: { deletion: { num_deleted: 4 } },
+          alert: { deletion: { num_deleted: 2 } },
           space_ids: ['another-space'],
         },
       });
     });
 
     test('should use search_after to paginate query', async () => {
-      internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
-        saved_objects: [
-          {
-            id: 'alert-deletion-settings',
-            type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
-            attributes: {
-              alertDeletion: {
-                isActiveAlertsDeletionEnabled: false,
-                isInactiveAlertsDeletionEnabled: true,
-                activeAlertsDeletionThreshold: 1,
-                inactiveAlertsDeletionThreshold: 30,
-              },
-            },
-            references: [],
-          },
-        ],
-      });
       esClient.openPointInTime.mockResolvedValueOnce({
         id: 'pit1',
         _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
@@ -861,7 +771,21 @@ describe('AlertDeletionClient', () => {
       getAlertIndicesAliasMock.mockReturnValueOnce(['alert-index-1']);
 
       // @ts-ignore - accessing private function for testing
-      await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController());
+      await alertDeletionClient.runTask(
+        {
+          ...alertDeletionTaskInstance,
+          params: {
+            settings: {
+              isActiveAlertsDeletionEnabled: false,
+              isInactiveAlertsDeletionEnabled: true,
+              activeAlertsDeletionThreshold: 1,
+              inactiveAlertsDeletionThreshold: 30,
+            },
+            spaceIds: ['default'],
+          },
+        },
+        new AbortController()
+      );
 
       expect(ruleTypeRegistry.getAllTypes).toHaveBeenCalledTimes(1);
 
@@ -986,29 +910,182 @@ describe('AlertDeletionClient', () => {
       });
     });
 
+    test('should update task state when active alerts are deleted', async () => {
+      esClient.openPointInTime.mockResolvedValueOnce({
+        id: 'pit1',
+        _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+      });
+      esClient.search.mockResolvedValueOnce({
+        took: 10,
+        timed_out: false,
+        _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+        hits: {
+          total: { relation: 'eq', value: 2 },
+          hits: [getMockAlert({ id: 'abc' }), getMockAlert({ id: 'def' })],
+        },
+      });
+      esClient.openPointInTime.mockResolvedValueOnce({
+        id: 'pit2',
+        _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+      });
+      esClient.search.mockResolvedValueOnce({
+        took: 10,
+        timed_out: false,
+        _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+        hits: {
+          total: { relation: 'eq', value: 2 },
+          hits: [getMockAlert({ id: 'xyz' }), getMockAlert({ id: 'rst' })],
+        },
+      });
+
+      esClient.bulk.mockResolvedValueOnce({
+        errors: false,
+        took: 10,
+        items: [getDeletedResponse('abc'), getDeletedResponse('def')],
+      });
+      esClient.bulk.mockResolvedValueOnce({
+        errors: false,
+        took: 10,
+        items: [getDeletedResponse('ghi'), getDeletedResponse('jkl')],
+      });
+
+      getAlertIndicesAliasMock.mockReturnValueOnce(['alert-index-1']);
+
+      // @ts-ignore - accessing private function for testing
+      await alertDeletionClient.runTask(
+        {
+          ...alertDeletionTaskInstance,
+          params: {
+            settings: {
+              isActiveAlertsDeletionEnabled: true,
+              isInactiveAlertsDeletionEnabled: true,
+              activeAlertsDeletionThreshold: 90,
+              inactiveAlertsDeletionThreshold: 30,
+              categoryIds: ['observability'],
+            },
+            spaceIds: ['default'],
+          },
+        },
+        new AbortController()
+      );
+
+      expect(ruleTypeRegistry.getAllTypesForCategories).toHaveBeenCalledTimes(1);
+
+      expect(esClient.openPointInTime).toHaveBeenCalledTimes(2);
+      expect(esClient.openPointInTime).toHaveBeenNthCalledWith(1, {
+        keep_alive: '1m',
+        index: ['alert-index-1'],
+        ignore_unavailable: true,
+      });
+      expect(esClient.openPointInTime).toHaveBeenNthCalledWith(2, {
+        keep_alive: '1m',
+        index: ['alert-index-1'],
+        ignore_unavailable: true,
+      });
+
+      expect(esClient.search).toHaveBeenCalledTimes(2);
+      expect(esClient.search).toHaveBeenNthCalledWith(
+        1,
+        {
+          query: activeAlertsQuery(90, 'default'),
+          size: 1000,
+          sort: [{ [TIMESTAMP]: 'asc' }],
+          pit: { id: 'pit1', keep_alive: '1m' },
+          _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
+        },
+        { signal: expect.any(AbortSignal) }
+      );
+      expect(esClient.search).toHaveBeenNthCalledWith(
+        2,
+        {
+          query: inactiveAlertsQuery(30, 'default'),
+          size: 1000,
+          sort: [{ [TIMESTAMP]: 'asc' }],
+          pit: { id: 'pit2', keep_alive: '1m' },
+          _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID, TIMESTAMP],
+        },
+        { signal: expect.any(AbortSignal) }
+      );
+
+      // bulk delete based on search results
+      expect(esClient.bulk).toHaveBeenCalledTimes(2);
+      expect(esClient.bulk).toHaveBeenNthCalledWith(
+        1,
+        {
+          operations: [
+            { delete: { _index: '.internal.alerts-test.alerts-default-000001', _id: 'abc' } },
+            { delete: { _index: '.internal.alerts-test.alerts-default-000001', _id: 'def' } },
+          ],
+        },
+        { signal: expect.any(AbortSignal) }
+      );
+      expect(esClient.bulk).toHaveBeenNthCalledWith(
+        2,
+        {
+          operations: [
+            { delete: { _index: '.internal.alerts-test.alerts-default-000001', _id: 'xyz' } },
+            { delete: { _index: '.internal.alerts-test.alerts-default-000001', _id: 'rst' } },
+          ],
+        },
+        { signal: expect.any(AbortSignal) }
+      );
+
+      expect(auditService.withoutRequest.log).toHaveBeenCalledTimes(4);
+      ['abc', 'def', 'xyz', 'rst'].forEach((id) => {
+        expect(auditService.withoutRequest.log).toHaveBeenCalledWith({
+          message: `System has deleted alert [id=${id}]`,
+          event: {
+            action: 'alert_delete',
+            category: ['database'],
+            outcome: 'success',
+            type: ['deletion'],
+          },
+        });
+      });
+
+      // bulk task state update for active alert setting
+      expect(taskManagerStart.bulkUpdateState).toHaveBeenCalledTimes(1);
+      expect(taskManagerStart.bulkUpdateState).toHaveBeenCalledWith(['1'], expect.any(Function));
+
+      expect(esClient.closePointInTime).toHaveBeenCalledTimes(2);
+
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+        '@timestamp': expect.any(String),
+        event: {
+          action: 'delete-alerts',
+          outcome: 'success',
+          start: expect.any(String),
+          end: expect.any(String),
+          duration: expect.any(String),
+        },
+        message: 'Alert deletion task deleted 4 alerts',
+        kibana: {
+          alert: { deletion: { num_deleted: 4 } },
+          space_ids: ['default'],
+        },
+      });
+    });
+
     describe('error handling', () => {
       test('should handle invalid category IDs rule settings saved objects', async () => {
-        internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
-          saved_objects: [
-            {
-              id: 'alert-deletion-settings',
-              type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
-              attributes: {
-                alertDeletion: {
-                  isActiveAlertsDeletionEnabled: false,
-                  isInactiveAlertsDeletionEnabled: true,
-                  activeAlertsDeletionThreshold: 1,
-                  inactiveAlertsDeletionThreshold: 30,
-                  categoryIds: ['invalid-category'],
-                },
-              },
-              references: [],
-            },
-          ],
-        });
-
         // @ts-ignore - accessing private function for testing
-        await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController());
+        await alertDeletionClient.runTask(
+          {
+            ...alertDeletionTaskInstance,
+            params: {
+              settings: {
+                isActiveAlertsDeletionEnabled: false,
+                isInactiveAlertsDeletionEnabled: true,
+                activeAlertsDeletionThreshold: 1,
+                inactiveAlertsDeletionThreshold: 30,
+                categoryIds: ['invalid-category'],
+              },
+              spaceIds: ['default'],
+            },
+          },
+          new AbortController()
+        );
 
         expect(esClient.deleteByQuery).not.toHaveBeenCalled();
         expect(esClient.search).not.toHaveBeenCalled();
@@ -1032,13 +1109,17 @@ describe('AlertDeletionClient', () => {
         });
       });
 
-      test('should handle errors querying for rule settings saved objects', async () => {
-        internalSavedObjectsRepository.bulkGet.mockImplementationOnce(() => {
-          throw new Error('error getting saved object');
-        });
-
+      test('should handle undefined settings in task params', async () => {
         // @ts-ignore - accessing private function for testing
-        await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController());
+        await alertDeletionClient.runTask(
+          {
+            ...alertDeletionTaskInstance,
+            params: {
+              spaceIds: ['default'],
+            },
+          },
+          new AbortController()
+        );
 
         expect(esClient.deleteByQuery).not.toHaveBeenCalled();
         expect(esClient.search).not.toHaveBeenCalled();
@@ -1054,133 +1135,55 @@ describe('AlertDeletionClient', () => {
             end: expect.any(String),
             duration: expect.any(String),
           },
-          error: { message: `error getting saved object` },
+          error: { message: `Invalid task parameters: {\"spaceIds\":[\"default\"]}` },
           kibana: {
             alert: { deletion: { num_deleted: 0 } },
-            space_ids: ['default', 'space-1', 'another-space'],
+            space_ids: ['default'],
           },
         });
       });
 
-      test('should handle bulk errors querying for rule settings saved objects', async () => {
-        internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
-          saved_objects: [
-            {
-              id: 'alert-deletion-settings',
-              type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
-              attributes: {
-                alertDeletion: {
-                  isActiveAlertsDeletionEnabled: false,
-                  isInactiveAlertsDeletionEnabled: false,
-                  activeAlertsDeletionThreshold: 45,
-                  inactiveAlertsDeletionThreshold: 100,
-                },
-              },
-              references: [],
-            },
-            {
-              id: 'space-1:alert-deletion-settings',
-              type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
-              attributes: {},
-              references: [],
-              namespaces: ['space-1'],
-              error: {
-                error:
-                  'Saved object [alert-deletion-settings/space-1:alert-deletion-settings] not found',
-                statusCode: 404,
-                message:
-                  'Saved object [alert-deletion-settings/space-1:alert-deletion-settings] not found',
-              },
-            },
-            {
-              id: 'space2:alert-deletion-settings',
-              type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
-              namespaces: ['space-2'],
-              // malformed SO, missing attributes
-              attributes: {},
-              references: [],
-            },
-          ],
-        });
-
+      test('should handle undefined spaceIds in task params', async () => {
         // @ts-ignore - accessing private function for testing
-        await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController());
+        await alertDeletionClient.runTask(
+          {
+            ...alertDeletionTaskInstance,
+            params: {
+              settings: {
+                isActiveAlertsDeletionEnabled: false,
+                isInactiveAlertsDeletionEnabled: true,
+                activeAlertsDeletionThreshold: 1,
+                inactiveAlertsDeletionThreshold: 30,
+              },
+            },
+          },
+          new AbortController()
+        );
 
         expect(esClient.deleteByQuery).not.toHaveBeenCalled();
         expect(esClient.search).not.toHaveBeenCalled();
         expect(esClient.bulk).not.toHaveBeenCalled();
         expect(taskManagerStart.bulkUpdateState).not.toHaveBeenCalled();
-        expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
+        expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
         expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
           '@timestamp': expect.any(String),
           event: {
             action: 'delete-alerts',
-            outcome: 'success',
-            start: expect.any(String),
-            end: expect.any(String),
-            duration: expect.any(String),
-          },
-          kibana: {
-            alert: { deletion: { num_deleted: 0 } },
-            space_ids: ['default'],
-          },
-          message: 'Alert deletion task deleted 0 alerts',
-        });
-        expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
-          '@timestamp': expect.any(String),
-          event: {
-            action: 'delete-alerts',
             outcome: 'failure',
             start: expect.any(String),
             end: expect.any(String),
             duration: expect.any(String),
           },
           error: {
-            message:
-              'Saved object [alert-deletion-settings/space-1:alert-deletion-settings] not found',
+            message: `Invalid task parameters: {\"settings\":{\"isActiveAlertsDeletionEnabled\":false,\"isInactiveAlertsDeletionEnabled\":true,\"activeAlertsDeletionThreshold\":1,\"inactiveAlertsDeletionThreshold\":30}}`,
           },
           kibana: {
             alert: { deletion: { num_deleted: 0 } },
-            space_ids: ['default', 'space-1', 'another-space'],
-          },
-        });
-        expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
-          '@timestamp': expect.any(String),
-          event: {
-            action: 'delete-alerts',
-            outcome: 'failure',
-            start: expect.any(String),
-            end: expect.any(String),
-            duration: expect.any(String),
-          },
-          error: {
-            message: 'Undefined alert deletion rules settings',
-          },
-          kibana: {
-            alert: { deletion: { num_deleted: 0 } },
-            space_ids: ['space-2'],
           },
         });
       });
 
       test('should handle errors querying for alerts to delete', async () => {
-        internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
-          saved_objects: [
-            {
-              id: 'alert-deletion-settings',
-              type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
-              attributes: {
-                alertDeletion: {
-                  isActiveAlertsDeletionEnabled: true,
-                  isInactiveAlertsDeletionEnabled: true,
-                  activeAlertsDeletionThreshold: 45,
-                  inactiveAlertsDeletionThreshold: 100,
-                },
-              },
-              references: [],
-            },
-          ],
-        });
         esClient.openPointInTime.mockResolvedValueOnce({
           id: 'pit1',
           _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
@@ -1210,7 +1213,21 @@ describe('AlertDeletionClient', () => {
         getAlertIndicesAliasMock.mockReturnValueOnce(['index1', 'index2']);
 
         // @ts-ignore - accessing private function for testing
-        await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController());
+        await alertDeletionClient.runTask(
+          {
+            ...alertDeletionTaskInstance,
+            params: {
+              settings: {
+                isActiveAlertsDeletionEnabled: true,
+                isInactiveAlertsDeletionEnabled: true,
+                activeAlertsDeletionThreshold: 45,
+                inactiveAlertsDeletionThreshold: 100,
+              },
+              spaceIds: ['default'],
+            },
+          },
+          new AbortController()
+        );
 
         // active alerts search failures should not prevent inactive alerts from being deleted
 
@@ -1274,23 +1291,6 @@ describe('AlertDeletionClient', () => {
       });
 
       test('should handle errors bulk deleting alerts', async () => {
-        internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
-          saved_objects: [
-            {
-              id: 'alert-deletion-settings',
-              type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
-              attributes: {
-                alertDeletion: {
-                  isActiveAlertsDeletionEnabled: true,
-                  isInactiveAlertsDeletionEnabled: false,
-                  activeAlertsDeletionThreshold: 45,
-                  inactiveAlertsDeletionThreshold: 100,
-                },
-              },
-              references: [],
-            },
-          ],
-        });
         esClient.openPointInTime.mockResolvedValueOnce({
           id: 'pit1',
           _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
@@ -1327,7 +1327,21 @@ describe('AlertDeletionClient', () => {
         getAlertIndicesAliasMock.mockReturnValueOnce(['index1', 'index2', 'alert-index-3']);
 
         // @ts-ignore - accessing private function for testing
-        await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController());
+        await alertDeletionClient.runTask(
+          {
+            ...alertDeletionTaskInstance,
+            params: {
+              settings: {
+                isActiveAlertsDeletionEnabled: true,
+                isInactiveAlertsDeletionEnabled: false,
+                activeAlertsDeletionThreshold: 45,
+                inactiveAlertsDeletionThreshold: 100,
+              },
+              spaceIds: ['default'],
+            },
+          },
+          new AbortController()
+        );
 
         expect(esClient.openPointInTime).toHaveBeenCalledTimes(1);
         expect(esClient.openPointInTime).toHaveBeenNthCalledWith(1, {
