@@ -87,7 +87,7 @@ const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
 });
 
 const resetKnowledgeBase = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/kb/uninstall',
+  endpoint: 'POST /internal/observability_ai_assistant/kb/reset',
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],
@@ -103,6 +103,19 @@ const resetKnowledgeBase = createObservabilityAIAssistantServerRoute({
     await client.resetKnowledgeBase();
 
     return { result: 'success' };
+  },
+});
+
+const reIndexKnowledgeBase = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/kb/reindex',
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
+  },
+  handler: async (resources): Promise<void> => {
+    const client = await resources.service.getClient({ request: resources.request });
+    return client.reIndexKnowledgeBase();
   },
 });
 
@@ -330,6 +343,7 @@ export const knowledgeBaseRoutes = {
   ...semanticTextMigrationKnowledgeBase,
   ...setupKnowledgeBase,
   ...resetKnowledgeBase,
+  ...reIndexKnowledgeBase,
   ...getKnowledgeBaseStatus,
   ...getKnowledgeBaseEntries,
   ...saveKnowledgeBaseUserInstruction,

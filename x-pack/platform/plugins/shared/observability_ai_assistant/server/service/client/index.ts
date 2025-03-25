@@ -714,6 +714,13 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.reset(esClient);
   };
 
+  reIndexKnowledgeBase = () => {
+    return reIndexKnowledgeBase({
+      esClient: this.dependencies.esClient,
+      logger: this.dependencies.logger,
+    });
+  };
+
   reIndexKnowledgeBaseAndPopulateMissingSemanticTextField = () => {
     return reIndexKnowledgeBaseAndPopulateMissingSemanticTextField({
       esClient: this.dependencies.esClient,

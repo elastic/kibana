@@ -14,7 +14,6 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 import {
   deleteKnowledgeBaseModel,
   importTinyElserModel,
-  deleteInferenceEndpoint,
   setupKnowledgeBase,
   waitForKnowledgeBaseReady,
 } from '../utils/knowledge_base';
@@ -51,8 +50,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     after(async () => {
       await deleteWriteIndices(es);
       await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
+      await deleteKnowledgeBaseModel({ ml, es });
     });
 
     it('has an index created version earlier than 8.11', async () => {

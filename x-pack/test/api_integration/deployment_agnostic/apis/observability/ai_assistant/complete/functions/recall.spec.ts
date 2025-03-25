@@ -10,7 +10,6 @@ import { first, uniq } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   clearKnowledgeBase,
-  deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
   addSampleDocsToInternalKb,
   addSampleDocsToCustomIndex,
@@ -80,8 +79,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     after(async () => {
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
+      await deleteKnowledgeBaseModel({ ml, es });
       await clearKnowledgeBase(es);
       // clear custom index
       await es.indices.delete({ index: customSearchConnectorIndex }, { ignore: [404] });
@@ -176,11 +174,8 @@ async function clearBefore(getService: DeploymentAgnosticFtrProviderContext['get
   const ml = getService('ml');
   const es = getService('es');
 
-  await deleteKnowledgeBaseModel(ml).catch(() => {
+  await deleteKnowledgeBaseModel({ ml, es }).catch(() => {
     log.error('Failed to delete knowledge base model');
-  });
-  await deleteInferenceEndpoint({ es }).catch(() => {
-    log.error('Failed to delete inference endpoint');
   });
   await clearKnowledgeBase(es).catch(() => {
     log.error('Failed to clear knowledge base');

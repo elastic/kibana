@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteKnowledgeBaseModel,
@@ -32,8 +31,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     afterEach(async () => {
-      await deleteKnowledgeBaseModel(ml).catch((e) => {});
-      await deleteInferenceEndpoint({ es, name: AI_ASSISTANT_KB_INFERENCE_ID }).catch((err) => {});
+      await deleteKnowledgeBaseModel({ ml, es }).catch((e) => {});
     });
 
     it('returns correct status after knowledge base is setup', async () => {
@@ -49,7 +47,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('returns correct status after model is deleted', async () => {
-      await deleteKnowledgeBaseModel(ml);
+      await deleteKnowledgeBaseModel({ ml, es, shouldDeleteInferenceEndpoint: false });
 
       const res = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'GET /internal/observability_ai_assistant/kb/status',
@@ -78,19 +76,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(res.body.errorMessage).to.include.string(
         'Inference endpoint not found [obs_ai_assistant_kb_inference]'
       );
-    });
-
-    it('returns correct status after elser is stopped', async () => {
-      await deleteInferenceEndpoint({ es, name: AI_ASSISTANT_KB_INFERENCE_ID });
-
-      const res = await observabilityAIAssistantAPIClient.editor({
-        endpoint: 'GET /internal/observability_ai_assistant/kb/status',
-      });
-
-      expect(res.status).to.be(200);
-
-      expect(res.body.enabled).to.be(true);
-      expect(res.body.ready).to.be(false);
     });
 
     describe('security roles and access privileges', () => {

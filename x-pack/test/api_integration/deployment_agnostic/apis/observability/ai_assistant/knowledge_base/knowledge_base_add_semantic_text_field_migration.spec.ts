@@ -15,7 +15,6 @@ import {
   deleteKnowledgeBaseModel,
   importTinyElserModel,
   clearKnowledgeBase,
-  deleteInferenceEndpoint,
   setupKnowledgeBase,
   waitForKnowledgeBaseReady,
 } from '../utils/knowledge_base';
@@ -81,8 +80,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     after(async () => {
       await clearKnowledgeBase(es);
       await esArchiver.unload(archive);
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
+      await deleteKnowledgeBaseModel({ ml, es });
     });
 
     describe('before migrating', () => {

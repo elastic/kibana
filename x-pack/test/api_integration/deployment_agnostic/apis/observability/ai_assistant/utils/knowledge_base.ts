@@ -49,6 +49,14 @@ export async function setupKnowledgeBase(
   return { status, body };
 }
 
+export async function reindexKnowledgeBase(
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient
+) {
+  return observabilityAIAssistantAPIClient.admin({
+    endpoint: 'POST /internal/observability_ai_assistant/kb/reindex',
+  });
+}
+
 export async function waitForKnowledgeBaseReady({
   observabilityAIAssistantAPIClient,
   log,
@@ -68,10 +76,21 @@ export async function waitForKnowledgeBaseReady({
   });
 }
 
-export async function deleteKnowledgeBaseModel(ml: ReturnType<typeof MachineLearningProvider>) {
+export async function deleteKnowledgeBaseModel({
+  ml,
+  es,
+  shouldDeleteInferenceEndpoint = true,
+}: {
+  ml: ReturnType<typeof MachineLearningProvider>;
+  es: Client;
+  shouldDeleteInferenceEndpoint?: boolean;
+}) {
   await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
   await ml.api.deleteTrainedModelES(TINY_ELSER.id);
   await ml.testResources.cleanMLSavedObjects();
+  if (shouldDeleteInferenceEndpoint) {
+    await deleteInferenceEndpoint({ es });
+  }
 }
 
 export async function clearKnowledgeBase(es: Client) {

@@ -25,7 +25,6 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_pr
 import {
   addSampleDocsToInternalKb,
   clearKnowledgeBase,
-  deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
 } from '../../utils/knowledge_base';
 import { chatComplete } from '../../utils/conversation';
@@ -108,8 +107,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         actionId: connectorId,
       });
 
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
+      await deleteKnowledgeBaseModel({ ml, es });
       await clearKnowledgeBase(es);
     });
 

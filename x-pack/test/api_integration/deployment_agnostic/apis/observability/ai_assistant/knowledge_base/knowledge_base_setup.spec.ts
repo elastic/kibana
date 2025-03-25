@@ -11,7 +11,6 @@ import {
   deleteKnowledgeBaseModel,
   importTinyElserModel,
   TINY_ELSER,
-  deleteInferenceEndpoint,
   setupKnowledgeBase,
 } from '../utils/knowledge_base';
 
@@ -22,8 +21,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('/internal/observability_ai_assistant/kb/setup', function () {
     before(async () => {
-      await deleteKnowledgeBaseModel(ml).catch(() => {});
-      await deleteInferenceEndpoint({ es }).catch(() => {});
+      await deleteKnowledgeBaseModel({ ml, es }).catch(() => {});
     });
 
     it('returns model info when successful', async () => {
@@ -33,8 +31,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(res.body.service_settings.model_id).to.be('pt_tiny_elser');
       expect(res.body.inference_id).to.be('obs_ai_assistant_kb_inference');
 
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
+      await deleteKnowledgeBaseModel({ ml, es });
     });
 
     it('returns error message if model is not deployed', async () => {

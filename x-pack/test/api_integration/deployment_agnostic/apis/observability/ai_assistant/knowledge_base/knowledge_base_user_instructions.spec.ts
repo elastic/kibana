@@ -15,7 +15,6 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 import {
   clearKnowledgeBase,
   importTinyElserModel,
-  deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
   setupKnowledgeBase,
   waitForKnowledgeBaseReady,
@@ -43,8 +42,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     after(async () => {
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
+      await deleteKnowledgeBaseModel({ ml, es });
       await clearKnowledgeBase(es);
       await clearConversations(es);
     });

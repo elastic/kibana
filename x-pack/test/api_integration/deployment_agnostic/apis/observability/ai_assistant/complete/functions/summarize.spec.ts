@@ -16,7 +16,6 @@ import { invokeChatCompleteWithFunctionRequest } from '../../utils/conversation'
 import {
   clearKnowledgeBase,
   importTinyElserModel,
-  deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
   setupKnowledgeBase,
   waitForKnowledgeBaseReady,
@@ -73,9 +72,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await observabilityAIAssistantAPIClient.deleteActionConnector({
         actionId: connectorId,
       });
-      await deleteKnowledgeBaseModel(ml);
+      await deleteKnowledgeBaseModel({ ml, es });
       await clearKnowledgeBase(es);
-      await deleteInferenceEndpoint({ es });
     });
 
     it('persists entry in knowledge base', async () => {
