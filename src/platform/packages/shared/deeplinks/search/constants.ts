@@ -18,6 +18,7 @@ export const SERVERLESS_ES_CONNECTORS_ID = 'serverlessConnectors';
 export const ES_SEARCH_PLAYGROUND_ID = 'searchPlayground';
 export const SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID = 'searchInferenceEndpoints';
 export const ES_SEARCH_SYNONYMS_ID = 'searchSynonyms';
+export const SEARCH_QUERY_RULES_ID = 'searchQueryRules';
 export const SEARCH_HOMEPAGE = 'searchHomepage';
 export const SEARCH_INDICES_START = 'elasticsearchStart';
 export const SEARCH_INDICES = 'elasticsearchIndices';

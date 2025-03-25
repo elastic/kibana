@@ -158,6 +158,7 @@ export const QuerySearchBar = memo(
                   disableQueryLanguageSwitcher={true}
                   onClearSavedQuery={() => {}}
                   filters={kqlQuerySchema.is(field.value) ? [] : field.value?.filters ?? []}
+                  saveQueryMenuVisibility="allowed_by_app_privilege"
                 />
               </div>
             </EuiFormRow>
