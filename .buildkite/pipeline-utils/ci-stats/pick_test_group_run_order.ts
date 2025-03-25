@@ -573,7 +573,10 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
             label: `Scout: [ ${group} / ${title} ] plugin`,
             command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
             timeout_in_minutes: 60,
-            agents: expandAgentQueue(usesParallelWorkers ? 'n1-highcpu-8' : 'n2-4-spot'),
+            agents: {
+              machineType: 'n2-highcpu-8',
+              preemptible: true,
+            },
             env: {
               SCOUT_CONFIG_GROUP_KEY: key,
               SCOUT_CONFIG_GROUP_TYPE: group,
