@@ -412,6 +412,14 @@ describe('single line query', () => {
       });
     });
 
+    describe('map expressions', () => {
+      test('null', () => {
+        const { text } = reprint('ROW fn(1, {"foo": "bar", "baz": null})');
+
+        expect(text).toBe('ROW FN(1, {"foo": "bar", "baz": NULL})');
+      });
+    });
+
     describe('literals expressions', () => {
       test('null', () => {
         const { text } = reprint('ROW null');

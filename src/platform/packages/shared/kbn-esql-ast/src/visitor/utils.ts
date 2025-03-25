@@ -72,6 +72,12 @@ export function* children(node: ESQLProperNode): Iterable<ESQLAstExpression> {
       }
       break;
     }
+    case 'map': {
+      for (const item of node.entries) {
+        yield item;
+      }
+      break;
+    }
     case 'inlineCast': {
       if (Array.isArray(node.value)) {
         for (const item of singleItems(node.value)) {

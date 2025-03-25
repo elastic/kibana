@@ -29,6 +29,8 @@ import type {
   ESQLIntegerLiteral,
   ESQLList,
   ESQLLiteral,
+  ESQLMap,
+  ESQLMapEntry,
   ESQLOrderExpression,
   ESQLProperNode,
   ESQLSource,
@@ -589,3 +591,13 @@ export class IdentifierExpressionVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends VisitorContext<Methods, Data, ESQLIdentifier> {}
+
+export class MapExpressionVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends VisitorContext<Methods, Data, ESQLMap> {}
+
+export class MapEntryExpressionVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends VisitorContext<Methods, Data, ESQLMapEntry> {}
