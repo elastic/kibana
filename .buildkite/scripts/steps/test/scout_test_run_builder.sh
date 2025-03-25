@@ -8,7 +8,7 @@ source .buildkite/scripts/common/util.sh
 .buildkite/scripts/copy_es_snapshot_cache.sh
 
 echo '--- Discover Playwright Configs and upload to Buildkite artifacts'
-node scripts/scout discover-playwright-configs --save
+node scripts/scout discover-playwright-configs --save --validate
 cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
 buildkite-agent artifact upload "scout_playwright_configs.json"
 
