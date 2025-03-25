@@ -4172,36 +4172,6 @@
             "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ESQLAstMetricsCommand.aggregates",
-            "type": "Array",
-            "tags": [],
-            "label": "aggregates",
-            "description": [],
-            "signature": [
-              "ESQLAstField",
-              "[] | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ESQLAstMetricsCommand.grouping",
-            "type": "Array",
-            "tags": [],
-            "label": "grouping",
-            "description": [],
-            "signature": [
-              "ESQLAstField",
-              "[] | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
