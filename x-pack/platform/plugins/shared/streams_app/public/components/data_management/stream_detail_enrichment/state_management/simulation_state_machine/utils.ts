@@ -143,6 +143,10 @@ export function getMappedSchemaFields(fields: SchemaField[]) {
   return fields.filter(isSchemaFieldTyped).filter((field) => field.status === 'mapped');
 }
 
+export function getUnmappedSchemaFields(fields: SchemaField[]) {
+  return fields.filter((field) => field.status === 'unmapped');
+}
+
 export function convertToFieldDefinition(fields: MappedSchemaField[]): FieldDefinition {
   return fields.reduce(
     (mappedFields, field) =>

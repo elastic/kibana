@@ -7,7 +7,11 @@
 
 import { FieldDefinition, isWiredStreamGetResponse } from '@kbn/streams-schema';
 import { StreamEnrichmentContext } from './types';
-import { convertToFieldDefinition, getMappedSchemaFields } from '../simulation_state_machine';
+import {
+  convertToFieldDefinition,
+  getMappedSchemaFields,
+  getUnmappedSchemaFields,
+} from '../simulation_state_machine';
 
 export function getStagedProcessors(context: StreamEnrichmentContext) {
   return context.processorsRefs
@@ -30,9 +34,15 @@ export function getUpsertWiredFields(
     return undefined;
   }
 
-  const originalFieldDefinition = context.definition.stream.ingest.wired.fields;
+  const originalFieldDefinition = { ...context.definition.stream.ingest.wired.fields };
 
   const { detectedSchemaFields } = context.simulatorRef.getSnapshot().context;
+
+  // Remove unmapped fields from original definition
+  const unmappedSchemaFields = getUnmappedSchemaFields(detectedSchemaFields);
+  unmappedSchemaFields.forEach((field) => {
+    delete originalFieldDefinition[field.name];
+  });
 
   const mappedSchemaFields = getMappedSchemaFields(detectedSchemaFields).filter(
     (field) => !originalFieldDefinition[field.name]
