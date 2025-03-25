@@ -6,16 +6,15 @@
  */
 
 import { APP_PATH } from '@kbn/security-solution-plugin/common';
-import type { SecurityProductTypes } from '../../common/config';
 import type { Services } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
 import { initSideNavigation } from './side_navigation';
 import { enableManagementCardsLanding } from './management_cards';
 
-export const startNavigation = (services: Services, productTypes: SecurityProductTypes) => {
+export const startNavigation = (services: Services) => {
   services.serverless.setProjectHome(APP_PATH);
 
-  initSideNavigation(services, productTypes);
+  initSideNavigation(services);
   enableManagementCardsLanding(services);
   subscribeBreadcrumbs(services);
 };

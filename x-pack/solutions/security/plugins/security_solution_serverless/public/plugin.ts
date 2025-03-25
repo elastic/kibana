@@ -75,7 +75,7 @@ export class SecuritySolutionServerlessPlugin
     });
 
     setOnboardingSettings(services);
-    startNavigation(services, productTypes);
+    startNavigation(services);
 
     return {};
   }
