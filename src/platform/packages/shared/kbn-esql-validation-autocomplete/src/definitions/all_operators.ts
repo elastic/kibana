@@ -13,6 +13,7 @@ import {
   type FunctionParameterType,
   type FunctionReturnType,
   FunctionDefinitionTypes,
+  Location,
 } from './types';
 import { operatorFunctionDefinitions } from './generated/operators';
 type MathFunctionSignature = [FunctionParameterType, FunctionParameterType, FunctionReturnType];
@@ -65,8 +66,13 @@ function createComparisonDefinition(
     type: FunctionDefinitionTypes.OPERATOR,
     name,
     description,
-    supportedCommands: ['eval', 'where', 'row', 'sort'],
-    supportedOptions: ['by'],
+    locationsAvailable: [
+      Location.EVAL,
+      Location.WHERE,
+      Location.ROW,
+      Location.SORT,
+      Location.STATS_BY,
+    ],
     validate,
     signatures: [
       ...commonSignatures,
@@ -212,8 +218,13 @@ export const logicalOperators: FunctionDefinition[] = [
   type: FunctionDefinitionTypes.OPERATOR,
   name,
   description,
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   signatures: [
     {
       params: [
@@ -242,7 +253,7 @@ const nullFunctions: FunctionDefinition[] = [
   type: FunctionDefinitionTypes.OPERATOR,
   name,
   description,
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
+  locationsAvailable: [Location.EVAL, Location.WHERE, Location.ROW, Location.SORT],
   signatures: [
     {
       params: [{ name: 'left', type: 'any' }],
@@ -327,21 +338,6 @@ const otherDefinitions: FunctionDefinition[] = [
           { name: 'right', type: 'any' },
         ],
         returnType: 'unknown',
-      },
-    ],
-  },
-  {
-    // TODO — this shouldn't be a function or an operator...
-    name: 'info',
-    type: FunctionDefinitionTypes.OPERATOR,
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.infoDoc', {
-      defaultMessage: 'Show information about the current ES node',
-    }),
-    supportedCommands: ['show'],
-    signatures: [
-      {
-        params: [],
-        returnType: 'unknown', // meaningless
       },
     ],
   },

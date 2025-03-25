@@ -20,6 +20,7 @@ import {
   FunctionDefinition,
   FunctionParameterType,
   FunctionDefinitionTypes,
+  Location,
 } from '../definitions/types';
 import { shouldBeQuotedSource, shouldBeQuotedText } from '../shared/helpers';
 import { buildFunctionDocumentation } from './documentation_util';
@@ -107,12 +108,19 @@ export function getOperatorSuggestion(fn: FunctionDefinition): SuggestionRawDefi
   };
 }
 
-interface FunctionFilterPredicates {
-  command?: string;
+interface BaseFunctionFilterPredicates {
   option?: string | undefined;
   returnTypes?: string[];
   ignored?: string[];
 }
+
+/**
+ * We should be using "location," not "command." "command" is only here for
+ * supporting legacy code.
+ */
+type FunctionFilterPredicates =
+  | (BaseFunctionFilterPredicates & { location: Location; command?: never })
+  | (BaseFunctionFilterPredicates & { command: string; location?: never });
 
 export const filterFunctionDefinitions = (
   functions: FunctionDefinition[],
@@ -121,32 +129,38 @@ export const filterFunctionDefinitions = (
   if (!predicates) {
     return functions;
   }
-  const { command, option, returnTypes, ignored = [] } = predicates;
-  return functions.filter(
-    ({ name, supportedCommands, supportedOptions, ignoreAsSuggestion, signatures }) => {
-      if (ignoreAsSuggestion) {
-        return false;
-      }
+  const { command, location, returnTypes, ignored = [] } = predicates;
 
-      if (ignored.includes(name)) {
-        return false;
-      }
+  let locationToUse = location;
+  if (command) {
+    locationToUse = {
+      eval: Location.EVAL,
+      row: Location.ROW,
+      where: Location.WHERE,
+      sort: Location.SORT,
+      stats: Location.STATS,
+    }[command];
+  }
 
-      if (option && !supportedOptions?.includes(option)) {
-        return false;
-      }
-
-      if (command && !supportedCommands.includes(command)) {
-        return false;
-      }
-
-      if (returnTypes && !returnTypes.includes('any')) {
-        return signatures.some((signature) => returnTypes.includes(signature.returnType as string));
-      }
-
-      return true;
+  return functions.filter(({ name, locationsAvailable, ignoreAsSuggestion, signatures }) => {
+    if (ignoreAsSuggestion) {
+      return false;
     }
-  );
+
+    if (ignored.includes(name)) {
+      return false;
+    }
+
+    if (locationToUse && !locationsAvailable.includes(locationToUse)) {
+      return false;
+    }
+
+    if (returnTypes && !returnTypes.includes('any')) {
+      return signatures.some((signature) => returnTypes.includes(signature.returnType as string));
+    }
+
+    return true;
+  });
 };
 
 /**

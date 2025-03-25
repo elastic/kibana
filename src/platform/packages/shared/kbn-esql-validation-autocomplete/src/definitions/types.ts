@@ -176,6 +176,49 @@ export enum FunctionDefinitionTypes {
   GROUPING = 'grouping',
 }
 
+/**
+ * This is a list of locations within an ES|QL query.
+ *
+ * It is currently used to suggest appropriate functions and
+ * operators given the location of the cursor.
+ */
+export enum Location {
+  /**
+   * In the top-level EVAL command
+   */
+  EVAL = 'eval',
+
+  /**
+   * In the top-level WHERE command
+   */
+  WHERE = 'where',
+
+  /**
+   * In the top-level ROW command
+   */
+  ROW = 'row',
+
+  /**
+   * In the top-level SORT command
+   */
+  SORT = 'sort',
+
+  /**
+   * In the top-level STATS command
+   */
+  STATS = 'stats',
+
+  /**
+   * In a grouping clause
+   */
+  STATS_BY = 'stats_by',
+
+  /**
+   * In a per-agg filter
+   */
+  STATS_WHERE = 'stats_where',
+}
+
 export interface FunctionDefinition {
   type: FunctionDefinitionTypes;
   preview?: boolean;
@@ -183,8 +226,7 @@ export interface FunctionDefinition {
   name: string;
   alias?: string[];
   description: string;
-  supportedCommands: string[];
-  supportedOptions?: string[];
+  locationsAvailable: Location[];
   signatures: Signature[];
   examples?: string[];
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
