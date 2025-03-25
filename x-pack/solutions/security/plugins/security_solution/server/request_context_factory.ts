@@ -158,7 +158,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           actionsClient,
           savedObjectsClient: coreContext.savedObjects.client,
           mlAuthz,
-          experimentalFeatures: config.experimentalFeatures,
           productFeaturesService,
           license: licensing.license,
         });
@@ -267,6 +266,8 @@ export class RequestContextFactory implements IRequestContextFactory {
             request,
             namespace: getSpaceId(),
           }),
+          security: startPlugins.security,
+          request,
         });
       }),
       getAssetInventoryClient: memoize(() => {

@@ -12,7 +12,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   type CriteriaWithPagination,
-  EuiToolTip,
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
@@ -24,22 +23,8 @@ import type { PackageListItem } from '../../../../../../../../common';
 import { type UrlPagination, useLink, useAuthz } from '../../../../../../../hooks';
 import type { InstalledPackageUIPackageListItem } from '../types';
 
-import { InstallationStatus } from './installation_status';
-
-/**
- * Wrapper to display a tooltip if element is disabled (i.e. due to insufficient permissions)
- */
-const DisabledWrapperTooltip: React.FunctionComponent<{
-  children: React.ReactElement;
-  disabled: boolean;
-  tooltipContent: React.ReactNode;
-}> = ({ children, disabled, tooltipContent }) => {
-  if (disabled) {
-    return <EuiToolTip content={tooltipContent}>{children}</EuiToolTip>;
-  } else {
-    return <>{children}</>;
-  }
-};
+import { InstallationVersionStatus } from './installation_version_status';
+import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
 
 export const InstalledIntegrationsTable: React.FunctionComponent<{
   installedPackages: InstalledPackageUIPackageListItem[];
@@ -125,19 +110,12 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
             },
           },
           {
-            name: i18n.translate('xpack.fleet.epmInstalledIntegrations.statusColumnTitle', {
-              defaultMessage: 'Status',
-            }),
-            render: (item: InstalledPackageUIPackageListItem) => (
-              <InstallationStatus status={item.ui.installation_status} />
-            ),
-          },
-          {
-            field: 'version',
-            width: '126px',
             name: i18n.translate('xpack.fleet.epmInstalledIntegrations.versionColumnTitle', {
               defaultMessage: 'Version',
             }),
+            render: (item: InstalledPackageUIPackageListItem) => (
+              <InstallationVersionStatus item={item} />
+            ),
           },
           {
             name: i18n.translate(
@@ -182,22 +160,66 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               );
             },
           },
+          // TODO Actions are not yet implemented to be done in https://github.com/elastic/kibana/issues/209867
           {
             actions: [
               {
-                render: () => {
-                  return <p>test</p>;
-                },
+                name: i18n.translate('xpack.fleet.epmInstalledIntegrations.upgradeActionLabel', {
+                  defaultMessage: 'Upgrade',
+                }),
+                description: (item) =>
+                  i18n.translate('xpack.fleet.epmInstalledIntegrations.upgradeActionDescription', {
+                    defaultMessage: 'Upgrade to {version}.',
+                    values: { version: item.version },
+                  }),
+                icon: 'refresh',
+                type: 'icon',
+                enabled: () => false,
               },
               {
-                name: 'test2',
-                description: 'test2',
-                onClick: () => {},
+                name: i18n.translate('xpack.fleet.epmInstalledIntegrations.viewPoliciesLabel', {
+                  defaultMessage: 'View policies',
+                }),
+                icon: 'search',
+                type: 'icon',
+                description: i18n.translate(
+                  'xpack.fleet.epmInstalledIntegrations.viewPoliciesLabel',
+                  {
+                    defaultMessage: 'View policies',
+                  }
+                ),
+                enabled: (item) => (item?.packagePoliciesInfo?.count ?? 0) > 0,
               },
               {
-                name: 'test3',
-                description: 'test3',
-                onClick: () => {},
+                name: i18n.translate('xpack.fleet.epmInstalledIntegrations.editIntegrationLabel', {
+                  defaultMessage: 'Edit integration',
+                }),
+                icon: 'pencil',
+                type: 'icon',
+                description: i18n.translate(
+                  'xpack.fleet.epmInstalledIntegrations.editIntegrationLabel',
+                  {
+                    defaultMessage: 'Edit integration',
+                  }
+                ),
+                enabled: () => false,
+              },
+              {
+                name: i18n.translate(
+                  'xpack.fleet.epmInstalledIntegrations.uninstallIntegrationLabel',
+                  {
+                    defaultMessage: 'Uninstall integration',
+                  }
+                ),
+                icon: 'trash',
+                type: 'icon',
+                description: i18n.translate(
+                  'xpack.fleet.epmInstalledIntegrations.uninstallIntegrationLabel',
+                  {
+                    defaultMessage: 'Uninstall integration',
+                  }
+                ),
+                enabled: (item) => (item?.packagePoliciesInfo?.count ?? 0) === 0,
               },
             ],
           },

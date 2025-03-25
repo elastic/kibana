@@ -16,7 +16,7 @@ import {
   SecurityCellActionType,
 } from '../cell_actions';
 import { getSourcererScopeId } from '../../../helpers';
-import { TimelineContext } from '../../../timelines/components/timeline';
+import { TimelineContext } from '../../../timelines/components/timeline/context';
 
 import { TableContext } from '../events_viewer/shared';
 

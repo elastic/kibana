@@ -18,9 +18,8 @@ import { validateIndexPatterns } from '../utils';
 
 export const createThresholdAlertType = (
   createOptions: CreateRuleOptions
-): SecurityAlertType<ThresholdRuleParams, ThresholdAlertState, {}, 'default'> => {
-  const { licensing, experimentalFeatures, scheduleNotificationResponseActionsService } =
-    createOptions;
+): SecurityAlertType<ThresholdRuleParams, ThresholdAlertState> => {
+  const { licensing, scheduleNotificationResponseActionsService } = createOptions;
   return {
     id: THRESHOLD_RULE_TYPE_ID,
     name: 'Threshold Rule',
@@ -59,6 +58,7 @@ export const createThresholdAlertType = (
     isExportable: false,
     category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
+    solution: 'security',
     async executor(execOptions) {
       const { sharedParams, services, startedAt, state } = execOptions;
       const result = await thresholdExecutor({
@@ -67,7 +67,6 @@ export const createThresholdAlertType = (
         startedAt,
         state,
         licensing,
-        experimentalFeatures,
         scheduleNotificationResponseActionsService,
       });
       return result;

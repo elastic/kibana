@@ -12,8 +12,8 @@ import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { RecoveredActionGroup } from '../../../../../common';
-import { RegistryAlertTypeWithAuth } from '../../../../authorization';
-import { AsApiContract } from '../../../lib';
+import type { RegistryAlertTypeWithAuth } from '../../../../authorization';
+import type { AsApiContract } from '../../../lib';
 
 const rulesClient = rulesClientMock.create();
 
@@ -58,6 +58,7 @@ describe('ruleTypesRoute', () => {
         },
         category: 'test',
         producer: 'test',
+        solution: 'stack',
         enabledInLicense: true,
         defaultScheduleInterval: '10m',
         doesSetRecoveryContext: false,
@@ -67,7 +68,7 @@ describe('ruleTypesRoute', () => {
       } as RegistryAlertTypeWithAuth,
     ];
     const expectedResult: Array<
-      AsApiContract<Omit<RegistryAlertTypeWithAuth, 'validLegacyConsumers'>>
+      AsApiContract<Omit<RegistryAlertTypeWithAuth, 'validLegacyConsumers' | 'solution'>>
     > = [
       {
         id: '1',
@@ -176,6 +177,7 @@ describe('ruleTypesRoute', () => {
         },
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         enabledInLicense: true,
         hasAlertsMappings: false,
         hasFieldsForAAD: false,
@@ -233,6 +235,7 @@ describe('ruleTypesRoute', () => {
         },
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         enabledInLicense: true,
         hasAlertsMappings: false,
         hasFieldsForAAD: false,

@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
-
 import { firstValueFrom } from 'rxjs';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { getFilter } from '../utils/get_filter';
@@ -19,14 +13,12 @@ import { groupAndBulkCreate } from './alert_suppression/group_and_bulk_create';
 import { searchAfterAndBulkCreate } from '../utils/search_after_bulk_create';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import type { UnifiedQueryRuleParams } from '../../rule_schema';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../utils/reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
-import type { CreateRuleOptions, SecuritySharedParams } from '../types';
+import type { CreateRuleOptions, SecurityRuleServices, SecuritySharedParams } from '../types';
 
 export const queryExecutor = async ({
   sharedParams,
-  experimentalFeatures,
   eventsTelemetry,
   services,
   bucketHistory,
@@ -35,9 +27,8 @@ export const queryExecutor = async ({
   isLoggedRequestsEnabled,
 }: {
   sharedParams: SecuritySharedParams<UnifiedQueryRuleParams>;
-  experimentalFeatures: ExperimentalFeatures;
   eventsTelemetry: ITelemetryEventsSender | undefined;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: SecurityRuleServices;
   bucketHistory?: BucketHistory[];
   scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
   licensing: LicensingPluginSetup;
@@ -73,7 +64,6 @@ export const queryExecutor = async ({
             bucketHistory,
             groupByFields: ruleParams.alertSuppression.groupBy,
             eventsTelemetry,
-            experimentalFeatures,
             isLoggedRequestsEnabled,
           })
         : {

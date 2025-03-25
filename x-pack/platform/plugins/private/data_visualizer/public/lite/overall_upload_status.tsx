@@ -54,7 +54,7 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
       title: i18n.translate(
         'xpack.dataVisualizer.file.overallUploadStatus.creatingIndexAndIngestPipeline',
         {
-          defaultMessage: 'Creating index and ingest pipeline',
+          defaultMessage: 'Creating index',
         }
       ),
       children: <></>,

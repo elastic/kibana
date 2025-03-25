@@ -8,24 +8,27 @@ required:
 properties:
   serviceName:
     type: string
-    description: The service name from APM
+    description: Filter the errors coming from your application to apply the rule to a specific service.
   windowSize:
     type: number
-    description: The window size
+    description: >
+      The time frame in which the errors must occur (in `windowUnit` units).
+      Generally it should be a value higher than the rule check interval to avoid gaps in detection.
     example: 6
   windowUnit:
     type: string
-    description: The window size unit
+    description: >
+      The type of units for the time window: minutes, hours, or days.
     enum:
       - "m"
       - "h"
       - "d"
   environment:
     type: string
-    description: The environment from APM
+    description: Filter the errors coming from your application to apply the rule to a specific environment.
   threshold:
     type: number
-    description: The error count threshold value
+    description: The error count threshold.
   groupBy:
     type: array
     default: ["service.name", "service.environment"]
@@ -37,5 +40,10 @@ properties:
         - "service.environment"
         - "transaction.name"
         - "error.grouping_key"
+    description: >
+      Perform a composite aggregation against the selected fields.
+      When any of these groups match the selected rule conditions, an alert is triggered per group.
   errorGroupingKey:
     type: string
+    description: >
+      Filter the errors coming from your application to apply the rule to a specific error grouping key, which is a hash of the stack trace and other properties.

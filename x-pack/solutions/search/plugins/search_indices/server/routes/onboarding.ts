@@ -15,6 +15,12 @@ export function registerOnboardingRoutes(router: IRouter, logger: Logger) {
   router.get(
     {
       path: GET_ONBOARDING_TOKEN_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {},
       options: {
         access: 'internal',

@@ -18,5 +18,5 @@ Because the whole app is a single page, it's quite straightforward to test. Simp
 4. However oven the ? icon to view the tooltips
 5. Use the breakdown feature on the page load distribution and total page view visualizations
 6. Click on a specific country in the page load by country visualization to test filtering from the visualization
-7. Click on a piece of the pie chart from the Vistor breakdowns to test filtering from the visualization
+7. Click on a piece of the pie chart from the Visitor breakdowns to test filtering from the visualization
 8. Navigate through the console errors list

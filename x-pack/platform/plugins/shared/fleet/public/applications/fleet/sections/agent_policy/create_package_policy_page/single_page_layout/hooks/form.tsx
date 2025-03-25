@@ -8,8 +8,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { load } from 'js-yaml';
-
 import { isEqual } from 'lodash';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
 import {
@@ -28,6 +28,7 @@ import {
   sendBulkInstallPackages,
   sendGetPackagePolicies,
   useMultipleAgentPolicies,
+  useFleetStatus,
 } from '../../../../../hooks';
 import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
 import {
@@ -49,8 +50,8 @@ import {
   getCloudFormationPropsFromPackagePolicy,
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
-
 import { AGENTLESS_DISABLED_INPUTS } from '../../../../../../../../common/constants';
+import { ensurePackageKibanaAssetsInstalled } from '../../services/ensure_kibana_assets_installed';
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
 
@@ -160,6 +161,7 @@ export function useOnSubmit({
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
 }) {
   const { notifications } = useStartServices();
+  const { spaceId } = useFleetStatus();
   const confirmForceInstall = useConfirmForceInstall();
   const spaceSettings = useSpaceSettingsContext();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
@@ -413,6 +415,15 @@ export function useOnSubmit({
         force: forceInstall,
       });
 
+      if (!error && data?.item.package) {
+        await ensurePackageKibanaAssetsInstalled({
+          currentSpaceId: spaceId ?? DEFAULT_SPACE_ID,
+          pkgName: data.item.package.name,
+          pkgVersion: data.item.package.version,
+          toasts: notifications.toasts,
+        });
+      }
+
       const hasAzureArmTemplate = data?.item
         ? getAzureArmPropsFromPackagePolicy(data.item).templateUrl
         : false;
@@ -465,7 +476,12 @@ export function useOnSubmit({
           setFormState('SUBMITTED_NO_AGENTS');
           return;
         }
-        onSaveNavigate(data!.item);
+
+        if (isAgentlessConfigured) {
+          onSaveNavigate(data!.item, ['openEnrollmentFlyout']);
+        } else {
+          onSaveNavigate(data!.item);
+        }
 
         notifications.toasts.addSuccess({
           title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
@@ -505,6 +521,7 @@ export function useOnSubmit({
     },
     [
       formState,
+      spaceId,
       hasErrors,
       agentCount,
       isAgentlessIntegration,

@@ -558,7 +558,9 @@ queue:
         cy.getBySel(SETTINGS_OUTPUTS.TYPE_INPUT).select('logstash');
         cy.getBySel(kafkaOutputFormValues.name.selector).clear().type('kafka_to_logstash');
         cy.get('[placeholder="Specify host"').clear().type('localhost:5000');
-        cy.get('[placeholder="Specify ssl certificate"]').clear().type('SSL CERTIFICATE');
+
+        cy.getBySel(SETTINGS_OUTPUTS.SSL_BUTTON).click();
+        cy.get('[placeholder="Specify SSL certificate"]').clear().type('SSL CERTIFICATE');
         cy.get('[placeholder="Specify certificate key"]').clear().type('SSL KEY');
 
         cy.intercept('PUT', '**/api/fleet/outputs/**').as('saveOutput');

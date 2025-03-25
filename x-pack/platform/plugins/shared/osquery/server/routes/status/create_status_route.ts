@@ -171,7 +171,7 @@ export const createStatusRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                 const agentPacks = filter(migrationObject.packs, (pack) =>
                   pack.policy_ids.includes(key)
                 );
-                await packagePolicyService?.upgrade(internalSavedObjectsClient, esClient, [value]);
+                await packagePolicyService?.upgrade(internalSavedObjectsClient, esClient, value);
                 const packagePolicy = await packagePolicyService?.get(
                   internalSavedObjectsClient,
                   value

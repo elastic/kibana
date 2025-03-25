@@ -14,6 +14,7 @@ export function ConversationViewWithProps() {
   const { path } = useObservabilityAIAssistantParams('/conversations/*');
   const conversationId = 'conversationId' in path ? path.conversationId : undefined;
   const observabilityAIAssistantRouter = useObservabilityAIAssistantRouter();
+
   function navigateToConversation(nextConversationId?: string) {
     if (nextConversationId) {
       observabilityAIAssistantRouter.push('/conversations/{conversationId}', {
@@ -26,6 +27,7 @@ export function ConversationViewWithProps() {
       observabilityAIAssistantRouter.push('/conversations/new', { path: {}, query: {} });
     }
   }
+
   return (
     <ConversationView
       conversationId={conversationId}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleTypeIndex } from '../../types';
+import type { RuleTypeIndex } from '../../types';
 
 export const ruleTypesIndex = new Map([
   [

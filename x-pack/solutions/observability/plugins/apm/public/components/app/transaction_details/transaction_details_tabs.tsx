@@ -15,13 +15,11 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { maybe } from '../../../../common/utils/maybe';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { useCriticalPathFeatureEnabledSetting } from '../../../hooks/use_critical_path_feature_enabled_setting';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useSampleChartSelection } from '../../../hooks/use_sample_chart_selection';
 import type { TraceSamplesFetchResult } from '../../../hooks/use_transaction_trace_samples_fetcher';
 import { useTransactionTraceSamplesFetcher } from '../../../hooks/use_transaction_trace_samples_fetcher';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
-import { aggregatedCriticalPathTab } from './aggregated_critical_path_tab';
 import { failedTransactionsCorrelationsTab } from './failed_transactions_correlations_tab';
 import { latencyCorrelationsTab } from './latency_correlations_tab';
 import { profilingTab } from './profiling_tab';
@@ -46,22 +44,18 @@ export function TransactionDetailsTabs() {
   );
   const { agentName } = useApmServiceContext();
 
-  const isCriticalPathFeatureEnabled = useCriticalPathFeatureEnabledSetting();
   const isTransactionProfilingEnabled = useTransactionProfilingSetting();
   const { onPageReady } = usePerformanceContext();
 
   const availableTabs = useMemo(() => {
     const tabs = [traceSamplesTab, latencyCorrelationsTab, failedTransactionsCorrelationsTab];
-    if (isCriticalPathFeatureEnabled) {
-      tabs.push(aggregatedCriticalPathTab);
-    }
 
     if (isTransactionProfilingEnabled && isJavaAgentName(agentName)) {
       tabs.push(profilingTab);
     }
 
     return tabs;
-  }, [agentName, isCriticalPathFeatureEnabled, isTransactionProfilingEnabled]);
+  }, [agentName, isTransactionProfilingEnabled]);
 
   const { urlParams } = useLegacyUrlParams();
   const history = useHistory();

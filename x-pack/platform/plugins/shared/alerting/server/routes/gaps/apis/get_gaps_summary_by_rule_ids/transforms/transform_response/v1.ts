@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { GetGapsSummaryByRuleIdsResponse } from '../../../../../../application/rule/methods/get_gaps_summary_by_rule_ids/types';
-import { GetGapsSummaryByRuleIdsResponseBodyV1 } from '../../../../../../../common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
+import type { GetGapsSummaryByRuleIdsResponse } from '../../../../../../application/rule/methods/get_gaps_summary_by_rule_ids/types';
+import type { GetGapsSummaryByRuleIdsResponseBodyV1 } from '../../../../../../../common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
 
 export const transformResponse = (
   response: GetGapsSummaryByRuleIdsResponse

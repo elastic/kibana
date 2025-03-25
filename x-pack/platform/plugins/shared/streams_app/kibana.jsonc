@@ -13,13 +13,14 @@
       "streams",
       "data",
       "dataViews",
+      "discoverShared",
       "unifiedSearch",
       "share",
       "savedObjectsTagging",
       "navigation",
       "fieldsMetadata",
       "datasetQuality",
-      "licensing",
+      "licensing"
     ],
     "requiredBundles": [
       "kibanaReact"
