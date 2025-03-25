@@ -14,12 +14,10 @@ import {
   EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -240,31 +238,17 @@ export function SloManagementTable() {
       }),
       render: (item: SLODefinitionResponse['version']) => {
         return item < SLO_MODEL_VERSION ? (
-          <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs">
-            <EuiFlexItem grow={0}>
-              <EuiText size="s">{item}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={0}>
-              <EuiToolTip
-                title={
-                  <EuiText>
-                    {i18n.translate('xpack.slo.sloManagementTable.columns.outdatedTooltip', {
-                      defaultMessage:
-                        'This SLO is from a previous version and needs to either be reset to upgrade to the latest version OR deleted and removed from the system. When you reset the SLO, the transform will be updated to the latest version and the historical data will be regenerated from the source data.',
-                    })}
-                  </EuiText>
-                }
-              >
-                <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs">
-                  <EuiFlexItem grow={0}>
-                    <EuiIcon type="warning" />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiText size="s">
+            {i18n.translate('xpack.slo.sloManagementTable.version.outdated', {
+              defaultMessage: 'Outdated',
+            })}
+          </EuiText>
         ) : (
-          <EuiText size="s">{item}</EuiText>
+          <EuiText size="s">
+            {i18n.translate('xpack.slo.sloManagementTable.version.current', {
+              defaultMessage: 'Current',
+            })}
+          </EuiText>
         );
       },
     },
@@ -318,17 +302,22 @@ export function SloManagementTable() {
           onRefresh={refetch}
         />
         <EuiSpacer size="m" />
-        {!isError && (
-          <EuiBasicTable<SLODefinitionResponse>
-            tableCaption={TABLE_CAPTION}
-            items={data?.results ?? []}
-            rowHeader="status"
-            columns={columns}
-            pagination={pagination}
-            onChange={onTableChange}
-            loading={isLoading}
-          />
-        )}
+        <EuiBasicTable<SLODefinitionResponse>
+          tableCaption={TABLE_CAPTION}
+          error={
+            isError
+              ? i18n.translate('xpack.slo.sloManagementTable.error', {
+                  defaultMessage: 'An error occurred while retrieving SLO definitions',
+                })
+              : undefined
+          }
+          items={data?.results ?? []}
+          rowHeader="name"
+          columns={columns}
+          pagination={pagination}
+          onChange={onTableChange}
+          loading={isLoading}
+        />
       </EuiPanel>
       {sloToDelete ? (
         <SloDeleteModal
