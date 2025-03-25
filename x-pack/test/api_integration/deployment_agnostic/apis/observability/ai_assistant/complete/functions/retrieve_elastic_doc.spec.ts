@@ -51,6 +51,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
+      afterEach(async () => {
+        llmProxy.clear();
+      });
+
       it('makes 1 requests to the LLM', () => {
         expect(llmProxy.interceptedRequests.length).to.be(1);
       });
@@ -87,7 +91,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptWithFunctionRequest({
           name: 'retrieve_elastic_doc',
           arguments: () => JSON.stringify({}),
-          when: () => true,
         });
 
         void llmProxy.interceptConversation('Hello from LLM Proxy');
