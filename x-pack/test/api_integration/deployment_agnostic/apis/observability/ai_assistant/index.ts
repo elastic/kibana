@@ -23,6 +23,7 @@ export default function aiAssistantApiIntegrationTests({
     loadTestFile(require.resolve('./complete/functions/retrieve_elastic_doc.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/summarize.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/recall.spec.ts'));
+    loadTestFile(require.resolve('./complete/functions/title_conversation.spec.ts'));
     loadTestFile(require.resolve('./public_complete/public_complete.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_setup.spec.ts'));
     loadTestFile(

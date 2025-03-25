@@ -78,10 +78,12 @@ export async function invokeChatCompleteWithFunctionRequest({
 export async function chatComplete({
   userPrompt,
   connectorId,
+  persist = false,
   observabilityAIAssistantAPIClient,
 }: {
   userPrompt: string;
   connectorId: string;
+  persist?: boolean;
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
 }) {
   const { status, body } = await observabilityAIAssistantAPIClient.editor({
@@ -98,7 +100,7 @@ export async function chatComplete({
           },
         ],
         connectorId,
-        persist: false,
+        persist,
         screenContexts: [],
         scopes: ['observability' as const],
       },
@@ -106,9 +108,10 @@ export async function chatComplete({
   });
 
   expect(status).to.be(200);
+  const messageEvents = decodeEvents(body);
   const messageAddedEvents = getMessageAddedEvents(body);
-
-  return { messageAddedEvents, body, status };
+  const conversationCreateEvent = getConversationCreatedEvent(body);
+  return { messageAddedEvents, conversationCreateEvent, messageEvents, status };
 }
 
 // order of instructions can vary, so we sort to compare them
@@ -134,4 +137,39 @@ export async function getSystemMessage(
   });
 
   return body.systemMessage;
+}
+
+export async function clearConversations(es: Client) {
+  const KB_INDEX = '.kibana-observability-ai-assistant-conversations-*';
+
+  return es.deleteByQuery({
+    index: KB_INDEX,
+    conflicts: 'proceed',
+    query: { match_all: {} },
+    refresh: true,
+  });
+}
+
+export function getConversationCreatedEvent(body: Readable | string) {
+  const decodedEvents = decodeEvents(body);
+  const conversationCreatedEvent = decodedEvents.find(
+    (event) => event.type === StreamingChatResponseEventType.ConversationCreate
+  ) as ConversationCreateEvent;
+
+  return conversationCreatedEvent;
+}
+
+export function getConversationUpdatedEvent(body: Readable | string) {
+  const decodedEvents = decodeEvents(body);
+  const conversationUpdatedEvent = decodedEvents.find(
+    (event) => event.type === StreamingChatResponseEventType.ConversationUpdate
+  ) as ConversationUpdateEvent;
+
+  if (!conversationUpdatedEvent) {
+    throw new Error(
+      `No conversation updated event found: ${JSON.stringify(decodedEvents, null, 2)}`
+    );
+  }
+
+  return conversationUpdatedEvent;
 }
