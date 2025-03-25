@@ -16,54 +16,61 @@ export default function (ftrContext: FtrProviderContext) {
   const { getService } = ftrContext;
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-
   const scenario = createScenario(ftrContext);
 
+  const fetchLatestLicense = async (): Promise<ILicense> => {
+    // make sure license ids are aligned between ES and Kibana
+    await scenario.waitForPluginToDetectLicenseUpdate();
+
+    return await browser.executeAsync(async function refreshAndFetchLicense(cb) {
+      const {
+        start: { core, plugins },
+        testUtils,
+      } = window._coreProvider;
+      const licensing: LicensingPluginStart = plugins.licensing;
+
+      // this call enforces signature check to detect license update and causes license re-fetch
+      await core.http.get('/');
+
+      // trigger a manual refresh, just to be sure
+      await licensing.refresh();
+
+      // wait a bit to make sure any older values have passed through the replay(1)
+      await testUtils.delay(1000);
+
+      cb(await licensing.getLicense());
+    });
+  };
+
   describe('changes in license types', () => {
-    after(async () => {
+    before(async function setup() {
+      await scenario.setup();
+    });
+
+    after(async function teardown() {
       await scenario.teardown();
     });
 
-    const fetchLatestLicense = async (): Promise<ILicense> => {
-      return await browser.executeAsync(async (cb) => {
-        const {
-          start: { core, plugins },
-          testUtils,
-        } = window._coreProvider;
-        const licensing: LicensingPluginStart = plugins.licensing;
-
-        // this call enforces signature check to detect license update and causes license re-fetch
-        await core.http.get('/');
-        // trigger a manual refresh, just to be sure
-        await licensing.refresh();
-        // wait a bit to make sure the older values have passed through the replay(1)
-        await testUtils.delay(1000);
-        cb(await licensing.getLicense());
-      });
-    };
-
-    it('provides changes in license types', async () => {
-      await scenario.setup();
-      await scenario.waitForPluginToDetectLicenseUpdate();
-
+    it('are reflected in the start contract', async function updateAndCheckLicense() {
       // fetch default license
       let license = await fetchLatestLicense();
       expect(license.type).to.be('basic');
 
-      // license hasn't changed
-      await scenario.waitForPluginToDetectLicenseUpdate();
+      // ensure consecutive fetch still yields 'basic'
       license = await fetchLatestLicense();
       expect(license.type).to.be('basic');
 
       // switch to trial (can do it only once)
       await scenario.startTrial();
-      await scenario.waitForPluginToDetectLicenseUpdate();
+      license = await fetchLatestLicense();
+      expect(license.type).to.be('trial');
+
+      // ensure consecutive fetch still yields 'trial'
       license = await fetchLatestLicense();
       expect(license.type).to.be('trial');
 
       // switch back to basic
       await scenario.startBasic();
-      await scenario.waitForPluginToDetectLicenseUpdate();
       license = await fetchLatestLicense();
       expect(license.type).to.be('basic');
 
