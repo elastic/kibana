@@ -10,7 +10,6 @@ import { EffectedPolicySelect } from './effected_policy_select';
 import React from 'react';
 import { forceHTMLElementOffsetWidth } from './test_utils';
 import { fireEvent, act, waitFor } from '@testing-library/react';
-import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -21,7 +20,7 @@ import { useLicense as _useLicense } from '../../../common/hooks/use_license';
 import type { LicenseService } from '../../../../common/license';
 import { buildPerPolicyTag } from '../../../../common/endpoint/service/artifacts/utils';
 import { ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE } from '../../common/translations';
-import { fleetBulkGetPackagePoliciesListHttpMock } from '../../mocks';
+import { allFleetHttpMocks, fleetBulkGetPackagePoliciesListHttpMock } from '../../mocks';
 import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 
 jest.mock('../../../common/components/user_privileges');
@@ -30,21 +29,24 @@ jest.mock('../../../common/hooks/use_license');
 const useLicenseMock = _useLicense as jest.Mock;
 
 describe('when using EffectedPolicySelect component', () => {
-  const generator = new EndpointDocGenerator('effected-policy-select');
-
   let mockedContext: AppContextTestRender;
   let componentProps: EffectedPolicySelectProps;
+  let handleOnChange: jest.MockedFunction<EffectedPolicySelectProps['onChange']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
+  let apiMocks: ReturnType<typeof allFleetHttpMocks>;
 
-  const handleOnChange: jest.MockedFunction<EffectedPolicySelectProps['onChange']> = jest.fn();
-  const render = (props: Partial<EffectedPolicySelectProps> = {}) => {
+  const render = async (
+    props: Partial<EffectedPolicySelectProps> = {}
+  ): Promise<ReturnType<AppContextTestRender['render']>> => {
     componentProps = {
       ...componentProps,
       ...props,
     };
     renderResult = mockedContext.render(<EffectedPolicySelect {...componentProps} />);
+
     return renderResult;
   };
+
   let resetHTMLElementOffsetWidth: () => void;
 
   beforeAll(() => {
@@ -55,13 +57,17 @@ describe('when using EffectedPolicySelect component', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    apiMocks = allFleetHttpMocks(mockedContext.coreStart.http);
+    handleOnChange = jest.fn((updatedArtifact) => {
+      componentProps.item = updatedArtifact;
+      renderResult.rerender(<EffectedPolicySelect {...componentProps} />);
+    });
 
     // Default props
     componentProps = {
       item: new ExceptionsListItemGenerator('seed').generateTrustedApp({
         tags: [GLOBAL_ARTIFACT_TAG],
       }),
-      options: [],
       onChange: handleOnChange,
       'data-test-subj': 'test',
     };
@@ -73,207 +79,155 @@ describe('when using EffectedPolicySelect component', () => {
     handleOnChange.mockClear();
   });
 
-  describe('and no policy entries exist', () => {
-    it('should display no options available message', () => {
-      componentProps.item.tags = [];
-      const { getByTestId } = render();
-      const euiSelectableMessageElement =
-        getByTestId('test-policiesSelectable').getElementsByClassName('euiSelectableMessage')[0];
-      expect(euiSelectableMessageElement).not.toBeNull();
-      expect(euiSelectableMessageElement.textContent).toEqual('No options available');
+  const waitForPoliciesToLoad = async () => {
+    await waitFor(() => {
+      expect(
+        renderResult.container.querySelectorAll('.euiSelectableListItem').length
+      ).toBeGreaterThan(0);
     });
+  };
+
+  const clickOnGlobalButton = () => {
+    act(() => {
+      fireEvent.click(renderResult.getByTestId('test-global'));
+    });
+  };
+
+  const clickOnPerPolicyButton = () => {
+    act(() => {
+      fireEvent.click(renderResult.getByTestId('test-perPolicy'));
+    });
+  };
+
+  const clickOnPolicy = () => {
+    act(() => {
+      fireEvent.click(renderResult.getByTestId('some id here'));
+    });
+  };
+
+  it('should display button group with Global and Per-Policy choices', async () => {
+    const { getByTestId } = await render();
+
+    expect(getByTestId('test-global').textContent).toEqual('Global');
+    expect(getByTestId('test-perPolicy').textContent).toEqual('Per Policy');
   });
 
-  describe('and policy entries exist', () => {
-    const policyId = 'abc123';
-    const policyTestSubj = `policy-${policyId}`;
+  it('should show Global as current selection when artifact is global', async () => {
+    const { getByTestId } = await render();
 
-    const selectGlobalPolicy = () => {
-      act(() => {
-        fireEvent.click(renderResult.getByTestId('test-global'));
-      });
-    };
+    expect(getByTestId('test-global').getAttribute('aria-pressed')).toEqual('true');
+  });
 
-    const selectPerPolicy = () => {
-      act(() => {
-        fireEvent.click(renderResult.getByTestId('test-perPolicy'));
-      });
-    };
+  it('should show Per Policy as current selection when artifact is per-policy', async () => {
+    componentProps.item.tags = [];
+    const { getByTestId } = await render();
 
-    const clickOnPolicy = () => {
-      act(() => {
-        fireEvent.click(renderResult.getByTestId(policyTestSubj));
-      });
-    };
+    expect(getByTestId('test-perPolicy').getAttribute('aria-pressed')).toEqual('true');
+  });
+
+  it('should hide policy selection area when artifact is global', async () => {
+    const { queryByTestId } = await render();
+    expect(queryByTestId('test-policiesSelector')).toBeNull();
+  });
+
+  it('should show policy items when user clicks per-policy', async () => {
+    const { getByTestId } = await render();
+    clickOnPerPolicyButton();
+    await waitForPoliciesToLoad();
+
+    expect(getByTestId('test-policiesSelector')).not.toBeNull();
+  });
+
+  it('should display custom description', async () => {
+    componentProps.description = 'custom here';
+    const { getByTestId } = await render();
+
+    expect(getByTestId('test-description').textContent).toEqual('custom here');
+  });
+
+  it('should show button group as disabled', async () => {
+    componentProps.disabled = true;
+    const { getByTestId } = await render();
+
+    expect((getByTestId('test-byPolicyGlobalButtonGroup') as HTMLFieldSetElement).disabled).toEqual(
+      true
+    );
+  });
+
+  it('should call onChange when artifact is set to Per-Policy', async () => {
+    await render();
+    clickOnPerPolicyButton();
+    await waitForPoliciesToLoad();
+
+    expect(handleOnChange).toHaveBeenCalledWith(expect.objectContaining({ tags: [] }));
+  });
+
+  it('should call onChange when Per Policy artifact is set to Global', async () => {
+    componentProps.item.tags = [];
+    await render();
+    clickOnGlobalButton();
+
+    expect(handleOnChange).toHaveBeenCalledWith(
+      expect.objectContaining({ tags: [GLOBAL_ARTIFACT_TAG] })
+    );
+  });
+
+  it('should call onChange when policy selection changes', async () => {
+    componentProps.item.tags = [];
+    await render();
+    clickOnPolicy();
+    await waitForPoliciesToLoad();
+
+    expect(handleOnChange).toHaveBeenCalledWith(
+      expect.objectContaining({ tags: ['policy:somepolicy'] })
+    );
+  });
+
+  describe('and space awareness is enabled', () => {
+    let httpMocks: ReturnType<typeof fleetBulkGetPackagePoliciesListHttpMock>;
 
     beforeEach(() => {
-      const policy = generator.generatePolicyPackagePolicy();
-      policy.name = 'test policy A';
-      policy.id = policyId;
-
-      componentProps = {
-        ...componentProps,
-        options: [policy],
-      };
-
-      handleOnChange.mockImplementation((updatedItem) => {
-        componentProps = {
-          ...componentProps,
-          item: updatedItem,
-        };
-        renderResult.rerender(<EffectedPolicySelect {...componentProps} />);
+      mockedContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
+      componentProps.item.tags = [buildPerPolicyTag('321')];
+      httpMocks = fleetBulkGetPackagePoliciesListHttpMock(mockedContext.coreStart.http);
+      httpMocks.responseProvider.bulkPackagePolicies.mockReturnValue({
+        items: [new FleetPackagePolicyGenerator('seed').generate({ id: 'abc123' })],
       });
     });
 
-    it('should display policies', () => {
-      componentProps.item.tags = [];
-      const { getByTestId } = render();
-      expect(getByTestId(policyTestSubj));
-    });
+    it('should display count of policies assigned to artifact that are not accessible in active space', async () => {
+      const { getByTestId } = await render();
 
-    it('should hide policy items if global is checked', () => {
-      const { queryByTestId } = render();
-      expect(queryByTestId(policyTestSubj)).toBeNull();
-    });
-
-    it('should show policy items when user clicks per-policy', async () => {
-      const { getByTestId } = render();
-      selectPerPolicy();
-
-      expect(getByTestId(policyTestSubj)).not.toBeNull();
-    });
-
-    it('should call onChange with updated item', () => {
-      render();
-
-      selectPerPolicy();
-      expect(handleOnChange.mock.calls[0][0]).toEqual({
-        ...componentProps.item,
-        tags: [],
-      });
-
-      selectGlobalPolicy();
-      expect(handleOnChange.mock.calls[1][0]).toEqual(componentProps.item);
-    });
-
-    it('should maintain policies selection even if global was checked, and user switched back to per policy', () => {
-      const { debug } = render();
-      debug(undefined, 999999);
-
-      selectPerPolicy();
-      clickOnPolicy();
-      // FYI: If wondering why `componentProps.item` is being used successfully here and below:
-      // its because `handlOnChange` is setup above to re-render the component everytime an update
-      // is received, thus it will always reflect the latest state of the artifact
-      expect(handleOnChange).toHaveBeenLastCalledWith(componentProps.item);
-
-      // Toggle isGlobal back to True
-      selectGlobalPolicy();
-      expect(handleOnChange).toHaveBeenLastCalledWith(componentProps.item);
-    });
-
-    it('should show loader only when by policy selected', () => {
-      componentProps.isLoading = true;
-      const { queryByTestId, getByTestId, rerender } = render();
-      expect(queryByTestId('loading-spinner')).toBeNull();
-
-      componentProps.item = {
-        ...componentProps.item,
-        tags: [],
-      };
-      rerender(<EffectedPolicySelect {...componentProps} />);
-
-      expect(getByTestId('loading-spinner')).not.toBeNull();
-    });
-
-    it('should hide policy link when no policy management privileges', () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
-        ...initialUserPrivilegesState(),
-        endpointPrivileges: {
-          loading: false,
-          canWritePolicyManagement: false,
-          canReadPolicyManagement: false,
-        },
-      });
-      componentProps.item.tags = [];
-      const { queryByTestId } = render();
-      expect(queryByTestId('test-policyLink')).toBeNull();
-    });
-
-    it('should show policy link when all policy management privileges', () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
-        ...initialUserPrivilegesState(),
-        endpointPrivileges: {
-          loading: false,
-          canWritePolicyManagement: true,
-          canReadPolicyManagement: true,
-        },
-      });
-      componentProps.item.tags = [];
-      const { getByTestId } = render();
-      expect(getByTestId('test-policyLink'));
-    });
-
-    it('should show policy link when read policy management privileges', () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
-        ...initialUserPrivilegesState(),
-        endpointPrivileges: {
-          loading: false,
-          canWritePolicyManagement: false,
-          canReadPolicyManagement: true,
-        },
-      });
-      componentProps.item.tags = [];
-      const { getByTestId } = render();
-      expect(getByTestId('test-policyLink'));
-    });
-
-    describe('and space awareness is enabled', () => {
-      let httpMocks: ReturnType<typeof fleetBulkGetPackagePoliciesListHttpMock>;
-
-      beforeEach(() => {
-        mockedContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
-        componentProps.item.tags = [buildPerPolicyTag('321')];
-        httpMocks = fleetBulkGetPackagePoliciesListHttpMock(mockedContext.coreStart.http);
-        httpMocks.responseProvider.bulkPackagePolicies.mockReturnValue({
-          items: [new FleetPackagePolicyGenerator('seed').generate({ id: 'abc123' })],
-        });
-      });
-
-      it('should display count of policies assigned to artifact that are not accessible in active space', async () => {
-        const { getByTestId } = render();
-
-        await waitFor(() => {
-          expect(getByTestId('test-unAccessiblePoliciesCallout').textContent).toEqual(
-            ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE(1)
-          );
-        });
-      });
-
-      it('should disable global button if user has no global artifact privilege', async () => {
-        (useUserPrivileges as jest.Mock).mockReturnValue({
-          ...initialUserPrivilegesState(),
-          endpointPrivileges: {
-            loading: false,
-            canManageGroupPolicies: false,
-          },
-        });
-        const { getByTestId } = render();
-
-        expect((getByTestId('test-global') as HTMLButtonElement).disabled).toBe(true);
-      });
-
-      it('should preserve assignment to policies not currently accessible in active space', async () => {
-        const { getByTestId } = render();
-        await waitFor(() => {
-          expect(getByTestId('test-unAccessiblePoliciesCallout'));
-        });
-        clickOnPolicy();
-
-        expect(handleOnChange).toHaveBeenLastCalledWith(
-          expect.objectContaining({ tags: ['policy:321', 'policy:abc123'] })
+      await waitFor(() => {
+        expect(getByTestId('test-unAccessiblePoliciesCallout').textContent).toEqual(
+          ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE(1)
         );
       });
+    });
+
+    it('should disable global button if user has no global artifact privilege', async () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...initialUserPrivilegesState(),
+        endpointPrivileges: {
+          loading: false,
+          canManageGroupPolicies: false,
+        },
+      });
+      const { getByTestId } = await render();
+
+      expect((getByTestId('test-global') as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it('should preserve assignment to policies not currently accessible in active space', async () => {
+      const { getByTestId } = await render();
+      await waitFor(() => {
+        expect(getByTestId('test-unAccessiblePoliciesCallout'));
+      });
+      clickOnPolicy();
+
+      expect(handleOnChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ tags: ['policy:321', 'policy:abc123'] })
+      );
     });
   });
 });

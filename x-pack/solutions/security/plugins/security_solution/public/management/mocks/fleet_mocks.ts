@@ -186,6 +186,8 @@ export const fleetGetEndpointPackagePolicyHttpMock =
 export type FleetGetEndpointPackagePolicyListHttpMockInterface = ResponseProvidersInterface<{
   endpointPackagePolicyList: () => GetPolicyListResponse;
 }>;
+// TODO:PT delete this mock (duplicate against the fleet list api)
+/** @deprecated use `fleetGetPackagePoliciesListHttpMock` instead */
 export const fleetGetEndpointPackagePolicyListHttpMock =
   httpHandlerMockFactory<FleetGetEndpointPackagePolicyListHttpMockInterface>([
     {

@@ -27,6 +27,7 @@ import type { PolicySelectorProps } from '../policy_selector';
 import { PolicySelector } from '../policy_selector';
 import { useArtifactRestrictedPolicyAssignments } from '../../hooks/artifacts/use_artifact_restricted_policy_assignments';
 import { useGetUpdatedTags } from '../../hooks/artifacts';
+import { useLicense } from '../../../common/hooks/use_license';
 import {
   ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE,
   NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE,
@@ -79,6 +80,7 @@ export interface EffectedPolicySelectProps {
 export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
   ({ item, description, onChange, disabled = false, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isSpaceAwarenessEnabled = useIsExperimentalFeatureEnabled(
       'endpointManagementSpaceAwarenessEnabled'
     );
@@ -168,7 +170,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
         <EuiSpacer size="xs" />
         <EuiFlexGroup>
           <EuiFlexItem grow={2}>
-            <EuiText size="s">
+            <EuiText size="s" data-test-subj={getTestId('description')}>
               <p>
                 {description
                   ? description
@@ -204,6 +206,9 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               selectedPolicyIds={selectedPolicyIds}
               onChange={handleOnPolicySelectChange}
               data-test-subj={getTestId('policiesSelector')}
+              useCheckbox={true}
+              showPolicyLink={true}
+              isDisabled={isGlobal || !isPlatinumPlus || disabled}
             />
           </EuiFormRow>
         )}

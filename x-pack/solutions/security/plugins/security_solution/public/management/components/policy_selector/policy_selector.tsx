@@ -171,6 +171,8 @@ export interface PolicySelectorProps {
   ) => Pick<EuiSelectableOption, 'disabled' | 'toolTipContent' | 'toolTipProps'>;
   /** If `true`, then only a single selection will be allowed. Default is `false` */
   singleSelection?: boolean;
+  /** Disable selector */
+  isDisabled?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -198,6 +200,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
     policyDisplayOptions,
     singleSelection = false,
     additionalListItems = [],
+    isDisabled = false,
     'data-test-subj': dataTestSubj,
   }) => {
     const toasts = useToasts();
@@ -319,7 +322,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
             : {};
 
           return {
-            disabled: false,
+            disabled: isDisabled,
             ...customDisplayOptions,
             label: policy.name,
             className: 'policy-name',
@@ -331,7 +334,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
                 id={htmlIdGenerator()()}
                 onChange={NOOP}
                 checked={isPolicySelected.has(policy.id)}
-                disabled={customDisplayOptions.disabled ?? false}
+                disabled={customDisplayOptions.disabled ?? isDisabled}
                 data-test-subj={getTestId(`policy-${policy.id}-checkbox`)}
               />
             ) : undefined,
@@ -352,7 +355,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
                     id={htmlIdGenerator()()}
                     onChange={NOOP}
                     checked={additionalItem.checked === 'on'}
-                    disabled={additionalItem.disabled ?? false}
+                    disabled={additionalItem.disabled ?? isDisabled}
                     data-test-subj={getTestId(
                       `${additionalItem['data-test-subj'] ?? getTestId('additionalItem')}-checkbox`
                     )}
@@ -367,6 +370,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
       canWriteIntegrationPolicies,
       getAppUrl,
       getTestId,
+      isDisabled,
       policyDisplayOptions,
       policyListResponse,
       selectedPolicyIds,
@@ -384,6 +388,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
             titleSize="s"
             paddingSize="m"
             color="subdued"
+            data-test-subj={getTestId('noPolicies')}
             body={
               userSearchValue ? (
                 <EuiText size="s">{'Your search criteria did not match any policy'}</EuiText>
@@ -392,7 +397,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
           />
         </>
       );
-    }, [userSearchValue]);
+    }, [getTestId, userSearchValue]);
 
     const isCustomOption = useCallback((option: EuiSelectableOption) => {
       // @ts-expect-error
@@ -602,7 +607,8 @@ export const PolicySelector = memo<PolicySelectorProps>(
                   onSearch={onSearchHandler}
                   onChange={onSearchInputChangeHandler}
                   incremental={false}
-                  disabled={view === 'selected-list'}
+                  disabled={isDisabled || view === 'selected-list'}
+                  data-test-subj={getTestId('searchbar')}
                   isClearable
                   fullWidth
                   compressed
@@ -617,6 +623,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
                 disabled={selectedCount === 0}
                 color="text"
                 fill={view === 'selected-list'}
+                data-test-subj={getTestId('viewSelectedButton')}
               >
                 <FormattedMessage
                   id="xpack.securitySolution.policySelector.selectedCount"
@@ -646,6 +653,8 @@ export const PolicySelector = memo<PolicySelectorProps>(
                     size="xs"
                     value="selectAll"
                     onClick={onSelectUnselectAllClickHandler}
+                    data-test-subj={getTestId('selectAllButton')}
+                    isDisabled={isDisabled}
                   >
                     <FormattedMessage
                       id="xpack.securitySolution.policySelector.selectAll"
@@ -658,6 +667,8 @@ export const PolicySelector = memo<PolicySelectorProps>(
                     size="xs"
                     value="unSelectAll"
                     onClick={onSelectUnselectAllClickHandler}
+                    data-test-subj={getTestId('unselectAllButton')}
+                    isDisabled={isDisabled}
                   >
                     <FormattedMessage
                       id="xpack.securitySolution.policySelector.unSelectAll"
@@ -689,7 +700,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
         <EuiPanel paddingSize="s" hasShadow={false} hasBorder className="footer-container">
           <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
             <EuiFlexItem className="border-right">
-              <EuiText size="s">
+              <EuiText size="s" data-test-subj={getTestId('policyFetchTotal')}>
                 <FormattedMessage
                   id="xpack.securitySolution.policySelector.totalPoliciesFound"
                   defaultMessage="{count} {count, plural, =1 {policy} other {policies}} {isSelectedList, select, true {selected} other {found}}"
@@ -710,6 +721,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
                   pageCount={Math.ceil((policyListResponse?.total ?? 0) / perPage)}
                   activePage={(policyListResponse?.page ?? 1) - 1}
                   onPageClick={onPageClickHandler}
+                  data-test-subj={getTestId('pagination')}
                 />
               ) : (
                 <EuiText size="s" color="textSu">
