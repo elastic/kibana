@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, type EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type { ConnectionStatsItemWithComparisonData } from '../../../../common/connections';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyMessage } from '../empty_message';
-import type { ITableColumn } from '../managed_table';
 import { ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
@@ -87,7 +86,7 @@ export function DependenciesTable({
     [dependencies]
   );
 
-  const columns: Array<ITableColumn<FormattedSpanMetricGroup>> = [
+  const columns: Array<EuiBasicTableColumn<FormattedSpanMetricGroup>> = [
     {
       field: 'name',
       name: nameColumnTitle,
