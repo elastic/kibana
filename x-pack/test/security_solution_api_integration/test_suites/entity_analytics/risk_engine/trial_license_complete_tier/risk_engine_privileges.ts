@@ -40,6 +40,14 @@ const ROLES = [
     },
   },
   {
+    name: 'manage_ingest_pipelines',
+    privileges: {
+      elasticsearch: {
+        cluster: ['manage_ingest_pipelines'],
+      },
+    },
+  },
+  {
     name: 'risk_score_index_read',
     privileges: {
       elasticsearch: {
