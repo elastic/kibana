@@ -11,8 +11,11 @@ import { TooltipInfo, XYChartSeriesIdentifier } from '@elastic/charts';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import React, { FC } from 'react';
-import type { UseEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+// @ts-expect-error style types not defined
+import { euiToolTipStyles } from '@elastic/eui/lib/components/tool_tip/tool_tip.styles';
+
 import { CommonXYDataLayerConfig } from '../../../common';
 import {
   DatatablesWithFormatInfo,
@@ -24,8 +27,6 @@ import { XDomain } from '../x_domain';
 import { EndzoneTooltipHeader } from './endzone_tooltip_header';
 import { TooltipData, TooltipRow } from './tooltip_row';
 import { isEndzoneBucket } from './utils';
-
-import './tooltip.scss';
 
 type Props = TooltipInfo & {
   xDomain?: XDomain;
@@ -52,6 +53,35 @@ export const Tooltip: FC<Props> = ({
   layers,
 }) => {
   const pickedValue = values.find(({ isHighlighted }) => isHighlighted);
+
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
+  const toolTipStyles = euiToolTipStyles(euiThemeContext).euiToolTip;
+
+  const customToolTipStyles = css`
+    pointer-events: none;
+    // Override position absolute from toolTipStyles
+    position: relative;
+
+    & {
+      // stylelint-disable-line no-duplicate-selectors
+      max-width: calc(${euiTheme.size.xl} * 10);
+      overflow: hidden;
+      padding: ${euiTheme.size.s};
+    }
+
+    table {
+      table-layout: fixed;
+      width: 100%;
+
+      td,
+      th {
+        text-align: left;
+        padding: ${euiTheme.size.xs};
+        overflow-wrap: break-word;
+      }
+    }
+  `;
 
   if (!pickedValue) {
     return null;
@@ -128,10 +158,10 @@ export const Tooltip: FC<Props> = ({
   const renderEndzoneTooltip = header ? isEndzoneBucket(header?.value, xDomain) : false;
 
   return (
-    <div className="detailedTooltip">
+    <div css={[toolTipStyles, customToolTipStyles]}>
       {renderEndzoneTooltip && (
         <div
-          css={({ euiTheme }: UseEuiTheme) => css`
+          css={css`
             > :last-child {
               margin-bottom: ${euiTheme.size.s};
             }
