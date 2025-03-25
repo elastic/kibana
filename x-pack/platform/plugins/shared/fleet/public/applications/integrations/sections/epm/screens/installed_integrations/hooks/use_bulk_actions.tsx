@@ -72,7 +72,7 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
               title: i18n.translate(
                 'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUpgradeSuccessTitle',
                 {
-                  defaultMessage: 'Upgrade succeed',
+                  defaultMessage: 'Upgrade succeeded',
                 }
               ),
             });

@@ -62,7 +62,7 @@ describe('Bulk upgrade task', () => {
       expect(res).toEqual([{ name: 'test_valid', success: true }]);
     });
 
-    it('should return error for non successfull upgrade', async () => {
+    it('should return error for non successful upgrade', async () => {
       const res = await _runBulkUpgradeTask({
         abortController: new AbortController(),
         logger: loggingSystemMock.createLogger(),
@@ -94,7 +94,7 @@ describe('Bulk upgrade task', () => {
       ]);
     });
 
-    it('should work for successfull upgrade with package policies upgrade', async () => {
+    it('should work for successful upgrade with package policies upgrade', async () => {
       const res = await _runBulkUpgradeTask({
         abortController: new AbortController(),
         logger: loggingSystemMock.createLogger(),
