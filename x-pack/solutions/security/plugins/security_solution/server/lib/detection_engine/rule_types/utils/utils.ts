@@ -126,7 +126,7 @@ export const hasReadIndexPrivileges = async (args: {
   // Some indices have read privileges others do not.
   if (indexesWithNoReadPrivileges.length > 0) {
     const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
-    warningStatusMessage = `This rule may not have the required read privileges to the following index patterns: ${indexesString}`;
+    warningStatusMessage = `The concrete indices that match this index pattern may not be available to this rule's api key: ${indexesString}`;
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatusEnum['partial failure'],
       message: warningStatusMessage,

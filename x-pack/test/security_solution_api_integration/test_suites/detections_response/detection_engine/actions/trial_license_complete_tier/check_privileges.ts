@@ -85,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.contain(
-            `This rule may not have the required read privileges to the following index patterns: ["${index[0]}"]`
+            `The concrete indices that match this index pattern may not be available to this rule's api key: ["${index[0]}"]`
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
@@ -166,7 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.eql(
-            `This rule may not have the required read privileges to the following index patterns: ["${index[0]}"]`
+            `The concrete indices that match this index pattern may not be available to this rule's api key: ["${index[0]}"]`
           );
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
