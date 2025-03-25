@@ -491,8 +491,16 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Create new detection rules in bulk.
-   */
+    * Create new detection rules in bulk.
+> warn
+> This API is deprecated and will be removed in Kibana v9.0.
+
+> warn
+> When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+> If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
+
+    */
   async bulkCreateRules(props: BulkCreateRulesProps) {
     this.log.info(`${new Date().toISOString()} Calling API BulkCreateRules`);
     return this.kbnClient
@@ -507,8 +515,11 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Delete detection rules in bulk.
-   */
+    * Delete detection rules in bulk.
+> warn
+> This API is deprecated and will be removed in Kibana v9.0.
+
+    */
   async bulkDeleteRules(props: BulkDeleteRulesProps) {
     this.log.info(`${new Date().toISOString()} Calling API BulkDeleteRules`);
     return this.kbnClient
@@ -523,8 +534,11 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Deletes multiple rules.
-   */
+    * Delete detection rules in bulk.
+> warn
+> This API is deprecated and will be removed in Kibana v9.0.
+
+    */
   async bulkDeleteRulesPost(props: BulkDeleteRulesPostProps) {
     this.log.info(`${new Date().toISOString()} Calling API BulkDeleteRulesPost`);
     return this.kbnClient
@@ -539,8 +553,16 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Update specific fields of existing detection rules using the `rule_id` or `id` field.
-   */
+    * Update specific fields of existing detection rules using the `rule_id` or `id` field.
+> warn
+> This API is deprecated and will be removed in Kibana v9.0.
+
+> warn
+> When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+> If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
+
+    */
   async bulkPatchRules(props: BulkPatchRulesProps) {
     this.log.info(`${new Date().toISOString()} Calling API BulkPatchRules`);
     return this.kbnClient
@@ -556,8 +578,13 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
   }
   /**
     * Update multiple detection rules using the `rule_id` or `id` field. The original rules are replaced, and all unspecified fields are deleted.
-> info
-> You cannot modify the `id` or `rule_id` values.
+> warn
+> This API is deprecated and will be removed in Kibana v9.0.
+
+> warn
+> When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+> If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
     */
   async bulkUpdateRules(props: BulkUpdateRulesProps) {
@@ -1942,7 +1969,7 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Pin an event to an existing Timeline.
+   * Pin/unpin an event to/from an existing Timeline.
    */
   async persistPinnedEventRoute(props: PersistPinnedEventRouteProps) {
     this.log.info(`${new Date().toISOString()} Calling API PersistPinnedEventRoute`);

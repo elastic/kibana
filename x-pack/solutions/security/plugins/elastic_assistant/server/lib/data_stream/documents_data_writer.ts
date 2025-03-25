@@ -136,13 +136,15 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
               path: 'users',
               query: {
                 bool: {
-                  must: [
-                    {
-                      match: authenticatedUser.profile_uid
-                        ? { 'users.id': authenticatedUser.profile_uid }
-                        : { 'users.name': authenticatedUser.username },
-                    },
+                  should: [
+                    // Match on users.id if profile_uid exists
+                    ...(authenticatedUser.profile_uid
+                      ? [{ term: { 'users.id': authenticatedUser.profile_uid } }]
+                      : []),
+                    // Always try to match on users.name
+                    { term: { 'users.name': authenticatedUser.username } },
                   ],
+                  minimum_should_match: 1,
                 },
               },
             },

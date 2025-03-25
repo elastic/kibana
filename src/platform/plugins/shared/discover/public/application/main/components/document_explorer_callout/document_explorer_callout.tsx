@@ -21,7 +21,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { DOC_TABLE_LEGACY } from '@kbn/discover-utils';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 

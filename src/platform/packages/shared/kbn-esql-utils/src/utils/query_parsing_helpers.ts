@@ -17,6 +17,7 @@ import type {
 } from '@kbn/esql-ast';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { monaco } from '@kbn/monaco';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 
@@ -184,8 +185,28 @@ export const mapVariableToColumn = (
   return columns;
 };
 
-export const getValuesFromQueryField = (queryString: string) => {
-  const validQuery = `${queryString} ""`;
+const getQueryUpToCursor = (queryString: string, cursorPosition?: monaco.Position) => {
+  const lines = queryString.split('\n');
+  const lineNumber = cursorPosition?.lineNumber ?? lines.length;
+  const column = cursorPosition?.column ?? lines[lineNumber - 1].length;
+
+  // Handle the case where the cursor is within the first line
+  if (lineNumber === 1) {
+    return lines[0].slice(0, column);
+  }
+
+  // Get all lines up to the specified line number (exclusive of the current line)
+  const previousLines = lines.slice(0, lineNumber - 1).join('\n');
+  const currentLine = lines[lineNumber - 1].slice(0, column);
+
+  // Join the previous lines and the partial current line
+  return previousLines + '\n' + currentLine;
+};
+
+export const getValuesFromQueryField = (queryString: string, cursorPosition?: monaco.Position) => {
+  const queryInCursorPosition = getQueryUpToCursor(queryString, cursorPosition);
+
+  const validQuery = `${queryInCursorPosition} ""`;
   const { root } = parse(validQuery);
   const lastCommand = root.commands[root.commands.length - 1];
   const columns: ESQLColumn[] = [];

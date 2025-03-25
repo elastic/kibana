@@ -16,8 +16,8 @@ import type {
   ISearchSource,
 } from '@kbn/data-plugin/public';
 import { FetchStatus } from '../../types';
-import { DataMain$, DataRefetch$ } from '../state_management/discover_data_state_container';
-import { DiscoverSearchSessionManager } from '../state_management/discover_search_session';
+import type { DataMain$, DataRefetch$ } from '../state_management/discover_data_state_container';
+import type { DiscoverSearchSessionManager } from '../state_management/discover_search_session';
 
 /**
  * This function returns an observable that's used to trigger data fetching

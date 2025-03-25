@@ -16,7 +16,8 @@ import {
   OBSERVABILITY_LOGS_EXPLORER_APP_ID,
 } from '@kbn/deeplinks-observability';
 import { discoverServiceMock } from '../../__mocks__/services';
-import { LogsExplorerTabs, LogsExplorerTabsProps } from './logs_explorer_tabs';
+import type { LogsExplorerTabsProps } from './logs_explorer_tabs';
+import { LogsExplorerTabs } from './logs_explorer_tabs';
 import { DISCOVER_APP_LOCATOR } from '../../../common';
 
 const mockSetLastUsedViewer = jest.fn();

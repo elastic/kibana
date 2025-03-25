@@ -156,7 +156,7 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
   );
 }
 
-export function useDownloadSourcesOptions(agentPolicy: Partial<NewAgentPolicy | AgentPolicy>) {
+export function useDownloadSourcesOptions() {
   const downloadSourcesRequest = useGetDownloadSources();
 
   const dataDownloadSourceOptions = useMemo(() => {
@@ -169,14 +169,12 @@ export function useDownloadSourcesOptions(agentPolicy: Partial<NewAgentPolicy | 
 
     return [
       getDefaultDownloadSource(defaultDownloadSourceName),
-      ...downloadSourcesRequest.data.items
-        .filter((item) => !item.is_default)
-        .map((item) => {
-          return {
-            value: item.id,
-            inputDisplay: item.name,
-          };
-        }),
+      ...downloadSourcesRequest.data.items.map((item) => {
+        return {
+          value: item.id,
+          inputDisplay: item.name,
+        };
+      }),
     ];
   }, [downloadSourcesRequest]);
 
@@ -222,17 +220,15 @@ export function useFleetServerHostsOptions(agentPolicy: Partial<NewAgentPolicy |
 
     return [
       getDefaultFleetServerHosts(defaultFleetServerHostsName),
-      ...fleetServerHostsRequest.data.items
-        .filter((item) => !item.is_default)
-        .map((item) => {
-          const isInternalFleetServerHost = !!item.is_internal;
+      ...fleetServerHostsRequest.data.items.map((item) => {
+        const isInternalFleetServerHost = !!item.is_internal;
 
-          return {
-            value: item.id,
-            inputDisplay: item.name,
-            disabled: isInternalFleetServerHost,
-          };
-        }),
+        return {
+          value: item.id,
+          inputDisplay: item.name,
+          disabled: isInternalFleetServerHost,
+        };
+      }),
     ];
   }, [fleetServerHostsRequest]);
 

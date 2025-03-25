@@ -152,16 +152,8 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User requested to install the product documentation for use in AI Assistants.
 
 .2+| `knowledge_base_entry_create`
-| `success` | User has created knowledge base entry [id=x]
-| `failure` | Failed attempt to create a knowledge base entry
-
-.2+| `knowledge_base_entry_update`
-| `success` | User has updated knowledge base entry [id=x]
-| `failure` | Failed attempt to update a knowledge base entry
-
-.2+| `knowledge_base_entry_delete`
-| `success` | User has deleted knowledge base entry [id=x]
-| `failure` | Failed attempt to delete a knowledge base entry
+| `success` | User has created knowledge base entry [id=x].
+| `failure` | Failed attempt to create a knowledge base entry.
 
 3+a|
 ====== Type: change
@@ -352,6 +344,10 @@ Refer to the corresponding {es} logs for potential write errors.
 .1+| `product_documentation_update`
 | `unknown` | User requested to update the product documentation for use in AI Assistants.
 
+.2+| `knowledge_base_entry_update`
+| `success` | User has updated knowledge base entry [id=x].
+| `failure` | Failed attempt to update a knowledge base entry.
+
 3+a|
 ====== Type: deletion
 
@@ -445,6 +441,10 @@ Refer to the corresponding {es} logs for potential write errors.
 
 .1+| `product_documentation_delete`
 | `unknown` | User requested to delete the product documentation for use in AI Assistants.
+
+.2+| `knowledge_base_entry_delete`
+| `success` | User has deleted knowledge base entry [id=x].
+| `failure` | Failed attempt to delete a knowledge base entry.
 
 3+a|
 ====== Type: access

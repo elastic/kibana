@@ -80,8 +80,12 @@ Object {
     },
     Object {
       "correctiveAction": Object {
-        "blockerForReindexing": undefined,
         "excludedActions": Array [],
+        "metadata": Object {
+          "isClosedIndex": false,
+          "isFrozenIndex": false,
+          "isInDataStream": false,
+        },
         "type": "reindex",
       },
       "details": "This index was created using version: 6.8.13",
@@ -94,22 +98,29 @@ Object {
     },
     Object {
       "correctiveAction": Object {
-        "blockerForReindexing": undefined,
-        "excludedActions": Array [],
-        "type": "reindex",
+        "metadata": Object {
+          "isClosedIndex": false,
+          "isFrozenIndex": true,
+          "isInDataStream": false,
+        },
+        "type": "unfreeze",
       },
-      "details": "This index has version: 7.17.28-8.0.0",
+      "details": "Frozen indices must be unfrozen before upgrading to version 9.0. (The legacy frozen indices feature no longer offers any advantages. You may consider cold or frozen tiers in place of frozen indices.)",
       "index": "frozen_index",
       "isCritical": true,
-      "message": "Old index with a compatibility version < 8.0",
+      "message": "Index [frozen_index] is a frozen index. The frozen indices feature is deprecated and will be removed in version 9.0.",
       "resolveDuringUpgrade": false,
       "type": "index_settings",
-      "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.0.html#breaking-changes-8.0",
+      "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/frozen-indices.html",
     },
     Object {
       "correctiveAction": Object {
-        "blockerForReindexing": "index-closed",
         "excludedActions": Array [],
+        "metadata": Object {
+          "isClosedIndex": true,
+          "isFrozenIndex": false,
+          "isInDataStream": false,
+        },
         "type": "reindex",
       },
       "details": "This index was created using version: 6.8.13",
@@ -177,8 +188,12 @@ Object {
     },
     Object {
       "correctiveAction": Object {
-        "blockerForReindexing": undefined,
         "excludedActions": Array [],
+        "metadata": Object {
+          "isClosedIndex": false,
+          "isFrozenIndex": false,
+          "isInDataStream": false,
+        },
         "transformIds": Array [
           "abc",
         ],
@@ -194,8 +209,12 @@ Object {
     },
     Object {
       "correctiveAction": Object {
-        "blockerForReindexing": undefined,
         "excludedActions": Array [],
+        "metadata": Object {
+          "isClosedIndex": false,
+          "isFrozenIndex": false,
+          "isInDataStream": false,
+        },
         "type": "reindex",
       },
       "details": "This index has version: 7.17.25",

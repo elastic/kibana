@@ -36,7 +36,6 @@ import { getNotificationResultsLink } from '../rule_actions_legacy';
 // eslint-disable-next-line no-restricted-imports
 import { formatAlertForNotificationActions } from '../rule_actions_legacy/logic/notifications/schedule_notification_actions';
 import { createResultObject } from './utils';
-import { bulkCreateFactory, wrapHitsFactory } from './factories';
 import { RuleExecutionStatusEnum } from '../../../../common/api/detection_engine/rule_monitoring';
 import { truncateList } from '../rule_monitoring';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
@@ -172,8 +171,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           const { from, maxSignals, timestampOverride, timestampOverrideFallbackDisabled, to } =
             params;
           const {
-            alertWithPersistence,
-            alertWithSuppression,
             savedObjectsClient,
             scopedClusterClient,
             uiSettingsClient,
@@ -393,12 +390,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
 
             const alertTimestampOverride = isPreview ? startedAt : undefined;
-            const bulkCreate = bulkCreateFactory(
-              alertWithPersistence,
-              refresh,
-              ruleExecutionLogger,
-              experimentalFeatures
-            );
 
             const legacySignalFields: string[] = Object.keys(aadFieldConversion);
             const [ignoreFieldsRegexes, ignoreFieldsStandard] = partition(
@@ -416,18 +407,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
 
             const intendedTimestamp = startedAtOverridden ? startedAt : undefined;
-            const wrapHits = wrapHitsFactory({
-              ignoreFields: ignoreFieldsObject,
-              ignoreFieldsRegexes,
-              mergeStrategy,
-              completeRule,
-              spaceId,
-              indicesToQuery: inputIndex,
-              alertTimestampOverride,
-              publicBaseUrl,
-              ruleExecutionLogger,
-              intendedTimestamp,
-            });
 
             const { filter: exceptionFilter, unprocessedExceptions } = await buildExceptionFilter({
               startedAt,
@@ -455,8 +434,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     },
                     searchAfterSize,
                     tuple,
-                    bulkCreate,
-                    wrapHits,
                     listClient,
                     ruleDataClient,
                     mergeStrategy,
@@ -465,12 +442,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     ruleExecutionLogger,
                     aggregatableTimestampField,
                     alertTimestampOverride,
-                    alertWithSuppression,
                     refreshOnIndexingAlerts: refresh,
                     publicBaseUrl,
                     experimentalFeatures,
                     intendedTimestamp,
                     spaceId,
+                    ignoreFields: ignoreFieldsObject,
+                    ignoreFieldsRegexes,
                   },
                 });
 

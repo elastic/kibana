@@ -168,6 +168,7 @@ export function getRuleType(): GeoContainmentRuleType {
     executor,
     category: DEFAULT_APP_CATEGORIES.management.id,
     producer: STACK_ALERTS_FEATURE_ID,
+    solution: 'stack',
     validate: {
       params: trackingContainmentRuleParamsSchema,
     },
@@ -193,7 +194,6 @@ export function getRuleType(): GeoContainmentRuleType {
         return injectEntityAndBoundaryIds(params, references);
       },
     },
-    // @ts-ignore
     alerts: STACK_ALERTS_AAD_CONFIG,
   };
 }

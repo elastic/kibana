@@ -93,11 +93,9 @@ describe('ESQL Theme', () => {
       'show_ws',
       'setting',
       'setting_ws',
-      'metrics_ws',
-      'closing_metrics_ws',
       'join_ws',
       'change_point_ws',
-      'insist_ws',
+      'fork_ws',
     ];
 
     // First, check that every valid exception is actually valid

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Page } from '@playwright/test';
+import { Page, test as base } from '@playwright/test';
 import { subj } from '@kbn/test-subj-selector';
 import { PathOptions } from '../../../../common/services/kibana_url';
-import { KibanaUrl, ScoutLogger, coreWorkerFixtures } from '../../worker';
+import { KibanaUrl, ScoutLogger } from '../../worker';
 import { ScoutPage } from '.';
 
 /**
@@ -59,6 +59,8 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
     await page.locator(testSubjSelector).click();
     for (const char of text) {
       await page.keyboard.insertText(char);
+      // it is important to delay characters input to avoid flakiness, default is 25 ms
+
       await page.waitForTimeout(delay);
     }
   };
@@ -118,7 +120,7 @@ export function extendPlaywrightPage({
  * await page.gotoApp('discover);
  * ```
  */
-export const scoutPageFixture = coreWorkerFixtures.extend<
+export const scoutPageFixture = base.extend<
   { page: ScoutPage; log: ScoutLogger },
   { kbnUrl: KibanaUrl }
 >({

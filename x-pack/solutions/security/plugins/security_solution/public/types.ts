@@ -35,6 +35,7 @@ import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { OsqueryPluginStart } from '@kbn/osquery-plugin/public';
 import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
@@ -161,6 +162,7 @@ export interface StartPlugins {
   integrationAssistant?: IntegrationAssistantPluginStart;
   serverless?: ServerlessPluginStart;
   productDocBase: ProductDocBasePluginStart;
+  share?: SharePluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {

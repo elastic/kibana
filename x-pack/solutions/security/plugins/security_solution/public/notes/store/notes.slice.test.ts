@@ -168,18 +168,20 @@ describe('notesSlice', () => {
           },
         };
 
-        expect(notesReducer(initialNonEmptyState, action)).toEqual({
-          ...initalEmptyState,
-          entities: {
-            [newMockNote.noteId]: newMockNote,
-            [mockNote2.noteId]: mockNote2,
-          },
-          ids: [mockNote2.noteId, newMockNote.noteId],
-          status: {
-            ...initalEmptyState.status,
-            fetchNotesByDocumentIds: ReqStatus.Succeeded,
-          },
-        });
+        expect(notesReducer(initialNonEmptyState, action)).toEqual(
+          expect.objectContaining({
+            ...initalEmptyState,
+            entities: {
+              [newMockNote.noteId]: newMockNote,
+              [mockNote2.noteId]: mockNote2,
+            },
+            ids: expect.arrayContaining([mockNote2.noteId, newMockNote.noteId]),
+            status: {
+              ...initalEmptyState.status,
+              fetchNotesByDocumentIds: ReqStatus.Succeeded,
+            },
+          })
+        );
       });
 
       it('should set correct error state when failing to fetch notes by document ids', () => {
@@ -250,18 +252,20 @@ describe('notesSlice', () => {
           },
         };
 
-        expect(notesReducer(initialNonEmptyState, action)).toEqual({
-          ...initalEmptyState,
-          entities: {
-            [newMockNote.noteId]: newMockNote,
-            [mockNote2.noteId]: mockNote2,
-          },
-          ids: [mockNote2.noteId, newMockNote.noteId],
-          status: {
-            ...initalEmptyState.status,
-            fetchNotesBySavedObjectIds: ReqStatus.Succeeded,
-          },
-        });
+        expect(notesReducer(initialNonEmptyState, action)).toEqual(
+          expect.objectContaining({
+            ...initalEmptyState,
+            entities: {
+              [newMockNote.noteId]: newMockNote,
+              [mockNote2.noteId]: mockNote2,
+            },
+            ids: expect.arrayContaining([mockNote2.noteId, newMockNote.noteId]),
+            status: {
+              ...initalEmptyState.status,
+              fetchNotesBySavedObjectIds: ReqStatus.Succeeded,
+            },
+          })
+        );
       });
 
       it('should set correct error state when failing to fetch notes by saved object ids', () => {

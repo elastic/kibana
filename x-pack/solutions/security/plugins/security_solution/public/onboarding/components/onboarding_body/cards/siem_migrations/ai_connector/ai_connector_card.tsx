@@ -87,7 +87,7 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
               {isInferenceConnector ? (
                 <FormattedMessage
                   id="xpack.securitySolution.onboarding.aiConnectorCardInferenceDescription"
-                  defaultMessage="The Elastic-provided connector is selected by default. You can configure another connector and model if you prefer. Learn more about {docsLink} and performance with our {llmMatrixLink}"
+                  defaultMessage="The Elastic-provided connector is selected by default. You can configure another connector and model if you prefer. Learn more about {docsLink} and {llmMatrixLink}"
                   values={{
                     llmMatrixLink: <LlmPerformanceMatrixDocsLink text={i18n.LLM_MATRIX_LINK} />,
                     docsLink: <SiemMigrationDocsLink text={i18n.AI_POWERED_MIGRATIONS_LINK} />,

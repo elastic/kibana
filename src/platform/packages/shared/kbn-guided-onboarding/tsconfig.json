@@ -17,6 +17,8 @@
     "@kbn/i18n-react",
     "@kbn/cloud",
     "@kbn/analytics",
+    "@kbn/deeplinks-observability",
+    "@kbn/share-plugin",
   ],
   "exclude": [
     "target/**/*",

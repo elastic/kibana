@@ -29,26 +29,25 @@ function getParsedFile(flags: RunCliFlags) {
     path.resolve(__dirname, '../../scenarios', `${parsedFile}.js`),
   ].find((p) => existsSync(p));
 
-  if (filepath) {
-    // eslint-disable-next-line no-console
-    console.log(`Loading scenario from ${filepath}`);
-    return filepath;
+  if (!filepath) {
+    throw new Error(`Could not find scenario file: "${parsedFile}"`);
   }
 
-  throw new Error(`Could not find scenario file: "${parsedFile}"`);
+  return filepath;
 }
 
 export function parseRunCliFlags(flags: RunCliFlags) {
-  const { logLevel, target } = flags;
+  const { logLevel, target, debug, verbose } = flags;
   if (target?.includes('.kb.')) {
     throw new Error(`Target URL seems to be a Kibana URL, please provide Elasticsearch URL`);
   }
   const parsedFile = getParsedFile(flags);
 
-  let parsedLogLevel = LogLevel.info;
+  let parsedLogLevel = verbose ? LogLevel.verbose : debug ? LogLevel.debug : LogLevel.info;
+
   switch (logLevel) {
-    case 'trace':
-      parsedLogLevel = LogLevel.trace;
+    case 'verbose':
+      parsedLogLevel = LogLevel.verbose;
       break;
 
     case 'info':
@@ -67,13 +66,11 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       parsedLogLevel = LogLevel.error;
       break;
   }
-
   return {
     ...pick(
       flags,
       'target',
       'workers',
-      'scenarioOpts',
       'kibana',
       'concurrency',
       'versionOverride',
@@ -81,6 +78,7 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'assume-package-version',
       'liveBucketSize'
     ),
+    scenarioOpts: flags.scenarioOpts as unknown as Record<string, any>,
     logLevel: parsedLogLevel,
     file: parsedFile,
   };

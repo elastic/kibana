@@ -32,13 +32,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Navigation', () => {
     before(async () => {
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await synthtrace.index(generateLogsData({ to }));
       await navigateToLogsExplorer();
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await synthtrace.clean();
     });
 

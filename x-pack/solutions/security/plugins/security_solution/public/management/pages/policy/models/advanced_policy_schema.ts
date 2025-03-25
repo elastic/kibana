@@ -2071,10 +2071,10 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.events.registry.enforce_registry_filters',
+    key: 'windows.advanced.events.enforce_registry_filters',
     first_supported_version: '8.15',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.registry.enforce_registry_filters',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.enforce_registry_filters',
       {
         defaultMessage:
           'Reduce data volume by filtering out registry events which are not relevant to behavioral protections.  Default: true',

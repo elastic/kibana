@@ -91,12 +91,35 @@ export function getEnterpriseSearchNodeDeprecation(
             defaultMessage:
               "Edit 'kibana.yml' to remove 'enterpriseSearch.customHeaders' if it exists",
           }),
+          i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.removeappsdisabled', {
+            defaultMessage:
+              "Edit 'kibana.yml' to remove 'enterpriseSearch.appsDisabled' if it exists",
+          }),
           i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.restart', {
             defaultMessage: 'Restart Kibana',
           }),
         ]
       );
     }
+
+    let removeConfigText = '';
+    if (!isCloud) {
+      removeConfigText =
+        '- You must also remove any Enterprise Search configuration elements in your Kibana config.\n';
+    }
+
+    const messageText =
+      'Enterprise Search is not supported in versions >= 9.x.\n\n' +
+      'Please note the following:\n' +
+      '- You must remove any Enterprise Search nodes from your deployment to proceed with the upgrade.\n' +
+      removeConfigText +
+      '- If you are currently using App Search, Workplace Search, or the Elastic Web Crawler, these features will ' +
+      'cease to function if you remove Enterprise Search from your deployment. Therefore, it is critical to ' +
+      'first [migrate your Enterprise Search use cases]({migration_link}) before decommissioning your ' +
+      'Enterprise Search instances.\n' +
+      '- Scheduled syncs for Elastic-managed connectors will automatically resume after the 9.x upgrade completes.\n\n' +
+      'For full details, see the documentation.{addendum}';
+
     return [
       {
         level: 'critical',
@@ -111,17 +134,7 @@ export function getEnterpriseSearchNodeDeprecation(
               addendum,
               migration_link: docsUrl,
             },
-            defaultMessage:
-              'Enterprise Search is not supported in versions >= 9.x.\n\n' +
-              'Please note the following:\n' +
-              '- You must remove any Enterprise Search nodes from your deployment to proceed with the upgrade.\n' +
-              '- You must also remove any Enterprise Search configuration elements in your Kibana config.\n' +
-              '- If you are currently using App Search, Workplace Search, or the Elastic Web Crawler, these features will ' +
-              'cease to function if you remove Enterprise Search from your deployment. Therefore, it is critical to ' +
-              'first [migrate your Enterprise Search use cases]({migration_link}) before decommissioning your ' +
-              'Enterprise Search instances.\n' +
-              '- Scheduled syncs for Elastic-managed connectors will automatically resume after the 9.x upgrade completes.\n\n' +
-              'For full details, see the documentation.{addendum}',
+            defaultMessage: messageText,
           }),
         },
         documentationUrl: docsUrl,

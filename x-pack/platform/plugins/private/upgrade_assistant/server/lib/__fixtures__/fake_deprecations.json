@@ -69,7 +69,10 @@
         "message": "Index created before 7.0",
         "url": "https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html",
         "details": "This index was created using version: 6.8.13",
-        "resolve_during_rolling_upgrade": false
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "reindex_required": true
+        }
       }
     ],
     "frozen_index": [
@@ -97,7 +100,10 @@
         "message": "Index created before 7.0",
         "url": "https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html",
         "details": "This index was created using version: 6.8.13",
-        "resolve_during_rolling_upgrade": false
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "reindex_required": true
+        }
       }
     ],
     "deprecated_settings": [
@@ -183,7 +189,10 @@
         "message": "Old index with a compatibility version < 8.0",
         "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
         "details": "This index has version: 7.17.25",
-        "resolve_during_rolling_upgrade": false
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "reindex_required": true
+        }
       }
     ],
     ".ent-search-1": [

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { composeStories } from '@storybook/testing-react';
+import { composeStories } from '@storybook/react';
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { disableConsoleWarning } from '../../../../../utils/test_helpers';

@@ -47,7 +47,7 @@ test.describe(
 
     test(`should allow updating Advanced Settings`, async ({ pageObjects: { customLogs } }) => {
       await customLogs.getLogFilePathInputField(0).fill(logsFilePath);
-      await expect(customLogs.advancedSettingsContent).not.toBeVisible();
+      await expect(customLogs.advancedSettingsContent).toBeHidden();
       await customLogs.clickAdvancedSettingsButton();
       await expect(
         customLogs.advancedSettingsContent,
@@ -63,13 +63,13 @@ test.describe(
 
       await customLogs.namespaceInput.fill('default');
       await expect(customLogs.customConfigInput).toHaveValue('');
-      await expect(customLogs.continueButton).not.toBeDisabled();
+      await expect(customLogs.continueButton).toBeEnabled();
 
       await customLogs.clickAdvancedSettingsButton();
       await expect(
         customLogs.advancedSettingsContent,
         'Advanced Settings should be closed'
-      ).not.toBeVisible();
+      ).toBeHidden();
     });
 
     test('should validate Integration Name field', async ({

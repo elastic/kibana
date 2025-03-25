@@ -29,6 +29,12 @@ export const DurationClarificationCallOut: React.FunctionComponent<Props> = ({
         <br />
         <br />
         <FormattedMessage
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.backingIndicesUnfrozen"
+          defaultMessage="If any of the backing indices of the data stream are frozen, they will be converted to non-frozen indices during the update process."
+        />
+        <br />
+        <br />
+        <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.suggestReadOnly"
           defaultMessage="Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed. {learnMoreHtml}"
           values={{
