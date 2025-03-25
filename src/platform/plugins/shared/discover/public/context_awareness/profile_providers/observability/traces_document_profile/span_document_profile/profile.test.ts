@@ -18,10 +18,17 @@ import type { ProfileProviderServices } from '../../../profile_provider_services
 import { applicationMock } from '../__mocks__/application_mock';
 
 describe('spanDocumentProfileProvider', () => {
-  const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
-    profileId: OBSERVABILITY_ROOT_PROFILE_ID,
-    solutionType: SolutionType.Observability,
+  const getRootContext = ({
+    profileId,
+  }: {
+    profileId: string;
+  }): ContextWithProfileId<RootContext> => {
+    return {
+      profileId,
+      solutionType: SolutionType.Observability,
+    };
   };
+
   const DATA_SOURCE_CONTEXT: ContextWithProfileId<DataSourceContext> = {
     profileId: 'traces-span-document-profile',
     category: DataSourceCategory.Traces,
@@ -36,7 +43,8 @@ describe('spanDocumentProfileProvider', () => {
     isMatch: false,
   };
 
-  describe('when apm is enabled', () => {
+  describe('when root profile is observability', () => {
+    const profileId = OBSERVABILITY_ROOT_PROFILE_ID;
     const mockServices: ProfileProviderServices = {
       ...createContextAwarenessMocks().profileProviderServices,
       ...applicationMock({ apm: { show: true } }),
@@ -48,9 +56,9 @@ describe('spanDocumentProfileProvider', () => {
     it('matches records with the correct data stream type and the correct processor event', () => {
       expect(
         spanDocumentProfileProvider.resolve({
-          rootContext: ROOT_CONTEXT,
+          rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildMockRecord('another-index', {
+          record: buildMockRecord('index', {
             'data_stream.type': ['traces'],
             'processor.event': ['span'],
           }),
@@ -61,7 +69,7 @@ describe('spanDocumentProfileProvider', () => {
     it('does not match records with neither characteristic', () => {
       expect(
         spanDocumentProfileProvider.resolve({
-          rootContext: ROOT_CONTEXT,
+          rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
           record: buildMockRecord('another-index'),
         })
@@ -69,7 +77,8 @@ describe('spanDocumentProfileProvider', () => {
     });
   });
 
-  describe('when apm is NOT enabled', () => {
+  describe('when root profile is NOT observability', () => {
+    const profileId = 'another-profile';
     const mockServices: ProfileProviderServices = {
       ...createContextAwarenessMocks().profileProviderServices,
       ...applicationMock({}),
@@ -81,9 +90,9 @@ describe('spanDocumentProfileProvider', () => {
     it('does not match records with the correct data stream type and the correct processor event', () => {
       expect(
         spanDocumentProfileProvider.resolve({
-          rootContext: ROOT_CONTEXT,
+          rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
-          record: buildMockRecord('another-index', {
+          record: buildMockRecord('index', {
             'data_stream.type': ['traces'],
             'processor.event': ['span'],
           }),
