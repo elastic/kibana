@@ -79,8 +79,6 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
 
   const isMounted = useMountedState();
   const { euiTheme } = useEuiTheme();
-  const breakpointMandL = useEuiBreakpoint(['m', 'l']);
-  const breakpointXL = useEuiMinBreakpoint('xl');
   const chromeStyle = useObservable(chromeStyle$);
 
   // These hooks are used when on chromeStyle set to 'project'
@@ -100,6 +98,14 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchCharLimitExceeded, setSearchCharLimitExceeded] = useState(false);
 
+  const styles = css({
+    [useEuiBreakpoint(['m', 'l'])]: {
+      width: mathWithUnits(euiTheme.size.xxl, (x) => x * 10),
+    },
+    [useEuiMinBreakpoint('xl')]: {
+      width: mathWithUnits(euiTheme.size.xxl, (x) => x * 15),
+    },
+  });
   // Initialize searchableTypes data
   useEffect(() => {
     if (initialLoad) {
@@ -364,14 +370,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       isPreFiltered
       onChange={onChange}
       options={options}
-      css={css({
-        [breakpointMandL]: {
-          width: mathWithUnits(euiTheme.size.xxl, (x) => x * 10),
-        },
-        [breakpointXL]: {
-          width: mathWithUnits(euiTheme.size.xxl, (x) => x * 15),
-        },
-      })}
+      css={styles}
       popoverButtonBreakpoints={['xs', 's']}
       singleSelection={true}
       renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchValue)}
