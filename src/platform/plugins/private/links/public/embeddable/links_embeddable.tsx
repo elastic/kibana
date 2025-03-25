@@ -40,8 +40,6 @@ import {
   ResolvedLink,
 } from '../types';
 import { DISPLAY_NAME } from '../../common';
-import { injectReferences } from '../../common/persistable_state';
-
 import { checkForDuplicateTitle, linksClient } from '../content_management';
 import { resolveLinks } from '../lib/resolve_links';
 import {
@@ -76,21 +74,16 @@ export const getLinksEmbeddableFactory = () => {
         };
       }
 
-      const { attributes: attributesWithInjectedIds } = injectReferences({
-        attributes: state.attributes,
-        references: serializedState.references ?? [],
-      });
-
-      const resolvedLinks = await resolveLinks(attributesWithInjectedIds.links ?? []);
+      const resolvedLinks = await resolveLinks(state.attributes.links ?? []);
 
       return {
         title,
         description,
         hidePanelTitles,
         links: resolvedLinks,
-        layout: attributesWithInjectedIds.layout,
-        defaultPanelTitle: attributesWithInjectedIds.title,
-        defaultPanelDescription: attributesWithInjectedIds.description,
+        layout: state.attributes.layout,
+        defaultPanelTitle: state.attributes.title,
+        defaultPanelDescription: state.attributes.description,
       };
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
@@ -117,7 +110,7 @@ export const getLinksEmbeddableFactory = () => {
           return { rawState: linksByReferenceState, references: [] };
         }
         const runtimeState = api.snapshotRuntimeState();
-        const { attributes, references } = serializeLinksAttributes(runtimeState);
+        const { attributes, references } = serializeLinksAttributes(runtimeState, false);
         const linksByValueState: LinksByValueSerializedState = {
           attributes,
           ...titleManager.serialize(),
