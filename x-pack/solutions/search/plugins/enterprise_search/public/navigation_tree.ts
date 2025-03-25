@@ -238,7 +238,7 @@ export const getNavigationTreeDefinition = ({
               breadcrumbStatus: 'hidden',
               children: [
                 {
-                  link: 'ml:modelManagement',
+                  link: 'management:trained_models',
                   title: i18n.translate(
                     'xpack.enterpriseSearch.searchNav.management.trainedModels',
                     {

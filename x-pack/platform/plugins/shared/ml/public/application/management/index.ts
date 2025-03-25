@@ -35,7 +35,7 @@ const MANAGED_SECTIONS_SERVERLESS_CHECK: Record<
     mlCapabilities: MlCapabilities
   ) => {
     const isEsProject = !mlFeatures.ad && !mlFeatures.dfa && mlFeatures.nlp;
-    if (isServerless && isEsProject) return false;
+    if (isEsProject) return false;
     return (
       (mlFeatures.nlp && mlCapabilities.canGetTrainedModels) ||
       (mlFeatures.dfa && mlCapabilities.canGetDataFrameAnalytics) ||
@@ -47,8 +47,6 @@ const MANAGED_SECTIONS_SERVERLESS_CHECK: Record<
     isServerless: boolean,
     mlCapabilities: MlCapabilities
   ) => {
-    const isEsProject = !mlFeatures.ad && !mlFeatures.dfa && mlFeatures.nlp;
-    if (isServerless && isEsProject) return false;
     return mlFeatures.ad && mlCapabilities.isADEnabled && mlCapabilities.canGetJobs;
   },
   [MANAGEMENT_SECTION_IDS.ANALYTICS]: (
@@ -56,8 +54,6 @@ const MANAGED_SECTIONS_SERVERLESS_CHECK: Record<
     isServerless: boolean,
     mlCapabilities: MlCapabilities
   ) => {
-    const isEsProject = !mlFeatures.ad && !mlFeatures.dfa && mlFeatures.nlp;
-    if (isServerless && isEsProject) return false;
     return mlFeatures.dfa && mlCapabilities.isDFAEnabled && mlCapabilities.canGetDataFrameAnalytics;
   },
   [MANAGEMENT_SECTION_IDS.TRAINED_MODELS]: (
@@ -66,17 +62,15 @@ const MANAGED_SECTIONS_SERVERLESS_CHECK: Record<
     mlCapabilities: MlCapabilities
   ) => {
     const isEsProject = !mlFeatures.ad && !mlFeatures.dfa && mlFeatures.nlp;
-    if (isServerless && isEsProject) return false;
-    return mlFeatures.nlp && mlCapabilities.canGetTrainedModels;
+    if (isEsProject) return true;
+    return (mlFeatures.nlp || mlFeatures.dfa) && mlCapabilities.canGetTrainedModels;
   },
   [MANAGEMENT_SECTION_IDS.AD_SETTINGS]: (
     mlFeatures: MlFeatures,
     isServerless: boolean,
     mlCapabilities: MlCapabilities
   ) => {
-    const isEsProject = !mlFeatures.ad && !mlFeatures.dfa && mlFeatures.nlp;
-    if (isServerless && isEsProject) return false;
-    return mlFeatures.ad && mlCapabilities.canGetJobs;
+    return mlFeatures.ad && mlCapabilities.isADEnabled && mlCapabilities.canGetJobs;
   },
 };
 

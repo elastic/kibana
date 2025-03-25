@@ -168,7 +168,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         breadcrumbStatus: 'hidden',
         children: [
           {
-            link: 'ml:modelManagement',
+            link: 'management:trained_models',
             title: i18n.translate('xpack.serverlessSearch.nav.trainedModels', {
               defaultMessage: 'Trained models',
             }),
