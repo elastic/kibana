@@ -649,7 +649,7 @@ describe('MetricVisComponent', function () {
       expect(screen.getAllByRole('meter')).toHaveLength(table.rows.length);
       expect(screen.getAllByLabelText(/Percentage of terms/)).toHaveLength(table.rows.length);
     });
-    it.skip('should configure trendlines if provided', () => {
+    it('should configure trendlines if provided', async () => {
       // Raw values here, not formatted
       const trends: Record<string, MetricWTrend['trend']> = {
         Friday: [
@@ -697,55 +697,36 @@ describe('MetricVisComponent', function () {
         ],
       };
 
-      const data = shallow(
-        <MetricVis
-          config={{
-            ...config,
-            metric: {
-              ...config.metric,
-              trends,
-            },
-          }}
-          data={table}
-          {...defaultProps}
-        />
-      )
-        .find(Metric)
-        .props().data![0] as MetricWTrend[];
-
-      data?.forEach((tileConfig) => {
-        // title has been formatted, so clean it up before using as index
-        expect(tileConfig.trend).toEqual(trends[tileConfig.title!.replace('terms-', '')]);
-        expect(tileConfig.trendShape).toEqual('area');
+      await renderChart({
+        config: {
+          ...config,
+          metric: {
+            ...config.metric,
+            trends,
+          },
+        },
       });
+
+      const primaryLabel = table.columns.find((col) => col.id === basePriceColumnId)!.name;
+      expect(screen.getAllByTitle(`${primaryLabel} over time.`)).toHaveLength(table.rows.length);
+      expect(
+        screen.getAllByText('A line chart showing the trend of the primary metric over time.')
+      ).toHaveLength(table.rows.length);
+      expect(screen.getAllByRole('img')).toHaveLength(table.rows.length);
     });
 
-    it.skip('renders with no data', () => {
-      const component = shallow(
-        <MetricVis
-          config={{ ...config, metric: { ...config.metric, minTiles: 6 } }}
-          data={{ type: 'datatable', rows: [], columns: table.columns }}
-          {...defaultProps}
-        />
-      );
+    it('renders with no data', async () => {
+      await renderChart({
+        config: { ...config, metric: { ...config.metric, minTiles: 6 } },
+        data: { type: 'datatable', rows: [], columns: table.columns },
+      });
 
-      const { data } = component.find(Metric).props();
-
-      expect(data).toBeDefined();
-      expect(data).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-            undefined,
-          ],
-          Array [
-            undefined,
-          ],
-        ]
-      `);
+      // will show 10 (5 x 2) empty tiles (higher than config)
+      expect(screen.getAllByRole('presentation')).toHaveLength(10);
+      expect(screen.getByRole('list')).toHaveStyle({
+        'grid-template-columns': 'repeat(5, minmax(0, 1fr)',
+        'grid-template-rows': 'repeat(2, minmax(64px, 1fr)',
+      });
     });
   });
 
