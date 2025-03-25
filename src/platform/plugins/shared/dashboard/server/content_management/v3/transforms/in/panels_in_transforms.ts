@@ -25,16 +25,16 @@ export function transformPanelsIn(
     transformSetPanelIndex,
     (panelsWithIds: DashboardAttributes['panels']) =>
       extractPanelReferences(references, embeddable, panelsWithIds),
+    transformPanelsProperties,
     JSON.stringify
   )(panels);
 }
 
 function transformSetPanelIndex(panels: DashboardAttributes['panels']) {
-  const updatedPanels = panels.map(({ panelIndex, gridData, panelConfig, ...restPanel }) => {
+  const updatedPanels = panels.map(({ panelIndex, gridData, ...restPanel }) => {
     const idx = panelIndex ?? uuidv4();
     return {
       ...restPanel,
-      embeddableConfig: panelConfig,
       panelIndex: idx,
       gridData: {
         ...gridData,
@@ -63,4 +63,19 @@ function extractPanelReferences(
     };
   });
   return extractedPanels;
+}
+
+function transformPanelsProperties(panels: DashboardAttributes['panels']) {
+  return panels.map(
+    ({ panelConfig, gridData, id, panelIndex, panelRefName, title, type, version }) => ({
+      gridData,
+      id,
+      embeddableConfig: panelConfig,
+      panelIndex,
+      panelRefName,
+      title,
+      type,
+      version,
+    })
+  );
 }
