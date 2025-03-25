@@ -19,9 +19,8 @@ export function transformPanelsOut(
   embeddable: EmbeddableStart,
   references?: SavedObjectReference[]
 ): DashboardAttributes['panels'] {
-  return flow(JSON.parse, transformPanelsProperties, (panels: DashboardAttributes['panels']) =>
-    injectPanelReferences(embeddable, references, panels)
-  )(panelsJSON);
+  const transformedPanels = flow(JSON.parse, transformPanelsProperties)(panelsJSON);
+  return injectPanelReferences(transformedPanels, embeddable, references);
 }
 
 function transformPanelsProperties(panels: SavedDashboardPanel[]) {
@@ -40,9 +39,9 @@ function transformPanelsProperties(panels: SavedDashboardPanel[]) {
 }
 
 function injectPanelReferences(
+  panels: DashboardAttributes['panels'],
   embeddable: EmbeddableStart,
-  references: SavedObjectReference[] = [],
-  panels: DashboardAttributes['panels']
+  references: SavedObjectReference[] = []
 ) {
   const injectedPanels = panels.map((panel) => {
     if (!panel.panelIndex) return panel;

@@ -37,6 +37,6 @@ export {
 } from './cm_services';
 export {
   dashboardAttributesOut,
-  itemAttrsToSavedObjectAttrs,
+  itemAttrsToSavedObject,
   savedObjectToItem,
 } from './transform_utils';

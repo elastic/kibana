@@ -15,7 +15,7 @@ import type {
   DashboardAttributes,
   DashboardGetOut,
   DashboardItem,
-  ItemAttrsToSavedObjectAttrsReturn,
+  ItemAttrsToSavedObjectReturn,
   PartialDashboardItem,
   SavedObjectToItemReturn,
 } from './types';
@@ -93,6 +93,13 @@ export const getResultV3ToV2 = (
     version,
   } = attributes;
 
+  // TODO Find a way for the transform to handle the references
+  const { panelsJSON, references: soReferences } = transformPanelsIn(
+    panels,
+    embeddable,
+    references
+  );
+
   const v2Attributes = {
     ...(controlGroupInput && {
       controlGroupInput: transformControlGroupIn(controlGroupInput) as ControlGroupAttributesV2,
@@ -102,7 +109,7 @@ export const getResultV3ToV2 = (
       kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),
     }),
     ...(options && { optionsJSON: JSON.stringify(options) }),
-    panelsJSON: panels ? transformPanelsIn(panels, embeddable, references) : '[]',
+    panelsJSON,
     refreshInterval,
     ...(timeFrom && { timeFrom }),
     timeRestore,
@@ -119,13 +126,18 @@ export const getResultV3ToV2 = (
   };
 };
 
-export const itemAttrsToSavedObjectAttrs = (
+export const itemAttrsToSavedObject = (
   attributes: DashboardAttributes,
   embeddable: EmbeddableStart,
-  references?: SavedObjectReference[]
-): ItemAttrsToSavedObjectAttrsReturn => {
+  references: SavedObjectReference[] = []
+): ItemAttrsToSavedObjectReturn => {
   try {
     const { controlGroupInput, kibanaSavedObjectMeta, options, panels, ...rest } = attributes;
+    const { panelsJSON, references: soReferences } = transformPanelsIn(
+      panels,
+      embeddable,
+      references
+    );
     const soAttributes = {
       ...rest,
       ...(controlGroupInput && {
@@ -134,16 +146,14 @@ export const itemAttrsToSavedObjectAttrs = (
       ...(options && {
         optionsJSON: JSON.stringify(options),
       }),
-      ...(panels && {
-        panelsJSON: transformPanelsIn(panels, embeddable, references),
-      }),
+      panelsJSON,
       ...(kibanaSavedObjectMeta && {
         kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),
       }),
     };
-    return { attributes: soAttributes, error: null };
+    return { attributes: soAttributes, references: soReferences, error: null };
   } catch (e) {
-    return { attributes: null, error: e };
+    return { attributes: null, references: null, error: e };
   }
 };
 

@@ -22,7 +22,7 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { getCmServicesDefinition } from './cm_services';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
-import { itemAttrsToSavedObjectAttrs, savedObjectToItem } from './latest';
+import { itemAttrsToSavedObject, savedObjectToItem } from './latest';
 import type {
   DashboardAttributes,
   DashboardItem,
@@ -155,11 +155,11 @@ export class DashboardStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, error: attributesError } = itemAttrsToSavedObjectAttrs(
-      dataToLatest,
-      this.embeddable,
-      optionsToLatest?.references
-    );
+    const {
+      attributes: soAttributes,
+      references: soReferences,
+      error: attributesError,
+    } = itemAttrsToSavedObject(dataToLatest, this.embeddable, optionsToLatest?.references);
     if (attributesError) {
       throw Boom.badRequest(`Invalid data. ${attributesError.message}`);
     }
@@ -168,7 +168,10 @@ export class DashboardStorage {
     const savedObject = await soClient.create<DashboardSavedObjectAttributes>(
       DASHBOARD_SAVED_OBJECT_TYPE,
       soAttributes,
-      optionsToLatest
+      {
+        ...optionsToLatest,
+        references: soReferences,
+      }
     );
 
     const { item, error: itemError } = savedObjectToItem(savedObject, this.embeddable, false);
@@ -227,11 +230,11 @@ export class DashboardStorage {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
     }
 
-    const { attributes: soAttributes, error: attributesError } = itemAttrsToSavedObjectAttrs(
-      dataToLatest,
-      this.embeddable,
-      optionsToLatest?.references
-    );
+    const {
+      attributes: soAttributes,
+      error: attributesError,
+      references: soReferences,
+    } = itemAttrsToSavedObject(dataToLatest, this.embeddable, optionsToLatest?.references);
     if (attributesError) {
       throw Boom.badRequest(`Invalid data. ${attributesError.message}`);
     }
@@ -241,7 +244,10 @@ export class DashboardStorage {
       DASHBOARD_SAVED_OBJECT_TYPE,
       id,
       soAttributes,
-      optionsToLatest
+      {
+        ...optionsToLatest,
+        references: soReferences,
+      }
     );
 
     const { item, error: itemError } = savedObjectToItem(partialSavedObject, this.embeddable, true);
