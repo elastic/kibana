@@ -10,6 +10,7 @@ import { EuiSpacer, EuiCallOut, EuiText } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import deepMerge from 'deepmerge';
 import ReactMarkdown from 'react-markdown';
+
 import styled from 'styled-components';
 
 import type {
@@ -24,10 +25,10 @@ import type {
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { NOTIFICATION_DEFAULT_FREQUENCY } from '../../../../../common/constants';
-import type { FieldHook } from '../../../../shared_imports';
-import { useFormContext } from '../../../../shared_imports';
-import { useKibana } from '../../../../common/lib/kibana';
+import { NOTIFICATION_DEFAULT_FREQUENCY } from '../../../../common/constants';
+import type { FieldHook } from '../../../shared_imports';
+import { useFormContext } from '../../../shared_imports';
+import { useKibana } from '../../lib/kibana';
 import {
   FORM_CUSTOM_FREQUENCY_OPTION,
   FORM_ERRORS_TITLE,

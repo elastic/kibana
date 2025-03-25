@@ -9,10 +9,10 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { RuleActionsField } from '.';
-import { useForm, Form } from '../../../../shared_imports';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useFormFieldMock } from '../../../../common/mock';
-jest.mock('../../../../common/lib/kibana');
+import { useForm, Form } from '../../../shared_imports';
+import { useKibana } from '../../lib/kibana';
+import { useFormFieldMock } from '../../mock';
+jest.mock('../../lib/kibana');
 
 describe('RuleActionsField', () => {
   it('should not render ActionForm if no actions are supported', () => {
