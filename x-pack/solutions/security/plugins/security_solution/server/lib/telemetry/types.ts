@@ -482,14 +482,20 @@ export interface TelemetryConfiguration {
   };
   pagination_config?: PaginationConfiguration;
   indices_metadata_config?: IndicesMetadataConfiguration;
+  ingest_pipelines_stats_config?: IngestPipelinesStatsConfiguration;
 }
 
 export interface IndicesMetadataConfiguration {
   indices_threshold: number;
   datastreams_threshold: number;
+  indices_settings_threshold: number;
   max_prefixes: number;
   max_group_size: number;
   min_group_size: number;
+}
+
+export interface IngestPipelinesStatsConfiguration {
+  enabled: boolean;
 }
 
 export interface PaginationConfiguration {

@@ -125,7 +125,7 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
     const commandAst = createCommand('from', ctx);
     this.ast.push(commandAst);
     commandAst.args.push(...collectAllSourceIdentifiers(ctx));
-    const metadataContext = ctx.metadata();
+    const metadataContext = ctx.indexPatternAndMetadataFields().metadata();
     if (metadataContext && metadataContext.METADATA()) {
       const option = createOption(
         metadataContext.METADATA().getText().toLowerCase(),
@@ -146,19 +146,12 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
       type: 'command',
       args: [],
       sources: ctx
+        .indexPatternAndMetadataFields()
         .getTypedRuleContexts(IndexPatternContext)
         .map((sourceCtx) => createSource(sourceCtx)),
     };
     this.ast.push(node);
-    const aggregates = collectAllAggFields(ctx.aggFields());
-    const grouping = collectAllFields(ctx.fields());
-    if (aggregates && aggregates.length) {
-      node.aggregates = aggregates;
-    }
-    if (grouping && grouping.length) {
-      node.grouping = grouping;
-    }
-    node.args.push(...node.sources, ...aggregates, ...grouping);
+    node.args.push(...node.sources);
   }
 
   /**

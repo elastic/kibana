@@ -75,7 +75,8 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   const correctiveAction = deprecation.correctiveAction as ReindexAction | undefined;
   const isESTransformTarget = !!correctiveAction?.transformIds?.length;
   const isMLAnomalyIndex = Boolean(indexName?.startsWith(ML_ANOMALIES_PREFIX));
-  const { excludedActions = [] } = (deprecation.correctiveAction as ReindexAction) || {};
+  const { excludedActions = [], indexSizeInBytes = 0 } =
+    (deprecation.correctiveAction as ReindexAction) || {};
   const readOnlyExcluded = excludedActions.includes('readOnly');
   const reindexExcluded = excludedActions.includes('reindex');
 
@@ -95,6 +96,13 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   } else {
     showDefaultGuidance = true;
   }
+
+  // Determine if the index is larger than 1GB
+  const isLargeIndex = indexSizeInBytes > 1073741824;
+
+  const canShowActionButtons = !isCompleted && !hasFetchFailed && hasRequiredPrivileges;
+  const canShowReindexButton = canShowActionButtons && !reindexExcluded;
+  const canShowReadonlyButton = canShowActionButtons && !readOnlyExcluded && !isReadonly;
 
   return (
     <Fragment>
@@ -206,6 +214,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                     `/app/management/data/index_management/indices/index_details?indexName=${indexName}`
                   )}`,
                   indexBlockUrl: docLinks.links.upgradeAssistant.indexBlocks,
+                  isLargeIndex,
                 })}
               />
             </Fragment>
@@ -230,31 +239,26 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
-              {!isReadonly &&
-                !hasFetchFailed &&
-                !isCompleted &&
-                hasRequiredPrivileges &&
-                !isESTransformTarget &&
-                !readOnlyExcluded && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      onClick={startReadonly}
-                      disabled={loading}
-                      color={reindexExcluded ? 'primary' : 'accent'}
-                      fill={reindexExcluded}
-                      data-test-subj="startIndexReadonlyButton"
-                    >
-                      <FormattedMessage
-                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.startIndexReadonlyButton"
-                        defaultMessage="Mark as read-only"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                )}
-              {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && !reindexExcluded && (
+              {canShowReadonlyButton && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    fill
+                    onClick={startReadonly}
+                    disabled={loading}
+                    color={'primary'}
+                    fill={isLargeIndex || reindexExcluded}
+                    data-test-subj="startIndexReadonlyButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.startIndexReadonlyButton"
+                      defaultMessage="Mark as read-only"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+              {canShowReindexButton && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill={!isLargeIndex || readOnlyExcluded}
                     color={reindexStatus === ReindexStatus.cancelled ? 'warning' : 'primary'}
                     iconType={reindexStatus === ReindexStatus.cancelled ? 'play' : undefined}
                     onClick={startReindex}

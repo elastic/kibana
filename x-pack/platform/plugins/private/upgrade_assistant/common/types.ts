@@ -220,6 +220,11 @@ export interface ReindexAction extends IndexAction {
    * The actions that should be excluded from the reindex corrective action.
    */
   excludedActions?: string[];
+
+  /**
+   * The size of the index in bytes
+   */
+  indexSizeInBytes?: number;
 }
 
 export interface UnfreezeAction extends IndexAction {
