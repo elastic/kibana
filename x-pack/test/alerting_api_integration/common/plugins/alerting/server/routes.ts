@@ -806,6 +806,29 @@ export function defineRoutes(
     }
   );
 
+  router.get(
+    {
+      path: '/api/alerts_fixture/last_run_alert_deletion',
+      validate: {},
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      const alerting = await alertingStart;
+
+      try {
+        const result = await alerting.getLastRunAlertDeletion(req);
+        return res.ok({
+          body: { lastRun: result },
+        });
+      } catch (err) {
+        return res.notFound();
+      }
+    }
+  );
+
   router.post(
     {
       path: '/api/alerts_fixture/schedule_alert_deletion',

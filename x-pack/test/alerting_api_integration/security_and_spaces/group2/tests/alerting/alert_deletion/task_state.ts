@@ -58,6 +58,14 @@ export default function alertDeletionTaskStateTests({ getService }: FtrProviderC
     });
 
     it('should remove active alerts from task state when deleted', async () => {
+      // get last run date should be undefined
+      const lastRunResponsePre = await supertestWithoutAuth
+        .get(`${getUrlPrefix(Space1.id)}/api/alerts_fixture/last_run_alert_deletion`)
+        .set('kbn-xsrf', 'foo')
+        .auth(Superuser.username, Superuser.password)
+        .expect(200);
+      expect(lastRunResponsePre.body.lastRun).to.be(undefined);
+
       const response = await supertestWithoutAuth
         .post(`${getUrlPrefix(Space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -141,6 +149,17 @@ export default function alertDeletionTaskStateTests({ getService }: FtrProviderC
       // instance1 should have been cleared but instance2 should still be there
       expect(get(taskStateAfter, 'alertInstances.instance1')).to.be(undefined);
       expect(get(taskStateAfter, 'alertInstances.instance2')).not.to.be(undefined);
+
+      // get last run date should be defined
+      const lastRunResponsePost = await supertestWithoutAuth
+        .get(`${getUrlPrefix(Space1.id)}/api/alerts_fixture/last_run_alert_deletion`)
+        .set('kbn-xsrf', 'foo')
+        .auth(Superuser.username, Superuser.password)
+        .expect(200);
+
+      expect(lastRunResponsePost.body.lastRun).to.match(
+        /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+      );
     });
   });
 }

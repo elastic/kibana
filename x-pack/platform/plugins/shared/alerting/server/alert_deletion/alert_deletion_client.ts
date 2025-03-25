@@ -17,7 +17,7 @@ import type {
   TaskManagerStartContract,
   ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
-import type { IEventLogger } from '@kbn/event-log-plugin/server';
+import type { IEventLogger, IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { millisToNanos } from '@kbn/event-log-plugin/server';
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, SPACE_IDS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { omitBy } from 'lodash';
@@ -28,6 +28,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { GetAlertIndicesAlias } from '../lib';
 import { AlertAuditAction, alertAuditEvent, alertAuditSystemEvent } from '../lib';
 import type {
@@ -35,7 +36,7 @@ import type {
   RulesSettingsAlertDeletion,
   RulesSettingsAlertDeletionProperties,
 } from '../types';
-import { EVENT_LOG_ACTIONS } from '../plugin';
+import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from '../plugin';
 
 export const ALERT_DELETION_TASK_TYPE = 'alert-deletion';
 
@@ -55,6 +56,7 @@ interface ConstructorOpts {
   logger: Logger;
   ruleTypeRegistry: RuleTypeRegistry;
   securityService: Promise<SecurityServiceStart>;
+  spacesService: Promise<SpacesServiceStart | undefined>;
   taskManagerSetup: TaskManagerSetupContract;
   taskManagerStartPromise: Promise<TaskManagerStartContract>;
 }
@@ -73,6 +75,7 @@ export class AlertDeletionClient {
   private readonly getAlertIndicesAlias: GetAlertIndicesAlias;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private readonly securityService: Promise<SecurityServiceStart>;
+  private readonly spacesService: Promise<SpacesServiceStart | undefined>;
   private readonly taskManagerStartPromise: Promise<TaskManagerStartContract>;
 
   constructor(opts: ConstructorOpts) {
@@ -83,6 +86,7 @@ export class AlertDeletionClient {
     this.ruleTypeRegistry = opts.ruleTypeRegistry;
     this.logger = opts.logger.get(ALERT_DELETION_TASK_TYPE);
     this.securityService = opts.securityService;
+    this.spacesService = opts.spacesService;
     this.taskManagerStartPromise = opts.taskManagerStartPromise;
 
     // Registers the task that handles alert deletion
@@ -104,6 +108,35 @@ export class AlertDeletionClient {
         },
       },
     });
+  }
+
+  public async getLastRun(req: KibanaRequest): Promise<string | undefined> {
+    const esClient = await this.elasticsearchClientPromise;
+    const spacesService = await this.spacesService;
+    const currentSpaceId = spacesService ? spacesService.getSpaceId(req) : 'default';
+
+    try {
+      const searchResponse: SearchResponse<IValidatedEvent> = await esClient.search({
+        index: '.kibana-event-log*',
+        query: {
+          bool: {
+            filter: [
+              { term: { 'event.action': EVENT_LOG_ACTIONS.deleteAlerts } },
+              { term: { 'event.provider': EVENT_LOG_PROVIDER } },
+              { term: { 'kibana.space_ids': currentSpaceId } },
+            ],
+          },
+        },
+        size: 1,
+        sort: [{ [TIMESTAMP]: 'desc' }],
+      });
+
+      if (searchResponse.hits.hits.length > 0) {
+        return searchResponse.hits.hits[0]._source?.['@timestamp'];
+      }
+    } catch (err) {
+      this.logger.error(`Error getting last run date: ${err.message}`);
+    }
   }
 
   public async scheduleTask(

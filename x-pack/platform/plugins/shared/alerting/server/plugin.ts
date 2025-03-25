@@ -190,6 +190,7 @@ export interface AlertingServerStart {
     settings: RulesSettingsAlertDeletionProperties,
     spaceId: string
   ): Promise<number>;
+  getLastRunAlertDeletion(req: KibanaRequest): Promise<string | undefined>;
 }
 
 export interface AlertingPluginsSetup {
@@ -366,6 +367,7 @@ export class AlertingPlugin {
       logger: this.logger,
       ruleTypeRegistry: this.ruleTypeRegistry!,
       securityService: core.getStartServices().then(([{ security }]) => security),
+      spacesService: core.getStartServices().then(([_, { spaces }]) => spaces?.spacesService),
       taskManagerSetup: plugins.taskManager,
       taskManagerStartPromise,
     });
@@ -689,6 +691,8 @@ export class AlertingPlugin {
         settings: RulesSettingsAlertDeletionProperties,
         spaceId: string
       ) => await this.alertDeletionClient!.previewTask(settings, spaceId),
+      getLastRunAlertDeletion: async (req: KibanaRequest) =>
+        await this.alertDeletionClient!.getLastRun(req),
     };
   }
 
