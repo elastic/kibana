@@ -50,6 +50,7 @@ export async function initDiagnosticsBundle({
 
   const kibanaClientOpts = {
     baseURL: kbHost ?? parsedCloudId.kibanaHost,
+    allowAbsoluteUrls: false,
     auth,
     headers: {
       'kbn-xsrf': 'true',
