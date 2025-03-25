@@ -117,8 +117,6 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
         },
         mode: 'create',
         onChange: expect.any(Function),
-        policies: expect.any(Array),
-        policiesIsLoading: false,
       },
       expect.anything()
     );

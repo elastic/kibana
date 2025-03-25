@@ -203,6 +203,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
             <PolicySelector
               selectedPolicyIds={selectedPolicyIds}
               onChange={handleOnPolicySelectChange}
+              data-test-subj={getTestId('policiesSelector')}
             />
           </EuiFormRow>
         )}

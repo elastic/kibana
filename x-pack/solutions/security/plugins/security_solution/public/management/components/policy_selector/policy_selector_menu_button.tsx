@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiFilterButton, EuiFilterGroup, EuiPopover, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { PolicySelectorProps } from './policy_selector';
 import { PolicySelector } from './policy_selector';
 
@@ -20,6 +21,7 @@ export type PolicySelectorMenuButtonProps = PolicySelectorProps;
 export const PolicySelectorMenuButton = memo<PolicySelectorMenuButtonProps>((props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [countOfPolicies, setCountOfPolicies] = useState(0);
+  const getTestId = useTestIdGenerator(props['data-test-subj']);
 
   const countOfSelectedPolicies: number = useMemo(() => {
     return (
@@ -48,7 +50,7 @@ export const PolicySelectorMenuButton = memo<PolicySelectorMenuButtonProps>((pro
     () => (
       <EuiFilterButton
         iconType="arrowDown"
-        data-test-subj="policiesSelectorButton"
+        data-test-subj={getTestId()}
         onClick={() => {
           setIsPopoverOpen((prevState) => !prevState);
         }}
@@ -65,7 +67,7 @@ export const PolicySelectorMenuButton = memo<PolicySelectorMenuButtonProps>((pro
         </EuiText>
       </EuiFilterButton>
     ),
-    [isPopoverOpen, countOfSelectedPolicies, countOfPolicies]
+    [getTestId, isPopoverOpen, countOfPolicies, countOfSelectedPolicies]
   );
 
   const closePopover = useCallback(() => {
@@ -80,7 +82,7 @@ export const PolicySelectorMenuButton = memo<PolicySelectorMenuButtonProps>((pro
         closePopover={closePopover}
         panelPaddingSize="none"
       >
-        <PolicySelector {...props} onFetch={onFetch} />
+        <PolicySelector {...props} onFetch={onFetch} data-test-subj={getTestId('policySelector')} />
       </EuiPopover>
     </EuiFilterGroup>
   );

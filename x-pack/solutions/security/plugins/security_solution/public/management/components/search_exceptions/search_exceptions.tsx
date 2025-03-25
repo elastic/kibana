@@ -145,6 +145,7 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
               selectedPolicyIds={includedPolicies}
               additionalListItems={additionalSelectionItems}
               onChange={policySelectionOnChangeHandler}
+              data-test-subj="policiesSelectorButton"
             />
           </EuiFlexItem>
         ) : null}
