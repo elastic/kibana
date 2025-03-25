@@ -27,6 +27,7 @@ import {
   ALL_PLATFORMS,
   SERVERLESS_PLATFORMS,
 } from './platform';
+import { BuildOptions } from '../build_distributables';
 
 interface Options {
   isRelease: boolean;
@@ -96,7 +97,7 @@ export class Config {
     public readonly isRelease: boolean,
     public readonly downloadFreshNode: boolean,
     public readonly pluginSelector: PluginSelector,
-    public readonly buildOptions: BuildOptions
+    public readonly buildOptions: Partial<BuildOptions>
   ) {
     this.pluginFilter = getPluginPackagesFilter(this.pluginSelector);
   }
