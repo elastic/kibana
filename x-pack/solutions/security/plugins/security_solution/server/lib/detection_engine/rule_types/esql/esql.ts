@@ -23,12 +23,7 @@ import { rowToDocument, mergeEsqlResultInSource, getMvExpandUsage } from './util
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
-import type {
-  CreateRuleOptions,
-  SecurityRuleServices,
-  SecuritySharedParams,
-  SignalSource,
-} from '../types';
+import type { SecurityRuleServices, SecuritySharedParams, SignalSource } from '../types';
 import { logEsqlRequest } from '../utils/logged_requests';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import { checkErrorDetails } from '../utils/check_error_details';
@@ -49,6 +44,7 @@ import {
   getIsAlertSuppressionActive,
 } from '../utils/get_is_alert_suppression_active';
 import { bulkCreate } from '../factories';
+import { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 export const esqlExecutor = async ({
   sharedParams,
@@ -61,7 +57,7 @@ export const esqlExecutor = async ({
   services: SecurityRuleServices;
   state: Record<string, unknown>;
   licensing: LicensingPluginSetup;
-  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
 }) => {
   const {
     completeRule,
