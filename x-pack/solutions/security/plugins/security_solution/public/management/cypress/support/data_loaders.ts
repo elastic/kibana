@@ -237,10 +237,21 @@ export const dataLoaders = (
       return deleteIndexedHostsAndAlerts(esClient, kbnClient, indexedData);
     },
 
-    indexEndpointHeartbeats: async (options: { count?: number; unbilledCount?: number }) => {
+    indexEndpointHeartbeats: async (options: {
+      count?: number;
+      unbilledCount?: number;
+      startTimestamp?: number;
+    }) => {
       const { esClient, log } = await setupStackServicesUsingCypressConfig(config);
-      return (await indexEndpointHeartbeats(esClient, log, options.count, options.unbilledCount))
-        .data;
+      return (
+        await indexEndpointHeartbeats(
+          esClient,
+          log,
+          options.startTimestamp,
+          options.count,
+          options.unbilledCount
+        )
+      ).data;
     },
 
     deleteIndexedEndpointHeartbeats: async (

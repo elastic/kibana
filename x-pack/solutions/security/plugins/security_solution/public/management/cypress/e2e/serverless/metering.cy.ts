@@ -40,9 +40,12 @@ describe(
 
     before(() => {
       startTransparentApiProxy({ port: 3623 }).then(() => {
+        const DELAY_MS = 30_000;
+
         indexEndpointHeartbeats({
           count: HEARTBEAT_COUNT,
           unbilledCount: UNBILLED_COUNT,
+          startTimestamp: new Date().getTime() + DELAY_MS,
         }).then((indexedHeartbeats) => {
           endpointData = indexedHeartbeats;
         });
