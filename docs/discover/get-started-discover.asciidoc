@@ -299,6 +299,8 @@ you don't have to select a data view. It's your query that determines the data t
 
 You can switch to the ES|QL mode of Discover from the application menu bar.
 
+TIP: If you've entered a KQL or Lucene query in the default mode of Discover, it automatically converts to {esql}.
+
 Note that in ES|QL mode, the **Documents** tab is named **Results**.
 
 Learn more about how to use ES|QL queries in <<try-esql, Using ES|QL>>.
