@@ -54,6 +54,13 @@ export const querySchema: z.ZodType<QueryDslQueryContainer> = z.lazy(() =>
 
 export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryKqlSchema;
 
+export const upsertStreamQueryRequestSchema = z.object({
+  title: NonEmptyString,
+  kql: z.object({
+    query: NonEmptyString,
+  }),
+});
+
 export const isStreamQueryKql = createIsNarrowSchema(streamQuerySchema, streamQueryKqlSchema);
 
 export const streamUpsertRequestSchemaBase: z.Schema<StreamUpsertRequestBase> = z.object({
