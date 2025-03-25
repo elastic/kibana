@@ -178,6 +178,9 @@ describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
     internal: {
       registry: {
         kibanaVersionCheckEnabled: false,
+        spec: {
+          min: '1.0',
+        },
       },
     },
     packages: [
