@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export * from './find_reference_link.util';
+export const INTEGRATION_VENDORS = {
+  ELASTIC: 'Elastic',
+  QUALYS_VMDR: 'Qualys VMDR',
+  WIZ: 'Wiz',
+};

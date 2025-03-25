@@ -7,6 +7,7 @@
 
 import { CspFinding, CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common';
 import { isNativeCspFinding } from './is_native_csp_finding';
+import { INTEGRATION_VENDORS } from '../constants';
 
 export const CSP_VULN_DATASET = 'cloud_security_posture.vulnerabilities';
 export const WIZ_MISCONFIGURATIONS_DATASET = 'wiz.cloud_configuration_finding';
@@ -18,8 +19,9 @@ export const getVendorName = (finding: CspFinding | CspVulnerabilityFinding) => 
 
   const dataset = finding.data_stream?.dataset;
 
-  if (dataset === WIZ_MISCONFIGURATIONS_DATASET || dataset === WIZ_VULN_DATASET) return 'Wiz';
-  if (dataset === QUALYS_VULN_DATASET) return 'Qualys';
+  if (dataset === WIZ_MISCONFIGURATIONS_DATASET || dataset === WIZ_VULN_DATASET)
+    return INTEGRATION_VENDORS.WIZ;
+  if (dataset?.startsWith(QUALYS_VULN_DATASET)) return INTEGRATION_VENDORS.QUALYS_VMDR;
 
-  if (isNativeCspFinding(finding)) return 'Elastic';
+  if (isNativeCspFinding(finding)) return INTEGRATION_VENDORS.ELASTIC;
 };
