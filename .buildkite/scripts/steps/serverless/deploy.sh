@@ -9,6 +9,7 @@ KIBANA_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless:pr-$BUILDKITE_PULL_R
 
 deploy() {
   PROJECT_TYPE=$1
+  # BOOKMARK - List of Kibana solutions
   case $PROJECT_TYPE in
     elasticsearch)
       PROJECT_TYPE_LABEL='Elasticsearch Serverless'

@@ -10,6 +10,7 @@
 export {
   getAgentName,
   isOpenTelemetryAgentName,
+  isEDOTAgentName,
   hasOpenTelemetryPrefix,
   isJavaAgentName,
   isRumAgentName,

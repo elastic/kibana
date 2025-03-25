@@ -10,6 +10,7 @@
 import { basename, join } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { orderBy } from 'lodash';
+import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 import type { Package } from '../types';
 import { HARDCODED_MODULE_PATHS, applyTransforms } from './transforms';
 import {
@@ -99,7 +100,7 @@ export const calculateModuleTargetFolder = (module: Package): string => {
         moduleFolder
       );
     }
-  } else if (group === 'observability' || group === 'security' || group === 'search') {
+  } else if (KIBANA_SOLUTIONS.some((solution) => solution === group)) {
     path = join(
       BASE_FOLDER,
       'x-pack', // all solution modules are 'x-pack'
