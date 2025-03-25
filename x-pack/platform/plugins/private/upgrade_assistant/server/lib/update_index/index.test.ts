@@ -6,7 +6,7 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { updateIndex } from './index';
+import { updateIndex } from '.';
 import { IndicesPutSettingsRequest } from '@elastic/elasticsearch/lib/api/types';
 import { getReindexWarnings } from '../reindexing/index_settings';
 
@@ -19,7 +19,7 @@ const ackResponseMock = {
   acknowledged: true,
   shards_acknowledged: true,
   indices: [],
-}
+};
 
 describe('updateIndex', () => {
   const mockGetReindexWarnings = getReindexWarnings as jest.Mock;
@@ -74,9 +74,9 @@ describe('updateIndex', () => {
         testIndex: {
           settings: {
             index: {
-              'force_memory_term_dictionary': 'true',
+              force_memory_term_dictionary: 'true',
               'soft_deletes.enabled': 'true',
-              'number_of_shards': '1',
+              number_of_shards: '1',
             },
           },
         },
@@ -114,11 +114,14 @@ describe('updateIndex', () => {
 
       // The important part here is that we're setting the deprecated settings to null
       expect(mockClient.indices.putSettings).toHaveBeenCalled();
-      const putSettingsCall = mockClient.indices.putSettings.mock.calls[0][0] as IndicesPutSettingsRequest;
+      const putSettingsCall = mockClient.indices.putSettings.mock
+        .calls[0][0] as IndicesPutSettingsRequest;
       expect(putSettingsCall.index).toBe('testIndex');
 
       // Use a more flexible check that's less dependent on object structure
-      expect(JSON.stringify(putSettingsCall.settings)).toContain('index.force_memory_term_dictionary');
+      expect(JSON.stringify(putSettingsCall.settings)).toContain(
+        'index.force_memory_term_dictionary'
+      );
       expect(JSON.stringify(putSettingsCall.settings)).toContain('index.soft_deletes.enabled');
 
       // Verify logging
@@ -136,7 +139,7 @@ describe('updateIndex', () => {
         testIndex: {
           settings: {
             index: {
-              'force_memory_term_dictionary': 'true',
+              force_memory_term_dictionary: 'true',
             },
           },
         },
@@ -171,11 +174,14 @@ describe('updateIndex', () => {
 
       // Verify indices.putSettings was called
       expect(mockClient.indices.putSettings).toHaveBeenCalled();
-      const putSettingsCall = mockClient.indices.putSettings.mock.calls[0][0] as IndicesPutSettingsRequest;
+      const putSettingsCall = mockClient.indices.putSettings.mock
+        .calls[0][0] as IndicesPutSettingsRequest;
       expect(putSettingsCall.index).toBe('testIndex');
 
       // Use a more flexible check that's less dependent on object structure
-      expect(JSON.stringify(putSettingsCall.settings)).toContain('index.force_memory_term_dictionary');
+      expect(JSON.stringify(putSettingsCall.settings)).toContain(
+        'index.force_memory_term_dictionary'
+      );
 
       // Verify error was logged but didn't fail the operation
       expect(mockLogger.warn).toHaveBeenCalledWith(

@@ -6,9 +6,9 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { UpdateIndexOperation } from '../../../common/update_index';
 import { getReindexWarnings } from '../reindexing/index_settings';
-import type { Logger } from '@kbn/core/server';
 
 export interface UpdateIndexParams {
   esClient: ElasticsearchClient;
@@ -68,8 +68,9 @@ async function removeDeprecatedSettings(
     const flatSettings = indexSettings[index] || {};
     const warnings = flatSettings ? getReindexWarnings(flatSettings) : undefined;
     const indexSettingsWarning = warnings?.find(
-      (warning) => warning.warningType === 'indexSetting' &&
-      (warning.flow === 'reindex' || warning.flow === 'all')
+      (warning) =>
+        warning.warningType === 'indexSetting' &&
+        (warning.flow === 'reindex' || warning.flow === 'all')
     );
 
     // If there are deprecated settings, set them to null to remove them
@@ -83,7 +84,9 @@ async function removeDeprecatedSettings(
 
       if (Object.keys(settingsToApply).length > 0) {
         log?.info(
-          `Removing deprecated settings ${Object.keys(settingsToApply).join(', ')} from index ${index}`
+          `Removing deprecated settings ${Object.keys(settingsToApply).join(
+            ', '
+          )} from index ${index}`
         );
 
         await esClient.indices.putSettings({

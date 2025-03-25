@@ -387,8 +387,10 @@ export const reindexServiceFactory = (
     // Get the warnings for this index to check for deprecated settings
     const flatSettings = await actions.getFlatSettings(indexName);
     const warnings = flatSettings ? getReindexWarnings(flatSettings) : undefined;
-    const indexSettingsWarning = warnings?.find(warning =>
-      warning.warningType === 'indexSetting' && (warning.flow === 'reindex' || warning.flow === 'all')
+    const indexSettingsWarning = warnings?.find(
+      (warning) =>
+        warning.warningType === 'indexSetting' &&
+        (warning.flow === 'reindex' || warning.flow === 'all')
     );
 
     // If there are deprecated settings, set them to null to remove them
@@ -397,7 +399,11 @@ export const reindexServiceFactory = (
       for (const setting of deprecatedSettings) {
         settingsToApply[setting] = null;
       }
-      log.info(`Removing deprecated settings ${deprecatedSettings.join(', ')} from reindexed index ${newIndexName}`);
+      log.info(
+        `Removing deprecated settings ${deprecatedSettings.join(
+          ', '
+        )} from reindexed index ${newIndexName}`
+      );
     }
 
     const settingsResponse = await esClient.indices.putSettings({

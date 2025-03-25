@@ -736,9 +736,9 @@ describe('reindexService', () => {
         // Setup empty flatSettings with no warnings
         actions.getFlatSettings.mockResolvedValueOnce({
           settings: {
-            'index.provided_name': 'myIndex'
+            'index.provided_name': 'myIndex',
           },
-          mappings: {}
+          mappings: {},
         });
 
         clusterClient.asCurrentUser.indices.putSettings.mockResponseOnce({ acknowledged: true });
@@ -758,9 +758,9 @@ describe('reindexService', () => {
         // Setup empty flatSettings with no warnings
         actions.getFlatSettings.mockResolvedValueOnce({
           settings: {
-            'index.provided_name': 'myIndex'
+            'index.provided_name': 'myIndex',
           },
-          mappings: {}
+          mappings: {},
         });
 
         clusterClient.asCurrentUser.indices.putSettings.mockResponseOnce({ acknowledged: true });
@@ -792,9 +792,9 @@ describe('reindexService', () => {
           settings: {
             'index.provided_name': 'myIndex',
             'index.force_memory_term_dictionary': 'true',
-            'index.soft_deletes.enabled': 'true'
+            'index.soft_deletes.enabled': 'true',
           },
-          mappings: {}
+          mappings: {},
         });
 
         clusterClient.asCurrentUser.indices.putSettings.mockResponseOnce({ acknowledged: true });
@@ -803,18 +803,22 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.indexSettingsRestored);
 
         // Check that deprecated settings are removed (set to null)
-        expect(clusterClient.asCurrentUser.indices.putSettings).toHaveBeenCalledWith(expect.objectContaining({
-          index: reindexOp.attributes.newIndexName,
-          settings: expect.objectContaining({
-            'index.number_of_replicas': null,
-            'index.refresh_interval': null,
-            'index.force_memory_term_dictionary': null,
-            'index.soft_deletes.enabled': null
+        expect(clusterClient.asCurrentUser.indices.putSettings).toHaveBeenCalledWith(
+          expect.objectContaining({
+            index: reindexOp.attributes.newIndexName,
+            settings: expect.objectContaining({
+              'index.number_of_replicas': null,
+              'index.refresh_interval': null,
+              'index.force_memory_term_dictionary': null,
+              'index.soft_deletes.enabled': null,
+            }),
           })
-        }));
+        );
 
         // Check that a log was created about removing the settings
-        expect(log.info).toHaveBeenCalledWith(expect.stringContaining('Removing deprecated settings'));
+        expect(log.info).toHaveBeenCalledWith(
+          expect.stringContaining('Removing deprecated settings')
+        );
       });
 
       it('fails if the request is not acknowledged', async () => {

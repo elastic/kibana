@@ -13,7 +13,11 @@ import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import type { RouteDependencies } from '../types';
 import { updateIndex } from '../lib/update_index';
 
-export function registerUpdateIndexRoute({ router, lib: { handleEsError }, log }: RouteDependencies) {
+export function registerUpdateIndexRoute({
+  router,
+  lib: { handleEsError },
+  log,
+}: RouteDependencies) {
   const BASE_PATH = `${API_BASE_PATH}/update_index`;
   router.post(
     {
