@@ -99,12 +99,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const {
         dashboards,
+        queries,
         stream,
         effective_lifecycle: effectiveLifecycle,
         elasticsearch_assets: elasticsearchAssets,
       } = body;
 
       expect(dashboards).to.eql([]);
+      expect(queries).to.eql([]);
 
       expect(stream).to.eql({
         name: TEST_STREAM_NAME,
