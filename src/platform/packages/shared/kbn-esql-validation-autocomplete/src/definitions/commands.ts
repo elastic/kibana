@@ -29,7 +29,7 @@ import {
   noCaseCompare,
 } from '../shared/helpers';
 
-import { type CommandDefinition } from './types';
+import { type CommandDefinition, numericTypes } from './types';
 import { ENRICH_MODES, checkAggExistence, checkFunctionContent } from './commands_helpers';
 
 import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
@@ -48,6 +48,7 @@ import { suggest as suggestForShow } from '../autocomplete/commands/show';
 import { suggest as suggestForSort } from '../autocomplete/commands/sort';
 import { suggest as suggestForStats } from '../autocomplete/commands/stats';
 import { suggest as suggestForWhere } from '../autocomplete/commands/where';
+import { suggest as suggestForChangePoint } from '../autocomplete/commands/change_point';
 
 import { getMessageFromId } from '../validation/errors';
 import { METADATA_FIELDS } from '../shared/constants';
@@ -607,5 +608,89 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       params: [{ name: 'index', type: 'source', wildcards: true }],
     },
     suggest: suggestForJoin,
+  },
+  {
+    name: 'change_point',
+    preview: true,
+    description: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.definitions.changePointDoc',
+      {
+        defaultMessage: 'Detect change point in the query results',
+      }
+    ),
+    declaration: `CHANGE_POINT <value> ON <field_name> AS <type>, <pvalue>`,
+    examples: [
+      '… | change_point value',
+      '… | change_point value on timestamp',
+      '… | change_point value on timestamp as type, pvalue',
+    ],
+    signature: {
+      multipleParams: false,
+      params: [
+        // Common validation for innerTypes mixing up params.
+        // { name: 'value', type: 'column', innerTypes: [...numericTypes] },
+        // { name: 'on', type: 'option', innerTypes: ['any'] },
+        { name: 'value', type: 'column' },
+        { name: 'on', type: 'option' },
+      ],
+    },
+    validate: (command: ESQLCommand, references) => {
+      const messages: ESQLMessage[] = [];
+
+      // validate change point value column
+      const valueArg = command.args[0];
+      if (isColumnItem(valueArg)) {
+        const columnName = valueArg.name;
+        // look up for columns in variable and existing fields
+        let valueColumnType: string | undefined;
+        const variableRef = references.variables.get(columnName);
+        if (variableRef) {
+          valueColumnType = variableRef.find((v) => v.name === columnName)?.type;
+        } else {
+          const fieldRef = references.fields.get(columnName);
+          valueColumnType = fieldRef?.type;
+        }
+
+        if (valueColumnType && !numericTypes.includes(valueColumnType)) {
+          messages.push({
+            location: command.location,
+            text: i18n.translate(
+              'kbn-esql-validation-autocomplete.esql.validation.changePointUnsupportedFieldType',
+              {
+                defaultMessage:
+                  'CHANGE_POINT only supports numeric types values, found [{columnName}] of type [{valueColumnType}]',
+                values: { columnName, valueColumnType },
+              }
+            ),
+            type: 'error',
+            code: 'changePointUnsupportedFieldType',
+          });
+        }
+      }
+
+      // validate ON column
+      const defaultOnColumnName = '@timestamp';
+      const onColumn = command.args.find((arg) => isOptionItem(arg) && arg.name === 'on');
+      const hadDefaultOnColumn = references.fields.has(defaultOnColumnName);
+      if (!onColumn && !hadDefaultOnColumn) {
+        messages.push({
+          location: command.location,
+          text: i18n.translate(
+            'kbn-esql-validation-autocomplete.esql.validation.changePointOnFieldMissing',
+            {
+              defaultMessage: 'Default {defaultOnColumnName} column is missing',
+              values: { defaultOnColumnName },
+            }
+          ),
+          type: 'error',
+          code: 'changePointOnFieldMissing',
+        });
+      }
+
+      // validate AS
+
+      return messages;
+    },
+    suggest: suggestForChangePoint,
   },
 ];

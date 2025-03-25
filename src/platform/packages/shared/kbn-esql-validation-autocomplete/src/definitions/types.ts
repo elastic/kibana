@@ -45,6 +45,16 @@ export const fieldTypes = [
   'function_named_parameters',
 ] as const;
 
+export const numericTypes = [
+  'double',
+  'integer',
+  'long',
+  'unsigned_long',
+  'counter_integer',
+  'counter_long',
+  'counter_double',
+];
+
 export type FieldType = (typeof fieldTypes)[number];
 
 export const isFieldType = (type: string | FunctionParameterType): type is FieldType =>
