@@ -50,7 +50,7 @@ const EUI_ELEMENTS = [
 for (const [name, tester] of [tsTester, babelTester]) {
   describe(name, () => {
     tester.run(
-      '@kbn/eui_elements_should_have_a11y_props',
+      '@kbn/eui_elements_should_have_aria_label_or_aria_labelledby_props',
       EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps,
       {
         valid: EUI_ELEMENTS.map((element) => ({
@@ -68,7 +68,8 @@ for (const [name, tester] of [tsTester, babelTester]) {
                 message: `<${element[0]}> should have a \`aria-label\` for a11y. Use the autofix suggestion or add your own.`,
               },
             ],
-            output: `<${element[0]} aria-label="Value Thing hello ${element[1]}">Value Thing hello</${element[0]}>`,
+            output: `<${element[0]} aria-label={i18n.translate('app_not_found_in_i18nrc..ValueThinghelloariaLabel', { defaultMessage: 'Value Thing hello ${element[1]}' })}>Value Thing hello</${element[0]}>
+import { i18n } from '@kbn/i18n';`,
           };
         }),
       }

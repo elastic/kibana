@@ -13,6 +13,10 @@ import { Node } from 'estree';
 
 import { checkNodeForExistingAriaLabelProp } from '../helpers/check_node_for_existing_data_test_subj_prop';
 import { getIntentFromNode } from '../helpers/get_intent_from_node';
+import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
+import { getFunctionName } from '../helpers/get_function_name';
+import { getI18nImportFixer } from '../helpers/get_i18n_import_fixer';
+import { isTruthy } from '../helpers/utils';
 
 export const EUI_ELEMENTS = [
   'EuiButtonIcon',
@@ -28,7 +32,7 @@ export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: Rule.RuleModul
     fixable: 'code',
   },
   create(context) {
-    const { report, sourceCode } = context;
+    const { cwd, filename, report, sourceCode } = context;
 
     return {
       JSXIdentifier: (node: TSESTree.Node) => {
@@ -67,12 +71,40 @@ export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: Rule.RuleModul
 
         const suggestion = `${intent}${element}`; // 'Actions Button'
 
+        const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
+        // @ts-expect-error upgrade typescript v5.1.6
+        const functionDeclaration = sourceCode.getScope(node as TSNode)
+          .block as TSESTree.FunctionDeclaration;
+        const functionName = getFunctionName(functionDeclaration);
+
+        const translationIdSuggestion = `${i18nAppId}.${functionName}.${intent.replaceAll(
+          ' ',
+          ''
+        )}ariaLabel`; // 'xpack.observability.overview.logs.loadMore.ariaLabel'
+
+        // Check if i18n has already been imported into the file
+        const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine, replaceMode } =
+          getI18nImportFixer({
+            sourceCode,
+            translationFunction: 'i18n.translate',
+          });
+
         // 3. Report feedback to engineer
         report({
           node: node as any,
           message: `<${name}> should have a \`aria-label\` for a11y. Use the autofix suggestion or add your own.`,
           fix(fixer) {
-            return fixer.insertTextAfterRange(range, ` aria-label="${suggestion}"`);
+            return [
+              fixer.insertTextAfterRange(
+                range,
+                ` aria-label={i18n.translate('${translationIdSuggestion}', { defaultMessage: '${suggestion}' })}`
+              ),
+              !hasI18nImportLine && rangeToAddI18nImportLine
+                ? replaceMode === 'replace'
+                  ? fixer.replaceTextRange(rangeToAddI18nImportLine, i18nImportLine)
+                  : fixer.insertTextAfterRange(rangeToAddI18nImportLine, `\n${i18nImportLine}`)
+                : null,
+            ].filter(isTruthy);
           },
         });
       },
