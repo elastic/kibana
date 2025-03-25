@@ -307,7 +307,12 @@ export class EsoModelVersionExample
       {
         path: '/internal/eso_mv_example/generate',
         validate: false,
-        security: { authz: { enabled: false, reason: '' } },
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This routes delegates authorization to SO client.',
+          },
+        },
       },
       async (context, request, response) => {
         const { elasticsearch } = await context.core;
@@ -359,7 +364,12 @@ export class EsoModelVersionExample
       {
         path: '/internal/eso_mv_example/read_raw',
         validate: false,
-        security: { authz: { enabled: false, reason: '' } },
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This routes delegates authorization to SO client.',
+          },
+        },
       },
       async (context, request, response) => {
         // Read the raw documents so we can display the model versions prior to migration transformations
@@ -396,7 +406,9 @@ export class EsoModelVersionExample
       {
         path: '/internal/eso_mv_example/get_objects',
         validate: false,
-        security: { authz: { enabled: false, reason: '' } },
+        security: {
+          authz: { enabled: false, reason: 'This routes delegates authorization to SO client.' },
+        },
       },
       async (context, request, response) => {
         // Get the objects via the SO client so we can display how the objects are migrated via the MV definitions
@@ -434,7 +446,9 @@ export class EsoModelVersionExample
       {
         path: '/internal/eso_mv_example/get_decrypted',
         validate: false,
-        security: { authz: { enabled: false, reason: '' } },
+        security: {
+          authz: { enabled: false, reason: 'This route delegates authorization to SO client.' },
+        },
       },
       async (context, request, response) => {
         // Decrypt the objects as the internal user so we can display the secrets

@@ -40,7 +40,12 @@ export class PrebootExamplePlugin implements PrebootPlugin {
       prebootRouter.get(
         {
           path: '/api/preboot/state',
-          security: { authz: { enabled: false, reason: '' } },
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out of authorization as it is a core preboot route',
+            },
+          },
           validate: false,
           options: { authRequired: false },
         },
@@ -56,7 +61,12 @@ export class PrebootExamplePlugin implements PrebootPlugin {
       prebootRouter.post(
         {
           path: '/api/preboot/complete_setup',
-          security: { authz: { enabled: false, reason: '' } },
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out of authorization as it is a core preboot route',
+            },
+          },
           validate: {
             body: schema.object({ shouldReloadConfig: schema.boolean() }),
           },
@@ -71,7 +81,12 @@ export class PrebootExamplePlugin implements PrebootPlugin {
       prebootRouter.post(
         {
           path: '/api/preboot/write_config',
-          security: { authz: { enabled: false, reason: '' } },
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out of authorization as it is a core preboot route',
+            },
+          },
           validate: {
             body: schema.object({ key: schema.string(), value: schema.string() }),
           },
@@ -94,7 +109,9 @@ export class PrebootExamplePlugin implements PrebootPlugin {
       prebootRouter.post(
         {
           path: '/api/preboot/connect_to_es',
-          security: { authz: { enabled: false, reason: '' } },
+          security: {
+            authz: { enabled: false, reason: 'This route delegates authorization to es client' },
+          },
           validate: {
             body: schema.object({
               host: schema.string(),

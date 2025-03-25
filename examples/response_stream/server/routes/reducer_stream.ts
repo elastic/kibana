@@ -27,7 +27,13 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
     .post({
       path: RESPONSE_STREAM_API_ENDPOINT.REDUCER_STREAM,
       access: 'internal',
-      security: { authz: { requiredPrivileges: ['some-privilege'] } },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route  route is opted out of authorization as it is a developer example endpoint.',
+        },
+      },
     })
     .addVersion(
       {
