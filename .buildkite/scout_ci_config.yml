@@ -3,7 +3,7 @@ ui_tests:
   enabled:
     - apm
     - discover_enhanced
-    - maps
     - observability_onboarding
-    - security_solution
   disabled:
+    - maps
+    - security_solution
