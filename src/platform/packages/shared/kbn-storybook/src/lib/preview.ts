@@ -10,21 +10,13 @@
 import type { Preview } from '@storybook/react';
 import * as jest from 'jest-mock';
 import { decorators } from './decorators';
-import {
-  AMSTERDAM_DARK,
-  AMSTERDAM_LIGHT,
-  BOREALIS_DARK,
-  BOREALIS_LIGHT,
-  DEFAULT_THEME,
-  THEME_TITLES,
-} from './themes';
 
 // @ts-expect-error
 window.jest = jest;
 
 const preview: Preview = {
   decorators,
-  initialGlobals: { euiTheme: DEFAULT_THEME },
+  initialGlobals: { euiTheme: 'v8.light' },
   globalTypes: {
     euiTheme: {
       description: 'Change the EUI theme',
@@ -34,24 +26,14 @@ const preview: Preview = {
         dynamicTitle: true,
         items: [
           {
-            value: BOREALIS_LIGHT,
+            value: 'v8.light',
             icon: 'hearthollow',
-            title: THEME_TITLES[BOREALIS_LIGHT],
+            title: 'Light',
           },
           {
-            value: BOREALIS_DARK,
+            value: 'v8.dark',
             icon: 'heart',
-            title: THEME_TITLES[BOREALIS_DARK],
-          },
-          {
-            value: AMSTERDAM_LIGHT,
-            icon: 'hearthollow',
-            title: THEME_TITLES[AMSTERDAM_LIGHT],
-          },
-          {
-            value: AMSTERDAM_DARK,
-            icon: 'heart',
-            title: THEME_TITLES[AMSTERDAM_DARK],
+            title: 'Dark',
           },
         ],
       },
