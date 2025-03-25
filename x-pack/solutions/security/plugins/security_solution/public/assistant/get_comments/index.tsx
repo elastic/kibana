@@ -89,7 +89,7 @@ export const getComments: GetAssistantMessages = ({
               contentReferencesVisible={contentReferencesVisible}
               transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
               contentReferences={null}
-              messageRole='assistant'
+              messageRole="assistant"
               isFetching
               // we never need to append to a code block in the loading comment, which is what this index is used for
               index={999}
