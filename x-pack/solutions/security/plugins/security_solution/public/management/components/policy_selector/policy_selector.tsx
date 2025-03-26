@@ -305,7 +305,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
             href={getAppUrl({ path: urlPath, appId })}
             appPath={urlPath}
             target="_blank"
-            data-test-subj={getTestId('policyLink')}
+            data-test-subj={getTestId(`policy-${policy.id}-policyLink`)}
           >
             <FormattedMessage
               id="xpack.securitySolution.effectedPolicySelect.viewPolicyLinkLabel"
@@ -636,7 +636,14 @@ export const PolicySelector = memo<PolicySelectorProps>(
         </EuiPanel>
 
         <EuiPanel paddingSize="s" hasShadow={false} hasBorder className="body-container">
-          {isFetching && <EuiProgress size="xs" color="accent" position="absolute" />}
+          {isFetching && (
+            <EuiProgress
+              size="xs"
+              color="accent"
+              position="absolute"
+              data-test-subj={getTestId('isFetching')}
+            />
+          )}
 
           {selectableOptions.length > 0 && (
             <EuiPanel
@@ -648,20 +655,22 @@ export const PolicySelector = memo<PolicySelectorProps>(
               `}
             >
               <EuiFlexGroup gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false} className="border-right">
-                  <EuiButtonEmpty
-                    size="xs"
-                    value="selectAll"
-                    onClick={onSelectUnselectAllClickHandler}
-                    data-test-subj={getTestId('selectAllButton')}
-                    isDisabled={isDisabled}
-                  >
-                    <FormattedMessage
-                      id="xpack.securitySolution.policySelector.selectAll"
-                      defaultMessage="Select all"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
+                {view === 'full-list' && (
+                  <EuiFlexItem grow={false} className="border-right">
+                    <EuiButtonEmpty
+                      size="xs"
+                      value="selectAll"
+                      onClick={onSelectUnselectAllClickHandler}
+                      data-test-subj={getTestId('selectAllButton')}
+                      isDisabled={isDisabled}
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.policySelector.selectAll"
+                        defaultMessage="Select all"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     size="xs"

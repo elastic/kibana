@@ -48,7 +48,7 @@ describe('when using EffectedPolicySelect component', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
-    apiMocks = allFleetHttpMocks(mockedContext.coreStart.http, { debug: true });
+    apiMocks = allFleetHttpMocks(mockedContext.coreStart.http);
     handleOnChange = jest.fn((updatedArtifact) => {
       componentProps.item = updatedArtifact;
       renderResult.rerender(<EffectedPolicySelect {...componentProps} />);
