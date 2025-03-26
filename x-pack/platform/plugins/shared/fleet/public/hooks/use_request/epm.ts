@@ -359,6 +359,7 @@ interface UpdatePackageArgs {
 interface InstallKibanaAssetsArgs {
   pkgName: string;
   pkgVersion: string;
+  spaceIds?: string[];
 }
 
 export const useUpdatePackageMutation = () => {
@@ -385,11 +386,16 @@ export const useInstallKibanaAssetsMutation = () => {
   });
 };
 
-export const sendInstallKibanaAssetsForRq = ({ pkgName, pkgVersion }: InstallKibanaAssetsArgs) =>
+export const sendInstallKibanaAssetsForRq = ({
+  pkgName,
+  pkgVersion,
+  spaceIds,
+}: InstallKibanaAssetsArgs) =>
   sendRequestForRq({
     path: epmRouteService.getInstallKibanaAssetsPath(pkgName, pkgVersion),
     method: 'post',
     version: API_VERSIONS.public.v1,
+    body: spaceIds ? { space_ids: spaceIds } : undefined,
   });
 
 export const sendUpdatePackage = (

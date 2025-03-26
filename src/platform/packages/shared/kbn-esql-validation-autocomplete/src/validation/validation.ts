@@ -20,23 +20,16 @@ import {
   walk,
 } from '@kbn/esql-ast';
 import type { ESQLAstJoinCommand, ESQLIdentifier } from '@kbn/esql-ast/src/types';
-import { CommandOptionsDefinition } from '../definitions/types';
-import { METADATA_FIELDS } from '../shared/constants';
-import { compareTypesWithLiterals } from '../shared/esql_types';
 import {
   areFieldAndVariableTypesCompatible,
   getColumnExists,
-  getColumnForASTNode,
   getCommandDefinition,
-  getQuotedColumnName,
-  hasWildcard,
   isColumnItem,
   isFunctionItem,
   isOptionItem,
   isParametrized,
   isSourceItem,
   isTimeIntervalItem,
-  isVariable,
   sourceExists,
 } from '../shared/helpers';
 import type { ESQLCallbacks } from '../shared/types';
@@ -234,9 +227,8 @@ function validateCommand(
     }
     default: {
       // Now validate arguments
-      for (const commandArg of command.args) {
-        const wrappedArg = Array.isArray(commandArg) ? commandArg : [commandArg];
-        for (const arg of wrappedArg) {
+      for (const arg of command.args) {
+        if (!Array.isArray(arg)) {
           if (isFunctionItem(arg)) {
             messages.push(
               ...validateFunction({
@@ -249,14 +241,7 @@ function validateCommand(
               })
             );
           } else if (isOptionItem(arg)) {
-            messages.push(
-              ...validateOption(
-                arg,
-                commandDef.options.find(({ name }) => name === arg.name),
-                command,
-                references
-              )
-            );
+            messages.push(...validateOption(arg, command, references));
           } else if (isColumnItem(arg) || isIdentifier(arg)) {
             if (command.name === 'stats' || command.name === 'inlinestats') {
               messages.push(errors.unknownAggFunction(arg));
@@ -276,7 +261,7 @@ function validateCommand(
               })
             );
           } else if (isSourceItem(arg)) {
-            messages.push(...validateSource(arg, command.name, references));
+            messages.push(...validateSource(arg, references));
           }
         }
       }
@@ -290,54 +275,36 @@ function validateCommand(
 
 function validateOption(
   option: ESQLCommandOption,
-  optionDef: CommandOptionsDefinition | undefined,
   command: ESQLCommand,
   referenceMaps: ReferenceMaps
 ): ESQLMessage[] {
   // check if the arguments of the option are of the correct type
   const messages: ESQLMessage[] = [];
-  if (option.incomplete || command.incomplete) {
+  if (option.incomplete || command.incomplete || option.name === 'metadata') {
     return messages;
   }
-  if (!optionDef) {
-    messages.push(
-      getMessageFromId({
-        messageId: 'unknownOption',
-        values: { command: command.name.toUpperCase(), option: option.name },
-        locations: option.location,
-      })
-    );
+
+  if (option.name === 'metadata') {
+    // Validation for the metadata statement is handled in the FROM command's validate method
     return messages;
   }
-  // use dedicate validate fn if provided
-  if (optionDef.validate) {
-    const fields = METADATA_FIELDS;
-    messages.push(...optionDef.validate(option, command, new Set(fields)));
-  }
-  if (!optionDef.skipCommonValidation) {
-    option.args.forEach((arg) => {
-      if (!Array.isArray(arg)) {
-        if (!optionDef.signature.multipleParams) {
-          if (isColumnItem(arg)) {
-            messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
-          }
-        } else {
-          if (isColumnItem(arg)) {
-            messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
-          }
-          if (isFunctionItem(arg)) {
-            messages.push(
-              ...validateFunction({
-                fn: arg,
-                parentCommand: command.name,
-                parentOption: option.name,
-                references: referenceMaps,
-              })
-            );
-          }
-        }
-      }
-    });
+
+  for (const arg of option.args) {
+    if (Array.isArray(arg)) {
+      continue;
+    }
+    if (isColumnItem(arg)) {
+      messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
+    } else if (isFunctionItem(arg)) {
+      messages.push(
+        ...validateFunction({
+          fn: arg,
+          parentCommand: command.name,
+          parentOption: option.name,
+          references: referenceMaps,
+        })
+      );
+    }
   }
 
   return messages;
@@ -397,59 +364,20 @@ function validateUnsupportedTypeFields(fields: Map<string, ESQLRealField>, ast: 
   return messages;
 }
 
-export function validateSources(
-  command: ESQLCommand,
-  sources: ESQLSource[],
-  references: ReferenceMaps
-): ESQLMessage[] {
-  const messages: ESQLMessage[] = [];
-
-  for (const source of sources) {
-    messages.push(...validateSource(source, command.name, references));
-  }
-
-  return messages;
-}
-
-function validateSource(
-  source: ESQLSource,
-  commandName: string,
-  { sources, policies }: ReferenceMaps
-) {
+export function validateSource(source: ESQLSource, { sources }: ReferenceMaps) {
   const messages: ESQLMessage[] = [];
   if (source.incomplete) {
     return messages;
   }
 
-  const commandDef = getCommandDefinition(commandName);
-  const isWildcardAndNotSupported =
-    hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
-  if (isWildcardAndNotSupported) {
+  if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
     messages.push(
       getMessageFromId({
-        messageId: 'wildcardNotSupportedForCommand',
-        values: { command: commandName.toUpperCase(), value: source.name },
+        messageId: 'unknownIndex',
+        values: { name: source.name },
         locations: source.location,
       })
     );
-  } else {
-    if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownIndex',
-          values: { name: source.name },
-          locations: source.location,
-        })
-      );
-    } else if (source.sourceType === 'policy' && !policies.has(source.name)) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownPolicy',
-          values: { name: source.name },
-          locations: source.location,
-        })
-      );
-    }
   }
 
   return messages;
@@ -465,65 +393,9 @@ export function validateColumnForCommand(
     if (!references.variables.has(column.name) && !isParametrized(column)) {
       messages.push(errors.unknownColumn(column));
     }
-  } else {
-    const columnName = getQuotedColumnName(column);
-    if (getColumnExists(column, references)) {
-      const commandDef = getCommandDefinition(commandName);
-      const columnParamsWithInnerTypes = commandDef.signature.params.filter(
-        ({ type, innerTypes }) => type === 'column' && innerTypes
-      );
-      // this should be guaranteed by the columnCheck above
-      const columnRef = getColumnForASTNode(column, references)!;
-
-      if (columnParamsWithInnerTypes.length) {
-        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(
-          ({ innerTypes }) =>
-            innerTypes &&
-            !innerTypes.includes('any') &&
-            !innerTypes.some((type) => compareTypesWithLiterals(type, columnRef.type))
-        );
-        if (hasSomeWrongInnerTypes) {
-          const supportedTypes: string[] = columnParamsWithInnerTypes
-            .map(({ innerTypes }) => innerTypes)
-            .flat()
-            .filter((type) => type !== undefined) as string[];
-
-          messages.push(
-            getMessageFromId({
-              messageId: 'unsupportedColumnTypeForCommand',
-              values: {
-                command: commandName.toUpperCase(),
-                type: supportedTypes.join(', '),
-                typeCount: supportedTypes.length,
-                givenType: columnRef.type,
-                column: columnName,
-              },
-              locations: column.location,
-            })
-          );
-        }
-      }
-      if (
-        hasWildcard(columnName) &&
-        !isVariable(columnRef) &&
-        !commandDef.signature.params.some(({ type, wildcards }) => type === 'column' && wildcards)
-      ) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'wildcardNotSupportedForCommand',
-            values: {
-              command: commandName.toUpperCase(),
-              value: columnName,
-            },
-            locations: column.location,
-          })
-        );
-      }
-    } else {
-      if (column.name) {
-        messages.push(errors.unknownColumn(column));
-      }
-    }
+  } else if (!getColumnExists(column, references)) {
+    messages.push(errors.unknownColumn(column));
   }
+
   return messages;
 }
