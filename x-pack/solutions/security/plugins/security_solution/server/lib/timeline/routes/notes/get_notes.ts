@@ -21,7 +21,7 @@ import type { StartPlugins } from '../../../../plugin_contract';
 import { AssociatedFilter } from '../../../../../common/notes/constants';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { MAX_UNASSOCIATED_NOTES, NOTE_URL } from '../../../../../common/constants';
+import { NOTES_PER_PAGE_HARD_LIMIT, NOTE_URL } from '../../../../../common/constants';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../utils/common';
@@ -55,10 +55,6 @@ export const getNotesRoute = (
         try {
           const queryParams = request.query;
           const frameworkRequest = await buildFrameworkRequest(context, request);
-          const {
-            uiSettings: { client: uiSettingsClient },
-          } = await frameworkRequest.context.core;
-          const maxUnassociatedNotes = await uiSettingsClient.get<number>(MAX_UNASSOCIATED_NOTES);
 
           // if documentIds is provided, we will search for all the notes associated with the documentIds
           const documentIds = queryParams.documentIds ?? null;
@@ -73,7 +69,7 @@ export const getNotesRoute = (
                   )
                 ),
                 page: 1,
-                perPage: maxUnassociatedNotes,
+                perPage: NOTES_PER_PAGE_HARD_LIMIT,
               };
               const res = await getAllSavedNote(frameworkRequest, options);
               const body: GetNotesResponse = res ?? {};
@@ -85,7 +81,7 @@ export const getNotesRoute = (
               type: noteSavedObjectType,
               filter: nodeBuilder.is(`${noteSavedObjectType}.attributes.eventId`, documentIds),
               page: 1,
-              perPage: maxUnassociatedNotes,
+              perPage: NOTES_PER_PAGE_HARD_LIMIT,
             };
             const res = await getAllSavedNote(frameworkRequest, options);
             return response.ok({ body: res ?? {} });
@@ -103,7 +99,7 @@ export const getNotesRoute = (
                   id: savedObjectId,
                 })),
                 page: 1,
-                perPage: maxUnassociatedNotes,
+                perPage: NOTES_PER_PAGE_HARD_LIMIT,
               };
               const res = await getAllSavedNote(frameworkRequest, options);
               const body: GetNotesResponse = res ?? {};
@@ -117,7 +113,7 @@ export const getNotesRoute = (
                 type: timelineSavedObjectType,
                 id: savedObjectIds,
               },
-              perPage: maxUnassociatedNotes,
+              perPage: NOTES_PER_PAGE_HARD_LIMIT,
             };
             const res = await getAllSavedNote(frameworkRequest, options);
             const body: GetNotesResponse = res ?? {};
