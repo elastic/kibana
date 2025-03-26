@@ -63,7 +63,7 @@ export const WorkspaceGlobalCSSComponent = ({
   const theme = useEuiTheme();
   const shadow = euiShadowSmall(theme);
   const { euiTheme } = theme;
-  const { hasPushFlyout } = useSyncPushFlyoutStyles();
+  useSyncPushFlyoutStyles();
 
   let toolWidth = `0px`;
 
@@ -191,20 +191,24 @@ export const WorkspaceGlobalCSSComponent = ({
 
       /* Alterations */
       .kbnBody .euiFlyout:not(.euiCollapsibleNavBeta) {
-        inset-block-start: calc(
-          var(--kbnWorkspace--application-top, 0) + ${hasPushFlyout ? '0px' : euiTheme.size.m}
-        );
-        inset-block-end: ${hasPushFlyout ? '0px' : euiTheme.size.s};
-        inset-inline-end: calc(
-          var(--kbnWorkspace--application-right, 0) + ${hasPushFlyout ? '0px' : euiTheme.size.m}
-        );
-        ${!hasPushFlyout &&
-        `
+        // overlay flyout
+        &:not([class*='push']) {
+          inset-block-start: calc(var(--kbnWorkspace--application-top, 0) + ${euiTheme.size.m});
+          inset-block-end: ${euiTheme.size.s};
+          inset-inline-end: calc(var(--kbnWorkspace--application-right, 0) + ${euiTheme.size.m});
+
           border: ${euiTheme.border.thin};
           ${shadow}
           border-radius: ${euiTheme.border.radius.medium};
           clip-path: none;
-        `}
+        }
+
+        // push flyout
+        &[class*='push'] {
+          inset-block-start: var(--kbnWorkspace--application-top, 0);
+          inset-block-end: '0px';
+          inset-inline-end: var(--kbnWorkspace--application-right, 0);
+        }
       }
 
       .kbnBody .euiOverlayMask {

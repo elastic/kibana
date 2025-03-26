@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+
+export const euiPushFlyoutPaddingInlineEnd = '--eui-push-flyout-padding-inline-end';
 
 /**
  * This is definitely a hack for experimental purposes.
@@ -15,8 +17,6 @@ import { useEffect, useState } from 'react';
  * This hook listens to styles changes on the body and updates a CSS variable that is used to push the workspace content
  */
 export function useSyncPushFlyoutStyles() {
-  const [hasPushFlyout, setHasPushFlyout] = useState(false);
-
   useEffect(() => {
     const targetNode = document.body;
 
@@ -57,14 +57,12 @@ export function useSyncPushFlyoutStyles() {
           paddingInlineEnd = paddingInlineEnd ?? end;
 
           if (paddingInlineEnd) {
-            setHasPushFlyout(true);
             document.documentElement.style.setProperty(
-              '--eui-push-flyout-padding-inline-end',
+              euiPushFlyoutPaddingInlineEnd,
               paddingInlineEnd
             );
           } else {
-            setHasPushFlyout(false);
-            document.documentElement.style.removeProperty('--eui-push-flyout-padding-inline-end');
+            document.documentElement.style.removeProperty(euiPushFlyoutPaddingInlineEnd);
           }
         }
       }
@@ -78,6 +76,4 @@ export function useSyncPushFlyoutStyles() {
       observer.disconnect();
     };
   }, []);
-
-  return { hasPushFlyout };
 }
