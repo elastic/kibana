@@ -32,43 +32,6 @@ describe('slices', () => {
       });
     });
 
-    describe.skip('updateDataView', () => {
-      it('should update a persisted data view', () => {
-        const initialState = {
-          ...initialSharedState,
-          dataViews: [{ id: '1', title: 'test view' }],
-        };
-
-        const updatedDataView = {
-          id: '1',
-          title: 'updated view',
-          isPersisted: () => true,
-          toSpec: () => ({ id: '1', title: 'updated view' }),
-        } as unknown as DataView;
-
-        const state = reducer(initialState, actions.updateDataView(updatedDataView));
-
-        expect(state.dataViews[0]).toEqual({ id: '1', title: 'updated view' });
-      });
-
-      it('should update an ad hoc data view', () => {
-        const initialState = {
-          ...initialSharedState,
-          adhocDataViews: [{ title: 'ad hoc view' }],
-        };
-
-        const updatedDataView = {
-          title: 'ad hoc view',
-          isPersisted: () => false,
-          toSpec: () => ({ title: 'ad hoc view' }),
-        } as unknown as DataView;
-
-        const state = reducer(initialState, actions.updateDataView(updatedDataView));
-
-        expect(state.adhocDataViews[0]).toEqual({ title: 'ad hoc view' });
-      });
-    });
-
     describe('addDataView', () => {
       it('should add a persisted data view', () => {
         const newDataView = {
@@ -196,72 +159,6 @@ describe('slices', () => {
         );
 
         expect(state).toEqual(initialScopeState);
-      });
-    });
-
-    // TODO: reload the relevant shared data view list on update,
-    // we no longer keep the cache in redux
-    describe.skip('sharedDataViewManagerSlice.updateDataView', () => {
-      it('should update the selected data view when ids match', () => {
-        const initialState = {
-          ...initialScopeState,
-          dataView: { id: '1', title: 'test view' },
-        };
-
-        const updatedDataView = {
-          id: '1',
-          title: 'updated view',
-          isPersisted: () => true,
-          toSpec: () => ({ id: '1', title: 'updated view' }),
-        } as unknown as DataView;
-
-        const state = reducer(
-          initialState,
-          sharedDataViewManagerSlice.actions.updateDataView(updatedDataView)
-        );
-
-        expect(state.dataViewId).toEqual('1');
-      });
-
-      it('should update the selected data view when titles match for ad hoc views', () => {
-        const initialState = {
-          ...initialScopeState,
-          dataView: { title: 'ad hoc view' },
-        };
-
-        const updatedDataView = {
-          title: 'ad hoc view',
-          isPersisted: () => false,
-          toSpec: () => ({ title: 'ad hoc view' }),
-        } as unknown as DataView;
-
-        const state = reducer(
-          initialState,
-          sharedDataViewManagerSlice.actions.updateDataView(updatedDataView)
-        );
-
-        expect(state.dataViewId).toEqual('1');
-      });
-
-      it.skip('should not update the selected data view when ids do not match', () => {
-        const initialState = {
-          ...initialScopeState,
-          dataView: { id: '1', title: 'test view' },
-        };
-
-        const updatedDataView = {
-          id: '2',
-          title: 'other view',
-          isPersisted: () => true,
-          toSpec: () => ({ id: '2', title: 'other view' }),
-        } as unknown as DataView;
-
-        const state = reducer(
-          initialState,
-          sharedDataViewManagerSlice.actions.updateDataView(updatedDataView)
-        );
-
-        expect(state.dataViewId).toEqual('1');
       });
     });
   });

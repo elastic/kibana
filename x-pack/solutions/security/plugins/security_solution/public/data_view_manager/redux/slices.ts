@@ -32,17 +32,6 @@ export const sharedDataViewManagerSlice = createSlice({
       state.dataViews = action.payload;
       state.status = 'ready';
     },
-    updateDataView: (state, action: PayloadAction<DataView>) => {
-      if (action.payload.isPersisted()) {
-        const dataViewIndex = state.dataViews.findIndex((dv) => dv.id === action.payload.id);
-        state.dataViews[dataViewIndex] = action.payload.toSpec();
-      } else {
-        const adHocDataViewIndex = state.adhocDataViews.findIndex(
-          (dv) => dv.title === action.payload.title
-        );
-        state.adhocDataViews[adHocDataViewIndex] = action.payload.toSpec();
-      }
-    },
     addDataView: (state, action: PayloadAction<DataView>) => {
       const dataViewSpec = action.payload.toSpec();
 
@@ -89,12 +78,6 @@ export const createDataViewSelectionSlice = <T extends DataViewManagerScopeName>
         }
 
         state.status = 'loading';
-      });
-
-      builder.addCase(sharedDataViewManagerSlice.actions.updateDataView, (state, action) => {
-        if (action.payload.isPersisted() && action.payload.id === state.dataViewId) {
-          state.dataViewId = action.payload.id ?? null;
-        }
       });
     },
   });

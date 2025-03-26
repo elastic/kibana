@@ -74,14 +74,13 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
   );
 
   /**
-   * Dispatches an action that will result in data view update in the in-memory caches,
-   * as well as across all scopes where the data view is currently selected.
+   * Selects data view again. After changes are made to the data view, this results in cache invalidation and will force the reload everywhere.
    */
   const handleDataViewModified = useCallback(
     (updatedDataView: DataView) => {
-      dispatch(sharedDataViewManagerSlice.actions.updateDataView(updatedDataView));
+      selectDataView({ id: updatedDataView.id, scope: [props.scope] });
     },
-    [dispatch]
+    [props.scope, selectDataView]
   );
 
   const triggerConfig = useMemo(() => {
