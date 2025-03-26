@@ -29,7 +29,7 @@ export type URLQuery = AssetsBaseURLQuery & Record<string, unknown>;
 
 type SortOrder = [string, string];
 
-export interface AssetInventoryDataTableResult {
+export interface AssetInventoryURLStateResult {
   setUrlQuery: (query: Record<string, unknown>) => void;
   sort: SortOrder[];
   filters: Filter[];
@@ -59,7 +59,7 @@ const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery) => ({
 /*
   Hook for managing common table state and methods for the Asset Inventory DataTable
 */
-export const useAssetInventoryDataTable = ({
+export const useAssetInventoryURLState = ({
   defaultQuery = getDefaultQuery,
   paginationLocalStorageKey,
   columnsLocalStorageKey,
@@ -67,7 +67,7 @@ export const useAssetInventoryDataTable = ({
   defaultQuery?: (params: AssetsBaseURLQuery) => URLQuery;
   paginationLocalStorageKey: string;
   columnsLocalStorageKey?: string;
-}): AssetInventoryDataTableResult => {
+}): AssetInventoryURLStateResult => {
   const getPersistedDefaultQuery = usePersistedQuery<URLQuery>(defaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery<URLQuery>(getPersistedDefaultQuery);
   const { pageSize, setPageSize } = usePageSize(paginationLocalStorageKey);
