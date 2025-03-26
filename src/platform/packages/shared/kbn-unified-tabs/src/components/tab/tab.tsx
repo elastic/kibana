@@ -10,6 +10,7 @@
 import React, { MouseEvent, KeyboardEvent, useCallback, useState, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import useEvent from 'react-use/lib/useEvent';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -45,6 +46,7 @@ export interface TabProps {
   onLabelEdited: EditTabLabelProps['onLabelEdited'];
   onSelect: (item: TabItem) => Promise<void>;
   onClose: ((item: TabItem) => Promise<void>) | undefined;
+  onSelectedTabKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => Promise<void>;
   tabPreviewData: TabPreviewData;
 }
 
@@ -61,10 +63,11 @@ export const Tab: React.FC<TabProps> = (props) => {
     onLabelEdited,
     onSelect,
     onClose,
+    onSelectedTabKeyDown,
     tabPreviewData,
   } = props;
   const { euiTheme } = useEuiTheme();
-  const tabRef = useRef<HTMLDivElement | null>(null);
+  const tabInteractiveElementRef = useRef<HTMLDivElement | null>(null);
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [isActionPopoverOpen, setActionPopover] = useState<boolean>(false);
@@ -74,10 +77,18 @@ export const Tab: React.FC<TabProps> = (props) => {
   });
 
   const tabButtonAriaLabel = i18n.translate('unifiedTabs.tabButtonAriaLabel', {
-    defaultMessage: 'Click to select or double-click to edit session name',
+    defaultMessage: 'Click to select, double-click to edit session name, or drag to reorder',
   });
 
   const hidePreview = useCallback(() => setShowPreview(false), [setShowPreview]);
+
+  const onToggleActionsMenu = useCallback(
+    (isOpen: boolean) => {
+      setActionPopover(isOpen);
+      hidePreview();
+    },
+    [setActionPopover, hidePreview]
+  );
 
   const onSelectEvent = useCallback(
     async (event: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>) => {
@@ -112,17 +123,41 @@ export const Tab: React.FC<TabProps> = (props) => {
     async (event: KeyboardEvent<HTMLDivElement>) => {
       if (event.key === keys.ENTER) {
         event.preventDefault();
+        tabInteractiveElementRef.current?.focus();
         await onSelectEvent(event);
       }
     },
     [onSelectEvent]
   );
 
+  const onGlobalKeyDown = useCallback(
+    async (event: KeyboardEvent<HTMLDivElement>) => {
+      if (
+        !isSelected ||
+        isDragging ||
+        document.activeElement !== tabInteractiveElementRef.current
+      ) {
+        return;
+      }
+
+      await onSelectedTabKeyDown?.(event);
+    },
+    [onSelectedTabKeyDown, isSelected, isDragging]
+  );
+
+  useEvent('keydown', onGlobalKeyDown);
+
   useEffect(() => {
-    if (isDragging && tabRef.current) {
-      tabRef.current.focus();
+    if (isDragging && tabInteractiveElementRef.current) {
+      tabInteractiveElementRef.current.focus();
     }
   }, [isDragging]);
+
+  useEffect(() => {
+    if (isInlineEditActive && !isSelected) {
+      setIsInlineEditActive(false);
+    }
+  }, [isInlineEditActive, isSelected, setIsInlineEditActive]);
 
   const mainTabContent = (
     <EuiFlexGroup
@@ -132,6 +167,21 @@ export const Tab: React.FC<TabProps> = (props) => {
       responsive={false}
       gutterSize="none"
     >
+      {!isInlineEditActive && (
+        <div
+          ref={tabInteractiveElementRef}
+          aria-label={tabButtonAriaLabel}
+          css={tabInteractiveElementCss}
+          {...dragHandleProps}
+          {...getTabAttributes(item, tabContentId)}
+          role="tab"
+          tabIndex={isSelected ? 0 : -1}
+          aria-selected={isSelected}
+          onClick={onSelectEvent}
+          onDoubleClick={onDoubleClick}
+          onKeyDown={onKeyDownEvent}
+        />
+      )}
       <div css={getTabContentCss()}>
         {isInlineEditActive ? (
           <EditTabLabel
@@ -142,11 +192,9 @@ export const Tab: React.FC<TabProps> = (props) => {
         ) : (
           <>
             <div
-              aria-label={tabButtonAriaLabel}
               css={getTabButtonCss(euiTheme)}
-              className="unifiedTabs__tabBtn"
+              className="unifiedTabs__tabLabel"
               data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
-              onDoubleClick={onDoubleClick}
             >
               <EuiText color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
                 {item.label}
@@ -160,14 +208,17 @@ export const Tab: React.FC<TabProps> = (props) => {
                       item={item}
                       getTabMenuItems={getTabMenuItems}
                       isPopoverOpen={isActionPopoverOpen}
-                      setPopover={setActionPopover}
+                      setPopover={onToggleActionsMenu}
                     />
                   </EuiFlexItem>
                 )}
                 {!!onClose && (
                   <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
                     <EuiButtonIcon
-                      aria-label={closeButtonLabel}
+                      // semantically role="tablist" does not allow other buttons in tabs
+                      aria-hidden={true}
+                      tabIndex={-1}
+                      aria-label={closeButtonLabel} // TODO: replace with a EuiToolTip
                       title={closeButtonLabel}
                       color="text"
                       data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
@@ -193,23 +244,21 @@ export const Tab: React.FC<TabProps> = (props) => {
       tabItem={item}
     >
       <TabWithBackground
-        {...getTabAttributes(item, tabContentId)}
-        {...dragHandleProps}
-        ref={tabRef}
-        role="tab"
-        aria-selected={isSelected}
         data-test-subj={`unifiedTabs_tab_${item.id}`}
         isSelected={isSelected}
         isDragging={isDragging}
         services={services}
-        onClick={onSelectEvent}
-        onKeyDown={onKeyDownEvent}
       >
         {mainTabContent}
       </TabWithBackground>
     </TabPreview>
   );
 };
+
+const tabInteractiveElementCss = css`
+  position: absolute;
+  inset: 0;
+`;
 
 function getTabContainerCss(
   euiTheme: EuiThemeComputed,
@@ -220,6 +269,7 @@ function getTabContainerCss(
   // TODO: remove the usage of deprecated colors
 
   return css`
+    position: relative;
     display: inline-flex;
     border-right: ${euiTheme.border.thin};
     border-color: ${isDragging ? 'transparent' : euiTheme.colors.lightShade};
@@ -236,6 +286,7 @@ function getTabContainerCss(
       right: 0;
       opacity: 0;
       transition: opacity ${euiTheme.animation.fast};
+      pointer-events: auto;
     }
 
     &:hover,
@@ -244,22 +295,17 @@ function getTabContainerCss(
         opacity: 1;
       }
 
-      .unifiedTabs__tabBtn {
+      .unifiedTabs__tabLabel {
         width: calc(100% - ${euiTheme.size.l} * 2);
       }
     }
 
-    ${isSelected
+    ${!isSelected
       ? `
-          .unifiedTabs__tabBtn {
-            cursor: default;
-          }`
-      : `
-          cursor: pointer;
-
           &:hover {
             color: ${euiTheme.colors.text};
-        }`}
+        }`
+      : ''}
   `;
 }
 
@@ -267,6 +313,7 @@ function getTabContentCss() {
   return css`
     position: relative;
     width: 100%;
+    pointer-events: none;
   `;
 }
 
@@ -281,6 +328,7 @@ function getTabButtonCss(euiTheme: EuiThemeComputed) {
     border: none;
     border-radius: 0;
     background: transparent;
+    pointer-events: none;
   `;
 }
 

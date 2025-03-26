@@ -23,7 +23,7 @@ export interface TabMenuProps {
   item: TabItem;
   getTabMenuItems: GetTabMenuItems;
   isPopoverOpen: boolean;
-  setPopover: React.Dispatch<React.SetStateAction<boolean>>;
+  setPopover: (isOpen: boolean) => void;
 }
 
 export const TabMenu: React.FC<TabMenuProps> = ({
@@ -73,12 +73,15 @@ export const TabMenu: React.FC<TabMenuProps> = ({
       closePopover={closePopover}
       button={
         <EuiButtonIcon
-          aria-label={menuButtonLabel}
+          // semantically role="tablist" does not allow other buttons in tabs
+          aria-hidden={true}
+          tabIndex={-1}
+          aria-label={menuButtonLabel} // TODO: replace with a EuiToolTip
           title={menuButtonLabel}
           color="text"
           data-test-subj={`unifiedTabs_tabMenuBtn_${item.id}`}
           iconType="boxesVertical"
-          onClick={() => setPopover((prev) => !prev)}
+          onClick={() => setPopover(!isPopoverOpen)}
         />
       }
     >

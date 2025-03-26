@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -20,6 +20,7 @@ import {
   EuiFlexItem,
   euiDragDropReorder,
   useEuiTheme,
+  keys,
 } from '@elastic/eui';
 import { Tab, type TabProps } from '../tab';
 import type { TabItem, TabsServices, TabPreviewData } from '../../types';
@@ -73,6 +74,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   const tabsContainerRef = useRef<HTMLDivElement | null>(null);
   tabsContainerRef.current = tabsContainerElement;
   const hasReachedMaxItemsCount = maxItemsCount ? items.length >= maxItemsCount : false;
+  const moveFocusToSelectedItemRef = useRef<boolean>(false);
 
   const addButtonLabel = i18n.translate('unifiedTabs.createTabButton', {
     defaultMessage: 'New session',
@@ -93,6 +95,11 @@ export const TabsBar: React.FC<TabsBarProps> = ({
       );
       if (selectedTab) {
         selectedTab.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        if (moveFocusToSelectedItemRef.current) {
+          (selectedTab as HTMLDivElement).focus();
+          moveFocusToSelectedItemRef.current = false;
+        }
       }
     }
   }, [selectedItem]);
@@ -106,6 +113,58 @@ export const TabsBar: React.FC<TabsBarProps> = ({
       }
     },
     [items, onReorder]
+  );
+
+  const selectAndMoveFocusToItemIndex = useCallback(
+    async (itemIndex: number) => {
+      const item = items[itemIndex];
+
+      if (item && item.id !== selectedItem?.id) {
+        moveFocusToSelectedItemRef.current = true;
+        await onSelect(item);
+      }
+    },
+    [items, selectedItem, onSelect]
+  );
+
+  const onSelectedTabKeyDown = useCallback(
+    async (event: KeyboardEvent<HTMLDivElement>) => {
+      const selectedItemIndex = items.findIndex((item) => item.id === selectedItem?.id);
+      if (selectedItemIndex < 0) {
+        return;
+      }
+
+      if (event.key === keys.ARROW_LEFT && selectedItemIndex > 0) {
+        await selectAndMoveFocusToItemIndex(selectedItemIndex - 1);
+        return;
+      }
+
+      if (event.key === keys.ARROW_RIGHT && selectedItemIndex < items.length - 1) {
+        await selectAndMoveFocusToItemIndex(selectedItemIndex + 1);
+        return;
+      }
+
+      if (event.key === keys.HOME && items.length > 0) {
+        await selectAndMoveFocusToItemIndex(0);
+        return;
+      }
+
+      if (event.key === keys.END && items.length > 0) {
+        await selectAndMoveFocusToItemIndex(items.length - 1);
+        return;
+      }
+
+      if (
+        (event.key === keys.BACKSPACE || event.key === 'Delete') &&
+        selectedItem &&
+        items.length > 1
+      ) {
+        moveFocusToSelectedItemRef.current = true;
+        await onClose?.(selectedItem);
+        return;
+      }
+    },
+    [items, selectedItem, selectAndMoveFocusToItemIndex, onClose]
   );
 
   const mainTabsBarContent = (
@@ -146,6 +205,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
                             getTabMenuItems={getTabMenuItems}
                             onLabelEdited={onLabelEdited}
                             onSelect={onSelect}
+                            onSelectedTabKeyDown={onSelectedTabKeyDown}
                             onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
                             tabPreviewData={getPreviewData(item)}
                           />
