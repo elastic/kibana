@@ -50,7 +50,6 @@ import {
 } from './math_completion';
 import { LANGUAGE_ID } from './math_tokenization';
 
-import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
 import { insertOrReplaceFormulaColumn } from '../parse';
 import { filterByVisibleOperation } from '../util';
