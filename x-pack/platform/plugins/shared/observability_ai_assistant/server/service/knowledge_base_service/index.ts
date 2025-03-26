@@ -6,10 +6,8 @@
  */
 
 import { serverUnavailable } from '@hapi/boom';
-import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { orderBy } from 'lodash';
-import { encode } from 'gpt-tokenizer';
 import { resourceNames } from '..';
 import {
   Instruction,
@@ -17,23 +15,20 @@ import {
   KnowledgeBaseEntryRole,
   KnowledgeBaseType,
 } from '../../../common/types';
-import { getAccessQuery, getUserAccessFilters } from '../util/get_access_query';
-import { getCategoryQuery } from '../util/get_category_query';
-import { getSpaceQuery } from '../util/get_space_query';
+import { ObservabilityAIAssistantConfig } from '../../config';
+import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import {
   createInferenceEndpoint,
   deleteInferenceEndpoint,
-  getElserModelStatus,
   isInferenceEndpointMissingOrUnavailable,
 } from '../inference_endpoint';
-import { recallFromSearchConnectors } from './recall_from_search_connectors';
-import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
-import { ObservabilityAIAssistantConfig } from '../../config';
+import { scheduleKbSemanticTextMigrationTask } from '../task_manager_definitions/register_kb_semantic_text_migration_task';
+import { getAccessQuery, getUserAccessQuery } from '../util/get_access_query';
+import { getSpaceQuery } from '../util/get_space_query';
 import {
   isKnowledgeBaseIndexWriteBlocked,
   isSemanticTextUnsupportedError,
 } from './reindex_knowledge_base';
-import { scheduleKbSemanticTextMigrationTask } from '../task_manager_definitions/register_kb_semantic_text_migration_task';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
@@ -42,15 +37,6 @@ interface Dependencies {
   };
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
-}
-
-export interface RecalledEntry {
-  id: string;
-  title?: string;
-  text: string;
-  score: number | null;
-  is_correction?: boolean;
-  labels?: Record<string, string>;
 }
 
 function throwKnowledgeBaseNotReady(body: any) {
@@ -82,146 +68,9 @@ export class KnowledgeBaseService {
     }
   }
 
-  private async recallFromKnowledgeBase({
-    queries,
-    categories,
-    namespace,
-    user,
-  }: {
-    queries: Array<{ text: string; boost?: number }>;
-    categories?: string[];
-    namespace: string;
-    user?: { name: string };
-  }): Promise<RecalledEntry[]> {
-    const response = await this.dependencies.esClient.asInternalUser.search<
-      Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels' | 'title'> & { doc_id?: string }
-    >({
-      index: [resourceNames.aliases.kb],
-      query: {
-        bool: {
-          should: queries.map(({ text, boost = 1 }) => ({
-            semantic: {
-              field: 'semantic_text',
-              query: text,
-              boost,
-            },
-          })),
-          filter: [
-            ...getAccessQuery({
-              user,
-              namespace,
-            }),
-            ...getCategoryQuery({ categories }),
-
-            // exclude user instructions
-            { bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } } },
-          ],
-        },
-      },
-      size: 20,
-      _source: {
-        includes: ['text', 'is_correction', 'labels', 'doc_id', 'title'],
-      },
-    });
-
-    return response.hits.hits.map((hit) => ({
-      text: hit._source?.text!,
-      is_correction: hit._source?.is_correction,
-      labels: hit._source?.labels,
-      title: hit._source?.title ?? hit._source?.doc_id, // use `doc_id` as fallback title for backwards compatibility
-      score: hit._score!,
-      id: hit._id!,
-    }));
-  }
-
-  recall = async ({
-    user,
-    queries,
-    categories,
-    namespace,
-    esClient,
-    uiSettingsClient,
-    limit = {},
-  }: {
-    queries: Array<{ text: string; boost?: number }>;
-    categories?: string[];
-    user?: { name: string };
-    namespace: string;
-    esClient: { asCurrentUser: ElasticsearchClient; asInternalUser: ElasticsearchClient };
-    uiSettingsClient: IUiSettingsClient;
-    limit?: { tokens?: number; size?: number };
-  }): Promise<RecalledEntry[]> => {
-    if (!this.dependencies.config.enableKnowledgeBase) {
-      return [];
-    }
-
-    this.dependencies.logger.debug(
-      () => `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
-    );
-
-    const [documentsFromKb, documentsFromConnectors] = await Promise.all([
-      this.recallFromKnowledgeBase({
-        user,
-        queries,
-        categories,
-        namespace,
-      }).catch((error) => {
-        if (isInferenceEndpointMissingOrUnavailable(error)) {
-          throwKnowledgeBaseNotReady(error.body);
-        }
-        throw error;
-      }),
-      recallFromSearchConnectors({
-        esClient,
-        uiSettingsClient,
-        queries,
-        core: this.dependencies.core,
-        logger: this.dependencies.logger,
-      }).catch((error) => {
-        this.dependencies.logger.debug('Error getting data from search indices');
-        this.dependencies.logger.debug(error);
-        return [];
-      }),
-    ]);
-
-    this.dependencies.logger.debug(
-      `documentsFromKb: ${JSON.stringify(documentsFromKb.slice(0, 5), null, 2)}`
-    );
-    this.dependencies.logger.debug(
-      `documentsFromConnectors: ${JSON.stringify(documentsFromConnectors.slice(0, 5), null, 2)}`
-    );
-
-    const sortedEntries = orderBy(
-      documentsFromKb.concat(documentsFromConnectors),
-      'score',
-      'desc'
-    ).slice(0, limit.size ?? 20);
-
-    const maxTokens = limit.tokens ?? 4_000;
-
-    let tokenCount = 0;
-
-    const returnedEntries: RecalledEntry[] = [];
-
-    for (const entry of sortedEntries) {
-      returnedEntries.push(entry);
-      tokenCount += encode(entry.text).length;
-      if (tokenCount >= maxTokens) {
-        break;
-      }
-    }
-
-    const droppedEntries = sortedEntries.length - returnedEntries.length;
-    if (droppedEntries > 0) {
-      this.dependencies.logger.info(`Dropped ${droppedEntries} entries because of token limit`);
-    }
-
-    return returnedEntries;
-  };
-
   getUserInstructions = async (
     namespace: string,
-    user?: { name: string }
+    user: { name: string; id?: string } | null
   ): Promise<Array<Instruction & { public?: boolean }>> => {
     if (!this.dependencies.config.enableKnowledgeBase) {
       return [];
@@ -343,7 +192,7 @@ export class KnowledgeBaseService {
     namespace,
   }: {
     isPublic: boolean;
-    user?: { name: string; id?: string };
+    user: { name: string; id?: string } | null;
     namespace?: string;
   }) => {
     if (!this.dependencies.config.enableKnowledgeBase) {
@@ -359,7 +208,7 @@ export class KnowledgeBaseService {
             { term: { namespace } },
             {
               bool: {
-                should: [...getUserAccessFilters(user)],
+                should: [getUserAccessQuery(user)],
                 minimum_should_match: 1,
               },
             },
@@ -379,8 +228,8 @@ export class KnowledgeBaseService {
     namespace,
   }: {
     docId: string;
-    user?: { name: string; id?: string };
-    namespace?: string;
+    user: { name: string; id?: string } | null;
+    namespace: string | null;
   }) => {
     const query = {
       bool: {
@@ -412,7 +261,7 @@ export class KnowledgeBaseService {
     namespace,
   }: {
     entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
-    user?: { name: string; id?: string };
+    user: { name: string; id?: string } | null;
     namespace: string;
   }): Promise<void> => {
     if (!this.dependencies.config.enableKnowledgeBase) {
@@ -429,7 +278,7 @@ export class KnowledgeBaseService {
           '@timestamp': new Date().toISOString(),
           ...doc,
           ...(doc.text ? { semantic_text: doc.text } : {}),
-          user,
+          ...(user ? { user } : {}),
           namespace,
         },
         refresh: 'wait_for',
@@ -488,13 +337,5 @@ export class KnowledgeBaseService {
       }
       throw error;
     }
-  };
-
-  getStatus = async () => {
-    return getElserModelStatus({
-      esClient: this.dependencies.esClient,
-      logger: this.dependencies.logger,
-      config: this.dependencies.config,
-    });
   };
 }

@@ -21,7 +21,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLoadingSpinner,
   EuiPopover,
   EuiScreenReaderOnly,
   EuiSpacer,
@@ -222,16 +221,6 @@ export function KnowledgeBaseTab() {
   const handleChangeQuery = (e: React.ChangeEvent<HTMLInputElement> | undefined) => {
     setQuery(e?.currentTarget.value || '');
   };
-
-  if (knowledgeBase.status.loading) {
-    return (
-      <EuiFlexGroup alignItems="center" direction="column">
-        <EuiFlexItem grow>
-          <EuiLoadingSpinner size="xl" data-test-subj="knowledgeBaseTabLoader" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
 
   return knowledgeBase.status.value?.ready ? (
     <>

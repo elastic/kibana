@@ -197,36 +197,36 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
 
     const { connectorId, prompt, context } = resources.params.body;
 
+    const inferenceClient = (await resources.plugins.inference.start()).getClient({
+      bindTo: {
+        connectorId,
+        functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
+      },
+      request: resources.request,
+    });
+
     const response$ = from(
       recallAndScore({
         analytics: (await resources.plugins.core.start()).analytics,
-        chat: (name, params) =>
-          client.chat(name, {
-            ...params,
-            stream: true,
-            connectorId,
-            simulateFunctionCalling,
-            signal,
-            tracer: new LangTracer(otelContext.active()),
-          }),
         context,
         logger: resources.logger,
         messages: [],
         userPrompt: prompt,
         recall: client.recall,
         signal,
+        inferenceClient,
       })
     ).pipe(
-      map(({ scores, suggestions, relevantDocuments }) => {
+      map(({ scores, entries, queries, selected }) => {
         return createFunctionResponseMessage({
           name: 'context',
           data: {
-            suggestions,
             scores,
+            entries,
+            queries,
+            selected,
           },
-          content: {
-            relevantDocuments,
-          },
+          content: {},
         });
       })
     );

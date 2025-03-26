@@ -9,7 +9,7 @@ import pLimit from 'p-limit';
 import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import {
+import type {
   InferenceInferenceEndpointInfo,
   MlDeploymentAllocationState,
   MlDeploymentAssignmentState,
@@ -19,6 +19,21 @@ import moment from 'moment';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { Instruction, KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
 
+// here to minimize changes in a single PR,
+// should be removed entirely in a follow-up,
+// see https://github.com/elastic/kibana/pull/213596
+export interface LegacyKnowledgeBaseStatus {
+  errorMessage?: string;
+  ready: boolean;
+  enabled: boolean;
+  endpoint?: Partial<InferenceInferenceEndpointInfo>;
+  model_stats?: {
+    deployment_state?: MlDeploymentAssignmentState;
+    allocation_state?: MlDeploymentAllocationState;
+    allocation_count?: MlTrainedModelDeploymentAllocationStatus['allocation_count'];
+  };
+}
+
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',
   security: {
@@ -26,27 +41,35 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
       requiredPrivileges: ['ai_assistant'],
     },
   },
-  handler: async ({
-    service,
-    request,
-  }): Promise<{
-    errorMessage?: string;
-    ready: boolean;
-    enabled: boolean;
-    endpoint?: Partial<InferenceInferenceEndpointInfo>;
-    model_stats?: {
-      deployment_state?: MlDeploymentAssignmentState;
-      allocation_state?: MlDeploymentAllocationState;
-      allocation_count?: MlTrainedModelDeploymentAllocationStatus['allocation_count'];
-    };
-  }> => {
+  handler: async ({ service, request }): Promise<LegacyKnowledgeBaseStatus> => {
     const client = await service.getClient({ request });
 
     if (!client) {
       throw notImplemented();
     }
 
-    return client.getKnowledgeBaseStatus();
+    return client.getKnowledgeBaseStatus().then((status) => {
+      if (!status.enabled) {
+        return {
+          ready: false,
+          enabled: false,
+        };
+      }
+      return {
+        enabled: true,
+        ready: status.internal.available,
+        ...(status.internal.available
+          ? {
+              endpoint: status.internal.endpoint,
+              model_stats: {
+                allocation_state: status.internal.allocation_state,
+                deployment_state: status.internal.deployment_state,
+                allocation_count: status.internal.allocation_count,
+              },
+            }
+          : {}),
+      };
+    });
   },
 });
 
@@ -293,8 +316,8 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    const { ready } = await client.getKnowledgeBaseStatus();
-    if (!ready) {
+    const status = await client.getKnowledgeBaseStatus();
+    if (!status.enabled || !status.internal.available) {
       throw new Error('Knowledge base is not ready');
     }
 

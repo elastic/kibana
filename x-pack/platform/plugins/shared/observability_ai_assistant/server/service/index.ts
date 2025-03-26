@@ -116,10 +116,7 @@ export class ObservabilityAIAssistantService {
       actionsClient: await plugins.actions.getActionsClientWithRequest(request),
       uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
       namespace: spaceId,
-      esClient: {
-        asInternalUser,
-        asCurrentUser: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
-      },
+      esClient: coreStart.elasticsearch.client.asScoped(request),
       inferenceClient,
       logger: this.logger,
       user: user
@@ -127,9 +124,10 @@ export class ObservabilityAIAssistantService {
             id: user.profile_uid,
             name: user.username,
           }
-        : undefined,
+        : null,
       knowledgeBaseService: kbService,
       scopes: scopes || ['all'],
+      productDocBase: plugins.productDocBase,
     });
   }
 
