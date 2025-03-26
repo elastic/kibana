@@ -35,7 +35,7 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
 import type { BuildReasonMessage } from './reason_formatters';
 import { SERVER_APP_ID } from '../../../../../common/constants';
