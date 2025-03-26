@@ -87,13 +87,12 @@ export const createDataViewSelectedListener = (dependencies: {
         }
       }
 
-      const resolvedSpecToUse =
-        cachedDataViewSpec || (await dataViewById?.toSpec()) || adHocDataView?.toSpec();
+      const resolvedIdToUse = cachedDataViewSpec?.id || dataViewById?.id || adHocDataView?.id;
 
       action.payload.scope.forEach((scope) => {
         const currentScopeActions = scopes[scope].actions;
-        if (resolvedSpecToUse && resolvedSpecToUse.id) {
-          listenerApi.dispatch(currentScopeActions.setSelectedDataView(resolvedSpecToUse.id));
+        if (resolvedIdToUse && resolvedIdToUse) {
+          listenerApi.dispatch(currentScopeActions.setSelectedDataView(resolvedIdToUse));
         } else if (dataViewByIdError || adhocDataViewCreationError) {
           const err = dataViewByIdError || adhocDataViewCreationError;
           listenerApi.dispatch(
