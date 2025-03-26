@@ -80,7 +80,7 @@ function DimensionButtonImpl({
                 width: 100%;
                 &:focus {
                   background-color: transparent;
-                  text-decoration-thickness: ${euiTheme.border.thin} !important;
+                  text-decoration-thickness: ${euiThemeVars.euiBorderThin} !important;
                 }
                 &:hover {
                   text-decoration: none;
