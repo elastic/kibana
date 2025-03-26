@@ -1360,6 +1360,7 @@
     "@elastic/synthetics": "^1.18.0",
     "@emotion/babel-preset-css-prop": "^11.11.0",
     "@emotion/jest": "^11.11.0",
+    "@fast-check/jest": "^2.1.0",
     "@frsource/cypress-plugin-visual-regression-diff": "^3.3.10",
     "@jest/console": "^29.7.0",
     "@jest/reporters": "^29.7.0",
