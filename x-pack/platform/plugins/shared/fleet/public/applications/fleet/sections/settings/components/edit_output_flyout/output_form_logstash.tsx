@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiSpacer, EuiLink, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -76,6 +76,8 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
         </>
       )}
       <EuiSpacer size="m" />
+      <EuiSwitch label="Enable SSL" {...inputs.logstashEnableSSLInput.props} />
+      <EuiSpacer size="m" />
       <LogstashInstructions />
       <EuiSpacer size="m" />
       <MultiRowInput
@@ -108,13 +110,15 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
         {...inputs.logstashHostsInput.props}
       />
       <EuiSpacer size="m" />
-      <SSLFormSection
-        inputs={inputs}
-        useSecretsStorage={useSecretsStorage}
-        isConvertedToSecret={isConvertedToSecret.sslKey}
-        onToggleSecretAndClearValue={onToggleSecretAndClearValue}
-        type={inputs.typeInput.value as FormType}
-      />
+      {inputs.logstashEnableSSLInput.value && (
+        <SSLFormSection
+          inputs={inputs}
+          useSecretsStorage={useSecretsStorage}
+          isConvertedToSecret={isConvertedToSecret.sslKey}
+          onToggleSecretAndClearValue={onToggleSecretAndClearValue}
+          type={inputs.typeInput.value as FormType}
+        />
+      )}
     </>
   );
 };

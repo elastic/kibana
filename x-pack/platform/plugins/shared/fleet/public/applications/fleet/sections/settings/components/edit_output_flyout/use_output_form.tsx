@@ -92,6 +92,7 @@ export interface OutputFormInputsType {
   diskQueueEncryptionEnabled: ReturnType<typeof useSwitchInput>;
   diskQueueCompressionEnabled: ReturnType<typeof useSwitchInput>;
   compressionLevelInput: ReturnType<typeof useSelectInput>;
+  logstashEnableSSLInput: ReturnType<typeof useSwitchInput>;
   logstashHostsInput: ReturnType<typeof useComboInput>;
   presetInput: ReturnType<typeof useInput>;
   additionalYamlConfigInput: ReturnType<typeof useInput>;
@@ -362,6 +363,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
 
   const isSSLEditable = isDisabled('ssl');
   // Logstash inputs
+  const logstashEnableSSLInput = useSwitchInput(output ? Boolean(output?.ssl) : true);
+
   const logstashHostsInput = useComboInput(
     'logstashHostsComboxBox',
     output?.hosts ?? [],
@@ -582,6 +585,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     diskQueueMaxSizeInput,
     diskQueueCompressionEnabled,
     compressionLevelInput,
+    logstashEnableSSLInput,
     logstashHostsInput,
     presetInput,
     additionalYamlConfigInput,
@@ -943,13 +947,15 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
               is_default: defaultOutputInput.value,
               is_default_monitoring: defaultMonitoringOutputInput.value,
               config_yaml: additionalYamlConfigInput.value,
-              ssl: {
-                certificate: sslCertificateInput.value,
-                key: sslKeyInput.value || undefined,
-                certificate_authorities: sslCertificateAuthoritiesInput.value.filter(
-                  (val) => val !== ''
-                ),
-              },
+              ssl: logstashEnableSSLInput.value
+                ? {
+                    certificate: sslCertificateInput.value,
+                    key: sslKeyInput.value || undefined,
+                    certificate_authorities: sslCertificateAuthoritiesInput.value.filter(
+                      (val) => val !== ''
+                    ),
+                  }
+                : undefined,
               ...(!sslKeyInput.value &&
                 sslKeySecretInput.value && {
                   secrets: {
@@ -1116,6 +1122,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     kafkaBrokerTimeoutInput.value,
     kafkaBrokerReachabilityTimeoutInput.value,
     kafkaBrokerAckReliabilityInput.value,
+    logstashEnableSSLInput.value,
     logstashHostsInput.value,
     sslCertificateInput.value,
     sslKeyInput.value,
