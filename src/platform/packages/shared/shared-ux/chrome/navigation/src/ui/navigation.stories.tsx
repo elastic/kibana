@@ -13,11 +13,15 @@ import { of } from 'rxjs';
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiCollapsibleNavBeta,
   EuiCollapsibleNavBetaProps,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHeader,
   EuiHeaderSection,
   EuiPageTemplate,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import type {
@@ -272,7 +276,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
             },
             {
               id: 'item05',
-              title: 'Item 05',
+              title: 'Item 05, with custom',
               path: '',
               icon: 'iInCircle',
               renderAs: 'panelOpener',
@@ -283,6 +287,31 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
                   title: 'Item 23',
                   href: '/app/kibana',
                   icon: 'iInCircle',
+                },
+                {
+                  id: 'spacer1',
+                  path: '',
+                  title: 'This text is not shown.',
+                  renderItem: () => {
+                    return <EuiSpacer />;
+                  },
+                },
+                {
+                  id: 'callout1',
+                  path: '',
+                  title: 'This text is not shown.',
+                  renderItem: () => {
+                    return (
+                      <EuiCallOut title="Check it out" iconType="cluster">
+                        <EuiFlexGroup justifyContent="spaceAround" direction="column">
+                          <EuiFlexItem>
+                            <p>Choose an integration to start</p>
+                            <EuiButton>Browse integrations</EuiButton>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiCallOut>
+                    );
+                  },
                 },
               ],
             },
