@@ -17,6 +17,7 @@ import { useDataView } from '../../hooks/use_data_view';
 import { sharedStateSelector } from '../../redux/selectors';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
+import { useInvalidateCache } from '../../hooks/use_data_view_cache';
 
 export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) => {
   const dispatch = useDispatch();
@@ -27,6 +28,7 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
   } = useKibana();
   const closeDataViewEditor = useRef<() => void | undefined>();
   const closeFieldEditor = useRef<() => void | undefined>();
+  const invalidateCache = useInvalidateCache();
 
   const { dataView } = useDataView(props.scope);
 
@@ -42,7 +44,13 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
     });
   }, [dataViewEditor, dispatch, props.scope, selectDataView]);
 
-  const onFieldEdited = useCallback(() => {}, []);
+  const handleChangeDataView = useCallback(
+    (id: string) => {
+      invalidateCache();
+      selectDataView({ id, scope: [props.scope] });
+    },
+    [invalidateCache, props.scope, selectDataView]
+  );
 
   const editField = useCallback(
     async (fieldName?: string, _uiAction: 'edit' | 'add' = 'edit') => {
@@ -51,27 +59,25 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
       }
 
       const dataViewInstance = await data.dataViews.get(dataViewId);
+
       closeFieldEditor.current = await dataViewFieldEditor.openEditor({
         ctx: {
           dataView: dataViewInstance,
         },
         fieldName,
         onSave: async () => {
-          onFieldEdited();
+          if (!dataViewInstance.id) {
+            return;
+          }
+
+          handleChangeDataView(dataViewInstance.id);
         },
       });
     },
-    [dataViewId, data.dataViews, dataViewFieldEditor, onFieldEdited]
+    [dataViewId, data.dataViews, dataViewFieldEditor, handleChangeDataView]
   );
 
   const handleAddField = useCallback(() => editField(undefined, 'add'), [editField]);
-
-  const handleChangeDataView = useCallback(
-    (id: string) => {
-      selectDataView({ id, scope: [props.scope] });
-    },
-    [props.scope, selectDataView]
-  );
 
   /**
    * Selects data view again. After changes are made to the data view, this results in cache invalidation and will force the reload everywhere.

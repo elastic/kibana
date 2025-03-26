@@ -14,6 +14,7 @@ import { type DataViewManagerScopeName } from '../constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { sourcererAdapterSelector } from '../redux/selectors';
 import type { SharedDataViewSelectionState } from '../redux/types';
+import { dataViewCache } from './use_data_view_cache';
 
 /*
  * This hook should be used whenever we need the actual DataView and not just the spec for the
@@ -41,7 +42,17 @@ export const useFullDataView = (
       // TODO: remove conditional .get call when new data view picker is stabilized
       // this is due to the fact that many of our tests mock kibana hook and do not provide proper
       // double for dataViews service
-      setRetrievedDataView(await dataViews?.get(dataViewId));
+
+      const getDataViewFromCache = async (id: string) => {
+        if (dataViewCache[id]) {
+          return dataViewCache[id];
+        }
+
+        dataViewCache[id] = dataViews?.get(id);
+        return dataViewCache[id];
+      };
+
+      setRetrievedDataView(await getDataViewFromCache(dataViewId));
     })();
   }, [dataViews, dataViewId, internalStatus]);
 
