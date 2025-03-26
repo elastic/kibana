@@ -33,9 +33,6 @@ const Renderer = () => {
 
 export default {
   title: 'renderers/image',
-};
-
-export const Default = {
   render: (_, props) => {
     return <Renderer />;
   },
