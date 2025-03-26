@@ -11,11 +11,12 @@ import React from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getTraceDocumentOverview } from '@kbn/discover-utils';
+import { TRANSACTION_DURATION_FIELD, getTraceDocumentOverview } from '@kbn/discover-utils';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { transactionFields } from './resources/fields';
 import { getTransactionFieldConfiguration } from './resources/get_transaction_field_configuration';
 import { TransactionSummaryField } from './sub_components/transaction_summary_field';
+import { TransactionDurationSummary } from './sub_components/transaction_duration_summary';
 export type TransactionOverviewProps = DocViewRenderProps;
 
 export function TransactionOverview({
@@ -26,6 +27,7 @@ export function TransactionOverview({
   onRemoveColumn,
 }: TransactionOverviewProps) {
   const parsedDoc = getTraceDocumentOverview(hit);
+  const transactionDuration = parsedDoc[TRANSACTION_DURATION_FIELD];
 
   const detailTitle = i18n.translate(
     'unifiedDocViewer.observability.traces.transactionOverview.title',
@@ -58,6 +60,13 @@ export function TransactionOverview({
             />
           );
         })}
+
+        {transactionDuration && (
+          <>
+            <EuiSpacer size="m" />
+            <TransactionDurationSummary duration={transactionDuration} />
+          </>
+        )}
       </EuiPanel>
     </FieldActionsProvider>
   );
