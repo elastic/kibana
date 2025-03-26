@@ -56,7 +56,7 @@
     "@kbn/react-kibana-context-render",
     "@kbn/apm-data-access-plugin",
     "@kbn/ebt-tools",
-    "@kbn/security-plugin-types-common"
+    "@kbn/core-security-server"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
