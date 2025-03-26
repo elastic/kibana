@@ -65,7 +65,7 @@ export const Tab: React.FC<TabProps> = (props) => {
     defaultMessage: 'Click to select or double-click to edit session name',
   });
 
-  const hidePreview = () => setShowPreview(false);
+  const hidePreview = useCallback(() => setShowPreview(false), [setShowPreview]);
 
   const onSelectEvent = useCallback(
     async (event: MouseEvent<HTMLElement>) => {
@@ -76,7 +76,7 @@ export const Tab: React.FC<TabProps> = (props) => {
         await onSelect(item);
       }
     },
-    [onSelect, item, isSelected]
+    [onSelect, item, isSelected, hidePreview]
   );
 
   const onCloseEvent = useCallback(
@@ -97,10 +97,10 @@ export const Tab: React.FC<TabProps> = (props) => {
     [onSelectEvent]
   );
 
-  const handleDoubleClick = useCallback(() => {
+  const onDoubleClick = useCallback(() => {
     setIsInlineEditActive(true);
     hidePreview();
-  }, []);
+  }, [setIsInlineEditActive, hidePreview]);
 
   const mainTabContent = (
     <EuiFlexGroup
@@ -126,7 +126,7 @@ export const Tab: React.FC<TabProps> = (props) => {
               data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
               type="button"
               onClick={onSelectEvent}
-              onDoubleClick={handleDoubleClick}
+              onDoubleClick={onDoubleClick}
             >
               <EuiText color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
                 {item.label}
