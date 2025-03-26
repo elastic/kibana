@@ -55,10 +55,14 @@ const OutcomeControls = () => {
   const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
-  const simulationFailureRate = useSimulatorSelector((state) =>
-    state.context.simulation
-      ? state.context.simulation.failure_rate + state.context.simulation.skipped_rate
-      : undefined
+  const simulationFailureRate = useSimulatorSelector(
+    (state) => state.context.simulation?.failure_rate
+  );
+  const simulationSkippedRate = useSimulatorSelector(
+    (state) => state.context.simulation?.skipped_rate
+  );
+  const simulationPartiallyParsedRate = useSimulatorSelector(
+    (state) => state.context.simulation?.partially_parsed_rate
   );
   const simulationSuccessRate = useSimulatorSelector(
     (state) => state.context.simulation?.success_rate
@@ -100,22 +104,42 @@ const OutcomeControls = () => {
           {previewDocsFilterOptions.outcome_filter_all.label}
         </EuiFilterButton>
         <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_matched.id)}
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
           badgeColor="success"
           numActiveFilters={
             simulationSuccessRate ? parseFloat((simulationSuccessRate * 100).toFixed(2)) : undefined
           }
         >
-          {previewDocsFilterOptions.outcome_filter_matched.label}
+          {previewDocsFilterOptions.outcome_filter_parsed.label}
         </EuiFilterButton>
         <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_unmatched.id)}
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_partially_parsed.id)}
+          badgeColor="accent"
+          numActiveFilters={
+            simulationPartiallyParsedRate
+              ? parseFloat((simulationPartiallyParsedRate * 100).toFixed(2))
+              : undefined
+          }
+        >
+          {previewDocsFilterOptions.outcome_filter_partially_parsed.label}
+        </EuiFilterButton>
+        <EuiFilterButton
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_skipped.id)}
+          badgeColor="accent"
+          numActiveFilters={
+            simulationSkippedRate ? parseFloat((simulationSkippedRate * 100).toFixed(2)) : undefined
+          }
+        >
+          {previewDocsFilterOptions.outcome_filter_skipped.label}
+        </EuiFilterButton>
+        <EuiFilterButton
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
           badgeColor="accent"
           numActiveFilters={
             simulationFailureRate ? parseFloat((simulationFailureRate * 100).toFixed(2)) : undefined
           }
         >
-          {previewDocsFilterOptions.outcome_filter_unmatched.label}
+          {previewDocsFilterOptions.outcome_filter_failed.label}
         </EuiFilterButton>
       </EuiFilterGroup>
       <StreamsAppSearchBar

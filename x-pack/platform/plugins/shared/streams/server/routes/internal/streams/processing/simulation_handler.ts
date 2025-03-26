@@ -575,9 +575,10 @@ const prepareSimulationResponse = async (
   processorsMetrics: Record<string, ProcessorMetrics>,
   detectedFields: DetectedField[]
 ) => {
-  const successRate = computeSuccessRate(docReports);
+  const successRate = computeParsedRate(docReports);
+  const partiallyParsedRate = computePartiallyParsedRate(docReports);
   const skippedRate = computeSkippedRate(docReports);
-  const failureRate = 1 - skippedRate - successRate;
+  const failureRate = computeFailedRate(docReports);
   const isNotAdditiveSimulation = some(processorsMetrics, (metrics) =>
     metrics.errors.some(isNonAdditiveSimulationError)
   );
@@ -587,6 +588,7 @@ const prepareSimulationResponse = async (
     documents: docReports,
     processors_metrics: processorsMetrics,
     failure_rate: parseFloat(failureRate.toFixed(2)),
+    partially_parsed_rate: parseFloat(partiallyParsedRate.toFixed(2)),
     skipped_rate: parseFloat(skippedRate.toFixed(2)),
     success_rate: parseFloat(successRate.toFixed(2)),
     is_non_additive_simulation: isNotAdditiveSimulation,
@@ -607,6 +609,7 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
       },
     },
     failure_rate: 1,
+    partially_parsed_rate: 0,
     skipped_rate: 0,
     success_rate: 0,
     is_non_additive_simulation: isNonAdditiveSimulationError(error),
@@ -659,14 +662,29 @@ const computeDetectedFields = async (
   });
 };
 
-const computeSuccessRate = (docs: SimulationDocReport[]) => {
+const computeParsedRate = (docs: SimulationDocReport[]) => {
   const successfulCount = docs.reduce((rate, doc) => (rate += doc.status === 'parsed' ? 1 : 0), 0);
+
+  return successfulCount / docs.length;
+};
+
+const computePartiallyParsedRate = (docs: SimulationDocReport[]) => {
+  const successfulCount = docs.reduce(
+    (rate, doc) => (rate += doc.status === 'partially_parsed' ? 1 : 0),
+    0
+  );
 
   return successfulCount / docs.length;
 };
 
 const computeSkippedRate = (docs: SimulationDocReport[]) => {
   const skippedCount = docs.reduce((rate, doc) => (rate += doc.status === 'skipped' ? 1 : 0), 0);
+
+  return skippedCount / docs.length;
+};
+
+const computeFailedRate = (docs: SimulationDocReport[]) => {
+  const skippedCount = docs.reduce((rate, doc) => (rate += doc.status === 'failed' ? 1 : 0), 0);
 
   return skippedCount / docs.length;
 };
