@@ -53,12 +53,8 @@ export function SloManagementSearchBar({ filters, setFilters, onRefresh }: Props
       onRefresh={onRefresh}
       renderQueryInputAppend={() => (
         <EuiComboBox
-          aria-label={i18n.translate('xpack.slo.sloDefinitions.filterByTag', {
-            defaultMessage: 'Filter tags',
-          })}
-          placeholder={i18n.translate('xpack.slo.sloDefinitions.filterByTag', {
-            defaultMessage: 'Filter tags',
-          })}
+          aria-label={filterTagsLabel}
+          placeholder={filterTagsLabel}
           delimiter=","
           options={suggestions?.tags ? [existOption, ...suggestions?.tags] : []}
           selectedOptions={selectedOptions}
@@ -73,6 +69,10 @@ export function SloManagementSearchBar({ filters, setFilters, onRefresh }: Props
     />
   );
 }
+
+const filterTagsLabel = i18n.translate('xpack.slo.sloDefinitions.filterByTag', {
+  defaultMessage: 'Filter tags',
+});
 
 const existOption = {
   prepend: (
