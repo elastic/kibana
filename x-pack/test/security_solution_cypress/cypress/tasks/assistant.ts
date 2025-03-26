@@ -43,6 +43,7 @@ import {
   QUICK_PROMPT_BADGE,
   ADD_NEW_CONNECTOR,
   SEND_TO_TIMELINE_BUTTON,
+  KNOWLEDGE_BASE_INSTALL_BUTTON,
 } from '../screens/ai_assistant';
 
 export const openAssistant = (context?: 'rule' | 'alert') => {
@@ -173,6 +174,10 @@ export const selectRule = (ruleId: string) => {
   // not be.visible because of eui css
   cy.get(TIMELINE_CHECKBOX(ruleId)).should('exist');
   cy.get(TIMELINE_CHECKBOX(ruleId)).click();
+};
+
+export const installKnowledgeBase = () => {
+  cy.get(KNOWLEDGE_BASE_INSTALL_BUTTON).click();
 };
 
 /**

@@ -30,6 +30,7 @@ export const CONVERSATION_TITLE_SAVE_BUTTON = '[data-test-subj="euiInlineEditMod
 export const CREATE_SYSTEM_PROMPT = '[data-test-subj="addSystemPrompt"]';
 export const EMPTY_CONVO = '[data-test-subj="emptyConvo"]';
 export const FLYOUT_NAV_TOGGLE = '[data-test-subj="aiAssistantFlyoutNavigationToggle"]';
+export const KNOWLEDGE_BASE_INSTALL_BUTTON = '[data-test-subj="install-knowledge-base-button"]';
 export const MODAL_SAVE_BUTTON = '[data-test-subj="save-button"]';
 export const NEW_CHAT = '[data-test-subj="newChatFromOverlay"]';
 export const PROMPT_CONTEXT_SELECTOR =

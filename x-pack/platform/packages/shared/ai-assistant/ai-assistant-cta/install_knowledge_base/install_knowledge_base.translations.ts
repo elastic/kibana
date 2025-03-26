@@ -15,7 +15,7 @@ const cardDescription = i18n.translate(
   'xpack.aiAssistant.callToAction.installKnowledgeBase.cardDescription',
   {
     defaultMessage:
-      'Your Generative AI Connector is setup, but you need to also set up a knowledge base to get started.',
+      'Your Generative AI Connector is set up, but you need to also set up a knowledge base to get started.',
   }
 );
 
