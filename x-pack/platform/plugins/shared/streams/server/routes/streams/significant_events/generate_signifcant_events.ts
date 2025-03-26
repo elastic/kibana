@@ -1,0 +1,297 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { BoundInferenceClient } from '@kbn/inference-plugin/server';
+import { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import {
+  analyzeDocuments,
+  getLogPatterns,
+  sortAndTruncateAnalyzedFields,
+} from '@kbn/genai-utils-server';
+import { ShortIdTable } from '@kbn/genai-utils-common';
+import moment from 'moment';
+import { Logger } from '@kbn/core/server';
+import pLimit from 'p-limit';
+import { v4 } from 'uuid';
+import { KQL_GUIDE } from './kql_guide';
+import { kqlQuery, rangeQuery } from '../../internal/esql/query_helpers';
+
+const LOOKBACK_DAYS = 7;
+
+export interface GeneratedSignificantEventQuery {
+  title: string;
+  kql: string;
+}
+
+export async function generateSignificantEventDefinitions({
+  name,
+  inferenceClient,
+  esClient,
+  logger,
+}: {
+  name: string;
+  inferenceClient: Pick<BoundInferenceClient, 'output'>;
+  esClient: TracedElasticsearchClient;
+  logger: Logger;
+}): Promise<GeneratedSignificantEventQuery[]> {
+  const mend = moment();
+  const mstart = mend.clone().subtract(24, 'hours');
+
+  const start = mstart.valueOf();
+  const end = mend.valueOf();
+
+  const analysis = await analyzeDocuments({
+    esClient,
+    kuery: '',
+    start,
+    end,
+    index: name,
+  });
+
+  const textFields = analysis.fields
+    .filter((field) => field.types.includes('text'))
+    .map((field) => field.name);
+
+  const categorizationField = textFields.includes('message')
+    ? 'message'
+    : textFields.includes('body.text')
+    ? 'body.text'
+    : undefined;
+
+  const lookbackStart = mend.clone().subtract(LOOKBACK_DAYS, 'days').valueOf();
+
+  const logPatterns = categorizationField
+    ? await getLogPatterns({
+        start: lookbackStart,
+        end,
+        esClient,
+        fields: [categorizationField],
+        index: name,
+        kuery: '',
+        includeChanges: true,
+        metadata: [],
+      }).then((results) => {
+        return results.map((result) => {
+          const { pattern, highlight, sample, count } = result;
+          return {
+            pattern,
+            highlight,
+            sample,
+            count,
+          };
+        });
+      })
+    : undefined;
+
+  if (logPatterns?.length) {
+    logger.debug(() => {
+      return `Found ${logPatterns?.length} log patterns:
+      
+      ${logPatterns
+        .map((pattern) => {
+          return `- ${pattern.pattern} (${pattern.sample}`;
+        })
+        .join('\n')}
+      `;
+    });
+  }
+
+  const short = sortAndTruncateAnalyzedFields(analysis);
+
+  const instruction = `I want to generate KQL queries that help me find
+    important log messages. Each pattern should have its own
+    query. I will use these queries to help me see changes in
+    these patterns. Only generate queries for patterns that
+    are indicative of something unusual happening, like startup/
+    shutdown messages, or warnings, errors and fatal messages. Prefer
+    simple match queries over wildcards. The goal of this is to have
+    queries that each represent a specific pattern, to be able to
+    monitor for changes in the pattern and use it as a signal in
+    root cause analysis. Some example of patterns:
+    
+    - \`message: "CircuitBreakingException"\`
+    - \`message: "max number of clients reached"\`
+    - \`message:(connection AND refused)\`
+    `;
+
+  const chunks = [
+    instruction,
+    KQL_GUIDE,
+    ...(logPatterns
+      ? `## Log patterns
+    
+    The following log patterns where found over the last
+    ${LOOKBACK_DAYS}. The field used is \`${categorizationField}\`:
+    
+    ${JSON.stringify(logPatterns)}`
+      : ''),
+    `## Dataset analysis
+    
+    ${JSON.stringify(short)}`,
+  ];
+  const { output } = await inferenceClient.output({
+    id: 'generate_kql_queries',
+    input: chunks.filter(Boolean).join('\n\n'),
+    schema: {
+      type: 'object',
+      properties: {
+        queries: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              title: {
+                type: 'string',
+                description: 'A title for the log pattern',
+              },
+              kql: {
+                type: 'string',
+                description: 'The KQL of the specific log pattern',
+              },
+            },
+            required: ['kql', 'title'],
+          },
+        },
+      },
+      required: ['queries'],
+    } as const,
+  });
+
+  const queries = output.queries;
+
+  if (!queries.length) {
+    return [];
+  }
+
+  if (queries.length) {
+    logger.debug(() => {
+      return `Generated queries:
+      
+      ${queries
+        .map((query) => {
+          return `- ${query.kql}`;
+        })
+        .join('\n')}`;
+    });
+  }
+
+  const MATCH_ALL_TITLE = '_match_all_title';
+
+  const limiter = pLimit(10);
+
+  const queriesWithCounts = await Promise.all(
+    [...queries, { title: MATCH_ALL_TITLE, kql: '*' }].map((query) =>
+      limiter(async () => {
+        return esClient
+          .search('verify_query', {
+            track_total_hits: true,
+            index: name,
+            size: 0,
+            query: {
+              bool: {
+                filter: [...kqlQuery(query.kql), ...rangeQuery(lookbackStart, end)],
+              },
+            },
+          })
+          .then((response) => ({ ...query, count: response.hits.total.value }));
+      })
+    )
+  );
+
+  const totalCount = queriesWithCounts.find((query) => query.title === MATCH_ALL_TITLE)?.count ?? 0;
+
+  if (queries.length) {
+    logger.debug(() => {
+      return `Ran queries:
+      
+      ${queriesWithCounts
+        .map((query) => {
+          return `- ${query.kql}: ${query.count}`;
+        })
+        .join('\n')}`;
+    });
+  }
+
+  const idLookupTable = new ShortIdTable();
+
+  const queriesWithShortIds = queriesWithCounts.map((query) => {
+    const id = v4();
+    return {
+      id,
+      shortId: idLookupTable.take(id),
+      ...query,
+    };
+  });
+
+  const { output: selectedQueries } = await inferenceClient.output({
+    id: 'verify_kql_queries',
+    input: [
+      instruction,
+      `You've previously generated some queries. I've ran those queries
+      to get the count for each. The total count of documents for the
+      given time period is ${totalCount}. Based on these document counts,
+      select the queries that you consider relevant.
+      
+      ## Queries
+
+      ${JSON.stringify(
+        queriesWithShortIds.map(({ shortId, kql, title, count }) => {
+          return {
+            id: shortId,
+            kql,
+            title,
+            count,
+          };
+        })
+      )}
+      `,
+    ].join('\n\n'),
+    schema: {
+      type: 'object',
+      properties: {
+        queries: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+              },
+            },
+            required: ['id'],
+          },
+        },
+      },
+      required: ['queries'],
+    } as const,
+  });
+
+  const queriesByShortId = new Map(
+    queriesWithShortIds.map(({ shortId, ...query }) => [shortId, query])
+  );
+
+  const selected = selectedQueries.queries.flatMap(({ id }) => {
+    const query = queriesByShortId.get(id);
+    if (!query) {
+      return [];
+    }
+    return { title: query.title, kql: query.kql, count: query.count };
+  });
+
+  logger.debug(() => {
+    return `Selected queries:
+    
+    ${selected
+      .map((query) => {
+        return `- ${query.kql}`;
+      })
+      .join('\n')}
+    `;
+  });
+
+  return selected;
+}

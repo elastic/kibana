@@ -37,6 +37,7 @@ import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 import { DashboardsTable } from '../stream_detail_dashboards_view/dashboard_table';
 import { AssetImage } from '../asset_image';
 import { useWiredStreams } from '../../hooks/use_wired_streams';
+import { useTimefilter } from '../../hooks/use_timefilter';
 
 const formatNumber = (val: number) => {
   return Number(val).toLocaleString('en', {
@@ -48,7 +49,6 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
   const {
     dependencies: {
       start: {
-        data,
         dataViews,
         streams: { streamsRepositoryClient },
         share,
@@ -60,7 +60,7 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
     timeRange,
     setTimeRange,
     absoluteTimeRange: { start, end },
-  } = data.query.timefilter.timefilter.useTimefilter();
+  } = useTimefilter();
 
   const indexPatterns = useMemo(() => {
     return getIndexPatterns(definition?.stream);
@@ -149,7 +149,7 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
       });
     },
 
-    [definition, dataViews, streamsRepositoryClient, start, end]
+    [definition, streamsRepositoryClient, start, end]
   );
 
   const [selectedTab, setSelectedTab] = React.useState<string | undefined>(undefined);

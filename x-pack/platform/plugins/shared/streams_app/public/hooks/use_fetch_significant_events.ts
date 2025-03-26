@@ -21,10 +21,12 @@ export const useFetchSignificantEvents = ({
   name,
   start,
   end,
+  kql,
 }: {
   name?: string;
   start: number;
   end: number;
+  kql?: string;
 }) => {
   const {
     dependencies: {
@@ -50,12 +52,12 @@ export const useFetchSignificantEvents = ({
       });
 
       if (!min || !max) {
-        return Promise.resolve(undefined);
+        return undefined;
       }
 
       const bucketSize = calculateAuto.near(50, moment.duration(max.diff(min)));
       if (!bucketSize) {
-        return Promise.resolve(undefined);
+        return undefined;
       }
 
       const intervalString = `${bucketSize.asSeconds()}s`;

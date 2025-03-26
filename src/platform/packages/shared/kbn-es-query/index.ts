@@ -19,6 +19,14 @@ export type {
   IFieldSubTypeNested,
 } from './src/es_query';
 
+export {
+  excludeFrozenQuery,
+  excludeTiersQuery,
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from './src/es_query/helpers';
+
 export type {
   CustomFilter,
   ExistsFilter,

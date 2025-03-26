@@ -19,6 +19,7 @@ import { streamsAppRouter } from '../../routes/config';
 import { StreamsAppStartDependencies } from '../../types';
 import { StreamsAppServices } from '../../services/types';
 import { HeaderMenuPortal } from '../header_menu';
+import { SyncTimerange } from './sync_timerange';
 
 export function AppRoot({
   coreStart,
@@ -48,10 +49,12 @@ export function AppRoot({
     <StreamsAppContextProvider context={context}>
       <RedirectAppLinks coreStart={coreStart}>
         <RouterProvider history={history} router={streamsAppRouter}>
-          <BreadcrumbsContextProvider>
-            <RouteRenderer />
-          </BreadcrumbsContextProvider>
-          <StreamsAppHeaderActionMenu appMountParameters={appMountParameters} />
+          <SyncTimerange>
+            <BreadcrumbsContextProvider>
+              <RouteRenderer />
+            </BreadcrumbsContextProvider>
+            <StreamsAppHeaderActionMenu appMountParameters={appMountParameters} />
+          </SyncTimerange>
         </RouterProvider>
       </RedirectAppLinks>
     </StreamsAppContextProvider>

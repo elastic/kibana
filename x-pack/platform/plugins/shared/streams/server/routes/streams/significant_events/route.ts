@@ -11,17 +11,23 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { badRequest, notFound } from '@hapi/boom';
 import { buildEsQuery } from '@kbn/es-query';
+import { ChangePointType } from '@kbn/es-types/src';
+import { ServerSentEventBase } from '@kbn/sse-utils';
 import {
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
   StreamQueryKql,
   streamQueryKqlSchema,
 } from '@kbn/streams-schema';
+import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
-import { createTracedEsClient } from '@kbn/traced-es-client';
-import { ChangePointType } from '@kbn/es-types/src';
+import { Observable, from as rxjsFrom, map } from 'rxjs';
 import { createServerRoute } from '../../create_server_route';
+import {
+  GeneratedSignificantEventQuery,
+  generateSignificantEventDefinitions,
+} from './generate_signifcant_events';
 
 const stringToDate = z.string().transform((arg) => new Date(arg));
 
@@ -78,7 +84,7 @@ function createSearchRequest({
 }
 
 const previewSignificantEventsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/significant_events/_preview 2023-10-31',
+  endpoint: 'POST /api/streams/{name}/significant_events/_preview',
   params: z.object({
     path: z.object({ name: z.string() }),
     query: z.object({ from: stringToDate, to: stringToDate, bucketSize: z.string() }),
@@ -88,7 +94,7 @@ const previewSignificantEventsRoute = createServerRoute({
   }),
 
   options: {
-    access: 'public',
+    access: 'internal',
     summary: 'Read the significant events',
     description: 'Read the significant events',
     availability: {
@@ -161,6 +167,78 @@ const previewSignificantEventsRoute = createServerRoute({
           };
         }) ?? [],
     };
+  },
+});
+
+const generateSignificantEventDefinitionsRoute = createServerRoute({
+  endpoint: 'GET /api/streams/{name}/significant_events/_generate',
+  options: {
+    access: 'internal',
+    summary: `Generate significant events`,
+    description: `Generate significant events for a stream, based on historical data`,
+    availability: {
+      stability: 'experimental',
+    },
+  },
+  params: z.object({
+    path: z.object({
+      name: z.string(),
+    }),
+    query: z.object({
+      connectorId: z.string(),
+    }),
+  }),
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
+  handler: async ({
+    params,
+    logger,
+    context,
+    request,
+    getScopedClients,
+  }): Promise<
+    Observable<
+      ServerSentEventBase<'generated_queries', { queries: GeneratedSignificantEventQuery[] }>
+    >
+  > => {
+    const { scopedClusterClient, inferenceClient } = await getScopedClients({ request });
+
+    const {
+      path: { name },
+      query: { connectorId },
+    } = params;
+
+    return rxjsFrom(
+      generateSignificantEventDefinitions({
+        name,
+        inferenceClient: inferenceClient.bindTo({ connectorId }),
+        esClient: createTracedEsClient({
+          client: scopedClusterClient.asCurrentUser,
+          logger,
+          plugin: 'streams',
+        }),
+        logger,
+      })
+    ).pipe(
+      map(
+        (
+          queries
+        ): ServerSentEventBase<
+          'generated_queries',
+          { queries: GeneratedSignificantEventQuery[] }
+        > => {
+          return {
+            queries,
+            type: 'generated_queries',
+          };
+        }
+      )
+    );
   },
 });
 
@@ -270,4 +348,5 @@ function buildQuery(kql: string) {
 export const significantEventsRoutes = {
   ...readSignificantEventsRoute,
   ...previewSignificantEventsRoute,
+  ...generateSignificantEventDefinitionsRoute,
 };

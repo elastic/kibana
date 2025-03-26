@@ -40,6 +40,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
       start: new Date().getTime() - 15 * 60 * 1000,
       end: new Date().getTime(),
     },
+    setTimeRange: jest.fn(),
   });
 
   return {

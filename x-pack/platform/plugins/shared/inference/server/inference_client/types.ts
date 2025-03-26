@@ -11,6 +11,7 @@ import type {
   BoundOutputAPI,
   OutputAPI,
   InferenceConnector,
+  BoundChatCompleteOptions,
 } from '@kbn/inference-common';
 
 /**
@@ -33,6 +34,7 @@ export interface InferenceClient {
    * Non-inference connectors will throw an error.
    */
   getConnectorById: (id: string) => Promise<InferenceConnector>;
+  bindTo: (options: BoundChatCompleteOptions) => BoundInferenceClient;
 }
 
 /**

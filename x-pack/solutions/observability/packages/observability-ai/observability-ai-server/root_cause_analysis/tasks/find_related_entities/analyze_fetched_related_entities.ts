@@ -11,9 +11,9 @@ import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_ent
 import {
   DocumentAnalysis,
   TruncatedDocumentAnalysis,
-} from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
-import { sortAndTruncateAnalyzedFields } from '@kbn/observability-utils-common/llm/log_analysis/sort_and_truncate_analyzed_fields';
-import { analyzeDocuments } from '@kbn/observability-utils-server/entities/analyze_documents';
+} from '@kbn/genai-utils-common/log_analysis/document_analysis';
+import { sortAndTruncateAnalyzedFields } from '@kbn/genai-utils-server/log_analysis/sort_and_truncate_analyzed_fields';
+import { analyzeDocuments } from '@kbn/genai-utils-server/log_analysis/analyze_documents';
 import { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery } from '@kbn/observability-utils-server/es/queries/kql_query';

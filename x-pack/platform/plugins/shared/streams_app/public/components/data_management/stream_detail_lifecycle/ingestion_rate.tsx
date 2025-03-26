@@ -29,12 +29,12 @@ import {
   LIGHT_THEME,
   Settings,
 } from '@elastic/charts';
-import { useKibana } from '../../../hooks/use_kibana';
 import { DataStreamStats } from './hooks/use_data_stream_stats';
 import { formatBytes } from './helpers/format_bytes';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { useIngestionRate, useIngestionRatePerTier } from './hooks/use_ingestion_rate';
 import { useIlmPhasesColorAndDescription } from './hooks/use_ilm_phases_color_and_description';
+import { useTimefilter } from '../../../hooks/use_timefilter';
 
 export function IngestionRate({
   definition,
@@ -47,12 +47,7 @@ export function IngestionRate({
   isLoadingStats: boolean;
   refreshStats: () => void;
 }) {
-  const {
-    dependencies: {
-      start: { data },
-    },
-  } = useKibana();
-  const { timeRange, setTimeRange } = data.query.timefilter.timefilter.useTimefilter();
+  const { timeRange, setTimeRange } = useTimefilter();
 
   return (
     <>

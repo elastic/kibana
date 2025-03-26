@@ -25,6 +25,13 @@ const imageSets = {
       defaultMessage: 'No results image for the streams app',
     }),
   },
+  significantEventsEmptyState: {
+    light: () => import('./sig_events_empty_state_light.png'),
+    dark: () => import('./sig_events_empty_state_light.png'),
+    alt: i18n.translate('xpack.streams.significantEvents.emptyStateImage', {
+      defaultMessage: 'Empty state illustration for the Significant events view',
+    }),
+  },
 };
 
 interface AssetImageProps extends Omit<EuiImageProps, 'src' | 'url' | 'alt'> {

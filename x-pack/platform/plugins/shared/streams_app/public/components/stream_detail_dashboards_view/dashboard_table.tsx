@@ -18,6 +18,7 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { tagListToReferenceList } from './to_reference_list';
+import { useTimefilter } from '../../hooks/use_timefilter';
 
 export function DashboardsTable({
   dashboards,
@@ -41,11 +42,12 @@ export function DashboardsTable({
       start: {
         savedObjectsTagging: { ui: savedObjectsTaggingUi },
         share,
-        data,
       },
     },
   } = useKibana();
-  const { timeRange } = data.query.timefilter.timefilter.useTimefilter();
+
+  const { timeRange } = useTimefilter();
+
   const dashboardLocator = share.url.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
   const columns = useMemo((): Array<EuiBasicTableColumn<SanitizedDashboardAsset>> => {
     return [
@@ -54,7 +56,7 @@ export function DashboardsTable({
         name: i18n.translate('xpack.streams.dashboardTable.dashboardNameColumnTitle', {
           defaultMessage: 'Dashboard name',
         }),
-        render: (_, { label, id }) => (
+        render: (_, { title, id }) => (
           <EuiLink
             data-test-subj="streamsAppColumnsLink"
             onClick={() => {
@@ -71,7 +73,7 @@ export function DashboardsTable({
               }
             }}
           >
-            {label}
+            {title}
           </EuiLink>
         ),
       },

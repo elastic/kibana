@@ -7,7 +7,10 @@
 
 import { partition, shuffle } from 'lodash';
 import { truncateList } from '@kbn/inference-common';
-import type { DocumentAnalysis, TruncatedDocumentAnalysis } from './document_analysis';
+import type {
+  DocumentAnalysis,
+  TruncatedDocumentAnalysis,
+} from '@kbn/genai-utils-common/log_analysis/document_analysis';
 
 export function sortAndTruncateAnalyzedFields(
   analysis: DocumentAnalysis
@@ -24,7 +27,7 @@ export function sortAndTruncateAnalyzedFields(
         let label = `${field.name}:${field.types.join(',')}`;
 
         if (field.empty) {
-          return `${name} (empty)`;
+          return `${field.name} (empty)`;
         }
 
         label += ` - ${field.cardinality} distinct values`;

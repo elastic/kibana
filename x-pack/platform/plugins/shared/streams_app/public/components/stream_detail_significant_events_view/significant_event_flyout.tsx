@@ -33,6 +33,7 @@ import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { SparkPlot } from '../spark_plot';
 import { formatChangePoint } from './change_point';
 import { getAnnotationFromFormattedChangePoint } from './utils/get_annotation_from_formatted_change_point';
+import { useTimefilter } from '../../hooks/use_timefilter';
 
 function getTitle(query?: StreamQueryKql) {
   if (!query) {
@@ -92,7 +93,7 @@ export function SignificantEventFlyoutContents({
     },
   } = useKibana();
 
-  const { timeRange: initialTimeRange } = data.query.timefilter.timefilter.useTimefilter();
+  const { timeRange: initialTimeRange } = useTimefilter();
 
   const [timeRange, setTimeRange] = useState(initialTimeRange);
 
@@ -176,7 +177,7 @@ export function SignificantEventFlyoutContents({
         ?.asSeconds()!;
 
       return streams.streamsRepositoryClient.fetch(
-        `POST /api/streams/{name}/significant_events/_preview 2023-10-31`,
+        `POST /api/streams/{name}/significant_events/_preview`,
         {
           signal,
           params: {

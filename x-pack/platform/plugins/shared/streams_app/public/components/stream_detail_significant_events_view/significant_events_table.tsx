@@ -7,7 +7,7 @@
 import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AbortableAsyncState } from '@kbn/react-hooks';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { TickFormatter } from '@elastic/charts';
 import { SignificantEventItem } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
@@ -38,6 +38,8 @@ export function SignificantEventsTable({
   const items = useMemo(() => {
     return response.value ?? [];
   }, [response.value]);
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
     {
@@ -96,6 +98,9 @@ export function SignificantEventsTable({
               defaultMessage: 'Edit query',
             }
           ),
+          enabled: (item) => {
+            return !isLoading;
+          },
           onClick: (item) => {
             onEditClick?.(item);
           },
@@ -112,6 +117,9 @@ export function SignificantEventsTable({
               defaultMessage: 'Remove query from stream',
             }
           ),
+          enabled: (item) => {
+            return !isLoading;
+          },
           onClick: (item) => {
             onDeleteClick?.(item);
           },
