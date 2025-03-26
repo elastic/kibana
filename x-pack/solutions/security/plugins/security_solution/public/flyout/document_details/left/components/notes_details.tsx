@@ -9,7 +9,6 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MAX_NOTES_PER_DOCUMENT } from '../../../../../common/constants';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import type { TimelineModel } from '../../../..';
 import { Flyouts } from '../../shared/constants/flyouts';
@@ -48,14 +47,6 @@ export const NO_NOTES = (isAlert: boolean) =>
     defaultMessage: 'No notes have been created for this {value}.',
     values: { value: isAlert ? 'alert' : 'event' },
   });
-
-export const MAX_NOTES_PER_DOCUMENT_MESSAGE = i18n.translate(
-  'xpack.securitySolution.flyout.left.notes.maxNotesPerDocument',
-  {
-    defaultMessage: 'You cannot add more than {value} notes to an event or an alert.',
-    values: { value: MAX_NOTES_PER_DOCUMENT },
-  }
-);
 
 /**
  * List all the notes for a document id and allows to create new notes associated with that document.
@@ -139,8 +130,6 @@ export const NotesDetails = memo(() => {
     [isAlert]
   );
 
-  const hasMaxNotes = useMemo(() => notes.length >= MAX_NOTES_PER_DOCUMENT, [notes]);
-
   return (
     <BasicAlertDataContext.Provider value={basicData}>
       {fetchStatus === ReqStatus.Loading && (
@@ -158,8 +147,6 @@ export const NotesDetails = memo(() => {
             eventId={eventId}
             timelineId={isTimelineFlyout && attachToTimeline ? timelineSavedObjectId : ''}
             onNoteAdd={isTimelineFlyout && attachToTimeline ? onNoteAddInTimeline : undefined}
-            disableButton={hasMaxNotes}
-            disableReason={hasMaxNotes ? MAX_NOTES_PER_DOCUMENT_MESSAGE : undefined}
           >
             {isTimelineFlyout && (
               <AttachToActiveTimeline
