@@ -56,30 +56,31 @@ export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: Rule.RuleModul
           return;
         }
 
+        // 1. Analyze the props of the element to see if we have to do anything
         const relevantPropValues = getPropValues({
           propNames: PROP_NAMES,
           node: parent,
           getScope: () => sourceCode.getScope(node as Node),
         });
 
-        // Element already has a prop for aria-label or aria-labelledby. We don't need to do anything.
+        // Element already has a prop for aria-label or aria-labelledby. We can bail out.
         if (relevantPropValues['aria-label'] || relevantPropValues['aria-labelledby']) return;
 
         // Start building the suggestion.
 
-        // 1. The intention of the element (i.e. "Select date", "Submit", "Cancel")
+        // 2. The intention of the element (i.e. "Select date", "Submit", "Cancel")
         const intent =
           name === 'EuiButtonIcon' && relevantPropValues.iconType
             ? relevantPropValues.iconType // For EuiButtonIcon, use the iconType as the intent (i.e. 'pen', 'trash')
             : getIntentFromNode(parent);
 
-        // 2. The element name (i.e. "Button", "Beta Badge", "Select")
+        // 3. The element name (i.e. "Button", "Beta Badge", "Select")
         const { elementName, elementNameWithSpaces } = sanitizeEuiElementName(name);
 
         // Proposed default message
         const defaultMessage = `${upperCaseFirstChar(intent)} ${elementNameWithSpaces}`.trim(); // 'Actions Button'
 
-        // 3. Set up the translation ID
+        // 4. Set up the translation ID
         const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
 
         const functionDeclaration = sourceCode.getScope(node as Node).block;
@@ -97,14 +98,14 @@ export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: Rule.RuleModul
           .map((el) => lowerCaseFirstChar(el).replaceAll(' ', ''))
           .join('.'); // 'xpack.observability.overview.logs.loadMore.ariaLabel'
 
-        // Check if i18n has already been imported into the file
+        // 5. Check if i18n has already been imported into the file
         const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine, replaceMode } =
           getI18nImportFixer({
             sourceCode,
             translationFunction: 'i18n.translate',
           });
 
-        // 3. Report feedback to engineer
+        // 6. Report feedback to engineer
         report({
           node: node as any,
           message: `<${name}> should have a \`aria-label\` for a11y. Use the autofix suggestion or add your own.`,
