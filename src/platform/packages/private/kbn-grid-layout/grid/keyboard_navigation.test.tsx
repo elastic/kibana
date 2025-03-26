@@ -1,0 +1,103 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+import React from 'react';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { getSampleLayout } from './test_utils/sample_layout';
+import { GridLayout, GridLayoutProps } from './grid_layout';
+import { gridSettings, mockRenderPanelContents } from './test_utils/mocks';
+import { EuiThemeProvider } from '@elastic/eui';
+
+const onLayoutChange = jest.fn();
+
+const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
+  const props = {
+    accessMode: 'EDIT',
+    layout: getSampleLayout(),
+    gridSettings,
+    renderPanelContents: mockRenderPanelContents,
+    onLayoutChange,
+    ...propsOverrides,
+  } as GridLayoutProps;
+
+  const { rerender, ...rtlRest } = render(<GridLayout {...props} />, { wrapper: EuiThemeProvider });
+
+  return {
+    ...rtlRest,
+    rerender: (overrides: Partial<GridLayoutProps>) => {
+      const newProps = { ...props, ...overrides } as GridLayoutProps;
+      return rerender(<GridLayout {...newProps} />);
+    },
+  };
+};
+
+const getPanelHandle = (panelId: string, interactionType: 'resize' | 'drag' = 'drag') => {
+  const gridPanel = screen.getByText(`panel content ${panelId}`).closest('div')!;
+  const handleText = new RegExp(interactionType === 'resize' ? /resize to move/i : /drag to move/i);
+  return within(gridPanel).getByRole('button', { name: handleText });
+};
+
+const focusHandle = (panelId: string, type: 'resize' | 'drag') => {
+  const panelHandle = getPanelHandle(panelId);
+  panelHandle.focus();
+};
+
+describe('Keyboard navigation', () => {
+  window.HTMLElement.prototype.scrollIntoView = jest.fn();
+  Object.defineProperty(window, 'scrollY', { value: 0, writable: false });
+  Object.defineProperty(document.body, 'scrollHeight', { value: 2000, writable: false });
+
+  const pressEnter = async () => {
+    await userEvent.keyboard('[Enter]');
+  };
+  const pressKey = async (
+    k: '[Enter]' | '{Escape}' | '[ArrowDown]' | '[ArrowUp]' | '[ArrowRight]' | '[ArrowLeft]'
+  ) => {
+    await userEvent.keyboard(k);
+  };
+  it('should show the panel active when during interaction for drag handle', async () => {
+    renderGridLayout();
+    const panelHandle = getPanelHandle('panel1');
+    focusHandle('panel1', 'drag');
+    expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass('kbnGridPanel', {
+      exact: true,
+    });
+    await pressEnter();
+    await pressKey('[ArrowDown]');
+    expect(panelHandle).toHaveFocus(); // focus is not lost during interaction
+    expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
+      'kbnGridPanel kbnGridPanel--active',
+      { exact: true }
+    );
+    await pressEnter();
+    expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass('kbnGridPanel', {
+      exact: true,
+    });
+  });
+  it('should show the panel active when during interaction for resize handle', async () => {
+    renderGridLayout();
+    const panelHandle = getPanelHandle('panel5');
+    focusHandle('panel5', 'resize');
+    expect(screen.getByLabelText('panelId:panel5').closest('div')).toHaveClass('kbnGridPanel', {
+      exact: true,
+    });
+    await pressEnter();
+    await pressKey('[ArrowDown]');
+    expect(panelHandle).toHaveFocus(); // focus is not lost during interaction
+    expect(screen.getByLabelText('panelId:panel5').closest('div')).toHaveClass(
+      'kbnGridPanel kbnGridPanel--active',
+      { exact: true }
+    );
+    await pressKey('{Escape}');
+    expect(screen.getByLabelText('panelId:panel5').closest('div')).toHaveClass('kbnGridPanel', {
+      exact: true,
+    });
+    expect(panelHandle).toHaveFocus(); // focus is not lost during interaction
+  });
+});

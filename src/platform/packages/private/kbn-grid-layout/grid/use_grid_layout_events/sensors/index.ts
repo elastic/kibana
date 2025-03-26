@@ -8,7 +8,7 @@
  */
 
 import { UserInteractionEvent } from '../types';
-import { isKeyboardEvent, getFocusedElementPosition } from './keyboard';
+import { isKeyboardEvent, getElementPosition } from './keyboard';
 import { isMouseEvent, getMouseSensorPosition } from './mouse';
 import { isTouchEvent, getTouchSensorPosition } from './touch';
 
@@ -21,8 +21,8 @@ export function getSensorPosition(e: UserInteractionEvent) {
     return getMouseSensorPosition(e);
   } else if (isTouchEvent(e)) {
     return getTouchSensorPosition(e);
-  } else if (isKeyboardEvent(e)) {
-    return getFocusedElementPosition();
+  } else if (isKeyboardEvent(e) && e.target instanceof HTMLElement) {
+    return getElementPosition(e.target);
   }
   throw new Error('Invalid event type');
 }

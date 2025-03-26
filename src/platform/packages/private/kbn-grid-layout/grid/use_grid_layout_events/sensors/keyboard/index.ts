@@ -15,8 +15,11 @@ export const isKeyboardEvent = (e: Event | React.UIEvent<HTMLElement>): e is Use
 };
 
 // Returns the top/left coordinates of the currently focused element for the keyboard sensor calculations
-export const getFocusedElementPosition = () => {
-  const { left: clientX, top: clientY } = document.activeElement?.getBoundingClientRect() || {
+export const getElementPosition = (target: EventTarget | null) => {
+  if (!target || !(target instanceof HTMLElement)) {
+    throw new Error('No valid target element found');
+  }
+  const { left: clientX, top: clientY } = target.getBoundingClientRect() || {
     left: 0,
     top: 0,
   };

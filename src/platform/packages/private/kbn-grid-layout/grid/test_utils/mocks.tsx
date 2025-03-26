@@ -44,6 +44,7 @@ export const getGridLayoutStateManagerMock = (overrides?: Partial<GridLayoutStat
     runtimeSettings$: new BehaviorSubject<RuntimeGridSettings>({
       ...gridSettings,
       columnPixelWidth: 0,
+      keyboardDragTopLimit: 0,
     }),
     panelRefs: { current: {} },
     rowRefs: { current: {} },
