@@ -94,7 +94,7 @@ describe('pickValuesBasedOnStructure', () => {
       fc.property(arbObjectA, arbObjectB, (objA, objB) => {
         const target = Object.assign({}, objB, objA) as object;
         const result = pickValuesBasedOnStructure(objA, target);
-        expect(objA).toEqual(result);
+        expect(result).toEqual(objA);
       }),
       { verbose: true, numRuns: 1_000 }
     );
