@@ -26,7 +26,7 @@ export const getRuleList = (
 
   return [
     {
-      title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.nameTitle', {
+      title: i18n.translate('xpack.securitySolution.findings.findingsFlyout.ruleTab.nameTitle', {
         defaultMessage: 'Name',
       }),
       description: rule?.name ? (
@@ -36,9 +36,12 @@ export const getRuleList = (
       ),
     },
     {
-      title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.descriptionTitle', {
-        defaultMessage: 'Description',
-      }),
+      title: i18n.translate(
+        'xpack.securitySolution.findings.findingsFlyout.ruleTab.descriptionTitle',
+        {
+          defaultMessage: 'Description',
+        }
+      ),
       description: rule?.description ? (
         <CspFlyoutMarkdown>{rule.description}</CspFlyoutMarkdown>
       ) : (

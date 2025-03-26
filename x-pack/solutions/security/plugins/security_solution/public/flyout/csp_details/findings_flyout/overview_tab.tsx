@@ -51,9 +51,12 @@ const getDetailsList = (
   discoverDataViewLink?: string
 ) => [
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle', {
-      defaultMessage: 'Rule Name',
-    }),
+    title: i18n.translate(
+      'xpack.securitySolution.findings.findingsFlyout.overviewTab.ruleNameTitle',
+      {
+        defaultMessage: 'Rule Name',
+      }
+    ),
     description: data.rule?.name ? (
       <RuleNameLink ruleFlyoutLink={ruleFlyoutLink} ruleName={data.rule.name} />
     ) : (
@@ -61,15 +64,21 @@ const getDetailsList = (
     ),
   },
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.alertsTitle', {
-      defaultMessage: 'Alerts',
-    }),
+    title: i18n.translate(
+      'xpack.securitySolution.findings.findingsFlyout.overviewTab.alertsTitle',
+      {
+        defaultMessage: 'Alerts',
+      }
+    ),
     description: <FindingsDetectionRuleCounter finding={data} />,
   },
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleTagsTitle', {
-      defaultMessage: 'Rule Tags',
-    }),
+    title: i18n.translate(
+      'xpack.securitySolution.findings.findingsFlyout.overviewTab.ruleTagsTitle',
+      {
+        defaultMessage: 'Rule Tags',
+      }
+    ),
     description: data.rule?.tags?.length ? (
       <>
         {data.rule.tags.map((tag) => (
@@ -81,17 +90,23 @@ const getDetailsList = (
     ),
   },
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.evaluatedAtTitle', {
-      defaultMessage: 'Evaluated at',
-    }),
+    title: i18n.translate(
+      'xpack.securitySolution.findings.findingsFlyout.overviewTab.evaluatedAtTitle',
+      {
+        defaultMessage: 'Evaluated at',
+      }
+    ),
     description: data['@timestamp']
       ? moment(data['@timestamp']).format(CSP_MOMENT_FORMAT)
       : EMPTY_VALUE,
   },
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.frameworkSourcesTitle', {
-      defaultMessage: 'Framework Sources',
-    }),
+    title: i18n.translate(
+      'xpack.securitySolution.findings.findingsFlyout.overviewTab.frameworkSourcesTitle',
+      {
+        defaultMessage: 'Framework Sources',
+      }
+    ),
     description:
       data.rule?.benchmark?.id && data.rule?.benchmark?.name ? (
         <BenchmarkIcons
@@ -103,21 +118,30 @@ const getDetailsList = (
       ),
   },
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.cisSectionTitle', {
-      defaultMessage: 'Framework Section',
-    }),
+    title: i18n.translate(
+      'xpack.securitySolution.findings.findingsFlyout.overviewTab.cisSectionTitle',
+      {
+        defaultMessage: 'Framework Section',
+      }
+    ),
     description: data.rule?.section ? data.rule?.section : EMPTY_VALUE,
   },
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.vendorTitle', {
-      defaultMessage: 'Vendor',
-    }),
+    title: i18n.translate(
+      'xpack.securitySolution.findings.findingsFlyout.overviewTab.vendorTitle',
+      {
+        defaultMessage: 'Vendor',
+      }
+    ),
     description: getVendorName(data) || EMPTY_VALUE,
   },
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.dataViewTitle', {
-      defaultMessage: 'Data View',
-    }),
+    title: i18n.translate(
+      'xpack.securitySolution.findings.findingsFlyout.overviewTab.dataViewTitle',
+      {
+        defaultMessage: 'Data View',
+      }
+    ),
     description: discoverDataViewLink ? (
       <EuiLink href={discoverDataViewLink}>{CDR_MISCONFIGURATIONS_INDEX_PATTERN}</EuiLink>
     ) : (
@@ -136,15 +160,21 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
     ),
   },
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.impactTitle', {
-      defaultMessage: 'Impact',
-    }),
+    title: i18n.translate(
+      'xpack.securitySolution.findings.findingsFlyout.overviewTab.impactTitle',
+      {
+        defaultMessage: 'Impact',
+      }
+    ),
     description: rule?.impact ? <CspFlyoutMarkdown>{rule.impact}</CspFlyoutMarkdown> : EMPTY_VALUE,
   },
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.defaultValueTitle', {
-      defaultMessage: 'Default Value',
-    }),
+    title: i18n.translate(
+      'xpack.securitySolution.findings.findingsFlyout.overviewTab.defaultValueTitle',
+      {
+        defaultMessage: 'Default Value',
+      }
+    ),
     description: rule?.default_value ? (
       <CspFlyoutMarkdown>{rule.default_value}</CspFlyoutMarkdown>
     ) : (
@@ -152,9 +182,12 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
     ),
   },
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.rationaleTitle', {
-      defaultMessage: 'Rationale',
-    }),
+    title: i18n.translate(
+      'xpack.securitySolution.findings.findingsFlyout.overviewTab.rationaleTitle',
+      {
+        defaultMessage: 'Rationale',
+      }
+    ),
     description: rule?.rationale ? (
       <CspFlyoutMarkdown>{rule.rationale}</CspFlyoutMarkdown>
     ) : (
@@ -171,7 +204,7 @@ const getEvidenceList = ({ result }: CspFinding) =>
         <>
           <EuiText color="subdued">
             <FormattedMessage
-              id="xpack.csp.findings.findingsFlyout.overviewTab.evidenceDescription"
+              id="xpack.securitySolution.findings.findingsFlyout.overviewTab.evidenceDescription"
               defaultMessage="The specific resource metadata that was evaluated to generate this posture finding"
             />
           </EuiText>
@@ -223,17 +256,23 @@ export const OverviewTab = ({
       [
         {
           initialIsOpen: true,
-          title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.detailsTitle', {
-            defaultMessage: 'Details',
-          }),
+          title: i18n.translate(
+            'xpack.securitySolution.findings.findingsFlyout.overviewTab.detailsTitle',
+            {
+              defaultMessage: 'Details',
+            }
+          ),
           id: 'detailsAccordion',
           listItems: getDetailsList(data, ruleFlyoutLink, discoverDataViewLink),
         },
         {
           initialIsOpen: true,
-          title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.remediationTitle', {
-            defaultMessage: 'Remediation',
-          }),
+          title: i18n.translate(
+            'xpack.securitySolution.findings.findingsFlyout.overviewTab.remediationTitle',
+            {
+              defaultMessage: 'Remediation',
+            }
+          ),
           id: 'remediationAccordion',
           listItems: getRemediationList(data.rule),
         },
@@ -241,7 +280,7 @@ export const OverviewTab = ({
           hasEvidence && {
             initialIsOpen: true,
             title: i18n.translate(
-              'xpack.csp.findings.findingsFlyout.overviewTab.evidenceSourcesTitle',
+              'xpack.securitySolution.findings.findingsFlyout.overviewTab.evidenceSourcesTitle',
               { defaultMessage: 'Evidence' }
             ),
             id: 'evidenceAccordion',

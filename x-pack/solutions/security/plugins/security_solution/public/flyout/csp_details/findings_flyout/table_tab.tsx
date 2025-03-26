@@ -55,12 +55,16 @@ const pagination: EuiInMemoryTableProps<FlattenedItem>['pagination'] = {
 const columns: EuiInMemoryTableProps<FlattenedItem>['columns'] = [
   {
     field: 'key',
-    name: i18n.translate('xpack.csp.flyout.tableTab.fieldLabel', { defaultMessage: 'Field' }),
+    name: i18n.translate('xpack.securitySolution.flyout.tableTab.fieldLabel', {
+      defaultMessage: 'Field',
+    }),
     width: '25%',
   },
   {
     field: 'value',
-    name: i18n.translate('xpack.csp.flyout.tableTab.fieldValueLabel', { defaultMessage: 'Value' }),
+    name: i18n.translate('xpack.securitySolution.flyout.tableTab.fieldValueLabel', {
+      defaultMessage: 'Value',
+    }),
     render: (value, record) => <div style={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>,
   },
 ];
