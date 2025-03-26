@@ -21,11 +21,6 @@ import {
 import { replaceParams } from '@kbn/openapi-common/shared';
 
 import { AlertsMigrationCleanupRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
-import { BulkCreateRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_create_rules/bulk_create_rules_route.gen';
-import { BulkDeleteRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';
-import { BulkDeleteRulesPostRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';
-import { BulkPatchRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_patch_rules/bulk_patch_rules_route.gen';
-import { BulkUpdateRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_update_rules/bulk_update_rules_route.gen';
 import { BulkUpsertAssetCriticalityRecordsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
 import { CleanDraftTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
 import { ConfigureRiskEngineSavedObjectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
@@ -217,64 +212,6 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-     * Create new detection rules in bulk.
-     */
-    bulkCreateRules(props: BulkCreateRulesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(routeWithNamespace('/api/detection_engine/rules/_bulk_create', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Delete detection rules in bulk.
-     */
-    bulkDeleteRules(props: BulkDeleteRulesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .delete(routeWithNamespace('/api/detection_engine/rules/_bulk_delete', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Deletes multiple rules.
-     */
-    bulkDeleteRulesPost(props: BulkDeleteRulesPostProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(routeWithNamespace('/api/detection_engine/rules/_bulk_delete', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Update specific fields of existing detection rules using the `rule_id` or `id` field.
-     */
-    bulkPatchRules(props: BulkPatchRulesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .patch(routeWithNamespace('/api/detection_engine/rules/_bulk_update', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-      * Update multiple detection rules using the `rule_id` or `id` field. The original rules are replaced, and all unspecified fields are deleted.
-> info
-> You cannot modify the `id` or `rule_id` values.
-
-      */
-    bulkUpdateRules(props: BulkUpdateRulesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .put(routeWithNamespace('/api/detection_engine/rules/_bulk_update', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
     },
     /**
       * Bulk upsert up to 1000 asset criticality records.
@@ -1643,21 +1580,6 @@ detection engine rules.
 
 export interface AlertsMigrationCleanupProps {
   body: AlertsMigrationCleanupRequestBodyInput;
-}
-export interface BulkCreateRulesProps {
-  body: BulkCreateRulesRequestBodyInput;
-}
-export interface BulkDeleteRulesProps {
-  body: BulkDeleteRulesRequestBodyInput;
-}
-export interface BulkDeleteRulesPostProps {
-  body: BulkDeleteRulesPostRequestBodyInput;
-}
-export interface BulkPatchRulesProps {
-  body: BulkPatchRulesRequestBodyInput;
-}
-export interface BulkUpdateRulesProps {
-  body: BulkUpdateRulesRequestBodyInput;
 }
 export interface BulkUpsertAssetCriticalityRecordsProps {
   body: BulkUpsertAssetCriticalityRecordsRequestBodyInput;

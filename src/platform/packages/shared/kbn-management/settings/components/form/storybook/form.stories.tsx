@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import { ComponentMeta } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { FieldDefinition } from '@kbn/management-settings-types';
 import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
@@ -20,7 +20,7 @@ import { Form as Component } from '../form';
 import { FormProvider } from '../services';
 
 export default {
-  title: `Settings/Form/Form`,
+  title: 'Settings/Form/Form',
   description: 'A form with field rows',
   argTypes: {
     isSavingEnabled: {
@@ -57,7 +57,7 @@ export default {
       default: 'ghost',
     },
   },
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
 interface FormStoryProps {
   /** True if saving settings is enabled, false otherwise. */
@@ -66,30 +66,34 @@ interface FormStoryProps {
   requirePageReload: boolean;
 }
 
-export const Form = ({ isSavingEnabled, requirePageReload }: FormStoryProps) => {
-  const fields: FieldDefinition[] = getFieldDefinitions(
-    getSettingsMock(requirePageReload),
-    uiSettingsClientMock
-  );
+export const Form: StoryObj<FormStoryProps> = {
+  render: ({ isSavingEnabled, requirePageReload }) => {
+    const fields: FieldDefinition[] = getFieldDefinitions(
+      getSettingsMock(requirePageReload),
+      uiSettingsClientMock
+    );
 
-  const categorizedFields = categorizeFields(fields);
+    const categorizedFields = categorizeFields(fields);
 
-  const categoryCounts = Object.keys(categorizedFields).reduce(
-    (acc, category) => ({
-      ...acc,
-      [category]: categorizedFields[category].count,
-    }),
-    {}
-  );
+    const categoryCounts = Object.keys(categorizedFields).reduce(
+      (acc, category) => ({
+        ...acc,
+        [category]: categorizedFields[category].count,
+      }),
+      {}
+    );
 
-  const onClearQuery = () => {};
+    const onClearQuery = () => {};
 
-  return (
-    <Component {...{ fields, isSavingEnabled, categoryCounts, onClearQuery, scope: 'namespace' }} />
-  );
-};
+    return (
+      <Component
+        {...{ fields, isSavingEnabled, categoryCounts, onClearQuery, scope: 'namespace' }}
+      />
+    );
+  },
 
-Form.args = {
-  isSavingEnabled: true,
-  requirePageReload: false,
+  args: {
+    isSavingEnabled: true,
+    requirePageReload: false,
+  },
 };

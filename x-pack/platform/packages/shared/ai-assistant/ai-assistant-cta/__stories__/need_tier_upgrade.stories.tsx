@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 
 import { NeedTierUpgrade as Component } from '../need_tier_upgrade';
 
@@ -16,6 +16,6 @@ export default {
   argTypes: {
     onManageSubscription: { action: 'onManageSubscription' },
   },
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
-export const NeedTierUpgrade: ComponentStory<typeof Component> = (args) => <Component {...args} />;
+export const NeedTierUpgrade: StoryFn<typeof Component> = (args) => <Component {...args} />;
