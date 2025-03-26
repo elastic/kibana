@@ -26,7 +26,7 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
   }
 
   clone(): StreamActiveRecord<GroupStreamDefinition> {
-    return new GroupStream(cloneDeep(this._updated_definition), this.dependencies);
+    return new GroupStream(cloneDeep(this.definition), this.dependencies);
   }
 
   protected async doHandleUpsertChange(
@@ -46,7 +46,7 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
     }
 
     // Deduplicate members
-    this._updated_definition = {
+    this._definition = {
       name: definition.name,
       group: {
         ...definition.group,
@@ -66,15 +66,12 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
       return { cascadingChanges: [], changeStatus: 'deleted' };
     }
     // remove deleted streams from the group
-    if (
-      this.changeStatus !== 'deleted' &&
-      this._updated_definition.group.members.includes(target)
-    ) {
-      this._updated_definition = {
-        ...this._updated_definition,
+    if (this.changeStatus !== 'deleted' && this.definition.group.members.includes(target)) {
+      this._definition = {
+        ...this.definition,
         group: {
-          ...this._updated_definition.group,
-          members: this._updated_definition.group.members.filter((member) => member !== target),
+          ...this.definition.group,
+          members: this.definition.group.members.filter((member) => member !== target),
         },
       };
       return { cascadingChanges: [], changeStatus: 'upserted' };
@@ -133,7 +130,7 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
     }
 
     // validate members
-    for (const member of this._updated_definition.group.members) {
+    for (const member of this.definition.group.members) {
       const memberStream = desiredState.get(member);
       if (!memberStream || memberStream.isDeleted()) {
         return {
@@ -158,7 +155,7 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
     return [
       {
         type: 'upsert_dot_streams_document',
-        request: this._updated_definition,
+        request: this.definition,
       },
     ];
   }
@@ -172,7 +169,7 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
       {
         type: 'delete_dot_streams_document',
         request: {
-          name: this._updated_definition.name,
+          name: this.definition.name,
         },
       },
     ];

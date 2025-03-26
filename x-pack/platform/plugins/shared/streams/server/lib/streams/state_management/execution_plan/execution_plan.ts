@@ -126,10 +126,10 @@ export class ExecutionPlan {
         this.upsertComponentTemplates(upsert_component_template),
         this.upsertIndexTemplates(upsert_index_template),
       ]);
+      await this.upsertDatastreams(upsert_datastream);
       await Promise.all([
         this.upsertWriteIndexOrRollover(upsert_write_index_or_rollover),
         this.updateLifecycle(update_lifecycle),
-        this.upsertDatastreams(upsert_datastream),
       ]);
 
       await this.upsertIngestPipelines(upsert_ingest_pipeline);
@@ -283,10 +283,6 @@ export class ExecutionPlan {
   private async upsertAndDeleteDotStreamsDocuments(
     actions: Array<UpsertDotStreamsDocumentAction | DeleteDotStreamsDocumentAction>
   ) {
-    if (actions.length === 0) {
-      return;
-    }
-
     return this.dependencies.storageClient.bulk({
       operations: actions.map(dotDocumentActionToBulkOperation),
     });

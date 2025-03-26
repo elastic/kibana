@@ -396,6 +396,16 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
     refresh = 'wait_for',
     ...request
   }): Promise<StorageClientBulkResponse> => {
+    if (operations.length === 0) {
+      this.logger.debug(`Bulk request with 0 operations is a noop`);
+      return Promise.resolve({
+        errors: false,
+        items: [],
+        took: 0,
+        ingest_took: 0,
+      });
+    }
+
     this.logger.debug(`Processing ${operations.length} bulk operations`);
 
     const bulkOperations = operations.flatMap((operation): BulkOperationContainer[] => {

@@ -18,17 +18,17 @@ export interface ValidationResult {
 export type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
 
 export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = StreamDefinition> {
-  protected _updated_definition: TDefinition;
+  protected _definition: TDefinition;
   protected dependencies: StateDependencies;
   private _changeStatus: StreamChangeStatus = 'unchanged';
 
   constructor(definition: TDefinition, dependencies: StateDependencies) {
-    this._updated_definition = definition;
+    this._definition = definition;
     this.dependencies = dependencies;
   }
 
   public get definition(): TDefinition {
-    return this._updated_definition;
+    return this._definition;
   }
 
   protected get changeStatus(): StreamChangeStatus {
