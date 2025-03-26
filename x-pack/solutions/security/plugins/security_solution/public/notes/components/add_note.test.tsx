@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import { AddNote, CREATE_NOTE_ERROR } from './add_note';
-import { ADD_NOTE_BUTTON_TEST_ID, ADD_NOTE_MARKDOWN_TEST_ID } from './test_ids';
+import {
+  ADD_NOTE_BUTTON_DISABLE_REASON_TEST_ID,
+  ADD_NOTE_BUTTON_TEST_ID,
+  ADD_NOTE_MARKDOWN_TEST_ID,
+} from './test_ids';
 import { ReqStatus } from '../store/notes.slice';
 
 jest.mock('../../flyout/document_details/shared/hooks/use_which_flyout');
@@ -67,17 +71,39 @@ describe('AddNote', () => {
     expect(addButton).not.toHaveAttribute('disabled');
   });
 
-  it('should disable add button always is disableButton props is true', async () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <AddNote eventId={'event-id'} disableButton={true} />
-      </TestProviders>
-    );
+  describe('disabled state', () => {
+    it('should disable add button always is disableButton props is true', async () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <AddNote eventId={'event-id'} disableButton={true} />
+        </TestProviders>
+      );
 
-    await userEvent.type(getByTestId('euiMarkdownEditorTextArea'), 'new note');
+      await userEvent.type(getByTestId('euiMarkdownEditorTextArea'), 'new note');
 
-    const addButton = getByTestId(ADD_NOTE_BUTTON_TEST_ID);
-    expect(addButton).toHaveAttribute('disabled');
+      const addButton = getByTestId(ADD_NOTE_BUTTON_TEST_ID);
+      expect(addButton).toHaveAttribute('disabled');
+    });
+
+    it('should display disableReason when button is disabled and reason is provided', async () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <AddNote eventId={'event-id'} disableButton={true} disableReason={'Some Test reason'} />
+        </TestProviders>
+      );
+
+      await userEvent.type(getByTestId('euiMarkdownEditorTextArea'), 'new note');
+
+      const addButton = getByTestId(ADD_NOTE_BUTTON_TEST_ID);
+      expect(addButton).toHaveAttribute('disabled');
+
+      fireEvent.mouseOver(addButton);
+      await waitFor(() => {
+        expect(getByTestId(ADD_NOTE_BUTTON_DISABLE_REASON_TEST_ID)).toHaveTextContent(
+          'Some Test reason'
+        );
+      });
+    });
   });
 
   it('should render the add note button in loading state while creating a new note', () => {

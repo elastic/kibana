@@ -22,3 +22,5 @@ export const NOTE_CONTENT_POPOVER_TEST_ID = `${PREFIX}NoteContentPopover` as con
 export const SEARCH_BAR_TEST_ID = `${PREFIX}SearchBar` as const;
 export const CREATED_BY_SELECT_TEST_ID = `${PREFIX}CreatedBySelect` as const;
 export const ASSOCIATED_NOT_SELECT_TEST_ID = `${PREFIX}AssociatedNoteSelect` as const;
+export const ADD_NOTE_BUTTON_DISABLE_REASON_TEST_ID =
+  `${PREFIX}AddNoteButtonDisableReason` as const;
