@@ -7,15 +7,31 @@
  */
 
 import React from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
 import { withKibana } from '../../../../kibana_react/public';
 import type { SearchBarProps } from './search_bar';
 
-const Fallback = () => <div />;
+type FallbackProps = Pick<SearchBarProps, 'displayStyle'>;
+
+const Fallback = ({ displayStyle }: FallbackProps) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={{
+        minHeight: `calc(${euiTheme.size.xxl} + ${euiTheme.size.s} * 2)`, // in px
+        marginBottom:
+          displayStyle === 'detached'
+            ? euiTheme.border.width.thin // in px
+            : '0px',
+      }}
+    />
+  );
+};
 
 const LazySearchBar = React.lazy(() => import('./search_bar'));
 const WrappedSearchBar = (props: SearchBarProps) => (
-  <React.Suspense fallback={<Fallback />}>
+  <React.Suspense fallback={<Fallback displayStyle={props.displayStyle} />}>
     <LazySearchBar {...props} />
   </React.Suspense>
 );
