@@ -191,7 +191,7 @@ export function GraphVisualization({
                       node.isSelected &&
                         css`
                           stroke-width: ${euiThemeContext.euiTheme.size.xs};
-                          stroke: ${transparentize(euiThemeContext.euiTheme.colors.primary, 0.25)};
+                          stroke: ${euiThemeContext.euiTheme.colors.borderBasePrimary};
                         `,
                     ]}
                   />
