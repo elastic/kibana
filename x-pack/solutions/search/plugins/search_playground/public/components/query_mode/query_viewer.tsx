@@ -59,16 +59,7 @@ export const ElasticsearchQueryViewer = ({
   const editorMounted = useCallback((editor: monacoEditor.editor.IStandaloneCodeEditor) => {
     monacoEditor.languages.json.jsonDefaults.setDiagnosticsOptions({
       validate: true,
-      schemas: [
-        {
-          uri: editor.getModel()?.uri.toString() ?? '', // TODO: probably a better option for this
-          fileMatch: ['*'],
-          schema: {
-            type: 'object',
-            properties: {}, // TODO: load _search JSON schema
-          },
-        },
-      ],
+      schemas: [],
     });
   }, []);
 
