@@ -77,6 +77,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
             children: [
               {
                 id: 'rules-landing',
+                link: 'securitySolutionUI:rules-landing',
                 title: i18n.translate('xpack.securitySolutionEss.nav.rules', {
                   defaultMessage: 'Rules',
                 }),
@@ -173,6 +174,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
             children: [
               {
                 id: 'investigations',
+                link: 'securitySolutionUI:investigations',
                 title: i18n.translate('xpack.securitySolutionEss.nav.investigations', {
                   defaultMessage: 'Investigations',
                 }),
@@ -208,6 +210,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
               },
               {
                 id: 'explore',
+                link: 'securitySolutionUI:explore',
                 title: i18n.translate('xpack.securitySolutionEss.nav.explore', {
                   defaultMessage: 'Explore',
                 }),
@@ -328,12 +331,14 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
             children: [
               {
                 id: 'assets',
+                link: 'securitySolutionUI:assets',
                 title: i18n.translate('xpack.securitySolutionEss.nav.assets', {
                   defaultMessage: 'Assets',
                 }),
                 children: [
                   {
                     id: 'fleet:',
+                    link: 'fleet',
                     title: i18n.translate('xpack.securitySolutionEss.nav.assets.fleet', {
                       defaultMessage: 'Fleet',
                     }),
@@ -370,6 +375,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                   },
                   {
                     id: 'endpoints',
+                    link: 'securitySolutionUI:endpoints',
                     title: i18n.translate('xpack.securitySolutionEss.nav.assets.endpoints', {
                       defaultMessage: 'Endpoints',
                     }),
@@ -377,6 +383,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                       {
                         id: 'endpoints',
                         link: 'securitySolutionUI:endpoints',
+                        breadcrumbStatus: 'hidden',
                       },
                       {
                         id: 'policy',
@@ -414,6 +421,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
             children: [
               {
                 id: 'machine_learning-landing',
+                link: 'securitySolutionUI:machine_learning-landing',
                 title: i18n.translate('xpack.securitySolutionEss.nav.ml', {
                   defaultMessage: 'Machine learning',
                 }),
