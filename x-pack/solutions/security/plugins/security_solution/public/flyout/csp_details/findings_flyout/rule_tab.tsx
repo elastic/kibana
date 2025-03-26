@@ -55,7 +55,7 @@ export const getRuleList = (
       description:
         ruleState === 'muted' ? (
           <FormattedMessage
-            id="xpack.csp.findings.findingsFlyout.ruleTab.disabledRuleText"
+            id="xpack.securitySolution.findings.findingsFlyout.ruleTab.disabledRuleText"
             defaultMessage="Disabled"
           />
         ) : rule?.benchmark?.name ? (
