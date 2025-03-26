@@ -72,6 +72,7 @@ export { Storage } from './storage';
 export { hashedItemStore, HashedItemStore } from './storage/hashed_item_store';
 export { persistState, retrieveState } from './state_management/state_hash';
 export {
+  cleanEmptyKeys,
   hashQuery,
   hashUrl,
   unhashUrl,

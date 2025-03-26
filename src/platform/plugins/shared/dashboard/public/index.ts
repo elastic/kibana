@@ -29,8 +29,7 @@ export type { DashboardStart } from './plugin';
 export { DashboardListingTable } from './dashboard_listing';
 export { DashboardTopNav } from './dashboard_top_nav';
 export type { RedirectToProps } from './dashboard_app/types';
-export { type DashboardAppLocator, cleanEmptyKeys } from './dashboard_app/locator/locator';
-export { getDashboardLocatorParamsFromEmbeddable } from './dashboard_app/locator/get_dashboard_locator_params';
+export type { DashboardAppLocator } from './dashboard_app/locator/locator';
 
 export { type SearchDashboardsResponse } from './services/dashboard_content_management_service/lib/find_dashboards';
 

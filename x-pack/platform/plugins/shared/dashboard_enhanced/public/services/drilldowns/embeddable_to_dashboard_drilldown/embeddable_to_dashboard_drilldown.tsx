@@ -4,17 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { extractTimeRange, isFilterPinned } from '@kbn/es-query';
+
 import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import type { KibanaLocation } from '@kbn/share-plugin/public';
-import {
-  cleanEmptyKeys,
-  DashboardLocatorParams,
-  getDashboardLocatorParamsFromEmbeddable,
-} from '@kbn/dashboard-plugin/public';
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
+import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
 import {
   AbstractDashboardDrilldown,
@@ -46,48 +40,8 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
     context: Context,
     useUrlForState: boolean
   ): Promise<KibanaLocation> {
-    let params: DashboardLocatorParams = { dashboardId: config.dashboardId };
-
-    if (context.embeddable) {
-      params = {
-        ...params,
-        ...getDashboardLocatorParamsFromEmbeddable(context.embeddable, config),
-      };
-    }
-
-    /** Get event params */
-    const { restOfFilters: filtersFromEvent, timeRange: timeRangeFromEvent } = extractTimeRange(
-      context.filters,
-      context.timeFieldName
-    );
-
-    if (filtersFromEvent) {
-      params.filters = [...(params.filters ?? []), ...filtersFromEvent];
-    }
-
-    if (timeRangeFromEvent) {
-      params.timeRange = timeRangeFromEvent;
-    }
-
-    const location = await this.locator.getLocation(params);
-    if (useUrlForState) {
-      this.useUrlForState(location);
-    }
-
-    return location;
-  }
-
-  private useUrlForState(location: KibanaLocation<DashboardLocatorParams>) {
-    const state = location.state;
-    location.path = setStateToKbnUrl(
-      '_a',
-      cleanEmptyKeys({
-        query: state.query,
-        filters: state.filters?.filter((f) => !isFilterPinned(f)),
-      }),
-      { useHash: false, storeInHashQuery: true },
-      location.path
-    );
+    const { getLocation } = await import('../async_module');
+    return getLocation(this.locator, config, context, useUrlForState);
   }
 
   public readonly inject = createInject({ drilldownId: this.id });

@@ -19,6 +19,18 @@ import {
 } from '../../../common/state_management/set_state_to_kbn_url';
 import { persistState } from '../state_hash';
 
+/**
+ * @returns {object} stateObj with keys with undefined values removed
+ */
+export const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
+  Object.keys(stateObj).forEach((key) => {
+    if (stateObj[key] === undefined) {
+      delete stateObj[key];
+    }
+  });
+  return stateObj;
+};
+
 export const getCurrentUrl = (history: History) => history.createHref(history.location);
 
 /**

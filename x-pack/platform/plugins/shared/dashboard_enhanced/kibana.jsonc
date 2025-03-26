@@ -22,7 +22,6 @@
       "unifiedSearch"
     ],
     "requiredBundles": [
-      "dashboard",
       "embeddable",
       "embeddableEnhanced",
       "kibanaUtils",

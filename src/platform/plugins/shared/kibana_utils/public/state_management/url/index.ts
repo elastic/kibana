@@ -10,6 +10,7 @@
 export { hashUrl, hashQuery, unhashUrl, unhashQuery } from './hash_unhash_url';
 export type { IKbnUrlControls } from './kbn_url_storage';
 export {
+  cleanEmptyKeys,
   createKbnUrlControls,
   setStateToKbnUrl,
   getStateFromKbnUrl,

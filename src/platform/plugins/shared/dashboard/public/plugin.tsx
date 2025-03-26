@@ -59,6 +59,7 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
+import { isFilterPinned } from '@kbn/es-query';
 
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { DashboardAppLocatorDefinition } from './dashboard_app/locator/locator';
@@ -153,19 +154,7 @@ export class DashboardPlugin
 
     if (share) {
       share.url.locators.create(
-        new DashboardAppLocatorDefinition({
-          useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
-          getDashboardFilterFields: async (dashboardId: string) => {
-            const [{ getDashboardContentManagementService }] = await Promise.all([
-              import('./services/dashboard_content_management_service'),
-              untilPluginStartServicesReady(),
-            ]);
-            return (
-              (await getDashboardContentManagementService().loadDashboardState({ id: dashboardId }))
-                .dashboardInput?.filters ?? []
-            );
-          },
-        })
+        new DashboardAppLocatorDefinition(core.uiSettings.get('state:storeInSessionStorage'))
       );
     }
 
@@ -187,8 +176,7 @@ export class DashboardPlugin
             filter(
               ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
             ),
-            map(async ({ state }) => {
-              const { isFilterPinned } = await import('@kbn/es-query');
+            map(({ state }) => {
               return {
                 ...state,
                 filters: state.filters?.filter(isFilterPinned),

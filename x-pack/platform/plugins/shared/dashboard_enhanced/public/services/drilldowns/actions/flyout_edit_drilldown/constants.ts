@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './flyout_create_drilldown';
-export * from './flyout_edit_drilldown';
+export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';

@@ -9,8 +9,9 @@ import { CoreSetup } from '@kbn/core/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { SetupDependencies, StartDependencies } from '../../plugin';
-import { FlyoutCreateDrilldownAction, FlyoutEditDrilldownAction } from './actions';
 import { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
+import { OPEN_FLYOUT_ADD_DRILLDOWN } from './actions/flyout_create_drilldown/constants';
+import { OPEN_FLYOUT_EDIT_DRILLDOWN } from './actions/flyout_edit_drilldown/constants';
 
 interface BootstrapParams {
   enableDrilldowns: boolean;
@@ -33,11 +34,15 @@ export class DashboardDrilldownsService {
   ) {
     const start = createStartServicesGetter(core.getStartServices);
 
-    const actionFlyoutCreateDrilldown = new FlyoutCreateDrilldownAction({ start });
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutCreateDrilldown);
+    uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, OPEN_FLYOUT_ADD_DRILLDOWN, async () => {
+      const { FlyoutCreateDrilldownAction } = await import('./async_module');
+      return new FlyoutCreateDrilldownAction({ start });
+    });
 
-    const actionFlyoutEditDrilldown = new FlyoutEditDrilldownAction({ start });
-    uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, actionFlyoutEditDrilldown);
+    uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, OPEN_FLYOUT_EDIT_DRILLDOWN, async () => {
+      const { FlyoutEditDrilldownAction } = await import('./async_module');
+      return new FlyoutEditDrilldownAction({ start });
+    });
 
     const dashboardToDashboardDrilldown = new EmbeddableToDashboardDrilldown({ start });
     uiActions.registerDrilldown(dashboardToDashboardDrilldown);

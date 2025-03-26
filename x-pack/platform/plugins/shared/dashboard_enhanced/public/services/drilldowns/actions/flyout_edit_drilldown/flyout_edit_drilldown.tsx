@@ -38,8 +38,7 @@ import {
   DRILLDOWN_MAX_WIDTH,
   ensureNestedTriggers,
 } from '../drilldown_shared';
-
-export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
+import { OPEN_FLYOUT_EDIT_DRILLDOWN } from './constants';
 
 export interface FlyoutEditDrilldownParams {
   start: StartServicesGetter<Pick<StartDependencies, 'uiActionsEnhanced'>>;
