@@ -20,8 +20,7 @@ import { useLicense as _useLicense } from '../../../common/hooks/use_license';
 import type { LicenseService } from '../../../../common/license';
 import { buildPerPolicyTag } from '../../../../common/endpoint/service/artifacts/utils';
 import { ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE } from '../../common/translations';
-import { allFleetHttpMocks, fleetBulkGetPackagePoliciesListHttpMock } from '../../mocks';
-import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { allFleetHttpMocks } from '../../mocks';
 
 jest.mock('../../../common/components/user_privileges');
 jest.mock('../../../common/hooks/use_license');
@@ -34,18 +33,10 @@ describe('when using EffectedPolicySelect component', () => {
   let handleOnChange: jest.MockedFunction<EffectedPolicySelectProps['onChange']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let apiMocks: ReturnType<typeof allFleetHttpMocks>;
-
-  const render = async (
-    props: Partial<EffectedPolicySelectProps> = {}
-  ): Promise<ReturnType<AppContextTestRender['render']>> => {
-    componentProps = {
-      ...componentProps,
-      ...props,
-    };
-    renderResult = mockedContext.render(<EffectedPolicySelect {...componentProps} />);
-
-    return renderResult;
-  };
+  let render: (
+    props?: Partial<EffectedPolicySelectProps>
+  ) => Promise<ReturnType<AppContextTestRender['render']>>;
+  let policyId: string;
 
   let resetHTMLElementOffsetWidth: () => void;
 
@@ -57,11 +48,13 @@ describe('when using EffectedPolicySelect component', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
-    apiMocks = allFleetHttpMocks(mockedContext.coreStart.http);
+    apiMocks = allFleetHttpMocks(mockedContext.coreStart.http, { debug: true });
     handleOnChange = jest.fn((updatedArtifact) => {
       componentProps.item = updatedArtifact;
       renderResult.rerender(<EffectedPolicySelect {...componentProps} />);
     });
+
+    policyId = apiMocks.responseProvider.packagePolicies().items[0].id;
 
     // Default props
     componentProps = {
@@ -70,6 +63,18 @@ describe('when using EffectedPolicySelect component', () => {
       }),
       onChange: handleOnChange,
       'data-test-subj': 'test',
+    };
+
+    render = async (
+      props: Partial<EffectedPolicySelectProps> = {}
+    ): Promise<ReturnType<AppContextTestRender['render']>> => {
+      componentProps = {
+        ...componentProps,
+        ...props,
+      };
+      renderResult = mockedContext.render(<EffectedPolicySelect {...componentProps} />);
+
+      return renderResult;
     };
 
     (useLicenseMock() as jest.Mocked<LicenseService>).isPlatinumPlus.mockReturnValue(true);
@@ -101,7 +106,7 @@ describe('when using EffectedPolicySelect component', () => {
 
   const clickOnPolicy = () => {
     act(() => {
-      fireEvent.click(renderResult.getByTestId('some id here'));
+      fireEvent.click(renderResult.getByTestId(`test-policiesSelector-policy-${policyId}`));
     });
   };
 
@@ -175,23 +180,20 @@ describe('when using EffectedPolicySelect component', () => {
   it('should call onChange when policy selection changes', async () => {
     componentProps.item.tags = [];
     await render();
-    clickOnPolicy();
     await waitForPoliciesToLoad();
+    clickOnPolicy();
 
     expect(handleOnChange).toHaveBeenCalledWith(
-      expect.objectContaining({ tags: ['policy:somepolicy'] })
+      expect.objectContaining({ tags: [buildPerPolicyTag(policyId)] })
     );
   });
 
   describe('and space awareness is enabled', () => {
-    let httpMocks: ReturnType<typeof fleetBulkGetPackagePoliciesListHttpMock>;
-
     beforeEach(() => {
       mockedContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
-      componentProps.item.tags = [buildPerPolicyTag('321')];
-      httpMocks = fleetBulkGetPackagePoliciesListHttpMock(mockedContext.coreStart.http);
-      httpMocks.responseProvider.bulkPackagePolicies.mockReturnValue({
-        items: [new FleetPackagePolicyGenerator('seed').generate({ id: 'abc123' })],
+      componentProps.item.tags = [buildPerPolicyTag('policy-321-not-in-space')];
+      apiMocks.responseProvider.bulkPackagePolicies.mockReturnValue({
+        items: [],
       });
     });
 
@@ -223,10 +225,13 @@ describe('when using EffectedPolicySelect component', () => {
       await waitFor(() => {
         expect(getByTestId('test-unAccessiblePoliciesCallout'));
       });
+      await waitForPoliciesToLoad();
       clickOnPolicy();
 
       expect(handleOnChange).toHaveBeenLastCalledWith(
-        expect.objectContaining({ tags: ['policy:321', 'policy:abc123'] })
+        expect.objectContaining({
+          tags: [buildPerPolicyTag('policy-321-not-in-space'), buildPerPolicyTag(policyId)],
+        })
       );
     });
   });

@@ -349,7 +349,7 @@ export const fleetGetPackagePoliciesListHttpMock =
       id: 'packagePolicies',
       path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
       method: 'get',
-      handler: ({ query }) => {
+      handler: () => {
         const generator = new EndpointDocGenerator('seed');
         const fleetPackagePolicyGenerator = new FleetPackagePolicyGenerator('seed');
         const endpointMetadata = generator.generateHostMetadata();
@@ -367,13 +367,6 @@ export const fleetGetPackagePoliciesListHttpMock =
           // FIXME: remove hard-coded IDs below and get them from the new FleetPackagePolicyGenerator (#2262)
           'ddf6570b-9175-4a6d-b288-61a09771c647',
           'b8e616ae-44fc-4be7-846c-ce8fa5c082dd',
-
-          // And finally, include any kql filters for package policies ids
-          ...getPackagePoliciesFromKueryString(
-            `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${(query?.ids as string[]).join(
-              ' or '
-            )} )`
-          ),
         ];
 
         return {
