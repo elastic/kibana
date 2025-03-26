@@ -63,7 +63,7 @@ export const WorkspaceGlobalCSSComponent = ({
   const theme = useEuiTheme();
   const shadow = euiShadowSmall(theme);
   const { euiTheme } = theme;
-  useSyncPushFlyoutStyles();
+  const pushFlyoutStyles = useSyncPushFlyoutStyles();
 
   let toolWidth = `0px`;
 
@@ -190,6 +190,8 @@ export const WorkspaceGlobalCSSComponent = ({
       }
 
       /* Alterations */
+      ${pushFlyoutStyles}
+
       .kbnBody .euiFlyout:not(.euiCollapsibleNavBeta) {
         // overlay flyout
         &:not([class*='push']) {

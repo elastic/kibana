@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { css, SerializedStyles } from '@emotion/react';
 
 export const euiPushFlyoutPaddingInlineEnd = '--eui-push-flyout-padding-inline-end';
 
@@ -17,6 +18,8 @@ export const euiPushFlyoutPaddingInlineEnd = '--eui-push-flyout-padding-inline-e
  * This hook listens to styles changes on the body and updates a CSS variable that is used to push the workspace content
  */
 export function useSyncPushFlyoutStyles() {
+  const [styles, setStyles] = useState<SerializedStyles | null>(null);
+
   useEffect(() => {
     const targetNode = document.body;
 
@@ -57,12 +60,11 @@ export function useSyncPushFlyoutStyles() {
           paddingInlineEnd = paddingInlineEnd ?? end;
 
           if (paddingInlineEnd) {
-            document.documentElement.style.setProperty(
-              euiPushFlyoutPaddingInlineEnd,
-              paddingInlineEnd
-            );
+            setStyles(css`
+              ${euiPushFlyoutPaddingInlineEnd}: ${paddingInlineEnd};
+            `);
           } else {
-            document.documentElement.style.removeProperty(euiPushFlyoutPaddingInlineEnd);
+            setStyles(null);
           }
         }
       }
@@ -76,4 +78,6 @@ export function useSyncPushFlyoutStyles() {
       observer.disconnect();
     };
   }, []);
+
+  return styles;
 }
