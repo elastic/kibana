@@ -18,7 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { OnboardingContextProvider } from '../../../onboarding/components/onboarding_context';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { InventoryTitle } from '../inventory_title';
+import { AssetInventoryTitle } from '../asset_inventory_title';
 import { AssetInventoryLoading } from '../asset_inventory_loading';
 import illustration from '../../../common/images/integrations_light.png';
 import { IntegrationsCardGridTabs } from '../../../onboarding/components/onboarding_body/cards/integrations/integration_card_grid_tabs';
@@ -34,7 +34,7 @@ export const NoDataFound = () => {
 
   return (
     <>
-      <InventoryTitle />
+      <AssetInventoryTitle />
       <EuiSpacer size="l" />
       <OnboardingSuccessCallout />
       <EuiPanel data-test-subj={TEST_SUBJ_ONBOARDING_NO_DATA_FOUND}>

@@ -282,20 +282,25 @@ export type CommandSuggestFunction<CommandName extends string> = (
 export interface CommandDefinition<CommandName extends string> {
   name: CommandName;
 
-  examples: string[];
+  /**
+   * A description of what the command does. Displayed in the autocomplete.
+   */
+  description: string;
 
   /**
-   * The pattern for declaring this command statement.
+   * The pattern for declaring this command statement. Displayed in the autocomplete.
    */
   declaration: string;
+
+  /**
+   * A list of examples of how to use the command. Displayed in the autocomplete.
+   */
+  examples: string[];
 
   /**
    * Command name prefix, such as "LEFT" or "RIGHT" for JOIN command.
    */
   types?: CommandTypeDefinition[];
-
-  alias?: string;
-  description: string;
 
   /**
    * Displays a Technical preview label in the autocomplete
@@ -303,7 +308,8 @@ export interface CommandDefinition<CommandName extends string> {
   preview?: boolean;
 
   /**
-   * Whether to show or hide in autocomplete suggestion list
+   * Whether to show or hide in autocomplete suggestion list. We generally use
+   * this for commands that are not yet ready to be advertised.
    */
   hidden?: boolean;
 
@@ -318,23 +324,6 @@ export interface CommandDefinition<CommandName extends string> {
    * This method is called to load suggestions when the cursor is within this command.
    */
   suggest: CommandSuggestFunction<CommandName>;
-
-  /** @deprecated this property will disappear in the future */
-  signature: {
-    multipleParams: boolean;
-    // innerTypes here is useful to drill down the type in case of "column"
-    // i.e. column of type string
-    params: Array<{
-      name: string;
-      type: string;
-      optional?: boolean;
-      innerTypes?: Array<SupportedDataType | 'any' | 'policy'>;
-      values?: string[];
-      valueDescriptions?: string[];
-      constantOnly?: boolean;
-      wildcards?: boolean;
-    }>;
-  };
 }
 
 export interface CommandTypeDefinition {
