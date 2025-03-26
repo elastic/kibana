@@ -38865,8 +38865,6 @@ paths:
       summary: Get Kibana's current status
       tags:
         - system
-<<<<<<< HEAD
-=======
   /api/streams:
     get:
       description: Fetches list of all streams
@@ -41512,7 +41510,6 @@ paths:
       summary: Get the task manager health
       tags:
         - task manager
->>>>>>> c9bfa082a07 ([DOCS] Add minimal task manager health APIs (#213862))
   /api/timeline:
     delete:
       description: Delete one or more Timelines or Timeline templates.
