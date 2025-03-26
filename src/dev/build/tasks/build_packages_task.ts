@@ -222,7 +222,8 @@ export const BuildPackages: Task = {
           ) {
             await scanCopy({
               source: config.resolveFromRepo(
-                'bazel-bin',
+                'target',
+                'build',
                 pkg.normalizedRepoRelativeDir,
                 'shared_built_assets'
               ),
@@ -235,7 +236,8 @@ export const BuildPackages: Task = {
           if (pkg.manifest.id === '@kbn/monaco') {
             await scanCopy({
               source: config.resolveFromRepo(
-                'bazel-bin',
+                'target',
+                'build',
                 pkg.normalizedRepoRelativeDir,
                 'target_workers'
               ),

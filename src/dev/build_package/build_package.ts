@@ -19,8 +19,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 const PATH_TO_WEBPACK_CLI = 'node_modules/.bin/webpack-cli';
 
 const getTargetDirForPackage = (packageFolder: string) => {
-  // TODO: change this to avoid bazel-bin
-  return path.resolve(REPO_ROOT, 'bazel-bin', packageFolder);
+  return path.resolve(REPO_ROOT, 'target', 'build', packageFolder);
 };
 
 const getFullOutputPath = (packageFolder: string, commandName: string) => {
