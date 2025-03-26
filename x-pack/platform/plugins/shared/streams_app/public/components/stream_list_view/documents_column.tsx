@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
-import moment from 'moment';
 import {
   BarSeries,
   Chart,
@@ -51,19 +50,15 @@ export function DocumentsColumn({
   } = useKibana();
 
   const { absoluteTimeRange } = useTimeFilter();
+  const minInterval = Math.floor((absoluteTimeRange.end - absoluteTimeRange.start) / numDataPoints);
 
   const histogramQueryFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      const bucketSize = Math.round(
-        moment
-          .duration((absoluteTimeRange.end - absoluteTimeRange.start) / numDataPoints)
-          .asSeconds()
-      );
       return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
         params: {
           body: {
             operationName: 'get_doc_count_for_stream',
-            query: `FROM ${indexPattern} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${bucketSize} seconds)`,
+            query: `FROM ${indexPattern} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
             start: absoluteTimeRange.start,
             end: absoluteTimeRange.end,
           },
@@ -71,7 +66,7 @@ export function DocumentsColumn({
         signal,
       });
     },
-    [streamsRepositoryClient, indexPattern, absoluteTimeRange, numDataPoints]
+    [streamsRepositoryClient, indexPattern, absoluteTimeRange, minInterval]
   );
 
   const allTimeseries = React.useMemo(
@@ -124,7 +119,7 @@ export function DocumentsColumn({
           >
             <Chart size={{ width: '100%', height: euiThemeVars.euiSizeL }}>
               <SettingsWithTheme
-                xDomain={{ min: absoluteTimeRange.start, max: absoluteTimeRange.end }}
+                xDomain={{ min: absoluteTimeRange.start, max: absoluteTimeRange.end, minInterval }}
                 noResults={<div />}
               />
               <Tooltip
