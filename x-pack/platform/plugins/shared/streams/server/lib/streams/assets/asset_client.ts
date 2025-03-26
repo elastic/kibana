@@ -17,6 +17,7 @@ import {
   Asset,
   AssetLink,
   AssetLinkRequest,
+  AssetUnlinkRequest,
   AssetType,
   AssetWithoutUuid,
   DashboardLink,
@@ -120,13 +121,7 @@ type StoredQueryLink = Omit<QueryLink, 'query'> & {
   [QUERY_KQL_BODY]: string;
 };
 
-export type StoredAssetLink = (
-  | SloLink
-  | RuleLink
-  | DashboardLink
-  | StoredQueryLink
-  | StoredQueryLink
-) & {
+export type StoredAssetLink = (SloLink | RuleLink | DashboardLink | StoredQueryLink) & {
   [STREAM_NAME]: string;
 };
 
@@ -134,7 +129,7 @@ interface AssetBulkIndexOperation {
   index: { asset: AssetLinkRequest };
 }
 interface AssetBulkDeleteOperation {
-  delete: { asset: AssetLinkRequest };
+  delete: { asset: AssetUnlinkRequest };
 }
 
 function fromStorage(link: StoredAssetLink): AssetLink {
@@ -232,8 +227,8 @@ export class AssetClient {
     };
   }
 
-  async unlinkAsset(name: string, link: AssetLinkRequest) {
-    const id = getUuid(name, link);
+  async unlinkAsset(name: string, asset: AssetUnlinkRequest) {
+    const id = getUuid(name, asset);
 
     await this.clients.storageClient.delete({ id });
   }
@@ -267,9 +262,8 @@ export class AssetClient {
   async bulk(name: string, operations: AssetBulkOperation[]) {
     return await this.clients.storageClient.bulk({
       operations: operations.map((operation) => {
-        const document = toStorage(name, Object.values(operation)[0].asset as AssetLinkRequest);
-
         if ('index' in operation) {
+          const document = toStorage(name, Object.values(operation)[0].asset as AssetLinkRequest);
           return {
             index: {
               document,
@@ -278,9 +272,10 @@ export class AssetClient {
           };
         }
 
+        const id = getUuid(name, operation.delete.asset);
         return {
           delete: {
-            _id: document[ASSET_UUID],
+            _id: id,
           },
         };
       }),

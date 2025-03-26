@@ -277,12 +277,12 @@ const readSignificantEventsRoute = createServerRoute({
     const { name } = params.path;
     const { from, to, bucketSize } = params.query;
 
-    const assetLinks = await assetClient.getAssetLinks(name, ['query']);
-    if (isEmpty(assetLinks)) {
+    const assetQueries = await assetClient.getAssetLinks(name, ['query']);
+    if (isEmpty(assetQueries)) {
       return [];
     }
 
-    const searchRequests = assetLinks.flatMap((asset) => {
+    const searchRequests = assetQueries.flatMap((asset) => {
       return [
         { index: name },
         createSearchRequest({
@@ -300,13 +300,14 @@ const readSignificantEventsRoute = createServerRoute({
     >({ searches: searchRequests });
 
     const significantEvents = response.responses.map((queryResponse, queryIndex) => {
-      const query = assetLinks[queryIndex];
+      const query = assetQueries[queryIndex];
       if ('error' in queryResponse) {
         return {
           id: query.query.id,
           title: query.query.title,
           kql: query.query.kql,
           occurrences: [],
+          change_points: {},
         };
       }
 
