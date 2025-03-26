@@ -29,8 +29,6 @@ describe('useFullDataView', () => {
   });
 
   describe('when data view is available', () => {
-    beforeAll(() => {});
-
     it('should return DataView instance', async () => {
       const wrapper = renderHook(() => useFullDataView(DataViewManagerScopeName.default), {
         wrapper: TestProviders,
