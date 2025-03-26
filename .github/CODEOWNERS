@@ -765,6 +765,7 @@ src/platform/packages/shared/response-ops/alerts-fields-browser @elastic/respons
 src/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_form @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_params @elastic/response-ops
+src/platform/packages/shared/response-ops/rules-apis @elastic/response-ops
 examples/response_stream @elastic/ml-ui
 src/platform/packages/shared/kbn-rison @elastic/kibana-operations
 x-pack/platform/packages/private/rollup @elastic/kibana-management

@@ -1,58 +1,58 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { loadRuleTags } from '../lib/rule_api/aggregate';
-import { useKibana } from '../../common/lib/kibana';
-import type { LoadRuleTagsProps } from '../lib/rule_api';
-import type { GetRuleTagsResponse } from '../lib/rule_api/aggregate_helpers';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
+import type { SetOptional } from 'type-fest';
+import type { GetRuleTagsParams, GetRuleTagsResponse } from '../apis/get_rule_tags';
+import { getRuleTags } from '../apis/get_rule_tags';
+import { queryKeys } from '../query_keys';
 
-interface UseLoadTagsQueryProps {
-  enabled: boolean;
+interface UseGetRuleTagsQueryParams extends SetOptional<GetRuleTagsParams, 'page'> {
+  // Params
   refresh?: Date;
-  search?: string;
-  perPage?: number;
-  page?: number;
+  enabled: boolean;
+
+  // Services
+  toasts: ToastsStart;
 }
 
 const EMPTY_TAGS: string[] = [];
 
+export const getKey = queryKeys.getRuleTags;
+
 // React query will refetch all prev pages when the cache keys change:
 // https://github.com/TanStack/query/discussions/3576
-export function useLoadTagsQuery(props: UseLoadTagsQueryProps) {
-  const { enabled, refresh, search, perPage, page = 1 } = props;
-
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
-
-  const queryFn = ({ pageParam }: { pageParam?: LoadRuleTagsProps }) => {
-    if (pageParam) {
-      return loadRuleTags({
-        http,
-        perPage: pageParam.perPage,
-        page: pageParam.page,
-        search,
-      });
-    }
-    return loadRuleTags({
+export function useGetRuleTagsQuery({
+  enabled,
+  refresh,
+  search,
+  ruleTypeIds,
+  perPage,
+  page = 1,
+  http,
+  toasts,
+}: UseGetRuleTagsQueryParams) {
+  const queryFn = ({ pageParam }: { pageParam?: GetRuleTagsParams }) =>
+    getRuleTags({
       http,
-      perPage,
-      page,
+      perPage: pageParam?.perPage ?? perPage,
+      page: pageParam?.page ?? page,
       search,
+      ruleTypeIds,
     });
-  };
 
   const onErrorFn = () => {
     toasts.addDanger(
-      i18n.translate('xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleTags', {
+      i18n.translate('responseOpsRulesApis.unableToLoadRuleTags', {
         defaultMessage: 'Unable to load rule tags',
       })
     );
@@ -71,15 +71,13 @@ export function useLoadTagsQuery(props: UseLoadTagsQueryProps) {
 
   const { refetch, data, fetchNextPage, isLoading, isFetching, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: [
-        'loadRuleTags',
+      queryKey: getKey({
+        ruleTypeIds,
         search,
         perPage,
         page,
-        {
-          refresh: refresh?.toISOString(),
-        },
-      ],
+        refresh,
+      }),
       queryFn,
       onError: onErrorFn,
       enabled,

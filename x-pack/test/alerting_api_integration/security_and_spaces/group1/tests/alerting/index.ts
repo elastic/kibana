@@ -32,6 +32,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./get_alert_state'));
       loadTestFile(require.resolve('./get_alert_summary'));
       loadTestFile(require.resolve('./rule_types'));
+      loadTestFile(require.resolve('./rule_types_internal'));
       loadTestFile(require.resolve('./retain_api_key'));
       loadTestFile(require.resolve('./bulk_untrack'));
       loadTestFile(require.resolve('./bulk_untrack_by_query'));
