@@ -20,6 +20,12 @@ const baseUrl = url.format({
   query: { rangeFrom: start, rangeTo: end },
 });
 
+const transactionTabPath = '/app/apm/services/adservice-edot-synth/transactions/view';
+const transactionUrl = url.format({
+  pathname: transactionTabPath,
+  query: { rangeFrom: start, rangeTo: end, transactionName: 'oteldemo.AdServiceEdotSynth/GetAds' },
+});
+
 describe('Service Overview', () => {
   before(() => {
     synthtraceOtel.index(
@@ -97,6 +103,13 @@ describe('Service Overview', () => {
 
       cy.contains('a', 'oteldemo.AdServiceEdotSynth/GetAds').click();
       cy.contains('h5', 'oteldemo.AdServiceEdotSynth/GetAds');
+    });
+    it('shows transaction summary', () => {
+      cy.visitKibana(transactionUrl);
+
+      cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
+      cy.getByTestSubj('apmHttpInfoUrl').should('exist');
+      cy.getByTestSubj('apmHttpStatusBadge').should('exist');
     });
   });
 
