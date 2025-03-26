@@ -11,12 +11,18 @@ import React from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TRANSACTION_ID_FIELD, getTraceDocumentOverview } from '@kbn/discover-utils';
+import {
+  SPAN_DURATION_FIELD,
+  TRANSACTION_ID_FIELD,
+  getTraceDocumentOverview,
+} from '@kbn/discover-utils';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { TransactionProvider } from './hooks/use_transaction';
 import { spanFields } from './resources/fields';
 import { getSpanFieldConfiguration } from './resources/get_span_field_configuration';
 import { SpanSummaryField } from './sub_components/span_summary_field';
+import { SpanDurationSummary } from './sub_components/span_duration_summary';
+
 export type SpanOverviewProps = DocViewRenderProps & {
   transactionIndexPattern: string;
 };
@@ -63,6 +69,13 @@ export function SpanOverview({
               />
             );
           })}
+
+          {parsedDoc[SPAN_DURATION_FIELD] && (
+            <>
+              <EuiSpacer size="m" />
+              <SpanDurationSummary duration={parsedDoc[SPAN_DURATION_FIELD]} />
+            </>
+          )}
         </EuiPanel>
       </FieldActionsProvider>
     </TransactionProvider>
