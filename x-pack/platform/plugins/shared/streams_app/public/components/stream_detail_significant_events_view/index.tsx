@@ -90,7 +90,6 @@ export function StreamDetailSignificantEventsView({
       return undefined;
     }
 
-    setIsSuggestionFlyoutOpen(true);
     setIsSuggestionsLoading(true);
 
     return lastValueFrom(
@@ -110,6 +109,7 @@ export function StreamDetailSignificantEventsView({
       )
     )
       .then((event) => {
+        setIsSuggestionFlyoutOpen(true);
         setSuggestedEvents(
           event.queries.map((suggestion) => {
             return {
@@ -323,6 +323,9 @@ export function StreamDetailSignificantEventsView({
               })
               .then(() => {
                 significantEventsFetchState.refresh();
+              })
+              .finally(() => {
+                setIsSuggestionFlyoutOpen(false);
               });
           }}
           onClose={() => {
