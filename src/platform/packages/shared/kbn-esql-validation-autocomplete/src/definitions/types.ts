@@ -219,6 +219,17 @@ export enum Location {
   STATS_WHERE = 'stats_where',
 }
 
+const commandOptionNameToLocation: Record<string, Location> = {
+  eval: Location.EVAL,
+  where: Location.WHERE,
+  row: Location.ROW,
+  sort: Location.SORT,
+  stats: Location.STATS,
+};
+
+export const getLocationFromCommandOrOptionName = (name: string) =>
+  commandOptionNameToLocation[name];
+
 export interface FunctionDefinition {
   type: FunctionDefinitionTypes;
   preview?: boolean;

@@ -108,19 +108,11 @@ export function getOperatorSuggestion(fn: FunctionDefinition): SuggestionRawDefi
   };
 }
 
-interface BaseFunctionFilterPredicates {
-  option?: string | undefined;
+interface FunctionFilterPredicates {
+  location: Location;
   returnTypes?: string[];
   ignored?: string[];
 }
-
-/**
- * We should be using "location," not "command." "command" is only here for
- * supporting legacy code.
- */
-type FunctionFilterPredicates =
-  | (BaseFunctionFilterPredicates & { location: Location; command?: never })
-  | (BaseFunctionFilterPredicates & { command: string; location?: never });
 
 export const filterFunctionDefinitions = (
   functions: FunctionDefinition[],
@@ -129,18 +121,7 @@ export const filterFunctionDefinitions = (
   if (!predicates) {
     return functions;
   }
-  const { command, location, returnTypes, ignored = [] } = predicates;
-
-  let locationToUse = location;
-  if (command) {
-    locationToUse = {
-      eval: Location.EVAL,
-      row: Location.ROW,
-      where: Location.WHERE,
-      sort: Location.SORT,
-      stats: Location.STATS,
-    }[command];
-  }
+  const { location, returnTypes, ignored = [] } = predicates;
 
   return functions.filter(({ name, locationsAvailable, ignoreAsSuggestion, signatures }) => {
     if (ignoreAsSuggestion) {
@@ -151,7 +132,7 @@ export const filterFunctionDefinitions = (
       return false;
     }
 
-    if (locationToUse && !locationsAvailable.includes(locationToUse)) {
+    if (location && !locationsAvailable.includes(location)) {
       return false;
     }
 
