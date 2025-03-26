@@ -49,7 +49,7 @@ export const getRuleList = (
       ),
     },
     {
-      title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.AlertsTitle', {
+      title: i18n.translate('xpack.securitySolution.findings.findingsFlyout.ruleTab.AlertsTitle', {
         defaultMessage: 'Alerts',
       }),
       description:
@@ -65,7 +65,7 @@ export const getRuleList = (
         ),
     },
     {
-      title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.tagsTitle', {
+      title: i18n.translate('xpack.securitySolution.findings.findingsFlyout.ruleTab.tagsTitle', {
         defaultMessage: 'Tags',
       }),
       description: rule?.tags?.length ? (
@@ -79,9 +79,12 @@ export const getRuleList = (
       ),
     },
     {
-      title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.frameworkSourcesTitle', {
-        defaultMessage: 'Framework Sources',
-      }),
+      title: i18n.translate(
+        'xpack.securitySolution.findings.findingsFlyout.ruleTab.frameworkSourcesTitle',
+        {
+          defaultMessage: 'Framework Sources',
+        }
+      ),
       description:
         rule?.benchmark?.id && rule?.benchmark?.name ? (
           <BenchmarkIcons benchmarkId={rule.benchmark.id} benchmarkName={rule.benchmark.name} />
@@ -90,15 +93,21 @@ export const getRuleList = (
         ),
     },
     {
-      title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.cisSectionTitle', {
-        defaultMessage: 'Framework Section',
-      }),
+      title: i18n.translate(
+        'xpack.securitySolution.findings.findingsFlyout.ruleTab.cisSectionTitle',
+        {
+          defaultMessage: 'Framework Section',
+        }
+      ),
       description: rule?.section || EMPTY_VALUE,
     },
     {
-      title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.profileApplicabilityTitle', {
-        defaultMessage: 'Profile Applicability',
-      }),
+      title: i18n.translate(
+        'xpack.securitySolution.findings.findingsFlyout.ruleTab.profileApplicabilityTitle',
+        {
+          defaultMessage: 'Profile Applicability',
+        }
+      ),
       description: rule?.profile_applicability ? (
         <CspFlyoutMarkdown>{rule.profile_applicability}</CspFlyoutMarkdown>
       ) : (
@@ -106,21 +115,27 @@ export const getRuleList = (
       ),
     },
     {
-      title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.benchmarkTitle', {
-        defaultMessage: 'Benchmark',
-      }),
+      title: i18n.translate(
+        'xpack.securitySolution.findings.findingsFlyout.ruleTab.benchmarkTitle',
+        {
+          defaultMessage: 'Benchmark',
+        }
+      ),
       description: rule?.benchmark?.name || EMPTY_VALUE,
     },
     {
-      title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.auditTitle', {
+      title: i18n.translate('xpack.securitySolution.findings.findingsFlyout.ruleTab.auditTitle', {
         defaultMessage: 'Audit',
       }),
       description: rule?.audit ? <CspFlyoutMarkdown>{rule.audit}</CspFlyoutMarkdown> : EMPTY_VALUE,
     },
     {
-      title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.referencesTitle', {
-        defaultMessage: 'References',
-      }),
+      title: i18n.translate(
+        'xpack.securitySolution.findings.findingsFlyout.ruleTab.referencesTitle',
+        {
+          defaultMessage: 'References',
+        }
+      ),
       description: reference ? <CspFlyoutMarkdown>{reference}</CspFlyoutMarkdown> : EMPTY_VALUE,
     },
   ];
