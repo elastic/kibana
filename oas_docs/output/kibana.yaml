@@ -41,11 +41,6 @@ info:
     label: Feedback
     url: https://github.com/elastic/docs-content/issues/new?assignees=&labels=feedback%2Ccommunity&projects=&template=api-feedback.yaml&title=%5BFeedback%5D%3A+
 servers:
-  - url: http://localhost:5622
-  - url: https://{kibana_url}
-    variables:
-      kibana_url:
-        default: localhost:5601
   - url: https://{kibana_url}
     variables:
       kibana_url:
@@ -55,6 +50,12 @@ security:
   - basicAuth: []
 tags:
   - name: alerting
+    description: |
+      Alerting enables you to define rules, which detect complex conditions within your data. When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
+    externalDocs:
+      description: Alerting documentation
+      url: https://www.elastic.co/guide/en/kibana/8.x/alerting-getting-started.html
+    x-displayName: Alerting
   - description: |
       Adjust APM agent configuration without need to redeploy your application.
     name: APM agent configuration
@@ -46386,3 +46387,19 @@ components:
     basicAuth:
       scheme: basic
       type: http
+x-topics:
+  - title: Kibana spaces
+    content: |
+      Spaces enable you to organize your dashboards and other saved objects into meaningful categories.
+      You can use the default space or create your own spaces.
+
+      To run APIs in non-default spaces, you must add `s/{space_id}/` to the path.
+      For example:
+
+      ```
+      curl -X GET "http://localhost:5601/s/marketing/api/data_views"
+      ```
+
+      If you use the Kibana console to send API requests, it automatically adds the appropriate space identifier.
+
+      To learn more, check out [Spaces](https://www.elastic.co/guide/en/kibana/8.x/xpack-spaces.html).
