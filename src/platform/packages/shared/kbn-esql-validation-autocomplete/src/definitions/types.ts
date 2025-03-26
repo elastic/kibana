@@ -217,6 +217,37 @@ export enum Location {
    * In a per-agg filter
    */
   STATS_WHERE = 'stats_where',
+
+  /**
+   * Top-level ENRICH command
+   */
+  ENRICH = 'enrich',
+
+  /**
+   * ENRICH...WITH clause
+   */
+  ENRICH_WITH = 'enrich_with',
+
+  /**
+   * In the top-level DISSECT command (used only for
+   * assignment in APPEND_SEPARATOR)
+   */
+  DISSECT = 'dissect',
+
+  /**
+   * In RENAME (used only for AS)
+   */
+  RENAME = 'rename',
+
+  /**
+   * In the JOIN command (used only for AS)
+   */
+  JOIN = 'join',
+
+  /**
+   * In the SHOW command
+   */
+  SHOW = 'show',
 }
 
 const commandOptionNameToLocation: Record<string, Location> = {
@@ -225,8 +256,20 @@ const commandOptionNameToLocation: Record<string, Location> = {
   row: Location.ROW,
   sort: Location.SORT,
   stats: Location.STATS,
+  by: Location.STATS_BY,
+  enrich: Location.ENRICH,
+  with: Location.ENRICH_WITH,
+  dissect: Location.DISSECT,
+  rename: Location.RENAME,
+  join: Location.JOIN,
+  show: Location.SHOW,
 };
 
+/**
+ * Pause before using this in new places. Where possible, use the Location enum directly.
+ *
+ * This is primarily around for backwards compatibility with the old system of command and option names.
+ */
 export const getLocationFromCommandOrOptionName = (name: string) =>
   commandOptionNameToLocation[name];
 

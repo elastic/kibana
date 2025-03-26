@@ -759,7 +759,7 @@ export async function suggestForExpression({
 }: {
   expressionRoot: ESQLSingleAstItem | undefined;
   location: Location;
-  preferredExpressionType: SupportedDataType;
+  preferredExpressionType?: SupportedDataType;
 } & Pick<
   CommandSuggestParams<string>,
   'innerText' | 'getExpressionType' | 'getColumnsByType' | 'previousCommands'

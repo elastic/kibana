@@ -688,13 +688,13 @@ const enrichGrouping = (
       ];
       return {
         ...op,
+        locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
         signatures,
-        supportedOptions: ['by'],
       };
     }
     return {
       ...op,
-      supportedOptions: ['by'],
+      locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
     };
   });
 };

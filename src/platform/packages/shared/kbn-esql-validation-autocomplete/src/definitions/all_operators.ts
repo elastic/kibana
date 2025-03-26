@@ -269,8 +269,13 @@ const otherDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.notDoc', {
       defaultMessage: 'Not',
     }),
-    supportedCommands: ['eval', 'where', 'row', 'sort'],
-    supportedOptions: ['by'],
+    locationsAvailable: [
+      Location.EVAL,
+      Location.WHERE,
+      Location.ROW,
+      Location.SORT,
+      Location.STATS_BY,
+    ],
     signatures: [
       {
         params: [{ name: 'expression', type: 'boolean' }],
@@ -284,17 +289,16 @@ const otherDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.assignDoc', {
       defaultMessage: 'Assign (=)',
     }),
-    supportedCommands: [
-      'eval',
-      'stats',
-      'inlinestats',
-      'metrics',
-      'row',
-      'dissect',
-      'where',
-      'enrich',
+    locationsAvailable: [
+      Location.EVAL,
+      Location.STATS,
+      Location.STATS_BY,
+      Location.ROW,
+      Location.WHERE,
+      Location.ENRICH,
+      Location.ENRICH_WITH,
+      Location.DISSECT,
     ],
-    supportedOptions: ['by', 'with'],
     signatures: [
       {
         params: [
@@ -311,8 +315,7 @@ const otherDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.asDoc', {
       defaultMessage: 'Rename as (AS)',
     }),
-    supportedCommands: ['rename', 'join'],
-    supportedOptions: [],
+    locationsAvailable: [Location.RENAME, Location.JOIN],
     signatures: [
       {
         params: [
@@ -329,8 +332,7 @@ const otherDefinitions: FunctionDefinition[] = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.whereDoc', {
       defaultMessage: 'WHERE operator',
     }),
-    supportedCommands: ['stats', 'inlinestats', 'metrics'],
-    supportedOptions: [],
+    locationsAvailable: [Location.STATS],
     signatures: [
       {
         params: [
@@ -338,6 +340,21 @@ const otherDefinitions: FunctionDefinition[] = [
           { name: 'right', type: 'any' },
         ],
         returnType: 'unknown',
+      },
+    ],
+  },
+  {
+    // TODO — this shouldn't be a function or an operator...
+    name: 'info',
+    type: FunctionDefinitionTypes.OPERATOR,
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.infoDoc', {
+      defaultMessage: 'Show information about the current ES node',
+    }),
+    locationsAvailable: [Location.SHOW],
+    signatures: [
+      {
+        params: [],
+        returnType: 'unknown', // meaningless
       },
     ],
   },
