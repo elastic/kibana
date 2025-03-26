@@ -74,13 +74,17 @@ export const useRiskScore = <T extends EntityType>({
   includeAlertsCount = false,
 }: UseRiskScore<T>): RiskScoreState<T> => {
   const defaultIndex = useGetDefaultRiskIndex(riskEntity, onlyLatest);
+  const {
+    data: riskEngineStatus,
+    isFetching: isStatusLoading,
+    refetch: refetchEngineStatus,
+  } = useRiskEngineStatus();
   const factoryQueryType = EntityRiskQueries.list;
   const { querySize, cursorStart } = pagination || {};
   const { addError } = useAppToasts();
   const { isPlatinumOrTrialLicense } = useMlCapabilities();
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
   const isAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
-  const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
   const hasEngineBeenInstalled = riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED';
   const {
     loading,
@@ -95,11 +99,13 @@ export const useRiskScore = <T extends EntityType>({
     abort: skip || !hasEngineBeenInstalled || isStatusLoading || !isAuthorized,
     showErrorToast: false,
   });
+
   const refetchAll = useCallback(() => {
     if (defaultIndex) {
+      refetchEngineStatus();
       refetch();
     }
-  }, [defaultIndex, refetch]);
+  }, [defaultIndex, refetch, refetchEngineStatus]);
 
   const riskScoreResponse = useMemo(
     () => ({

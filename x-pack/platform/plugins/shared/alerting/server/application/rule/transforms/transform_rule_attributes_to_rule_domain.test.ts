@@ -8,8 +8,8 @@
 import { RecoveredActionGroup } from '../../../../common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { transformRuleAttributesToRuleDomain } from './transform_rule_attributes_to_rule_domain';
-import { UntypedNormalizedRuleType } from '../../../rule_type_registry';
-import { RawRuleAction } from '../../../types';
+import type { UntypedNormalizedRuleType } from '../../../rule_type_registry';
+import type { RawRuleAction } from '../../../types';
 
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test.rule-type',
@@ -21,6 +21,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
   producer: 'alerts',
+  solution: 'stack',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
   autoRecoverAlerts: true,

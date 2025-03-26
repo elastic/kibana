@@ -6,7 +6,7 @@
  */
 
 import { CaseSeverity } from '../../../common/types/domain';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import React from 'react';
 import { SeveritySelector } from './selector';
@@ -15,7 +15,7 @@ import userEvent from '@testing-library/user-event';
 describe('Severity field selector', () => {
   const onSeverityChange = jest.fn();
   it('renders a list of severity fields', () => {
-    const result = render(
+    render(
       <SeveritySelector
         selectedSeverity={CaseSeverity.MEDIUM}
         onSeverityChange={onSeverityChange}
@@ -24,12 +24,12 @@ describe('Severity field selector', () => {
       />
     );
 
-    expect(result.getByTestId('case-severity-selection')).toBeTruthy();
-    expect(result.getAllByTestId('case-severity-selection-medium').length).toBeTruthy();
+    expect(screen.getByTestId('case-severity-selection')).toBeTruthy();
+    expect(screen.getAllByTestId('case-severity-selection-medium').length).toBeTruthy();
   });
 
   it('renders a list of severity options when clicked', async () => {
-    const result = render(
+    render(
       <SeveritySelector
         selectedSeverity={CaseSeverity.MEDIUM}
         onSeverityChange={onSeverityChange}
@@ -37,15 +37,15 @@ describe('Severity field selector', () => {
         isDisabled={false}
       />
     );
-    await userEvent.click(result.getByTestId('case-severity-selection'));
-    expect(result.getByTestId('case-severity-selection-low')).toBeTruthy();
-    expect(result.getAllByTestId('case-severity-selection-medium').length).toBeTruthy();
-    expect(result.getByTestId('case-severity-selection-high')).toBeTruthy();
-    expect(result.getByTestId('case-severity-selection-critical')).toBeTruthy();
+    await userEvent.click(screen.getByTestId('case-severity-selection'));
+    expect(screen.getByTestId('case-severity-selection-low')).toBeTruthy();
+    expect(screen.getAllByTestId('case-severity-selection-medium').length).toBeTruthy();
+    expect(screen.getByTestId('case-severity-selection-high')).toBeTruthy();
+    expect(screen.getByTestId('case-severity-selection-critical')).toBeTruthy();
   });
 
   it('calls onSeverityChange with the newly selected severity when clicked', async () => {
-    const result = render(
+    render(
       <SeveritySelector
         selectedSeverity={CaseSeverity.MEDIUM}
         onSeverityChange={onSeverityChange}
@@ -53,10 +53,10 @@ describe('Severity field selector', () => {
         isDisabled={false}
       />
     );
-    await userEvent.click(result.getByTestId('case-severity-selection'));
+    await userEvent.click(screen.getByTestId('case-severity-selection'));
     await waitForEuiPopoverOpen();
-    expect(result.getByTestId('case-severity-selection-low')).toBeTruthy();
-    await userEvent.click(result.getByTestId('case-severity-selection-low'));
+    expect(screen.getByTestId('case-severity-selection-low')).toBeTruthy();
+    await userEvent.click(screen.getByTestId('case-severity-selection-low'));
     expect(onSeverityChange).toHaveBeenLastCalledWith('low');
   });
 });

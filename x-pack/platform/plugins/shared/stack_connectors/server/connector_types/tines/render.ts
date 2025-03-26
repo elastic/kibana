@@ -6,8 +6,8 @@
  */
 
 import { set } from '@kbn/safer-lodash-set/fp';
-import { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { RenderParameterTemplates } from '@kbn/actions-plugin/server/types';
+import type { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { RenderParameterTemplates } from '@kbn/actions-plugin/server/types';
 import { SUB_ACTION } from '../../../common/tines/constants';
 
 interface Context {

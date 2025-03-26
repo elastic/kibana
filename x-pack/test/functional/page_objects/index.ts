@@ -37,6 +37,7 @@ import { NavigationalSearchPageObject } from './navigational_search';
 import { ObservabilityLogsExplorerPageObject } from './observability_logs_explorer';
 import { DatasetQualityPageObject } from './dataset_quality';
 import { ObservabilityPageProvider } from './observability_page';
+import { AlertControlsProvider } from './alert_controls';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { ReportingPageObject } from './reporting_page';
 import { RoleMappingsPageProvider } from './role_mappings_page';
@@ -96,6 +97,7 @@ export const pageObjects = {
   observabilityLogsExplorer: ObservabilityLogsExplorerPageObject,
   datasetQuality: DatasetQualityPageObject,
   observability: ObservabilityPageProvider,
+  alertControls: AlertControlsProvider,
   remoteClusters: RemoteClustersPageProvider,
   reporting: ReportingPageObject,
   roleMappings: RoleMappingsPageProvider,

@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Provider } from 'react-redux';
 import { Router } from '@kbn/shared-ux-router';
 import type { History } from 'history';
@@ -36,15 +36,21 @@ export const AppRootProvider = memo<{
   startServices: StartServices;
   queryClient: QueryClient;
   children: ReactNode | ReactNode[];
-}>(({ store, history, coreStart, queryClient, startServices, children }) => {
+}>(({ store, history, coreStart, depsStart, queryClient, startServices, children }) => {
   const { theme: themeStart } = coreStart;
   const theme = useObservable(themeStart.theme$, themeStart.getTheme());
   const isDarkMode = theme.darkMode;
+  const services = useMemo(() => {
+    return {
+      ...depsStart,
+      ...startServices,
+    };
+  }, [depsStart, startServices]);
 
   return (
     <KibanaRenderContextProvider {...coreStart}>
       <Provider store={store}>
-        <KibanaContextProvider services={startServices}>
+        <KibanaContextProvider services={services}>
           <EuiThemeProvider darkMode={isDarkMode}>
             <QueryClientProvider client={queryClient}>
               <UpsellingProvider upsellingService={startServices.upselling}>

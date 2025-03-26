@@ -17,7 +17,7 @@ import { useIndicesStatusQuery } from '../../hooks/api/use_indices_status';
 import { useIndicesRedirect } from './hooks/use_indices_redirect';
 import { ElasticsearchStart } from './elasticsearch_start';
 import { LoadIndicesStatusError } from '../shared/load_indices_status_error';
-import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
+import { useIndexManagementBreadcrumbs } from '../../hooks/use_index_management_breadcrumbs';
 import { usePageChrome } from '../../hooks/use_page_chrome';
 
 const PageTitle = i18n.translate('xpack.searchIndices.startPage.docTitle', {
@@ -33,7 +33,13 @@ export const ElasticsearchStartPage = () => {
     error: indicesFetchError,
   } = useIndicesStatusQuery();
 
-  usePageChrome(PageTitle, [...IndexManagementBreadcrumbs, { text: PageTitle }]);
+  const indexManagementBreadcrumbs = useIndexManagementBreadcrumbs();
+  usePageChrome(PageTitle, [
+    ...indexManagementBreadcrumbs,
+    {
+      text: PageTitle,
+    },
+  ]);
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
@@ -49,7 +55,7 @@ export const ElasticsearchStartPage = () => {
       grow={false}
       solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
-      <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
+      <KibanaPageTemplate.Section alignment="top" restrictWidth={false} grow>
         {isInitialLoading && <EuiLoadingLogo />}
         {hasIndicesStatusFetchError && <LoadIndicesStatusError error={indicesFetchError} />}
         {!isInitialLoading && !hasIndicesStatusFetchError && (

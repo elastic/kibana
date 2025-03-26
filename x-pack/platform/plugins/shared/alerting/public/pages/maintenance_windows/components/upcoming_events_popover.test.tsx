@@ -6,7 +6,8 @@
  */
 import { fireEvent, screen } from '@testing-library/react';
 import * as React from 'react';
-import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
+import type { AppMockRenderer } from '../../../lib/test_utils';
+import { createAppMockRenderer } from '../../../lib/test_utils';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
 import { MaintenanceWindowStatus } from '../../../../common';
 

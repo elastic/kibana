@@ -15,7 +15,7 @@ import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_manag
 import { getAllLocations } from '../synthetics_service/get_all_locations';
 import { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
 import { PrivateLocation, ServiceLocation } from '../../common/runtime_types';
-import { monitorAttributes, syntheticsMonitorType } from '../../common/types/saved_objects';
+import { monitorAttributes } from '../../common/types/saved_objects';
 
 const StringOrArraySchema = schema.maybe(
   schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
@@ -82,30 +82,13 @@ export const getMonitors = async (
     sortField,
     sortOrder,
     query,
-    tags,
-    monitorTypes,
-    locations,
-    filter = '',
     searchAfter,
-    projects,
-    schedules,
-    monitorQueryIds,
     showFromAllSpaces,
   } = context.request.query;
 
-  const { filtersStr } = await getMonitorFilters({
-    filter,
-    monitorTypes,
-    tags,
-    locations,
-    projects,
-    schedules,
-    monitorQueryIds,
-    context,
-  });
+  const { filtersStr } = await getMonitorFilters(context);
 
-  return context.savedObjectsClient.find({
-    type: syntheticsMonitorType,
+  return context.monitorConfigRepository.find({
     perPage,
     page,
     sortField: parseMappingKey(sortField),
@@ -129,16 +112,26 @@ interface Filters {
   monitorQueryIds?: string | string[];
 }
 
-export const getMonitorFilters = async (
-  data: {
-    context: RouteContext;
-  } & Filters
-) => {
-  const { context, locations } = data;
+export const getMonitorFilters = async (context: RouteContext) => {
+  const {
+    tags,
+    monitorTypes,
+    locations,
+    filter = '',
+    projects,
+    schedules,
+    monitorQueryIds,
+  } = context.request.query;
   const locationFilter = await parseLocationFilter(context, locations);
 
   return parseArrayFilters({
-    ...data,
+    filter,
+    tags,
+    monitorTypes,
+    locations,
+    projects,
+    schedules,
+    monitorQueryIds,
     locationFilter,
   });
 };
@@ -260,7 +253,7 @@ export const isMonitorsQueryFiltered = (monitorQuery: MonitorsQuery) => {
   );
 };
 
-function parseMappingKey(key: string | undefined) {
+export function parseMappingKey(key: string | undefined) {
   switch (key) {
     case 'schedule.keyword':
       return 'schedule.number';

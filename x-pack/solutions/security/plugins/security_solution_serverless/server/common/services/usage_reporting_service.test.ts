@@ -159,6 +159,7 @@ describe('UsageReportingService', () => {
             cert: expect.any(String),
             key: expect.any(String),
             ca: expect.arrayContaining([expect.any(String)]),
+            allowPartialTrustChain: true,
           }),
         }),
       });

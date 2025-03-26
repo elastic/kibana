@@ -28,6 +28,7 @@ import { SecurityUsageReportingTask } from './task_manager/usage_reporting_task'
 import { cloudSecurityMetringTaskProperties } from './cloud_security/cloud_security_metering_task_config';
 import { registerProductFeatures, getSecurityProductTier } from './product_features';
 import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
+import { METERING_TASK as AI4SOC_METERING_TASK } from './ai4soc/constants/metering';
 import {
   endpointMeteringService,
   setEndpointPackagePolicyServerlessBillingFlags,
@@ -35,6 +36,7 @@ import {
 import { NLPCleanupTask } from './task_manager/nlp_cleanup_task/nlp_cleanup_task';
 import { telemetryEvents } from './telemetry/event_based_telemetry';
 import { UsageReportingService } from './common/services/usage_reporting_service';
+import { ai4SocMeteringService } from './ai4soc/services';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -49,6 +51,7 @@ export class SecuritySolutionServerlessPlugin
   private config: ServerlessSecurityConfig;
   private cloudSecurityUsageReportingTask: SecurityUsageReportingTask | undefined;
   private endpointUsageReportingTask: SecurityUsageReportingTask | undefined;
+  private ai4SocUsageReportingTask: SecurityUsageReportingTask | undefined;
   private nlpCleanupTask: NLPCleanupTask | undefined;
   private readonly logger: Logger;
   private readonly usageReportingService: UsageReportingService;
@@ -108,6 +111,23 @@ export class SecuritySolutionServerlessPlugin
       usageReportingService: this.usageReportingService,
     });
 
+    this.ai4SocUsageReportingTask = new SecurityUsageReportingTask({
+      core: coreSetup,
+      logFactory: this.initializerContext.logger,
+      config: this.config,
+      taskType: AI4SOC_METERING_TASK.TYPE,
+      taskTitle: AI4SOC_METERING_TASK.TITLE,
+      version: AI4SOC_METERING_TASK.VERSION,
+      meteringCallback: ai4SocMeteringService.getUsageRecords,
+      taskManager: pluginsSetup.taskManager,
+      cloudSetup: pluginsSetup.cloud,
+      usageReportingService: this.usageReportingService,
+      backfillConfig: {
+        enabled: true,
+        maxRecords: AI4SOC_METERING_TASK.MAX_BACKFILL_RECORDS,
+      },
+    });
+
     this.nlpCleanupTask = new NLPCleanupTask({
       core: coreSetup,
       logFactory: this.initializerContext.logger,
@@ -135,6 +155,15 @@ export class SecuritySolutionServerlessPlugin
         interval: this.config.usageReportingTaskInterval,
       })
       .catch(() => {});
+
+    if (ai4SocMeteringService.shouldMeter(this.config)) {
+      this.ai4SocUsageReportingTask
+        ?.start({
+          taskManager: pluginsSetup.taskManager,
+          interval: this.config.ai4SocUsageReportingTaskInterval,
+        })
+        .catch(() => {});
+    }
 
     this.nlpCleanupTask?.start({ taskManager: pluginsSetup.taskManager }).catch(() => {});
 

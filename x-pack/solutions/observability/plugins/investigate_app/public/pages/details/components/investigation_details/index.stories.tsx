@@ -6,12 +6,12 @@
  */
 
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
-import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { KibanaReactStorybookDecorator } from '../../../../../.storybook/storybook_decorator';
 import { InvestigationDetails as Component } from './investigation_details';
 
-const meta: ComponentMeta<typeof Component> = {
+const meta: Meta<typeof Component> = {
   component: Component,
   title: 'app/Organisms/InvestigatationDetails',
   decorators: [KibanaReactStorybookDecorator],
@@ -19,12 +19,12 @@ const meta: ComponentMeta<typeof Component> = {
 
 export default meta;
 
-const defaultProps: ComponentStoryObj<typeof Component> = {
+const defaultProps: StoryObj<typeof Component> = {
   args: {},
   render: (props) => <Component user={mockAuthenticatedUser()} />,
 };
 
-export const InvestigateViewStory: ComponentStoryObj<typeof Component> = {
+export const InvestigateViewStory: StoryObj<typeof Component> = {
   ...defaultProps,
   name: 'default',
 };
