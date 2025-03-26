@@ -26,26 +26,33 @@ export class InterceptTelemetry {
 
     return {
       reportInterceptRegistration: this.reportInterceptRegistration.bind(this),
+      reportInterceptOverload: this.reportInterceptOverload.bind(this),
       reportInterceptInteraction: this.reportInterceptInteraction.bind(this),
     };
   }
 
-  private reportInterceptRegistration({ interceptTitle }: { interceptTitle: string }) {
+  private reportInterceptRegistration({ interceptId }: { interceptId: string }) {
     this.reportEvent?.(EventMetric.INTERCEPT_REGISTRATION, {
-      [EventFieldType.INTERCEPT_TITLE]: interceptTitle,
+      [EventFieldType.INTERCEPT_ID]: interceptId,
+    });
+  }
+
+  private reportInterceptOverload({ interceptId }: { interceptId: string }) {
+    this.reportEvent?.(EventMetric.INTERCEPT_OVERLOAD, {
+      [EventFieldType.INTERCEPT_ID]: interceptId,
     });
   }
 
   private reportInterceptInteraction({
     interactionType,
-    interceptTitle,
+    interceptId,
   }: {
     interactionType: string;
-    interceptTitle: string;
+    interceptId: string;
   }) {
     this.reportEvent?.(EventMetric.INTERCEPT_INTERACTION, {
       [EventFieldType.INTERACTION_TYPE]: interactionType,
-      [EventFieldType.INTERCEPT_TITLE]: interceptTitle,
+      [EventFieldType.INTERCEPT_ID]: interceptId,
     });
   }
 }

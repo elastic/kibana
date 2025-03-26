@@ -102,7 +102,7 @@ export class ProductInterceptPrompter {
     eventReporter: ReturnType<PromptTelemetry['start']>
   ) {
     intercepts.add({
-      title: 'kibana_product_intercept',
+      id: 'kibana_product_intercept',
       steps: [
         {
           id: 'start',

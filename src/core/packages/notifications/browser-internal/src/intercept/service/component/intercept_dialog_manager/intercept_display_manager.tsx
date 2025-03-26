@@ -94,7 +94,6 @@ export function InterceptDisplayManager({ ackIntercept, intercept$ }: InterceptD
           // this will cause the component to unmount
           ackIntercept({
             interceptId: currentIntercept!.id,
-            interceptTitle: currentIntercept!.title,
             ackType: 'completed',
           });
         }
@@ -108,7 +107,6 @@ export function InterceptDisplayManager({ ackIntercept, intercept$ }: InterceptD
   const dismissProductIntercept = useCallback(() => {
     ackIntercept({
       interceptId: currentIntercept!.id,
-      interceptTitle: currentIntercept!.title,
       ackType: 'dismissed',
     });
     currentIntercept?.onDismiss?.();

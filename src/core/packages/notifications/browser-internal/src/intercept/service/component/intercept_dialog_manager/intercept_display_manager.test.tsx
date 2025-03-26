@@ -15,16 +15,6 @@ import { InterceptDisplayManager } from './intercept_display_manager';
 import { Intercept } from '@kbn/core-notifications-browser/src/types';
 
 describe('InterceptDisplayManager', () => {
-  const originalRequestIdleCallback = window.requestIdleCallback;
-
-  beforeAll(() => {
-    window.requestIdleCallback = jest.fn().mockImplementation((cb) => cb());
-  });
-
-  afterAll(() => {
-    window.requestIdleCallback = originalRequestIdleCallback;
-  });
-
   it('does not render the dialog shell when there is not intercept to display', () => {
     const ackProductIntercept = jest.fn();
 
@@ -44,7 +34,6 @@ describe('InterceptDisplayManager', () => {
 
     const intercept$ = new Rx.BehaviorSubject<Intercept>({
       id: '1',
-      title: 'title',
       steps: [
         { ...interceptStep, id: 'start' },
         interceptStep,
@@ -78,7 +67,6 @@ describe('InterceptDisplayManager', () => {
 
     const intercept$ = new Rx.BehaviorSubject<Intercept>({
       id: '1',
-      title: 'title',
       steps: [
         { ...interceptStep, id: 'start' },
         interceptStep,
@@ -101,13 +89,12 @@ describe('InterceptDisplayManager', () => {
     expect(ackProductIntercept).toHaveBeenCalledWith({
       ackType: 'dismissed',
       interceptId: '1',
-      interceptTitle: 'title',
     });
 
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
-  it('invokes the passed onProgress handler with the response the user provides feedback', async () => {
+  it('invokes the passed onProgress handler with the response the user provides as feedback', async () => {
     const user = userEvent.setup();
 
     const ackProductIntercept = jest.fn();
@@ -120,19 +107,39 @@ describe('InterceptDisplayManager', () => {
 
     const productIntercept: Intercept = {
       id: '1',
-      title: 'title',
       steps: [
         { ...interceptStep, id: 'start' },
         {
           ...interceptStep,
           content: function InterceptContentTest({ onValue }) {
             return (
-              <input
-                data-test-subj="intercept-test-input"
-                onChange={(evt) => {
-                  onValue(evt.target.value);
+              <form
+                data-test-subj="intercept-test-form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  // @ts-expect-error -- the value we seek is defined, else our tests would fail
+                  onValue((e.target as HTMLFormElement).elements.drone!.value);
                 }}
-              />
+              >
+                <fieldset>
+                  <legend>Select a maintenance drone:</legend>
+                  <div>
+                    <input type="radio" id="huey" name="drone" value="huey" defaultChecked />
+                    <label htmlFor="huey">Huey</label>
+                  </div>
+                  <div>
+                    <input type="radio" id="dewey" name="drone" value="dewey" />
+                    <label htmlFor="dewey">Dewey</label>
+                  </div>
+                  <div>
+                    <input type="radio" id="louie" name="drone" value="louie" />
+                    <label htmlFor="louie">Louie</label>
+                  </div>
+                  <div>
+                    <button type="submit">Submit</button>
+                  </div>
+                </fieldset>
+              </form>
             );
           },
         },
@@ -156,10 +163,12 @@ describe('InterceptDisplayManager', () => {
     // transition user to next step in intercept dialog
     await user.click(screen.getByTestId('productInterceptProgressionButton'));
 
-    expect(screen.queryByTestId('intercept-test-input')).not.toBeNull();
+    expect(screen.queryByTestId('intercept-test-form')).not.toBeNull();
 
-    await user.type(screen.getByTestId('intercept-test-input'), 'test');
+    await user.click(screen.getByText('Louie'));
 
-    await waitFor(() => expect(productIntercept.onProgress).toHaveBeenCalledWith('hello', 'test'));
+    await user.click(screen.getByText('Submit'));
+
+    await waitFor(() => expect(productIntercept.onProgress).toHaveBeenCalledWith('hello', 'louie'));
   });
 });

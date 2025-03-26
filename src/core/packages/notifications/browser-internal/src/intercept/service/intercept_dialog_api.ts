@@ -46,18 +46,19 @@ export class InterceptDialogApi {
     return this.productIntercepts$.asObservable();
   }
 
-  private add(productIntercept: Omit<Intercept, 'id'> & Partial<Pick<Intercept, 'id'>>): string {
-    const intercept = {
-      ...productIntercept,
-      id: productIntercept?.id ?? crypto.randomUUID(),
-    };
+  private add(productIntercept: Intercept): string {
+    const existingIntercepts = this.productIntercepts$.getValue();
 
-    // order is important so we can operate on a FIFO basis
-    this.productIntercepts$.next([intercept, ...this.productIntercepts$.getValue()]);
+    if (existingIntercepts.some((intercept) => intercept.id === productIntercept.id)) {
+      this.eventReporter?.reportInterceptOverload({ interceptId: productIntercept.id });
+    } else {
+      // order is important so we can operate on a FIFO basis
+      this.productIntercepts$.next([productIntercept, ...existingIntercepts]);
 
-    this.eventReporter?.reportInterceptRegistration({ interceptTitle: intercept.title });
+      this.eventReporter?.reportInterceptRegistration({ interceptId: productIntercept.id });
+    }
 
-    return intercept.id;
+    return productIntercept.id;
   }
 
   /**
@@ -65,11 +66,9 @@ export class InterceptDialogApi {
    */
   private ack({
     interceptId,
-    interceptTitle,
     ackType,
   }: {
     interceptId: string;
-    interceptTitle: string;
     ackType: 'dismissed' | 'completed';
   }): void {
     this.productIntercepts$.next(
@@ -78,7 +77,7 @@ export class InterceptDialogApi {
 
     this.eventReporter?.reportInterceptInteraction({
       interactionType: ackType,
-      interceptTitle,
+      interceptId,
     });
   }
 }
