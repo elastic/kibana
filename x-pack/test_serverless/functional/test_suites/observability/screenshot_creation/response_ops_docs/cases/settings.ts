@@ -52,7 +52,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         screenshotDirectories
       );
       await retry.waitFor('add-template exist', async () => {
-        return await testSubjects.exists('add-template');
+        return await testSubjects.isEnabled('add-template');
       });
       await testSubjects.click('add-template');
       await svlCommonScreenshots.takeScreenshot(
@@ -62,7 +62,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         1000
       );
       await retry.waitFor('common-flyout-cancel exist', async () => {
-        return await testSubjects.isEnabled('common-flyout-cancel');
+        return await testSubjects.exists('common-flyout-cancel');
       });
       await testSubjects.click('common-flyout-cancel');
       await retry.waitFor('dropdown-connectors exist', async () => {
