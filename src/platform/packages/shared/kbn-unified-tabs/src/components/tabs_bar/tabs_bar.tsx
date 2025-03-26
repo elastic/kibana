@@ -28,6 +28,7 @@ export type TabsBarProps = Pick<
 > & {
   items: TabItem[];
   selectedItem: TabItem | null;
+  recentlyClosedItems: TabItem[];
   maxItemsCount?: number;
   services: TabsServices;
   onAdd: () => Promise<void>;
@@ -37,6 +38,7 @@ export type TabsBarProps = Pick<
 export const TabsBar: React.FC<TabsBarProps> = ({
   items,
   selectedItem,
+  recentlyClosedItems,
   maxItemsCount,
   tabContentId,
   getTabMenuItems,
@@ -137,7 +139,12 @@ export const TabsBar: React.FC<TabsBarProps> = ({
           margin-right: ${euiTheme.size.base};
         `}
       >
-        <TabsBarMenu openedTabs={items} selectedTab={selectedItem} onSelect={onSelect} />
+        <TabsBarMenu
+          openedTabs={items}
+          selectedTab={selectedItem}
+          onSelectOpenedTab={onSelect}
+          recentlyClosedTabs={recentlyClosedItems}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

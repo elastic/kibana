@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Do we restore tab if one of "recently closed" tabs is clicked?
-
-// If so, should it be removed from "recently closed" and added to "opened tabs"?
-
-// Where should object mapping happen (TabItem and EuiSelectableOptions have different shape)?
-
-// In EUI examples selectable list state is managed in a local useState, but we need to keep it in sync with TabsBar
-// eg. adding a new tab should add it to the list of opened tabs - what's your take on this?
-
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -27,6 +18,7 @@ import {
   EuiSelectable,
   EuiPopoverTitle,
   EuiHorizontalRule,
+  EuiSelectableOptionsListProps,
 } from '@elastic/eui';
 import type { TabItem } from '../../types';
 import type { TabsBarProps } from '../tabs_bar';
@@ -42,30 +34,35 @@ const getOpenedTabsList = (
   }));
 };
 
+const getRecentlyClosedTabsList = (tabItems: TabItem[]): EuiSelectableOption[] => {
+  return tabItems.map((tab) => ({
+    label: tab.label,
+    key: tab.id,
+  }));
+};
+
 interface TabsBarMenuProps {
-  onSelect: TabsBarProps['onSelect'];
+  onSelectOpenedTab: TabsBarProps['onSelect'];
   selectedTab: TabsBarProps['selectedItem'];
   openedTabs: TabsBarProps['items'];
+  recentlyClosedTabs: TabsBarProps['recentlyClosedItems'];
 }
 
-export const TabsBarMenu: React.FC<TabsBarMenuProps> = ({ openedTabs, selectedTab, onSelect }) => {
+export const TabsBarMenu: React.FC<TabsBarMenuProps> = ({
+  openedTabs,
+  selectedTab,
+  onSelectOpenedTab,
+  recentlyClosedTabs,
+}) => {
   const openedTabsList = useMemo(
     () => getOpenedTabsList(openedTabs, selectedTab),
     [openedTabs, selectedTab]
   );
+  const recentlyClosedTabsList = useMemo(
+    () => getRecentlyClosedTabsList(recentlyClosedTabs),
+    [recentlyClosedTabs]
+  );
 
-  const [recentlyClosedTabs, setRecentlyClosedTabs] = useState<EuiSelectableOption[]>([
-    {
-      label: 'Session 4',
-    },
-    {
-      label: 'Session 5',
-      checked: 'on',
-    },
-    {
-      label: 'Session 6',
-    },
-  ]);
   const [isPopoverOpen, setPopover] = useState(false);
   const contextMenuPopoverId = useGeneratedHtmlId();
 
@@ -77,6 +74,13 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = ({ openedTabs, selectedTa
     setPopover(false);
   }, [setPopover]);
 
+  const selectableListProps = {
+    onFocusBadge: false,
+    truncationProps: {
+      truncation: 'middle',
+    },
+  } as Partial<EuiSelectableOptionsListProps>;
+
   return (
     <EuiPopover
       id={contextMenuPopoverId}
@@ -85,6 +89,9 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = ({ openedTabs, selectedTa
       panelPaddingSize="none"
       anchorPosition="downRight"
       hasArrow={false}
+      panelProps={{
+        css: popoverCss,
+      }}
       button={
         <EuiButtonIcon
           aria-label={menuButtonLabel}
@@ -105,14 +112,11 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = ({ openedTabs, selectedTa
           const clickedTabId = newOptions.find((option) => option.checked)?.key;
           const tabToNavigate = openedTabs.find((tab) => tab.id === clickedTabId);
           if (tabToNavigate) {
-            onSelect(tabToNavigate);
+            onSelectOpenedTab(tabToNavigate);
           }
         }}
         singleSelection="always"
-        css={listCss}
-        listProps={{
-          onFocusBadge: false,
-        }}
+        listProps={selectableListProps}
       >
         {(tabs) => (
           <>
@@ -125,36 +129,37 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = ({ openedTabs, selectedTa
           </>
         )}
       </EuiSelectable>
-      <EuiHorizontalRule margin="none" />
-      <EuiSelectable
-        aria-label={i18n.translate('unifiedTabs.recentlyClosedTabsList', {
-          defaultMessage: 'Recently closed tabs list',
-        })}
-        options={recentlyClosedTabs}
-        onChange={() => {
-          console.log('restore tab'); // TODO restore closet tab0
-        }}
-        singleSelection={true}
-        css={listCss}
-        listProps={{
-          onFocusBadge: false,
-        }}
-      >
-        {(tabs) => (
-          <>
-            <EuiPopoverTitle paddingSize="s">
-              {i18n.translate('unifiedTabs.recentlyClosed', {
-                defaultMessage: 'Recently closed',
-              })}
-            </EuiPopoverTitle>
-            {tabs}
-          </>
-        )}
-      </EuiSelectable>
+      {recentlyClosedTabs.length > 0 && (
+        <>
+          <EuiHorizontalRule margin="none" />
+          <EuiSelectable
+            aria-label={i18n.translate('unifiedTabs.recentlyClosedTabsList', {
+              defaultMessage: 'Recently closed tabs list',
+            })}
+            options={recentlyClosedTabsList}
+            onChange={() => {
+              alert('restore tab'); // TODO restore closed tab
+            }}
+            singleSelection={true}
+            listProps={selectableListProps}
+          >
+            {(tabs) => (
+              <>
+                <EuiPopoverTitle paddingSize="s">
+                  {i18n.translate('unifiedTabs.recentlyClosed', {
+                    defaultMessage: 'Recently closed',
+                  })}
+                </EuiPopoverTitle>
+                {tabs}
+              </>
+            )}
+          </EuiSelectable>
+        </>
+      )}
     </EuiPopover>
   );
 };
 
-const listCss = css`
+const popoverCss = css`
   width: 240px;
 `;
