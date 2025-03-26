@@ -9,6 +9,8 @@ import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import useDebounce from 'react-use/lib/useDebounce';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { Mappings as MappingsEditor } from '../../application/file_data_visualizer/components/import_settings/advanced/inputs';
 
 interface Props {
@@ -36,14 +38,26 @@ export const Mappings: FC<Props> = ({ mappings, setMappings, showTitle, readonly
   );
 
   return (
-    <MappingsEditor
-      initialized={readonly}
-      data={localMappings}
-      onChange={(value) => {
-        setLocalMappings(value);
-      }}
-      indexName={''}
-      showTitle={showTitle}
-    />
+    <>
+      {readonly ? (
+        <EuiCallOut
+          size="s"
+          color="primary"
+          title={i18n.translate('xpack.dataVisualizer.file.mappingsReadonlyWarning', {
+            defaultMessage:
+              'Mappings for individual files are not editable. You can only edit the common mappings in the advanced section below.',
+          })}
+        />
+      ) : null}
+      <MappingsEditor
+        initialized={readonly}
+        data={localMappings}
+        onChange={(value) => {
+          setLocalMappings(value);
+        }}
+        indexName={''}
+        showTitle={showTitle}
+      />
+    </>
   );
 };
