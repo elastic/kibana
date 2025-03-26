@@ -11,6 +11,7 @@ import {
   isDeprecationLoggingEnabled,
   setDeprecationLogging,
   isDeprecationLogIndexingEnabled,
+  getRecentEsDeprecationLogs,
 } from './es_deprecation_logging_apis';
 
 describe('getDeprecationLoggingStatus', () => {
@@ -122,5 +123,73 @@ describe('isDeprecationLogIndexingEnabled', () => {
         persistent: { cluster: { deprecation_indexing: { enabled: 'true' } } },
       })
     ).toBe(true);
+  });
+});
+
+describe('getRecentEsDeprecationLogs', () => {
+  it('returns empty results when index does not exist', async () => {
+    const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+    dataClient.asCurrentUser.indices.exists.mockResolvedValue(false as any);
+
+    const result = await getRecentEsDeprecationLogs(dataClient);
+    expect(result).toEqual({ logs: [], count: 0 });
+    expect(dataClient.asCurrentUser.search).not.toHaveBeenCalled();
+  });
+
+  it('returns logs and count when index exists', async () => {
+    const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+    const mockHits = [
+      { _source: { '@timestamp': '2025-03-25T12:34:56.789Z', message: 'Deprecation log 1' } },
+      { _source: { '@timestamp': '2025-03-25T12:34:57.789Z', message: 'Deprecation log 2' } },
+    ];
+
+    dataClient.asCurrentUser.indices.exists.mockResolvedValue(true as any);
+    dataClient.asCurrentUser.search.mockResolvedValue({
+      hits: {
+        hits: mockHits,
+        total: { value: 2 },
+      },
+    } as any);
+
+    const result = await getRecentEsDeprecationLogs(dataClient);
+    expect(result).toEqual({
+      logs: mockHits.map((hit) => hit._source),
+      count: 2,
+    });
+
+    // Verify search was called with correct params
+    expect(dataClient.asCurrentUser.search).toHaveBeenCalledWith({
+      index: '.logs-deprecation.elasticsearch-default',
+      body: expect.objectContaining({
+        query: expect.any(Object),
+        sort: [{ '@timestamp': { order: 'desc' } }],
+      }),
+    });
+  });
+
+  it('gracefully handles search errors', async () => {
+    const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+    dataClient.asCurrentUser.indices.exists.mockResolvedValue(true as any);
+    dataClient.asCurrentUser.search.mockRejectedValue(new Error('Search error'));
+
+    const result = await getRecentEsDeprecationLogs(dataClient);
+    expect(result).toEqual({ logs: [], count: 0 });
+  });
+
+  it('uses provided timeframe parameter', async () => {
+    const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+    dataClient.asCurrentUser.indices.exists.mockResolvedValue(true as any);
+    dataClient.asCurrentUser.search.mockResolvedValue({
+      hits: { hits: [], total: { value: 0 } },
+    } as any);
+
+    const customTimeframe = 60 * 60 * 1000; // 1 hour
+    await getRecentEsDeprecationLogs(dataClient, customTimeframe);
+
+    expect(dataClient.asCurrentUser.search).toHaveBeenCalled();
+    const searchCall = dataClient.asCurrentUser.search.mock.calls[0][0];
+    const rangeQuery = searchCall.body.query.bool.must.range;
+
+    expect(rangeQuery['@timestamp']).toBeDefined();
   });
 });
