@@ -15,4 +15,5 @@ export interface GenericEntityRecord {
   };
   labels: Record<string, string>;
   tags: string[];
+  [key?: string]: unknown;
 }

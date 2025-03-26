@@ -19,13 +19,17 @@ import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UniversalEntityFlyoutHeader } from './header';
 import { UniversalEntityFlyoutContent } from './content';
 
+interface CommonError {
+  body: {
+    error: string;
+    message: string;
+    statusCode: number;
+  };
+}
+
 export const isCommonError = (error: unknown): error is CommonError => {
-  if (
-    !(error as any)?.body ||
-    !(error as any)?.body?.error ||
-    !(error as any)?.body?.message ||
-    !(error as any)?.body?.statusCode
-  ) {
+  // @ts-ignore TS2339: Property body does not exist on type {}
+  if (!error?.body || !error?.body?.error || !error?.body?.message || !error?.body?.statusCode) {
     return false;
   }
 
@@ -60,7 +64,7 @@ export const UniversalEntityPanel = ({ entityDocId }: UniversalEntityPanelProps)
     );
   }
 
-  if (!getGenericEntity.data || getGenericEntity.isError) {
+  if (!getGenericEntity.data?._source || getGenericEntity.isError) {
     return (
       <>
         <EuiEmptyPrompt
@@ -81,9 +85,9 @@ export const UniversalEntityPanel = ({ entityDocId }: UniversalEntityPanelProps)
                   id="xpack.securitySolution.universalEntityFlyout.errorBody"
                   defaultMessage="{error} {statusCode}: {body}"
                   values={{
-                    error: error.body.error,
-                    statusCode: error.body.statusCode,
-                    body: error.body.message,
+                    error: getGenericEntity.error.body.error,
+                    statusCode: getGenericEntity.error.body.statusCode,
+                    body: getGenericEntity.error.body.message,
                   }}
                 />
               </p>

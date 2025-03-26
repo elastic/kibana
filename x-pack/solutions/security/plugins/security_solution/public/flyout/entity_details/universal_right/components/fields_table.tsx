@@ -105,7 +105,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({ document, tableStorage
         return updatedPinned;
       });
     },
-    [setPinnedFields]
+    [setPinnedFields, storageKey]
   );
 
   const sortedItems = getSortedFlattenedItems(document, pinnedFields);

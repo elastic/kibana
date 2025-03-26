@@ -30,10 +30,10 @@ jest.mock('../../flyout/shared/hooks/use_on_expandable_flyout_close', () => ({
 }));
 
 describe('useDynamicEntityFlyout', () => {
-  let openFlyoutMock;
-  let closeFlyoutMock;
-  let toastsMock;
-  let onFlyoutCloseMock;
+  let openFlyoutMock: jest.Mock;
+  let closeFlyoutMock: jest.Mock;
+  let toastsMock: { addDanger: jest.Mock };
+  let onFlyoutCloseMock: jest.Mock;
 
   beforeEach(() => {
     openFlyoutMock = jest.fn();

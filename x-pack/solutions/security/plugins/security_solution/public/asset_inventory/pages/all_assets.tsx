@@ -72,6 +72,7 @@ import {
   LOCAL_STORAGE_COLUMNS_SETTINGS_KEY,
   LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
 } from '../constants';
+import type { GenericEntityRecord } from '../types/generic_entity_record';
 
 const gridStyle: EuiDataGridStyle = {
   border: 'horizontal',
@@ -171,12 +172,13 @@ export const AllAssets = () => {
   });
 
   const openTableFlyout = (doc?: DataTableRecord | undefined) => {
-    if (doc) {
+    if (doc && doc.raw._source) {
+      const source: GenericEntityRecord = doc.raw._source;
       setExpandedDoc(doc); // Table is expecting the same doc ref to highlight the selected row
       openDynamicFlyout({
         entityDocId: doc.raw._id,
-        entityType: doc.raw._source?.entity?.type,
-        entityName: doc.raw._source?.entity?.name,
+        entityType: source.entity?.type,
+        entityName: source.entity?.name,
         scopeId: ASSET_INVENTORY_TABLE_ID,
         contextId: ASSET_INVENTORY_TABLE_ID,
       });
