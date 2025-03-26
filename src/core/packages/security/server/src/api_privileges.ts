@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApiOperation } from '@kbn/security-plugin-types-common';
+export enum ApiOperation {
+  Read = 'read',
+  Create = 'create',
+  Update = 'update',
+  Delete = 'delete',
+  Manage = 'manage',
+}
 
 export class ApiPrivileges {
   public static manage(subject: string) {
