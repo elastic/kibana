@@ -12,7 +12,8 @@ import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import type { Agent as SuperTestAgent } from 'supertest';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
+import type { ObjectRemover } from '../../../../common/lib';
+import { getUrlPrefix, getTestRuleData, getEventLog } from '../../../../common/lib';
 import { Spaces } from '../../../scenarios';
 import { TEST_CACHE_EXPIRATION_TIME } from '../create_test_data';
 

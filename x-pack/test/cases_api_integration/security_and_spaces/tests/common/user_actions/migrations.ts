@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
-import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
+import type { UserActions, UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
 import { CaseUserActionsDeprecatedResponse } from '@kbn/cases-plugin/common/types/api';
-import { UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { deleteAllCaseItems, getCaseUserActions } from '../../../../common/lib/api';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { deleteAllCaseItems, findCaseUserActions } from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
