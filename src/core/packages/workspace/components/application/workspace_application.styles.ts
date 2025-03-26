@@ -36,6 +36,7 @@ const content =
       border-top-left-radius: ${euiTheme.border.radius.medium};
       border-top-right-radius: ${euiTheme.border.radius.medium};
       ${overflow};
+      padding-inline-end: var(--eui-push-flyout-padding-inline-end, 0);
     `;
 
 export const styles = {

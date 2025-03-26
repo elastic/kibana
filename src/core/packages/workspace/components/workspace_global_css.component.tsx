@@ -12,6 +12,7 @@ import { Global, css } from '@emotion/react';
 import { useEuiTheme, euiShadowSmall } from '@elastic/eui';
 import type { ToolboxSize } from './types';
 import svg from './illustration_main_bg.svg';
+import { useSyncPushFlyoutStyles } from './flyouts/use_sync_push_flyout_styles';
 
 export interface WorkspaceGlobalCSSComponentProps {
   isToolboxOpen: boolean;
@@ -62,6 +63,8 @@ export const WorkspaceGlobalCSSComponent = ({
   const theme = useEuiTheme();
   const shadow = euiShadowSmall(theme);
   const { euiTheme } = theme;
+  const { hasPushFlyout } = useSyncPushFlyoutStyles();
+
   let toolWidth = `0px`;
 
   if (isToolboxOpen) {
@@ -188,13 +191,20 @@ export const WorkspaceGlobalCSSComponent = ({
 
       /* Alterations */
       .kbnBody .euiFlyout:not(.euiCollapsibleNavBeta) {
-        inset-block-start: calc(var(--kbnWorkspace--application-top, 0) + ${euiTheme.size.m});
-        inset-block-end: ${euiTheme.size.s};
-        inset-inline-end: calc(var(--kbnWorkspace--application-right, 0) + ${euiTheme.size.m});
-        border-radius: ${euiTheme.border.radius.medium};
-        clip-path: none;
-        border: ${euiTheme.border.thin};
-        ${shadow}
+        inset-block-start: calc(
+          var(--kbnWorkspace--application-top, 0) + ${hasPushFlyout ? '0px' : euiTheme.size.m}
+        );
+        inset-block-end: ${hasPushFlyout ? '0px' : euiTheme.size.s};
+        inset-inline-end: calc(
+          var(--kbnWorkspace--application-right, 0) + ${hasPushFlyout ? '0px' : euiTheme.size.m}
+        );
+        ${!hasPushFlyout &&
+        `
+          border: ${euiTheme.border.thin};
+          ${shadow}
+          border-radius: ${euiTheme.border.radius.medium};
+          clip-path: none;
+        `}
       }
 
       .kbnBody .euiOverlayMask {
