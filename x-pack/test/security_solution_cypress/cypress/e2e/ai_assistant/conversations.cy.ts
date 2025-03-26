@@ -120,7 +120,6 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       closeAssistant();
       deleteConnectors();
       openAssistant();
-      selectConversation(mockConvo1.title);
       cy.get(CONNECTOR_MISSING_CALLOUT).should('be.visible');
     });
   });
