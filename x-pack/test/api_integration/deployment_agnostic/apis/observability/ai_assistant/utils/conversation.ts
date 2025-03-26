@@ -5,18 +5,23 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { Client } from '@elastic/elasticsearch';
 import {
+  ConversationCreateEvent,
+  ConversationUpdateEvent,
   Message,
   MessageAddEvent,
   MessageRole,
   StreamingChatResponseEvent,
+  StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { Readable } from 'stream';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
-import type { ObservabilityAIAssistantApiClient } from '../../../../../services/observability_ai_assistant_api';
+import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
 
-function decodeEvents(body: Readable | string) {
+export function decodeEvents(body: Readable | string) {
   return String(body)
     .split('\n')
     .map((line) => line.trim())
@@ -77,10 +82,12 @@ export async function invokeChatCompleteWithFunctionRequest({
 
 export async function chatComplete({
   userPrompt,
+  screenContexts = [],
   connectorId,
   observabilityAIAssistantAPIClient,
 }: {
   userPrompt: string;
+  screenContexts?: ObservabilityAIAssistantScreenContextRequest[];
   connectorId: string;
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
 }) {
@@ -99,7 +106,7 @@ export async function chatComplete({
         ],
         connectorId,
         persist: false,
-        screenContexts: [],
+        screenContexts,
         scopes: ['observability' as const],
       },
     },
@@ -134,4 +141,45 @@ export async function getSystemMessage(
   });
 
   return body.systemMessage;
+}
+
+export async function clearConversations(es: Client) {
+  const KB_INDEX = '.kibana-observability-ai-assistant-conversations-*';
+
+  return es.deleteByQuery({
+    index: KB_INDEX,
+    conflicts: 'proceed',
+    query: { match_all: {} },
+    refresh: true,
+  });
+}
+
+export function getConversationCreatedEvent(body: Readable | string) {
+  const decodedEvents = decodeEvents(body);
+  const conversationCreatedEvent = decodedEvents.find(
+    (event) => event.type === StreamingChatResponseEventType.ConversationCreate
+  ) as ConversationCreateEvent;
+
+  if (!conversationCreatedEvent) {
+    throw new Error(
+      `No conversation created event found: ${JSON.stringify(decodedEvents, null, 2)}`
+    );
+  }
+
+  return conversationCreatedEvent;
+}
+
+export function getConversationUpdatedEvent(body: Readable | string) {
+  const decodedEvents = decodeEvents(body);
+  const conversationUpdatedEvent = decodedEvents.find(
+    (event) => event.type === StreamingChatResponseEventType.ConversationUpdate
+  ) as ConversationUpdateEvent;
+
+  if (!conversationUpdatedEvent) {
+    throw new Error(
+      `No conversation updated event found: ${JSON.stringify(decodedEvents, null, 2)}`
+    );
+  }
+
+  return conversationUpdatedEvent;
 }
