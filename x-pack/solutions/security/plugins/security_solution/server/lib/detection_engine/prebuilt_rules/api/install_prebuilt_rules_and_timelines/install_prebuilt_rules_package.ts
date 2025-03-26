@@ -51,18 +51,14 @@ export async function installSecurityAiPromptsPackage(
   config: ConfigType,
   context: SecuritySolutionApiRequestHandlerContext
 ) {
-  // console.log('--> calling findLatestPackageVersion for security_ai_prompts');
-
   try {
-    // console.log('--> inner try block');
     await findLatestPackageVersion(context, SECURITY_AI_PROMPTS_PACKAGE_NAME);
   } catch (e) {
-    // console.log('--> caught error in inner catch block', e);
+    // fail silently
+    return null;
   }
 
   const pkgVersion = await findLatestPackageVersion(context, SECURITY_AI_PROMPTS_PACKAGE_NAME);
-
-  // console.log('--> calling ensureInstalledPackage for security_ai_prompts');
 
   return context.getInternalFleetServices().packages.ensureInstalledPackage({
     pkgName: SECURITY_AI_PROMPTS_PACKAGE_NAME,

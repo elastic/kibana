@@ -24,18 +24,16 @@ export const bootstrapPrebuiltRulesHandler = async (
   const siemResponse = buildSiemResponse(response);
 
   try {
-    // console.log('--> inside bootstrapPrebuiltRulesHandler');
     const ctx = await context.resolve(['securitySolution']);
     const securityContext = ctx.securitySolution;
     const config = securityContext.getConfig();
+    const securityAIPromptsEnabled = config.experimentalFeatures.securityAIPromptsEnabled;
 
-    // console.log('--> calling installPrebuiltRulesPackage');
     const prebuiltRulesResult = await installPrebuiltRulesPackage(config, securityContext);
-    // console.log('--> calling installEndpointPackage');
     const endpointResult = await installEndpointPackage(config, securityContext);
-    // console.log('--> calling installSecurityAiPromptsPackage');
-    const securityAiPromptsResult = await installSecurityAiPromptsPackage(config, securityContext);
-    // console.log('--> securityAiPromptsResult:', securityAiPromptsResult);
+    const securityAiPromptsResult = securityAIPromptsEnabled
+      ? await installSecurityAiPromptsPackage(config, securityContext)
+      : null;
 
     const responseBody: BootstrapPrebuiltRulesResponse = {
       packages: [
@@ -49,11 +47,15 @@ export const bootstrapPrebuiltRulesHandler = async (
           version: endpointResult.package.version,
           status: endpointResult.status,
         },
-        {
-          name: securityAiPromptsResult.package.name,
-          version: securityAiPromptsResult.package.version,
-          status: securityAiPromptsResult.status,
-        },
+        ...(securityAIPromptsEnabled && securityAiPromptsResult !== null
+          ? [
+              {
+                name: securityAiPromptsResult.package.name,
+                version: securityAiPromptsResult.package.version,
+                status: securityAiPromptsResult.status,
+              },
+            ]
+          : []),
       ],
     };
 
