@@ -28,7 +28,7 @@ import { useFetchDetectionRulesByTags } from '../common/api/use_fetch_detection_
 import { useKibana } from '../common/hooks/use_kibana';
 import { showCreateDetectionRuleSuccessToast } from './take_action';
 
-//DEL this File
+// DEL this File
 
 const RULES_PAGE_PATH = '/rules/management';
 const ALERTS_PAGE_PATH = '/alerts';
