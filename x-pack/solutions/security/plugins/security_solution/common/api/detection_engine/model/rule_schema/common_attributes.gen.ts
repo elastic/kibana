@@ -32,7 +32,7 @@ export type RuleSignatureId = z.infer<typeof RuleSignatureId>;
 export const RuleSignatureId = z.string();
 
 /**
- * The rule’s name.
+ * A human-readable name for the rule.
  */
 export type RuleName = z.infer<typeof RuleName>;
 export const RuleName = z.string().min(1);
@@ -540,11 +540,11 @@ export const RuleActionAlertsFilter = z.object({
   timeframe: z
     .object({
       /**
-       * List of days of the week on which this action can be run. Days of the week are expressed as numbers between `1-7`, where `1` is Monday and `7` is Sunday. To select all days of the week, enter an empty array.
+       * List of days of the week on which this action will be run. Days of the week are expressed as numbers between `1-7`, where `1` is Monday and `7` is Sunday. To select all days of the week, enter an empty array.
        */
       days: z.array(z.number().int()).optional(),
       /**
-       * The hours of the day during which this action can run. Hours of the day are expressed as two strings in the format `hh:mm` in `24` hour time. A start of `00:00` and an end of `24:00` means the action can run all day.
+       * The hours of the day during which this action will run. Hours of the day are expressed as two strings in the format `hh:mm` in `24` hour time. A start of `00:00` and an end of `24:00` means the action can run all day.
        */
       hours: z
         .object({
@@ -559,7 +559,7 @@ export const RuleActionAlertsFilter = z.object({
         })
         .optional(),
       /**
-       * An ISO timezone name, such as `Europe/Madrid` or `America/New_York`. Specific offsets such as UTC or UTC+1 will also work, but lack built-in DST.
+       * An ISO timezone name. Specific offsets such as UTC or UTC+1 will also work, but lack built-in DST.
        */
       timezone: z.string().optional(),
     })
