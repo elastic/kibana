@@ -17,6 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { docLinks } from '../../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { SynonymSets } from '../synonym_sets/synonym_sets';
@@ -92,7 +93,14 @@ export const SearchSynonymsOverview = () => {
           </EuiText>
         </KibanaPageTemplate.Header>
       )}
-      <KibanaPageTemplate.Section restrictWidth>
+      <KibanaPageTemplate.Section
+        restrictWidth
+        contentProps={{
+          css: css({
+            height: '100%',
+          }),
+        }}
+      >
         {isCreateModalVisible && (
           <CreateSynonymsSetModal
             onClose={() => {
@@ -109,11 +117,22 @@ export const SearchSynonymsOverview = () => {
           <SynonymSets />
         )}
         {!isInitialLoading && synonymsData && synonymsData._meta.totalItemCount === 0 && (
-          <EmptyPrompt
-            getStartedAction={() => {
-              setIsCreateModalVisible(true);
-            }}
-          />
+          <EuiFlexGroup
+            justifyContent="center"
+            alignItems="center"
+            direction="column"
+            css={css({
+              height: '75%',
+            })}
+          >
+            <EuiFlexItem>
+              <EmptyPrompt
+                getStartedAction={() => {
+                  setIsCreateModalVisible(true);
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         )}
       </KibanaPageTemplate.Section>
       {embeddableConsole}
