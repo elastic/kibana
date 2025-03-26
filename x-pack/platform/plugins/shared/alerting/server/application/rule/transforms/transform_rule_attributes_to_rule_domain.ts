@@ -234,7 +234,12 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     ...(esRule.alertDelay ? { alertDelay: esRule.alertDelay } : {}),
     ...(esRule.legacyId !== undefined ? { legacyId: esRule.legacyId } : {}),
     ...(esRule.flapping !== undefined ? { flapping: esRule.flapping } : {}),
-    attachments: esRule.attachments,
+    attachments: esRule.attachments
+      ? {
+          ...esRule.attachments,
+          dashboards: esRule.attachments.dashboards ?? [],
+        }
+      : undefined,
   };
 
   // Bad casts, but will fix once we fix all rule types
