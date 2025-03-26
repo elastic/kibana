@@ -137,7 +137,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
           margin-right: ${euiTheme.size.base};
         `}
       >
-        <TabsBarMenu />
+        <TabsBarMenu openedTabs={items} selectedTab={selectedItem} onSelect={onSelect} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
