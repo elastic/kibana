@@ -83,6 +83,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = ({
 
   return (
     <EuiPopover
+      data-test-subj="unifiedTabs_tabsBarMenu"
       id={contextMenuPopoverId}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
