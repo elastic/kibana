@@ -11,6 +11,7 @@ import {
   TITLE_CONVERSATION_FUNCTION_NAME,
   TITLE_SYSTEM_MESSAGE,
 } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   LlmProxy,
   createLlmProxy,
@@ -22,8 +23,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  // Failing: See https://github.com/elastic/kibana/issues/215952
-  describe.skip('when calling the title_conversation function', function () {
+  describe('when calling the title_conversation function', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['failsOnMKI']);
     let llmProxy: LlmProxy;
@@ -67,19 +67,31 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         titleRequestBody = llmProxy.interceptedRequests[0].requestBody;
       });
 
+      after(async () => {
+        const { status } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
+          params: {
+            path: {
+              conversationId,
+            },
+          },
+        });
+        expect(status).to.be(200);
+      });
+
       it('makes 2 requests to the LLM', () => {
         expect(llmProxy.interceptedRequests.length).to.be(2);
       });
 
       it('sends the correct system message to the LLM for the title', () => {
         expect(
-          titleRequestBody.messages.find((message) => message.role === 'system')?.content
+          titleRequestBody.messages.find((message) => message.role === MessageRole.System)?.content
         ).to.be(TITLE_SYSTEM_MESSAGE);
       });
 
       it('sends the correct user message to the LLM for the title', () => {
         expect(
-          titleRequestBody.messages.find((message) => message.role === 'user')?.content
+          titleRequestBody.messages.find((message) => message.role === MessageRole.User)?.content
         ).to.contain('Why the sky is blue?');
       });
 
