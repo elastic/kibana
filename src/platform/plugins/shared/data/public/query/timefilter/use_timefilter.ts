@@ -8,7 +8,7 @@
  */
 
 import { TimeRange } from '@kbn/es-query';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Timefilter } from './timefilter';
 
 export interface TimefilterHook {
@@ -18,6 +18,7 @@ export interface TimefilterHook {
     end: number;
   };
   setTimeRange: React.Dispatch<React.SetStateAction<TimeRange>>;
+  refreshAbsoluteTimeRange: () => boolean;
 }
 
 export function createUseTimefilterHook(timefilter: Timefilter) {
@@ -25,11 +26,14 @@ export function createUseTimefilterHook(timefilter: Timefilter) {
     const [timeRange, setTimeRange] = useState(() => timefilter.getTime());
 
     const [absoluteTimeRange, setAbsoluteTimeRange] = useState(() => timefilter.getAbsoluteTime());
+    const absoluteTimeRangeRef = useRef(absoluteTimeRange);
 
     useEffect(() => {
       const timeUpdateSubscription = timefilter.getTimeUpdate$().subscribe({
         next: () => {
           setTimeRange(() => timefilter.getTime());
+          const newAbsoluteTimeRange = timefilter.getAbsoluteTime();
+          absoluteTimeRangeRef.current = newAbsoluteTimeRange;
           setAbsoluteTimeRange(() => timefilter.getAbsoluteTime());
         },
       });
@@ -51,6 +55,19 @@ export function createUseTimefilterHook(timefilter: Timefilter) {
       []
     );
 
+    const refreshAbsoluteTimeRange = useCallback(() => {
+      const newAbsoluteTimeRange = timefilter.getAbsoluteTime();
+      if (
+        newAbsoluteTimeRange.from !== absoluteTimeRangeRef.current.from ||
+        newAbsoluteTimeRange.to !== absoluteTimeRangeRef.current.to
+      ) {
+        setAbsoluteTimeRange(newAbsoluteTimeRange);
+        absoluteTimeRangeRef.current = newAbsoluteTimeRange;
+        return true;
+      }
+      return false;
+    }, []);
+
     const asEpoch = useMemo(() => {
       return {
         start: new Date(absoluteTimeRange.from).getTime(),
@@ -62,6 +79,7 @@ export function createUseTimefilterHook(timefilter: Timefilter) {
       timeRange,
       absoluteTimeRange: asEpoch,
       setTimeRange: setTimeRangeMemoized,
+      refreshAbsoluteTimeRange,
     };
   };
 }
