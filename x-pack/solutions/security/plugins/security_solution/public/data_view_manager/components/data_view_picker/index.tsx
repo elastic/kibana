@@ -17,7 +17,6 @@ import { useDataView } from '../../hooks/use_data_view';
 import { sharedStateSelector } from '../../redux/selectors';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
-import { useInvalidateCache } from '../../hooks/use_data_view_cache';
 
 export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) => {
   const dispatch = useDispatch();
@@ -28,7 +27,6 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
   } = useKibana();
   const closeDataViewEditor = useRef<() => void | undefined>();
   const closeFieldEditor = useRef<() => void | undefined>();
-  const invalidateCache = useInvalidateCache();
 
   const { dataView } = useDataView(props.scope);
 
@@ -46,10 +44,9 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
 
   const handleChangeDataView = useCallback(
     (id: string) => {
-      invalidateCache();
       selectDataView({ id, scope: [props.scope] });
     },
-    [invalidateCache, props.scope, selectDataView]
+    [props.scope, selectDataView]
   );
 
   const editField = useCallback(
