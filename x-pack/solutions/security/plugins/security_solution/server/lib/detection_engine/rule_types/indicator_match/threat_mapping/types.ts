@@ -30,7 +30,7 @@ import type {
 } from '../../types';
 import type { ThreatRuleParams } from '../../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
-import { ScheduleNotificationResponseActionsService } from '../../../rule_response_actions/schedule_notification_response_actions';
+import type { ScheduleNotificationResponseActionsService } from '../../../rule_response_actions/schedule_notification_response_actions';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 

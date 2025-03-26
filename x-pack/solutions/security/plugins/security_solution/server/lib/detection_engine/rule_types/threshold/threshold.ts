@@ -32,7 +32,7 @@ import {
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from './build_signal_history';
 import { getSignalHistory, transformBulkCreatedItemsToHits } from './utils';
-import { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 export const thresholdExecutor = async ({
   sharedParams,

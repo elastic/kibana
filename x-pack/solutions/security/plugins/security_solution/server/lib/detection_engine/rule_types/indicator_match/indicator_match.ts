@@ -12,7 +12,7 @@ import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { createThreatSignals } from './threat_mapping/create_threat_signals';
 import type { ThreatRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
-import { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 export const indicatorMatchExecutor = async ({
   sharedParams,

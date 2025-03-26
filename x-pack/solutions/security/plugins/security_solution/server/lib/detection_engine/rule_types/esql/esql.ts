@@ -44,7 +44,7 @@ import {
   getIsAlertSuppressionActive,
 } from '../utils/get_is_alert_suppression_active';
 import { bulkCreate } from '../factories';
-import { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 export const esqlExecutor = async ({
   sharedParams,

@@ -47,7 +47,7 @@ import { logShardFailures } from '../utils/log_shard_failure';
 import { checkErrorDetails } from '../utils/check_error_details';
 import { wrapSequences } from './wrap_sequences';
 import { bulkCreate, wrapHits } from '../factories';
-import { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 interface EqlExecutorParams {
   sharedParams: SecuritySharedParams<EqlRuleParams>;

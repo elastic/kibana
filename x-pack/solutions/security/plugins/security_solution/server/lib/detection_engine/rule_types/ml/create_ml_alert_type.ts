@@ -15,7 +15,7 @@ import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_a
 import { mlExecutor } from './ml';
 import type { SecurityAlertType, WrapSuppressedHits } from '../types';
 import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 
 export const createMlAlertType = (
   ml: SetupPlugins['ml']

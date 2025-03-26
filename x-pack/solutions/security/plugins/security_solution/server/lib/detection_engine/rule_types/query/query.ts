@@ -16,7 +16,7 @@ import type { UnifiedQueryRuleParams } from '../../rule_schema';
 import { buildReasonMessageForQueryAlert } from '../utils/reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
-import { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 export const queryExecutor = async ({
   sharedParams,

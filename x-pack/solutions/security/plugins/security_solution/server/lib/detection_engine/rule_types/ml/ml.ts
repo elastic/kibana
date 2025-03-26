@@ -28,7 +28,7 @@ import type { AnomalyResults } from '../../../machine_learning';
 import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
 import { buildReasonMessageForMlAlert } from '../utils/reason_formatters';
 import { alertSuppressionTypeGuard } from '../utils/get_is_alert_suppression_active';
-import { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 interface MachineLearningRuleExecutorParams {
   sharedParams: SecuritySharedParams<MachineLearningRuleParams>;
