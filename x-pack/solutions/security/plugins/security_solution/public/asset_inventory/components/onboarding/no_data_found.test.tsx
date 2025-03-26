@@ -8,18 +8,13 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { NoDataFound } from './no_data_found';
-import { TEST_SUBJ_ONBOARDING_SUCCESS_CALLOUT } from '../../constants';
 import { renderWithTestProvider } from '../../test/test_provider';
 
 // Mocking components which implementation details are out of scope for this unit test
 jest.mock('../../../onboarding/components/onboarding_context', () => ({
   OnboardingContextProvider: () => <div data-test-subj="onboarding-grid" />,
 }));
-jest.mock('./onboarding_success_callout', () => ({
-  OnboardingSuccessCallout: () => (
-    <div data-test-subj="asset-inventory-onboarding-success-callout" />
-  ),
-}));
+
 jest.mock('../../../common/hooks/use_space_id');
 
 describe('NoDataFound Component', () => {
@@ -42,8 +37,6 @@ describe('NoDataFound Component', () => {
     renderWithTestProvider(<NoDataFound />);
 
     expect(screen.getByText(/start onboarding your assets/i)).toBeInTheDocument();
-
-    expect(screen.getByTestId(TEST_SUBJ_ONBOARDING_SUCCESS_CALLOUT)).toBeInTheDocument();
 
     expect(screen.getByTestId('onboarding-grid')).toBeInTheDocument();
   });
