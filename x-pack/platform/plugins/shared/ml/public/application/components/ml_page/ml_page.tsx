@@ -11,6 +11,7 @@ import { createHtmlPortalNode, type HtmlPortalNode } from 'react-reverse-portal'
 import { Redirect, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Subscription } from 'rxjs';
+import type { EuiPaddingSize } from '@elastic/eui';
 import { EuiPageSection, EuiPageHeader } from '@elastic/eui';
 import { map, distinctUntilChanged } from 'rxjs';
 
@@ -259,7 +260,7 @@ interface CommonPageWrapperProps {
   pageDeps: PageDependencies;
   routeList: MlRoute[];
   headerPortal: HtmlPortalNode;
-  paddingSize?: 'none' | 's' | 'm' | 'l' | 'xl';
+  paddingSize?: EuiPaddingSize;
 }
 
 const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(

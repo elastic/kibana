@@ -121,7 +121,6 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
     const newIndices = newDataViewTitle.split(',');
     jobCreator.indices = newIndices;
     resetAdvancedJob(jobCreator, navigateToMlManagementLink);
-    // exclude mlJobService from deps
   }, [jobCreator, newDataViewTitle, navigateToMlManagementLink]);
 
   return (

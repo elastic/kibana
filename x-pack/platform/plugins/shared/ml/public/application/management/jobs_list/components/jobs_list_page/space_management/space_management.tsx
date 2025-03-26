@@ -39,7 +39,6 @@ interface Props {
   onReload: React.Dispatch<React.SetStateAction<(() => void) | null>>;
 }
 
-// @TODO: Delete this file
 export const SpaceManagement: FC<Props> = ({ spacesApi, onTabChange, onReload }) => {
   const {
     services: { application },

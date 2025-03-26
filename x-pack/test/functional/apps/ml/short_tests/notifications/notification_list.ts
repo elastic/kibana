@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-const timepickerFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker']);
   const esArchiver = getService('esArchiver');
@@ -104,9 +103,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.notifications.table.waitForTableToLoad();
 
       await PageObjects.timePicker.pauseAutoRefresh();
-      // const fromTime = moment().subtract(1, 'week').format(timepickerFormat);
-      // const toTime = moment().format(timepickerFormat);
-      // await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
       await ml.notifications.table.waitForTableToLoad();
 

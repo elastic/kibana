@@ -104,7 +104,7 @@ export const MANAGEMENT_SECTIONS: Record<ManagementSectionId, string> = {
 export function registerManagementSections(
   management: ManagementSetup,
   core: CoreSetup<MlStartDependencies>,
-  deps: { usageCollection?: UsageCollectionSetup; telemetry?: ITelemetryClient }, // TODO: update type
+  deps: { usageCollection?: UsageCollectionSetup; telemetry?: ITelemetryClient },
   isServerless: boolean,
   mlFeatures: MlFeatures,
   nlpSettings: NLPSettings,

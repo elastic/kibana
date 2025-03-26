@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
     );
     await ml.commonUI.changeToSpace(spaceId);
 
-    // // AD
+    // AD
     await ml.navigation.navigateToJobManagement(spaceId);
 
     if (shouldBeDisplayed) {
