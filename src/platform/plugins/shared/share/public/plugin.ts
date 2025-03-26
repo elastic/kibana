@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './index.scss';
-
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
