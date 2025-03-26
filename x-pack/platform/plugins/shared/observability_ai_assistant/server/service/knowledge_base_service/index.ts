@@ -103,7 +103,7 @@ export class KnowledgeBaseService {
     const response = await this.dependencies.esClient.asInternalUser.search<
       Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels' | 'title'> & { doc_id?: string }
     >({
-      index: [resourceNames.indexPatterns.kb],
+      index: [resourceNames.writeIndexAlias.kb],
       query: {
         bool: {
           should: queries.map(({ text, boost = 1 }) => ({
@@ -235,7 +235,7 @@ export class KnowledgeBaseService {
     }
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
-        index: resourceNames.indexPatterns.kb,
+        index: resourceNames.writeIndexAlias.kb,
         query: {
           bool: {
             filter: [
@@ -283,7 +283,7 @@ export class KnowledgeBaseService {
       const response = await this.dependencies.esClient.asInternalUser.search<
         KnowledgeBaseEntry & { doc_id?: string }
       >({
-        index: resourceNames.indexPatterns.kb,
+        index: resourceNames.writeIndexAlias.kb,
         query: {
           bool: {
             filter: [
@@ -346,7 +346,7 @@ export class KnowledgeBaseService {
 
   hasEntries = async () => {
     const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
-      index: resourceNames.indexPatterns.kb,
+      index: resourceNames.writeIndexAlias.kb,
       size: 0,
       _source: false,
       track_total_hits: 1,
@@ -373,7 +373,7 @@ export class KnowledgeBaseService {
       return null;
     }
     const res = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
-      index: resourceNames.indexPatterns.kb,
+      index: resourceNames.writeIndexAlias.kb,
       query: {
         bool: {
           filter: [
@@ -421,7 +421,7 @@ export class KnowledgeBaseService {
 
     const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
       size: 1,
-      index: resourceNames.indexPatterns.kb,
+      index: resourceNames.writeIndexAlias.kb,
       query,
       _source: false,
     });
