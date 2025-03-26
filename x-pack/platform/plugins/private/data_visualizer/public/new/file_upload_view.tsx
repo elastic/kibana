@@ -99,6 +99,7 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose, reset })
                 lite={false}
                 setPipeline={fileUploadManager.updatePipeline(i)}
                 analyzeFileWithOverrides={fileUploadManager.analyzeFileWithOverrides(i)}
+                autoExpand={filesStatus.length === 1}
               />
             ))}
 

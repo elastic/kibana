@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import {
   EuiPanel,
@@ -55,6 +55,7 @@ interface Props {
   showFileSummary?: boolean;
   lite: boolean;
   analyzeFileWithOverrides?: (overrides: InputOverrides) => void;
+  autoExpand?: boolean;
 }
 
 export const FileStatus: FC<Props> = ({
@@ -67,12 +68,14 @@ export const FileStatus: FC<Props> = ({
   showFileSummary,
   setPipeline,
   analyzeFileWithOverrides,
+  autoExpand = false,
 }) => {
   const fileClash = uploadStatus.fileClashes[index] ?? {
     clash: false,
   };
 
   const [selectedTab, setSelectedTab] = useState<TAB>(TAB.SUMMARY);
+  const [expanded, setExpanded] = useState<boolean>(false);
 
   const importStarted =
     uploadStatus.overallImportStatus === STATUS.STARTED ||
@@ -84,6 +87,12 @@ export const FileStatus: FC<Props> = ({
     }
   `;
 
+  useEffect(() => {
+    if (fileStatus.analysisError !== undefined || (autoExpand && fileStatus.results !== null)) {
+      setExpanded(true);
+    }
+  }, [autoExpand, fileStatus]);
+
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="s">
@@ -94,7 +103,8 @@ export const FileStatus: FC<Props> = ({
             <EuiAccordion
               id="accordion1"
               isDisabled={fileStatus.results === null && fileStatus.analysisError === undefined}
-              forceState={fileStatus.analysisError !== undefined ? 'open' : undefined}
+              forceState={expanded ? 'open' : 'closed'}
+              onToggle={() => setExpanded(!expanded)}
               buttonProps={{ css: buttonCss }}
               buttonContent={
                 <>
