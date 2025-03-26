@@ -11,7 +11,7 @@ import { flow } from 'lodash';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import type { SavedDashboardPanel } from '../../../../dashboard_saved_object';
-import type { DashboardAttributes } from '../../types';
+import type { DashboardAttributes, DashboardPanel } from '../../types';
 import { getReferencesForPanelId } from '../../../../../common';
 
 export function transformPanelsOut(
@@ -43,17 +43,49 @@ function injectPanelReferences(
   embeddable: EmbeddableStart,
   references: SavedObjectReference[] = []
 ) {
-  const injectedPanels = panels.map((panel) => {
-    if (!panel.panelIndex) return panel;
-    const panelReferences = getReferencesForPanelId(panel.panelIndex, references);
-    const { type: embeddableType, ...injectedPanelConfig } = embeddable.inject(
-      { type: panel.type, ...panel.panelConfig },
-      panelReferences
-    );
-    return {
-      ...panel,
-      panelConfig: injectedPanelConfig,
-    };
+  return panels.map((panel) => {
+    const panelsWithSavedObjectIdInjected = injectPanelSavedObjectId(panel, references);
+    return injectPanelEmbeddableReferences(panelsWithSavedObjectIdInjected, embeddable, references);
   });
-  return injectedPanels;
+}
+
+function injectPanelEmbeddableReferences(
+  panel: DashboardPanel,
+  embeddable: EmbeddableStart,
+  references: SavedObjectReference[] = []
+) {
+  if (!panel.panelIndex) return panel;
+  const filteredReferences = getReferencesForPanelId(panel.panelIndex, references);
+  const { type: embeddableType, ...injectedPanelConfig } = embeddable.inject(
+    { type: panel.type, ...panel.panelConfig },
+    filteredReferences
+  );
+  return {
+    ...panel,
+    panelConfig: injectedPanelConfig,
+  };
+}
+
+function injectPanelSavedObjectId(panel: DashboardPanel, references: SavedObjectReference[]) {
+  if (!panel.panelIndex) return panel;
+  if (!panel.panelRefName) return panel;
+  const filteredReferences = getReferencesForPanelId(panel.panelIndex, references);
+  const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
+  const matchingReference = panelReferences.find(
+    (reference) => reference.name === panel.panelRefName
+  );
+
+  if (!matchingReference) {
+    throw new Error(`Could not find reference "${panel.panelRefName}"`);
+  }
+
+  const { panelRefName, ...injectedPanel } = panel;
+
+  return {
+    ...injectedPanel,
+    panelConfig: {
+      ...panel.panelConfig,
+      savedObjectId: matchingReference.id,
+    },
+  };
 }

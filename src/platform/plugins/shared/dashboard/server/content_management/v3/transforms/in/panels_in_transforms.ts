@@ -13,7 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
-import type { DashboardAttributes } from '../../types';
+import type { DashboardAttributes, DashboardPanel } from '../../types';
 import { prefixReferencesFromPanel } from '../../../../../common';
 
 export function transformPanelsIn(
@@ -50,26 +50,64 @@ function transformSetPanelIndex(panels: DashboardAttributes['panels']) {
 }
 
 function extractPanelReferences(
-  panels: DashboardAttributes['panels'],
+  panels: DashboardPanel[],
   embeddable: EmbeddableStart,
   references: SavedObjectReference[] = []
 ) {
-  const extractedPanels = panels.map((panel) => {
-    if (!panel.panelIndex) return panel;
-    const { state: extractedPanelConfig, references: panelReferences } = embeddable.extract({
-      type: panel.type,
-      ...panel.panelConfig,
-    });
-    references.push(...prefixReferencesFromPanel(panel.panelIndex, panelReferences));
-    return {
-      ...panel,
-      panelConfig: extractedPanelConfig,
-    };
+  const extractedPanels: DashboardPanel[] = [];
+  panels.forEach((panel) => {
+    const { panel: extractedPanel, references: embeddableReferences } =
+      extractPanelEmbeddableReferences(panel, embeddable);
+
+    const { panel: finalPanel, references: soReferences } =
+      extractPanelSavedObjectId(extractedPanel);
+
+    extractedPanels.push(finalPanel);
+    references = [...references, ...embeddableReferences, ...soReferences];
   });
+
   return { panels: extractedPanels, references };
 }
 
-function transformPanelsProperties(panels: DashboardAttributes['panels']) {
+function extractPanelEmbeddableReferences(panel: DashboardPanel, embeddable: EmbeddableStart) {
+  if (!panel.panelIndex) return { panel, references: [] };
+  const { state: extractedPanelConfig, references: extractedReferences } = embeddable.extract({
+    type: panel.type,
+    ...panel.panelConfig,
+  });
+  return {
+    panel: {
+      ...panel,
+      panelConfig: extractedPanelConfig,
+    },
+    references: prefixReferencesFromPanel(panel.panelIndex, extractedReferences),
+  };
+}
+
+function extractPanelSavedObjectId(panel: DashboardPanel): {
+  panel: DashboardPanel;
+  references: SavedObjectReference[];
+} {
+  const { savedObjectId, ...panelConfig } = panel.panelConfig;
+  if (!savedObjectId) return { panel, references: [] };
+  const panelRefName = `panel_${panel.panelIndex}`;
+  return {
+    panel: {
+      ...panel,
+      panelRefName,
+      panelConfig,
+    },
+    references: [
+      {
+        name: `${panel.panelIndex}:${panelRefName}`,
+        type: panel.type,
+        id: savedObjectId,
+      },
+    ],
+  };
+}
+
+function transformPanelsProperties(panels: DashboardPanel[]) {
   return panels.map(
     ({ panelConfig, gridData, id, panelIndex, panelRefName, title, type, version }) => ({
       gridData,

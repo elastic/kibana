@@ -94,7 +94,7 @@ export const getResultV3ToV2 = (
   } = attributes;
 
   // TODO Find a way for the transform to handle the references
-  const { panelsJSON, references: soReferences } = transformPanelsIn(
+  const { panelsJSON, references: panelReferences } = transformPanelsIn(
     panels,
     embeddable,
     references
@@ -122,6 +122,7 @@ export const getResultV3ToV2 = (
     item: {
       ...rest,
       attributes: v2Attributes,
+      references: [...references, ...panelReferences],
     },
   };
 };
@@ -133,7 +134,7 @@ export const itemAttrsToSavedObject = (
 ): ItemAttrsToSavedObjectReturn => {
   try {
     const { controlGroupInput, kibanaSavedObjectMeta, options, panels, ...rest } = attributes;
-    const { panelsJSON, references: soReferences } = transformPanelsIn(
+    const { panelsJSON, references: panelReferences } = transformPanelsIn(
       panels,
       embeddable,
       references
@@ -151,7 +152,11 @@ export const itemAttrsToSavedObject = (
         kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),
       }),
     };
-    return { attributes: soAttributes, references: soReferences, error: null };
+    return {
+      attributes: soAttributes,
+      references: [...references, ...panelReferences],
+      error: null,
+    };
   } catch (e) {
     return { attributes: null, references: null, error: e };
   }
