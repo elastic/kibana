@@ -219,7 +219,7 @@ describe('dashboard locator', () => {
     expect(location.path.indexOf('relative')).toBeGreaterThan(1);
   });
 
-  /*describe('preserving saved filters', () => {
+  /* describe('preserving saved filters', () => {
     const savedFilter1 = {
       meta: {
         alias: null,

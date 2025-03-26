@@ -80,4 +80,4 @@ export async function getLocation(useHashedUrl: boolean, params: DashboardLocato
     path,
     state: getSerializableRecord(cleanEmptyKeys(state)),
   };
-};
+}
