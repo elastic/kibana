@@ -212,7 +212,7 @@ describe('Rule Upgrade button', () => {
 function expectRuleUpgradeButtonToBeDisabled(): void {
   expect(
     within(screen.getByRole('dialog')).getByRole('button', {
-      name: 'Update',
+      name: 'Update rule',
     })
   ).toBeDisabled();
 }
@@ -220,7 +220,7 @@ function expectRuleUpgradeButtonToBeDisabled(): void {
 function expectRuleUpgradeButtonToBeEnabled(): void {
   expect(
     within(screen.getByRole('dialog')).getByRole('button', {
-      name: 'Update',
+      name: 'Update rule',
     })
   ).toBeEnabled();
 }

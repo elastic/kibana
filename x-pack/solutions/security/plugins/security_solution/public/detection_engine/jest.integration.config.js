@@ -9,8 +9,8 @@ module.exports = {
   preset: '@kbn/test/jest_integration',
   rootDir: '../../../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/public/detection_engine'],
-  testMatch: ['**/__integration_tests__/**/*.[jt]s?(x)'],
-  modulePathIgnorePatterns: ['__mocks__'],
+  testMatch: ['**/__integration_tests__/**/*.test.[jt]s?(x)'],
+  modulePathIgnorePatterns: ['__mocks__', 'mock'],
   openHandlesTimeout: 0,
   forceExit: true,
 };

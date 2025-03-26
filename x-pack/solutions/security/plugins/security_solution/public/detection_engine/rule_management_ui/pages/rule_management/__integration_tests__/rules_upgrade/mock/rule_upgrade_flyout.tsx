@@ -36,19 +36,6 @@ import { KibanaServices } from '../../../../../../../common/lib/kibana';
 
 /** **********************************************/
 // Mocks necessary to render Rule Upgrade Flyout
-
-// Enable Prebuilt Rules Customization feature
-jest.mock('../../../../../../../../common/experimental_features', () => {
-  const actual = jest.requireActual('../../../../../../../../common/experimental_features');
-
-  return {
-    ...actual,
-    allowedExperimentalValues: {
-      ...actual.allowedExperimentalValues,
-      prebuiltRulesCustomizationEnabled: true,
-    },
-  };
-});
 jest.mock('../../../../../../../detections/components/user_info');
 jest.mock('../../../../../../../detections/containers/detection_engine/lists/use_lists_config');
 /** **********************************************/
@@ -275,4 +262,27 @@ function createFieldDefinition(fieldSpec: FieldSpec): Partial<DataViewField> {
       ...fieldSpec,
     },
   };
+}
+
+interface ExtractKibanaFetchRequestByParams {
+  path: string;
+  method: string;
+}
+
+export function extractSingleKibanaFetchBodyBy({
+  path,
+  method,
+}: ExtractKibanaFetchRequestByParams): Record<string, unknown> {
+  const kibanaFetchMock = KibanaServices.get().http.fetch as jest.Mock;
+  const ruleUpgradeRequests = kibanaFetchMock.mock.calls.filter(
+    ([_path, _options]) => _path === path && _options.method === method
+  );
+
+  expect(ruleUpgradeRequests).toHaveLength(1);
+
+  try {
+    return JSON.parse(ruleUpgradeRequests[0][1].body);
+  } catch {
+    throw new Error('Unable to parse Kibana fetch body');
+  }
 }

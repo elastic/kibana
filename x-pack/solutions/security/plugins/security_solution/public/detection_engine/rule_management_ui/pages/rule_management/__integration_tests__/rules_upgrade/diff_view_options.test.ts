@@ -13,10 +13,13 @@ import {
 import { VersionsPickerOptionEnum } from '../../../../../rule_management/components/rule_details/three_way_diff/comparison_side/versions_picker/versions_picker';
 import { mockRuleUpgradeReviewData, renderRuleUpgradeFlyout } from './mock/rule_upgrade_flyout';
 import {
-  setResolvedName,
+  acceptSuggestedFieldValue,
+  saveAndAcceptFieldValue,
+  saveFieldValue,
   switchToFieldEdit,
   toggleFieldAccordion,
 } from './mock/rule_upgrade_helpers';
+import { inputFieldValue } from './mock/set_field_value';
 
 describe('Rule upgrade preview Diff View options', () => {
   describe('non-customized field w/ an upgrade (AAB)', () => {
@@ -44,7 +47,9 @@ describe('Rule upgrade preview Diff View options', () => {
       const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('Update from Elastic');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('Changes from Elastic');
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Updated name');
     });
@@ -73,10 +78,13 @@ describe('Rule upgrade preview Diff View options', () => {
       const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       switchToFieldEdit(fieldUpgradeWrapper);
-      await setResolvedName(fieldUpgradeWrapper, 'Resolved name');
+      await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Resolved name' });
+      await saveFieldValue(fieldUpgradeWrapper);
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('My changes');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('My changes');
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Resolved name');
     });
@@ -104,10 +112,13 @@ describe('Rule upgrade preview Diff View options', () => {
       toggleFieldAccordion(fieldUpgradeWrapper);
       switchToFieldEdit(fieldUpgradeWrapper);
 
-      await setResolvedName(fieldUpgradeWrapper, 'Updated name');
+      await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Updated name' });
+      await saveFieldValue(fieldUpgradeWrapper);
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('Update from Elastic');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('Changes from Elastic');
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Updated name');
     });
@@ -138,7 +149,9 @@ describe('Rule upgrade preview Diff View options', () => {
       const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('My changes');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('My changes');
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Customized name');
     });
@@ -167,10 +180,13 @@ describe('Rule upgrade preview Diff View options', () => {
       const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       switchToFieldEdit(fieldUpgradeWrapper);
-      await setResolvedName(fieldUpgradeWrapper, 'Resolved name');
+      await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Resolved name' });
+      await saveFieldValue(fieldUpgradeWrapper);
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('My changes');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('My changes');
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Resolved name');
     });
@@ -198,10 +214,13 @@ describe('Rule upgrade preview Diff View options', () => {
       toggleFieldAccordion(fieldUpgradeWrapper);
       switchToFieldEdit(fieldUpgradeWrapper);
 
-      await setResolvedName(fieldUpgradeWrapper, 'Customized name');
+      await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Customized name' });
+      await saveFieldValue(fieldUpgradeWrapper);
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('My changes');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('My changes');
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Customized name');
     });
@@ -232,7 +251,9 @@ describe('Rule upgrade preview Diff View options', () => {
       const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('My changes');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('My changes and final updates');
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Updated name');
     });
@@ -263,7 +284,9 @@ describe('Rule upgrade preview Diff View options', () => {
       switchDiffViewTo(diffViewSelector, VersionsPickerOptionEnum.UpdateFromElastic);
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('Update from Elastic');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('Changes from Elastic');
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Updated name');
     });
@@ -292,10 +315,13 @@ describe('Rule upgrade preview Diff View options', () => {
       const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       switchToFieldEdit(fieldUpgradeWrapper);
-      await setResolvedName(fieldUpgradeWrapper, 'Resolved name');
+      await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Resolved name' });
+      await saveFieldValue(fieldUpgradeWrapper);
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('My changes');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('My changes');
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Resolved name');
     });
@@ -323,10 +349,13 @@ describe('Rule upgrade preview Diff View options', () => {
       toggleFieldAccordion(fieldUpgradeWrapper);
       switchToFieldEdit(fieldUpgradeWrapper);
 
-      await setResolvedName(fieldUpgradeWrapper, 'Updated name');
+      await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Updated name' });
+      await saveFieldValue(fieldUpgradeWrapper);
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('My changes');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('My changes');
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Updated name');
     });
@@ -354,7 +383,9 @@ describe('Rule upgrade preview Diff View options', () => {
       const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('My changes merged with Elastic’s');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent("My changes merged with Elastic's");
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Merged name');
     });
@@ -382,7 +413,9 @@ describe('Rule upgrade preview Diff View options', () => {
       switchDiffViewTo(diffViewSelector, VersionsPickerOptionEnum.UpdateFromElastic);
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('Update from Elastic');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('Changes from Elastic');
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Updated name');
     });
@@ -410,7 +443,9 @@ describe('Rule upgrade preview Diff View options', () => {
       switchDiffViewTo(diffViewSelector, VersionsPickerOptionEnum.MyOriginalChanges);
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('My original changes');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('My changes only');
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Customized name');
     });
@@ -436,12 +471,13 @@ describe('Rule upgrade preview Diff View options', () => {
       const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       switchToFieldEdit(fieldUpgradeWrapper);
-      await setResolvedName(fieldUpgradeWrapper, 'Resolved name', {
-        saveButtonText: 'Save and accept',
-      });
+      await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Resolved name' });
+      await saveAndAcceptFieldValue(fieldUpgradeWrapper);
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('My changes');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('My changes');
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Resolved name');
     });
@@ -468,12 +504,13 @@ describe('Rule upgrade preview Diff View options', () => {
 
       switchToFieldEdit(fieldUpgradeWrapper);
 
-      await setResolvedName(fieldUpgradeWrapper, 'Merged name', {
-        saveButtonText: 'Save and accept',
-      });
+      await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Merged name' });
+      await saveAndAcceptFieldValue(fieldUpgradeWrapper);
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('My changes merged with Elastic’s');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent("My changes merged with Elastic's");
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Merged name');
     });
@@ -501,7 +538,9 @@ describe('Rule upgrade preview Diff View options', () => {
       const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('My changes');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('My changes');
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Customized name');
     });
@@ -529,7 +568,9 @@ describe('Rule upgrade preview Diff View options', () => {
       switchDiffViewTo(diffViewSelector, VersionsPickerOptionEnum.UpdateFromElastic);
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('Update from Elastic');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('Changes from Elastic');
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Updated name');
     });
@@ -554,12 +595,13 @@ describe('Rule upgrade preview Diff View options', () => {
       const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
       const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
-      await setResolvedName(fieldUpgradeWrapper, 'Resolved name', {
-        saveButtonText: 'Save and accept',
-      });
+      await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Resolved name' });
+      await saveAndAcceptFieldValue(fieldUpgradeWrapper);
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('My changes');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('My changes');
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Resolved name');
     });
@@ -584,14 +626,103 @@ describe('Rule upgrade preview Diff View options', () => {
       const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
       const diffViewSelector = within(diffViewSection).getByRole('combobox');
 
-      await setResolvedName(fieldUpgradeWrapper, 'Customized name', {
-        saveButtonText: 'Save and accept',
-      });
+      await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Customized name' });
+      await saveAndAcceptFieldValue(fieldUpgradeWrapper);
 
       expect(diffViewSelector).toBeVisible();
-      expect(diffViewSelector).toHaveTextContent('My changes');
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('My changes');
       expect(diffViewSection).toHaveTextContent('-Initial name');
       expect(diffViewSection).toHaveTextContent('+Customized name');
+    });
+  });
+
+  describe('missing base - customized field w/ an upgrade resulting in a solvable conflict (-AB)', () => {
+    it('shows default diff view (incoming update)', async () => {
+      mockRuleUpgradeReviewData({
+        ruleType: 'query',
+        fieldName: 'name',
+        fieldVersions: {
+          current: 'Customized name',
+          target: 'Updated name',
+          merged: 'Customized name',
+        },
+        diffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+        conflict: ThreeWayDiffConflict.SOLVABLE,
+      });
+
+      const { getByTestId } = await renderRuleUpgradeFlyout();
+
+      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
+      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
+      const diffViewSelector = within(diffViewSection).getByRole('combobox');
+
+      expect(diffViewSelector).toBeVisible();
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('Changes from Elastic');
+      expect(diffViewSection).toHaveTextContent('-Customized name');
+      expect(diffViewSection).toHaveTextContent('+Updated name');
+    });
+
+    it('shows the same diff after saving unchanged field value', async () => {
+      mockRuleUpgradeReviewData({
+        ruleType: 'query',
+        fieldName: 'name',
+        fieldVersions: {
+          current: 'Customized name',
+          target: 'Updated name',
+          merged: 'Customized name',
+        },
+        diffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+        conflict: ThreeWayDiffConflict.SOLVABLE,
+      });
+
+      const { getByTestId } = await renderRuleUpgradeFlyout();
+
+      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
+      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
+      const diffViewSelector = within(diffViewSection).getByRole('combobox');
+
+      await acceptSuggestedFieldValue(fieldUpgradeWrapper);
+
+      expect(diffViewSelector).toBeVisible();
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('Changes from Elastic');
+      expect(diffViewSection).toHaveTextContent('-Customized name');
+      expect(diffViewSection).toHaveTextContent('+Updated name');
+    });
+
+    it('shows resolved value', async () => {
+      mockRuleUpgradeReviewData({
+        ruleType: 'query',
+        fieldName: 'name',
+        fieldVersions: {
+          current: 'Customized name',
+          target: 'Updated name',
+          merged: 'Customized name',
+        },
+        diffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+        conflict: ThreeWayDiffConflict.NON_SOLVABLE,
+      });
+
+      const { getByTestId } = await renderRuleUpgradeFlyout();
+
+      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
+      const diffViewSection = within(fieldUpgradeWrapper).getByTestId(`name-comparisonSide`);
+      const diffViewSelector = within(diffViewSection).getByRole('combobox');
+
+      await inputFieldValue(fieldUpgradeWrapper, { fieldName: 'name', value: 'Resolved name' });
+      await saveAndAcceptFieldValue(fieldUpgradeWrapper);
+
+      expect(diffViewSelector).toBeVisible();
+
+      const selectedOption = within(diffViewSelector).getByRole('option', { selected: true });
+      expect(selectedOption).toHaveTextContent('My changes and final updates');
+      expect(diffViewSection).toHaveTextContent('-Customized name');
+      expect(diffViewSection).toHaveTextContent('+Resolved name');
     });
   });
 });
@@ -600,4 +731,10 @@ function switchDiffViewTo(diffViewSelector: HTMLElement, option: VersionsPickerO
   act(() => {
     fireEvent.change(diffViewSelector, { target: { value: option } });
   });
+
+  expect(
+    within(diffViewSelector).getByRole('option', {
+      selected: true,
+    })
+  ).toHaveValue(option);
 }
