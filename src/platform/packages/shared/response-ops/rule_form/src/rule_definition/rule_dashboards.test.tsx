@@ -108,11 +108,13 @@ describe('RuleDashboards', () => {
 
     useRuleFormState.mockReturnValue({
       formData: {
-        dashboards: [
-          {
-            id: '1',
-          },
-        ],
+        attachments: {
+          dashboards: [
+            {
+              id: '1',
+            },
+          ],
+        },
       },
     });
 
@@ -135,11 +137,13 @@ describe('RuleDashboards', () => {
 
     useRuleFormState.mockReturnValue({
       formData: {
-        dashboards: [
-          {
-            id: '1',
-          },
-        ],
+        attachments: {
+          dashboards: [
+            {
+              id: '1',
+            },
+          ],
+        },
       },
     });
 
@@ -168,8 +172,8 @@ describe('RuleDashboards', () => {
     expect(mockOnChange).toHaveBeenCalledWith({
       type: 'setRuleProperty',
       payload: {
-        property: 'dashboards',
-        value: [{ id: '1' }, { id: '2' }],
+        property: 'attachments',
+        value: { dashboards: [{ id: '1' }, { id: '2' }] },
       },
     });
 
