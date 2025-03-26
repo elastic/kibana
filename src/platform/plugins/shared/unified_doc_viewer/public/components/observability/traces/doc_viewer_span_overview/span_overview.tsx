@@ -36,10 +36,7 @@ export function SpanOverview({
   transactionIndexPattern,
 }: SpanOverviewProps) {
   const parsedDoc = getTraceDocumentOverview(hit);
-
-  const detailTitle = i18n.translate('unifiedDocViewer.observability.traces.spanOverview.title', {
-    defaultMessage: 'Span detail',
-  });
+  const spanDuration = parsedDoc[SPAN_DURATION_FIELD];
 
   return (
     <TransactionProvider
@@ -55,7 +52,11 @@ export function SpanOverview({
         <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
           <EuiSpacer size="m" />
           <EuiTitle size="s">
-            <h2>{detailTitle}</h2>
+            <h2>
+              {i18n.translate('unifiedDocViewer.observability.traces.spanOverview.title', {
+                defaultMessage: 'Span detail',
+              })}
+            </h2>
           </EuiTitle>
           <EuiSpacer size="m" />
           {spanFields.map((fieldId) => {
@@ -70,10 +71,10 @@ export function SpanOverview({
             );
           })}
 
-          {parsedDoc[SPAN_DURATION_FIELD] && (
+          {spanDuration && (
             <>
               <EuiSpacer size="m" />
-              <SpanDurationSummary duration={parsedDoc[SPAN_DURATION_FIELD]} />
+              <SpanDurationSummary duration={spanDuration} />
             </>
           )}
         </EuiPanel>
