@@ -27,6 +27,10 @@ const getOpenedTabsList = (
   tabItems: TabItem[],
   selectedTab: TabItem | null
 ): EuiSelectableOption[] => {
+  if (tabItems.length === 0) {
+    return [];
+  }
+
   return tabItems.map((tab) => ({
     label: tab.label,
     checked: selectedTab && tab.id === selectedTab.id ? 'on' : undefined,
@@ -35,6 +39,10 @@ const getOpenedTabsList = (
 };
 
 const getRecentlyClosedTabsList = (tabItems: TabItem[]): EuiSelectableOption[] => {
+  if (tabItems.length === 0) {
+    return [];
+  }
+
   return tabItems.map((tab) => ({
     label: tab.label,
     key: tab.id,
