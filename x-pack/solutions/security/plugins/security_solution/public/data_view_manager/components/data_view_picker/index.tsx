@@ -28,7 +28,7 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
   const closeDataViewEditor = useRef<() => void | undefined>();
   const closeFieldEditor = useRef<() => void | undefined>();
 
-  const { dataView } = useDataView(props.scope);
+  const { dataView, status } = useDataView(props.scope);
 
   const dataViewId = dataView?.id;
 
@@ -87,6 +87,10 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
   );
 
   const triggerConfig = useMemo(() => {
+    if (status === 'loading') {
+      return { label: 'Loading' };
+    }
+
     if (dataView.id === DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID) {
       return {
         label: 'Default Security Data View',
@@ -96,7 +100,7 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
     return {
       label: dataView?.name || dataView?.id || 'Data view',
     };
-  }, [dataView]);
+  }, [dataView.id, dataView?.name, status]);
 
   const { adhocDataViews: adhocDataViewSpecs, dataViews } = useSelector(sharedStateSelector);
 
@@ -116,6 +120,7 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
 
   return (
     <UnifiedDataViewPicker
+      isDisabled={status !== 'ready'}
       currentDataViewId={dataViewId || DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID}
       trigger={triggerConfig}
       onChangeDataView={handleChangeDataView}

@@ -50,6 +50,6 @@ export const useFullDataView = (
       return { dataView: undefined, status: internalStatus };
     }
 
-    return { dataView: retrievedDataView, status: internalStatus };
+    return { dataView: retrievedDataView, status: retrievedDataView ? internalStatus : 'loading' };
   }, [newDataViewPickerEnabled, retrievedDataView, internalStatus]);
 };
