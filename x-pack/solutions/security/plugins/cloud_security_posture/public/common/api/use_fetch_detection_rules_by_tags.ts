@@ -10,7 +10,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { DETECTION_RULE_RULES_API_CURRENT_VERSION } from '@kbn/cloud-security-posture-common';
 import type { RuleResponse } from '@kbn/cloud-security-posture-common';
-import { DETECTION_ENGINE_RULES_KEY } from '../constants';
+import { DETECTION_ENGINE_RULES_KEY } from '@kbn/cloud-security-posture';
 import {
   convertRuleTagsToMatchAllKQL,
   convertRuleTagsToMatchAnyKQL,

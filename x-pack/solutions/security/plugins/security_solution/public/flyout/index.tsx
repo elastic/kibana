@@ -59,7 +59,7 @@ import type { ServicePanelExpandableFlyoutProps } from './entity_details/service
 import { ServicePanel } from './entity_details/service_right';
 import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/service_details_left';
 import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/service_details_left';
-import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from './csp_details/findings_flyout/findings_right';
+import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from './csp_details/findings_flyout/findings_flyout';
 import { FindingsRuleFlyout } from './csp_details/findings_flyout/findings_flyout';
 
 /**
