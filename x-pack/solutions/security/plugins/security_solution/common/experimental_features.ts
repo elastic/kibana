@@ -117,7 +117,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Attack Discovery Scheduling functionality and API endpoint`.
    */
-  assistantAttackDiscoverySchedulingEnabled: true,
+  assistantAttackDiscoverySchedulingEnabled: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
