@@ -5,11 +5,15 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { Client } from '@elastic/elasticsearch';
 import {
+  ConversationCreateEvent,
+  ConversationUpdateEvent,
   Message,
   MessageAddEvent,
   MessageRole,
   StreamingChatResponseEvent,
+  StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { Readable } from 'stream';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
