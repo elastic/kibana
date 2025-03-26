@@ -63,7 +63,7 @@ export const registerPrivilegeMonitoringTask = ({
 
   taskManager.registerTaskDefinitions({
     [getTaskName()]: {
-      title: 'Entity Analytics Privilege Monitoring - Great Success',
+      title: 'Entity Analytics Privilege Monitoring',
       timeout: TIMEOUT,
       stateSchemaByVersion,
       createTaskRunner: createPrivilegeMonitoringTaskRunnerFactory({

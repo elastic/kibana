@@ -6,7 +6,7 @@
  */
 
 export const SCOPE = ['securitySolution'];
-export const TYPE = 'entity_analytics:monitoring_engine:great_success';
+export const TYPE = 'entity_analytics:monitoring:privileges:engine';
 export const VERSION = '1.0.0';
 export const TIMEOUT = '10m';
 export const INTERVAL = '1m';
