@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import url from 'url';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { Summary } from '.';
 import { TimestampTooltip } from '../timestamp_tooltip';
@@ -16,6 +15,7 @@ import { HttpInfoSummaryItem } from './http_info_summary_item';
 import { TransactionResultSummaryItem } from './transaction_result_summary_item';
 import { UserAgentSummaryItem } from './user_agent_summary_item';
 import { ColdStartBadge } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/badge/cold_start_badge';
+import { buildUrl } from './build_transaction_url';
 
 interface Props {
   transaction: Transaction;
@@ -26,25 +26,9 @@ interface Props {
 
 function getTransactionResultSummaryItem(transaction: Transaction) {
   const result = transaction.transaction.result;
-  const urlFull = transaction.url?.full || transaction.transaction?.page?.url;
-  // URL fields from Otel
-  const urlScheme = transaction.url?.scheme;
-  const urlPath = transaction.url?.path;
-  const serverAddress = transaction?.server?.address;
-  const serverPort = transaction?.server?.port;
-
-  const hasURLFromFields = urlFull && urlScheme && urlPath && serverAddress && serverPort;
-
   const method = transaction.http?.request?.method;
   const status = transaction.http?.response?.status_code;
-  const urlFromFields = hasURLFromFields
-    ? url.format({
-        protocol: urlScheme, // 'https',
-        hostname: serverAddress, // 'example.com',
-        port: serverPort, // 443,
-        pathname: urlPath, // '/some/path',
-      })
-    : urlFull;
+  const urlFromFields = buildUrl(transaction);
 
   if (urlFromFields || method || status) {
     return <HttpInfoSummaryItem method={method} status={status} url={urlFromFields} />;
