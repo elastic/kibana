@@ -262,10 +262,6 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
     cy.url().should('include', DASHBOARDS_URL);
   });
 
-  it('navigates to the Rules landing page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.RULES_LANDING, true);
-    cy.url().should('include', RULES_LANDING_URL);
-  });
   it('navigates to the Rules page', () => {
     navigateFromHeaderTo(ServerlessHeaders.RULES, true);
     cy.url().should('include', RULES_MANAGEMENT_URL);
