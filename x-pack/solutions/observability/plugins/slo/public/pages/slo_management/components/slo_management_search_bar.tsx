@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiText } from '@elastic/eui';
 import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
 import { useFetchSLOSuggestions } from '../../slo_edit/hooks/use_fetch_suggestions';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -56,15 +56,33 @@ export function SloManagementSearchBar({ filters, setFilters, onRefresh }: Props
           placeholder={i18n.translate('xpack.slo.sloDefinitions.filterByTag', {
             defaultMessage: 'Filter tags',
           })}
-          options={suggestions?.tags ?? []}
+          singleSelection={!!filters.tags.find((option) => option.value === '*')}
+          delimiter=","
+          options={suggestions?.tags ? [existOption, ...suggestions?.tags] : []}
           selectedOptions={filters.tags}
           onChange={(newOptions) => {
             setFilters({ search: filters.search, tags: newOptions });
           }}
           isClearable={true}
-          data-test-subj="demoComboBox"
+          data-test-subj="filter-slos-by-tag"
         />
       )}
     />
   );
 }
+
+const existOption = {
+  prepend: (
+    <EuiText size="s">
+      <strong>
+        <em>
+          {i18n.translate('xpack.slo.sloDefinitions.tagOptions.exists', {
+            defaultMessage: 'Exists',
+          })}
+        </em>
+      </strong>
+    </EuiText>
+  ),
+  label: '',
+  value: '*',
+};
