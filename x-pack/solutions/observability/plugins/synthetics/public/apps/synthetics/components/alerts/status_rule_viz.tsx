@@ -11,6 +11,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
@@ -31,7 +32,7 @@ export const StatusRuleViz = ({
 }: {
   ruleParams: StatusRuleParamsProps['ruleParams'];
 }) => {
-  const { data } = useSelector(selectInspectStatusRule);
+  const { data, loading } = useSelector(selectInspectStatusRule);
   const dispatch = useDispatch();
   const {
     services: { inspector },
@@ -57,7 +58,7 @@ export const StatusRuleViz = ({
 
   return (
     <EuiCallOut iconType="search" size="s">
-      <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           {i18n.translate('xpack.synthetics.statusRuleViz.ruleAppliesToFlexItemLabel', {
             defaultMessage: 'Rule applies to ',
@@ -76,7 +77,7 @@ export const StatusRuleViz = ({
                 {i18n.translate('xpack.synthetics.statusRuleViz.monitorQueryIdsPopoverButton', {
                   defaultMessage:
                     '{total} existing {total, plural, one {monitor} other {monitors}}',
-                  values: { total: data?.monitors.length },
+                  values: { total: loading ? '...' : data?.monitors.length },
                 })}
               </EuiButtonEmpty>
             }
@@ -93,6 +94,11 @@ export const StatusRuleViz = ({
             <RuleMonitorsTable />
           </EuiPopover>
         </EuiFlexItem>
+        {loading && (
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="s" />
+          </EuiFlexItem>
+        )}
         {/* to push detail button to end*/}
         <EuiFlexItem />
         <EuiFlexItem grow={false}>

@@ -118,7 +118,7 @@ export class StatusRuleExecutor {
       return processMonitors([]);
     }
 
-    const locationFilter = await parseLocationFilter(
+    const locationIds = await parseLocationFilter(
       {
         savedObjectsClient: this.soClient,
         server: this.server,
@@ -131,7 +131,7 @@ export class StatusRuleExecutor {
       configIds,
       filter: baseFilter,
       tags: this.params.tags,
-      locationFilter,
+      locations: locationIds,
       monitorTypes: this.params.monitorTypes,
       monitorQueryIds: this.params.monitorIds,
       projects: this.params.projects,
@@ -141,7 +141,11 @@ export class StatusRuleExecutor {
       filter: filtersStr,
     });
 
-    this.debug(`Found ${this.monitors.length} monitors for params ${JSON.stringify(this.params)}`);
+    this.debug(
+      `Found ${this.monitors.length} monitors for params ${JSON.stringify(
+        this.params
+      )} | parsed location filter is ${JSON.stringify(locationIds)} `
+    );
     return processMonitors(this.monitors);
   }
 

@@ -30,7 +30,7 @@ describe('common utils', () => {
     const filters = parseArrayFilters({
       configIds: ['1', '2'],
       tags: ['tag1', 'tag2'],
-      locationFilter: ['loc1', 'loc2'],
+      locations: ['loc1', 'loc2'],
       monitorTypes: ['type1', 'type2'],
       projects: ['project1', 'project2'],
       monitorQueryIds: ['query1', 'query2'],

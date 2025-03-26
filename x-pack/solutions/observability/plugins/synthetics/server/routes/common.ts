@@ -110,19 +110,20 @@ interface Filters {
   projects?: string | string[];
   schedules?: string | string[];
   monitorQueryIds?: string | string[];
+  configIds?: string | string[];
 }
 
 export const getMonitorFilters = async (context: RouteContext) => {
   const {
     tags,
     monitorTypes,
-    locations,
     filter = '',
     projects,
     schedules,
     monitorQueryIds,
+    locations: queryLocations,
   } = context.request.query;
-  const locationFilter = await parseLocationFilter(context, locations);
+  const locations = await parseLocationFilter(context, queryLocations);
 
   return parseArrayFilters({
     filter,
@@ -131,7 +132,7 @@ export const getMonitorFilters = async (context: RouteContext) => {
     projects,
     schedules,
     monitorQueryIds,
-    locationFilter,
+    locations,
   });
 };
 
@@ -143,17 +144,14 @@ export const parseArrayFilters = ({
   monitorTypes,
   schedules,
   monitorQueryIds,
-  locationFilter,
-}: Omit<Filters, 'locations'> & {
-  locationFilter?: string | string[];
-  configIds?: string[];
-}) => {
+  locations,
+}: Filters) => {
   const filtersStr = [
     filter,
     getSavedObjectKqlFilter({ field: 'tags', values: tags }),
     getSavedObjectKqlFilter({ field: 'project_id', values: projects }),
     getSavedObjectKqlFilter({ field: 'type', values: monitorTypes }),
-    getSavedObjectKqlFilter({ field: 'locations.id', values: locationFilter }),
+    getSavedObjectKqlFilter({ field: 'locations.id', values: locations }),
     getSavedObjectKqlFilter({ field: 'schedule.number', values: schedules }),
     getSavedObjectKqlFilter({ field: 'id', values: monitorQueryIds }),
     getSavedObjectKqlFilter({ field: 'config_id', values: configIds }),
@@ -161,7 +159,7 @@ export const parseArrayFilters = ({
     .filter((f) => !!f)
     .join(' AND ');
 
-  return { filtersStr, locationFilter };
+  return { filtersStr, locationIds: locations };
 };
 
 export const getSavedObjectKqlFilter = ({
@@ -214,6 +212,7 @@ export const parseLocationFilter = async (
     syntheticsMonitorClient,
     savedObjectsClient,
     server,
+    excludeAgentPolicies: true,
   });
 
   if (Array.isArray(locations)) {
