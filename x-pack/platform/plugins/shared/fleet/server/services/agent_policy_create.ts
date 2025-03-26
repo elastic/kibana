@@ -178,8 +178,7 @@ export async function createAgentPolicyWithPackages({
 
   // Create the agentless agent
   if (agentPolicy.supports_agentless) {
-    // TODO skip only for test
-    //await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
+    await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
   }
 
   return agentPolicy;
