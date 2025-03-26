@@ -633,6 +633,8 @@ export function Detail() {
         href: getHref('integration_details_overview', {
           pkgkey: packageInfoKey,
           ...(integration ? { integration } : {}),
+          ...(returnAppId ? { returnAppId } : {}),
+          ...(returnPath ? { returnPath } : {}),
         }),
       },
     ];
@@ -651,6 +653,8 @@ export function Detail() {
         href: getHref('integration_details_policies', {
           pkgkey: packageInfoKey,
           ...(integration ? { integration } : {}),
+          ...(returnAppId ? { returnAppId } : {}),
+          ...(returnPath ? { returnPath } : {}),
         }),
       });
     }
@@ -675,6 +679,8 @@ export function Detail() {
         href: getHref('integration_details_assets', {
           pkgkey: packageInfoKey,
           ...(integration ? { integration } : {}),
+          ...(returnAppId ? { returnAppId } : {}),
+          ...(returnPath ? { returnPath } : {}),
         }),
       });
     }
@@ -693,6 +699,8 @@ export function Detail() {
         href: getHref('integration_details_settings', {
           pkgkey: packageInfoKey,
           ...(integration ? { integration } : {}),
+          ...(returnAppId ? { returnAppId } : {}),
+          ...(returnPath ? { returnPath } : {}),
         }),
       });
     }
@@ -711,6 +719,8 @@ export function Detail() {
         href: getHref('integration_details_configs', {
           pkgkey: packageInfoKey,
           ...(integration ? { integration } : {}),
+          ...(returnAppId ? { returnAppId } : {}),
+          ...(returnPath ? { returnPath } : {}),
         }),
       });
     }
@@ -729,6 +739,8 @@ export function Detail() {
         href: getHref('integration_details_custom', {
           pkgkey: packageInfoKey,
           ...(integration ? { integration } : {}),
+          ...(returnAppId ? { returnAppId } : {}),
+          ...(returnPath ? { returnPath } : {}),
         }),
       });
     }
@@ -747,6 +759,8 @@ export function Detail() {
         href: getHref('integration_details_api_reference', {
           pkgkey: packageInfoKey,
           ...(integration ? { integration } : {}),
+          ...(returnAppId ? { returnAppId } : {}),
+          ...(returnPath ? { returnPath } : {}),
         }),
       });
     }
@@ -754,6 +768,8 @@ export function Detail() {
     return tabs;
   }, [
     packageInfo,
+    returnAppId,
+    returnPath,
     panel,
     getHref,
     integration,
