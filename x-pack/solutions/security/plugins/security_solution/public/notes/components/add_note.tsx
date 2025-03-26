@@ -13,11 +13,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../common/lib/kibana';
-import { ADD_NOTE_BUTTON_TEST_ID, ADD_NOTE_MARKDOWN_TEST_ID } from './test_ids';
+import {
+  ADD_NOTE_BUTTON_DISABLE_REASON_TEST_ID,
+  ADD_NOTE_BUTTON_TEST_ID,
+  ADD_NOTE_MARKDOWN_TEST_ID,
+} from './test_ids';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import type { State } from '../../common/store';
 import {
@@ -60,6 +65,10 @@ export interface AddNewNoteProps {
    */
   disableButton?: boolean;
   /**
+   * disable reason
+   */
+  disableReason?: string;
+  /**
    * Children to render between the markdown and the add note button
    */
   children?: React.ReactNode;
@@ -74,7 +83,14 @@ export interface AddNewNoteProps {
  * The checkbox is automatically checked if the flyout is opened from a timeline and that timeline is saved. It is disabled if the flyout is NOT opened from a timeline.
  */
 export const AddNote = memo(
-  ({ eventId, timelineId, disableButton = false, children, onNoteAdd }: AddNewNoteProps) => {
+  ({
+    eventId,
+    timelineId,
+    disableButton = false,
+    disableReason,
+    children,
+    onNoteAdd,
+  }: AddNewNoteProps) => {
     const { telemetry } = useKibana().services;
     const dispatch = useDispatch();
     const { addError: addErrorToast } = useAppToasts();
@@ -117,7 +133,7 @@ export const AddNote = memo(
       }
     }, [addErrorToast, createError, createStatus, resetError]);
 
-    const buttonDisabled = useMemo(
+    const isButtonDisabled = useMemo(
       () => disableButton || editorValue.trim().length === 0 || isMarkdownInvalid,
       [disableButton, editorValue, isMarkdownInvalid]
     );
@@ -142,16 +158,28 @@ export const AddNote = memo(
             <EuiSpacer size="m" />
           </>
         )}
-        <EuiFlexGroup alignItems="center" justifyContent="flexEnd" responsive={false}>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="flexEnd"
+          gutterSize="s"
+          responsive={false}
+        >
           <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={addNote}
-              isLoading={createStatus === ReqStatus.Loading}
-              disabled={buttonDisabled}
-              data-test-subj={ADD_NOTE_BUTTON_TEST_ID}
+            <EuiToolTip
+              data-test-subj={ADD_NOTE_BUTTON_DISABLE_REASON_TEST_ID}
+              content={isButtonDisabled ? disableReason : null}
+              position="top"
+              repositionOnScroll={true}
             >
-              {ADD_NOTE_BUTTON}
-            </EuiButton>
+              <EuiButton
+                onClick={addNote}
+                isLoading={createStatus === ReqStatus.Loading}
+                disabled={isButtonDisabled}
+                data-test-subj={ADD_NOTE_BUTTON_TEST_ID}
+              >
+                {ADD_NOTE_BUTTON}
+              </EuiButton>
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </>
