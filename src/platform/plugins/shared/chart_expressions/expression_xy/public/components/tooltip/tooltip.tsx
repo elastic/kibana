@@ -11,11 +11,8 @@ import { TooltipInfo, XYChartSeriesIdentifier } from '@elastic/charts';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import React, { FC } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { euiFontSize, euiShadow, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-// @ts-expect-error style types not defined
-import { euiToolTipStyles } from '@elastic/eui/lib/components/tool_tip/tool_tip.styles';
-
 import { CommonXYDataLayerConfig } from '../../../common';
 import {
   DatatablesWithFormatInfo,
@@ -56,15 +53,18 @@ export const Tooltip: FC<Props> = ({
 
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
-  const toolTipStyles = euiToolTipStyles(euiThemeContext).euiToolTip;
 
   const customToolTipStyles = css`
+    ${euiShadow(euiThemeContext)}
+    ${euiFontSize(euiThemeContext, 's')}
+    padding: ${euiTheme.size.s};
+    z-index: ${euiTheme.levels.toast};
+    border-radius: ${euiTheme.border.radius.medium};
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+    color: ${euiTheme.colors.textParagraph};
     pointer-events: none;
-    // Override position absolute from toolTipStyles
-    position: relative;
 
     & {
-      // stylelint-disable-line no-duplicate-selectors
       max-width: calc(${euiTheme.size.xl} * 10);
       overflow: hidden;
       padding: ${euiTheme.size.s};
@@ -158,7 +158,7 @@ export const Tooltip: FC<Props> = ({
   const renderEndzoneTooltip = header ? isEndzoneBucket(header?.value, xDomain) : false;
 
   return (
-    <div css={[toolTipStyles, customToolTipStyles]}>
+    <div css={[customToolTipStyles]}>
       {renderEndzoneTooltip && (
         <div
           css={css`

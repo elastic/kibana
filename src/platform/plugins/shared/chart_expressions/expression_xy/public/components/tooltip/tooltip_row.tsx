@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type UseEuiTheme, shade } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { FC } from 'react';
 
@@ -20,13 +19,12 @@ export const TooltipRow: FC<TooltipData> = ({ label, value }) => {
   return label && value ? (
     <tr>
       <td
-        css={({ euiTheme }: UseEuiTheme) => css`
+        css={({ euiTheme }) => css`
           font-weight: ${euiTheme.font.weight.medium};
-          color: ${shade(euiTheme.colors.ghost, 0.2)};
         `}
       >
         <div
-          css={({ euiTheme }: UseEuiTheme) =>
+          css={({ euiTheme }) =>
             css`
               max-width: calc(${euiTheme.size.xl} * 5);
               overflow-wrap: break-word;

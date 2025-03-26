@@ -6,28 +6,25 @@ exports[`Tooltip should render plain tooltip 1`] = `
     Array [
       Object {
         "map": undefined,
-        "name": "1vsecbs-euiToolTip",
+        "name": "10r2mvf",
         "next": undefined,
         "styles": "
+    
 box-shadow:
   0 1px 5px rgba(0,0,0,0.1),
   0 3.6px 13px rgba(0,0,0,0.07),
   0 8.4px 23px rgba(0,0,0,0.06),
   0 23px 35px rgba(0,0,0,0.05);
- border:1px solid transparent;border-radius:6px;background-color:#07101F;color:#FFFFFF;z-index:9000;max-inline-size: 256px; overflow-wrap:break-word;padding:8px;font-size:1.0000rem;line-height:1.4286rem; position:absolute;[class*='euiHorizontalRule']{background-color:#2B394F;};label:euiToolTip;",
-        "toString": [Function],
-      },
-      Object {
-        "map": undefined,
-        "name": "bol0qb",
-        "next": undefined,
-        "styles": "
+
+    font-size:1.0000rem;line-height:1.4286rem;
+    padding: 8px;
+    z-index: 9000;
+    border-radius: 6px;
+    background-color: #FFFFFF;
+    color: #1D2A3E;
     pointer-events: none;
-    // Override position absolute from toolTipStyles
-    position: relative;
 
     & {
-      // stylelint-disable-line no-duplicate-selectors
       max-width: calc(32px * 10);
       overflow: hidden;
       padding: 8px;
@@ -88,28 +85,25 @@ exports[`Tooltip should render tooltip with partial buckets 1`] = `
     Array [
       Object {
         "map": undefined,
-        "name": "1vsecbs-euiToolTip",
+        "name": "10r2mvf",
         "next": undefined,
         "styles": "
+    
 box-shadow:
   0 1px 5px rgba(0,0,0,0.1),
   0 3.6px 13px rgba(0,0,0,0.07),
   0 8.4px 23px rgba(0,0,0,0.06),
   0 23px 35px rgba(0,0,0,0.05);
- border:1px solid transparent;border-radius:6px;background-color:#07101F;color:#FFFFFF;z-index:9000;max-inline-size: 256px; overflow-wrap:break-word;padding:8px;font-size:1.0000rem;line-height:1.4286rem; position:absolute;[class*='euiHorizontalRule']{background-color:#2B394F;};label:euiToolTip;",
-        "toString": [Function],
-      },
-      Object {
-        "map": undefined,
-        "name": "bol0qb",
-        "next": undefined,
-        "styles": "
+
+    font-size:1.0000rem;line-height:1.4286rem;
+    padding: 8px;
+    z-index: 9000;
+    border-radius: 6px;
+    background-color: #FFFFFF;
+    color: #1D2A3E;
     pointer-events: none;
-    // Override position absolute from toolTipStyles
-    position: relative;
 
     & {
-      // stylelint-disable-line no-duplicate-selectors
       max-width: calc(32px * 10);
       overflow: hidden;
       padding: 8px;
@@ -187,28 +181,25 @@ exports[`Tooltip should render tooltip with partial buckets 2`] = `
     Array [
       Object {
         "map": undefined,
-        "name": "1vsecbs-euiToolTip",
+        "name": "10r2mvf",
         "next": undefined,
         "styles": "
+    
 box-shadow:
   0 1px 5px rgba(0,0,0,0.1),
   0 3.6px 13px rgba(0,0,0,0.07),
   0 8.4px 23px rgba(0,0,0,0.06),
   0 23px 35px rgba(0,0,0,0.05);
- border:1px solid transparent;border-radius:6px;background-color:#07101F;color:#FFFFFF;z-index:9000;max-inline-size: 256px; overflow-wrap:break-word;padding:8px;font-size:1.0000rem;line-height:1.4286rem; position:absolute;[class*='euiHorizontalRule']{background-color:#2B394F;};label:euiToolTip;",
-        "toString": [Function],
-      },
-      Object {
-        "map": undefined,
-        "name": "bol0qb",
-        "next": undefined,
-        "styles": "
+
+    font-size:1.0000rem;line-height:1.4286rem;
+    padding: 8px;
+    z-index: 9000;
+    border-radius: 6px;
+    background-color: #FFFFFF;
+    color: #1D2A3E;
     pointer-events: none;
-    // Override position absolute from toolTipStyles
-    position: relative;
 
     & {
-      // stylelint-disable-line no-duplicate-selectors
       max-width: calc(32px * 10);
       overflow: hidden;
       padding: 8px;
@@ -286,28 +277,25 @@ exports[`Tooltip should render tooltip with xDomain 1`] = `
     Array [
       Object {
         "map": undefined,
-        "name": "1vsecbs-euiToolTip",
+        "name": "10r2mvf",
         "next": undefined,
         "styles": "
+    
 box-shadow:
   0 1px 5px rgba(0,0,0,0.1),
   0 3.6px 13px rgba(0,0,0,0.07),
   0 8.4px 23px rgba(0,0,0,0.06),
   0 23px 35px rgba(0,0,0,0.05);
- border:1px solid transparent;border-radius:6px;background-color:#07101F;color:#FFFFFF;z-index:9000;max-inline-size: 256px; overflow-wrap:break-word;padding:8px;font-size:1.0000rem;line-height:1.4286rem; position:absolute;[class*='euiHorizontalRule']{background-color:#2B394F;};label:euiToolTip;",
-        "toString": [Function],
-      },
-      Object {
-        "map": undefined,
-        "name": "bol0qb",
-        "next": undefined,
-        "styles": "
+
+    font-size:1.0000rem;line-height:1.4286rem;
+    padding: 8px;
+    z-index: 9000;
+    border-radius: 6px;
+    background-color: #FFFFFF;
+    color: #1D2A3E;
     pointer-events: none;
-    // Override position absolute from toolTipStyles
-    position: relative;
 
     & {
-      // stylelint-disable-line no-duplicate-selectors
       max-width: calc(32px * 10);
       overflow: hidden;
       padding: 8px;
@@ -368,28 +356,25 @@ exports[`Tooltip should render tooltip without split-column-values 1`] = `
     Array [
       Object {
         "map": undefined,
-        "name": "1vsecbs-euiToolTip",
+        "name": "10r2mvf",
         "next": undefined,
         "styles": "
+    
 box-shadow:
   0 1px 5px rgba(0,0,0,0.1),
   0 3.6px 13px rgba(0,0,0,0.07),
   0 8.4px 23px rgba(0,0,0,0.06),
   0 23px 35px rgba(0,0,0,0.05);
- border:1px solid transparent;border-radius:6px;background-color:#07101F;color:#FFFFFF;z-index:9000;max-inline-size: 256px; overflow-wrap:break-word;padding:8px;font-size:1.0000rem;line-height:1.4286rem; position:absolute;[class*='euiHorizontalRule']{background-color:#2B394F;};label:euiToolTip;",
-        "toString": [Function],
-      },
-      Object {
-        "map": undefined,
-        "name": "bol0qb",
-        "next": undefined,
-        "styles": "
+
+    font-size:1.0000rem;line-height:1.4286rem;
+    padding: 8px;
+    z-index: 9000;
+    border-radius: 6px;
+    background-color: #FFFFFF;
+    color: #1D2A3E;
     pointer-events: none;
-    // Override position absolute from toolTipStyles
-    position: relative;
 
     & {
-      // stylelint-disable-line no-duplicate-selectors
       max-width: calc(32px * 10);
       overflow: hidden;
       padding: 8px;
@@ -445,28 +430,25 @@ exports[`Tooltip should render tooltip without split-row-values 1`] = `
     Array [
       Object {
         "map": undefined,
-        "name": "1vsecbs-euiToolTip",
+        "name": "10r2mvf",
         "next": undefined,
         "styles": "
+    
 box-shadow:
   0 1px 5px rgba(0,0,0,0.1),
   0 3.6px 13px rgba(0,0,0,0.07),
   0 8.4px 23px rgba(0,0,0,0.06),
   0 23px 35px rgba(0,0,0,0.05);
- border:1px solid transparent;border-radius:6px;background-color:#07101F;color:#FFFFFF;z-index:9000;max-inline-size: 256px; overflow-wrap:break-word;padding:8px;font-size:1.0000rem;line-height:1.4286rem; position:absolute;[class*='euiHorizontalRule']{background-color:#2B394F;};label:euiToolTip;",
-        "toString": [Function],
-      },
-      Object {
-        "map": undefined,
-        "name": "bol0qb",
-        "next": undefined,
-        "styles": "
+
+    font-size:1.0000rem;line-height:1.4286rem;
+    padding: 8px;
+    z-index: 9000;
+    border-radius: 6px;
+    background-color: #FFFFFF;
+    color: #1D2A3E;
     pointer-events: none;
-    // Override position absolute from toolTipStyles
-    position: relative;
 
     & {
-      // stylelint-disable-line no-duplicate-selectors
       max-width: calc(32px * 10);
       overflow: hidden;
       padding: 8px;
@@ -522,28 +504,25 @@ exports[`Tooltip should render tooltip without splitAccessors-values 1`] = `
     Array [
       Object {
         "map": undefined,
-        "name": "1vsecbs-euiToolTip",
+        "name": "10r2mvf",
         "next": undefined,
         "styles": "
+    
 box-shadow:
   0 1px 5px rgba(0,0,0,0.1),
   0 3.6px 13px rgba(0,0,0,0.07),
   0 8.4px 23px rgba(0,0,0,0.06),
   0 23px 35px rgba(0,0,0,0.05);
- border:1px solid transparent;border-radius:6px;background-color:#07101F;color:#FFFFFF;z-index:9000;max-inline-size: 256px; overflow-wrap:break-word;padding:8px;font-size:1.0000rem;line-height:1.4286rem; position:absolute;[class*='euiHorizontalRule']{background-color:#2B394F;};label:euiToolTip;",
-        "toString": [Function],
-      },
-      Object {
-        "map": undefined,
-        "name": "bol0qb",
-        "next": undefined,
-        "styles": "
+
+    font-size:1.0000rem;line-height:1.4286rem;
+    padding: 8px;
+    z-index: 9000;
+    border-radius: 6px;
+    background-color: #FFFFFF;
+    color: #1D2A3E;
     pointer-events: none;
-    // Override position absolute from toolTipStyles
-    position: relative;
 
     & {
-      // stylelint-disable-line no-duplicate-selectors
       max-width: calc(32px * 10);
       overflow: hidden;
       padding: 8px;
@@ -599,28 +578,25 @@ exports[`Tooltip should render tooltip without x-value 1`] = `
     Array [
       Object {
         "map": undefined,
-        "name": "1vsecbs-euiToolTip",
+        "name": "10r2mvf",
         "next": undefined,
         "styles": "
+    
 box-shadow:
   0 1px 5px rgba(0,0,0,0.1),
   0 3.6px 13px rgba(0,0,0,0.07),
   0 8.4px 23px rgba(0,0,0,0.06),
   0 23px 35px rgba(0,0,0,0.05);
- border:1px solid transparent;border-radius:6px;background-color:#07101F;color:#FFFFFF;z-index:9000;max-inline-size: 256px; overflow-wrap:break-word;padding:8px;font-size:1.0000rem;line-height:1.4286rem; position:absolute;[class*='euiHorizontalRule']{background-color:#2B394F;};label:euiToolTip;",
-        "toString": [Function],
-      },
-      Object {
-        "map": undefined,
-        "name": "bol0qb",
-        "next": undefined,
-        "styles": "
+
+    font-size:1.0000rem;line-height:1.4286rem;
+    padding: 8px;
+    z-index: 9000;
+    border-radius: 6px;
+    background-color: #FFFFFF;
+    color: #1D2A3E;
     pointer-events: none;
-    // Override position absolute from toolTipStyles
-    position: relative;
 
     & {
-      // stylelint-disable-line no-duplicate-selectors
       max-width: calc(32px * 10);
       overflow: hidden;
       padding: 8px;
@@ -676,28 +652,25 @@ exports[`Tooltip should render tooltip without x-value 2`] = `
     Array [
       Object {
         "map": undefined,
-        "name": "1vsecbs-euiToolTip",
+        "name": "10r2mvf",
         "next": undefined,
         "styles": "
+    
 box-shadow:
   0 1px 5px rgba(0,0,0,0.1),
   0 3.6px 13px rgba(0,0,0,0.07),
   0 8.4px 23px rgba(0,0,0,0.06),
   0 23px 35px rgba(0,0,0,0.05);
- border:1px solid transparent;border-radius:6px;background-color:#07101F;color:#FFFFFF;z-index:9000;max-inline-size: 256px; overflow-wrap:break-word;padding:8px;font-size:1.0000rem;line-height:1.4286rem; position:absolute;[class*='euiHorizontalRule']{background-color:#2B394F;};label:euiToolTip;",
-        "toString": [Function],
-      },
-      Object {
-        "map": undefined,
-        "name": "bol0qb",
-        "next": undefined,
-        "styles": "
+
+    font-size:1.0000rem;line-height:1.4286rem;
+    padding: 8px;
+    z-index: 9000;
+    border-radius: 6px;
+    background-color: #FFFFFF;
+    color: #1D2A3E;
     pointer-events: none;
-    // Override position absolute from toolTipStyles
-    position: relative;
 
     & {
-      // stylelint-disable-line no-duplicate-selectors
       max-width: calc(32px * 10);
       overflow: hidden;
       padding: 8px;
@@ -753,28 +726,25 @@ exports[`Tooltip should render tooltip without y-value 1`] = `
     Array [
       Object {
         "map": undefined,
-        "name": "1vsecbs-euiToolTip",
+        "name": "10r2mvf",
         "next": undefined,
         "styles": "
+    
 box-shadow:
   0 1px 5px rgba(0,0,0,0.1),
   0 3.6px 13px rgba(0,0,0,0.07),
   0 8.4px 23px rgba(0,0,0,0.06),
   0 23px 35px rgba(0,0,0,0.05);
- border:1px solid transparent;border-radius:6px;background-color:#07101F;color:#FFFFFF;z-index:9000;max-inline-size: 256px; overflow-wrap:break-word;padding:8px;font-size:1.0000rem;line-height:1.4286rem; position:absolute;[class*='euiHorizontalRule']{background-color:#2B394F;};label:euiToolTip;",
-        "toString": [Function],
-      },
-      Object {
-        "map": undefined,
-        "name": "bol0qb",
-        "next": undefined,
-        "styles": "
+
+    font-size:1.0000rem;line-height:1.4286rem;
+    padding: 8px;
+    z-index: 9000;
+    border-radius: 6px;
+    background-color: #FFFFFF;
+    color: #1D2A3E;
     pointer-events: none;
-    // Override position absolute from toolTipStyles
-    position: relative;
 
     & {
-      // stylelint-disable-line no-duplicate-selectors
       max-width: calc(32px * 10);
       overflow: hidden;
       padding: 8px;
