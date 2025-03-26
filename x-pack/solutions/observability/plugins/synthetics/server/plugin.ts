@@ -30,6 +30,7 @@ import { SyntheticsService } from './synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
+import { registerSyncGlobalParamsTask } from './synthetics_service/sync_global_params_task';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -88,6 +89,12 @@ export class Plugin implements PluginType {
     initSyntheticsServer(this.server, this.syntheticsMonitorClient, plugins, ruleDataClient);
 
     registerSyntheticsSavedObjects(core.savedObjects, plugins.encryptedSavedObjects);
+
+    registerSyncGlobalParamsTask({
+      serverSetup: this.server,
+      syntheticsMonitorClient: this.syntheticsMonitorClient,
+      taskManager: plugins.taskManager,
+    });
 
     return {};
   }

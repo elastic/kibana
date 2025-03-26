@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import { syncSpaceGlobalParams } from '../../../synthetics_service/sync_global_params';
+import { scheduleSpaceSyncGlobalParamsTask } from '../../../synthetics_service/sync_global_params_task';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import {
   SyntheticsParamRequest,
@@ -57,12 +57,14 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         savedObjectsData
       );
 
-      void syncSpaceGlobalParams({
+      const {
+        logger,
+        pluginsStart: { taskManager },
+      } = server;
+      await scheduleSpaceSyncGlobalParamsTask({
         spaceId,
-        logger: server.logger,
-        encryptedSavedObjects: server.encryptedSavedObjects,
-        savedObjects: server.coreStart.savedObjects,
-        syntheticsMonitorClient,
+        taskManager,
+        logger,
       });
 
       if (savedObjectsData.length > 1) {

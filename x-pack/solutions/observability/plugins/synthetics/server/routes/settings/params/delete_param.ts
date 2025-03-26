@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { syncSpaceGlobalParams } from '../../../synthetics_service/sync_global_params';
+import { scheduleSpaceSyncGlobalParamsTask } from '../../../synthetics_service/sync_global_params_task';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
@@ -36,14 +36,7 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       }),
     },
   },
-  handler: async ({
-    savedObjectsClient,
-    request,
-    response,
-    server,
-    spaceId,
-    syntheticsMonitorClient,
-  }) => {
+  handler: async ({ savedObjectsClient, request, response, server, spaceId }) => {
     const { ids } = request.body ?? {};
     const { id: paramId } = request.params ?? {};
 
@@ -70,12 +63,14 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       { force: true }
     );
 
-    void syncSpaceGlobalParams({
+    const {
+      logger,
+      pluginsStart: { taskManager },
+    } = server;
+    await scheduleSpaceSyncGlobalParamsTask({
       spaceId,
-      logger: server.logger,
-      encryptedSavedObjects: server.encryptedSavedObjects,
-      savedObjects: server.coreStart.savedObjects,
-      syntheticsMonitorClient,
+      taskManager,
+      logger,
     });
 
     return result.statuses.map(({ id, success }) => ({ id, deleted: success }));
