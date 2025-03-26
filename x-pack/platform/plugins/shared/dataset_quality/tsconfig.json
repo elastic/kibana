@@ -59,6 +59,13 @@
     "@kbn/unified-search-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/xstate-utils",
+    "@kbn/alerting-comparators",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/response-ops-rule-params",
+    "@kbn/stack-alerts-plugin",
+    "@kbn/data-view-editor-plugin",
+    "@kbn/rule-data-utils",
+    "@kbn/alerts-as-data-utils",
   ],
   "exclude": [
     "target/**/*"
