@@ -75,10 +75,10 @@ export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: Rule.RuleModul
             : getIntentFromNode(parent);
 
         // 3. The element name (i.e. "Button", "Beta Badge", "Select")
-        const { elementName, elementNameWithSpaces } = sanitizeEuiElementName(name);
+        const { elementName } = sanitizeEuiElementName(name);
 
         // Proposed default message
-        const defaultMessage = `${upperCaseFirstChar(intent)} ${elementNameWithSpaces}`.trim(); // 'Actions Button'
+        const defaultMessage = upperCaseFirstChar(intent).trim(); // 'Actions Button'
 
         // 4. Set up the translation ID
         const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
