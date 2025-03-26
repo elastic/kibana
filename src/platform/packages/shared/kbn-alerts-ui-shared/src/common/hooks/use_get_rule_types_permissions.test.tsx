@@ -53,7 +53,7 @@ describe('useGetRuleTypesPermissions', () => {
         wrapper: Wrapper,
       }
     );
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isSuccess).toBeTruthy());
     expect(result.current.ruleTypesState.data.size).toBe(2);
     expect(result.current.authorizedRuleTypes.length).toBe(2);
   });
@@ -71,7 +71,7 @@ describe('useGetRuleTypesPermissions', () => {
         wrapper: Wrapper,
       }
     );
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isSuccess).toBeTruthy());
     expect(result.current.ruleTypesState.data.size).toBe(1);
     expect(result.current.authorizedRuleTypes.length).toBe(1);
     expect(result.current.ruleTypesState.data.keys().next().value).toBe('rule-type-1');
@@ -90,7 +90,7 @@ describe('useGetRuleTypesPermissions', () => {
         wrapper: Wrapper,
       }
     );
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isSuccess).toBeTruthy());
     expect(result.current.ruleTypesState.data.size).toBe(1);
     expect(result.current.authorizedRuleTypes.length).toBe(1);
     expect(result.current.ruleTypesState.data.keys().next().value).toBe('rule-type-1');
@@ -109,7 +109,7 @@ describe('useGetRuleTypesPermissions', () => {
         wrapper: Wrapper,
       }
     );
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isSuccess).toBeTruthy());
     expect(result.current.ruleTypesState.data.size).toBe(0);
     expect(result.current.hasAnyAuthorizedRuleType).toBe(false);
     expect(result.current.authorizedToReadAnyRules).toBe(false);
@@ -134,7 +134,7 @@ describe('useGetRuleTypesPermissions', () => {
         wrapper: Wrapper,
       }
     );
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isSuccess).toBeTruthy());
     expect(result.current.ruleTypesState.data.size).toBe(1);
     expect(result.current.hasAnyAuthorizedRuleType).toBe(true);
     expect(result.current.authorizedToReadAnyRules).toBe(true);
@@ -159,7 +159,7 @@ describe('useGetRuleTypesPermissions', () => {
         wrapper: Wrapper,
       }
     );
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isSuccess).toBeTruthy());
     expect(result.current.ruleTypesState.data.size).toBe(1);
     expect(result.current.hasAnyAuthorizedRuleType).toBe(true);
     expect(result.current.authorizedToReadAnyRules).toBe(true);
