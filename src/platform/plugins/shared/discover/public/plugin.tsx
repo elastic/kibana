@@ -205,16 +205,11 @@ export class DiscoverPlugin
         // make sure the data view list is up to date
         discoverStartPlugins.dataViews.clearCache();
 
-        // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
-        // due to EUI bug https://github.com/elastic/eui/pull/5152
-        params.element.classList.add('dscAppWrapper');
-
         const { renderApp } = await import('./application');
         const unmount = renderApp({
           element: params.element,
           services,
           customizationContext: defaultCustomizationContext,
-          experimentalFeatures: this.experimentalFeatures,
         });
 
         return () => {

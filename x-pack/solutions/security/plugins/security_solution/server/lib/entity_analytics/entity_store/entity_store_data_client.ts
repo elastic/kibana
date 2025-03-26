@@ -25,7 +25,17 @@ import moment from 'moment';
 import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { estypes } from '@elastic/elasticsearch';
-import { getAllMissingPrivileges } from '../../../../common/entity_analytics/privileges';
+import { SO_ENTITY_DEFINITION_TYPE } from '@kbn/entityManager-plugin/server/saved_objects';
+import { RISK_SCORE_INDEX_PATTERN } from '../../../../common/constants';
+import {
+  ENTITY_STORE_INDEX_PATTERN,
+  ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES,
+  ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES,
+} from '../../../../common/entity_analytics/entity_store/constants';
+import {
+  getAllMissingPrivileges,
+  getMissingPrivilegesErrorMessage,
+} from '../../../../common/entity_analytics/privileges';
 import { merge } from '../../../../common/utils/objects/merge';
 import { getEnabledStoreEntityTypes } from '../../../../common/entity_analytics/entity_store/utils';
 import { EntityType } from '../../../../common/entity_analytics/types';
@@ -88,6 +98,7 @@ import {
   getEntitiesIndexName,
   isPromiseFulfilled,
   isPromiseRejected,
+  mergeEntityStoreIndices,
 } from './utils';
 import { EntityEngineActions } from './auditing/actions';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
@@ -99,8 +110,9 @@ import {
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
 import { createEngineDescription } from './installation/engine_description';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
-import { getEntityStoreSourceIndicesPrivileges } from './utils/get_entity_store_privileges';
 import type { ApiKeyManager } from './auth/api_key';
+import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
+import { entityEngineDescriptorTypeName } from './saved_object';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
@@ -803,30 +815,11 @@ export class EntityStoreDataClient {
       };
     }
 
-    const indexPatterns = await buildIndexPatterns(
+    const defaultIndexPatterns = await buildIndexPatterns(
       this.options.namespace,
       this.options.appClient,
       this.options.dataViewsService
     );
-
-    const privileges = await getEntityStoreSourceIndicesPrivileges(
-      this.options.request,
-      this.options.security,
-      indexPatterns
-    );
-
-    if (!privileges.has_all_required) {
-      const missingPrivilegesMsg = getAllMissingPrivileges(privileges).elasticsearch.index.map(
-        ({ indexName, privileges: missingPrivileges }) =>
-          `Missing [${missingPrivileges.join(', ')}] privileges for index '${indexName}'.`
-      );
-
-      throw new Error(
-        `The current user does not have the required indices privileges.\n${missingPrivilegesMsg.join(
-          '\n'
-        )}`
-      );
-    }
 
     const updateDefinitionPromises: Array<Promise<EngineDataviewUpdateResult>> = engines.map(
       async (engine) => {
@@ -843,6 +836,8 @@ export class EntityStoreDataClient {
           );
         }
 
+        const indexPatterns = mergeEntityStoreIndices(defaultIndexPatterns, engine.indexPattern);
+
         // Skip update if index patterns are the same
         if (isEqual(definition.indexPatterns, indexPatterns)) {
           logger.debug(
@@ -852,6 +847,18 @@ export class EntityStoreDataClient {
         } else {
           logger.info(
             `In namespace ${this.options.namespace}: Data view index changes detected, applying changes to entity definition.`
+          );
+        }
+
+        const privileges = await this.getEntityStoreSourceIndicesPrivileges(indexPatterns);
+
+        if (!privileges.has_all_required) {
+          const missingPrivilegesMsg = getMissingPrivilegesErrorMessage(
+            getAllMissingPrivileges(privileges)
+          );
+
+          throw new Error(
+            `The current user does not have the required indices privileges for updating the '${engine.type}' entity store.\n${missingPrivilegesMsg}`
           );
         }
 
@@ -895,6 +902,61 @@ export class EntityStoreDataClient {
       successes: updateSuccesses,
       errors: updateErrors,
     };
+  }
+
+  /**
+   * Get the index privileges required for installing all entity store resources
+   */
+  public getEntityStoreInitPrivileges = async (indices: string[]) => {
+    const security = this.options.security;
+
+    // The entity store needs access to all security solution indices
+    const indicesPrivileges = this.getEntityStoreSourceRequiredIndicesPrivileges(indices);
+
+    // The entity store has to create the following indices
+    indicesPrivileges[ENTITY_STORE_INDEX_PATTERN] = ['read', 'manage'];
+    indicesPrivileges[RISK_SCORE_INDEX_PATTERN] = ['read', 'manage'];
+
+    return checkAndFormatPrivileges({
+      request: this.options.request,
+      security,
+      privilegesToCheck: {
+        kibana: [
+          security.authz.actions.savedObject.get(entityEngineDescriptorTypeName, 'create'),
+          security.authz.actions.savedObject.get(SO_ENTITY_DEFINITION_TYPE, 'create'),
+        ],
+        elasticsearch: {
+          cluster: ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES,
+          index: indicesPrivileges,
+        },
+      },
+    });
+  };
+
+  /**
+   * Get the index privileges required for running the transform
+   */
+  public getEntityStoreSourceIndicesPrivileges = (indexPatterns: string[]) => {
+    const requiredIndicesPrivileges =
+      this.getEntityStoreSourceRequiredIndicesPrivileges(indexPatterns);
+
+    return checkAndFormatPrivileges({
+      request: this.options.request,
+      security: this.options.security,
+      privilegesToCheck: {
+        elasticsearch: {
+          cluster: [],
+          index: requiredIndicesPrivileges,
+        },
+      },
+    });
+  };
+
+  private getEntityStoreSourceRequiredIndicesPrivileges(securitySolutionIndices: string[]) {
+    return securitySolutionIndices.reduce<Record<string, string[]>>((acc, index) => {
+      acc[index] = ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES;
+      return acc;
+    }, {});
   }
 
   private log(

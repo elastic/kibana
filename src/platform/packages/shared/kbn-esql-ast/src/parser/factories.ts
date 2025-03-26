@@ -33,6 +33,8 @@ import {
   InputNamedOrPositionalParamContext,
   IdentifierOrParameterContext,
   StringContext,
+  InputNamedOrPositionalDoubleParamsContext,
+  InputDoubleParamsContext,
 } from '../antlr/esql_parser';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
 import type {
@@ -59,6 +61,7 @@ import type {
   ESQLBinaryExpression,
   BinaryExpressionOperator,
   ESQLCommand,
+  ESQLParamKinds,
 } from '../types';
 import { parseIdentifier, getPosition } from './helpers';
 import { Builder, type AstNodeParserFields } from '../builder';
@@ -289,13 +292,15 @@ export const createBinaryExpression = (
 
 export const createIdentifierOrParam = (ctx: IdentifierOrParameterContext) => {
   const identifier = ctx.identifier();
+
   if (identifier) {
     return createIdentifier(identifier);
-  } else {
-    const parameter = ctx.parameter();
-    if (parameter) {
-      return createParam(parameter);
-    }
+  }
+
+  const parameter = ctx.parameter() ?? ctx.doubleParameter();
+
+  if (parameter) {
+    return createParam(parameter);
   }
 };
 
@@ -307,19 +312,27 @@ export const createIdentifier = (identifier: IdentifierContext): ESQLIdentifier 
 };
 
 export const createParam = (ctx: ParseTree) => {
-  if (ctx instanceof InputParamContext) {
-    return Builder.param.unnamed(createParserFields(ctx));
-  } else if (ctx instanceof InputNamedOrPositionalParamContext) {
+  if (ctx instanceof InputParamContext || ctx instanceof InputDoubleParamsContext) {
+    const isDoubleParam = ctx instanceof InputDoubleParamsContext;
+    const paramKind: ESQLParamKinds = isDoubleParam ? '??' : '?';
+
+    return Builder.param.unnamed(createParserFields(ctx), { paramKind });
+  } else if (
+    ctx instanceof InputNamedOrPositionalParamContext ||
+    ctx instanceof InputNamedOrPositionalDoubleParamsContext
+  ) {
+    const isDoubleParam = ctx instanceof InputNamedOrPositionalDoubleParamsContext;
+    const paramKind: ESQLParamKinds = isDoubleParam ? '??' : '?';
     const text = ctx.getText();
-    const value = text.slice(1);
+    const value = text.slice(isDoubleParam ? 2 : 1);
     const valueAsNumber = Number(value);
     const isPositional = String(valueAsNumber) === value;
     const parserFields = createParserFields(ctx);
 
     if (isPositional) {
-      return Builder.param.positional({ value: valueAsNumber }, parserFields);
+      return Builder.param.positional({ paramKind, value: valueAsNumber }, parserFields);
     } else {
-      return Builder.param.named({ value }, parserFields);
+      return Builder.param.named({ paramKind, value }, parserFields);
     }
   }
 };
