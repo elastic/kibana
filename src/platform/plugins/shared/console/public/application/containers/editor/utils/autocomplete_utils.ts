@@ -308,7 +308,7 @@ const getSuggestions = (
   // if the rest of the line is empty or there is only " or ends with closing parentheses
   // then template can be inserted, otherwise only name
   context.addTemplate =
-    isEmptyOrDoubleQuote(lineContentAfterPosition) || /}*/.test(lineContentAfterPosition);
+    isEmptyOrDoubleQuote(lineContentAfterPosition) || /^}*$/.test(lineContentAfterPosition);
 
   // if there is " after the cursor, include it in the insert range
   let endColumn = position.column;
