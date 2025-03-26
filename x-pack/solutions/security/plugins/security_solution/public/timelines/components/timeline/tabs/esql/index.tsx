@@ -18,6 +18,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { APP_STATE_URL_KEY } from '@kbn/discover-plugin/common';
 import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { updateSavedSearchId } from '../../../../store/actions';
@@ -80,7 +81,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   const discoverSavedSearchStateSubscription = useRef<Subscription>();
   const discoverTimerangeSubscription = useRef<Subscription>();
 
-  // TODO: should not be here, used to make discover container work I suppose
+  // TODO: (DV_PICKER) should not be here, used to make discover container work I suppose
   useEffect(() => {
     if (!dataViewId) return;
     dataViewService.get(dataViewId).then((dv) => setDataView(dv?.toSpec?.()));
@@ -216,7 +217,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
       const hasESQLUrlState = (stateContainer.appState.getState()?.query as { esql: string })?.esql;
 
-      if (stateContainer.appState.isEmptyURL() || !hasESQLUrlState) {
+      if (!stateContainer.stateStorage.get(APP_STATE_URL_KEY) || !hasESQLUrlState) {
         if (savedSearchAppState?.savedSearch.timeRange) {
           stateContainer.globalState.set({
             ...stateContainer.globalState.get(),
@@ -289,7 +290,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   const DiscoverContainer = discover.DiscoverContainer;
 
-  // TODO this should not work like that
+  // TODO: (DV_PICKER) this should not work like that
   const isLoading = !dataView;
 
   return (
