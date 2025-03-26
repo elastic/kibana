@@ -122,6 +122,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = ({
           const tabToNavigate = openedTabs.find((tab) => tab.id === clickedTabId);
           if (tabToNavigate) {
             onSelectOpenedTab(tabToNavigate);
+            closePopover();
           }
         }}
         singleSelection="always"
@@ -148,6 +149,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = ({
             options={recentlyClosedTabsList}
             onChange={() => {
               alert('restore tab'); // TODO restore closed tab
+              closePopover();
             }}
             singleSelection={true}
             listProps={selectableListProps}
