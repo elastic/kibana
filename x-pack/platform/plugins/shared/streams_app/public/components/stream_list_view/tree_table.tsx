@@ -15,24 +15,23 @@ import {
   getSegments,
   isDescendantOf,
 } from '@kbn/streams-schema';
-import { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { RetentionColumn } from './retention_column';
+import { useTimeFilter } from '../../hooks/use_timefilter';
 
 export function StreamsTreeTable({
-  timefilter,
   loading,
   streams,
 }: {
-  timefilter: TimefilterHook; // Workaround to keep state in sync
   streams: ListStreamDetail[] | undefined;
   loading?: boolean;
 }) {
   const router = useStreamsAppRouter();
   const items = React.useMemo(() => flattenTrees(asTrees(streams ?? [])), [streams]);
+  const { timeRange, setTimeRange, refreshAbsoluteTimeRange } = useTimeFilter();
 
   return (
     <EuiInMemoryTable
@@ -77,9 +76,7 @@ export function StreamsTreeTable({
             defaultMessage: 'Documents',
           }),
           width: '40%',
-          render: (_, item) => (
-            <DocumentsColumn timefilter={timefilter} indexPattern={item.name} numDataPoints={25} />
-          ),
+          render: (_, item) => <DocumentsColumn indexPattern={item.name} numDataPoints={25} />,
         },
         {
           field: 'effective_lifecycle',
@@ -100,14 +97,16 @@ export function StreamsTreeTable({
         toolsRight: (
           <StreamsAppSearchBar
             onQuerySubmit={({ dateRange }, isUpdate) => {
-              if (dateRange && isUpdate) {
-                timefilter.setTimeRange(dateRange);
+              if (dateRange) {
+                setTimeRange(dateRange);
+                if (!isUpdate) {
+                  refreshAbsoluteTimeRange();
+                }
               }
-              timefilter.refreshAbsoluteTimeRange(); // Always update absolute time even if relative time did not change since the current time ("now") _will_ have changed between user interactions
             }}
-            onRefresh={timefilter.refreshAbsoluteTimeRange}
-            dateRangeFrom={timefilter.timeRange.from}
-            dateRangeTo={timefilter.timeRange.to}
+            onRefresh={refreshAbsoluteTimeRange}
+            dateRangeFrom={timeRange.from}
+            dateRangeTo={timeRange.to}
           />
         ),
       }}

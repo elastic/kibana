@@ -20,13 +20,10 @@ export function StreamListView() {
   const {
     dependencies: {
       start: {
-        data,
         streams: { streamsRepositoryClient },
       },
     },
   } = useKibana();
-
-  const timefilter = data.query.timefilter.timefilter.useTimefilter();
 
   const streamsListFetch = useStreamsAppFetch(
     async ({ signal }) => {
@@ -37,15 +34,6 @@ export function StreamListView() {
     },
     [streamsRepositoryClient]
   );
-
-  const { refreshAbsoluteTimeRange } = timefilter;
-
-  React.useEffect(() => {
-    // Refresh charts when list of streams gets refetched
-    if (streamsListFetch.value) {
-      refreshAbsoluteTimeRange();
-    }
-  }, [streamsListFetch.value, refreshAbsoluteTimeRange]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
@@ -84,11 +72,7 @@ export function StreamListView() {
         {!streamsListFetch.loading && !streamsListFetch.value?.length ? (
           <StreamsEmptyPrompt />
         ) : (
-          <StreamsTreeTable
-            timefilter={timefilter}
-            loading={streamsListFetch.loading}
-            streams={streamsListFetch.value}
-          />
+          <StreamsTreeTable loading={streamsListFetch.loading} streams={streamsListFetch.value} />
         )}
       </StreamsAppPageBody>
     </EuiFlexGroup>

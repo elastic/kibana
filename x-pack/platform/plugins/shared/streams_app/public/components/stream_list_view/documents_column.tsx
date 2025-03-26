@@ -30,17 +30,15 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
-import { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
+import { useTimeFilter } from '../../hooks/use_timefilter';
 
 export function DocumentsColumn({
-  timefilter,
   indexPattern,
   numDataPoints,
 }: {
-  timefilter: TimefilterHook; // Workaround to keep state in sync
   indexPattern: string;
   numDataPoints: number;
 }) {
@@ -52,24 +50,28 @@ export function DocumentsColumn({
     },
   } = useKibana();
 
-  const { start, end } = timefilter.absoluteTimeRange;
+  const { absoluteTimeRange } = useTimeFilter();
 
   const histogramQueryFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      const bucketSize = Math.round(moment.duration((end - start) / numDataPoints).asSeconds());
+      const bucketSize = Math.round(
+        moment
+          .duration((absoluteTimeRange.end - absoluteTimeRange.start) / numDataPoints)
+          .asSeconds()
+      );
       return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
         params: {
           body: {
             operationName: 'get_doc_count_for_stream',
             query: `FROM ${indexPattern} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${bucketSize} seconds)`,
-            start,
-            end,
+            start: absoluteTimeRange.start,
+            end: absoluteTimeRange.end,
           },
         },
         signal,
       });
     },
-    [streamsRepositoryClient, indexPattern, start, end, numDataPoints]
+    [streamsRepositoryClient, indexPattern, absoluteTimeRange, numDataPoints]
   );
 
   const allTimeseries = React.useMemo(
@@ -86,7 +88,7 @@ export function DocumentsColumn({
     0
   );
 
-  const xFormatter = niceTimeFormatter([start, end]);
+  const xFormatter = niceTimeFormatter([absoluteTimeRange.start, absoluteTimeRange.end]);
 
   return (
     <EuiFlexGroup
@@ -121,7 +123,10 @@ export function DocumentsColumn({
             `}
           >
             <Chart size={{ width: '100%', height: euiThemeVars.euiSizeL }}>
-              <SettingsWithTheme xDomain={{ min: start, max: end }} noResults={<div />} />
+              <SettingsWithTheme
+                xDomain={{ min: absoluteTimeRange.start, max: absoluteTimeRange.end }}
+                noResults={<div />}
+              />
               <Tooltip
                 stickTo={TooltipStickTo.Middle}
                 headerFormatter={({ value }) => xFormatter(value)}
