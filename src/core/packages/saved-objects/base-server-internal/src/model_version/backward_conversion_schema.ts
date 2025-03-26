@@ -12,6 +12,7 @@ import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectModelVersionForwardCompatibilitySchema,
 } from '@kbn/core-saved-objects-server';
+import { pickValuesBasedOnStructure } from '../utils';
 
 function isObjectType(
   schema: SavedObjectModelVersionForwardCompatibilitySchema
@@ -29,7 +30,7 @@ export const convertModelVersionBackwardConversionSchema = (
       const attrs = schema.validate(doc.attributes, {});
       return {
         ...doc,
-        attributes: attrs,
+        attributes: pickValuesBasedOnStructure(attrs, doc.attributes as object),
       };
     };
   } else {
