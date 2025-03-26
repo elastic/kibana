@@ -29,9 +29,9 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { omit } from 'lodash';
 import { internalStateActions } from '../state_management/redux';
 
-function getHookProps(
+async function getHookProps(
   query: AggregateQuery | Query | undefined,
-  dataViewsService?: DataViewsContract,
+  dataViewsService: DataViewsContract = discoverServiceMock.dataViews,
   appState?: Partial<DiscoverAppState>,
   defaultFetchStatus: FetchStatus = FetchStatus.PARTIAL
 ) {
@@ -39,9 +39,9 @@ function getHookProps(
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.appState.replaceUrlState = replaceUrlState;
   stateContainer.appState.update({ columns: [], ...appState });
-  stateContainer.internalState.dispatch(
-    internalStateActions.setSavedDataViews([dataViewMock as DataViewListItem])
-  );
+  const dataViewList = [dataViewMock as DataViewListItem];
+  jest.spyOn(dataViewsService, 'getIdsWithTitle').mockResolvedValue(dataViewList);
+  await stateContainer.internalState.dispatch(internalStateActions.loadDataViewList());
 
   const msgLoading = {
     fetchStatus: defaultFetchStatus,
@@ -50,7 +50,7 @@ function getHookProps(
   stateContainer.dataState.data$.documents$.next(msgLoading);
 
   return {
-    dataViews: dataViewsService ?? discoverServiceMock.dataViews,
+    dataViews: dataViewsService,
     stateContainer,
     savedSearch: savedSearchMock,
     replaceUrlState,
@@ -87,12 +87,12 @@ const getHookContext = (stateContainer: DiscoverStateContainer) => {
     </DiscoverMainProvider>
   );
 };
-const renderHookWithContext = (
+const renderHookWithContext = async (
   useDataViewsService: boolean = false,
   appState?: DiscoverAppState,
   defaultFetchStatus?: FetchStatus
 ) => {
-  const props = getHookProps(
+  const props = await getHookProps(
     query,
     useDataViewsService ? getDataViewsService() : undefined,
     appState,
@@ -108,7 +108,7 @@ const renderHookWithContext = (
 
 describe('useEsqlMode', () => {
   test('an ES|QL query should change state when loading and finished', async () => {
-    const { replaceUrlState, stateContainer } = renderHookWithContext(true);
+    const { replaceUrlState, stateContainer } = await renderHookWithContext(true);
 
     replaceUrlState.mockReset();
 
@@ -116,7 +116,7 @@ describe('useEsqlMode', () => {
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
   });
   test('should not change viewMode to undefined (default) if it was AGGREGATED_LEVEL', async () => {
-    const { replaceUrlState } = renderHookWithContext(false, {
+    const { replaceUrlState } = await renderHookWithContext(false, {
       viewMode: VIEW_MODE.AGGREGATED_LEVEL,
     });
 
@@ -124,7 +124,7 @@ describe('useEsqlMode', () => {
   });
 
   test('should change viewMode to undefined (default) if it was PATTERN_LEVEL', async () => {
-    const { replaceUrlState } = renderHookWithContext(false, {
+    const { replaceUrlState } = await renderHookWithContext(false, {
       viewMode: VIEW_MODE.PATTERN_LEVEL,
     });
 
@@ -135,7 +135,7 @@ describe('useEsqlMode', () => {
   });
 
   test('changing an ES|QL query with different result columns should change state when loading and finished', async () => {
-    const { replaceUrlState, stateContainer } = renderHookWithContext(false);
+    const { replaceUrlState, stateContainer } = await renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     stateContainer.dataState.data$.documents$.next(msgComplete);
     replaceUrlState.mockReset();
@@ -162,7 +162,7 @@ describe('useEsqlMode', () => {
   });
 
   test('changing an ES|QL query with same result columns but a different index pattern should change state when loading and finished', async () => {
-    const { replaceUrlState, stateContainer } = renderHookWithContext(false);
+    const { replaceUrlState, stateContainer } = await renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     stateContainer.dataState.data$.documents$.next(msgComplete);
     replaceUrlState.mockReset();
@@ -188,7 +188,7 @@ describe('useEsqlMode', () => {
   });
 
   test('changing a ES|QL query with no transformational commands should not change state when loading and finished if index pattern is the same', async () => {
-    const { replaceUrlState, stateContainer } = renderHookWithContext(false);
+    const { replaceUrlState, stateContainer } = await renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     stateContainer.dataState.data$.documents$.next(msgComplete);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
@@ -229,7 +229,7 @@ describe('useEsqlMode', () => {
   });
 
   test('only changing an ES|QL query with same result columns should not change columns', async () => {
-    const { replaceUrlState, stateContainer } = renderHookWithContext(false);
+    const { replaceUrlState, stateContainer } = await renderHookWithContext(false);
 
     const documents$ = stateContainer.dataState.data$.documents$;
 
@@ -271,7 +271,7 @@ describe('useEsqlMode', () => {
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
   });
   test('if its not an ES|QL query coming along, it should be ignored', async () => {
-    const { replaceUrlState, stateContainer } = renderHookWithContext(false);
+    const { replaceUrlState, stateContainer } = await renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next(msgComplete);
@@ -309,7 +309,7 @@ describe('useEsqlMode', () => {
   });
 
   test('it should not overwrite existing state columns on initial fetch', async () => {
-    const { replaceUrlState, stateContainer } = renderHookWithContext(false, {
+    const { replaceUrlState, stateContainer } = await renderHookWithContext(false, {
       columns: ['field1'],
     });
     const documents$ = stateContainer.dataState.data$.documents$;
@@ -353,7 +353,7 @@ describe('useEsqlMode', () => {
   });
 
   test('it should not overwrite existing state columns on initial fetch and non transformational commands', async () => {
-    const { replaceUrlState, stateContainer } = renderHookWithContext(false, {
+    const { replaceUrlState, stateContainer } = await renderHookWithContext(false, {
       columns: ['field1'],
     });
     const documents$ = stateContainer.dataState.data$.documents$;
@@ -373,7 +373,7 @@ describe('useEsqlMode', () => {
   });
 
   test('it should overwrite existing state columns on transitioning from a query with non transformational commands to a query with transformational', async () => {
-    const { replaceUrlState, stateContainer } = renderHookWithContext(false, {});
+    const { replaceUrlState, stateContainer } = await renderHookWithContext(false, {});
 
     const documents$ = stateContainer.dataState.data$.documents$;
 
@@ -407,7 +407,7 @@ describe('useEsqlMode', () => {
   });
 
   test('it should not overwrite state column when successfully fetching after an error fetch', async () => {
-    const { replaceUrlState, stateContainer } = renderHookWithContext(false, {
+    const { replaceUrlState, stateContainer } = await renderHookWithContext(false, {
       columns: [],
     });
     const documents$ = stateContainer.dataState.data$.documents$;
@@ -467,7 +467,7 @@ describe('useEsqlMode', () => {
   });
 
   test('changing an ES|QL query with an index pattern that not corresponds to a dataview should return results', async () => {
-    const props = getHookProps(query, discoverServiceMock.dataViews);
+    const props = await getHookProps(query, discoverServiceMock.dataViews);
     const { stateContainer, replaceUrlState } = props;
     const documents$ = stateContainer.dataState.data$.documents$;
     props.stateContainer.actions.setDataView(dataViewMock);
@@ -500,7 +500,7 @@ describe('useEsqlMode', () => {
   });
 
   it('should call setResetDefaultProfileState correctly when index pattern changes', async () => {
-    const { stateContainer } = renderHookWithContext(
+    const { stateContainer } = await renderHookWithContext(
       false,
       { query: { esql: 'from pattern' } },
       FetchStatus.LOADING
@@ -581,7 +581,7 @@ describe('useEsqlMode', () => {
   });
 
   it('should call setResetDefaultProfileState correctly when columns change', async () => {
-    const { stateContainer } = renderHookWithContext(false);
+    const { stateContainer } = await renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     const result1 = [buildDataTableRecord({ message: 'foo' } as EsHitRecord)];
     const result2 = [buildDataTableRecord({ message: 'foo', extension: 'bar' } as EsHitRecord)];
