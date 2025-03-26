@@ -348,8 +348,8 @@ export class KnowledgeBaseService {
     const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
       index: resourceNames.writeIndexAlias.kb,
       size: 0,
-      _source: false,
       track_total_hits: 1,
+      terminate_after: 1,
     });
 
     const hitCount =
