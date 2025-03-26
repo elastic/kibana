@@ -24,7 +24,7 @@ info:
     GET kbn:/api/data_views
     ```
 
-    For more information about the console, refer to [Run API requests](https://www.elastic.co/guide/en/kibana/current/console-kibana.html).
+    For more information about the console, refer to [Run API requests](https://www.elastic.co/docs/explore-analyze/query-filter/tools/console).
 
     NOTE: Access to internal Kibana API endpoints will be restricted in Kibana version 9.0. Please move any integrations to publicly documented APIs.
 
@@ -125,7 +125,7 @@ tags:
     description: Manage the roles that grant Elasticsearch and Kibana privileges.
     externalDocs:
       description: Kibana role management
-      url: https://www.elastic.co/guide/en/kibana/master/kibana-role-management.html
+      url: https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/defining-roles
   - name: saved objects
     x-displayName: Saved objects
     description: |
@@ -135,8 +135,8 @@ tags:
       For example, use:
 
       * [Data views](../group/endpoint-data-views)
-      * [Spaces](https://www.elastic.co/guide/en/kibana/current/spaces-api.html)
-      * [Short URLs](https://www.elastic.co/guide/en/kibana/current/short-urls-api.html)
+      * [Spaces](../group/endpoint-spaces)
+      * [Short URLs](../group/endpoint-short-url)
 
       Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions
   - description: Manage and interact with Security Assistant resources.
@@ -248,7 +248,7 @@ tags:
     x-displayName: Spaces
     description: Manage your Kibana spaces.
     externalDocs:
-      url: https://www.elastic.co/guide/en/kibana/master/xpack-spaces.html
+      url: https://www.elastic.co/docs/deploy-manage/manage-spaces
       description: Space overview
   - name: streams
     description: |
@@ -258,7 +258,7 @@ tags:
     x-displayName: Synthetics
     externalDocs:
       description: Synthetic monitoring
-      url: https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html
+      url: https://www.elastic.co/docs/solutions/observability/synthetics
   - name: system
     x-displayName: System
     description: |
@@ -81992,4 +81992,4 @@ x-topics:
 
       If you use the Kibana console to send API requests, it automatically adds the appropriate space identifier.
 
-      To learn more, check out [Spaces](https://www.elastic.co/guide/en/kibana/master/xpack-spaces.html).
+      To learn more, check out [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces).
