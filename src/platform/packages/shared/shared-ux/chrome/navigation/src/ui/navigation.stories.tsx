@@ -128,28 +128,27 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
               icon: 'iInCircle',
               renderAs: 'panelOpener',
               children: [
-                // FIXME: group mixed with items causes crash
-                // {
-                //   id: 'sub1',
-                //   path: '',
-                //   title: 'Item 11',
-                //   href: '/app/kibana',
-                //   icon: 'iInCircle',
-                // },
-                // {
-                //   id: 'sub2',
-                //   path: '',
-                //   title: 'Item 12',
-                //   href: '/app/kibana',
-                //   icon: 'iInCircle',
-                // },
-                // {
-                //   id: 'sub3',
-                //   path: '',
-                //   title: 'Item 13',
-                //   href: '/app/kibana',
-                //   icon: 'iInCircle',
-                // },
+                {
+                  id: 'sub1',
+                  path: '',
+                  title: 'Item 11',
+                  href: '/app/kibana',
+                  icon: 'iInCircle',
+                },
+                {
+                  id: 'sub2',
+                  path: '',
+                  title: 'Item 12',
+                  href: '/app/kibana',
+                  icon: 'iInCircle',
+                },
+                {
+                  id: 'sub3',
+                  path: '',
+                  title: 'Item 13',
+                  href: '/app/kibana',
+                  icon: 'iInCircle',
+                },
                 {
                   id: 'child-section1',
                   path: '',
