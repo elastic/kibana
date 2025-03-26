@@ -73,7 +73,6 @@ export async function upgradeBatch(
     startTime?: string;
     total?: number;
     isAutomatic?: boolean;
-    is_retry?: boolean;
   },
   spaceId?: string
 ): Promise<{ actionId: string }> {
@@ -196,7 +195,6 @@ export async function upgradeBatch(
     namespaces,
     is_automatic: options.isAutomatic,
     policyId: agentsToUpdate[0]?.policy_id,
-    is_retry: options.is_retry,
   });
 
   await createErrorActionResults(

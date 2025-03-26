@@ -133,7 +133,6 @@ export async function sendAutomaticUpgradeAgentsActions(
     agents: Agent[];
     version: string;
     upgradeDurationSeconds?: number;
-    is_retry?: boolean;
   }
 ): Promise<{ actionId: string }> {
   const currentSpaceId = getCurrentNamespace(soClient);
@@ -141,7 +140,7 @@ export async function sendAutomaticUpgradeAgentsActions(
     esClient,
     options.agents,
     {},
-    { ...options, isAutomatic: true, is_retry: options.is_retry ?? false },
+    { ...options, isAutomatic: true },
     currentSpaceId
   );
 }

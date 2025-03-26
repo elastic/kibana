@@ -74,7 +74,6 @@ export interface NewAgentAction {
   total?: number;
   is_automatic?: boolean;
   policyId?: string;
-  is_retry?: boolean;
 }
 
 export interface AgentAction extends NewAgentAction {
@@ -190,7 +189,6 @@ export interface ActionStatus {
   revision?: number;
   policyId?: string;
   is_automatic?: boolean;
-  is_retry?: boolean;
 }
 
 export interface AgentDiagnostics {
@@ -468,9 +466,6 @@ export interface FleetServerAgentAction {
 
   // the id of the policy associated with the action
   policyId?: string;
-
-  // the is_retry flag to tell when an action is a retry
-  is_retry?: boolean;
 
   [k: string]: unknown;
 }

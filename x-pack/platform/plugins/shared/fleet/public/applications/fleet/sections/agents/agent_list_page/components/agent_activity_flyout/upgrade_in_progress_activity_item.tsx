@@ -22,14 +22,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { ActionStatus } from '../../../../../types';
-import { useStartServices, useGetAutoUpgradeAgentsStatusQuery } from '../../../../../hooks';
+import { useStartServices } from '../../../../../hooks';
 
-import {
-  automaticUpgradeTitle,
-  formattedTime,
-  inProgressDescription,
-  inProgressTitle,
-} from './helpers';
+import { formattedTime, inProgressDescription, inProgressTitle } from './helpers';
 
 import { ViewAgentsButton } from './view_agents_button';
 
@@ -40,11 +35,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
   onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
 }> = ({ action, abortUpgrade, onClickViewAgents, onClickManageAutoUpgradeAgents }) => {
   // get the total agents in policy from the policy id
-  const { data: autoUpgradeAgentsStatus } = useGetAutoUpgradeAgentsStatusQuery(
-    action.policyId ?? ''
-  );
-  const totalAgentsInPolicy = autoUpgradeAgentsStatus?.totalAgents ?? null;
-  console.log('total agents in policy', autoUpgradeAgentsStatus);
+
   const { docLinks } = useStartServices();
   const theme = useEuiTheme();
   const isAutomaticUpgrade = action.is_automatic;
@@ -93,38 +84,30 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          {isAutomaticUpgrade ? (
-            automaticUpgradeTitle(action, totalAgentsInPolicy ?? 0)
-          ) : (
-            <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
-              <EuiFlexItem grow={false}>
-                {isScheduled ? (
-                  <EuiIcon type="clock" />
-                ) : !isAutomaticUpgrade ? (
-                  <EuiLoadingSpinner size="m" />
-                ) : null}
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText
-                  color={theme.euiTheme.colors.textPrimary}
-                  data-test-subj="upgradeInProgressTitle"
-                >
-                  {isScheduled && action.startTime ? (
-                    <FormattedMessage
-                      id="xpack.fleet.agentActivityFlyout.scheduleTitle"
-                      defaultMessage="{nbAgents} agents scheduled to upgrade to version {version}"
-                      values={{
-                        nbAgents: action.nbAgentsActioned - action.nbAgentsAck,
-                        version: action.version,
-                      }}
-                    />
-                  ) : (
-                    inProgressTitle(action, totalAgentsInPolicy ?? 0)
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+          <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
+            <EuiFlexItem grow={false}>
+              {isScheduled ? <EuiIcon type="clock" /> : <EuiLoadingSpinner size="m" />}
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText
+                color={theme.euiTheme.colors.textPrimary}
+                data-test-subj="upgradeInProgressTitle"
+              >
+                {isScheduled && action.startTime ? (
+                  <FormattedMessage
+                    id="xpack.fleet.agentActivityFlyout.scheduleTitle"
+                    defaultMessage="{nbAgents} agents scheduled to upgrade to version {version}"
+                    values={{
+                      nbAgents: action.nbAgentsActioned - action.nbAgentsAck,
+                      version: action.version,
+                    }}
+                  />
+                ) : (
+                  inProgressTitle(action, isAutomaticUpgrade)
+                )}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" alignItems="flexStart">

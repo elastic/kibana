@@ -69,7 +69,6 @@ export async function createAgentAction(
     traceparent: apm.currentTraceparent,
     is_automatic: newAgentAction.is_automatic,
     policyId: newAgentAction.policyId,
-    is_retry: newAgentAction.is_retry,
   };
 
   const messageSigningService = appContextService.getMessageSigningService();

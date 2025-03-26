@@ -100,7 +100,7 @@ export const ActivityItem: React.FunctionComponent<{
   } = {
     IN_PROGRESS: {
       icon: <EuiLoadingSpinner size="m" />,
-      title: <EuiText>{inProgressTitle(action)}</EuiText>,
+      title: <EuiText>{inProgressTitle(action, action.is_automatic)}</EuiText>,
       titleColor: theme.euiTheme.colors.textPrimary,
       description: <EuiText color="subdued">{inProgressDescription(action.creationTime)}</EuiText>,
     },

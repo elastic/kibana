@@ -267,7 +267,9 @@ export class AutomaticAgentUpgradeTask {
     const totalOnOrUpdatingToTargetVersionAgents = await this.getAgentCount(
       esClient,
       soClient,
-      `policy_id:${agentPolicy.id} AND (agent.version:${requiredVersion.version} OR ${updatingToKuery})`
+      `policy_id:${agentPolicy.id} AND (agent.version:${
+        requiredVersion.version
+      } AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}) OR ${updatingToKuery}`
     );
     console.log('the total count on or updating', totalOnOrUpdatingToTargetVersionAgents);
     numberOfAgentsForUpgrade -= totalOnOrUpdatingToTargetVersionAgents;
@@ -366,12 +368,11 @@ export class AutomaticAgentUpgradeTask {
         this.logger.info(
           `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: retrying upgrade to ${version} for ${agentsReadyForRetry.length} agents`
         );
-        console.log('sending the auto retry over');
+
         await sendAutomaticUpgradeAgentsActions(soClient, esClient, {
           agents: agentsReadyForRetry,
           version,
           ...this.getUpgradeDurationSeconds(agentsReadyForRetry.length),
-          is_retry: true,
         });
       }
     }
