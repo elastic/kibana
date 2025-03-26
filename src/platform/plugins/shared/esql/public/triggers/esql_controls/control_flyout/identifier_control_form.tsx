@@ -38,6 +38,7 @@ import {
   getQueryForFields,
   validateVariableName,
   getVariablePrefix,
+  getVariableTypeFromQuery,
 } from './helpers';
 import { EsqlControlType } from '../types';
 
@@ -218,16 +219,14 @@ export function IdentifierControlForm({
   const onCreateFieldControl = useCallback(async () => {
     const availableOptions = selectedIdentifiers.map((field) => field.label);
     // removes the double question mark from the variable name
-    const variableNameWithoutQuestionmark = variableName.startsWith(IDENTIFIER_VARIABLE_PREFIX)
-      ? variableName.slice(2)
-      : variableName;
+    const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
     const state = {
       availableOptions,
       selectedOptions: [availableOptions[0]],
       width: minimumWidth,
       title: label || variableNameWithoutQuestionmark,
       variableName: variableNameWithoutQuestionmark,
-      variableType,
+      variableType: getVariableTypeFromQuery(variableName, variableType),
       controlType: EsqlControlType.STATIC_VALUES,
       esqlQuery: queryString,
       grow,

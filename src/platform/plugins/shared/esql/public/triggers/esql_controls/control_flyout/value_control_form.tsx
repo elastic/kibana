@@ -47,6 +47,7 @@ import {
   areValuesIntervalsValid,
   validateVariableName,
   getVariablePrefix,
+  getVariableTypeFromQuery,
 } from './helpers';
 import { EsqlControlType } from '../types';
 import { ChooseColumnPopover } from './choose_column_popover';
@@ -300,16 +301,14 @@ export function ValueControlForm({
   const onCreateValueControl = useCallback(async () => {
     const availableOptions = selectedValues.map((value) => value.label);
     // removes the question mark from the variable name
-    const variableNameWithoutQuestionmark = variableName.startsWith(VALUE_VARIABLE_PREFIX)
-      ? variableName.slice(1)
-      : variableName;
+    const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
     const state = {
       availableOptions,
       selectedOptions: [availableOptions[0]],
       width: minimumWidth,
       title: label || variableNameWithoutQuestionmark,
       variableName: variableNameWithoutQuestionmark,
-      variableType,
+      variableType: getVariableTypeFromQuery(variableName, variableType),
       esqlQuery: valuesQuery || queryString,
       controlType: controlFlyoutType,
       grow,

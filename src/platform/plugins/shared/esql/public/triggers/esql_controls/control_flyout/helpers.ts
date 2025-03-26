@@ -118,3 +118,25 @@ export const validateVariableName = (variableName: string, prefix: '??' | '?') =
 
   return text;
 };
+
+export const getVariableTypeFromQuery = (str: string, variableType: ESQLVariableType) => {
+  const match = str.match(/^(\?*)/);
+  const leadingQuestionMarksCount = match ? match[0].length : 0;
+  if (
+    leadingQuestionMarksCount === 2 &&
+    variableType !== ESQLVariableType.FIELDS &&
+    variableType !== ESQLVariableType.FUNCTIONS
+  ) {
+    return ESQLVariableType.FIELDS;
+  }
+
+  if (
+    leadingQuestionMarksCount === 1 &&
+    variableType !== ESQLVariableType.TIME_LITERAL &&
+    variableType !== ESQLVariableType.VALUES
+  ) {
+    return ESQLVariableType.VALUES;
+  }
+
+  return variableType;
+};
