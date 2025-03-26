@@ -45106,7 +45106,7 @@ paths:
           in: query
           name: tags
           schema:
-            type: string
+            type: array
         - description: Filters the SLOs by name
           example: my service availability
           in: query
