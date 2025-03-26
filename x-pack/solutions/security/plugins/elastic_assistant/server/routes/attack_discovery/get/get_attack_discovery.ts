@@ -26,7 +26,7 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
       path: ATTACK_DISCOVERY_BY_CONNECTOR_ID,
       security: {
         authz: {
-          requiredPrivileges: ['elasticAssistant'],
+          requiredPrivileges: ['elasticAttackDiscovery'],
         },
       },
     })

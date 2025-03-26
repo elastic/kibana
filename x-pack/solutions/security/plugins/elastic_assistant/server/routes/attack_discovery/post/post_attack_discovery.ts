@@ -37,7 +37,7 @@ export const postAttackDiscoveryRoute = (
       path: ATTACK_DISCOVERY,
       security: {
         authz: {
-          requiredPrivileges: ['elasticAssistant'],
+          requiredPrivileges: ['elasticAttackDiscovery'],
         },
       },
       options: {

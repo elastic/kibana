@@ -28,7 +28,7 @@ export const getAttackDiscoveryBaseKibanaFeature = (): BaseKibanaFeatureConfig =
   minimumLicense: 'enterprise',
   privileges: {
     all: {
-      api: ['elasticAssistant'],
+      api: ['elasticAttackDiscovery', 'elasticAssistantFieldAnonymization'],
       app: [ATTACK_DISCOVERY_FEATURE_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {

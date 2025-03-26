@@ -637,7 +637,11 @@ const workflowInsightsSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          api: [`${APP_ID}-writeWorkflowInsights`, `${APP_ID}-readWorkflowInsights`],
+          api: [
+            `${APP_ID}-writeWorkflowInsights`,
+            `${APP_ID}-readWorkflowInsights`,
+            `${APP_ID}-elasticAssistantFieldAnonymization`,
+          ],
           id: 'workflow_insights_all',
           includeIn: 'none',
           name: TRANSLATIONS.all,
@@ -648,7 +652,7 @@ const workflowInsightsSubFeature = (): SubFeatureConfig => ({
           ui: ['writeWorkflowInsights', 'readWorkflowInsights'],
         },
         {
-          api: [`${APP_ID}-readWorkflowInsights`],
+          api: [`${APP_ID}-readWorkflowInsights`, `${APP_ID}-elasticAssistantFieldAnonymization`],
           id: 'workflow_insights_read',
           includeIn: 'none',
           name: TRANSLATIONS.read,

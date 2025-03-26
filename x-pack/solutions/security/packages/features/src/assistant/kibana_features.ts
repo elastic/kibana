@@ -31,7 +31,7 @@ export const getAssistantBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   },
   privileges: {
     all: {
-      api: ['elasticAssistant'],
+      api: ['elasticAssistant', 'elasticAssistantFieldAnonymization'],
       app: [ASSISTANT_FEATURE_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {
