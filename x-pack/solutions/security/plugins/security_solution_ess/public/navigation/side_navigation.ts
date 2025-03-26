@@ -318,7 +318,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                 children: [
                   {
                     id: 'fleet:',
-                    link: 'fleet',
+                    title: 'Fleet',
                     children: [
                       {
                         id: 'fleet:agents',
@@ -327,6 +327,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                       {
                         id: 'fleet:policies',
                         link: 'fleet:policies',
+                        title: 'Policies',
                       },
                       {
                         id: 'fleet:enrollment_tokens',
@@ -350,6 +351,10 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                     id: 'endpoints',
                     title: 'Endpoints',
                     children: [
+                      {
+                        id: 'endpoints',
+                        link: 'securitySolutionUI:endpoints',
+                      },
                       {
                         id: 'policy',
                         link: 'securitySolutionUI:policy',
