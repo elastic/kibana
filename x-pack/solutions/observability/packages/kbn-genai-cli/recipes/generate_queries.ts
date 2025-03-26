@@ -13,7 +13,7 @@ runRecipe(async ({ inferenceClient, kibanaClient, log, logger }) => {
   const queries = await generateSignificantEventDefinitions({
     inferenceClient,
     esClient: createTracedEsClient({ client: kibanaClient.es, logger }),
-    name: `logs.zookeeper`,
+    name: `logs`,
     logger,
   });
 

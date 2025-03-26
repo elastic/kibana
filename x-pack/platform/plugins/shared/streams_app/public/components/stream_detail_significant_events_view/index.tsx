@@ -161,7 +161,7 @@ export function StreamDetailSignificantEventsView({
     return <LoadingPanel />;
   }
 
-  if (!suggestedEvents.length && events.length === 0) {
+  if (significantEventsFetchState.value.length === 0 && !isSuggestionFlyoutOpen) {
     return (
       <SignificantEventsViewEmptyState
         onGenerateClick={() => {
@@ -247,20 +247,24 @@ export function StreamDetailSignificantEventsView({
                 return;
               }
 
-              await streams.streamsRepositoryClient.fetch('PUT /api/streams/{name} 2023-10-31', {
-                params: {
-                  body: {
-                    dashboards: definition.dashboards,
-                    queries: definition.queries.filter(
-                      (storedQuery) => storedQuery.id !== item.query.id
-                    ),
-                    stream: omit(definition.stream, 'name'),
+              await streams.streamsRepositoryClient
+                .fetch('PUT /api/streams/{name} 2023-10-31', {
+                  params: {
+                    body: {
+                      dashboards: definition.dashboards,
+                      queries: definition.queries.filter(
+                        (storedQuery) => storedQuery.id !== item.query.id
+                      ),
+                      stream: omit(definition.stream, 'name'),
+                    },
+                    path: {
+                      name,
+                    },
                   },
-                  path: {
-                    name,
-                  },
-                },
-              });
+                })
+                .then(() => {
+                  significantEventsFetchState.refresh();
+                });
             }}
             xFormatter={xFormatter}
           />
@@ -273,18 +277,22 @@ export function StreamDetailSignificantEventsView({
               return;
             }
 
-            await streams.streamsRepositoryClient.fetch('PUT /api/streams/{name} 2023-10-31', {
-              params: {
-                body: {
-                  dashboards: definition.dashboards,
-                  queries: definition.queries.concat(next),
-                  stream: omit(definition.stream, 'name'),
+            await streams.streamsRepositoryClient
+              .fetch('PUT /api/streams/{name} 2023-10-31', {
+                params: {
+                  body: {
+                    dashboards: definition.dashboards,
+                    queries: definition.queries.concat(next),
+                    stream: omit(definition.stream, 'name'),
+                  },
+                  path: {
+                    name,
+                  },
                 },
-                path: {
-                  name,
-                },
-              },
-            });
+              })
+              .then(() => {
+                significantEventsFetchState.refresh();
+              });
           }}
           onUpdate={async () => {}}
           onClose={() => {
@@ -299,8 +307,26 @@ export function StreamDetailSignificantEventsView({
         <SignificantEventSuggestionsFlyout
           name={name}
           suggestions={suggestedEvents}
-          onAccept={() => {}}
+          onAccept={async (next) => {
+            await streams.streamsRepositoryClient
+              .fetch('PUT /api/streams/{name} 2023-10-31', {
+                params: {
+                  body: {
+                    dashboards: definition.dashboards,
+                    queries: definition.queries.concat(next),
+                    stream: omit(definition.stream, 'name'),
+                  },
+                  path: {
+                    name,
+                  },
+                },
+              })
+              .then(() => {
+                significantEventsFetchState.refresh();
+              });
+          }}
           onClose={() => {
+            setSuggestedEvents([]);
             setIsSuggestionFlyoutOpen(false);
           }}
         />

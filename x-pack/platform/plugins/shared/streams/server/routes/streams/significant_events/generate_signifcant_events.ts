@@ -12,7 +12,7 @@ import {
   getLogPatterns,
   sortAndTruncateAnalyzedFields,
 } from '@kbn/genai-utils-server';
-import { ShortIdTable } from '@kbn/genai-utils-common';
+import { ShortIdTable, highlightPatternFromRegex } from '@kbn/genai-utils-common';
 import moment from 'moment';
 import { Logger } from '@kbn/core/server';
 import pLimit from 'p-limit';
@@ -76,12 +76,12 @@ export async function generateSignificantEventDefinitions({
         metadata: [],
       }).then((results) => {
         return results.map((result) => {
-          const { pattern, highlight, sample, count } = result;
+          const { sample, count, regex } = result;
           return {
-            pattern,
-            highlight,
-            sample,
             count,
+            highlight: highlightPatternFromRegex(regex, sample),
+            sample,
+            regex,
           };
         });
       })
@@ -93,7 +93,7 @@ export async function generateSignificantEventDefinitions({
       
       ${logPatterns
         .map((pattern) => {
-          return `- ${pattern.pattern} (${pattern.sample}`;
+          return `- ${pattern.sample} (${pattern.count})`;
         })
         .join('\n')}
       `;
@@ -115,24 +115,38 @@ export async function generateSignificantEventDefinitions({
     
     - \`message: "CircuitBreakingException"\`
     - \`message: "max number of clients reached"\`
-    - \`message:(connection AND refused)\`
+    - \`message: "Unable to connect * Connection refused"\`
     `;
 
   const chunks = [
     instruction,
     KQL_GUIDE,
-    ...(logPatterns
+    logPatterns
       ? `## Log patterns
     
     The following log patterns where found over the last
-    ${LOOKBACK_DAYS}. The field used is \`${categorizationField}\`:
+    ${LOOKBACK_DAYS} days. The field used is \`${categorizationField}\`:
     
-    ${JSON.stringify(logPatterns)}`
-      : ''),
+    ${JSON.stringify(
+      logPatterns.map((pattern) => {
+        const { regex, count } = pattern;
+        return {
+          regex,
+          count,
+        };
+      })
+    )}`
+      : '',
     `## Dataset analysis
     
     ${JSON.stringify(short)}`,
   ];
+
+  logger.debug(() => {
+    return `Input:
+    ${chunks.filter(Boolean).join('\n\n')}`;
+  });
+
   const { output } = await inferenceClient.output({
     id: 'generate_kql_queries',
     input: chunks.filter(Boolean).join('\n\n'),
@@ -179,30 +193,37 @@ export async function generateSignificantEventDefinitions({
     });
   }
 
-  const MATCH_ALL_TITLE = '_match_all_title';
-
   const limiter = pLimit(10);
 
-  const queriesWithCounts = await Promise.all(
-    [...queries, { title: MATCH_ALL_TITLE, kql: '*' }].map((query) =>
-      limiter(async () => {
-        return esClient
-          .search('verify_query', {
-            track_total_hits: true,
-            index: name,
-            size: 0,
-            query: {
-              bool: {
-                filter: [...kqlQuery(query.kql), ...rangeQuery(lookbackStart, end)],
+  const [queriesWithCounts, totalCount] = await Promise.all([
+    Promise.all(
+      queries.map((query) =>
+        limiter(async () => {
+          return esClient
+            .search('verify_query', {
+              track_total_hits: true,
+              index: name,
+              size: 0,
+              timeout: '5s',
+              query: {
+                bool: {
+                  filter: [...kqlQuery(query.kql), ...rangeQuery(lookbackStart, end)],
+                },
               },
-            },
-          })
-          .then((response) => ({ ...query, count: response.hits.total.value }));
+            })
+            .then((response) => ({ ...query, count: response.hits.total.value }));
+        })
+      )
+    ),
+    esClient
+      .search('verify_query', {
+        track_total_hits: true,
+        index: name,
+        size: 0,
+        timeout: '5s',
       })
-    )
-  );
-
-  const totalCount = queriesWithCounts.find((query) => query.title === MATCH_ALL_TITLE)?.count ?? 0;
+      .then((response) => response.hits.total.value),
+  ]);
 
   if (queries.length) {
     logger.debug(() => {

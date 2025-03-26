@@ -183,6 +183,7 @@ export async function runCategorizeTextAggregation({
     index,
     size: 0,
     track_total_hits: false,
+    timeout: '10s',
     query: {
       bool: {
         filter: [query, ...rangeQuery(start, end)],
@@ -348,35 +349,14 @@ export async function getLogPatterns({
       const patternsToExclude = topMessagePatterns.filter((pattern) => pattern.count >= 50);
 
       const excludeQueries = patternsToExclude.map((pattern) => {
-        // elasticsearch will barf because the query is too complex. this measures
-        // the # of groups to capture for a measure of complexity.
-        const complexity = pattern.regex.match(/(\.\+\?)|(\.\*\?)/g)?.length ?? 0;
-
         return {
-          bool: {
-            filter: [
-              ...(complexity <= 20
-                ? [
-                    {
-                      regexp: {
-                        [pattern.field]: {
-                          value: pattern.regex,
-                        },
-                      },
-                    },
-                  ]
-                : []),
-              {
-                match: {
-                  [pattern.field]: {
-                    query: pattern.pattern,
-                    fuzziness: 0,
-                    operator: 'and' as const,
-                    auto_generate_synonyms_phrase_query: false,
-                  },
-                },
-              },
-            ],
+          match: {
+            [pattern.field]: {
+              query: pattern.pattern,
+              fuzziness: 0,
+              operator: 'and' as const,
+              auto_generate_synonyms_phrase_query: false,
+            },
           },
         };
       });
