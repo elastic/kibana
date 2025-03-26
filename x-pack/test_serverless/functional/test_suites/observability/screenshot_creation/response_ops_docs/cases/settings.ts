@@ -18,8 +18,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
   const testSubjects = getService('testSubjects');
   const owner = OBSERVABILITY_OWNER;
 
-  // Failing: See https://github.com/elastic/kibana/issues/189058
-  describe.skip('Observability case settings', function () {
+  describe('Observability case settings', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
     });
@@ -63,7 +62,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         1000
       );
       await retry.waitFor('common-flyout-cancel exist', async () => {
-        return await testSubjects.exists('common-flyout-cancel');
+        return await testSubjects.isEnabled('common-flyout-cancel');
       });
       await testSubjects.click('common-flyout-cancel');
       await retry.waitFor('dropdown-connectors exist', async () => {
