@@ -25,6 +25,7 @@ import type { AgentPolicy } from '../types';
 
 interface Props {
   agentPolicies?: AgentPolicy[];
+  from?: 'fleet-policy-list' | undefined;
   children: (deletePackagePoliciesPrompt: DeletePackagePoliciesPrompt) => React.ReactElement;
 }
 
@@ -37,6 +38,7 @@ type OnSuccessCallback = (packagePoliciesDeleted: string[]) => void;
 
 export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   agentPolicies,
+  from,
   children,
 }) => {
   const { notifications } = useStartServices();
@@ -144,7 +146,9 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
           if (!!agentlessPolicy) {
             try {
               await sendDeleteAgentPolicy({ agentPolicyId: agentlessPolicy.id });
-              history.push(getPath('policies_list'));
+              if (from === 'fleet-policy-list') {
+                history.push(getPath('policies_list'));
+              }
             } catch (e) {
               notifications.toasts.addDanger(
                 i18n.translate(
@@ -186,7 +190,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
       }
       closeModal();
     },
-    [closeModal, packagePolicies, notifications.toasts, agentPolicies, getPath, history]
+    [closeModal, packagePolicies, notifications.toasts, agentPolicies, getPath, history, from]
   );
 
   const renderModal = () => {
