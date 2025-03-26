@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { type ConfigSchema, configSchema } from '../common/config';
+import type { PluginInitializerContext } from '@kbn/core/server';
+export { config } from '../common/config';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
   const { ProductInterceptServerPlugin } = await import('./plugin');
   return new ProductInterceptServerPlugin(initContext);
-};
-
-export const config: PluginConfigDescriptor<ConfigSchema> = {
-  exposeToBrowser: { enabled: true },
-  schema: configSchema,
 };

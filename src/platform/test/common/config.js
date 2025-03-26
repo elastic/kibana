@@ -84,6 +84,8 @@ export default function () {
             pattern: '[%date][%level][%logger] %message %meta',
           },
         })}`,
+        // disable product intercept for all ftr tests by default
+        '--xpack.product_intercept.enabled=false',
       ],
     },
   };

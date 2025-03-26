@@ -7,14 +7,14 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { ProductInterceptPrompter } from './lib/prompter';
-import type { ConfigSchema } from '../common/config';
+import type { ServerConfigSchema } from '../common/config';
 
 export class ProductInterceptPublicPlugin implements Plugin {
-  private readonly config: ConfigSchema;
+  private readonly config: ServerConfigSchema;
   private readonly prompter?: ProductInterceptPrompter;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<ConfigSchema>();
+    this.config = initializerContext.config.get<ServerConfigSchema>();
 
     if (this.config.enabled) {
       this.prompter = new ProductInterceptPrompter();

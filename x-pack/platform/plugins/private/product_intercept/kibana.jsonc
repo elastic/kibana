@@ -10,6 +10,7 @@
     "browser": true,
     "server": true,
     "requiredPlugins": ["cloud"],
-    "requiredBundles": []
+    "requiredBundles": [],
+    "configPath": ["xpack", "product_intercept"]
   }
 }

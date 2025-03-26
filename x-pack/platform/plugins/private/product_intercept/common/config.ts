@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import type { PluginConfigDescriptor, ExposedToBrowserDescriptor } from '@kbn/core/server';
 
 /**
  * Config used by plugin to determine if orchestration is invoked,
@@ -15,6 +16,24 @@ export const configSchema = schema.object({
   enabled: schema.boolean({
     defaultValue: true,
   }),
+  interval: schema.string({
+    defaultValue: '30d',
+    validate(value) {
+      if (!/^[0-9]+(d|h|m|s)$/.test(value)) {
+        return 'must be a supported duration string';
+      }
+    },
+  }),
 });
 
-export type ConfigSchema = TypeOf<typeof configSchema>;
+export type ServerConfigSchema = TypeOf<typeof configSchema>;
+
+const browserConfigSchemaDescriptor: ExposedToBrowserDescriptor<ServerConfigSchema> = {
+  enabled: true,
+  interval: false,
+};
+
+export const config: PluginConfigDescriptor<ServerConfigSchema> = {
+  exposeToBrowser: browserConfigSchemaDescriptor,
+  schema: configSchema,
+};

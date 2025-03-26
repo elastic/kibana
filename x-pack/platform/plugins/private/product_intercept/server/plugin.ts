@@ -21,7 +21,7 @@ import {
 } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { ProductInterceptTriggerCore } from './core';
-import type { ConfigSchema } from '../common/config';
+import type { ServerConfigSchema } from '../common/config';
 
 interface ProductInterceptServerPluginSetup {
   cloud: CloudSetup;
@@ -34,12 +34,12 @@ export class ProductInterceptServerPlugin
   implements Plugin<object, object, ProductInterceptServerPluginSetup, never>
 {
   private readonly logger: Logger;
-  private readonly config: ConfigSchema;
+  private readonly config: ServerConfigSchema;
   private readonly productInterceptCore?: ProductInterceptTriggerCore;
 
   constructor(private initContext: PluginInitializerContext<unknown>) {
     this.logger = initContext.logger.get();
-    this.config = initContext.config.get<ConfigSchema>();
+    this.config = initContext.config.get<ServerConfigSchema>();
 
     if (this.config.enabled) {
       this.productInterceptCore = new ProductInterceptTriggerCore();
@@ -48,7 +48,7 @@ export class ProductInterceptServerPlugin
 
   public setup(core: CoreSetup, { cloud }: ProductInterceptServerPluginSetup) {
     this.productInterceptCore?.setup(core, this.logger, {
-      isServerless: this.initContext.env.packageInfo.buildFlavor === 'serverless',
+      interceptTriggerInterval: this.config.interval,
       kibanaVersion: this.initContext.env.packageInfo.version,
       isCloudDeployment: cloud.isCloudEnabled,
     });

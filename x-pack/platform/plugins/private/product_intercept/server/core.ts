@@ -22,8 +22,8 @@ import {
 import { TRIGGER_API_ENDPOINT } from '../common/constants';
 
 interface ProductInterceptTriggerCoreSetup {
-  isServerless: boolean;
   isCloudDeployment: boolean;
+  interceptTriggerInterval: string;
   kibanaVersion: string;
 }
 
@@ -37,7 +37,7 @@ interface ProductInterceptTriggerRouteContext extends RequestHandlerContext {
 export class ProductInterceptTriggerCore {
   private logger?: Logger;
   private savedObjectsClient?: ISavedObjectsRepository;
-  private isServerless?: boolean;
+  private interceptTriggerInterval?: string;
   private isCloudDeployment?: boolean;
   private kibanaVersion?: string;
 
@@ -47,10 +47,10 @@ export class ProductInterceptTriggerCore {
   setup(
     core: CoreSetup,
     logger: Logger,
-    { isServerless, kibanaVersion, isCloudDeployment }: ProductInterceptTriggerCoreSetup
+    { interceptTriggerInterval, kibanaVersion, isCloudDeployment }: ProductInterceptTriggerCoreSetup
   ) {
     this.logger = logger;
-    this.isServerless = isServerless;
+    this.interceptTriggerInterval = interceptTriggerInterval;
     this.kibanaVersion = kibanaVersion;
     this.isCloudDeployment = isCloudDeployment;
 
@@ -122,14 +122,17 @@ export class ProductInterceptTriggerCore {
           });
         }
 
-        // if (request.headers['if-none-match']) {
-        //   return response.notModified({});
-        // }
+        const responseETag = `W/"${String(resolvedTriggerInfo.triggerIntervalInMs)}"`; // weak etag
+
+        if (request.headers['if-none-match'] === responseETag) {
+          return response.notModified({});
+        }
 
         return response.ok({
           headers: {
-            // etag: String(resolvedTriggerInfo.runs),
+            etag: responseETag,
             // age: String(responseExpirationValueInMs),
+            'cache-control': 'private',
             // 'cache-control': `private, max-age=${configuredIntervalInMs}, immutable`,
           },
           body: resolvedTriggerInfo,
@@ -149,12 +152,26 @@ export class ProductInterceptTriggerCore {
       // This will contain logic for cloud environments that get it's version bumped
     }
 
+    if (
+      existingTriggerDef &&
+      existingTriggerDef.triggerInterval !== this.interceptTriggerInterval
+    ) {
+      // provide escape hatch to update the trigger interval if needed, might prove useful on serverless environments
+      this.savedObjectsClient?.update<InterceptTriggerRecord>(
+        interceptTriggerRecordSavedObject.name,
+        this.defId,
+        {
+          triggerInterval: this.interceptTriggerInterval!,
+        }
+      );
+    }
+
     if (!existingTriggerDef) {
       await this.savedObjectsClient?.create<InterceptTriggerRecord>(
         interceptTriggerRecordSavedObject.name,
         {
           firstRegisteredAt: new Date().toISOString(),
-          triggerInterval: this.isServerless ? '30d' : '30s',
+          triggerInterval: this.interceptTriggerInterval!,
           installedOn: this.kibanaVersion!,
         },
         { id: this.defId }
