@@ -62,6 +62,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Concurrency control](#concurrency-control)
     - [User gets notified after someone edited a rule being previewed](#user-gets-notified-after-someone-edited-a-rule-being-previewed)
     - [User gets notified after a new rule versions is released](#user-gets-notified-after-a-new-rule-versions-is-released)
+  - [Licensing](#licensing)
+    - [**Scenario: User can NOT modify field values in the Rule Upgrade flyout when the license is insufficient**](#scenario-user-can-not-modify-field-values-in-the-rule-upgrade-flyout-when-the-license-is-insufficient)
+    - [**Scenario: User is notified about losing their modifications in the Rule Upgrade flyout when the license is insufficient**](#scenario-user-is-notified-about-losing-their-modifications-in-the-rule-upgrade-flyout-when-the-license-is-insufficient)
+    - [**Scenario: Customized prebuilt rule is upgraded to target version when upgraded via flyout on insufficient license**](#scenario-customized-prebuilt-rule-is-upgraded-to-target-version-when-upgraded-via-flyout-on-insufficient-license)
 
 ## Useful information
 
@@ -731,4 +735,47 @@ And saved custom field values via field forms
 When a new version of the same rule gets available
 Then user should see a notification that a new rule version was detected
 And saved custom field values got discarded
+```
+
+### Licensing
+
+#### **Scenario: User can NOT modify field values in the Rule Upgrade flyout when the license is insufficient**
+
+**Automation**: 1 e2e test.
+
+```Gherkin
+Given a Kibana installation running under an insufficient license
+And an installed prebuilt rule
+And this rule is outdated (a new version is available for this rule)
+When user opens a Rule Upgrade flyout for this rule
+Then user should see a read-only view of rule fields
+And user should NOT see any edit buttons or forms
+```
+
+#### **Scenario: User is notified about losing their modifications in the Rule Upgrade flyout when the license is insufficient**
+
+**Automation**: 1 e2e test.
+
+```Gherkin
+Given a Kibana installation running under an insufficient license
+And an installed prebuilt rule
+And this rule is outdated (a new version is available for this rule)
+And this rule is different from its base version
+When user opens a Rule Upgrade flyout for this rule
+Then user should see a warning message that their modifications will be lost
+```
+
+#### **Scenario: Customized prebuilt rule is upgraded to target version when upgraded via flyout on insufficient license**
+
+**Automation**: 1 e2e test.
+
+```Gherkin
+Given a Kibana installation running under an insufficient license
+And an installed prebuilt rule
+And this rule is outdated (a new version is available for this rule)
+And this rule is different from its base version
+When user opens a Rule Upgrade flyout for this rule and clicks on CTA
+Then success message should be displayed after upgrade
+And the upgraded prebuilt rule should be removed from the table
+And the upgraded prebuilt rule fields should be equal to the target version
 ```
