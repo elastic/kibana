@@ -18,6 +18,7 @@ import {
   ESQLCommandMode,
   ESQLCommandOption,
 } from '@kbn/esql-ast';
+import { isNumericType } from '../shared/esql_types';
 import {
   isAssignment,
   isColumnItem,
@@ -29,7 +30,7 @@ import {
   noCaseCompare,
 } from '../shared/helpers';
 
-import { type CommandDefinition, numericTypes } from './types';
+import { type CommandDefinition } from './types';
 import { ENRICH_MODES, checkAggExistence, checkFunctionContent } from './commands_helpers';
 
 import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
@@ -635,7 +636,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       const valueArg = command.args[0];
       if (isColumnItem(valueArg)) {
         const columnName = valueArg.name;
-        // look up for columns in variable and existing fields
+        // look up for columns in variables and existing fields
         let valueColumnType: string | undefined;
         const variableRef = references.variables.get(columnName);
         if (variableRef) {
@@ -645,7 +646,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
           valueColumnType = fieldRef?.type;
         }
 
-        if (valueColumnType && !numericTypes.includes(valueColumnType)) {
+        if (valueColumnType && !isNumericType(valueColumnType)) {
           messages.push({
             location: command.location,
             text: i18n.translate(
@@ -665,8 +666,8 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       // validate ON column
       const defaultOnColumnName = '@timestamp';
       const onColumn = command.args.find((arg) => isOptionItem(arg) && arg.name === 'on');
-      const hadDefaultOnColumn = references.fields.has(defaultOnColumnName);
-      if (!onColumn && !hadDefaultOnColumn) {
+      const hasDefaultOnColumn = references.fields.has(defaultOnColumnName);
+      if (!onColumn && !hasDefaultOnColumn) {
         messages.push({
           location: command.location,
           text: i18n.translate(

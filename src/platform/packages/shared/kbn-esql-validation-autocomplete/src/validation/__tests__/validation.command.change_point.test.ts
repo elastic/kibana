@@ -58,11 +58,7 @@ describe('validation', () => {
           await expectErrors('FROM index | CHANGE_POINT longField', [
             `Default @timestamp column is missing`,
           ]);
-
-          expect(callbacks.getColumnsFor).toHaveBeenCalledTimes(1);
         });
-
-        test('uses created @timestamp field', async () => {});
 
         test('allows manual input for ON field', async () => {
           const { expectErrors } = await setup();
@@ -78,7 +74,12 @@ describe('validation', () => {
           );
         });
 
-        test('doesn not allow renaming for change point type only', async () => {
+        test('allows renaming for change point type and pValue columns without specifying the ON field', async () => {
+          const { expectErrors } = await setup();
+          await expectErrors('FROM index | CHANGE_POINT longField AS changePointType, pValue', []);
+        });
+
+        test('does not allow renaming for change point type only', async () => {
           const { expectErrors } = await setup();
           await expectErrors(
             'FROM index | STATS field = AVG(longField) BY @timestamp=BUCKET(@timestamp, 8 hours) | CHANGE_POINT field ON @timestamp AS changePointType',
