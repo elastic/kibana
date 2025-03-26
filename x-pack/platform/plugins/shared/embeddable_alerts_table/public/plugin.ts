@@ -13,6 +13,7 @@ import type {
   EmbeddableAlertsTablePublicSetupDependencies,
   EmbeddableAlertsTablePublicStartDependencies,
 } from './types';
+import { registerAddAlertsTableAction } from './actions/register_add_alerts_table_action';
 
 export class EmbeddableAlertsTablePlugin
   implements
@@ -31,9 +32,12 @@ export class EmbeddableAlertsTablePlugin
     return {};
   }
 
-  public start({ http }: CoreStart, { uiActions }: EmbeddableAlertsTablePublicStartDependencies) {
+  public start(
+    coreServices: CoreStart,
+    { uiActions }: EmbeddableAlertsTablePublicStartDependencies
+  ) {
     // Waiting for other dependent PRs to be merged to enable this
-    // registerAddAlertsTableAction({ http, uiActions });
+    registerAddAlertsTableAction({ coreServices, uiActions });
     return {};
   }
 

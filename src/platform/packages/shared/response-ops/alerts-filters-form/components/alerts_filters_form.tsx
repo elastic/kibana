@@ -40,6 +40,7 @@ import {
   ADD_AND_OPERATION_BUTTON_SUBJ,
   ADD_OR_OPERATION_BUTTON_SUBJ,
   DELETE_OPERAND_BUTTON_SUBJ,
+  FILTERS_FORM_SUBJ,
 } from '../constants';
 
 export interface AlertsFiltersFormProps {
@@ -139,7 +140,7 @@ export const AlertsFiltersForm = ({
 
   return (
     <AlertsFiltersFormContextProvider value={contextValue}>
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" data-test-subj={FILTERS_FORM_SUBJ}>
         <EuiFlexItem>
           <AlertsFiltersFormItem
             type={firstItem.filter.type}

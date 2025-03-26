@@ -189,7 +189,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    * Enable when rows may have variable heights (disables virtualization)
    */
   dynamicRowHeight?: boolean;
-  emptyStateHeight?: 'tall' | 'short';
+  emptyStateHeight?: 'tall' | 'short' | 'flex';
   /**
    * An object used to compose the render context passed to all render functions as part of their
    * props
@@ -342,6 +342,7 @@ export type RenderContext<AC extends AdditionalContext> = {
     | 'renderFlyoutBody'
     | 'renderFlyoutFooter'
     | 'services'
+    | 'casesConfiguration'
   >,
   'columns'
 > &

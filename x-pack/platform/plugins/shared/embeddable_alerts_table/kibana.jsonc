@@ -23,7 +23,9 @@
       "fieldFormats",
       "licensing",
       "cases",
-      "kibanaUtils"
+      "kibanaUtils",
+      "kibanaReact",
+      "security",
     ],
     "optionalPlugins": []
   }

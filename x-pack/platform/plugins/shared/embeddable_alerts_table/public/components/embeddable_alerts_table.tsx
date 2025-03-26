@@ -1,0 +1,118 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useMemo } from 'react';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
+import type { RuleTypeSolution } from '@kbn/alerting-types';
+import type { TimeRange } from '@kbn/es-query';
+import type { AlertsFiltersExpression } from '@kbn/response-ops-alerts-filters-form/types';
+import { getRuleTypeIdsForSolution } from '@kbn/response-ops-alerts-filters-form/utils/get_rule_types_by_solution';
+import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
+import { getTime } from '@kbn/data-plugin/common';
+import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import { AlertActionsCell } from '@kbn/response-ops-alerts-table/components/alert_actions_cell';
+import { alertsFiltersToEsQuery } from '@kbn/response-ops-alerts-filters-form/utils/alerts_filters_to_es_query';
+import { ALERT_TIME_RANGE, TIMESTAMP } from '@kbn/rule-data-utils';
+import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { GENERAL_CASES_OWNER } from '@kbn/cases-plugin/common';
+import { RULE_TYPES_LOAD_ERROR_DESCRIPTION, RULE_TYPES_LOAD_ERROR_TITLE } from '../translations';
+
+export interface EmbeddableAlertsTableProps {
+  id: string;
+  timeRange?: TimeRange;
+  solution?: RuleTypeSolution;
+  filters?: AlertsFiltersExpression;
+  services: AlertsTableProps['services'];
+}
+
+/**
+ * Renders the AlertsTable based on the embeddable table config
+ */
+export const EmbeddableAlertsTable = ({
+  id,
+  timeRange,
+  solution,
+  filters,
+  services,
+}: EmbeddableAlertsTableProps) => {
+  const {
+    data: ruleTypes,
+    isLoading: isLoadingRuleTypes,
+    isError: cannotLoadRuleTypes,
+  } = useGetInternalRuleTypesQuery({ http: services.http });
+  const ruleTypeIds = useMemo(
+    () => (!ruleTypes || !solution ? [] : getRuleTypeIdsForSolution(ruleTypes, solution)),
+    [ruleTypes, solution]
+  );
+  const timeRangeQuery: QueryDslQueryContainer | null = timeRange
+    ? {
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            getTime(undefined, timeRange, {
+              fieldName: ALERT_TIME_RANGE,
+            })!.query,
+            getTime(undefined, timeRange, {
+              fieldName: TIMESTAMP,
+            })!.query,
+          ],
+        },
+      }
+    : null;
+  const filtersQuery = filters ? alertsFiltersToEsQuery(filters) : null;
+  const finalQuery = {
+    bool: {
+      must: [timeRangeQuery, filtersQuery].filter(Boolean) as QueryDslQueryContainer[],
+    },
+  };
+
+  if (isLoadingRuleTypes) {
+    // Using EuiLoadingChart instead of EuiLoadingSpinner to match the
+    // dashboard panel loading indicator
+    return (
+      <EuiFlexGroup alignItems="center" justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingChart size="l" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (cannotLoadRuleTypes) {
+    // If rule types are not available, we cannot forward their ids to the table for authorization
+    return (
+      <EuiEmptyPrompt
+        title={<h2>{RULE_TYPES_LOAD_ERROR_TITLE}</h2>}
+        body={<p>{RULE_TYPES_LOAD_ERROR_DESCRIPTION}</p>}
+        color="danger"
+        iconType="error"
+      />
+    );
+  }
+
+  return (
+    <AlertsTable
+      id={id}
+      ruleTypeIds={ruleTypeIds}
+      query={finalQuery}
+      showAlertStatusWithFlapping
+      renderActionsCell={AlertActionsCell}
+      toolbarVisibility={{
+        // Disabling the fullscreen toggle since it breaks in Dashboards
+        // and panels can be maximized on their own
+        showFullScreenSelector: false,
+      }}
+      emptyStateHeight="flex"
+      casesConfiguration={{
+        featureId: 'alerts',
+        owner: [GENERAL_CASES_OWNER],
+      }}
+      services={services}
+    />
+  );
+};

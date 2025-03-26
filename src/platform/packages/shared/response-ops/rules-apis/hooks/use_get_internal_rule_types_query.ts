@@ -18,5 +18,6 @@ export const useGetInternalRuleTypesQuery = ({ http }: { http: HttpStart }) => {
   return useQuery({
     queryKey: getKey(),
     queryFn: () => getInternalRuleTypes({ http }),
+    staleTime: Infinity,
   });
 };

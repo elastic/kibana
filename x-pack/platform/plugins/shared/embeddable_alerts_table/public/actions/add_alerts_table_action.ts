@@ -6,21 +6,27 @@
  */
 
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
-import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
+import { getInternalRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
 import { ALERTS_FEATURE_ID } from '@kbn/alerts-ui-shared/src/common/constants';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { getKey as getInternalRuleTypesQueryKey } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
+import { openConfigEditor } from '../components/open_config_editor';
 import { ADD_ALERTS_TABLE_ACTION_ID, EMBEDDABLE_ALERTS_TABLE_ID } from '../constants';
+import { ADD_ALERTS_TABLE_ACTION_LABEL } from '../translations';
+import { queryClient } from '../query_client';
 
 const checkRuleTypesPermissions = async (http: CoreStart['http']) => {
   try {
-    const ruleTypes = await getRuleTypes({ http });
+    const ruleTypes = await getInternalRuleTypes({ http });
+    // We cannot use the `useGetInternalRuleTypesQuery` hook since this check happens outside
+    // of React but we can set the query data in the client to avoid duplicated requests
+    queryClient.setQueryData(getInternalRuleTypesQueryKey(), ruleTypes);
     if (!ruleTypes.length) {
-      // If no rule types we should not show the action.
+      // If the user cannot read any rule type we should not show the action
       return false;
     }
     const isAuthorized = ruleTypes.some((ruleType) => {
@@ -37,29 +43,32 @@ const checkRuleTypesPermissions = async (http: CoreStart['http']) => {
   }
 };
 
-export const getAddAlertsTableAction = ({
-  http,
-}: {
-  http: CoreStart['http'];
-}): ActionDefinition<EmbeddableApiContext> => ({
-  id: ADD_ALERTS_TABLE_ACTION_ID,
-  grouping: [ADD_PANEL_VISUALIZATION_GROUP],
-  getIconType: () => 'bell',
-  isCompatible: async ({ embeddable }) => {
-    const hasAccessToAnyRuleTypes = await checkRuleTypesPermissions(http);
-    return apiIsPresentationContainer(embeddable) && hasAccessToAnyRuleTypes;
-  },
-  execute: async ({ embeddable }) => {
-    if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
-    await embeddable.addNewPanel(
-      {
-        panelType: EMBEDDABLE_ALERTS_TABLE_ID,
-      },
-      true
-    );
-  },
-  getDisplayName: () =>
-    i18n.translate('xpack.embeddableAlertsTable.ariaLabel', {
-      defaultMessage: 'Alerts table',
-    }),
-});
+export const getAddAlertsTableAction = (
+  coreServices: CoreStart
+): ActionDefinition<EmbeddableApiContext> => {
+  const { http } = coreServices;
+  return {
+    id: ADD_ALERTS_TABLE_ACTION_ID,
+    grouping: [ADD_PANEL_VISUALIZATION_GROUP],
+    getIconType: () => 'bell',
+    isCompatible: async ({ embeddable }) => {
+      const hasAccessToAnyRuleTypes = await checkRuleTypesPermissions(http);
+      return apiIsPresentationContainer(embeddable) && hasAccessToAnyRuleTypes;
+    },
+    execute: async ({ embeddable }) => {
+      if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
+      const tableConfig = await openConfigEditor({
+        coreServices,
+        parentApi: embeddable,
+      });
+      await embeddable.addNewPanel(
+        {
+          panelType: EMBEDDABLE_ALERTS_TABLE_ID,
+          initialState: { tableConfig },
+        },
+        true
+      );
+    },
+    getDisplayName: () => ADD_ALERTS_TABLE_ACTION_LABEL,
+  };
+};
