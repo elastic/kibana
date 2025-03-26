@@ -15,33 +15,29 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 import { EMPTY_EQUALS_CONDITION } from '../../../util/condition';
 import { NestedView } from '../../nested_view';
-import { useRoutingState } from './hooks/routing_state';
+import { useRoutingStateContext } from './hooks/routing_state';
 import { CurrentStreamEntry } from './current_stream_entry';
 import { NewRoutingStreamEntry } from './new_routing_stream_entry';
 import { RoutingStreamEntry } from './routing_stream_entry';
 
-export function ChildStreamList({
-  definition,
-  availableStreams,
-  routingAppState: {
-    childUnderEdit,
-    selectChildUnderEdit,
-    childStreams,
-    onChildStreamDragEnd,
-    onChildStreamDragStart,
-    draggingChildStream,
-  },
-}: {
-  definition: WiredStreamGetResponse;
-  routingAppState: ReturnType<typeof useRoutingState>;
-  availableStreams: string[];
-}) {
+export function ChildStreamList({ availableStreams }: { availableStreams: string[] }) {
+  const {
+    routingAppState: {
+      childUnderEdit,
+      selectChildUnderEdit,
+      childStreams,
+      onChildStreamDragEnd,
+      onChildStreamDragStart,
+      draggingChildStream,
+      hasChildStreamsOrderChanged,
+    },
+    definition,
+  } = useRoutingStateContext();
   return (
     <EuiFlexGroup
       direction="column"
@@ -115,6 +111,7 @@ export function ChildStreamList({
                       >
                         <RoutingStreamEntry
                           draggableProvided={provided}
+                          disableEditButton={hasChildStreamsOrderChanged}
                           child={
                             !childUnderEdit?.isNew &&
                             child.destination === childUnderEdit?.child.destination

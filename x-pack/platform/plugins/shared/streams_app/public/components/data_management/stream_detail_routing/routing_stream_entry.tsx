@@ -25,6 +25,7 @@ import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { alwaysToEmptyEquals } from '../../../util/condition';
 import { ConditionEditor } from '../condition_editor';
 import { ConditionMessage } from '../condition_message';
+import { ControlBar } from './control_bar';
 
 export function RoutingStreamEntry({
   draggableProvided,
@@ -33,6 +34,7 @@ export function RoutingStreamEntry({
   onEditStateChange,
   edit,
   availableStreams,
+  disableEditButton,
 }: {
   draggableProvided: DraggableProvided;
   child: RoutingDefinition;
@@ -40,6 +42,7 @@ export function RoutingStreamEntry({
   onEditStateChange: () => void;
   edit?: boolean;
   availableStreams: string[];
+  disableEditButton?: boolean;
 }) {
   const children = availableStreams.filter((stream) =>
     isDescendantOf(child.destination, stream)
@@ -126,6 +129,7 @@ export function RoutingStreamEntry({
         <EuiButtonIcon
           data-test-subj="streamsAppRoutingStreamEntryButton"
           iconType="pencil"
+          disabled={disableEditButton}
           onClick={() => {
             onEditStateChange();
           }}
@@ -135,15 +139,18 @@ export function RoutingStreamEntry({
         />
       </EuiFlexGroup>
       {edit && (
-        <ConditionEditor
-          condition={alwaysToEmptyEquals(child.if)}
-          onConditionChange={(condition) => {
-            onChildChange({
-              ...child,
-              if: condition,
-            });
-          }}
-        />
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <ConditionEditor
+            condition={alwaysToEmptyEquals(child.if)}
+            onConditionChange={(condition) => {
+              onChildChange({
+                ...child,
+                if: condition,
+              });
+            }}
+          />
+          <ControlBar />
+        </EuiFlexGroup>
       )}
     </EuiPanel>
   );

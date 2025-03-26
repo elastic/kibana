@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { RoutingDefinition } from '@kbn/streams-schema';
 import React from 'react';
 import { ConditionEditor } from '../condition_editor';
+import { ControlBar } from './control_bar';
 
 export function NewRoutingStreamEntry({
   child,
@@ -50,6 +51,7 @@ export function NewRoutingStreamEntry({
             });
           }}
         />
+        <ControlBar />
       </EuiFlexGroup>
     </EuiPanel>
   );
