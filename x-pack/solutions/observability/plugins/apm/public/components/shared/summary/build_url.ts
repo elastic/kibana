@@ -6,16 +6,21 @@
  */
 import url from 'url';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import type { Span } from '../../../../typings/es_schemas/ui/span';
+import type { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 
-export const buildUrl = (transaction: Transaction) => {
-  const urlFull = transaction.url?.full || transaction.transaction?.page?.url;
+export const buildUrl = (
+  transaction: Transaction | Span | APMError,
+  urlFullValue: string | undefined
+) => {
+  const urlFull = urlFullValue;
   // URL fields from Otel
   const urlScheme = transaction.url?.scheme;
   const urlPath = transaction.url?.path;
   const serverAddress = transaction?.server?.address;
   const serverPort = transaction?.server?.port;
 
-  const hasURLFromFields = urlFull && urlScheme && urlPath && serverAddress && serverPort;
+  const hasURLFromFields = urlFull || (urlScheme && urlPath && serverAddress && serverPort);
 
   return hasURLFromFields
     ? url.format({
