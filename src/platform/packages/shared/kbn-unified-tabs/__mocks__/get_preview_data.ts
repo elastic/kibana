@@ -7,4 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TabPreview, type TabPreviewProps } from './tab_preview';
+import { TabStatus, TabItem } from '../src/types';
+
+export const getPreviewDataMock = (item: TabItem) => ({
+  query: {
+    esql: 'SELECT * FROM table',
+  },
+  status: TabStatus.SUCCESS,
+});
