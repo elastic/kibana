@@ -113,6 +113,7 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
           className={classNames.accordion}
           buttonClassName={accordionButtonClassName}
           data-test-subj={groupTestSubj}
+          initialIsOpen={navNode.defaultIsCollapsed === false}
           buttonProps={{
             'data-test-subj': `panelAccordionBtnId-${navNode.id}`,
           }}

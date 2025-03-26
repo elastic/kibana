@@ -244,6 +244,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
                   path: '',
                   icon: 'iInCircle',
                   renderAs: 'accordion',
+                  defaultIsCollapsed: false,
                   children: [
                     {
                       id: 'sub1',
