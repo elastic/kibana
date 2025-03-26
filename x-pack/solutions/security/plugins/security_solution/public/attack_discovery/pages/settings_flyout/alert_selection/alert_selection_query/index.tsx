@@ -99,17 +99,20 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
    */
   const onTimeChange = useCallback(
     ({ start: startDate, end: endDate }: OnTimeChangeProps) => {
-      const updatedSettins = { ...settings, end: endDate, start: startDate };
-      if (unSubmittedQuery != null) {
-        const newUnSubmittedQuery: Query = {
-          query: unSubmittedQuery,
-          language: 'kuery',
-        };
-
-        updatedSettins.query = newUnSubmittedQuery; // <-- set the query to the unsubmitted query
-      }
-
-      onSettingsChanged?.(updatedSettins);
+      const query =
+        unSubmittedQuery != null
+          ? {
+              query: unSubmittedQuery, // <-- set the query to the unsubmitted query
+              language: 'kuery',
+            }
+          : settings.query;
+      const updatedSettings = {
+        ...settings,
+        end: endDate,
+        start: startDate,
+        query,
+      };
+      onSettingsChanged?.(updatedSettings);
     },
     [onSettingsChanged, settings, unSubmittedQuery]
   );
