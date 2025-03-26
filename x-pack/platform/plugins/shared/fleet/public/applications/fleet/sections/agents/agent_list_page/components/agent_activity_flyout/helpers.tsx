@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
-import { EuiProgress, EuiText } from '@elastic/eui';
+import { EuiIconTip, EuiProgress, EuiText, EuiTitle } from '@elastic/eui';
 
 import type { ActionStatus } from '../../../../../types';
 
@@ -98,23 +98,38 @@ export const inProgressTitle = (action: ActionStatus, totalAgents?: number) => (
 
 export const automaticUpgradeTitle = (action: ActionStatus, totalAgents: number) => (
   <EuiText>
-    <h3>Upgrade to {action.version}</h3>
+    <EuiTitle>
+      <h3>Upgrade to {action.version} </h3>
+    </EuiTitle>
     <EuiProgress
       color="primary"
       label={
-        <FormattedMessage
-          id="xpack.fleet.agentActivityFlyout.automaticUpgradeTitle"
-          defaultMessage="Target: {percentage}% of {agentsText}"
-          values={{
-            percentage: (action.nbAgentsActioned / totalAgents) * 100,
-            agentsCount: (action.nbAgentsActioned / totalAgents) * totalAgents,
-            agentsText: totalAgents === 1 ? 'agent' : 'agents',
-          }}
-        />
+        <EuiText color="subdued" size="s">
+          <FormattedMessage
+            id="xpack.fleet.agentActivityFlyout.automaticUpgradeTitle"
+            defaultMessage="Target: {percentage}% of {agentsText} {tooltip}"
+            values={{
+              percentage: ((action.nbAgentsActioned / totalAgents) * 100).toFixed(0),
+              agentsText: totalAgents === 1 ? 'agent' : 'agents',
+              tooltip: (
+                <EuiIconTip
+                  title="Agents Selected For Upgrade"
+                  content="We'll automatically retry any upgrade that fails"
+                  type="iInCircle"
+                />
+              ),
+            }}
+          />
+        </EuiText>
       }
       value={action.nbAgentsAck}
       max={action.nbAgentsActioned}
-      valueText={`${action.nbAgentsAck} of ${action.nbAgentsActioned} upgraded`}
+      valueText={
+        <EuiText
+          color="primary"
+          size="s"
+        >{`${action.nbAgentsAck} of ${action.nbAgentsActioned} upgraded`}</EuiText>
+      }
     />
   </EuiText>
 );

@@ -54,10 +54,11 @@ export const ActivitySection: React.FunctionComponent<{
   return (
     <>
       <EuiPanel color="subdued" hasBorder={true} borderRadius="none">
-        <EuiText>
+        <EuiText className="eui-alignCenter">
           {unifiedActions.some((action) => action.status === 'IN_PROGRESS') && (
             <EuiIcon type="dot" color="success" />
           )}
+
           <b>{title}</b>
         </EuiText>
       </EuiPanel>
