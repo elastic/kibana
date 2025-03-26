@@ -63,12 +63,14 @@ export function registerContextFunction({
         );
 
         const userPrompt = userMessage?.message.content!;
+        const userMessageFunctionName = userMessage?.message.name;
 
         const { scores, relevantDocuments, suggestions } = await recallAndScore({
           recall: client.recall,
           chat,
           logger: resources.logger,
           userPrompt,
+          userMessageFunctionName,
           context: screenDescription,
           messages,
           signal,
