@@ -17,7 +17,6 @@ import {
   type ThunkDispatch,
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { v4 as uuid } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
@@ -72,7 +71,7 @@ const initialState: DiscoverInternalState = {
 };
 
 export const createTabItem = (allTabs: TabState[]): TabItem => {
-  const id = uuid();
+  const id = uuidv4();
   const untitledTabCount = allTabs.filter((tab) => DEFAULT_TAB_REGEX.test(tab.label.trim())).length;
   const label =
     untitledTabCount > 0 ? `${DEFAULT_TAB_LABEL} ${untitledTabCount}` : DEFAULT_TAB_LABEL;
