@@ -11,7 +11,13 @@ import type {
   ResponseActionStatus,
   ResponseActionsApiCommandNames,
 } from '../../../../common/endpoint/service/response_actions/constants';
-import type { DataStreams, IlmPolicies, IlmsStats, IndicesStats } from '../indices.metadata.types';
+import type {
+  DataStreams,
+  IlmPolicies,
+  IlmsStats,
+  IndicesSettings,
+  IndicesStats,
+} from '../indices.metadata.types';
 import type { NodeIngestPipelinesStats } from '../ingest_pipelines_stats.types';
 import { SiemMigrationsEventTypes } from './types';
 
@@ -306,6 +312,14 @@ export const TELEMETRY_DATA_STREAM_EVENT: EventTypeOpts<DataStreams> = {
             type: 'keyword',
             _meta: { description: 'Name of the data stream' },
           },
+          ilm_policy: {
+            type: 'keyword',
+            _meta: { optional: true, description: 'ILM policy associated to the datastream' },
+          },
+          template: {
+            type: 'keyword',
+            _meta: { optional: true, description: 'Template associated to the datastream' },
+          },
           indices: {
             type: 'array',
             items: {
@@ -318,7 +332,7 @@ export const TELEMETRY_DATA_STREAM_EVENT: EventTypeOpts<DataStreams> = {
           },
         },
       },
-      _meta: { description: 'Datastreams' },
+      _meta: { description: 'Datastream settings' },
     },
   },
 };
@@ -334,6 +348,7 @@ export const TELEMETRY_INDEX_STATS_EVENT: EventTypeOpts<IndicesStats> = {
             type: 'keyword',
             _meta: { description: 'The name of the index being monitored.' },
           },
+
           query_total: {
             type: 'long',
             _meta: {
@@ -349,11 +364,38 @@ export const TELEMETRY_INDEX_STATS_EVENT: EventTypeOpts<IndicesStats> = {
                 'The total time spent on query execution across all search requests, measured in milliseconds.',
             },
           },
+
+          docs_count_primaries: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'The total number of documents currently stored in the index (primary shards).',
+            },
+          },
+          docs_deleted_primaries: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'The total number of documents that have been marked as deleted in the index (primary shards).',
+            },
+          },
+          docs_total_size_in_bytes_primaries: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'The total size, in bytes, of all documents stored in the index, including storage overhead (primary shards).',
+            },
+          },
+
           docs_count: {
             type: 'long',
             _meta: {
               optional: true,
-              description: 'The total number of documents currently stored in the index.',
+              description:
+                'The total number of documents currently stored in the index (primary and replica shards).',
             },
           },
           docs_deleted: {
@@ -361,7 +403,7 @@ export const TELEMETRY_INDEX_STATS_EVENT: EventTypeOpts<IndicesStats> = {
             _meta: {
               optional: true,
               description:
-                'The total number of documents that have been marked as deleted in the index.',
+                'The total number of documents that have been marked as deleted in the index (primary and replica shards).',
             },
           },
           docs_total_size_in_bytes: {
@@ -369,12 +411,62 @@ export const TELEMETRY_INDEX_STATS_EVENT: EventTypeOpts<IndicesStats> = {
             _meta: {
               optional: true,
               description:
-                'The total size, in bytes, of all documents stored in the index, including storage overhead.',
+                'The total size, in bytes, of all documents stored in the index, including storage overhead (primary and replica shards).',
+            },
+          },
+
+          index_failed: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'The total number of documents failed to index (primary and replica shards).',
+            },
+          },
+          index_failed_due_to_version_conflict: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'The total number of documents failed to index due to version conflict (primary and replica shards).',
             },
           },
         },
       },
-      _meta: { description: 'Datastreams' },
+      _meta: { description: 'Index stats' },
+    },
+  },
+};
+
+export const TELEMETRY_INDEX_SETTINGS_EVENT: EventTypeOpts<IndicesSettings> = {
+  eventType: 'telemetry_index_settings_event',
+  schema: {
+    items: {
+      type: 'array',
+      items: {
+        properties: {
+          index_name: {
+            type: 'keyword',
+            _meta: { description: 'The name of the index.' },
+          },
+          default_pipeline: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Pipeline applied if no pipeline parameter specified when indexing.',
+            },
+          },
+          final_pipeline: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description:
+                'Pipeline applied to the document at the end of the indexing process, after the document has been indexed.',
+            },
+          },
+        },
+      },
+      _meta: { description: 'Index settings' },
     },
   },
 };
@@ -484,7 +576,7 @@ export const TELEMETRY_ILM_POLICY_EVENT: EventTypeOpts<IlmPolicies> = {
           },
         },
       },
-      _meta: { description: 'Datastreams' },
+      _meta: { description: 'ILM policies' },
     },
   },
 };
@@ -525,7 +617,7 @@ export const TELEMETRY_ILM_STATS_EVENT: EventTypeOpts<IlmsStats> = {
           },
         },
       },
-      _meta: { description: 'Datastreams' },
+      _meta: { description: 'ILM stats' },
     },
   },
 };
@@ -1166,8 +1258,9 @@ export const events = [
   TELEMETRY_DATA_STREAM_EVENT,
   TELEMETRY_ILM_POLICY_EVENT,
   TELEMETRY_ILM_STATS_EVENT,
-  TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT,
+  TELEMETRY_INDEX_SETTINGS_EVENT,
   TELEMETRY_INDEX_STATS_EVENT,
+  TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT,
   SIEM_MIGRATIONS_MIGRATION_SUCCESS,
   SIEM_MIGRATIONS_MIGRATION_FAILURE,
   SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS,
