@@ -1306,7 +1306,6 @@ components:
         - host.name
         - user.name
         - service.name
-        - entity.id
       type: string
     IndexPattern:
       type: string
