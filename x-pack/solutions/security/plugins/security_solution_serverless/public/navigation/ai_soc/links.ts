@@ -7,10 +7,16 @@
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
-import { ALERT_SUMMARY } from './translations';
+import { ALERT_SUMMARY, CONFIGURATIONS } from './translations';
 
 export const alertSummaryLink: NodeDefinition<AppDeepLinkId, string, string> = {
   id: SecurityPageName.alertSummary,
   link: 'securitySolutionUI:alert_summary',
   title: ALERT_SUMMARY,
+};
+
+export const configurationsLink: NodeDefinition<AppDeepLinkId, string, string> = {
+  id: SecurityPageName.configurations,
+  link: 'securitySolutionUI:configurations',
+  title: CONFIGURATIONS,
 };

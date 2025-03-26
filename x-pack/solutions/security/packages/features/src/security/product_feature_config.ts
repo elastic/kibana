@@ -54,6 +54,18 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       },
     },
   },
+  [ProductFeatureSecurityKey.configurations]: {
+    privileges: {
+      all: {
+        ui: ['configurations'],
+        api: [],
+      },
+      read: {
+        ui: ['configurations_read'],
+        api: [],
+      },
+    },
+  },
   [ProductFeatureSecurityKey.investigationGuideInteractions]: {
     privileges: {
       all: {

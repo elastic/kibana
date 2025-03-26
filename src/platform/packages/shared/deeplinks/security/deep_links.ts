@@ -86,4 +86,5 @@ export enum SecurityPageName {
   coverageOverview = 'coverage-overview',
   notes = 'notes',
   alertSummary = 'alert_summary',
+  configurations = 'configurations',
 }
