@@ -15,7 +15,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { render, screen, waitFor } from '@testing-library/react';
-import { internalStateActions } from '../../state_management/redux';
+import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
@@ -50,7 +50,9 @@ describe('DiscoverTopNavInline', () => {
     props.stateContainer.customizationContext.inlineTopNav.enabled = false;
     render(
       <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNavInline {...props} />
+        <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+          <DiscoverTopNavInline {...props} />
+        </RuntimeStateProvider>
       </DiscoverMainProvider>
     );
     const topNav = screen.queryByTestId('discoverTopNavInline');
@@ -61,7 +63,9 @@ describe('DiscoverTopNavInline', () => {
     const props = getProps();
     render(
       <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNavInline {...props} />
+        <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+          <DiscoverTopNavInline {...props} />
+        </RuntimeStateProvider>
       </DiscoverMainProvider>
     );
     const topNav = screen.queryByTestId('discoverTopNavInline');
@@ -73,7 +77,9 @@ describe('DiscoverTopNavInline', () => {
     props.stateContainer.customizationContext.displayMode = 'embedded';
     render(
       <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNavInline {...props} />
+        <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+          <DiscoverTopNavInline {...props} />
+        </RuntimeStateProvider>
       </DiscoverMainProvider>
     );
     const topNav = screen.queryByTestId('discoverTopNavInline');
@@ -85,7 +91,9 @@ describe('DiscoverTopNavInline', () => {
       const props = getProps();
       render(
         <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNavInline {...props} />
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+            <DiscoverTopNavInline {...props} />
+          </RuntimeStateProvider>
         </DiscoverMainProvider>
       );
       const topNav = screen.queryByTestId('discoverTopNavInline');
@@ -100,7 +108,9 @@ describe('DiscoverTopNavInline', () => {
       const props = getProps({ hideNavMenuItems: true });
       render(
         <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNavInline {...props} />
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+            <DiscoverTopNavInline {...props} />
+          </RuntimeStateProvider>
         </DiscoverMainProvider>
       );
       const topNav = screen.queryByTestId('discoverTopNavInline');
@@ -118,7 +128,9 @@ describe('DiscoverTopNavInline', () => {
       props.stateContainer.customizationContext.inlineTopNav.showLogsExplorerTabs = true;
       render(
         <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNavInline {...props} />
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+            <DiscoverTopNavInline {...props} />
+          </RuntimeStateProvider>
         </DiscoverMainProvider>
       );
       const topNav = screen.queryByTestId('discoverTopNavInline');
@@ -133,7 +145,9 @@ describe('DiscoverTopNavInline', () => {
       const props = getProps();
       render(
         <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNavInline {...props} />
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+            <DiscoverTopNavInline {...props} />
+          </RuntimeStateProvider>
         </DiscoverMainProvider>
       );
       const topNav = screen.queryByTestId('discoverTopNavInline');

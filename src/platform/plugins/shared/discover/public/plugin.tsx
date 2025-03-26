@@ -231,7 +231,6 @@ export class DiscoverPlugin
           element: params.element,
           services,
           customizationContext$,
-          experimentalFeatures: this.experimentalFeatures,
         });
 
         return () => {

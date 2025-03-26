@@ -8,14 +8,13 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, filter, map, mergeMap, share, Subject, tap } from 'rxjs';
+import { BehaviorSubject, filter, map, mergeMap, ReplaySubject, share, Subject, tap } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
@@ -71,14 +70,6 @@ export interface DataDocumentsMsg extends DataMsg {
 
 export interface DataTotalHitsMsg extends DataMsg {
   result?: number;
-}
-
-export interface DataChartsMessage extends DataMsg {
-  response?: SearchResponse;
-}
-
-export interface DataAvailableFieldsMsg extends DataMsg {
-  fields?: string[];
 }
 
 export interface DiscoverDataStateContainer {
@@ -161,7 +152,7 @@ export function getDataStateContainer({
   const { data, uiSettings, toastNotifications, profilesManager } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
-  const fetchChart$ = new Subject<void>();
+  const fetchChart$ = new ReplaySubject<void>(1);
   const disableNextFetchOnStateChange$ = new BehaviorSubject(false);
 
   /**

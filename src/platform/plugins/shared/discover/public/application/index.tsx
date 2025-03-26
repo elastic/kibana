@@ -11,7 +11,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Observable } from 'rxjs';
-import type { ExperimentalFeatures } from '../../server/config';
 import { DiscoverRouter } from './discover_router';
 import type { DiscoverServices } from '../build_services';
 import type { DiscoverCustomizationContext } from '../customizations';
@@ -20,16 +19,10 @@ export interface RenderAppProps {
   element: HTMLElement;
   services: DiscoverServices;
   customizationContext$: Observable<DiscoverCustomizationContext>;
-  experimentalFeatures: ExperimentalFeatures;
 }
 
-export const renderApp = ({
-  element,
-  services,
-  customizationContext$,
-  experimentalFeatures,
-}: RenderAppProps) => {
-  const { history, capabilities, chrome, data, core } = services;
+export const renderApp = ({ element, services, customizationContext$ }: RenderAppProps) => {
+  const { capabilities, chrome, data, core } = services;
 
   if (!capabilities.discover.save) {
     chrome.setBadge({
@@ -42,13 +35,9 @@ export const renderApp = ({
       iconType: 'glasses',
     });
   }
+
   const unmount = toMountPoint(
-    <DiscoverRouter
-      services={services}
-      customizationContext$={customizationContext$}
-      experimentalFeatures={experimentalFeatures}
-      history={history}
-    />,
+    <DiscoverRouter services={services} customizationContext$={customizationContext$} />,
     core
   )(element);
 

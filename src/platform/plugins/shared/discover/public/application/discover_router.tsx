@@ -10,30 +10,24 @@
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import React from 'react';
-import type { History } from 'history';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import type { ExperimentalFeatures } from '../../server/config';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
-import { DiscoverMainRoute } from './main';
 import { NotFoundRoute } from './not_found';
 import type { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
 import type { DiscoverCustomizationContext } from '../customizations';
+import { DiscoverMainRoute } from './main';
 
-export type DiscoverRouterProps = Omit<DiscoverRoutesProps, 'customizationContext'> & {
+export interface DiscoverRouterProps {
+  services: DiscoverServices;
   customizationContext$: Observable<DiscoverCustomizationContext>;
-};
+}
 
-export const DiscoverRouter = ({
-  customizationContext$,
-  services,
-  history,
-  ...routeProps
-}: DiscoverRouterProps) => {
+export const DiscoverRouter = ({ services, customizationContext$ }: DiscoverRouterProps) => {
   const customizationContext = useObservable(customizationContext$);
 
   // The Discover state is not reactive, so we must avoid initialization before
@@ -45,13 +39,8 @@ export const DiscoverRouter = ({
   return (
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
-        <Router history={history} data-test-subj="discover-react-router">
-          <DiscoverRoutes
-            customizationContext={customizationContext}
-            services={services}
-            history={history}
-            {...routeProps}
-          />
+        <Router history={services.history} data-test-subj="discover-react-router">
+          <DiscoverRoutes customizationContext={customizationContext} />
         </Router>
       </EuiErrorBoundary>
     </KibanaContextProvider>
@@ -59,19 +48,11 @@ export const DiscoverRouter = ({
 };
 
 export interface DiscoverRoutesProps {
-  services: DiscoverServices;
   customizationContext: DiscoverCustomizationContext;
-  experimentalFeatures: ExperimentalFeatures;
-  history: History;
 }
 
 // this exists as a separate component to allow the tests to gather the routes
-export const DiscoverRoutes = ({
-  customizationContext,
-  services,
-  history,
-  ...routeProps
-}: DiscoverRoutesProps) => {
+export const DiscoverRoutes = ({ ...routeProps }: DiscoverRoutesProps) => {
   return (
     <Routes>
       <Route path="/context/:dataViewId/:id">
@@ -90,10 +71,10 @@ export const DiscoverRoutes = ({
         <ViewAlertRoute />
       </Route>
       <Route path="/view/:id">
-        <DiscoverMainRoute customizationContext={customizationContext} {...routeProps} />
+        <DiscoverMainRoute {...routeProps} />
       </Route>
       <Route path="/" exact>
-        <DiscoverMainRoute customizationContext={customizationContext} {...routeProps} />
+        <DiscoverMainRoute {...routeProps} />
       </Route>
       <NotFoundRoute />
     </Routes>
