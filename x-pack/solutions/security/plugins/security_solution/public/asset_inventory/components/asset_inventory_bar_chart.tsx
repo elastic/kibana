@@ -27,13 +27,17 @@ const yAxisTitle = i18n.translate(
 
 const chartStyles = { height: '260px' };
 
-export interface TopAssetsBarChartProps {
+export interface AssetInventoryBarChartProps {
   isLoading: boolean;
   isFetching: boolean;
   entities: AggregationResult[];
 }
 
-export const TopAssetsBarChart = ({ isLoading, isFetching, entities }: TopAssetsBarChartProps) => {
+export const AssetInventoryBarChart = ({
+  isLoading,
+  isFetching,
+  entities,
+}: AssetInventoryBarChartProps) => {
   const baseTheme = useElasticChartsTheme();
   return (
     <div css={chartStyles}>
