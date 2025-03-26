@@ -445,7 +445,7 @@ paths:
           in: query
           description: 'Specify which SLO tags to query by (comma-separated list)'
           schema:
-            type: string
+            type: array
         - name: search
           in: query
           description: Filters the SLOs by name

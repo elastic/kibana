@@ -19,7 +19,7 @@ get:
       in: query
       description: Filters the SLOs by tag
       schema:
-        type: string
+        type: array
     - name: search
       in: query
       description: Filters the SLOs by name

@@ -11,7 +11,6 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -40,7 +39,7 @@ import { SLO_MODEL_VERSION } from '../../../../common/constants';
 
 interface SearchFilters {
   search: string;
-  tags: EuiComboBoxOptionOption[];
+  tags: string[];
 }
 
 export function SloManagementTable() {
@@ -61,7 +60,7 @@ export function SloManagementTable() {
     name: filters.search,
     page: pageIndex + 1,
     perPage: pageSize,
-    tags: filters.tags.map((tag) => String(tag.value)),
+    tags: filters.tags,
   });
 
   const { data: permissions } = usePermissions();

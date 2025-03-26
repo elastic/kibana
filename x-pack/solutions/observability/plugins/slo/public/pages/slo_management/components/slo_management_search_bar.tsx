@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiText } from '@elastic/eui';
 import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
@@ -15,7 +15,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 interface Props {
   filters: {
     search: string;
-    tags: EuiComboBoxOptionOption[];
+    tags: string[];
   };
   setFilters: Function;
   onRefresh: () => void;
@@ -29,6 +29,9 @@ export function SloManagementSearchBar({ filters, setFilters, onRefresh }: Props
   } = useKibana().services;
 
   const { suggestions } = useFetchSLOSuggestions();
+  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
+    []
+  );
 
   return (
     <SearchBar
@@ -43,11 +46,11 @@ export function SloManagementSearchBar({ filters, setFilters, onRefresh }: Props
       showDatePicker={false}
       showSavedQueryControls={false}
       showFilterBar={false}
+      query={{ query: filters.search, language: 'text' }}
       onQuerySubmit={({ query: value }) => {
         setFilters({ search: value?.query, tags: filters.tags });
       }}
       onRefresh={onRefresh}
-      query={{ query: filters.search, language: 'text' }}
       renderQueryInputAppend={() => (
         <EuiComboBox
           aria-label={i18n.translate('xpack.slo.sloDefinitions.filterByTag', {
@@ -56,12 +59,12 @@ export function SloManagementSearchBar({ filters, setFilters, onRefresh }: Props
           placeholder={i18n.translate('xpack.slo.sloDefinitions.filterByTag', {
             defaultMessage: 'Filter tags',
           })}
-          singleSelection={!!filters.tags.find((option) => option.value === '*')}
           delimiter=","
           options={suggestions?.tags ? [existOption, ...suggestions?.tags] : []}
-          selectedOptions={filters.tags}
+          selectedOptions={selectedOptions}
           onChange={(newOptions) => {
-            setFilters({ search: filters.search, tags: newOptions });
+            setSelectedOptions(newOptions);
+            setFilters({ search: filters.search, tags: newOptions.map((option) => option.value) });
           }}
           isClearable={true}
           data-test-subj="filter-slos-by-tag"

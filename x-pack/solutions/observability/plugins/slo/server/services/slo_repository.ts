@@ -26,7 +26,7 @@ export interface SLORepository {
     pagination: Pagination,
     options?: {
       includeOutdatedOnly: boolean;
-      tags?: string;
+      tags: string[];
     }
   ): Promise<Paginated<SLODefinition>>;
 }
@@ -117,37 +117,17 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     pagination: Pagination,
     options: {
       includeOutdatedOnly: boolean;
-      tags?: string;
-    } = { includeOutdatedOnly: false, tags: undefined }
+      tags: string[];
+    } = { includeOutdatedOnly: false, tags: [] }
   ): Promise<Paginated<SLODefinition>> {
     const { includeOutdatedOnly, tags } = options;
-    let filter = null;
-    let tagString = '';
-    const splitTags = tags ? tags.split(',') : [];
-
-    if (splitTags.length > 1) {
-      tagString = '';
-      splitTags.forEach((tag: string, index: number) => {
-        if (tagString && tag) {
-          tagString += ` OR ${tag}`;
-        } else if (tag) {
-          tagString += `(${tag}`;
-        }
-
-        if (index === splitTags.length - 1) {
-          tagString += ')';
-        }
-      });
-    } else {
-      tagString = splitTags[0];
+    const filter = [];
+    if (tags.length > 0) {
+      filter.push(`slo.attributes.tags: (${tags.join(' OR ')})`);
     }
 
     if (!!includeOutdatedOnly) {
-      filter = `slo.attributes.version < ${SLO_MODEL_VERSION}${
-        tags ? ` and slo.attributes.tags : ${tagString}` : ``
-      }`;
-    } else if (tags) {
-      filter = `slo.attributes.tags : ${tagString}`;
+      filter.push(`slo.attributes.version < ${SLO_MODEL_VERSION}`);
     }
 
     const response = await this.soClient.find<StoredSLODefinition>({
@@ -156,7 +136,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       perPage: pagination.perPage,
       search,
       searchFields: ['name'],
-      ...(filter && { filter }),
+      ...(filter.length && { filter: filter.join(' AND ') }),
       sortField: 'id',
       sortOrder: 'asc',
     });
