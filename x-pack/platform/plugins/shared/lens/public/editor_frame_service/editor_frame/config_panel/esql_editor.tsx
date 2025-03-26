@@ -13,7 +13,6 @@ import { isEqual } from 'lodash';
 import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -136,15 +135,6 @@ export function ESQLEditor({
     });
     return () => s?.unsubscribe();
   }, [dataLoading$, dispatch, layerId]);
-
-  useEffect(() => {
-    if (isOfAggregateQueryType(query)) {
-      const updatedQuery = fixESQLQueryWithVariables(query.esql, esqlVariables);
-      if (updatedQuery !== query.esql) {
-        setQuery({ esql: updatedQuery });
-      }
-    }
-  }, [esqlVariables, query]);
 
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
