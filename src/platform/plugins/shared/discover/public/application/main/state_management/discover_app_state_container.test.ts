@@ -24,6 +24,7 @@ import { getDiscoverGlobalStateContainer } from './discover_global_state_contain
 import { omit } from 'lodash';
 import type { InternalStateStore } from './redux';
 import { createInternalStateStore, createRuntimeStateManager } from './redux';
+import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 
 let history: History;
 let stateStorage: IKbnUrlStateStorage;
@@ -41,7 +42,9 @@ describe('Test discover app state container', () => {
     });
     internalState = createInternalStateStore({
       services: discoverServiceMock,
+      customizationContext: mockCustomizationContext,
       runtimeStateManager: createRuntimeStateManager(),
+      urlStateStorage: stateStorage,
     });
     savedSearchState = getSavedSearchContainer({
       services: discoverServiceMock,
