@@ -269,7 +269,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           experimentalFeatures: config.experimentalFeatures,
           telemetry: core.analytics,
           config: config.entityAnalytics.entityStore,
-          apiKeyManager: getEntityStoreApiKeyManager(),          
+          apiKeyManager: getEntityStoreApiKeyManager(),
           security: startPlugins.security,
           request,
         });
