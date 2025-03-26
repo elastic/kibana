@@ -20,7 +20,6 @@ import type { SavedObjectLinksAttributes } from './saved_objects/schema/v1';
 import { CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksStorage } from './content_management';
 import { linksSavedObjectType } from './saved_objects';
-import { embeddableMigrationDefinition } from './content_management/cm_services';
 import { inject, extract } from './references';
 
 export class LinksServerPlugin implements Plugin<object, object> {
@@ -50,10 +49,8 @@ export class LinksServerPlugin implements Plugin<object, object> {
 
     plugins.embeddable.registerEmbeddableFactory({
       id: CONTENT_ID,
-      version: LATEST_VERSION,
       inject,
       extract,
-      getEmbeddableMigrationDefinition: () => embeddableMigrationDefinition,
     });
 
     core.savedObjects.registerType<SavedObjectLinksAttributes>(linksSavedObjectType);

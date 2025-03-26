@@ -14,15 +14,9 @@ import {
   createOptionsSchemas,
   objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
-import type {
-  ContentManagementServicesDefinition as ServicesDefinition,
-  VersionableObject,
-} from '@kbn/object-versioning';
-import type { SavedObjectReference } from '@kbn/core/server';
-import type { LinksByValueSerializedState } from './types';
+import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 
 import {
-  SavedObjectLinksAttributes,
   dashboardLinkSchema as dashboardLinkSchemaV1,
   externalLinkSchema,
   savedObjectLinksAttributesSchema as linksAttributesSchemaV1,
@@ -102,13 +96,4 @@ export const serviceDefinition: ServicesDefinition = {
       },
     },
   },
-};
-
-export const embeddableVersionableObject: VersionableObject<
-  unknown,
-  unknown,
-  LinksByValueSerializedState,
-  { attributes: SavedObjectLinksAttributes; references?: SavedObjectReference[] }
-> = {
-  schema: linksAttributesSchema,
 };

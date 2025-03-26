@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Version } from '@kbn/object-versioning';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type {
   PersistableStateService,
   PersistableState,
   PersistableStateDefinition,
 } from '@kbn/kibana-utils-plugin/common';
-import type { ObjectMigrationDefinition } from '@kbn/object-versioning';
 
 export type EmbeddableStateWithType = {
   enhancements?: SerializableRecord;
@@ -25,8 +23,6 @@ export interface EmbeddableRegistryDefinition<
   P extends EmbeddableStateWithType = EmbeddableStateWithType
 > extends PersistableStateDefinition<P> {
   id: string;
-  version?: Version;
-  getEmbeddableMigrationDefinition?: () => ObjectMigrationDefinition;
 }
 
 export type EmbeddablePersistableStateService = PersistableStateService<EmbeddableStateWithType>;

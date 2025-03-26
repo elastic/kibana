@@ -9,7 +9,6 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import type { ObjectMigrationDefinition } from '@kbn/object-versioning';
 import { EmbeddableStateWithType } from '../common/types';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableRegistryItem>;
@@ -28,5 +27,4 @@ export interface EnhancementRegistryItem<P extends SerializableRecord = Serializ
 export interface EmbeddableRegistryItem<P extends EmbeddableStateWithType = EmbeddableStateWithType>
   extends PersistableState<P> {
   id: string;
-  getEmbeddableMigrationDefinition?: () => ObjectMigrationDefinition;
 }

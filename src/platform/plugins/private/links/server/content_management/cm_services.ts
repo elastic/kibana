@@ -8,18 +8,12 @@
  */
 
 import type {
-  ObjectMigrationDefinition,
   ContentManagementServicesDefinition as ServicesDefinition,
   Version,
 } from '@kbn/object-versioning';
 
 import { serviceDefinition as cmV1 } from './v1/cm_services';
-import { embeddableVersionableObject as embeddableV1 } from './v1/cm_services';
 
 export const cmServicesDefinition: { [version: Version]: ServicesDefinition } = {
   1: cmV1,
-};
-
-export const embeddableMigrationDefinition: ObjectMigrationDefinition = {
-  1: embeddableV1,
 };
