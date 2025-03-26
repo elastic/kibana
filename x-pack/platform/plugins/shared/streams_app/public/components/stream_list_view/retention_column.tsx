@@ -42,7 +42,10 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
           target="_blank"
         >
           {i18n.translate('xpack.streams.streamsRetentionColumn.ilmBadgeLabel', {
-            defaultMessage: 'ILM policy',
+            defaultMessage: 'ILM policy: {name}',
+            values: {
+              name: lifecycle.ilm.policy,
+            },
           })}
         </EuiLink>
       </EuiBadge>

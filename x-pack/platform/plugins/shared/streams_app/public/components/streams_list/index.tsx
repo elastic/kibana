@@ -24,6 +24,7 @@ import {
   StreamDefinition,
   getSegments,
   isDescendantOf,
+  isRootStreamDefinition,
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
@@ -55,14 +56,13 @@ export function asTrees(streams: StreamDefinition[]) {
     }
 
     if (!existingNode) {
-      const segments = getSegments(stream.name);
       const newNode: StreamTree = {
         name: stream.name,
         children: [],
         stream,
         type: isUnwiredStreamDefinition(stream)
           ? 'classic'
-          : segments.length === 1
+          : isRootStreamDefinition(stream)
           ? 'root'
           : 'wired',
       };

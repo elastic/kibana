@@ -115,7 +115,11 @@ export function DocumentsColumn({
           >
             <EuiI18nNumber value={docCount} />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem
+            className={css`
+              border-bottom: 1px solid ${euiThemeVars.euiColorLightestShade};
+            `}
+          >
             <Chart size={{ width: '100%', height: euiThemeVars.euiSizeL }}>
               <SettingsWithTheme xDomain={{ min: start, max: end }} noResults={<div />} />
               <Tooltip

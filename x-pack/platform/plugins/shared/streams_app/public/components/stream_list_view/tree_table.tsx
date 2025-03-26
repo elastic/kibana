@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiIcon, EuiInMemoryTable } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
-import { isUnwiredStreamDefinition, getSegments, isDescendantOf } from '@kbn/streams-schema';
+import {
+  isRootStreamDefinition,
+  isUnwiredStreamDefinition,
+  getSegments,
+  isDescendantOf,
+} from '@kbn/streams-schema';
 import { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
@@ -136,14 +141,13 @@ export function asTrees(streams: ListStreamDetail[]) {
     }
 
     if (!existingNode) {
-      const segments = getSegments(streamDetail.stream.name);
       const newNode: StreamTree = {
         ...streamDetail,
         name: streamDetail.stream.name,
         children: [],
         type: isUnwiredStreamDefinition(streamDetail.stream)
           ? 'classic'
-          : segments.length === 1
+          : isRootStreamDefinition(streamDetail.stream)
           ? 'root'
           : 'wired',
       };

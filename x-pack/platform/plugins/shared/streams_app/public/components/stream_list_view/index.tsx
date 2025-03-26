@@ -38,12 +38,14 @@ export function StreamListView() {
     [streamsRepositoryClient]
   );
 
+  const { refreshAbsoluteTimeRange } = timefilter;
+
   React.useEffect(() => {
     // Refresh charts when list of streams gets refetched
     if (streamsListFetch.value) {
-      timefilter.refreshAbsoluteTimeRange();
+      refreshAbsoluteTimeRange();
     }
-  }, [streamsListFetch.value]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [streamsListFetch.value, refreshAbsoluteTimeRange]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
