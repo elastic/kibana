@@ -260,18 +260,17 @@ export class AutomaticAgentUpgradeTask {
     let numberOfAgentsForUpgrade = Math.round(
       (totalActiveAgents * requiredVersion.percentage) / 100
     );
-    console.log('the total active agents', totalActiveAgents);
-    console.log('the number of agents for upgrade', numberOfAgentsForUpgrade);
+
     // Subtract total number of agents already or on or updating to target version.
     const updatingToKuery = `(upgrade_details.target_version:${requiredVersion.version} AND NOT upgrade_details.state:UPG_FAILED)`;
     const totalOnOrUpdatingToTargetVersionAgents = await this.getAgentCount(
       esClient,
       soClient,
-      `policy_id:${agentPolicy.id} AND (agent.version:${
+      `((policy_id:${agentPolicy.id} AND agent.version:${
         requiredVersion.version
-      } AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}) OR ${updatingToKuery}`
+      }) OR ${updatingToKuery}) AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`
     );
-    console.log('the total count on or updating', totalOnOrUpdatingToTargetVersionAgents);
+
     numberOfAgentsForUpgrade -= totalOnOrUpdatingToTargetVersionAgents;
     // Return if target is already met.
     if (numberOfAgentsForUpgrade <= 0) {

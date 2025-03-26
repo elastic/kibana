@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
+import { EuiIconTip } from '@elastic/eui';
 
 import type { ActionStatus } from '../../../../../types';
 
@@ -88,7 +89,9 @@ export const inProgressTitle = (action: ActionStatus, isAutomatic: boolean | und
         action.type === 'POLICY_REASSIGN' && action.newPolicyId ? `to ${action.newPolicyId}` : '',
       upgradeText: action.type === 'UPGRADE' ? ` to version ${action.version}` : '',
       failuresText: action.nbAgentsFailed > 0 ? `, has ${action.nbAgentsFailed} failure(s)` : '',
-      automaticIcon: isAutomatic ? <p>icon here</p> : null,
+      automaticIcon: isAutomatic ? (
+        <EuiIconTip type="timeRefresh" content="Triggered By Automatic Upgrade" />
+      ) : null,
     }}
   />
 );

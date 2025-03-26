@@ -34,8 +34,6 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
   onClickViewAgents: (action: ActionStatus) => void;
   onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
 }> = ({ action, abortUpgrade, onClickViewAgents, onClickManageAutoUpgradeAgents }) => {
-  // get the total agents in policy from the policy id
-
   const { docLinks } = useStartServices();
   const theme = useEuiTheme();
   const isAutomaticUpgrade = action.is_automatic;
