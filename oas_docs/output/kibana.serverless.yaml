@@ -212,6 +212,11 @@ tags:
     x-displayName: System
     description: |
       Get information about the system status, resource usage, and installed plugins.
+  - externalDocs:
+      description: Task manager
+      url: https://www.elastic.co/guide/en/kibana/current/task-manager-production-considerations.html
+    name: task manager
+    x-displayName: Task manager
 paths:
   /api/actions/connector_types:
     get:
@@ -38860,6 +38865,2654 @@ paths:
       summary: Get Kibana's current status
       tags:
         - system
+<<<<<<< HEAD
+=======
+  /api/streams:
+    get:
+      description: Fetches list of all streams
+      operationId: get-streams
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Get stream list
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/_disable:
+    post:
+      description: Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.
+      operationId: post-streams-disable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Disable streams
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/_enable:
+    post:
+      description: Enables wired streams
+      operationId: post-streams-enable
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Enable streams
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/_resync:
+    post:
+      description: Resyncs all streams, making sure that Elasticsearch assets are up to date
+      operationId: post-streams-resync
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Resync streams
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}:
+    delete:
+      description: Deletes a stream definition and the underlying data stream
+      operationId: delete-streams-name
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Delete a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+    get:
+      description: Fetches a stream definition and associated dashboards
+      operationId: get-streams-name
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Get a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+    put:
+      description: Creates or updates a stream definition. Classic streams can not be created through this API, only updated
+      operationId: put-streams-name
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - anyOf:
+                    - allOf:
+                        - type: object
+                          properties:
+                            dashboards:
+                              items:
+                                minLength: 1
+                                type: string
+                              type: array
+                          required:
+                            - dashboards
+                        - type: object
+                          properties:
+                            stream:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                ingest:
+                                  allOf:
+                                    - type: object
+                                      properties:
+                                        lifecycle:
+                                          anyOf:
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                dsl:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    data_retention:
+                                                      minLength: 1
+                                                      type: string
+                                              required:
+                                                - dsl
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                ilm:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    policy:
+                                                      minLength: 1
+                                                      type: string
+                                                  required:
+                                                    - policy
+                                              required:
+                                                - ilm
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                inherit:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties: {}
+                                              required:
+                                                - inherit
+                                        processing:
+                                          items:
+                                            anyOf:
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  date:
+                                                    allOf:
+                                                      - type: object
+                                                        properties:
+                                                          description:
+                                                            type: string
+                                                          if:
+                                                            anyOf:
+                                                              - anyOf:
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - exists
+                                                                          - notExists
+                                                                        type: string
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - eq
+                                                                          - neq
+                                                                          - lt
+                                                                          - lte
+                                                                          - gt
+                                                                          - gte
+                                                                          - contains
+                                                                          - startsWith
+                                                                          - endsWith
+                                                                        type: string
+                                                                      value:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                      - value
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  and:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - and
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  or:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - or
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  never:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - never
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  always:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - always
+                                                          ignore_failure:
+                                                            type: boolean
+                                                        required:
+                                                          - if
+                                                      - type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          formats:
+                                                            items:
+                                                              minLength: 1
+                                                              type: string
+                                                            type: array
+                                                          locale:
+                                                            minLength: 1
+                                                            type: string
+                                                          output_format:
+                                                            minLength: 1
+                                                            type: string
+                                                          target_field:
+                                                            minLength: 1
+                                                            type: string
+                                                          timezone:
+                                                            minLength: 1
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                          - formats
+                                                required:
+                                                  - date
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  dissect:
+                                                    allOf:
+                                                      - type: object
+                                                        properties:
+                                                          description:
+                                                            type: string
+                                                          if:
+                                                            anyOf:
+                                                              - anyOf:
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - exists
+                                                                          - notExists
+                                                                        type: string
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - eq
+                                                                          - neq
+                                                                          - lt
+                                                                          - lte
+                                                                          - gt
+                                                                          - gte
+                                                                          - contains
+                                                                          - startsWith
+                                                                          - endsWith
+                                                                        type: string
+                                                                      value:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                      - value
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  and:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - and
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  or:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - or
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  never:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - never
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  always:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - always
+                                                          ignore_failure:
+                                                            type: boolean
+                                                        required:
+                                                          - if
+                                                      - type: object
+                                                        properties:
+                                                          append_separator:
+                                                            minLength: 1
+                                                            type: string
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          ignore_missing:
+                                                            type: boolean
+                                                          pattern:
+                                                            minLength: 1
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                          - pattern
+                                                required:
+                                                  - dissect
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  grok:
+                                                    allOf:
+                                                      - type: object
+                                                        properties:
+                                                          description:
+                                                            type: string
+                                                          if:
+                                                            anyOf:
+                                                              - anyOf:
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - exists
+                                                                          - notExists
+                                                                        type: string
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - eq
+                                                                          - neq
+                                                                          - lt
+                                                                          - lte
+                                                                          - gt
+                                                                          - gte
+                                                                          - contains
+                                                                          - startsWith
+                                                                          - endsWith
+                                                                        type: string
+                                                                      value:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                      - value
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  and:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - and
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  or:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - or
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  never:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - never
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  always:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - always
+                                                          ignore_failure:
+                                                            type: boolean
+                                                        required:
+                                                          - if
+                                                      - type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          ignore_missing:
+                                                            type: boolean
+                                                          pattern_definitions:
+                                                            additionalProperties:
+                                                              type: string
+                                                            type: object
+                                                          patterns:
+                                                            items:
+                                                              minLength: 1
+                                                              type: string
+                                                            minItems: 1
+                                                            type: array
+                                                        required:
+                                                          - field
+                                                          - patterns
+                                                required:
+                                                  - grok
+                                          type: array
+                                      required:
+                                        - lifecycle
+                                        - processing
+                                    - type: object
+                                      properties:
+                                        wired:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            fields:
+                                              additionalProperties:
+                                                allOf:
+                                                  - additionalProperties:
+                                                      anyOf:
+                                                        - anyOf:
+                                                            - type: string
+                                                            - type: number
+                                                            - type: boolean
+                                                            - enum:
+                                                                - 'null'
+                                                              nullable: true
+                                                            - not: {}
+                                                        - items:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                              - enum:
+                                                                  - 'null'
+                                                                nullable: true
+                                                              - not: {}
+                                                          type: array
+                                                        - {}
+                                                    type: object
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          format:
+                                                            minLength: 1
+                                                            type: string
+                                                          type:
+                                                            enum:
+                                                              - keyword
+                                                              - match_only_text
+                                                              - long
+                                                              - double
+                                                              - date
+                                                              - boolean
+                                                              - ip
+                                                            type: string
+                                                        required:
+                                                          - type
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          type:
+                                                            enum:
+                                                              - system
+                                                            type: string
+                                                        required:
+                                                          - type
+                                              type: object
+                                            routing:
+                                              items:
+                                                additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  destination:
+                                                    minLength: 1
+                                                    type: string
+                                                  if:
+                                                    anyOf:
+                                                      - anyOf:
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              field:
+                                                                minLength: 1
+                                                                type: string
+                                                              operator:
+                                                                enum:
+                                                                  - exists
+                                                                  - notExists
+                                                                type: string
+                                                            required:
+                                                              - field
+                                                              - operator
+                                                          - additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              field:
+                                                                minLength: 1
+                                                                type: string
+                                                              operator:
+                                                                enum:
+                                                                  - eq
+                                                                  - neq
+                                                                  - lt
+                                                                  - lte
+                                                                  - gt
+                                                                  - gte
+                                                                  - contains
+                                                                  - startsWith
+                                                                  - endsWith
+                                                                type: string
+                                                              value:
+                                                                anyOf:
+                                                                  - type: string
+                                                                  - type: number
+                                                                  - type: boolean
+                                                            required:
+                                                              - field
+                                                              - operator
+                                                              - value
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          and:
+                                                            items: {}
+                                                            type: array
+                                                        required:
+                                                          - and
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          or:
+                                                            items: {}
+                                                            type: array
+                                                        required:
+                                                          - or
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          never:
+                                                            additionalProperties: false
+                                                            type: object
+                                                            properties: {}
+                                                        required:
+                                                          - never
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          always:
+                                                            additionalProperties: false
+                                                            type: object
+                                                            properties: {}
+                                                        required:
+                                                          - always
+                                                required:
+                                                  - destination
+                                                  - if
+                                              type: array
+                                          required:
+                                            - fields
+                                            - routing
+                                      required:
+                                        - wired
+                              required:
+                                - ingest
+                          required:
+                            - stream
+                    - allOf:
+                        - type: object
+                          properties:
+                            dashboards:
+                              items:
+                                minLength: 1
+                                type: string
+                              type: array
+                          required:
+                            - dashboards
+                        - type: object
+                          properties:
+                            stream:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                ingest:
+                                  allOf:
+                                    - type: object
+                                      properties:
+                                        lifecycle:
+                                          anyOf:
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                dsl:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    data_retention:
+                                                      minLength: 1
+                                                      type: string
+                                              required:
+                                                - dsl
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                ilm:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    policy:
+                                                      minLength: 1
+                                                      type: string
+                                                  required:
+                                                    - policy
+                                              required:
+                                                - ilm
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                inherit:
+                                                  additionalProperties: false
+                                                  type: object
+                                                  properties: {}
+                                              required:
+                                                - inherit
+                                        processing:
+                                          items:
+                                            anyOf:
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  date:
+                                                    allOf:
+                                                      - type: object
+                                                        properties:
+                                                          description:
+                                                            type: string
+                                                          if:
+                                                            anyOf:
+                                                              - anyOf:
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - exists
+                                                                          - notExists
+                                                                        type: string
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - eq
+                                                                          - neq
+                                                                          - lt
+                                                                          - lte
+                                                                          - gt
+                                                                          - gte
+                                                                          - contains
+                                                                          - startsWith
+                                                                          - endsWith
+                                                                        type: string
+                                                                      value:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                      - value
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  and:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - and
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  or:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - or
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  never:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - never
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  always:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - always
+                                                          ignore_failure:
+                                                            type: boolean
+                                                        required:
+                                                          - if
+                                                      - type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          formats:
+                                                            items:
+                                                              minLength: 1
+                                                              type: string
+                                                            type: array
+                                                          locale:
+                                                            minLength: 1
+                                                            type: string
+                                                          output_format:
+                                                            minLength: 1
+                                                            type: string
+                                                          target_field:
+                                                            minLength: 1
+                                                            type: string
+                                                          timezone:
+                                                            minLength: 1
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                          - formats
+                                                required:
+                                                  - date
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  dissect:
+                                                    allOf:
+                                                      - type: object
+                                                        properties:
+                                                          description:
+                                                            type: string
+                                                          if:
+                                                            anyOf:
+                                                              - anyOf:
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - exists
+                                                                          - notExists
+                                                                        type: string
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - eq
+                                                                          - neq
+                                                                          - lt
+                                                                          - lte
+                                                                          - gt
+                                                                          - gte
+                                                                          - contains
+                                                                          - startsWith
+                                                                          - endsWith
+                                                                        type: string
+                                                                      value:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                      - value
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  and:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - and
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  or:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - or
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  never:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - never
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  always:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - always
+                                                          ignore_failure:
+                                                            type: boolean
+                                                        required:
+                                                          - if
+                                                      - type: object
+                                                        properties:
+                                                          append_separator:
+                                                            minLength: 1
+                                                            type: string
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          ignore_missing:
+                                                            type: boolean
+                                                          pattern:
+                                                            minLength: 1
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                          - pattern
+                                                required:
+                                                  - dissect
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  grok:
+                                                    allOf:
+                                                      - type: object
+                                                        properties:
+                                                          description:
+                                                            type: string
+                                                          if:
+                                                            anyOf:
+                                                              - anyOf:
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - exists
+                                                                          - notExists
+                                                                        type: string
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                  - additionalProperties: false
+                                                                    type: object
+                                                                    properties:
+                                                                      field:
+                                                                        minLength: 1
+                                                                        type: string
+                                                                      operator:
+                                                                        enum:
+                                                                          - eq
+                                                                          - neq
+                                                                          - lt
+                                                                          - lte
+                                                                          - gt
+                                                                          - gte
+                                                                          - contains
+                                                                          - startsWith
+                                                                          - endsWith
+                                                                        type: string
+                                                                      value:
+                                                                        anyOf:
+                                                                          - type: string
+                                                                          - type: number
+                                                                          - type: boolean
+                                                                    required:
+                                                                      - field
+                                                                      - operator
+                                                                      - value
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  and:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - and
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  or:
+                                                                    items: {}
+                                                                    type: array
+                                                                required:
+                                                                  - or
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  never:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - never
+                                                              - additionalProperties: false
+                                                                type: object
+                                                                properties:
+                                                                  always:
+                                                                    additionalProperties: false
+                                                                    type: object
+                                                                    properties: {}
+                                                                required:
+                                                                  - always
+                                                          ignore_failure:
+                                                            type: boolean
+                                                        required:
+                                                          - if
+                                                      - type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          ignore_missing:
+                                                            type: boolean
+                                                          pattern_definitions:
+                                                            additionalProperties:
+                                                              type: string
+                                                            type: object
+                                                          patterns:
+                                                            items:
+                                                              minLength: 1
+                                                              type: string
+                                                            minItems: 1
+                                                            type: array
+                                                        required:
+                                                          - field
+                                                          - patterns
+                                                required:
+                                                  - grok
+                                          type: array
+                                      required:
+                                        - lifecycle
+                                        - processing
+                                    - type: object
+                                      properties:
+                                        unwired:
+                                          additionalProperties: false
+                                          type: object
+                                          properties: {}
+                                      required:
+                                        - unwired
+                              required:
+                                - ingest
+                          required:
+                            - stream
+                - allOf:
+                    - type: object
+                      properties:
+                        dashboards:
+                          items:
+                            minLength: 1
+                            type: string
+                          type: array
+                      required:
+                        - dashboards
+                    - type: object
+                      properties:
+                        stream:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            group:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                description:
+                                  type: string
+                                members:
+                                  items:
+                                    minLength: 1
+                                    type: string
+                                  type: array
+                              required:
+                                - members
+                          required:
+                            - group
+                      required:
+                        - stream
+      responses: {}
+      summary: Create or update a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/_fork:
+    post:
+      description: Forks a wired stream and creates a child stream
+      operationId: post-streams-name-fork
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                if:
+                  anyOf:
+                    - anyOf:
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            field:
+                              minLength: 1
+                              type: string
+                            operator:
+                              enum:
+                                - exists
+                                - notExists
+                              type: string
+                          required:
+                            - field
+                            - operator
+                        - additionalProperties: false
+                          type: object
+                          properties:
+                            field:
+                              minLength: 1
+                              type: string
+                            operator:
+                              enum:
+                                - eq
+                                - neq
+                                - lt
+                                - lte
+                                - gt
+                                - gte
+                                - contains
+                                - startsWith
+                                - endsWith
+                              type: string
+                            value:
+                              anyOf:
+                                - type: string
+                                - type: number
+                                - type: boolean
+                          required:
+                            - field
+                            - operator
+                            - value
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        and:
+                          items: {}
+                          type: array
+                      required:
+                        - and
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        or:
+                          items: {}
+                          type: array
+                      required:
+                        - or
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        never:
+                          additionalProperties: false
+                          type: object
+                          properties: {}
+                      required:
+                        - never
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        always:
+                          additionalProperties: false
+                          type: object
+                          properties: {}
+                      required:
+                        - always
+                stream:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                  required:
+                    - name
+              required:
+                - stream
+                - if
+      responses: {}
+      summary: Fork a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/_group:
+    get:
+      description: Fetches the group settings of a group stream definition
+      operationId: get-streams-name-group
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Get group stream settings
+      tags:
+        - streams
+      x-state: Technical Preview
+    put:
+      description: Upserts the group settings of a group stream definition
+      operationId: put-streams-name-group
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                group:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    description:
+                      type: string
+                    members:
+                      items:
+                        minLength: 1
+                        type: string
+                      type: array
+                  required:
+                    - members
+              required:
+                - group
+      responses: {}
+      summary: Upsert group stream settings
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/_ingest:
+    get:
+      description: Fetches the ingest settings of an ingest stream definition
+      operationId: get-streams-name-ingest
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Get ingest stream settings
+      tags:
+        - streams
+      x-state: Technical Preview
+    put:
+      description: Upserts the ingest settings of an ingest stream definition
+      operationId: put-streams-name-ingest
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties:
+                    ingest:
+                      allOf:
+                        - type: object
+                          properties:
+                            lifecycle:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    dsl:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        data_retention:
+                                          minLength: 1
+                                          type: string
+                                  required:
+                                    - dsl
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    ilm:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        policy:
+                                          minLength: 1
+                                          type: string
+                                      required:
+                                        - policy
+                                  required:
+                                    - ilm
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    inherit:
+                                      additionalProperties: false
+                                      type: object
+                                      properties: {}
+                                  required:
+                                    - inherit
+                            processing:
+                              items:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      date:
+                                        allOf:
+                                          - type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              if:
+                                                anyOf:
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - exists
+                                                              - notExists
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - eq
+                                                              - neq
+                                                              - lt
+                                                              - lte
+                                                              - gt
+                                                              - gte
+                                                              - contains
+                                                              - startsWith
+                                                              - endsWith
+                                                            type: string
+                                                          value:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                          - value
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      and:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - and
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      or:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - or
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      never:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - never
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      always:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - always
+                                              ignore_failure:
+                                                type: boolean
+                                            required:
+                                              - if
+                                          - type: object
+                                            properties:
+                                              field:
+                                                minLength: 1
+                                                type: string
+                                              formats:
+                                                items:
+                                                  minLength: 1
+                                                  type: string
+                                                type: array
+                                              locale:
+                                                minLength: 1
+                                                type: string
+                                              output_format:
+                                                minLength: 1
+                                                type: string
+                                              target_field:
+                                                minLength: 1
+                                                type: string
+                                              timezone:
+                                                minLength: 1
+                                                type: string
+                                            required:
+                                              - field
+                                              - formats
+                                    required:
+                                      - date
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      dissect:
+                                        allOf:
+                                          - type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              if:
+                                                anyOf:
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - exists
+                                                              - notExists
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - eq
+                                                              - neq
+                                                              - lt
+                                                              - lte
+                                                              - gt
+                                                              - gte
+                                                              - contains
+                                                              - startsWith
+                                                              - endsWith
+                                                            type: string
+                                                          value:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                          - value
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      and:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - and
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      or:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - or
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      never:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - never
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      always:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - always
+                                              ignore_failure:
+                                                type: boolean
+                                            required:
+                                              - if
+                                          - type: object
+                                            properties:
+                                              append_separator:
+                                                minLength: 1
+                                                type: string
+                                              field:
+                                                minLength: 1
+                                                type: string
+                                              ignore_missing:
+                                                type: boolean
+                                              pattern:
+                                                minLength: 1
+                                                type: string
+                                            required:
+                                              - field
+                                              - pattern
+                                    required:
+                                      - dissect
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      grok:
+                                        allOf:
+                                          - type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              if:
+                                                anyOf:
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - exists
+                                                              - notExists
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - eq
+                                                              - neq
+                                                              - lt
+                                                              - lte
+                                                              - gt
+                                                              - gte
+                                                              - contains
+                                                              - startsWith
+                                                              - endsWith
+                                                            type: string
+                                                          value:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                          - value
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      and:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - and
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      or:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - or
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      never:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - never
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      always:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - always
+                                              ignore_failure:
+                                                type: boolean
+                                            required:
+                                              - if
+                                          - type: object
+                                            properties:
+                                              field:
+                                                minLength: 1
+                                                type: string
+                                              ignore_missing:
+                                                type: boolean
+                                              pattern_definitions:
+                                                additionalProperties:
+                                                  type: string
+                                                type: object
+                                              patterns:
+                                                items:
+                                                  minLength: 1
+                                                  type: string
+                                                minItems: 1
+                                                type: array
+                                            required:
+                                              - field
+                                              - patterns
+                                    required:
+                                      - grok
+                              type: array
+                          required:
+                            - lifecycle
+                            - processing
+                        - type: object
+                          properties:
+                            wired:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                fields:
+                                  additionalProperties:
+                                    allOf:
+                                      - additionalProperties:
+                                          anyOf:
+                                            - anyOf:
+                                                - type: string
+                                                - type: number
+                                                - type: boolean
+                                                - enum:
+                                                    - 'null'
+                                                  nullable: true
+                                                - not: {}
+                                            - items:
+                                                anyOf:
+                                                  - type: string
+                                                  - type: number
+                                                  - type: boolean
+                                                  - enum:
+                                                      - 'null'
+                                                    nullable: true
+                                                  - not: {}
+                                              type: array
+                                            - {}
+                                        type: object
+                                      - anyOf:
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              format:
+                                                minLength: 1
+                                                type: string
+                                              type:
+                                                enum:
+                                                  - keyword
+                                                  - match_only_text
+                                                  - long
+                                                  - double
+                                                  - date
+                                                  - boolean
+                                                  - ip
+                                                type: string
+                                            required:
+                                              - type
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              type:
+                                                enum:
+                                                  - system
+                                                type: string
+                                            required:
+                                              - type
+                                  type: object
+                                routing:
+                                  items:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      destination:
+                                        minLength: 1
+                                        type: string
+                                      if:
+                                        anyOf:
+                                          - anyOf:
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  field:
+                                                    minLength: 1
+                                                    type: string
+                                                  operator:
+                                                    enum:
+                                                      - exists
+                                                      - notExists
+                                                    type: string
+                                                required:
+                                                  - field
+                                                  - operator
+                                              - additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  field:
+                                                    minLength: 1
+                                                    type: string
+                                                  operator:
+                                                    enum:
+                                                      - eq
+                                                      - neq
+                                                      - lt
+                                                      - lte
+                                                      - gt
+                                                      - gte
+                                                      - contains
+                                                      - startsWith
+                                                      - endsWith
+                                                    type: string
+                                                  value:
+                                                    anyOf:
+                                                      - type: string
+                                                      - type: number
+                                                      - type: boolean
+                                                required:
+                                                  - field
+                                                  - operator
+                                                  - value
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              and:
+                                                items: {}
+                                                type: array
+                                            required:
+                                              - and
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              or:
+                                                items: {}
+                                                type: array
+                                            required:
+                                              - or
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              never:
+                                                additionalProperties: false
+                                                type: object
+                                                properties: {}
+                                            required:
+                                              - never
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              always:
+                                                additionalProperties: false
+                                                type: object
+                                                properties: {}
+                                            required:
+                                              - always
+                                    required:
+                                      - destination
+                                      - if
+                                  type: array
+                              required:
+                                - fields
+                                - routing
+                          required:
+                            - wired
+                  required:
+                    - ingest
+                - additionalProperties: false
+                  type: object
+                  properties:
+                    ingest:
+                      allOf:
+                        - type: object
+                          properties:
+                            lifecycle:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    dsl:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        data_retention:
+                                          minLength: 1
+                                          type: string
+                                  required:
+                                    - dsl
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    ilm:
+                                      additionalProperties: false
+                                      type: object
+                                      properties:
+                                        policy:
+                                          minLength: 1
+                                          type: string
+                                      required:
+                                        - policy
+                                  required:
+                                    - ilm
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    inherit:
+                                      additionalProperties: false
+                                      type: object
+                                      properties: {}
+                                  required:
+                                    - inherit
+                            processing:
+                              items:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      date:
+                                        allOf:
+                                          - type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              if:
+                                                anyOf:
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - exists
+                                                              - notExists
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - eq
+                                                              - neq
+                                                              - lt
+                                                              - lte
+                                                              - gt
+                                                              - gte
+                                                              - contains
+                                                              - startsWith
+                                                              - endsWith
+                                                            type: string
+                                                          value:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                          - value
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      and:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - and
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      or:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - or
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      never:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - never
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      always:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - always
+                                              ignore_failure:
+                                                type: boolean
+                                            required:
+                                              - if
+                                          - type: object
+                                            properties:
+                                              field:
+                                                minLength: 1
+                                                type: string
+                                              formats:
+                                                items:
+                                                  minLength: 1
+                                                  type: string
+                                                type: array
+                                              locale:
+                                                minLength: 1
+                                                type: string
+                                              output_format:
+                                                minLength: 1
+                                                type: string
+                                              target_field:
+                                                minLength: 1
+                                                type: string
+                                              timezone:
+                                                minLength: 1
+                                                type: string
+                                            required:
+                                              - field
+                                              - formats
+                                    required:
+                                      - date
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      dissect:
+                                        allOf:
+                                          - type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              if:
+                                                anyOf:
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - exists
+                                                              - notExists
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - eq
+                                                              - neq
+                                                              - lt
+                                                              - lte
+                                                              - gt
+                                                              - gte
+                                                              - contains
+                                                              - startsWith
+                                                              - endsWith
+                                                            type: string
+                                                          value:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                          - value
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      and:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - and
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      or:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - or
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      never:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - never
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      always:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - always
+                                              ignore_failure:
+                                                type: boolean
+                                            required:
+                                              - if
+                                          - type: object
+                                            properties:
+                                              append_separator:
+                                                minLength: 1
+                                                type: string
+                                              field:
+                                                minLength: 1
+                                                type: string
+                                              ignore_missing:
+                                                type: boolean
+                                              pattern:
+                                                minLength: 1
+                                                type: string
+                                            required:
+                                              - field
+                                              - pattern
+                                    required:
+                                      - dissect
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      grok:
+                                        allOf:
+                                          - type: object
+                                            properties:
+                                              description:
+                                                type: string
+                                              if:
+                                                anyOf:
+                                                  - anyOf:
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - exists
+                                                              - notExists
+                                                            type: string
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          field:
+                                                            minLength: 1
+                                                            type: string
+                                                          operator:
+                                                            enum:
+                                                              - eq
+                                                              - neq
+                                                              - lt
+                                                              - lte
+                                                              - gt
+                                                              - gte
+                                                              - contains
+                                                              - startsWith
+                                                              - endsWith
+                                                            type: string
+                                                          value:
+                                                            anyOf:
+                                                              - type: string
+                                                              - type: number
+                                                              - type: boolean
+                                                        required:
+                                                          - field
+                                                          - operator
+                                                          - value
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      and:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - and
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      or:
+                                                        items: {}
+                                                        type: array
+                                                    required:
+                                                      - or
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      never:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - never
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      always:
+                                                        additionalProperties: false
+                                                        type: object
+                                                        properties: {}
+                                                    required:
+                                                      - always
+                                              ignore_failure:
+                                                type: boolean
+                                            required:
+                                              - if
+                                          - type: object
+                                            properties:
+                                              field:
+                                                minLength: 1
+                                                type: string
+                                              ignore_missing:
+                                                type: boolean
+                                              pattern_definitions:
+                                                additionalProperties:
+                                                  type: string
+                                                type: object
+                                              patterns:
+                                                items:
+                                                  minLength: 1
+                                                  type: string
+                                                minItems: 1
+                                                type: array
+                                            required:
+                                              - field
+                                              - patterns
+                                    required:
+                                      - grok
+                              type: array
+                          required:
+                            - lifecycle
+                            - processing
+                        - type: object
+                          properties:
+                            unwired:
+                              additionalProperties: false
+                              type: object
+                              properties: {}
+                          required:
+                            - unwired
+                  required:
+                    - ingest
+      responses: {}
+      summary: Update ingest stream settings
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/content/export:
+    post:
+      description: Exports the content associated to a stream.
+      operationId: post-streams-name-content-export
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Export stream content
+      tags:
+        - streams
+  /api/streams/{name}/content/import:
+    post:
+      description: Links content objects to a stream.
+      operationId: post-streams-name-content-import
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                content: {}
+              required:
+                - content
+      responses: {}
+      summary: Import content into a stream
+      tags:
+        - streams
+  /api/streams/{name}/dashboards:
+    get:
+      description: Fetches all dashboards linked to a stream that are visible to the current user in the current space.
+      operationId: get-streams-name-dashboards
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Get stream dashboards
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/dashboards/_bulk:
+    post:
+      description: Bulk update dashboards linked to a stream. Can link new dashboards and delete existing ones.
+      operationId: post-streams-name-dashboards-bulk
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                operations:
+                  items:
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          index:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                            required:
+                              - id
+                        required:
+                          - index
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          delete:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                            required:
+                              - id
+                        required:
+                          - delete
+                  type: array
+              required:
+                - operations
+      responses: {}
+      summary: Bulk update dashboards
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/dashboards/{dashboardId}:
+    delete:
+      description: Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.
+      operationId: delete-streams-name-dashboards-dashboardid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: dashboardId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Unlink a dashboard from a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+    put:
+      description: Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.
+      operationId: put-streams-name-dashboards-dashboardid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: dashboardId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Link a dashboard to a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/task_manager/_health:
+    get:
+      description: |
+        Get the health status of the Kibana task manager.
+      operationId: task-manager-health
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                taskManagerHealthResponse1:
+                  $ref: '#/components/examples/Task_manager_health_Serverless_APIs_health_200response_serverless'
+              schema:
+                $ref: '#/components/schemas/Task_manager_health_Serverless_APIs_health_response_serverless'
+          description: Indicates a successful call
+      summary: Get the task manager health
+      tags:
+        - task manager
+>>>>>>> c9bfa082a07 ([DOCS] Add minimal task manager health APIs (#213862))
   /api/timeline:
     delete:
       description: Delete one or more Timelines or Timeline templates.
@@ -41650,6 +44303,305 @@ components:
               icon: indexPatternApp
               title: Kibana Sample Data Logs
             type: index-pattern
+    Task_manager_health_Serverless_APIs_health_200response_serverless:
+      description: A successful response from `GET api/task_manager/_health`.
+      value: |-
+        {
+          "id": "b44483e1-3ba2-4f28-93d0-1d96c69c32c1",
+          "timestamp": "2025-03-21T21:49:50.409Z",
+          "status": "OK",
+          "last_update": "2025-03-21T21:48:53.996Z",
+          "stats": {
+            "configuration": {
+              "timestamp": "2025-03-21T21:47:51.663Z",
+              "value": {
+                "request_capacity": 1000,
+                "monitored_aggregated_stats_refresh_rate": 60000,
+                "monitored_stats_running_average_window": 50,
+                "monitored_task_execution_thresholds": {
+                  "custom": {},
+                  "default": {
+                    "error_threshold": 90,
+                    "warn_threshold": 80
+                  }
+                },
+                "claim_strategy": "mget",
+                "poll_interval": 500,
+                "capacity": {
+                  "config": 10,
+                  "as_workers": 10,
+                  "as_cost": 20
+                }
+              },
+              "status": "OK"
+            },
+            "workload": {
+              "timestamp": "2025-03-21T21:48:53.996Z",
+              "value": {
+                "count": 21,
+                "cost": 42,
+                "task_types": {
+                  "Fleet-Metrics-Task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "Fleet-Usage-Logger": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "Fleet-Usage-Sender": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "ML:saved-objects-sync": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "actions:connector_usage_reporting": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "actions_telemetry": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "alerting_health_check": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "alerting_telemetry": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "alerts_invalidate_api_keys": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "cases-telemetry-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "dashboard_telemetry": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "fleet:automatic-agent-upgrade-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "fleet:check-deleted-files-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "fleet:delete-unenrolled-agents-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "fleet:sync-integrations-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "fleet:unenroll-inactive-agents-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "fleet:upgrade-agentless-deployments-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "logs-data-telemetry": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "running": 1
+                    }
+                  },
+                  "session_cleanup": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "task_manager:delete_inactive_background_task_nodes": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "task_manager:mark_removed_tasks_as_unrecognized": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  }
+                },
+                "non_recurring": 1,
+                "non_recurring_cost": 2,
+                "schedule": [
+                  [
+                    "1m",
+                    2
+                  ],
+                  [
+                    "5m",
+                    2
+                  ],
+                  [
+                    "10m",
+                    1
+                  ],
+                  [
+                    "15m",
+                    1
+                  ],
+                  [
+                    "30m",
+                    1
+                  ],
+                  [
+                    "1h",
+                    5
+                  ],
+                  [
+                    "3600s",
+                    1
+                  ],
+                  [
+                    "60m",
+                    1
+                  ],
+                  [
+                    "720m",
+                    1
+                  ],
+                  [
+                    "1d",
+                    4
+                  ],
+                  [
+                    "1440m",
+                    1
+                  ]
+                ],
+                "overdue": 0,
+                "overdue_cost": 0,
+                "overdue_non_recurring": 0,
+                "estimated_schedule_density": [
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "capacity_requirements": {
+                  "per_minute": 2,
+                  "per_hour": 43,
+                  "per_day": 7
+                }
+              },
+              "status": "OK"
+            }
+          }
+        }
     get_connector_types_generativeai_response:
       summary: A list of connector types for the `generativeAI` feature.
       value:
@@ -56437,6 +59389,33 @@ components:
         timeWindow:
           $ref: '#/components/schemas/SLOs_time_window'
       title: Update SLO request
+      type: object
+    Task_manager_health_Serverless_APIs_configuration:
+      description: |
+        This object summarizes the current configuration of Task Manager. This includes dynamic configurations that change over time, such as `poll_interval` and `max_workers`, which can adjust in reaction to changing load on the system.
+      type: object
+    Task_manager_health_Serverless_APIs_health_response_serverless:
+      title: Task health response properties
+      type: object
+      properties:
+        id:
+          type: string
+        last_update:
+          type: string
+        stats:
+          type: object
+          properties:
+            configuration:
+              $ref: '#/components/schemas/Task_manager_health_Serverless_APIs_configuration'
+            workload:
+              $ref: '#/components/schemas/Task_manager_health_Serverless_APIs_workload'
+        status:
+          type: string
+        timestamp:
+          type: string
+    Task_manager_health_Serverless_APIs_workload:
+      description: |
+        This object summarizes the work load across the cluster, including the tasks in the system, their types, and current status.
       type: object
     bedrock_config:
       title: Connector request properties for an Amazon Bedrock connector
