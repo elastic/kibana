@@ -9,6 +9,11 @@ import React from 'react';
 import { DataViewContext } from '../../common/contexts/data_view_context';
 import { TestProvider } from '../../test/test_provider';
 import { CloudSecurityDataTable, CloudSecurityDataTableProps } from './cloud_security_data_table';
+import { useExpandableFlyoutCsp } from '../../common/hooks/use_expandable_flyout_csp';
+
+jest.mock('../../common/hooks/use_expandable_flyout_csp', () => ({
+  useExpandableFlyoutCsp: jest.fn(),
+}));
 
 const mockDataView = {
   fields: {
@@ -85,6 +90,11 @@ const renderDataTable = (props: Partial<CloudSecurityDataTableProps> = {}) => {
 };
 
 describe('CloudSecurityDataTable', () => {
+  (useExpandableFlyoutCsp as jest.Mock).mockReturnValue({
+    openFlyout: jest.fn(),
+    closeFlyout: jest.fn(),
+    setFlyoutCloseCallback: jest.fn(),
+  });
   it('renders loading state', () => {
     const { getByTestId } = renderDataTable({ isLoading: true, rows: [] });
     expect(getByTestId('unifiedDataTableLoading')).toBeInTheDocument();

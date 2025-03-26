@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo, useContext } from 'react';
+import React, { useState, useMemo } from 'react';
 import _ from 'lodash';
 import {
   DataGridDensity,
@@ -36,7 +36,7 @@ import { useStyles } from './use_styles';
 import { AdditionalControls } from './additional_controls';
 import { useDataViewContext } from '../../common/contexts/data_view_context';
 import { TakeAction } from '../take_action';
-import { SecuritySolutionContext } from '../../application/security_solution_context';
+import { useExpandableFlyoutCsp } from '../../common/hooks/use_expandable_flyout_csp';
 
 export interface CloudSecurityDefaultColumn {
   id: string;
@@ -249,19 +249,13 @@ export const CloudSecurityDataTable = ({
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
-  const securitySolutionContext = useContext(SecuritySolutionContext);
+  const { openFlyout, closeFlyout, setFlyoutCloseCallback } = useExpandableFlyoutCsp();
 
-  if (
-    !securitySolutionContext ||
-    !securitySolutionContext.useExpandableFlyoutApi ||
-    !securitySolutionContext.useOnExpandableFlyoutClose
-  ) {
+  if (!openFlyout || !closeFlyout) {
     return <></>;
   }
-  const { openFlyout, closeFlyout } = securitySolutionContext.useExpandableFlyoutApi();
-  securitySolutionContext.useOnExpandableFlyoutClose({
-    callback: () => setExpandedDoc(undefined),
-  });
+
+  setFlyoutCloseCallback(setExpandedDoc);
 
   const onExpandDocClick = (record?: DataTableRecord | undefined) => {
     if (record) {
