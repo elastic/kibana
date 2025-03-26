@@ -198,3 +198,17 @@ export async function getKbIndices(es: Client) {
 
   return res.map(({ index }) => index!);
 }
+
+export async function deleteKbIndices(es: Client) {
+  const index = await getKbIndices(es);
+  if (index.length > 0) {
+    await es.indices.delete({ index, ignore_unavailable: true });
+  }
+}
+
+export async function getWriteIndex(es: Client) {
+  const response = await es.indices.getAlias({ index: resourceNames.writeIndexAlias.kb });
+  return Object.entries(response).find(
+    ([index, aliasInfo]) => aliasInfo.aliases[resourceNames.writeIndexAlias.kb]?.is_write_index
+  )?.[0];
+}

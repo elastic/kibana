@@ -25,7 +25,9 @@ export async function reIndexKnowledgeBase({
     );
 
     if (!currentWriteIndexName || !nextWriteIndexName) {
-      logger.debug('No knowledge base indices found. Skipping re-indexing.');
+      logger.info(
+        `No write index was found for alias "${resourceNames.writeIndexAlias.kb}" . Skipping re-indexing of knowledge base.`
+      );
       return;
     }
 
@@ -99,8 +101,6 @@ export async function getCurrentAndNextWriteIndexName(esClient: {
     { name: resourceNames.writeIndexAlias.kb },
     { ignore: [404] }
   );
-
-  // const currentWriteIndexName = Object.keys(response)[0];
 
   const currentWriteIndexName = Object.entries(response).find(
     ([index, aliasInfo]) => aliasInfo.aliases[resourceNames.writeIndexAlias.kb]?.is_write_index

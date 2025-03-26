@@ -14,8 +14,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
   const ml = getService('ml');
-  const retry = getService('retry');
-  const log = getService('log');
 
   describe('when the knowledge base model changes', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)

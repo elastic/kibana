@@ -40,6 +40,7 @@ export default function aiAssistantApiIntegrationTests({
         './knowledge_base/knowledge_base_reindex_to_fix_sparse_vector_support.spec.ts'
       )
     );
+    loadTestFile(require.resolve('./knowledge_base/knowledge_base_reindex.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_setup.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_status.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_user_instructions.spec.ts'));
