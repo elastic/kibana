@@ -305,9 +305,10 @@ const getSuggestions = (
     endLineNumber: position.lineNumber,
     endColumn: model.getLineMaxColumn(position.lineNumber),
   });
-  // if the rest of the line is empty or there is only "
+  // if the rest of the line is empty or there is only " or ends with closing parentheses
   // then template can be inserted, otherwise only name
-  context.addTemplate = isEmptyOrDoubleQuote(lineContentAfterPosition);
+  context.addTemplate =
+    isEmptyOrDoubleQuote(lineContentAfterPosition) || /}*/.test(lineContentAfterPosition);
 
   // if there is " after the cursor, include it in the insert range
   let endColumn = position.column;
@@ -340,7 +341,7 @@ const getSuggestions = (
       })
   );
 };
-const getInsertText = (
+export const getInsertText = (
   { name, insertValue, template, value }: ResultTerm,
   bodyContent: string,
   context: AutoCompleteContext
@@ -449,7 +450,7 @@ export const shouldTriggerSuggestions = (lineContent: string): boolean => {
  */
 export const isEmptyOrDoubleQuote = (lineContent: string): boolean => {
   lineContent = lineContent.trim();
-  return !lineContent || lineContent === '"' || lineContent === '}';
+  return !lineContent || lineContent === '"';
 };
 
 export const hasUnclosedQuote = (lineContent: string): boolean => {
