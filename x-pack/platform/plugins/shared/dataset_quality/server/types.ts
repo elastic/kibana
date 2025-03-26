@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import { CustomRequestHandlerContext } from '@kbn/core/server';
 import type { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
 import {
@@ -19,6 +20,7 @@ export interface DatasetQualityPluginSetupDependencies {
   telemetry: TelemetryPluginSetup;
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
+  alerting?: AlertingServerSetup;
 }
 
 export interface DatasetQualityPluginStartDependencies {
@@ -26,6 +28,7 @@ export interface DatasetQualityPluginStartDependencies {
   telemetry: TelemetryPluginStart;
   taskManager: TaskManagerStartContract;
   usageCollection?: UsageCollectionStart;
+  alerting?: AlertingServerStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

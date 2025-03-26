@@ -52,3 +52,18 @@ export const DEGRADED_DOCS_QUERY = `${_IGNORED}: *`;
 export const ALL_PATTERNS_SELECTOR = '::*';
 export const FAILURE_STORE_SELECTOR = '::failures';
 export const DATA_SELECTOR = '::data';
+
+export const DATASET_QUALITY_RULE_RUNTIME_FIELD_NAME = '_dataStreamName';
+export const DATASET_QUALITY_RULE_RUNTIME_FIELD_MAPPING = {
+  type: 'keyword',
+  script: {
+    source: `
+  def m = /.(?:ds|fs)-(.*?)-[0-9]{4}\.[0-9]{2}\.[0-9]{2}-[0-9]{6}/.matcher(doc['_index'].value);
+  if ( m.matches() ) { 
+      emit(m.group(1));
+  } else {
+      emit(doc['_index'].value)
+  }
+  `,
+  },
+};

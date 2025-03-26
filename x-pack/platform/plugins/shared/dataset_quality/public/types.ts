@@ -6,11 +6,13 @@
  */
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ComponentType } from 'react';
 import type { DatasetQualityProps } from './components/dataset_quality';
@@ -30,14 +32,16 @@ export interface DatasetQualityPluginStart {
 
 export interface DatasetQualityStartDeps {
   data: DataPublicPluginStart;
-  share: SharePluginStart;
-  fieldFormats: FieldFormatsStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  lens: LensPublicStart;
+  dataViewEditor: DataViewEditorStart;
   dataViews: DataViewsPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  lens: LensPublicStart;
+  share: SharePluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface DatasetQualitySetupDeps {
   share: SharePluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }

@@ -6,13 +6,14 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { TelemetryService } from './services/telemetry';
 import { createDatasetQuality } from './components/dataset_quality';
 import { createDatasetQualityDetails } from './components/dataset_quality_details';
 import { createDatasetQualityControllerLazyFactory } from './controller/dataset_quality/lazy_create_controller';
 import { createDatasetQualityDetailsControllerLazyFactory } from './controller/dataset_quality_details/lazy_create_controller';
-import { DataStreamsStatsService } from './services/data_streams_stats';
+import { registerRuleTypes } from './rule_types';
 import { DataStreamDetailsService } from './services/data_stream_details';
+import { DataStreamsStatsService } from './services/data_streams_stats';
+import { TelemetryService } from './services/telemetry';
 import {
   DatasetQualityPluginSetup,
   DatasetQualityPluginStart,
@@ -31,6 +32,10 @@ export class DatasetQualityPlugin
   public setup(core: CoreSetup, plugins: DatasetQualitySetupDeps) {
     this.telemetry.setup({ analytics: core.analytics });
     this.isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
+
+    registerRuleTypes({
+      ruleTypeRegistry: plugins.triggersActionsUi.ruleTypeRegistry,
+    });
 
     return {};
   }

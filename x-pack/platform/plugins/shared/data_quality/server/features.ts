@@ -11,6 +11,8 @@ import {
   KibanaFeatureScope,
   ElasticsearchFeatureConfig,
 } from '@kbn/features-plugin/common';
+import { DATASET_QUALITY_RULE_TYPE_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { PLUGIN_FEATURE_ID, PLUGIN_ID, PLUGIN_NAME } from '../common';
 
 export const KIBANA_FEATURE: KibanaFeatureConfig = {
@@ -19,6 +21,12 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
   category: DEFAULT_APP_CATEGORIES.management,
   scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [PLUGIN_ID],
+  alerting: [
+    {
+      ruleTypeId: DATASET_QUALITY_RULE_TYPE_ID,
+      consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID],
+    },
+  ],
   privileges: {
     all: {
       app: [PLUGIN_ID],
@@ -27,6 +35,25 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
         read: [],
       },
       ui: ['show'],
+      // TODO: Review RBAC for the rule type
+      alerting: {
+        rule: {
+          read: [
+            {
+              ruleTypeId: DATASET_QUALITY_RULE_TYPE_ID,
+              consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID],
+            },
+          ],
+        },
+        alert: {
+          read: [
+            {
+              ruleTypeId: DATASET_QUALITY_RULE_TYPE_ID,
+              consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID],
+            },
+          ],
+        },
+      },
     },
     read: {
       disabled: true,
@@ -35,6 +62,24 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
         read: [],
       },
       ui: ['show'],
+      alerting: {
+        rule: {
+          read: [
+            {
+              ruleTypeId: DATASET_QUALITY_RULE_TYPE_ID,
+              consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID],
+            },
+          ],
+        },
+        alert: {
+          read: [
+            {
+              ruleTypeId: DATASET_QUALITY_RULE_TYPE_ID,
+              consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID],
+            },
+          ],
+        },
+      },
     },
   },
 };
