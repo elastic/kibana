@@ -295,12 +295,7 @@ export function SloManagementTable() {
   return (
     <>
       <EuiPanel hasBorder={true}>
-        <SloManagementSearchBar
-          initialSearch={filters.search}
-          filters={filters}
-          setFilters={setFilters}
-          onRefresh={refetch}
-        />
+        <SloManagementSearchBar filters={filters} setFilters={setFilters} onRefresh={refetch} />
         <EuiSpacer size="m" />
         <EuiBasicTable<SLODefinitionResponse>
           tableCaption={TABLE_CAPTION}
