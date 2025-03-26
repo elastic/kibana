@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { Document } from '@langchain/core/documents';
+import type { DateMath } from '@elastic/elasticsearch/lib/api/types';
+import type { AttackDiscovery, DefendInsight, Replacements } from '@kbn/elastic-assistant-common';
 import { DEFEND_INSIGHTS_ID } from '@kbn/elastic-assistant-common';
 
 import {
@@ -68,3 +71,37 @@ export const ASSISTANT_GRAPH_MAP: Record<string, GraphMetadata> = {
     graphType: DEFEND_INSIGHTS_ID,
   },
 };
+
+export const NodeType = {
+  GENERATE_NODE: 'generate',
+  REFINE_NODE: 'refine',
+  RETRIEVE_ANONYMIZED_DOCS_NODE: 'retrieve_anonymized_docs',
+} as const;
+
+export type GraphInsightTypes = AttackDiscovery | DefendInsight;
+
+export interface BaseGraphState<T extends GraphInsightTypes> {
+  insights: T[] | null;
+  prompt: string;
+  anonymizedDocuments: Document[];
+  combinedGenerations: string;
+  combinedRefinements: string;
+  errors: string[];
+  generationAttempts: number;
+  generations: string[];
+  hallucinationFailures: number;
+  maxGenerationAttempts: number;
+  maxHallucinationFailures: number;
+  maxRepeatedGenerations: number;
+  refinements: string[];
+  refinePrompt: string;
+  continuePrompt: string;
+  replacements: Replacements;
+  unrefinedResults: T[] | null;
+  filter?: Record<string, unknown> | null;
+  start?: DateMath;
+  end?: DateMath;
+}
+
+export type AttackDiscoveryGraphState = BaseGraphState<AttackDiscovery>;
+export type DefendInsightsGraphState = BaseGraphState<DefendInsight>;

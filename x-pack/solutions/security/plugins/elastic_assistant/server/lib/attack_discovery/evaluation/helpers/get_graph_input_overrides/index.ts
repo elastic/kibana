@@ -7,13 +7,13 @@
 
 import { pick } from 'lodash/fp';
 
+import type { AttackDiscoveryGraphState } from '../../../../langchain/graphs';
 import { ExampleInputWithOverrides } from '../../example_input';
-import { GraphState } from '../../../graphs/default_attack_discovery_graph/types';
 
 /**
  * Parses input from an LangSmith dataset example to get the graph input overrides
  */
-export const getGraphInputOverrides = (outputs: unknown): Partial<GraphState> => {
+export const getGraphInputOverrides = (outputs: unknown): Partial<AttackDiscoveryGraphState> => {
   const validatedInput = ExampleInputWithOverrides.safeParse(outputs).data ?? {}; // safeParse removes unknown properties
 
   const { overrides } = validatedInput;

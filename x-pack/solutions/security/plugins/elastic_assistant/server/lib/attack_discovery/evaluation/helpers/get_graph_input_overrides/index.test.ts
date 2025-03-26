@@ -48,7 +48,7 @@ describe('getGraphInputOverrides', () => {
     it('returns the anonymizedAlerts from the root level of the outputs when present', () => {
       const overrides = getGraphInputOverrides(exampleWithAlerts.outputs);
 
-      expect(overrides.anonymizedAlerts).toEqual(exampleWithAlerts.outputs?.anonymizedAlerts);
+      expect(overrides.anonymizedDocuments).toEqual(exampleWithAlerts.outputs?.anonymizedDocuments);
     });
 
     it('does NOT populate the anonymizedAlerts key when it does NOT exist in the outputs', () => {

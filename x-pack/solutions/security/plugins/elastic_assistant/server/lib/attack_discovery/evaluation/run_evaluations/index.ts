@@ -14,12 +14,12 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { Client } from 'langsmith';
 import { evaluate } from 'langsmith/evaluation';
 
+import type { AttackDiscoveryGraphState } from '../../../langchain/graphs';
 import { getEvaluatorLlm } from '../helpers/get_evaluator_llm';
 import { getCustomEvaluator } from '../helpers/get_custom_evaluator';
 import { getDefaultPromptTemplate } from '../helpers/get_custom_evaluator/get_default_prompt_template';
 import { getGraphInputOverrides } from '../helpers/get_graph_input_overrides';
 import { DefaultAttackDiscoveryGraph } from '../../graphs/default_attack_discovery_graph';
-import { GraphState } from '../../graphs/default_attack_discovery_graph/types';
 
 /**
  * Runs an evaluation for each graph so they show up separately (resulting in
@@ -60,7 +60,7 @@ export const runEvaluations = async ({
           `Evaluating ${subject} with dataset "${datasetName}" and evaluator "${evaluatorConnectorId}"`
       );
 
-      const predict = async (input: unknown): Promise<GraphState> => {
+      const predict = async (input: unknown): Promise<AttackDiscoveryGraphState> => {
         logger.debug(() => `Raw example Input for ${subject}":\n ${input}`);
 
         // The example `Input` may have overrides for the initial state of the graph:

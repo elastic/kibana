@@ -37,10 +37,10 @@ import {
   DefendInsightsGetRequestQuery,
 } from '@kbn/elastic-assistant-common';
 
-import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/nodes/helpers/prompts';
-import type { GraphState } from '../../lib/defend_insights/graphs/default_defend_insights_graph/types';
+import type { DefendInsightsGraphState } from '../../lib/langchain/graphs';
 import type { GetRegisteredTools } from '../../services/app_context';
 import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '../../types';
+import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/prompts';
 import { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';
 import {
   DEFEND_INSIGHT_ERROR_EVENT,
@@ -485,17 +485,17 @@ export const invokeDefendInsightsGraph = async ({
 
   logger?.debug(() => 'invokeDefendInsightsGraph: invoking the Defend insights graph');
 
-  const result: GraphState = (await graph.invoke(
+  const result: DefendInsightsGraphState = (await graph.invoke(
     {},
     {
       callbacks: [...(traceOptions?.tracers ?? [])],
       runName: DEFEND_INSIGHTS_GRAPH_RUN_NAME,
       tags,
     }
-  )) as GraphState;
+  )) as DefendInsightsGraphState;
   const {
     insights,
-    anonymizedEvents,
+    anonymizedDocuments: anonymizedEvents,
     errors,
     generationAttempts,
     hallucinationFailures,
