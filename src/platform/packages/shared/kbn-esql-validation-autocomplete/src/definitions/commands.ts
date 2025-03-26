@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
 import {
-  type ESQLColumn,
-  type ESQLCommand,
-  type ESQLMessage,
-  type ESQLFunction,
-  isFunctionExpression,
-  isWhereExpression,
   ESQLCommandMode,
   ESQLCommandOption,
+  isFunctionExpression,
+  isWhereExpression,
+  type ESQLColumn,
+  type ESQLCommand,
+  type ESQLFunction,
+  type ESQLMessage,
+  Walker,
 } from '@kbn/esql-ast';
-import { isNumericType } from '../shared/esql_types';
+import { i18n } from '@kbn/i18n';
+import { ESQLAstRenameExpression } from '@kbn/esql-ast/src/types';
 import {
+  hasWildcard,
   isAssignment,
   isColumnItem,
   isFunctionItem,
@@ -27,11 +29,17 @@ import {
   isLiteralItem,
   isOptionItem,
   isSingleItem,
+  isSourceItem,
   noCaseCompare,
 } from '../shared/helpers';
 
+import {
+  ENRICH_MODES,
+  checkAggExistence,
+  checkFunctionContent,
+  validateColumnForGrokDissect,
+} from './commands_helpers';
 import { type CommandDefinition } from './types';
-import { ENRICH_MODES, checkAggExistence, checkFunctionContent } from './commands_helpers';
 
 import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
 import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
@@ -51,8 +59,9 @@ import { suggest as suggestForStats } from '../autocomplete/commands/stats';
 import { suggest as suggestForWhere } from '../autocomplete/commands/where';
 import { suggest as suggestForChangePoint } from '../autocomplete/commands/change_point';
 
-import { getMessageFromId } from '../validation/errors';
 import { METADATA_FIELDS } from '../shared/constants';
+import { getMessageFromId } from '../validation/errors';
+import { isNumericType } from '../shared/esql_types';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -148,11 +157,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: 'ROW column1 = value1[, ..., columnN = valueN]',
     examples: ['ROW a=1', 'ROW a=1, b=2'],
-    signature: {
-      multipleParams: true,
-      // syntax check already validates part of this
-      params: [{ name: 'assignment', type: 'any' }],
-    },
     suggest: suggestForRow,
   },
   {
@@ -163,10 +167,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: 'FROM index_pattern [METADATA fields]',
     examples: ['FROM logs', 'FROM logs-*', 'FROM logs_*, events-*'],
-    signature: {
-      multipleParams: true,
-      params: [{ name: 'index', type: 'source', wildcards: true }],
-    },
     suggest: suggestForFrom,
     validate: (command: ESQLCommand) => {
       const metadataStatement = command.args.find(
@@ -204,10 +204,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: 'SHOW item',
     examples: ['SHOW INFO'],
-    signature: {
-      multipleParams: false,
-      params: [{ name: 'functions', type: 'function' }],
-    },
     suggest: suggestForShow,
   },
   {
@@ -224,13 +220,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: '',
     examples: ['METRICS index', 'METRICS index, index2'],
-    signature: {
-      multipleParams: true,
-      params: [
-        { name: 'index', type: 'source', wildcards: true },
-        { name: 'expression', type: 'function', optional: true },
-      ],
-    },
     suggest: () => [],
   },
   {
@@ -244,10 +233,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       [columnN =] expressionN [WHERE boolean_expressionN]]
       [BY grouping_expression1[, ..., grouping_expressionN]]`,
     examples: ['… | stats avg = avg(a)', '… | stats sum(b) by b', '… | stats sum(b) by b % 2'],
-    signature: {
-      multipleParams: true,
-      params: [{ name: 'expression', type: 'function', optional: true }],
-    },
     validate: statsValidator,
     suggest: suggestForStats,
   },
@@ -263,10 +248,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     ),
     declaration: '',
     examples: ['… | EVAL bar = a * b | INLINESTATS m = MAX(bar) BY b'],
-    signature: {
-      multipleParams: true,
-      params: [{ name: 'expression', type: 'function', optional: true }],
-    },
     // Reusing the same validation logic as stats command
     validate: statsValidator,
     suggest: () => [],
@@ -285,10 +266,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       '… | EVAL then = NOW() + 1 year + 2 weeks',
       '… | EVAL a = b * c, d = e * f',
     ],
-    signature: {
-      multipleParams: true,
-      params: [{ name: 'expression', type: 'any' }],
-    },
     suggest: suggestForEval,
   },
   {
@@ -298,11 +275,36 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: 'RENAME old_name1 AS new_name1[, ..., old_nameN AS new_nameN]',
     examples: ['… | RENAME old AS new', '… | RENAME old AS new, a AS b'],
-    signature: {
-      multipleParams: true,
-      params: [{ name: 'renameClause', type: 'column' }],
-    },
     suggest: suggestForRename,
+    validate: (command: ESQLCommand<'rename'>) => {
+      const messages: ESQLMessage[] = [];
+
+      const renameExpressions = Walker.findAll(command, (node) => {
+        return node.type === 'option' && node.name === 'as';
+      }) as ESQLAstRenameExpression[];
+
+      for (const expression of renameExpressions) {
+        const [column] = expression.args;
+        if (!isColumnItem(column)) {
+          continue;
+        }
+
+        if (hasWildcard(column.name)) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'wildcardNotSupportedForCommand',
+              values: {
+                command: 'RENAME',
+                value: column.name,
+              },
+              locations: column.location,
+            })
+          );
+        }
+      }
+
+      return messages;
+    },
   },
   {
     name: 'limit',
@@ -312,10 +314,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: 'LIMIT max_number_of_rows',
     examples: ['… | LIMIT 100', '… | LIMIT 1'],
-    signature: {
-      multipleParams: false,
-      params: [{ name: 'size', type: 'integer', constantOnly: true }],
-    },
     suggest: suggestForLimit,
   },
   {
@@ -327,10 +325,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     declaration: 'KEEP column1[, ..., columnN]',
     examples: ['… | KEEP a', '… | KEEP a, b'],
     suggest: suggestForKeep,
-    signature: {
-      multipleParams: true,
-      params: [{ name: 'column', type: 'column', wildcards: true }],
-    },
   },
   {
     name: 'drop',
@@ -339,10 +333,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: 'DROP column1[, ..., columnN]',
     examples: ['… | DROP a', '… | DROP a, b'],
-    signature: {
-      multipleParams: true,
-      params: [{ name: 'column', type: 'column', wildcards: true }],
-    },
     suggest: suggestForDrop,
     validate: (command: ESQLCommand) => {
       const messages: ESQLMessage[] = [];
@@ -396,10 +386,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       '… | SORT c ASC NULLS FIRST',
       '… | SORT a - abs(b)',
     ],
-    signature: {
-      multipleParams: true,
-      params: [{ name: 'expression', type: 'any' }],
-    },
     suggest: suggestForSort,
   },
   {
@@ -410,10 +396,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: 'WHERE expression',
     examples: ['… | WHERE status_code == 200'],
-    signature: {
-      multipleParams: false,
-      params: [{ name: 'expression', type: 'boolean' }],
-    },
     suggest: suggestForWhere,
   },
   {
@@ -424,34 +406,29 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: 'DISSECT input "pattern" [APPEND_SEPARATOR="<separator>"]',
     examples: ['… | DISSECT a "%{b} %{c}" APPEND_SEPARATOR = ":"'],
-    signature: {
-      multipleParams: false,
-      params: [
-        { name: 'column', type: 'column', innerTypes: ['keyword', 'text'] },
-        { name: 'pattern', type: 'string', constantOnly: true },
-      ],
-    },
     suggest: suggestForDissect,
-    validate: (command: ESQLCommand) => {
+    validate: (command: ESQLCommand, references) => {
+      const messages: ESQLMessage[] = validateColumnForGrokDissect(command, references);
+
       const appendSeparatorClause = command.args.find((arg) => isOptionItem(arg)) as
         | ESQLCommandOption
         | undefined;
 
       if (!appendSeparatorClause) {
-        return [];
+        return messages;
       }
 
       if (appendSeparatorClause.name !== 'append_separator') {
-        return [
+        messages.push(
           getMessageFromId({
             messageId: 'unknownDissectKeyword',
             values: { keyword: appendSeparatorClause.name },
             locations: appendSeparatorClause.location,
-          }),
-        ];
+          })
+        );
+        return messages;
       }
 
-      const messages: ESQLMessage[] = [];
       const [firstArg] = appendSeparatorClause.args;
       if (
         !Array.isArray(firstArg) &&
@@ -462,7 +439,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         messages.push(
           getMessageFromId({
             messageId: 'wrongDissectOptionArgumentType',
-            values: { value: value ?? '' },
+            values: { value: (value as string | number) ?? '' },
             locations: firstArg.location,
           })
         );
@@ -478,14 +455,8 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: 'GROK input "pattern"',
     examples: ['… | GROK a "%{IP:b} %{NUMBER:c}"'],
-    signature: {
-      multipleParams: false,
-      params: [
-        { name: 'column', type: 'column', innerTypes: ['keyword', 'text'] },
-        { name: 'pattern', type: 'string', constantOnly: true },
-      ],
-    },
     suggest: suggestForGrok,
+    validate: validateColumnForGrokDissect,
   },
   {
     name: 'mv_expand',
@@ -495,10 +466,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     declaration: 'MV_EXPAND column',
     examples: ['ROW a=[1,2,3] | MV_EXPAND a'],
     preview: true,
-    signature: {
-      multipleParams: false,
-      params: [{ name: 'column', type: 'column', innerTypes: ['any'] }],
-    },
     suggest: suggestForMvExpand,
   },
   {
@@ -514,36 +481,55 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       '… | ENRICH my-policy ON pivotField',
       '… | ENRICH my-policy ON pivotField WITH a = enrichFieldA, b = enrichFieldB',
     ],
-    signature: {
-      multipleParams: false,
-      params: [{ name: 'policyName', type: 'source', innerTypes: ['policy'] }],
-    },
     suggest: suggestForEnrich,
-    validate: (command: ESQLCommand) => {
+    validate: (command: ESQLCommand, { policies }) => {
+      const messages: ESQLMessage[] = [];
+
+      const sources = command.args.filter(isSourceItem);
+      sources.forEach((source) => {
+        if (hasWildcard(source.name)) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'wildcardNotSupportedForCommand',
+              values: { command: 'ENRICH', value: source.name },
+              locations: source.location,
+            })
+          );
+        } else if (!policies.has(source.name)) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'unknownPolicy',
+              values: { name: source.name },
+              locations: source.location,
+            })
+          );
+        }
+      });
+
       const modeArg = command.args.find((arg) => isSingleItem(arg) && arg.type === 'mode') as
         | ESQLCommandMode
         | undefined;
 
       if (!modeArg) {
-        return [];
+        return messages;
       }
 
       const acceptedValues = ENRICH_MODES.map(({ name }) => '_' + name);
-      if (acceptedValues.some((value) => noCaseCompare(modeArg.text, value))) {
-        return [];
+      if (!acceptedValues.some((value) => noCaseCompare(modeArg.text, value))) {
+        messages.push(
+          getMessageFromId({
+            messageId: 'unsupportedMode',
+            values: {
+              command: 'ENRICH',
+              value: modeArg.text,
+              expected: acceptedValues.join(', '),
+            },
+            locations: modeArg.location,
+          })
+        );
       }
 
-      return [
-        getMessageFromId({
-          messageId: 'unsupportedMode',
-          values: {
-            command: 'ENRICH',
-            value: modeArg.text,
-            expected: acceptedValues.join(', '),
-          },
-          locations: modeArg.location,
-        }),
-      ];
+      return messages;
     },
   },
   {
@@ -552,10 +538,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     declaration: '',
     hidden: true,
     examples: [],
-    signature: {
-      params: [],
-      multipleParams: false,
-    },
     suggest: () => [],
   },
   {
@@ -604,10 +586,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       // '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field',
       // '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field, index.field2 = index2.field2',
     ],
-    signature: {
-      multipleParams: true,
-      params: [{ name: 'index', type: 'source', wildcards: true }],
-    },
     suggest: suggestForJoin,
   },
   {
@@ -625,10 +603,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       '… | change_point value on timestamp',
       '… | change_point value on timestamp as type, pvalue',
     ],
-    signature: {
-      multipleParams: false,
-      params: [],
-    },
     validate: (command: ESQLCommand, references) => {
       const messages: ESQLMessage[] = [];
 
