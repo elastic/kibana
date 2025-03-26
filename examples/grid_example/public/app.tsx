@@ -313,7 +313,7 @@ const layoutStyles = ({ euiTheme }: UseEuiTheme) => {
       transition: `opacity 100ms linear`,
     },
     // styling for panel resize handle
-    '.kbnGridPanel__resizeHandle': {
+    '.kbnGridPanel--resizeHandle': {
       opacity: '0',
       transition: `opacity 0.2s, border 0.2s`,
       borderRadius: `7px 0 7px 0`,
