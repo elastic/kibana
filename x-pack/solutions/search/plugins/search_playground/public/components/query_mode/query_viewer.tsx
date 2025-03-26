@@ -129,18 +129,15 @@ export const ElasticsearchQueryViewer = ({
       {userElasticsearchQueryValidations?.isUserCustomized &&
       (userElasticsearchQueryValidations?.userQueryErrors?.length ?? 0) > 0 ? (
         <EuiSplitPanel.Inner grow={false}>
-          <EuiCallOut
-            color="danger"
-            iconType="error"
-            title={i18n.translate('xpack.searchPlayground.viewQuery.invalidQuery.title', {
-              defaultMessage: 'User-customized Query is invalid',
-            })}
-            size="s"
-          >
-            {userElasticsearchQueryValidations.userQueryErrors!.map((error, errorIndex) => (
-              <p key={`user.query.error.${errorIndex}`}>{error}</p>
-            ))}
-          </EuiCallOut>
+          {userElasticsearchQueryValidations.userQueryErrors!.map((error, errorIndex) => (
+            <EuiCallOut
+              key={`user.query.error.${errorIndex}`}
+              color="danger"
+              iconType="error"
+              title={error}
+              size="s"
+            />
+          ))}
         </EuiSplitPanel.Inner>
       ) : null}
       <EuiSplitPanel.Inner paddingSize="none">
