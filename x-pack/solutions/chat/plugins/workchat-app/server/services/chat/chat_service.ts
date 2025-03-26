@@ -20,8 +20,9 @@ import {
   catchError,
   throwError,
   Observable,
+  EMPTY,
 } from 'rxjs';
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import { KibanaRequest, Logger, ElasticsearchServiceStart } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import {
@@ -47,6 +48,7 @@ interface ChatServiceOptions {
   inference: InferenceServerStart;
   conversationService: ConversationService;
   agentFactory: AgentFactory;
+  elasticsearch: ElasticsearchServiceStart;
 }
 
 export class ChatService {
@@ -54,12 +56,20 @@ export class ChatService {
   private readonly logger: Logger;
   private readonly conversationService: ConversationService;
   private readonly agentFactory: AgentFactory;
+  private readonly elasticsearch: ElasticsearchServiceStart;
 
-  constructor({ inference, logger, conversationService, agentFactory }: ChatServiceOptions) {
+  constructor({
+    inference,
+    logger,
+    conversationService,
+    agentFactory,
+    elasticsearch,
+  }: ChatServiceOptions) {
     this.inference = inference;
     this.logger = logger;
     this.conversationService = conversationService;
     this.agentFactory = agentFactory;
+    this.elasticsearch = elasticsearch;
   }
 
   converse({
@@ -79,8 +89,27 @@ export class ChatService {
       this.logger.error(`Error during converse from ${source}:\n${err.stack ?? err.message}`);
     };
 
+    // TODO: revert all
+    const foo = async () => {
+      await buildSchema({
+        indexName: 'hr-questions',
+        logger: this.logger,
+        esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
+        chatModel: await this.inference.getChatModel({
+          request,
+          connectorId,
+          chatModelOptions: {},
+        }),
+      });
+    };
+    foo().catch((e) => {
+      console.log('**** ERROR', e.stack);
+    });
+
     const isNewConversation = !conversationId;
     const nextUserEvent = createUserMessage({ content: nextUserMessage });
+
+    return EMPTY;
 
     return forkJoin({
       agentRunner: defer(() => this.agentFactory.getAgentRunner({ request, connectorId, agentId })),
