@@ -16,18 +16,21 @@ export function ObservabilityStatus() {
     http,
     docLinks,
     share: { url },
+    serverless: isServerless,
   } = useKibana().services;
   const { hasDataMap } = useHasData();
 
   const content = getContent(http, docLinks, url);
 
-  const boxes = content.map((app) => {
-    return {
-      ...app,
-      hasData: hasDataMap[app.id]?.hasData ?? false,
-      modules: [],
-    };
-  });
+  const boxes = content
+    .filter(({ showInServerless }) => !Boolean(isServerless) || showInServerless)
+    .map((app) => {
+      return {
+        ...app,
+        hasData: hasDataMap[app.id]?.hasData ?? false,
+        modules: [],
+      };
+    });
 
   return <ObservabilityStatusBoxes boxes={boxes} />;
 }
