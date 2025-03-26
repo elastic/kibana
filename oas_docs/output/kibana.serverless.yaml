@@ -5073,12 +5073,16 @@ paths:
       tags:
         - APM sourcemaps
       x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -X GET "http://localhost:5601/api/apm/sourcemaps" \
             -H 'Content-Type: application/json' \
             -H 'kbn-xsrf: true' \
             -H 'Authorization: ApiKey ${YOUR_API_KEY}'
     post:
       description: Upload a source map for a specific service and version.
       operationId: uploadSourceMap
+      parameters:
         - $ref: '#/components/parameters/APM_UI_elastic_api_version'
         - $ref: '#/components/parameters/APM_UI_kbn_xsrf'
       requestBody:
@@ -24307,6 +24311,9 @@ paths:
       tags:
         - Elastic Package Manager (EPM)
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/kibana_assets:
+    delete:
+      description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
+      operationId: delete-fleet-epm-packages-pkgname-pkgversion-kibana-assets
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -24429,6 +24436,7 @@ paths:
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize:
     post:
       operationId: post-fleet-epm-packages-pkgname-pkgversion-transforms-authorize
+      parameters:
         - description: The version of the API to use
           in: header
           name: elastic-api-version
