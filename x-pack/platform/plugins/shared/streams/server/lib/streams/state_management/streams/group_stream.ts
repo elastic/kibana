@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isResponseError } from '@kbn/es-errors';
+import { isNotFoundError } from '@kbn/es-errors';
 import type { GroupStreamDefinition, StreamDefinition } from '@kbn/streams-schema';
 import {
   isGroupStreamDefinition,
@@ -23,7 +23,6 @@ import { StreamActiveRecord } from './stream_active_record';
 export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
   constructor(definition: GroupStreamDefinition, dependencies: StateDependencies) {
     super(definition, dependencies);
-    // What about the assets?
   }
 
   clone(): StreamActiveRecord<GroupStreamDefinition> {
@@ -46,7 +45,14 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
       throw new StatusError('Cannot change stream types', 400);
     }
 
-    this._updated_definition = definition;
+    // Deduplicate members
+    this._updated_definition = {
+      name: definition.name,
+      group: {
+        ...definition.group,
+        members: Array.from(new Set(definition.group.members)),
+      },
+    };
 
     return { cascadingChanges: [], changeStatus: 'upserted' };
   }
@@ -81,41 +87,49 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
     if (this.isDeleted()) {
       return { isValid: true, errors: [] };
     }
+
+    if (this.definition.name.startsWith('logs.')) {
+      throw new StatusError('A group stream name can not start with [logs.]', 400);
+    }
+
     const existsInStartingState = startingState.has(this.definition.name);
 
     if (!existsInStartingState) {
       // Check for data stream conflict
-      const dataStreamResult =
+      try {
         await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
           name: this.definition.name,
         });
 
-      if (dataStreamResult.data_streams.length !== 0) {
         return {
           isValid: false,
           errors: [
-            `Cannot create group stream "${this.definition.name}" due to conflict caused by existing data stream`,
+            `Cannot create group stream "${this.definition.name}" due to conflict caused by existing data stream or index`,
           ],
         };
+      } catch (error) {
+        if (!isNotFoundError(error)) {
+          throw error;
+        }
       }
 
       // Check for index conflict
-      await this.dependencies.scopedClusterClient.asCurrentUser.indices
-        .get({
-          index: this.definition.name,
-        })
-        .catch((error) => {
-          if (!(isResponseError(error) && error.statusCode === 404)) {
-            throw error;
-          }
-        });
+      // await this.dependencies.scopedClusterClient.asCurrentUser.indices
+      //   .get({
+      //     index: this.definition.name,
+      //   })
+      //   .catch((error) => {
+      //     if (!(isResponseError(error) && error.statusCode === 404)) {
+      //       throw error;
+      //     }
+      //   });
 
-      return {
-        isValid: false,
-        errors: [
-          `Cannot create group stream "${this.definition.name}" due to conflict caused by existing index`,
-        ],
-      };
+      // return {
+      //   isValid: false,
+      //   errors: [
+      //     `Cannot create group stream "${this.definition.name}" due to conflict caused by existing index`,
+      //   ],
+      // };
     }
 
     // validate members

@@ -28,7 +28,7 @@ export function streamFromDefinition(
     return new UnwiredStream(definition, dependencies);
   } else if (isGroupStreamDefinition(definition)) {
     return new GroupStream(definition, dependencies);
-  } else {
-    throw new Error('Unsupported stream type');
   }
+
+  throw new Error('Unsupported stream type');
 }

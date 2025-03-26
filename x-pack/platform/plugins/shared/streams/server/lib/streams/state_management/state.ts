@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { difference, intersection } from 'lodash';
+import { StatusError } from '../errors/status_error';
 import { FailedToApplyRequestedChangesError } from './errors/failed_to_apply_requested_changes_error';
 import { FailedToDetermineElasticsearchActionsError } from './errors/failed_to_determine_elasticsearch_actions_error';
 import { FailedToLoadCurrentStateError } from './errors/failed_to_load_current_state_error';
@@ -16,16 +18,22 @@ import type { StreamActiveRecord } from './streams/stream_active_record';
 import { streamFromDefinition } from './streams/stream_from_definition';
 import type { StateDependencies, StreamChange } from './types';
 
-interface ValidDryRun {
-  result: 'valid_dry_run';
-  changedStreams: StreamActiveRecord[];
+interface Changes {
+  created: string[];
+  updated: string[];
+  deleted: string[];
+}
+
+interface ValidDryRunResult {
+  status: 'valid_dry_run';
+  changes: Changes;
   elasticsearchActions: ActionsByType;
 }
 
 type AttemptChangesResult =
-  | ValidDryRun
-  | { result: 'success' }
-  | { result: 'failed_with_rollback' };
+  | ValidDryRunResult
+  | { status: 'success'; changes: Changes }
+  | { status: 'failed_with_rollback'; error: any };
 
 export class State {
   private streamsByName: Map<string, StreamActiveRecord>;
@@ -48,20 +56,27 @@ export class State {
     await desiredState.validate(startingState);
 
     if (dryRun) {
-      const changedStreams = desiredState.changedStreams();
+      const changes = desiredState.changes(startingState);
+      // Do we always want to include/expose the Elasticsearch actions?
       const elasticsearchActions = await desiredState.plannedActions(startingState);
       return {
-        result: 'valid_dry_run',
-        changedStreams,
+        status: 'valid_dry_run',
+        changes,
         elasticsearchActions,
       };
     } else {
       try {
         await desiredState.commitChanges(startingState);
-        return { result: 'success' };
+        return { status: 'success', changes: desiredState.changes(startingState) };
       } catch (error) {
-        await desiredState.attemptRollback(startingState);
-        return { result: 'failed_with_rollback' };
+        await desiredState.attemptRollback(startingState, error);
+        return {
+          status: 'failed_with_rollback',
+          error: new StatusError(
+            `Failed to apply changes but successfully rolled back to previous state: ${error.message}`,
+            error.statusCode ?? 500
+          ),
+        };
       }
     }
   }
@@ -152,13 +167,8 @@ export class State {
     desiredState: State,
     startingState: State
   ): Promise<StreamChange[]> {
-    if (!desiredState.has(change.target)) {
-      if (change.type === 'delete') {
-        // Not sure if throwing or ignoring is better here, the desired state is without this stream which is correct...
-        return [];
-      }
-
-      const newStream = streamFromDefinition(change.request.stream, this.dependencies);
+    if (change.type !== 'delete' && !desiredState.has(change.definition.name)) {
+      const newStream = streamFromDefinition(change.definition, this.dependencies);
       desiredState.set(newStream.definition.name, newStream);
     }
 
@@ -203,7 +213,7 @@ export class State {
     await executionPlan.execute();
   }
 
-  async attemptRollback(startingState: State) {
+  async attemptRollback(startingState: State, originalError: any) {
     try {
       const rollbackTargets = this.changedStreams().map((stream) => {
         if (startingState.has(stream.definition.name)) {
@@ -223,7 +233,9 @@ export class State {
       );
       await executionPlan.execute();
     } catch (error) {
-      throw new FailedToRollbackError(`Failed to rollback attempted changes: ${error.message}`);
+      throw new FailedToRollbackError(
+        `Failed to rollback attempted changes: ${error.message}. Original error: ${originalError}`
+      );
     }
   }
 
@@ -248,6 +260,22 @@ export class State {
         `Failed to determine Elasticsearch actions: ${error.message}`
       );
     }
+  }
+
+  // Should this include the definitions, or are the names enough?
+  changes(startingState: State): Changes {
+    const startingStreams = startingState.all().map((stream) => stream.definition.name);
+    const desiredStreams = this.all().map((stream) => stream.definition.name);
+
+    const deleted = difference(startingStreams, desiredStreams);
+    const created = difference(desiredStreams, startingStreams);
+    const updated = intersection(startingStreams, desiredStreams);
+
+    return {
+      created,
+      updated,
+      deleted,
+    };
   }
 
   get(name: string) {

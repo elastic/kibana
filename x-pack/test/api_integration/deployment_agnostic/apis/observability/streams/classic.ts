@@ -260,8 +260,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
-        await esClient.indices.deleteDataStream({
-          name: DATA_STREAM_NAME,
+        await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: DATA_STREAM_NAME,
+            },
+          },
         });
 
         await esClient.indices.deleteIndexTemplate({

@@ -14,7 +14,7 @@ import type {
 import { isUnwiredStreamDefinition } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
 import { StatusError } from '../../errors/status_error';
-import { generateIngestPipeline } from '../../ingest_pipelines/generate_ingest_pipeline';
+import { generateClassicIngestPipelineBody } from '../../ingest_pipelines/generate_ingest_pipeline';
 import { getProcessingPipelineName } from '../../ingest_pipelines/name';
 import { getUnmanagedElasticsearchAssets } from '../../stream_crud';
 import type { ElasticsearchAction } from '../execution_plan/types';
@@ -26,7 +26,6 @@ import { StreamActiveRecord } from './stream_active_record';
 export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
   constructor(definition: UnwiredStreamDefinition, dependencies: StateDependencies) {
     super(definition, dependencies);
-    // What about the assets?
   }
 
   clone(): StreamActiveRecord<UnwiredStreamDefinition> {
@@ -101,7 +100,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
   protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
     const actions: ElasticsearchAction[] = [];
     if (this._updated_definition.ingest.processing.length > 0) {
-      actions.push(...(await this.createAppendPipelineActions()));
+      actions.push(...(await this.createUpsertPipelineActions()));
     }
     actions.push({
       type: 'upsert_dot_streams_document',
@@ -125,7 +124,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
   ): Promise<ElasticsearchAction[]> {
     const actions: ElasticsearchAction[] = [];
     if (this._processingChanged && this._updated_definition.ingest.processing.length > 0) {
-      actions.push(...(await this.createAppendPipelineActions()));
+      actions.push(...(await this.createUpsertPipelineActions()));
     }
 
     if (this._processingChanged && this._updated_definition.ingest.processing.length === 0) {
@@ -163,18 +162,19 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
       request: this._updated_definition,
     });
 
-    // TODO get assets into this
-
     return actions;
   }
 
-  private async createAppendPipelineActions(): Promise<ElasticsearchAction[]> {
+  private async createUpsertPipelineActions(): Promise<ElasticsearchAction[]> {
     const actions: ElasticsearchAction[] = [];
 
     actions.push({
       type: 'upsert_ingest_pipeline',
       stream: this.definition.name,
-      request: generateIngestPipeline(this._updated_definition.name, this._updated_definition),
+      request: {
+        id: getProcessingPipelineName(this.definition.name),
+        ...generateClassicIngestPipelineBody(this.definition),
+      },
     });
 
     const streamManagedPipelineName = getProcessingPipelineName(this._updated_definition.name);
@@ -203,7 +203,6 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
 
   protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {
     const actions: ElasticsearchAction[] = [
-      // Should we really delete here? Maybe we just need a rollover instead?
       {
         type: 'delete_datastream',
         request: {
@@ -250,7 +249,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
     const pipelineName = unmanagedAssets.find((asset) => asset.type === 'ingest_pipeline')?.id;
 
     return {
-      pipeline: pipelineName ? pipelineName : `${dataStream.template}@custom`,
+      pipeline: pipelineName ? pipelineName : `${dataStream.template}-pipeline`,
       template: dataStream.template,
     };
   }

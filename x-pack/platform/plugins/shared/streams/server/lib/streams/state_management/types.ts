@@ -6,37 +6,22 @@
  */
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import type { UnwiredStreamUpsertRequest, WiredStreamUpsertRequest } from '@kbn/streams-schema';
+import type { StreamDefinition } from '@kbn/streams-schema';
 import type { AssetClient } from '../assets/asset_client';
 import type { StreamsClient } from '../client';
 import type { StreamsStorageClient } from '../service';
 
-interface WiredStreamUpsertChange {
-  target: string;
-  type: 'wired_upsert';
-  request: WiredStreamUpsertRequest & {
-    stream: {
-      name: string;
-    };
-  };
-}
-
-interface UnwiredStreamUpsertChange {
-  target: string;
-  type: 'unwired_upsert';
-  request: UnwiredStreamUpsertRequest & {
-    stream: {
-      name: string;
-    };
-  };
+interface StreamUpsertChange {
+  type: 'upsert';
+  definition: StreamDefinition;
 }
 
 interface StreamDeleteChange {
-  target: string;
+  name: string;
   type: 'delete';
 }
 
-export type StreamChange = UnwiredStreamUpsertChange | WiredStreamUpsertChange | StreamDeleteChange;
+export type StreamChange = StreamUpsertChange | StreamDeleteChange;
 
 export interface StateDependencies {
   scopedClusterClient: IScopedClusterClient;

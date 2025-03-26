@@ -86,10 +86,6 @@ const upsertGroupRoute = createServerRoute({
 
     const { name } = params.path;
 
-    if (name.startsWith('logs.')) {
-      throw badRequest('A group stream name can not start with [logs.]');
-    }
-
     const assets = await assetClient.getAssets({
       entityId: name,
       entityType: 'stream',

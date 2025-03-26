@@ -21,7 +21,6 @@ import {
   StreamUpsertRequest,
   UnwiredStreamDefinition,
   WiredStreamDefinition,
-  asIngestStreamDefinition,
   assertsSchema,
   getAncestors,
   getParentId,
@@ -37,8 +36,9 @@ import {
   streamDefinitionSchema,
   findInheritedLifecycle,
   findInheritingStreams,
+  asWiredStreamDefinition,
 } from '@kbn/streams-schema';
-import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
+import { cloneDeep, keyBy } from 'lodash';
 import { AssetClient } from './assets/asset_client';
 import { ForbiddenMemberTypeError } from './errors/forbidden_member_type_error';
 import {
@@ -74,6 +74,8 @@ import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
 import { NameTakenError } from './errors/name_taken_error';
 import { MalformedStreamError } from './errors/malformed_stream_error';
+import { State } from './state_management/state';
+import { StatusError } from './errors/status_error';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -128,13 +130,22 @@ export class StreamsClient {
       return { acknowledged: true, result: 'noop' };
     }
 
-    await this.upsertStream({
-      request: {
-        dashboards: [],
-        stream: omit(rootStreamDefinition, 'name'),
-      },
-      name: rootStreamDefinition.name,
-    });
+    const result = await State.attemptChanges(
+      [
+        {
+          type: 'upsert',
+          definition: rootStreamDefinition,
+        },
+      ],
+      {
+        ...this.dependencies,
+        streamsClient: this,
+      }
+    );
+
+    if (result.status === 'failed_with_rollback') {
+      throw result.error;
+    }
 
     return { acknowledged: true, result: 'created' };
   }
@@ -153,9 +164,22 @@ export class StreamsClient {
       return { acknowledged: true, result: 'noop' };
     }
 
-    const definition = await this.getStream(LOGS_ROOT_STREAM_NAME);
+    const result = await State.attemptChanges(
+      [
+        {
+          type: 'delete',
+          name: rootStreamDefinition.name,
+        },
+      ],
+      {
+        ...this.dependencies,
+        streamsClient: this,
+      }
+    );
 
-    await this.deleteStreamFromDefinition(definition);
+    if (result.status === 'failed_with_rollback') {
+      throw result.error;
+    }
 
     const { assetClient, storageClient } = this.dependencies;
     await Promise.all([assetClient.clean(), storageClient.clean()]);
@@ -175,20 +199,11 @@ export class StreamsClient {
    * not exist yet.
    */
   async resyncStreams(): Promise<ResyncStreamsResponse> {
-    const streams = await this.getManagedStreams();
+    await State.resync({
+      ...this.dependencies,
+      streamsClient: this,
+    });
 
-    const streamsWithDepth = streams.map((stream) => ({
-      stream,
-      depth: stream.name.match(/\./g)?.length ?? 0,
-    }));
-
-    const streamsInOrder = orderBy(streamsWithDepth, 'depth', 'desc');
-
-    for (const { stream } of streamsInOrder) {
-      await this.syncStreamObjects({
-        definition: stream,
-      });
-    }
     return { acknowledged: true, result: 'updated' };
   }
 
@@ -238,58 +253,25 @@ export class StreamsClient {
     request: StreamUpsertRequest;
   }): Promise<UpsertStreamResponse> {
     const stream: StreamDefinition = { ...request.stream, name };
-    const { dashboards } = request;
-    const { result, parentDefinition } = await this.validateAndUpsertStream({
-      definition: stream,
-    });
 
-    if (parentDefinition) {
-      const isRoutingToChild = parentDefinition.ingest.wired.routing.find(
-        (item) => item.destination === name
-      );
+    const result = await State.attemptChanges(
+      [
+        {
+          type: 'upsert',
+          definition: stream,
+        },
+      ],
+      {
+        ...this.dependencies,
+        streamsClient: this,
+      }
+    );
 
-      if (!isRoutingToChild) {
-        // If the parent is not routing to the child, we need to update the parent
-        // to include the child in the routing with an empty condition, which means that no data is routed.
-        // The user can set the condition later on the parent
-        await this.updateStreamRouting({
-          definition: parentDefinition,
-          routing: parentDefinition.ingest.wired.routing.concat({
-            destination: name,
-            if: { never: {} },
-          }),
-        });
-      }
-    } else if (isWiredStreamDefinition(stream)) {
-      // if there is no parent, this is either the root stream, or
-      // there are intermediate streams missing in the tree.
-      // In the latter case, we need to create the intermediate streams first.
-      const parentId = getParentId(stream.name);
-      if (parentId) {
-        await this.upsertStream({
-          name: parentId,
-          request: {
-            dashboards: [],
-            stream: {
-              ingest: {
-                lifecycle: { inherit: {} },
-                processing: [],
-                wired: {
-                  fields: {},
-                  routing: [
-                    {
-                      destination: stream.name,
-                      if: { never: {} },
-                    },
-                  ],
-                },
-              },
-            },
-          },
-        });
-      }
+    if (result.status === 'failed_with_rollback') {
+      throw result.error;
     }
 
+    const { dashboards } = request;
     await this.dependencies.assetClient.syncAssetList({
       entityId: stream.name,
       entityType: 'stream',
@@ -297,8 +279,12 @@ export class StreamsClient {
       assetType: 'dashboard',
     });
 
-    return { acknowledged: true, result };
+    return {
+      acknowledged: true,
+      result: result.changes.created.includes(name) ? 'created' : 'updated',
+    };
   }
+
   /**
    * `validateAndUpsertStream` does the following things:
    * - determining whether the given definition is valid
@@ -524,15 +510,6 @@ export class StreamsClient {
 
   /**
    * Forks a stream into a child with a specific condition.
-   * It mostly defers to `upsertStream` for its validations,
-   * except for two things:
-   * - it makes sure the name is valid for a child of the
-   * forked stream
-   * - the child does not already exist
-   *
-   * Additionally, it adds the specified condition to the
-   * forked stream (which cannot happen via a PUT of the
-   * child stream).
    */
   async forkStream({
     parent,
@@ -543,45 +520,44 @@ export class StreamsClient {
     name: string;
     if: Condition;
   }): Promise<ForkStreamResponse> {
-    const parentDefinition = asIngestStreamDefinition(await this.getStream(parent));
-    if (!isWiredStreamDefinition(parentDefinition)) {
-      throw new MalformedStreamIdError('Cannot fork a stream that is not managed');
+    const parentDefinition = asWiredStreamDefinition(await this.getStream(parent));
+
+    const result = await State.attemptChanges(
+      [
+        {
+          type: 'upsert',
+          definition: {
+            ...parentDefinition,
+            ingest: {
+              ...parentDefinition.ingest,
+              wired: {
+                ...parentDefinition.ingest.wired,
+                routing: parentDefinition.ingest.wired.routing.concat({
+                  destination: name,
+                  if: condition,
+                }),
+              },
+            },
+          },
+        },
+        {
+          type: 'upsert',
+          definition: {
+            name,
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [],
+              wired: { fields: {}, routing: [] },
+            },
+          },
+        },
+      ],
+      { ...this.dependencies, streamsClient: this }
+    );
+
+    if (result.status === 'failed_with_rollback') {
+      throw result.error;
     }
-
-    const childDefinition: WiredStreamDefinition = {
-      name,
-      ingest: { lifecycle: { inherit: {} }, processing: [], wired: { fields: {}, routing: [] } },
-    };
-
-    // check whether root stream has a child of the given name already
-    if (
-      parentDefinition.ingest.wired.routing.some(
-        (item) => item.destination === childDefinition.name
-      )
-    ) {
-      throw new MalformedStreamIdError(
-        `The stream with ID (${name}) already exists as a child of the parent stream`
-      );
-    }
-    if (!isChildOf(parentDefinition.name, childDefinition.name)) {
-      throw new MalformedStreamIdError(
-        `The ID (${name}) from the new stream must start with the parent's name (${parentDefinition.name}), followed by a dot and a name`
-      );
-    }
-
-    // need to create the child first, otherwise we risk streaming data even though the child data stream is not ready
-
-    const { parentDefinition: updatedParentDefinition } = await this.validateAndUpsertStream({
-      definition: childDefinition,
-    });
-
-    await this.updateStreamRouting({
-      definition: updatedParentDefinition!,
-      routing: parentDefinition.ingest.wired.routing.concat({
-        destination: name,
-        if: condition,
-      }),
-    });
 
     return { acknowledged: true, result: 'created' };
   }
@@ -809,6 +785,7 @@ export class StreamsClient {
    * us to delete the root stream internally.
    */
   private async deleteStreamFromDefinition(definition: StreamDefinition): Promise<void> {
+    // Is this still needed?
     const { assetClient, logger, scopedClusterClient } = this.dependencies;
 
     if (isUnwiredStreamDefinition(definition)) {
@@ -879,12 +856,11 @@ export class StreamsClient {
    * Also verifies whether the user has access to the stream.
    */
   async deleteStream(name: string): Promise<DeleteStreamResponse> {
-    const definition = await this.getStream(name).catch((error) => {
-      if (isDefinitionNotFoundError(error)) {
-        return undefined;
-      }
-      throw error;
-    });
+    const definition = await this.getStream(name);
+
+    if (isWiredStreamDefinition(definition) && getParentId(name) === undefined) {
+      throw new StatusError('Cannot delete root stream', 400);
+    }
 
     const access =
       definition && isGroupStreamDefinition(definition)
@@ -894,22 +870,27 @@ export class StreamsClient {
             scopedClusterClient: this.dependencies.scopedClusterClient,
           });
 
+    // Can/should State manage access control as well?
     if (!access.write) {
       throw new SecurityError(`Cannot delete stream, insufficient privileges`);
     }
 
-    if (!definition) {
-      return { acknowledged: true, result: 'noop' };
-    }
-
-    if (isWiredStreamDefinition(definition)) {
-      const parentId = getParentId(name);
-      if (!parentId) {
-        throw new MalformedStreamIdError('Cannot delete root stream');
+    const result = await State.attemptChanges(
+      [
+        {
+          type: 'delete',
+          name,
+        },
+      ],
+      {
+        ...this.dependencies,
+        streamsClient: this,
       }
-    }
+    );
 
-    await this.deleteStreamFromDefinition(definition);
+    if (result.status === 'failed_with_rollback') {
+      throw result.error;
+    }
 
     return { acknowledged: true, result: 'deleted' };
   }

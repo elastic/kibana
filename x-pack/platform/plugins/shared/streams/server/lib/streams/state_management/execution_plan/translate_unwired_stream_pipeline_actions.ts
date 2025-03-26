@@ -37,7 +37,7 @@ export async function translateUnwiredStreamPipelineActions(
     return;
   }
 
-  const actionsByPipeline = groupBy(maybeActions, 'targetPipeline');
+  const actionsByPipeline = groupBy(maybeActions, 'pipeline');
 
   for (const [pipelineName, actions] of Object.entries(actionsByPipeline)) {
     const pipeline = await getPipeline(pipelineName, scopedClusterClient);
@@ -111,8 +111,10 @@ async function createStreamsManagedPipeline({
     request: {
       name: indexTemplate.name,
       ...indexTemplate.index_template,
-      ignore_missing_component_templates:
-        castArray(indexTemplate.index_template.ignore_missing_component_templates) ?? [],
+      ignore_missing_component_templates: indexTemplate.index_template
+        .ignore_missing_component_templates
+        ? castArray(indexTemplate.index_template.ignore_missing_component_templates)
+        : [],
       template: {
         ...(indexTemplate.index_template.template ?? {}),
         settings: {
@@ -158,7 +160,8 @@ async function updateExistingStreamsManagedPipeline({
       }
     } else {
       processors = processors.filter(
-        (processor) => processor.pipeline && processor.pipeline.name === action.referencePipeline
+        (processor) =>
+          processor.pipeline === undefined || processor.pipeline.name !== action.referencePipeline
       );
     }
   }
@@ -195,8 +198,10 @@ async function updateExistingStreamsManagedPipeline({
       request: {
         name: indexTemplate.name,
         ...indexTemplate.index_template,
-        ignore_missing_component_templates:
-          castArray(indexTemplate.index_template.ignore_missing_component_templates) ?? [],
+        ignore_missing_component_templates: indexTemplate.index_template
+          .ignore_missing_component_templates
+          ? castArray(indexTemplate.index_template.ignore_missing_component_templates)
+          : [],
         template: {
           ...(indexTemplate.index_template.template ?? {}),
           settings: {
@@ -236,7 +241,7 @@ async function updateExistingUserManagedPipeline({
     scopedClusterClient
   );
 
-  let processors = targetPipeline.processors ?? [];
+  let processors = targetPipeline?.processors ?? [];
   const existingPipelineProcessors = processors
     .filter((processor) => processor.pipeline !== undefined)
     .map((processor) => processor.pipeline?.name);
@@ -259,7 +264,7 @@ async function updateExistingUserManagedPipeline({
     stream: actions[0].dataStream,
     request: {
       id: targetPipelineName,
-      ...targetPipeline,
+      ...(targetPipeline ?? {}),
       processors,
     },
   });
@@ -271,9 +276,16 @@ async function findPipelineToModify(
   scopedClusterClient: IScopedClusterClient
 ): Promise<{
   targetPipelineName: string;
-  targetPipeline: IngestPipeline;
+  targetPipeline: IngestPipeline | undefined;
 }> {
-  const pipeline = (await getPipeline(pipelineName, scopedClusterClient)) as IngestPipeline;
+  const pipeline = await getPipeline(pipelineName, scopedClusterClient);
+
+  if (!pipeline) {
+    return {
+      targetPipelineName: pipelineName,
+      targetPipeline: undefined,
+    };
+  }
 
   const streamProcessor = pipeline.processors?.find(
     (processor) => processor.pipeline && referencePipelineNames.includes(processor.pipeline.name)

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isNotFoundError, isResponseError } from '@kbn/es-errors';
+import { isNotFoundError } from '@kbn/es-errors';
 import type {
   IngestStreamLifecycle,
   StreamDefinition,
@@ -27,7 +27,11 @@ import { getComponentTemplateName } from '../../component_templates/name';
 import { isDefinitionNotFoundError } from '../../errors/definition_not_found_error';
 import { NameTakenError } from '../../errors/name_taken_error';
 import { StatusError } from '../../errors/status_error';
-import { validateAncestorFields, validateDescendantFields } from '../../helpers/validate_fields';
+import {
+  validateAncestorFields,
+  validateDescendantFields,
+  validateSystemFields,
+} from '../../helpers/validate_fields';
 import { validateRootStreamChanges } from '../../helpers/validate_stream';
 import { generateIndexTemplate } from '../../index_templates/generate_index_template';
 import { getIndexTemplateName } from '../../index_templates/name';
@@ -39,11 +43,11 @@ import type { State } from '../state';
 import type { StateDependencies, StreamChange } from '../types';
 import type { StreamChangeStatus, ValidationResult } from './stream_active_record';
 import { StreamActiveRecord } from './stream_active_record';
+import { hasSupportedStreamsRoot } from '../../root_stream_definition';
 
 export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
   constructor(definition: WiredStreamDefinition, dependencies: StateDependencies) {
     super(definition, dependencies);
-    // What about the assets?
   }
 
   clone(): StreamActiveRecord<WiredStreamDefinition> {
@@ -117,24 +121,20 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     const cascadingChanges: StreamChange[] = [];
     if (parentId && !desiredState.has(parentId)) {
       cascadingChanges.push({
-        target: parentId,
-        type: 'wired_upsert',
-        request: {
-          dashboards: [],
-          stream: {
-            name: parentId,
-            ingest: {
-              lifecycle: { inherit: {} },
-              processing: [],
-              wired: {
-                fields: {},
-                routing: [
-                  {
-                    destination: this._updated_definition.name,
-                    if: { never: {} },
-                  },
-                ],
-              },
+        type: 'upsert',
+        definition: {
+          name: parentId,
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: [],
+            wired: {
+              fields: {},
+              routing: [
+                {
+                  destination: this._updated_definition.name,
+                  if: { never: {} },
+                },
+              ],
             },
           },
         },
@@ -152,24 +152,20 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
         );
         if (!hasChild) {
           cascadingChanges.push({
-            target: parentId,
-            type: 'wired_upsert',
-            request: {
-              dashboards: [],
-              stream: {
-                name: parentId,
-                ingest: {
-                  ...parentStream.definition.ingest,
-                  wired: {
-                    ...parentStream.definition.ingest.wired,
-                    routing: [
-                      ...currentParentRouting,
-                      {
-                        destination: this._updated_definition.name,
-                        if: { never: {} },
-                      },
-                    ],
-                  },
+            type: 'upsert',
+            definition: {
+              name: parentId,
+              ingest: {
+                ...parentStream.definition.ingest,
+                wired: {
+                  ...parentStream.definition.ingest.wired,
+                  routing: [
+                    ...currentParentRouting,
+                    {
+                      destination: this._updated_definition.name,
+                      if: { never: {} },
+                    },
+                  ],
                 },
               },
             },
@@ -203,20 +199,16 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
         );
         if (!hasChild) {
           cascadingChanges.push({
-            target: parentId,
-            type: 'wired_upsert',
-            request: {
-              dashboards: [],
-              stream: {
-                name: parentId,
-                ingest: {
-                  ...parentStream.definition.ingest,
-                  wired: {
-                    ...parentStream.definition.ingest.wired,
-                    routing: parentStream.definition.ingest.wired.routing.filter(
-                      (routing) => routing.destination !== this._updated_definition.name
-                    ),
-                  },
+            type: 'upsert',
+            definition: {
+              name: parentId,
+              ingest: {
+                ...parentStream.definition.ingest,
+                wired: {
+                  ...parentStream.definition.ingest.wired,
+                  routing: parentStream.definition.ingest.wired.routing.filter(
+                    (routing) => routing.destination !== this._updated_definition.name
+                  ),
                 },
               },
             },
@@ -227,7 +219,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
 
     cascadingChanges.push(
       ...this.definition.ingest.wired.routing.map((routing) => ({
-        target: routing.destination,
+        name: routing.destination,
         type: 'delete' as const,
       }))
     );
@@ -236,42 +228,53 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
   }
 
   protected async doValidate(desiredState: State, startingState: State): Promise<ValidationResult> {
+    if (!hasSupportedStreamsRoot(this.definition.name)) {
+      return {
+        isValid: false,
+        errors: ['Cannot create wired stream due to unsupported root stream'],
+      };
+    }
+
     const existsInStartingState = startingState.has(this.definition.name);
 
     if (!existsInStartingState) {
       // TODO in this check, make sure the existing data stream is not a stream-created one (if it is, state might be out of sync, but we can fix it)
+
       // Check for data stream conflict
-      const dataStreamResult =
+      try {
         await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
           name: this.definition.name,
         });
 
-      if (dataStreamResult.data_streams.length !== 0) {
         return {
           isValid: false,
           errors: [
-            `Cannot create wired stream "${this.definition.name}" due to conflict caused by existing data stream`,
+            `Cannot create wired stream "${this.definition.name}" due to conflict caused by existing data stream or index`,
           ],
         };
+      } catch (error) {
+        if (!isNotFoundError(error)) {
+          throw error;
+        }
       }
 
-      // Check for index conflict
-      await this.dependencies.scopedClusterClient.asCurrentUser.indices
-        .get({
-          index: this.definition.name,
-        })
-        .catch((error) => {
-          if (!(isResponseError(error) && error.statusCode === 404)) {
-            throw error;
-          }
-        });
+      // Check for index conflict (seems covered by the above check, but why?)
+      // try {
+      //   await this.dependencies.scopedClusterClient.asCurrentUser.indices.get({
+      //     index: this.definition.name,
+      //   });
 
-      return {
-        isValid: false,
-        errors: [
-          `Cannot create wired stream "${this.definition.name}" due to conflict caused by existing index`,
-        ],
-      };
+      //   return {
+      //     isValid: false,
+      //     errors: [
+      //       `Cannot create wired stream "${this.definition.name}" due to conflict caused by existing index`,
+      //     ],
+      //   };
+      // } catch (error) {
+      //   if (!isNotFoundError(error)) {
+      //     throw error;
+      //   }
+      // }
     }
 
     // validate routing
@@ -331,6 +334,8 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
       // only allow selective updates to a root stream
       validateRootStreamChanges(this.definition, this._updated_definition);
     }
+
+    validateSystemFields(this.definition);
 
     return { isValid: true, errors: [] };
   }
@@ -503,8 +508,6 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
       type: 'upsert_dot_streams_document',
       request: this._updated_definition,
     });
-
-    // TODO get assets into this
 
     return actions;
   }

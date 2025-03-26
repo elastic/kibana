@@ -87,7 +87,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
             },
           })
-          .expect(404);
+          .expect(400);
       });
 
       it('unsuccessfully updates a GroupStream with an itself as a member', async () => {

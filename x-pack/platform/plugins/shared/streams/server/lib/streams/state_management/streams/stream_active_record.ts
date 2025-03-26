@@ -60,9 +60,9 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     startingState: State
   ): Promise<StreamChange[]> {
     if (change.type === 'delete') {
-      return this.delete(change.target, desiredState, startingState);
+      return this.delete(change.name, desiredState, startingState);
     } else {
-      return this.upsert(change.request.stream, desiredState, startingState);
+      return this.upsert(change.definition, desiredState, startingState);
     }
   }
 
@@ -92,7 +92,7 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
 
   async validate(desiredState: State, startingState: State): Promise<ValidationResult> {
     try {
-      return this.doValidate(desiredState, startingState);
+      return await this.doValidate(desiredState, startingState);
     } catch (error) {
       return { isValid: false, errors: [error.message] };
     }

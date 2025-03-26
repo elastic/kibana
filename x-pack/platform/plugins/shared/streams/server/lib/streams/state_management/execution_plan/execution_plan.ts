@@ -143,9 +143,9 @@ export class ExecutionPlan {
         this.deleteIngestPipelines(delete_ingest_pipeline),
       ]);
 
-      await Promise.all([
-        this.upsertDotStreamsDocuments(upsert_dot_streams_document),
-        this.deleteDotStreamsDocuments(delete_dot_streams_document),
+      await this.upsertAndDeleteDotStreamsDocuments([
+        ...upsert_dot_streams_document,
+        ...delete_dot_streams_document,
       ]);
     } catch (error) {
       throw new FailedToExecuteElasticsearchActionsError(
@@ -232,7 +232,6 @@ export class ExecutionPlan {
     );
   }
 
-
   private async deleteDatastreams(actions: DeleteDatastreamAction[]) {
     return Promise.all(
       actions.map((action) =>
@@ -281,26 +280,36 @@ export class ExecutionPlan {
     );
   }
 
-  private async upsertDotStreamsDocuments(actions: UpsertDotStreamsDocumentAction[]) {
+  private async upsertAndDeleteDotStreamsDocuments(
+    actions: Array<UpsertDotStreamsDocumentAction | DeleteDotStreamsDocumentAction>
+  ) {
+    if (actions.length === 0) {
+      return;
+    }
+
     return this.dependencies.storageClient.bulk({
-      operations: actions.map((action) => ({
-        index: {
-          document: action.request,
-          _id: action.request.name,
-        },
-      })),
+      operations: actions.map(dotDocumentActionToBulkOperation),
     });
+  }
+}
+
+function dotDocumentActionToBulkOperation(
+  action: UpsertDotStreamsDocumentAction | DeleteDotStreamsDocumentAction
+) {
+  if (action.type === 'upsert_dot_streams_document') {
+    return {
+      index: {
+        document: action.request,
+        _id: action.request.name,
+      },
+    };
   }
 
-  private async deleteDotStreamsDocuments(actions: DeleteDotStreamsDocumentAction[]) {
-    return this.dependencies.storageClient.bulk({
-      operations: actions.map((action) => ({
-        delete: {
-          _id: action.request.name,
-        },
-      })),
-    });
-  }
+  return {
+    delete: {
+      _id: action.request.name,
+    },
+  };
 }
 
 function assertEmptyObject(object: Record<string, never>) {
