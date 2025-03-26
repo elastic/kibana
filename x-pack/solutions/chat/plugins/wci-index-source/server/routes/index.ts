@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { createBuilder } from './so_filters';
+import type { RouteDependencies } from './types';
+import { registerConfigurationRoutes } from './configuration';
+
+export const registerRoutes = (dependencies: RouteDependencies) => {
+  registerConfigurationRoutes(dependencies);
+};

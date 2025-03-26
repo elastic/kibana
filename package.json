@@ -1037,6 +1037,7 @@
     "@kbn/visualization-utils": "link:src/platform/packages/shared/kbn-visualization-utils",
     "@kbn/visualizations-plugin": "link:src/platform/plugins/shared/visualizations",
     "@kbn/watcher-plugin": "link:x-pack/platform/plugins/private/watcher",
+    "@kbn/wc-genai-utils": "link:x-pack/solutions/chat/packages/wc-genai-utils",
     "@kbn/wc-index-schema-builder": "link:x-pack/solutions/chat/packages/wc-index-schema-builder",
     "@kbn/wci-browser": "link:x-pack/solutions/chat/packages/wci-browser",
     "@kbn/wci-common": "link:x-pack/solutions/chat/packages/wci-common",

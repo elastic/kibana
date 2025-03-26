@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { createBuilder } from './so_filters';
+import type { IndexSourceDefinition } from '@kbn/wci-common';
+
+export interface GenerateConfigurationResponse {
+  definition: IndexSourceDefinition;
+}

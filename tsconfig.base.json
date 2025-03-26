@@ -2130,6 +2130,8 @@
       "@kbn/visualizations-plugin/*": ["src/platform/plugins/shared/visualizations/*"],
       "@kbn/watcher-plugin": ["x-pack/platform/plugins/private/watcher"],
       "@kbn/watcher-plugin/*": ["x-pack/platform/plugins/private/watcher/*"],
+      "@kbn/wc-genai-utils": ["x-pack/solutions/chat/packages/wc-genai-utils"],
+      "@kbn/wc-genai-utils/*": ["x-pack/solutions/chat/packages/wc-genai-utils/*"],
       "@kbn/wc-index-schema-builder": ["x-pack/solutions/chat/packages/wc-index-schema-builder"],
       "@kbn/wc-index-schema-builder/*": ["x-pack/solutions/chat/packages/wc-index-schema-builder/*"],
       "@kbn/wci-browser": ["x-pack/solutions/chat/packages/wci-browser"],
