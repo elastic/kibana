@@ -17,6 +17,7 @@ import { getDefaultNewSystemPrompt, getDefaultSystemPrompt } from '../use_conver
 import { useConversation } from '../use_conversation';
 import { sleep } from '../helpers';
 import { Conversation, WELCOME_CONVERSATION_TITLE } from '../../..';
+import type { LastConversation } from '../use_space_aware_context';
 
 export interface Props {
   allSystemPrompts: PromptResponse[];
@@ -27,6 +28,7 @@ export interface Props {
   refetchCurrentUserConversations: () => Promise<
     QueryObserverResult<Record<string, Conversation>, unknown>
   >;
+  setLastConversationId: (lastConversatioId?: string) => void;
 }
 
 interface UseCurrentConversation {
@@ -39,6 +41,7 @@ interface UseCurrentConversation {
     cId?: string;
     cTitle?: string;
     isStreamRefetch?: boolean;
+    silent?: boolean;
   }) => Promise<Conversation | undefined>;
   setCurrentConversation: Dispatch<SetStateAction<Conversation | undefined>>;
   setCurrentSystemPromptId: (promptId: string | undefined) => void;
@@ -56,6 +59,7 @@ export const useCurrentConversation = ({
   defaultConnector,
   mayUpdateConversations,
   refetchCurrentUserConversations,
+  setLastConversationId,
 }: Props): UseCurrentConversation => {
   const {
     createConversation,
@@ -109,13 +113,15 @@ export const useCurrentConversation = ({
    * @param cId - The conversation ID to refetch.
    * @param cTitle - The conversation title to refetch.
    * @param isStreamRefetch - Are we refetching because stream completed? If so retry several times to ensure the message has updated on the server
+   * @param silent - Should we show toasts on error
    */
   const refetchCurrentConversation = useCallback(
     async ({
       cId,
       cTitle,
       isStreamRefetch = false,
-    }: { cId?: string; cTitle?: string; isStreamRefetch?: boolean } = {}) => {
+      silent,
+    }: { cId?: string; cTitle?: string; isStreamRefetch?: boolean; silent?: boolean; } = {}) => {
       if (cId === '' || (cTitle && !conversations[cTitle])) {
         return;
       }
@@ -124,7 +130,7 @@ export const useCurrentConversation = ({
         cId ?? (cTitle && conversations[cTitle].id) ?? currentConversation?.id;
 
       if (cConversationId) {
-        let updatedConversation = await getConversation(cConversationId);
+        let updatedConversation = await getConversation(cConversationId, silent);
         let retries = 0;
         const maxRetries = 5;
 
@@ -183,8 +189,10 @@ export const useCurrentConversation = ({
           allConversations.data[cTitle]
         );
         setCurrentConversationId(updatedConvo.id);
+        setLastConversationId(updatedConvo.id);
       } else if (allConversations?.data?.[cId]) {
         setCurrentConversationId(cId);
+        setLastConversationId(cId);
       }
     },
     [

@@ -19,6 +19,7 @@ import { useConversation } from '../use_conversation';
 import { getCombinedMessage } from '../prompt/helpers';
 import { Conversation, useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
+import { useAssistantSpaceId, useAssistantLastConversation } from '../use_space_aware_context';
 
 export interface UseChatSendProps {
   currentConversation?: Conversation;
@@ -57,6 +58,8 @@ export const useChatSend = ({
     toasts,
     assistantAvailability: { isAssistantEnabled },
   } = useAssistantContext();
+  const spaceId = useAssistantSpaceId();
+  const { setLastConversation } = useAssistantLastConversation({ spaceId });
   const [userPrompt, setUserPrompt] = useState<string | null>(null);
 
   const { isLoading, sendMessage, abortStream } = useSendMessage();

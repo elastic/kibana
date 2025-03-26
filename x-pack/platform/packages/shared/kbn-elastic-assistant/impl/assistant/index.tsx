@@ -55,6 +55,11 @@ import {
   conversationContainsAnonymizedValues,
   conversationContainsContentReferences,
 } from './conversations/utils';
+import {
+  LastConversation,
+  useAssistantLastConversation,
+  useAssistantSpaceId,
+} from './use_space_aware_context';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
@@ -92,11 +97,9 @@ const AssistantComponent: React.FC<Props> = ({
     augmentMessageCodeBlocks,
     baseConversations,
     getComments,
-    getLastConversationId,
     http,
     promptContexts,
     currentUserAvatar,
-    setLastConversationId,
     contentReferencesVisible,
     showAnonymizedValues,
     setContentReferencesVisible,
@@ -133,6 +136,13 @@ const AssistantComponent: React.FC<Props> = ({
     http,
   });
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+  const spaceId = useAssistantSpaceId();
+  const { setLastConversationId, getLastConversationId } = useAssistantLastConversation({ spaceId });
+  const lastConversationIdFromLocalStorage = useMemo(
+    () => getLastConversationId(),
+    [getLastConversationId]
+  );
+
   const {
     currentConversation,
     currentSystemPrompt,
@@ -147,7 +157,8 @@ const AssistantComponent: React.FC<Props> = ({
     conversations,
     defaultConnector,
     refetchCurrentUserConversations,
-    conversationId: getLastConversationId(conversationTitle),
+    conversationId: lastConversationIdFromLocalStorage,
+    setLastConversationId,
     mayUpdateConversations:
       isFetchedConnectors &&
       isFetchedCurrentUserConversations &&
