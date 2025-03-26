@@ -12,6 +12,8 @@ import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { type UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { SearchBar } from '../search_bar';
 import {
   GraphState,
@@ -201,7 +203,7 @@ export const WorkspaceLayoutComponent = ({
       />
 
       {isInitialized && <GraphTitle />}
-      <div className="gphGraph__bar">
+      <div css={styles.bar}>
         <SearchBar
           isLoading={loading}
           urlQuery={urlQuery}
@@ -221,8 +223,8 @@ export const WorkspaceLayoutComponent = ({
       )}
 
       {isInitialized && workspace && (
-        <div className="gphGraph__container" id="GraphSvgContainer">
-          <div className="gphVisualization">
+        <div id="GraphSvgContainer" css={styles.container}>
+          <div css={styles.visualization}>
             <GraphVisualization
               workspace={workspace}
               selectSelected={selectSelected}
@@ -245,6 +247,26 @@ export const WorkspaceLayoutComponent = ({
       )}
     </Fragment>
   );
+};
+
+const styles = {
+  bar: ({ euiTheme }: UseEuiTheme) => `
+    margin: ${euiTheme.size.s};
+  `,
+
+  container: ({ euiTheme }: UseEuiTheme) => `
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    position: relative;
+    background: ${euiTheme.colors.emptyShade};
+  `,
+
+  visualization: css({
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+  }),
 };
 
 export const WorkspaceLayout = connect<WorkspaceLayoutStateProps, {}, {}, GraphState>(
