@@ -49,6 +49,13 @@ export const SomeThings: StoryFn<{}> = () => {
   return (
     <SignificantEventsTable
       name="logs"
+      onDeleteClick={() => {
+        return new Promise<void>((resolve) =>
+          setTimeout(() => {
+            resolve();
+          }, 1000)
+        );
+      }}
       response={{
         loading: false,
         value: [

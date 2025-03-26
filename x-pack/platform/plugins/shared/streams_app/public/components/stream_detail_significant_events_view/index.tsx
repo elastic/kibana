@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { IngestStreamGetResponse, StreamQuery, StreamQueryKql } from '@kbn/streams-schema';
 import React, { useCallback, useMemo, useState } from 'react';
 import { niceTimeFormatter } from '@elastic/charts';
-import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { lastValueFrom } from 'rxjs';
@@ -28,6 +27,7 @@ import { useStreamsAppRoutePath } from '../../hooks/use_streams_app_route_path';
 import { LoadingPanel } from '../loading_panel';
 import { SignificantEventsViewEmptyState } from './empty_state';
 import { SignificantEventSuggestionsFlyout } from './suggestions_flyout';
+import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
 
 export function StreamDetailSignificantEventsView({
   definition,
@@ -69,6 +69,9 @@ export function StreamDetailSignificantEventsView({
     end,
     kql,
   });
+
+  const { addQuery, bulk, removeQuery } =
+    useSignificantEventsApi({ name: definition?.stream.name }) || {};
 
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
 
@@ -232,8 +235,6 @@ export function StreamDetailSignificantEventsView({
           <Timeline start={start} end={end} events={events} xFormatter={xFormatter} />
         </EuiFlexItem>
 
-        <EuiSpacer />
-
         <EuiFlexItem grow={false}>
           <SignificantEventsTable
             name={definition?.stream.name}
@@ -243,28 +244,9 @@ export function StreamDetailSignificantEventsView({
               setQueryToEdit(item.query);
             }}
             onDeleteClick={async (item) => {
-              if (!definition || !name) {
-                return;
-              }
-
-              await streams.streamsRepositoryClient
-                .fetch('PUT /api/streams/{name} 2023-10-31', {
-                  params: {
-                    body: {
-                      dashboards: definition.dashboards,
-                      queries: definition.queries.filter(
-                        (storedQuery) => storedQuery.id !== item.query.id
-                      ),
-                      stream: omit(definition.stream, 'name'),
-                    },
-                    path: {
-                      name,
-                    },
-                  },
-                })
-                .then(() => {
-                  significantEventsFetchState.refresh();
-                });
+              await removeQuery?.(item.query.id).then(() => {
+                significantEventsFetchState.refresh();
+              });
             }}
             xFormatter={xFormatter}
           />
@@ -273,26 +255,9 @@ export function StreamDetailSignificantEventsView({
       {isEditFlyoutOpen ? (
         <SignificantEventFlyout
           onCreate={async (next) => {
-            if (!definition || !name) {
-              return;
-            }
-
-            await streams.streamsRepositoryClient
-              .fetch('PUT /api/streams/{name} 2023-10-31', {
-                params: {
-                  body: {
-                    dashboards: definition.dashboards,
-                    queries: definition.queries.concat(next),
-                    stream: omit(definition.stream, 'name'),
-                  },
-                  path: {
-                    name,
-                  },
-                },
-              })
-              .then(() => {
-                significantEventsFetchState.refresh();
-              });
+            await addQuery?.(next).then(() => {
+              significantEventsFetchState.refresh();
+            });
           }}
           onUpdate={async () => {}}
           onClose={() => {
@@ -308,19 +273,7 @@ export function StreamDetailSignificantEventsView({
           name={name}
           suggestions={suggestedEvents}
           onAccept={async (next) => {
-            await streams.streamsRepositoryClient
-              .fetch('PUT /api/streams/{name} 2023-10-31', {
-                params: {
-                  body: {
-                    dashboards: definition.dashboards,
-                    queries: definition.queries.concat(next),
-                    stream: omit(definition.stream, 'name'),
-                  },
-                  path: {
-                    name,
-                  },
-                },
-              })
+            await bulk?.(next.map((item) => ({ index: item })))
               .then(() => {
                 significantEventsFetchState.refresh();
               })

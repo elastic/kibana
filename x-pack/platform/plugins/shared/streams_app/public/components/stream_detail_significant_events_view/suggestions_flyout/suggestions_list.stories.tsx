@@ -9,7 +9,6 @@ import { Meta, StoryFn } from '@storybook/react';
 import React, { useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { without } from 'lodash';
 import { SignificantEventSuggestionsList } from './suggestions_list';
 import { previews } from './__storybook_mocks__/use_suggestion_preview';
 
@@ -21,7 +20,7 @@ const stories: Meta<{}> = {
 const suggestions = previews.map(({ suggestion }) => suggestion);
 
 export const Suggestions: StoryFn<{}> = () => {
-  const [selected, setSelected] = useState(suggestions);
+  const [selected, setSelected] = useState(suggestions.map((suggestion) => suggestion.id));
 
   return (
     <EuiPanel
@@ -32,10 +31,8 @@ export const Suggestions: StoryFn<{}> = () => {
       <SignificantEventSuggestionsList
         suggestions={suggestions}
         name="logs*"
-        onSuggestionClick={(suggestion) => {
-          setSelected((prev) =>
-            prev.includes(suggestion) ? without(prev, suggestion) : prev.concat(suggestion)
-          );
+        onSelectionChange={(next) => {
+          setSelected(() => next);
         }}
         selected={selected}
       />

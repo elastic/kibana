@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AbortableAsyncState } from '@kbn/react-hooks';
 import React, { useMemo, useState } from 'react';
@@ -15,6 +15,26 @@ import { formatChangePoint } from './change_point';
 import { ChangePointSummary } from './change_point_summary';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';
 import { buildDiscoverParams } from './utils/discover_helpers';
+
+function WithLoadingSpinner({ onClick, ...props }: React.ComponentProps<typeof EuiButtonIcon>) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  return (
+    <EuiButtonIcon
+      {...props}
+      isLoading={isLoading}
+      isDisabled={isLoading}
+      onClick={(
+        event: React.MouseEvent<HTMLAnchorElement> & React.MouseEvent<HTMLButtonElement>
+      ) => {
+        setIsLoading(true);
+        Promise.resolve(onClick?.(event)).finally(() => {
+          setIsLoading(false);
+        });
+      }}
+    />
+  );
+}
 
 export function SignificantEventsTable({
   name,
@@ -38,8 +58,6 @@ export function SignificantEventsTable({
   const items = useMemo(() => {
     return response.value ?? [];
   }, [response.value]);
-
-  const [isLoading, setIsLoading] = useState(false);
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
     {
@@ -98,14 +116,16 @@ export function SignificantEventsTable({
               defaultMessage: 'Edit query',
             }
           ),
-          enabled: (item) => {
-            return !isLoading;
+          render: (item) => {
+            return (
+              <WithLoadingSpinner
+                iconType="pencil"
+                onClick={() => {
+                  return onEditClick?.(item);
+                }}
+              />
+            );
           },
-          onClick: (item) => {
-            onEditClick?.(item);
-          },
-          icon: 'pencil',
-          type: 'icon',
         },
         {
           name: i18n.translate('xpack.streams.significantEventsTable.removeQueryActionTitle', {
@@ -117,14 +137,16 @@ export function SignificantEventsTable({
               defaultMessage: 'Remove query from stream',
             }
           ),
-          enabled: (item) => {
-            return !isLoading;
+          render: (item) => {
+            return (
+              <WithLoadingSpinner
+                iconType="trash"
+                onClick={() => {
+                  return onDeleteClick?.(item);
+                }}
+              />
+            );
           },
-          onClick: (item) => {
-            onDeleteClick?.(item);
-          },
-          icon: 'trash',
-          type: 'icon',
         },
       ],
     },
@@ -135,11 +157,13 @@ export function SignificantEventsTable({
       tableCaption={i18n.translate('xpack.streams.significantEventsTable.tableCaption', {
         defaultMessage: 'Significant events',
       })}
+      compressed
       items={items}
       rowHeader="title"
       columns={columns}
       loading={response.loading}
       tableLayout="auto"
+      itemId="id"
     />
   );
 }

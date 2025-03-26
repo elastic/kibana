@@ -20,5 +20,9 @@
     "@kbn/dev-cli-runner",
     "@kbn/inference-cli",
     "@kbn/tooling-log",
+    "@kbn/streams-plugin",
+    "@kbn/traced-es-client",
+    "@kbn/core",
+    "@kbn/logging",
   ],
 }

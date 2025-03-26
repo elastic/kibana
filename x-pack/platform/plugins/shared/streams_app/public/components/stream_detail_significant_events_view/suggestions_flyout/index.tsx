@@ -16,7 +16,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { StreamQueryKql } from '@kbn/streams-schema';
 import React, { useState } from 'react';
-import { without } from 'lodash';
 import { SignificantEventSuggestionsList } from './suggestions_list';
 
 interface SignificantEventSuggestionsFlyoutProps {
@@ -31,7 +30,9 @@ export function SignificantEventSuggestionsFlyout({
   onAccept,
   onClose,
 }: SignificantEventSuggestionsFlyoutProps) {
-  const [selectedSuggestions, setSelectedSuggestions] = useState(suggestions);
+  const [selectedSuggestions, setSelectedSuggestions] = useState(() =>
+    suggestions.map((suggestion) => suggestion.id)
+  );
 
   return (
     <EuiFlyout
@@ -54,12 +55,8 @@ export function SignificantEventSuggestionsFlyout({
           name={name}
           suggestions={suggestions}
           selected={selectedSuggestions}
-          onSuggestionClick={(suggestion) => {
-            setSelectedSuggestions((prev) =>
-              selectedSuggestions.includes(suggestion)
-                ? without(prev, suggestion)
-                : prev.concat(suggestion)
-            );
+          onSelectionChange={(next) => {
+            setSelectedSuggestions(() => next);
           }}
         />
       </EuiFlyoutBody>
@@ -80,7 +77,9 @@ export function SignificantEventSuggestionsFlyout({
             fill
             iconType="plusInCircle"
             onClick={() => {
-              onAccept?.(selectedSuggestions);
+              onAccept?.(
+                suggestions.filter((suggestion) => selectedSuggestions.includes(suggestion.id))
+              );
             }}
           >
             {i18n.translate(

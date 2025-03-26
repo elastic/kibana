@@ -61,6 +61,7 @@
     "@kbn/licensing-plugin",
     "@kbn/datemath",
     "@kbn/xstate-utils",
-    "@kbn/core-analytics-browser"
+    "@kbn/core-analytics-browser",
+    "@kbn/kibana-utils-plugin"
   ]
 }

@@ -18,7 +18,6 @@
   "kbn_references": [
     "@kbn/es-query",
     "@kbn/safer-lodash-set",
-    "@kbn/inference-common",
     "@kbn/utility-types",
   ]
 }

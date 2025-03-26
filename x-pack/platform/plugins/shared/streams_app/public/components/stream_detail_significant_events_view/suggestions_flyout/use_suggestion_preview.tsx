@@ -13,16 +13,17 @@ import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
-import { formatChangePoint } from '../change_point';
+import { FormattedChangePoint, formatChangePoint } from '../change_point';
 import { getAnnotationFromFormattedChangePoint } from '../utils/get_annotation_from_formatted_change_point';
 
-interface SignificantEventSuggestionPreview {
+export interface SignificantEventSuggestionPreview {
   suggestion: StreamQueryKql;
   timeseries?: Array<{
     x: number;
     y: number;
   }>;
   empty?: boolean;
+  change?: FormattedChangePoint;
   annotations?: Array<{
     color: string;
     icon: JSX.Element;
@@ -121,6 +122,7 @@ export function useSignificantEventSuggestionPreviews({
         id,
         timeseries,
         empty: !hasAnyData,
+        change,
         annotations: change
           ? [
               getAnnotationFromFormattedChangePoint({

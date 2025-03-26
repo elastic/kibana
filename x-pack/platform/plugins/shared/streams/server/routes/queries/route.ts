@@ -31,9 +31,9 @@ export interface DeleteQueryResponse {
 export type BulkUpdateAssetsResponse = { acknowledged: boolean } | { errors: ErrorCause[] };
 
 const listQueriesRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{name}/queries 2023-10-31',
+  endpoint: 'GET /api/streams/{name}/queries',
   options: {
-    access: 'public',
+    access: 'internal',
     summary: 'Get stream queries',
     description:
       'Fetches all queries linked to a stream that are visible to the current user in the current space.',
@@ -122,9 +122,9 @@ const upsertQueryRoute = createServerRoute({
 });
 
 const deleteQueryRoute = createServerRoute({
-  endpoint: 'DELETE /api/streams/{name}/queries/{queryId} 2023-10-31',
+  endpoint: 'DELETE /api/streams/{name}/queries/{queryId}',
   options: {
-    access: 'public',
+    access: 'internal',
     summary: 'Remove a query from a stream',
     description: 'Remove a query from a stream. Noop if the query is not found on the stream.',
     availability: {
@@ -165,9 +165,9 @@ const deleteQueryRoute = createServerRoute({
 });
 
 const bulkQueriesRoute = createServerRoute({
-  endpoint: `POST /api/streams/{name}/queries/_bulk 2023-10-31`,
+  endpoint: `POST /api/streams/{name}/queries/_bulk`,
   options: {
-    access: 'public',
+    access: 'internal',
     summary: 'Bulk update queries',
     description: 'Bulk update queries of a stream. Can add new queries and delete existing ones.',
     availability: {
