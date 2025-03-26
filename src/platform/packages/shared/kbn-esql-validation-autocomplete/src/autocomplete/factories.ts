@@ -35,7 +35,7 @@ const techPreviewLabel = i18n.translate(
   }
 );
 
-const getNamedParamPrefix = (variableType: ESQLVariableType) =>
+const getVariablePrefix = (variableType: ESQLVariableType) =>
   variableType === ESQLVariableType.FIELDS || variableType === ESQLVariableType.FUNCTIONS
     ? '??'
     : '?';
@@ -238,7 +238,7 @@ export const buildFieldsDefinitionsWithMetadata = (
     const controlSuggestions = fields.length
       ? getControlSuggestion(
           variableType,
-          variables?.map((v) => `${getNamedParamPrefix(variableType)}${v.key}`)
+          variables?.map((v) => `${getVariablePrefix(variableType)}${v.key}`)
         )
       : [];
     suggestions.push(...controlSuggestions);
@@ -500,7 +500,7 @@ export function getControlSuggestionIfSupported(
   const variables = getVariables?.()?.filter((variable) => variable.type === type) ?? [];
   const controlSuggestion = getControlSuggestion(
     type,
-    variables?.map((v) => `${getNamedParamPrefix(type)}${v.key}`)
+    variables?.map((v) => `${getVariablePrefix(type)}${v.key}`)
   );
   return controlSuggestion;
 }
