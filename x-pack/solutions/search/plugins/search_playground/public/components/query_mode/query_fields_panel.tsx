@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -33,7 +34,7 @@ const isQueryFieldSelected = (
 };
 
 export interface QueryFieldsPanelProps {
-  disabled: boolean;
+  customizedQuery: boolean;
   index: string;
   indexFields: QuerySourceFields;
   updateFields: (index: string, fieldName: string, checked: boolean) => void;
@@ -41,7 +42,7 @@ export interface QueryFieldsPanelProps {
 }
 
 export const QueryFieldsPanel = ({
-  disabled,
+  customizedQuery,
   index,
   indexFields,
   updateFields,
@@ -105,12 +106,34 @@ export const QueryFieldsPanel = ({
               ),
               align: 'right',
               render: (checked, field) => {
+                if (customizedQuery) {
+                  return (
+                    <EuiToolTip
+                      content={i18n.translate(
+                        'xpack.searchPlayground.viewQuery.sidePanel.fieldSelection.customized.warning.tooltip',
+                        {
+                          defaultMessage:
+                            'Field selection is not supported with a user-customized query',
+                        }
+                      )}
+                    >
+                      <EuiSwitch
+                        showLabel={false}
+                        label={field.name}
+                        disabled
+                        checked={false}
+                        onChange={() => {}}
+                        compressed
+                        data-test-subj={`field-${field.name}-${checked}`}
+                      />
+                    </EuiToolTip>
+                  );
+                }
                 return (
                   <EuiSwitch
                     showLabel={false}
                     label={field.name}
-                    disabled={disabled}
-                    checked={disabled ? false : checked}
+                    checked={checked}
                     onChange={(e) => updateFields(index, field.name, e.target.checked)}
                     compressed
                     data-test-subj={`field-${field.name}-${checked}`}

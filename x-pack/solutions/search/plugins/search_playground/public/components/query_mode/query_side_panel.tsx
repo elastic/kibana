@@ -135,7 +135,7 @@ export const QuerySidePanel = ({
               indexFields={group}
               updateFields={updateFields}
               queryFields={queryFields}
-              disabled={userElasticsearchQueryValidations?.isUserCustomized ?? false}
+              customizedQuery={userElasticsearchQueryValidations?.isUserCustomized ?? false}
             />
           </EuiFlexItem>
         ))}
