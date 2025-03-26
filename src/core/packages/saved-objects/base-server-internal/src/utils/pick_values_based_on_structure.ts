@@ -44,9 +44,20 @@ export function getFlattenedKeys(obj: object): string[] {
 }
 
 /**
- * Given two objects, use the first object as a structural map to extract keys
- * from a second object. The result should be an object that is structurally similar
- * to the first object, but with values from the second object.
+ * Given two objects, use the first object as a structural map to extract values
+ * from a second object, preserving the placement in the first object.
+ *
+ * @example
+ * ```ts
+ * const keySource = { a: 1, b: [1] };
+ * const target = { a: 2, b: [2, 3] };
+ * pickValuesBasedOnStructure(keySource, target);
+ * // => { a: 2, b: [2] }
+ * ```
+ *
+ * @note This is intended to specifically be used in the application forward
+ *       compatibility schemas when loading a saved object from the database,
+ *       downgrading it and keeping only the known, validated subset of values.
  */
 export function pickValuesBasedOnStructure(keySource: object, target: object): object {
   const keys = getFlattenedKeys(keySource);
