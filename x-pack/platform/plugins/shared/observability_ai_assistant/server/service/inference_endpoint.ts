@@ -35,8 +35,6 @@ export async function createInferenceEndpoint({
     return await esClient.asCurrentUser.inference.put(
       {
         inference_id: AI_ASSISTANT_KB_INFERENCE_ID,
-        // task_type: 'sparse_embedding',
-        // task_type: 'text_embedding',
         task_type: taskType,
         inference_config: {
           service: 'elasticsearch',
