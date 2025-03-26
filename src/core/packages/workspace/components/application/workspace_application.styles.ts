@@ -8,6 +8,7 @@
  */
 
 import { css } from '@emotion/react';
+import { euiPushFlyoutPaddingInlineEnd } from '@kbn/core-overlays-browser-internal';
 import { EmotionFn } from '../types';
 
 const root =
@@ -36,6 +37,7 @@ const content =
       border-top-left-radius: ${euiTheme.border.radius.medium};
       border-top-right-radius: ${euiTheme.border.radius.medium};
       ${overflow};
+      padding-inline-end: var(${euiPushFlyoutPaddingInlineEnd}, 0);
     `;
 
 export const styles = {
