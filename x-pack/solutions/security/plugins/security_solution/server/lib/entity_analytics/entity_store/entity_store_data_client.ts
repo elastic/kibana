@@ -88,6 +88,7 @@ import {
   getEntitiesIndexName,
   isPromiseFulfilled,
   isPromiseRejected,
+  mergeEntityStoreIndices,
 } from './utils';
 
 import { EntityEngineActions } from './auditing/actions';
@@ -802,30 +803,11 @@ export class EntityStoreDataClient {
       };
     }
 
-    const indexPatterns = await buildIndexPatterns(
+    const defaultIndexPatterns = await buildIndexPatterns(
       this.options.namespace,
       this.options.appClient,
       this.options.dataViewsService
     );
-
-    const privileges = await getEntityStoreSourceIndicesPrivileges(
-      this.options.request,
-      this.options.security,
-      indexPatterns
-    );
-
-    if (!privileges.has_all_required) {
-      const missingPrivilegesMsg = getAllMissingPrivileges(privileges).elasticsearch.index.map(
-        ({ indexName, privileges: missingPrivileges }) =>
-          `Missing [${missingPrivileges.join(', ')}] privileges for index '${indexName}'.`
-      );
-
-      throw new Error(
-        `The current user does not have the required indices privileges.\n${missingPrivilegesMsg.join(
-          '\n'
-        )}`
-      );
-    }
 
     const updateDefinitionPromises: Array<Promise<EngineDataviewUpdateResult>> = engines.map(
       async (engine) => {
@@ -842,6 +824,8 @@ export class EntityStoreDataClient {
           );
         }
 
+        const indexPatterns = mergeEntityStoreIndices(defaultIndexPatterns, engine.indexPattern);
+
         // Skip update if index patterns are the same
         if (isEqual(definition.indexPatterns, indexPatterns)) {
           logger.debug(
@@ -851,6 +835,25 @@ export class EntityStoreDataClient {
         } else {
           logger.info(
             `In namespace ${this.options.namespace}: Data view index changes detected, applying changes to entity definition.`
+          );
+        }
+
+        const privileges = await getEntityStoreSourceIndicesPrivileges(
+          this.options.request,
+          this.options.security,
+          indexPatterns
+        );
+
+        if (!privileges.has_all_required) {
+          const missingPrivilegesMsg = getAllMissingPrivileges(privileges).elasticsearch.index.map(
+            ({ indexName, privileges: missingPrivileges }) =>
+              `Missing [${missingPrivileges.join(', ')}] privileges for index '${indexName}'.`
+          );
+
+          throw new Error(
+            `The current user does not have the required indices privileges for updating the '${
+              engine.type
+            }' entity store.\n${missingPrivilegesMsg.join('\n')}`
           );
         }
 
