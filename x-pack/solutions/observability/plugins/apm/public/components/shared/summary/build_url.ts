@@ -9,25 +9,22 @@ import type { Transaction } from '../../../../typings/es_schemas/ui/transaction'
 import type { Span } from '../../../../typings/es_schemas/ui/span';
 import type { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 
-export const buildUrl = (
-  transaction: Transaction | Span | APMError,
-  urlFullValue: string | undefined
-) => {
-  const urlFull = urlFullValue;
+export const buildUrl = (item: Transaction | Span | APMError, urlFull: string | undefined) => {
+  if (urlFull) return urlFull;
   // URL fields from Otel
-  const urlScheme = transaction.url?.scheme;
-  const urlPath = transaction.url?.path;
-  const serverAddress = transaction?.server?.address;
-  const serverPort = transaction?.server?.port;
+  const urlScheme = item?.url?.scheme;
+  const urlPath = item?.url?.path;
+  const serverAddress = item?.server?.address;
+  const serverPort = item?.server?.port;
 
-  const hasURLFromFields = urlFull || (urlScheme && urlPath && serverAddress && serverPort);
+  const hasURLFromFields = urlScheme && serverAddress && serverPort;
 
   return hasURLFromFields
     ? url.format({
         protocol: urlScheme, // 'https',
         hostname: serverAddress, // 'example.com',
         port: serverPort, // 443,
-        pathname: urlPath, // '/some/path',
+        pathname: urlPath ?? '', // '/some/path',
       })
-    : urlFull;
+    : undefined;
 };

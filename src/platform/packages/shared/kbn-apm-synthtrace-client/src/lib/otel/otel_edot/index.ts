@@ -144,6 +144,8 @@ class OtelEdot extends Serializable<OtelEdotDocument> {
         'app.ads.count': 1,
         'event.outcome': 'success',
         'event.success_count': 1,
+        'http.request.method': 'GET',
+        'http.response.status_code': 200,
         'network.peer.address': '10.12.9.56',
         'network.peer.port': 41208,
         'network.type': 'ipv4',
@@ -166,6 +168,8 @@ class OtelEdot extends Serializable<OtelEdotDocument> {
         'transaction.root': false,
         'transaction.sampled': true,
         'transaction.type': 'request',
+        'url.path': '/',
+        'url.scheme': 'https',
       },
       data_stream: {
         dataset: 'generic.otel',
