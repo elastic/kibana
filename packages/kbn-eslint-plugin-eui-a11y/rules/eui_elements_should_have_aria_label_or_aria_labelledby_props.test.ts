@@ -68,9 +68,12 @@ for (const [name, tester] of [tsTester, babelTester]) {
                 message: `<${element[0]}> should have a \`aria-label\` for a11y. Use the autofix suggestion or add your own.`,
               },
             ],
-            output: `<${element[0]} aria-label={i18n.translate('app_not_found_in_i18nrc.${
-              element[1].charAt(0).toLowerCase() + element[1].slice(1)
-            }.ValueThinghelloariaLabel', { defaultMessage: 'Value Thing hello ${
+            output: `<${
+              element[0]
+            } aria-label={i18n.translate('app_not_found_in_i18nrc.valueThinghello${element[1].replaceAll(
+              ' ',
+              ''
+            )}.ariaLabel', { defaultMessage: 'Value Thing hello ${
               element[1]
             }' })}>Value Thing hello</${element[0]}>
 import { i18n } from '@kbn/i18n';`,

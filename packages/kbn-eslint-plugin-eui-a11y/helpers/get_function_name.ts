@@ -8,7 +8,7 @@
  */
 
 import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
-import { lowerCaseFirstLetter } from './utils';
+import { lowerCaseFirstChar } from './utils';
 
 export function getFunctionName(func: TSESTree.FunctionDeclaration | TSESTree.Node): string {
   if (
@@ -17,7 +17,7 @@ export function getFunctionName(func: TSESTree.FunctionDeclaration | TSESTree.No
     func.type === AST_NODE_TYPES.FunctionDeclaration &&
     func.id.type === AST_NODE_TYPES.Identifier
   ) {
-    return lowerCaseFirstLetter(func.id.name);
+    return lowerCaseFirstChar(func.id.name);
   }
 
   if (
@@ -29,7 +29,7 @@ export function getFunctionName(func: TSESTree.FunctionDeclaration | TSESTree.No
   }
 
   if (func.parent?.id && 'name' in func.parent.id) {
-    return lowerCaseFirstLetter(func.parent.id.name);
+    return lowerCaseFirstChar(func.parent.id.name);
   }
 
   return '';

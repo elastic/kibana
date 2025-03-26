@@ -11,12 +11,17 @@ import type { Rule } from 'eslint';
 import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
 import { Node } from 'estree';
 
-import { checkNodeForExistenceOfProps } from '../helpers/check_node_for_existence_of_props';
+import { getPropValues } from '../helpers/get_prop_values';
 import { getIntentFromNode } from '../helpers/get_intent_from_node';
 import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
 import { getFunctionName } from '../helpers/get_function_name';
 import { getI18nImportFixer } from '../helpers/get_i18n_import_fixer';
-import { isTruthy } from '../helpers/utils';
+import {
+  isTruthy,
+  lowerCaseFirstChar,
+  sanitizeEuiElementName,
+  upperCaseFirstChar,
+} from '../helpers/utils';
 
 export const EUI_ELEMENTS = [
   'EuiButtonIcon',
@@ -27,7 +32,7 @@ export const EUI_ELEMENTS = [
   'EuiSelectWithWidth',
 ];
 
-const PROP_NAMES = ['aria-label', 'aria-labelledby'];
+const PROP_NAMES = ['aria-label', 'aria-labelledby', 'iconType'];
 
 export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: Rule.RuleModule = {
   meta: {
@@ -51,40 +56,46 @@ export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: Rule.RuleModul
           return;
         }
 
-        const hasAriaLabelProp = checkNodeForExistenceOfProps(
-          parent,
-          () => sourceCode.getScope(node as Node),
-          PROP_NAMES
-        );
+        const relevantPropValues = getPropValues({
+          propNames: PROP_NAMES,
+          node: parent,
+          getScope: () => sourceCode.getScope(node as Node),
+        });
 
-        if (hasAriaLabelProp) return; // JSXOpeningElement already has a prop for aria-label. Bail.
+        // Element already has a prop for aria-label or aria-labelledby. We don't need to do anything.
+        if (relevantPropValues['aria-label'] || relevantPropValues['aria-labelledby']) return;
 
         // Start building the suggestion.
 
         // 1. The intention of the element (i.e. "Select date", "Submit", "Cancel")
-        const intent = getIntentFromNode(parent);
+        const intent =
+          name === 'EuiButtonIcon' && relevantPropValues.iconType
+            ? relevantPropValues.iconType // For EuiButtonIcon, use the iconType as the intent (i.e. 'pen', 'trash')
+            : getIntentFromNode(parent);
 
-        // 2. The element name that generates the events
-        const element = (
-          name
-            .replace('Eui', '')
-            .replace('Empty', '')
-            .replace('Icon', '')
-            .replace('WithWidth', '')
-            .match(/[A-Z][a-z]*/g) || []
-        ).join(' ');
+        // 2. The element name (i.e. "Button", "Beta Badge", "Select")
+        const { elementName, elementNameWithSpaces } = sanitizeEuiElementName(name);
 
-        const suggestion = `${intent}${element}`; // 'Actions Button'
+        // Proposed default message
+        const defaultMessage = `${upperCaseFirstChar(intent)} ${elementNameWithSpaces}`.trim(); // 'Actions Button'
 
+        // 3. Set up the translation ID
         const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
-        // @ts-expect-error upgrade typescript v5.1.6
-        const functionDeclaration = sourceCode.getScope(node as TSNode)
-          .block as TSESTree.FunctionDeclaration;
-        const functionName = getFunctionName(functionDeclaration);
 
-        const translationIdSuggestion = `${i18nAppId}.${functionName}.${
-          element.charAt(0).toLowerCase() + element.slice(1)
-        }.${intent.replaceAll(' ', '')}ariaLabel`.replaceAll('..', '.'); // 'xpack.observability.overview.logs.loadMore.ariaLabel'
+        const functionDeclaration = sourceCode.getScope(node as Node).block;
+        const functionName = getFunctionName(functionDeclaration as TSESTree.FunctionDeclaration);
+
+        const translation = [
+          i18nAppId,
+          functionName,
+          `${intent}${upperCaseFirstChar(elementName)}`,
+          'ariaLabel',
+        ];
+
+        const translationId = translation
+          .filter(Boolean)
+          .map((el) => lowerCaseFirstChar(el).replaceAll(' ', ''))
+          .join('.'); // 'xpack.observability.overview.logs.loadMore.ariaLabel'
 
         // Check if i18n has already been imported into the file
         const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine, replaceMode } =
@@ -101,7 +112,7 @@ export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: Rule.RuleModul
             return [
               fixer.insertTextAfterRange(
                 range,
-                ` aria-label={i18n.translate('${translationIdSuggestion}', { defaultMessage: '${suggestion}' })}`
+                ` aria-label={i18n.translate('${translationId}', { defaultMessage: '${defaultMessage}' })}`
               ),
               !hasI18nImportLine && rangeToAddI18nImportLine
                 ? replaceMode === 'replace'

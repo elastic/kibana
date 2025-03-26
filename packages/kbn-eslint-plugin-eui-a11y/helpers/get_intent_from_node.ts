@@ -33,7 +33,7 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
     keeping the code readable. In the cases where types are explicitly set to
     variables, it was done to help the compiler when it couldn't infer the type.
     */
-  return node.reduce((acc: string, currentNode) => {
+  const intent = node.reduce((acc: string, currentNode) => {
     switch (currentNode.type) {
       case 'JSXText':
         // When node is a string primitive
@@ -123,4 +123,6 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
 
     return acc;
   }, '');
+
+  return intent.trim();
 }
