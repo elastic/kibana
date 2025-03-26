@@ -135,6 +135,9 @@ export class FileUploadManager {
     private removePipelinesAfterImport: boolean = true,
     indexSettingsOverride: IndicesIndexSettings | undefined = undefined
   ) {
+    // eslint-disable-next-line no-console
+    console.log('FileUploadManager constructor');
+
     if (this.existingIndexName !== null) {
       this.loadExistingIndexMappings();
       this.autoCreateDataView = false;

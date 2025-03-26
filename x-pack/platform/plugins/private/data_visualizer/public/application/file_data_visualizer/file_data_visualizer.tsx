@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { FC, PropsWithChildren } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { FileUploadResults } from '@kbn/file-upload-common';
@@ -57,8 +57,10 @@ export const FileDataVisualizer: FC<Props> = ({
   const autoCreateDataView = true;
   const indexSettings = undefined;
 
-  const fileUploadManager = useMemo(
-    () =>
+  const [fileUploadManager, setFileUploadManager] = useState<FileUploadManager | undefined>();
+
+  const reset = useCallback(() => {
+    setFileUploadManager(
       new FileUploadManager(
         fileUpload,
         coreStart.http,
@@ -68,17 +70,26 @@ export const FileDataVisualizer: FC<Props> = ({
         autoCreateDataView,
         true,
         indexSettings
-      ),
-    [
-      autoAddInference,
-      autoCreateDataView,
-      coreStart.http,
-      data.dataViews,
-      existingIndex,
-      fileUpload,
-      indexSettings,
-    ]
-  );
+      )
+    );
+  }, [
+    autoAddInference,
+    autoCreateDataView,
+    coreStart.http,
+    data.dataViews,
+    existingIndex,
+    fileUpload,
+    indexSettings,
+  ]);
+
+  useEffect(() => {
+    reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (fileUploadManager === undefined) {
+    return;
+  }
 
   return (
     <KibanaRenderContextProvider {...coreStart}>
@@ -90,6 +101,9 @@ export const FileDataVisualizer: FC<Props> = ({
               getAdditionalLinks={getAdditionalLinks}
               resultLinks={resultLinks}
               setUploadResults={setUploadResults}
+              reset={() => {
+                reset();
+              }}
               onClose={() => {}}
             />
           ) : (

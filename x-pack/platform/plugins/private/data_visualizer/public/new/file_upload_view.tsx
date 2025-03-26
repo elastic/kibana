@@ -32,10 +32,11 @@ interface Props {
   resultLinks?: ResultLinks;
   getAdditionalLinks?: GetAdditionalLinks;
   setUploadResults?: (results: FileUploadResults) => void;
+  reset?: () => void;
   onClose?: () => void;
 }
 
-export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose }) => {
+export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose, reset }) => {
   const {
     setIndexName,
     setIndexValidationStatus,
@@ -59,6 +60,10 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose }) => {
     uploadStatus.analysisStatus !== STATUS.FAILED &&
     uploadStatus.analysisStatus !== STATUS.STARTED &&
     filesStatus.length > 0;
+
+  const resetForm = () => {
+    reset?.();
+  };
 
   return (
     <>
@@ -159,6 +164,15 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose }) => {
 
       {uploadStatus.overallImportStatus === STATUS.COMPLETED && importResults !== null ? (
         <>
+          <EuiButton onClick={resetForm}>
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.uploadView.importButton"
+              defaultMessage="Upload another file"
+            />
+          </EuiButton>
+
+          <EuiSpacer />
+
           <ResultsLinks
             index={importResults.index}
             dataViewId={importResults.dataView?.id}
