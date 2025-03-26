@@ -43,6 +43,21 @@ export const findRules = ({
   hasReference,
   ruleIds,
 }: FindRuleOptions): Promise<FindResult<RuleParams>> => {
+  console.log(
+    `rulesClient.find.options: ${JSON.stringify(
+      {
+        fields,
+        page,
+        perPage,
+        filter: enrichFilterWithRuleTypeMapping(enrichFilterWithRuleIds(filter, ruleIds)),
+        sortOrder,
+        sortField: transformSortField(sortField),
+        hasReference,
+      },
+      null,
+      2
+    )}`
+  );
   return rulesClient.find({
     options: {
       fields,

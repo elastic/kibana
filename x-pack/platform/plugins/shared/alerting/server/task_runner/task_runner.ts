@@ -367,6 +367,8 @@ export class TaskRunner<
       ruleTaskTimeout: this.ruleType.ruleTaskTimeout,
     });
 
+    const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
+
     const {
       state: updatedRuleTypeState,
       error,
@@ -374,6 +376,7 @@ export class TaskRunner<
     } = await this.ruleTypeRunner.run({
       context: ruleTypeRunnerContext,
       alertsClient,
+      actionsClient,
       executionId: this.executionId,
       executorServices,
       rule,
@@ -402,7 +405,7 @@ export class TaskRunner<
       ruleLabel,
       previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
       alertingEventLogger: this.alertingEventLogger,
-      actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
+      actionsClient,
       alertsClient,
     });
 
