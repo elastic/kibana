@@ -97,6 +97,16 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     [changeState]
   );
 
+  const onReorder = useCallback(
+    (reorderedItems: TabItem[]) => {
+      changeState((prevState) => ({
+        ...prevState,
+        items: reorderedItems,
+      }));
+    },
+    [changeState]
+  );
+
   const onAdd = useCallback(async () => {
     const newItem = createItem();
     changeState((prevState) => addTab(prevState, newItem, maxItemsCount));
@@ -135,6 +145,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           onAdd={onAdd}
           onLabelEdited={onLabelEdited}
           onSelect={onSelect}
+          onReorder={onReorder}
           onClose={onClose}
           getPreviewData={getPreviewData}
         />

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { MouseEvent, useCallback, useState, useRef } from 'react';
+import React, { MouseEvent, KeyboardEvent, useCallback, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -17,6 +17,8 @@ import {
   EuiText,
   useEuiTheme,
   type EuiThemeComputed,
+  type DraggableProvidedDragHandleProps,
+  keys,
 } from '@elastic/eui';
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
@@ -34,6 +36,7 @@ import { TabPreview } from '../tab_preview';
 export interface TabProps {
   item: TabItem;
   isSelected: boolean;
+  dragHandleProps?: DraggableProvidedDragHandleProps | null;
   tabContentId: string;
   tabsSizeConfig: TabsSizeConfig;
   getTabMenuItems?: GetTabMenuItems;
@@ -48,6 +51,7 @@ export const Tab: React.FC<TabProps> = (props) => {
   const {
     item,
     isSelected,
+    dragHandleProps,
     tabContentId,
     tabsSizeConfig,
     getTabMenuItems,
@@ -71,10 +75,10 @@ export const Tab: React.FC<TabProps> = (props) => {
     defaultMessage: 'Click to select or double-click to edit session name',
   });
 
-  const hidePreview = () => setShowPreview(false);
+  const hidePreview = useCallback(() => setShowPreview(false), [setShowPreview]);
 
   const onSelectEvent = useCallback(
-    async (event: MouseEvent<HTMLElement>) => {
+    async (event: MouseEvent<HTMLElement> | KeyboardEvent<HTMLElement>) => {
       event.stopPropagation();
       hidePreview();
 
@@ -82,7 +86,7 @@ export const Tab: React.FC<TabProps> = (props) => {
         await onSelect(item);
       }
     },
-    [onSelect, item, isSelected]
+    [onSelect, item, isSelected, hidePreview]
   );
 
   const onCloseEvent = useCallback(
@@ -93,20 +97,24 @@ export const Tab: React.FC<TabProps> = (props) => {
     [onClose, item]
   );
 
-  const onClickEvent = useCallback(
-    async (event: MouseEvent<HTMLDivElement>) => {
-      if (event.currentTarget === tabRef.current) {
-        // if user presses on the space around the buttons, we should still trigger the onSelectEvent
+  const onDoubleClick = useCallback(
+    (event: MouseEvent<HTMLDivElement>) => {
+      event.stopPropagation();
+      setIsInlineEditActive(true);
+      hidePreview();
+    },
+    [setIsInlineEditActive, hidePreview]
+  );
+
+  const onKeyDownEvent = useCallback(
+    async (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === keys.ENTER) {
+        event.preventDefault();
         await onSelectEvent(event);
       }
     },
     [onSelectEvent]
   );
-
-  const handleDoubleClick = useCallback(() => {
-    setIsInlineEditActive(true);
-    hidePreview();
-  }, []);
 
   const mainTabContent = (
     <EuiFlexGroup
@@ -125,19 +133,17 @@ export const Tab: React.FC<TabProps> = (props) => {
           />
         ) : (
           <>
-            <button
+            <div
               aria-label={tabButtonAriaLabel}
               css={getTabButtonCss(euiTheme)}
               className="unifiedTabs__tabBtn"
               data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
-              type="button"
-              onClick={onSelectEvent}
-              onDoubleClick={handleDoubleClick}
+              onDoubleClick={onDoubleClick}
             >
               <EuiText color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
                 {item.label}
               </EuiText>
-            </button>
+            </div>
             <div className="unifiedTabs__tabActions">
               <EuiFlexGroup responsive={false} direction="row" gutterSize="none">
                 {!!getTabMenuItems && (
@@ -180,13 +186,15 @@ export const Tab: React.FC<TabProps> = (props) => {
     >
       <TabWithBackground
         {...getTabAttributes(item, tabContentId)}
+        {...dragHandleProps}
         ref={tabRef}
         role="tab"
         aria-selected={isSelected}
         data-test-subj={`unifiedTabs_tab_${item.id}`}
         isSelected={isSelected}
         services={services}
-        onClick={onClickEvent}
+        onClick={onSelectEvent}
+        onKeyDown={onKeyDownEvent}
       >
         {mainTabContent}
       </TabWithBackground>

@@ -7,18 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  DropResult,
+  EuiButtonIcon,
+  EuiDragDropContext,
+  EuiDraggable,
+  EuiDroppable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  euiDragDropReorder,
+  useEuiTheme,
+} from '@elastic/eui';
 import { Tab, type TabProps } from '../tab';
 import type { TabItem, TabsServices, TabPreviewData } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
 
+const DROPPABLE_ID = 'unifiedTabsOrder';
+
 const growingFlexItemCss = css`
   min-width: 0;
+`;
+
+const droppableCss = css`
+  display: flex;
+  align-items: center;
+  wrap: no-wrap;
 `;
 
 export type TabsBarProps = Pick<
@@ -30,6 +48,7 @@ export type TabsBarProps = Pick<
   maxItemsCount?: number;
   services: TabsServices;
   onAdd: () => Promise<void>;
+  onReorder: (items: TabItem[]) => void;
   getPreviewData: (item: TabItem) => TabPreviewData;
 };
 
@@ -43,6 +62,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   onAdd,
   onLabelEdited,
   onSelect,
+  onReorder,
   onClose,
   getPreviewData,
 }) => {
@@ -77,6 +97,17 @@ export const TabsBar: React.FC<TabsBarProps> = ({
     }
   }, [selectedItem]);
 
+  const onDragEnd = useCallback(
+    ({ source, destination }: DropResult) => {
+      if (source && destination) {
+        const reorderedItems = euiDragDropReorder(items, source.index, destination.index);
+
+        onReorder(reorderedItems);
+      }
+    },
+    [items, onReorder]
+  );
+
   const mainTabsBarContent = (
     <EuiFlexGroup
       responsive={false}
@@ -89,30 +120,41 @@ export const TabsBar: React.FC<TabsBarProps> = ({
       <EuiFlexItem ref={setTabsContainerWithPlusElement} grow css={growingFlexItemCss}>
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false} css={growingFlexItemCss}>
-            <EuiFlexGroup
-              ref={setTabsContainerElement}
-              direction="row"
-              gutterSize="none"
-              alignItems="center"
-              responsive={false}
-              css={tabsContainerCss}
-            >
-              {items.map((item) => (
-                <Tab
-                  key={item.id}
-                  item={item}
-                  isSelected={selectedItem?.id === item.id}
-                  tabContentId={tabContentId}
-                  tabsSizeConfig={tabsSizeConfig}
-                  services={services}
-                  getTabMenuItems={getTabMenuItems}
-                  onLabelEdited={onLabelEdited}
-                  onSelect={onSelect}
-                  onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
-                  tabPreviewData={getPreviewData(item)}
-                />
-              ))}
-            </EuiFlexGroup>
+            <div ref={setTabsContainerElement} role="tablist" css={tabsContainerCss}>
+              <EuiDragDropContext onDragEnd={onDragEnd}>
+                <EuiDroppable droppableId={DROPPABLE_ID} direction="horizontal" css={droppableCss}>
+                  {() =>
+                    items.map((item, index) => (
+                      <EuiDraggable
+                        key={item.id}
+                        draggableId={item.id}
+                        index={index}
+                        usePortal
+                        hasInteractiveChildren
+                        customDragHandle="custom"
+                      >
+                        {({ dragHandleProps }) => (
+                          <Tab
+                            key={item.id}
+                            item={item}
+                            isSelected={selectedItem?.id === item.id}
+                            dragHandleProps={dragHandleProps}
+                            tabContentId={tabContentId}
+                            tabsSizeConfig={tabsSizeConfig}
+                            services={services}
+                            getTabMenuItems={getTabMenuItems}
+                            onLabelEdited={onLabelEdited}
+                            onSelect={onSelect}
+                            onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
+                            tabPreviewData={getPreviewData(item)}
+                          />
+                        )}
+                      </EuiDraggable>
+                    ))
+                  }
+                </EuiDroppable>
+              </EuiDragDropContext>
+            </div>
           </EuiFlexItem>
           {!!scrollLeftButton && <EuiFlexItem grow={false}>{scrollLeftButton}</EuiFlexItem>}
           {!!scrollRightButton && <EuiFlexItem grow={false}>{scrollRightButton}</EuiFlexItem>}
@@ -143,7 +185,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   );
 
   return (
-    <TabsBarWithBackground role="tablist" data-test-subj="unifiedTabs_tabsBar" services={services}>
+    <TabsBarWithBackground data-test-subj="unifiedTabs_tabsBar" services={services}>
       {mainTabsBarContent}
     </TabsBarWithBackground>
   );
