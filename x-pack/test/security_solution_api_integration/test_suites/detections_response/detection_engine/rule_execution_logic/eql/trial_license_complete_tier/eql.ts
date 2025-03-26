@@ -53,7 +53,6 @@ import {
   deleteAllRules,
   deleteAllAlerts,
   waitForRuleFailure,
-  waitForRulePartialFailure,
   routeWithNamespace,
 } from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
@@ -247,32 +246,23 @@ export default ({ getService }: FtrProviderContext) => {
       ).eql(1);
     });
 
-    // Failing: See https://github.com/elastic/kibana/issues/209024
-    it.skip('parses shard failures for EQL event query', async () => {
+    it('parses shard failures for EQL event query', async () => {
       await esArchiver.load(packetBeatPath);
       const rule: EqlRuleCreateProps = {
         ...getEqlRuleForAlertTesting(['auditbeat-*', 'packetbeat-*']),
         query: 'any where agent.type == "packetbeat" or broken == 1',
       };
       await setBrokenRuntimeField({ es, index: 'auditbeat-*' });
-      const createdRule = await createRule(supertest, log, rule);
-      const createdRuleId = createdRule.id;
-      await waitForRulePartialFailure({ supertest, log, id: createdRuleId });
-      const route = routeWithNamespace(DETECTION_ENGINE_RULES_URL);
-      const response = await supertest
-        .get(route)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31')
-        .query({ id: createdRule.id })
-        .expect(200);
-
-      const ruleResponse = response.body;
+      const { logs } = await previewRule({ supertest, rule });
       expect(
-        ruleResponse.execution_summary.last_execution.message.includes(
-          'The EQL event query was only executed on the available shards. The query failed to run successfully on the following shards:'
+        logs.some((previewLog) =>
+          previewLog.warnings.some((warning) =>
+            warning.includes(
+              'The EQL event query was only executed on the available shards. The query failed to run successfully on the following shards:'
+            )
+          )
         )
       ).eql(true);
-
       await unsetBrokenRuntimeField({ es, index: 'auditbeat-*' });
       await esArchiver.unload(packetBeatPath);
     });

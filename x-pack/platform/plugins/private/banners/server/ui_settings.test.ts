@@ -13,6 +13,7 @@ const createConfig = (parts: Partial<BannersConfigType> = {}): BannersConfigType
   placement: 'disabled',
   backgroundColor: '#0000',
   textColor: '#FFFFFF',
+  linkColor: '#0B64DD',
   textContent: 'some global banner text',
   disableSpaceBanners: false,
   ...parts,
@@ -35,6 +36,7 @@ describe('registerSettings', () => {
         value: 'some global banner text',
       }),
       'banners:textColor': expect.any(Object),
+      'banners:linkColor': expect.any(Object),
       'banners:backgroundColor': expect.any(Object),
     });
   });
@@ -50,6 +52,7 @@ describe('registerSettings', () => {
       placement: 'top',
       backgroundColor: '#FF00CC',
       textColor: '#AAFFEE',
+      linkColor: '#0B64DD',
       textContent: 'Some text',
     });
 
@@ -65,6 +68,9 @@ describe('registerSettings', () => {
       }),
       'banners:textColor': expect.objectContaining({
         value: config.textColor,
+      }),
+      'banners:linkColor': expect.objectContaining({
+        value: config.linkColor,
       }),
       'banners:backgroundColor': expect.objectContaining({
         value: config.backgroundColor,

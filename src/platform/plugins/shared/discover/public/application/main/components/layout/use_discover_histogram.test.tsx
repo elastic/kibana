@@ -415,11 +415,11 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.ref(api);
       });
-      expect(api.fetch).toHaveBeenCalled();
+      expect(api.fetch).not.toHaveBeenCalled();
       act(() => {
         savedSearchFetch$.next();
       });
-      expect(api.fetch).toHaveBeenCalledTimes(2);
+      expect(api.fetch).toHaveBeenCalledTimes(1);
     });
   });
 

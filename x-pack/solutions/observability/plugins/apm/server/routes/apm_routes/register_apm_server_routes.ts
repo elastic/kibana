@@ -32,7 +32,7 @@ import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import apm from 'elastic-apm-node';
 import type { VersionedRouteRegistrar } from '@kbn/core-http-server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import type {
   APMCore,
@@ -185,8 +185,6 @@ export function registerRoutes({
 
         return response.ok({ body });
       } catch (error) {
-        logger.error(error);
-
         if (!options.disableTelemetry && telemetryUsageCounter) {
           telemetryUsageCounter.incrementCounter({
             counterName: `${method.toUpperCase()} ${pathname}`,
@@ -211,6 +209,10 @@ export function registerRoutes({
         if (Boom.isBoom(error)) {
           opts.statusCode = error.output.statusCode;
           opts.body.attributes.data = error?.data;
+        }
+
+        if (opts.statusCode >= 500) {
+          logger.error(error);
         }
 
         // capture error with APM node agent
