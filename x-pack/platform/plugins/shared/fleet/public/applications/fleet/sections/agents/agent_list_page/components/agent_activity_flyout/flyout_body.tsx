@@ -145,6 +145,7 @@ export const FlyoutBody: React.FunctionComponent<{
   // Loaded actions
 
   const inProgressActions = currentActions.filter((a) => a.status === 'IN_PROGRESS');
+  console.log('the in progress actions', inProgressActions);
   const completedActions = currentActions.filter((a) => a.status !== 'IN_PROGRESS');
   const todayActions = getTodayActions(completedActions);
   const otherDays = getOtherDaysActions(completedActions);

@@ -44,7 +44,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
     action.policyId ?? ''
   );
   const totalAgentsInPolicy = autoUpgradeAgentsStatus?.totalAgents ?? null;
-
+  console.log('total agents in policy', autoUpgradeAgentsStatus);
   const { docLinks } = useStartServices();
   const theme = useEuiTheme();
   const isAutomaticUpgrade = action.is_automatic;

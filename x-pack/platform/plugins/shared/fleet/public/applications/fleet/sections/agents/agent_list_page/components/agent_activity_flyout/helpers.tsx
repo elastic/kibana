@@ -99,7 +99,9 @@ export const inProgressTitle = (action: ActionStatus, totalAgents?: number) => (
 export const automaticUpgradeTitle = (action: ActionStatus, totalAgents: number) => (
   <EuiText>
     <EuiTitle>
-      <h3>Upgrade to {action.version} </h3>
+      <h3>
+        Upgrade to {action.version} (total in policy: {totalAgents}){' '}
+      </h3>
     </EuiTitle>
     <EuiProgress
       color="primary"

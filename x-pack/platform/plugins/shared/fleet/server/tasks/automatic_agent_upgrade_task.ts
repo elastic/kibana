@@ -44,7 +44,7 @@ export const TYPE = 'fleet:automatic-agent-upgrade-task';
 export const VERSION = '1.0.0';
 const TITLE = 'Fleet Automatic agent upgrades';
 const SCOPE = ['fleet'];
-const INTERVAL = '30m';
+const INTERVAL = '1m';
 const TIMEOUT = '10m';
 const AGENT_POLICIES_BATCHSIZE = 500;
 const AGENTS_BATCHSIZE = 10000;
@@ -260,6 +260,8 @@ export class AutomaticAgentUpgradeTask {
     let numberOfAgentsForUpgrade = Math.round(
       (totalActiveAgents * requiredVersion.percentage) / 100
     );
+    console.log('the total active agents', totalActiveAgents);
+    console.log('the number of agents for upgrade', numberOfAgentsForUpgrade);
     // Subtract total number of agents already or on or updating to target version.
     const updatingToKuery = `(upgrade_details.target_version:${requiredVersion.version} AND NOT upgrade_details.state:UPG_FAILED)`;
     const totalOnOrUpdatingToTargetVersionAgents = await this.getAgentCount(
@@ -267,6 +269,7 @@ export class AutomaticAgentUpgradeTask {
       soClient,
       `policy_id:${agentPolicy.id} AND (agent.version:${requiredVersion.version} OR ${updatingToKuery})`
     );
+    console.log('the total count on or updating', totalOnOrUpdatingToTargetVersionAgents);
     numberOfAgentsForUpgrade -= totalOnOrUpdatingToTargetVersionAgents;
     // Return if target is already met.
     if (numberOfAgentsForUpgrade <= 0) {
