@@ -16,12 +16,13 @@ import type { TabsServices } from '../../types';
 
 export interface TabWithBackgroundProps extends HTMLAttributes<HTMLElement> {
   isSelected: boolean;
+  isDragging?: boolean;
   services: TabsServices;
   children: React.ReactNode;
 }
 
 export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgroundProps>(
-  ({ isSelected, services, children, ...otherProps }, ref) => {
+  ({ isSelected, isDragging, services, children, ...otherProps }, ref) => {
     const euiThemeContext = useEuiTheme();
     const { euiTheme } = euiThemeContext;
     const { isProjectChromeStyle } = useChromeStyle(services);
@@ -52,7 +53,9 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
         <div
           // a top shadow for an unselected tab to make sure that it stays visible when the tab is hovered
           css={css`
-            background: ${isSelected ? 'transparent' : getTabsShadowGradient(euiThemeContext)};
+            background: ${isSelected || isDragging
+              ? 'transparent'
+              : getTabsShadowGradient(euiThemeContext)};
             transition: background ${euiTheme.animation.fast};
           `}
         >

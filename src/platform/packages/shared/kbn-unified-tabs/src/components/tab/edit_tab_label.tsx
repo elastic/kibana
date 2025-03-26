@@ -86,7 +86,7 @@ export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited,
       data-test-subj={`unifiedTabs_editTabLabelInput_${item.id}`}
       css={css`
         block-size: 28px;
-        margin-top: ${euiTheme.size.xs};
+        margin-top: ${euiTheme.size.xxs};
       `}
       compressed
       value={value}

@@ -133,11 +133,12 @@ export const TabsBar: React.FC<TabsBarProps> = ({
                         hasInteractiveChildren
                         customDragHandle="custom"
                       >
-                        {({ dragHandleProps }) => (
+                        {({ dragHandleProps }, { isDragging }) => (
                           <Tab
                             key={item.id}
                             item={item}
                             isSelected={selectedItem?.id === item.id}
+                            isDragging={isDragging}
                             dragHandleProps={dragHandleProps}
                             tabContentId={tabContentId}
                             tabsSizeConfig={tabsSizeConfig}

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { MouseEvent, KeyboardEvent, useCallback, useState, useRef } from 'react';
+import React, { MouseEvent, KeyboardEvent, useCallback, useState, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -36,6 +36,7 @@ import { TabPreview } from '../tab_preview';
 export interface TabProps {
   item: TabItem;
   isSelected: boolean;
+  isDragging?: boolean;
   dragHandleProps?: DraggableProvidedDragHandleProps | null;
   tabContentId: string;
   tabsSizeConfig: TabsSizeConfig;
@@ -51,6 +52,7 @@ export const Tab: React.FC<TabProps> = (props) => {
   const {
     item,
     isSelected,
+    isDragging,
     dragHandleProps,
     tabContentId,
     tabsSizeConfig,
@@ -116,11 +118,17 @@ export const Tab: React.FC<TabProps> = (props) => {
     [onSelectEvent]
   );
 
+  useEffect(() => {
+    if (isDragging && tabRef.current) {
+      tabRef.current.focus();
+    }
+  }, [isDragging]);
+
   const mainTabContent = (
     <EuiFlexGroup
       alignItems="center"
       direction="row"
-      css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected)}
+      css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, isDragging)}
       responsive={false}
       gutterSize="none"
     >
@@ -192,6 +200,7 @@ export const Tab: React.FC<TabProps> = (props) => {
         aria-selected={isSelected}
         data-test-subj={`unifiedTabs_tab_${item.id}`}
         isSelected={isSelected}
+        isDragging={isDragging}
         services={services}
         onClick={onSelectEvent}
         onKeyDown={onKeyDownEvent}
@@ -205,14 +214,15 @@ export const Tab: React.FC<TabProps> = (props) => {
 function getTabContainerCss(
   euiTheme: EuiThemeComputed,
   tabsSizeConfig: TabsSizeConfig,
-  isSelected: boolean
+  isSelected: boolean,
+  isDragging?: boolean
 ) {
   // TODO: remove the usage of deprecated colors
 
   return css`
     display: inline-flex;
     border-right: ${euiTheme.border.thin};
-    border-color: ${euiTheme.colors.lightShade};
+    border-color: ${isDragging ? 'transparent' : euiTheme.colors.lightShade};
     height: ${euiTheme.size.xl};
     padding-inline: ${euiTheme.size.xs};
     min-width: ${tabsSizeConfig.regularTabMinWidth}px;
@@ -264,6 +274,7 @@ function getTabButtonCss(euiTheme: EuiThemeComputed) {
   return css`
     width: 100%;
     height: ${euiTheme.size.l};
+    padding-top: ${euiTheme.size.xxs};
     padding-inline: ${euiTheme.size.xs};
     text-align: left;
     color: inherit;
