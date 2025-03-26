@@ -14,7 +14,7 @@ The Webhook connector uses [axios](https://github.com/axios/axios) to send a POS
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
 
-:::{image} ../../images/webhook-connector.png
+:::{image} ../images/webhook-connector.png
 :alt: Webhook connector
 :class: screenshot
 :::
@@ -58,7 +58,7 @@ Certificate authority
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../../images/webhook-params-test.png
+:::{image} ../images/webhook-params-test.png
 :alt: Webhook params test
 :class: screenshot
 :::

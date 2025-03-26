@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import httpProxy from 'http-proxy';
+import type httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
-import http from 'http';
+import type http from 'http';
 import getPort from 'get-port';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import { getSlackServer } from '@kbn/actions-simulators-plugin/server/plugin';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
