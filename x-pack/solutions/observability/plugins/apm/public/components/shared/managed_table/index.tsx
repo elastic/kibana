@@ -36,6 +36,7 @@ export interface ITableColumn<T extends object> {
   width?: string;
   sortable?: boolean;
   truncateText?: boolean;
+  nameTooltip?: EuiBasicTableColumn<T>['nameTooltip'];
   render?: (value: any, item: T) => unknown;
 }
 
