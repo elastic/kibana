@@ -55249,12 +55249,12 @@ components:
           type: object
           properties:
             days:
-              description: List of days of the week on which this action can be run. Days of the week are expressed as numbers between `1-7`, where `1` is Monday and `7` is Sunday. To select all days of the week, enter an empty array.
+              description: List of days of the week on which this action will be run. Days of the week are expressed as numbers between `1-7`, where `1` is Monday and `7` is Sunday. To select all days of the week, enter an empty array.
               items:
                 type: integer
               type: array
             hours:
-              description: The hours of the day during which this action can run. Hours of the day are expressed as two strings in the format `hh:mm` in `24` hour time. A start of `00:00` and an end of `24:00` means the action can run all day.
+              description: The hours of the day during which this action will run. Hours of the day are expressed as two strings in the format `hh:mm` in `24` hour time. A start of `00:00` and an end of `24:00` means the action can run all day.
               type: object
               properties:
                 end:
@@ -55264,7 +55264,8 @@ components:
                   description: Start time in `hh:mm` format.
                   type: string
             timezone:
-              description: An ISO timezone name, such as `Europe/Madrid` or `America/New_York`. Specific offsets such as UTC or UTC+1 will also work, but lack built-in DST.
+              description: An ISO timezone name. Specific offsets such as UTC or UTC+1 will also work, but lack built-in DST.
+              example: America/New_York
               type: string
     Security_Detections_API_RuleActionFrequency:
       description: The action frequency defines when the action runs (for example, only on rule execution or at specific time intervals).
@@ -55506,7 +55507,7 @@ components:
         > This field is overwritten when you save changes to the rule’s settings.
       type: object
     Security_Detections_API_RuleName:
-      description: The rule’s name.
+      description: A human-readable name for the rule.
       minLength: 1
       type: string
     Security_Detections_API_RuleNameOverride:
@@ -57654,7 +57655,7 @@ components:
       description: Timeline template title
       type: string
     Security_Detections_API_TimestampField:
-      description: Contains the event timestamp used for sorting a sequence of events. This is different from timestamp_override, which is used for querying events within a range. Defaults to the @timestamp ECS field.
+      description: Specifies the name of the event timestamp field used for sorting a sequence of events. Not to be confused with `timestamp_override`, which specifies the more general field used for querying events within a range. Defaults to the @timestamp ECS field.
       type: string
     Security_Detections_API_TimestampOverride:
       description: Sets the time field used to query indices. When unspecified, rules query the @timestamp field. The source field must be an Elasticsearch date data type.

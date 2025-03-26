@@ -16,7 +16,7 @@ components:
 
     RuleName:
       type: string
-      description: The rule’s name.
+      description: A human-readable name for the rule.
       minLength: 1
 
     RuleDescription:
@@ -492,7 +492,7 @@ components:
       required:
         - field_names
 
-    RuleActionThrottle: 
+    RuleActionThrottle:
       description: Defines how often rule actions are taken.
       oneOf:
         - type: string
@@ -541,10 +541,10 @@ components:
               type: array
               items:
                 type: integer
-              description: List of days of the week on which this action can be run. Days of the week are expressed as numbers between `1-7`, where `1` is Monday and `7` is Sunday. To select all days of the week, enter an empty array.
+              description: List of days of the week on which this action will be run. Days of the week are expressed as numbers between `1-7`, where `1` is Monday and `7` is Sunday. To select all days of the week, enter an empty array.
             hours:
               type: object
-              description: The hours of the day during which this action can run. Hours of the day are expressed as two strings in the format `hh:mm` in `24` hour time. A start of `00:00` and an end of `24:00` means the action can run all day.
+              description: The hours of the day during which this action will run. Hours of the day are expressed as two strings in the format `hh:mm` in `24` hour time. A start of `00:00` and an end of `24:00` means the action can run all day.
               properties:
                 start:
                   type: string
@@ -554,7 +554,8 @@ components:
                   description: End time in `hh:mm` format.
             timezone:
               type: string
-              description: An ISO timezone name, such as `Europe/Madrid` or `America/New_York`. Specific offsets such as UTC or UTC+1 will also work, but lack built-in DST.
+              description: An ISO timezone name. Specific offsets such as UTC or UTC+1 will also work, but lack built-in DST.
+              example: America/New_York
         query:
           type: object
           description: Object containing a query filter which gets applied to an action and determines whether the action should run.
