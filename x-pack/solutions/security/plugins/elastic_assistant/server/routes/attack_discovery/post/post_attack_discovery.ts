@@ -11,6 +11,7 @@ import {
   AttackDiscoveryPostResponse,
   API_VERSIONS,
   Replacements,
+  ELASTIC_ASSISTANT_ATTACK_DISCOVERY,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -37,7 +38,7 @@ export const postAttackDiscoveryRoute = (
       path: ATTACK_DISCOVERY,
       security: {
         authz: {
-          requiredPrivileges: ['elasticAttackDiscovery'],
+          requiredPrivileges: [ELASTIC_ASSISTANT_ATTACK_DISCOVERY],
         },
       },
       options: {

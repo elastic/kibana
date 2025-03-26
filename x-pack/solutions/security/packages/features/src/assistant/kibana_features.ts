@@ -9,6 +9,10 @@ import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import {
+  ELASTIC_ASSISTANT,
+  ELASTIC_ASSISTANT_FIELD_ANONYMIZATION,
+} from '@kbn/elastic-assistant-common';
 import { type BaseKibanaFeatureConfig } from '../types';
 import { APP_ID, ASSISTANT_FEATURE_ID } from '../constants';
 
@@ -31,7 +35,7 @@ export const getAssistantBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
   },
   privileges: {
     all: {
-      api: ['elasticAssistant', 'elasticAssistantFieldAnonymization'],
+      api: [ELASTIC_ASSISTANT, ELASTIC_ASSISTANT_FIELD_ANONYMIZATION],
       app: [ASSISTANT_FEATURE_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {

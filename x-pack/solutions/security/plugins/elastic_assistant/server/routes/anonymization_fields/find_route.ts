@@ -11,6 +11,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
+  ELASTIC_ASSISTANT_FIELD_ANONYMIZATION,
 } from '@kbn/elastic-assistant-common';
 
 import {
@@ -35,14 +36,7 @@ export const findAnonymizationFieldsRoute = (
       path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
       security: {
         authz: {
-          requiredPrivileges: [
-            {
-              anyRequired: [
-                'elasticAssistantFieldAnonymization',
-                'securitySolution-elasticAssistantFieldAnonymization',
-              ],
-            },
-          ],
+          requiredPrivileges: [ELASTIC_ASSISTANT_FIELD_ANONYMIZATION],
         },
       },
     })

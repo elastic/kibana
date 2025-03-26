@@ -11,6 +11,7 @@ import {
   AttackDiscoveryGetResponse,
   API_VERSIONS,
   AttackDiscoveryGetRequestParams,
+  ELASTIC_ASSISTANT_ATTACK_DISCOVERY,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
@@ -26,7 +27,7 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
       path: ATTACK_DISCOVERY_BY_CONNECTOR_ID,
       security: {
         authz: {
-          requiredPrivileges: ['elasticAttackDiscovery'],
+          requiredPrivileges: [ELASTIC_ASSISTANT_ATTACK_DISCOVERY],
         },
       },
     })

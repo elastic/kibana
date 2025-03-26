@@ -60,3 +60,8 @@ export const ELASTIC_AI_ASSISTANT_EVALUATE_URL =
 export const DEFEND_INSIGHTS_ID = 'defend-insights';
 export const DEFEND_INSIGHTS = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/defend_insights`;
 export const DEFEND_INSIGHTS_BY_ID = `${DEFEND_INSIGHTS}/{id}`;
+
+// Permissions
+export const ELASTIC_ASSISTANT = 'elasticAssistant';
+export const ELASTIC_ASSISTANT_FIELD_ANONYMIZATION = `${ELASTIC_ASSISTANT}FieldAnonymization`;
+export const ELASTIC_ASSISTANT_ATTACK_DISCOVERY = `${ELASTIC_ASSISTANT}AttackDiscovery`;

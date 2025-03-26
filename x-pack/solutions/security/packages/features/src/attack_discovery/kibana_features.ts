@@ -9,6 +9,10 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
+import {
+  ELASTIC_ASSISTANT_ATTACK_DISCOVERY,
+  ELASTIC_ASSISTANT_FIELD_ANONYMIZATION,
+} from '@kbn/elastic-assistant-common';
 import { APP_ID, ATTACK_DISCOVERY_FEATURE_ID } from '../constants';
 import { type BaseKibanaFeatureConfig } from '../types';
 
@@ -28,7 +32,7 @@ export const getAttackDiscoveryBaseKibanaFeature = (): BaseKibanaFeatureConfig =
   minimumLicense: 'enterprise',
   privileges: {
     all: {
-      api: ['elasticAttackDiscovery', 'elasticAssistantFieldAnonymization'],
+      api: [ELASTIC_ASSISTANT_ATTACK_DISCOVERY, ELASTIC_ASSISTANT_FIELD_ANONYMIZATION],
       app: [ATTACK_DISCOVERY_FEATURE_ID, 'kibana'],
       catalogue: [APP_ID],
       savedObject: {

@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
+import { ELASTIC_ASSISTANT_FIELD_ANONYMIZATION } from '@kbn/elastic-assistant-common';
 import {
   ProductFeaturesPrivilegeId,
   ProductFeaturesPrivileges,
@@ -640,7 +641,7 @@ const workflowInsightsSubFeature = (): SubFeatureConfig => ({
           api: [
             `${APP_ID}-writeWorkflowInsights`,
             `${APP_ID}-readWorkflowInsights`,
-            `${APP_ID}-elasticAssistantFieldAnonymization`,
+            ELASTIC_ASSISTANT_FIELD_ANONYMIZATION,
           ],
           id: 'workflow_insights_all',
           includeIn: 'none',
@@ -652,7 +653,7 @@ const workflowInsightsSubFeature = (): SubFeatureConfig => ({
           ui: ['writeWorkflowInsights', 'readWorkflowInsights'],
         },
         {
-          api: [`${APP_ID}-readWorkflowInsights`, `${APP_ID}-elasticAssistantFieldAnonymization`],
+          api: [`${APP_ID}-readWorkflowInsights`, ELASTIC_ASSISTANT_FIELD_ANONYMIZATION],
           id: 'workflow_insights_read',
           includeIn: 'none',
           name: TRANSLATIONS.read,
