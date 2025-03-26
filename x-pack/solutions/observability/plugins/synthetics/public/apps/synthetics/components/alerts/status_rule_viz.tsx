@@ -69,17 +69,19 @@ export const StatusRuleViz = ({
             isOpen={isPopoverOpen}
             closePopover={() => setIsPopoverOpen(false)}
             button={
-              <EuiButtonEmpty
-                data-test-subj="syntheticsStatusRuleVizMonitorQueryIDsButton"
-                size="xs"
-                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-              >
-                {i18n.translate('xpack.synthetics.statusRuleViz.monitorQueryIdsPopoverButton', {
-                  defaultMessage:
-                    '{total} existing {total, plural, one {monitor} other {monitors}}',
-                  values: { total: loading ? '...' : data?.monitors.length },
-                })}
-              </EuiButtonEmpty>
+              loading ? undefined : (
+                <EuiButtonEmpty
+                  data-test-subj="syntheticsStatusRuleVizMonitorQueryIDsButton"
+                  size="xs"
+                  onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                >
+                  {i18n.translate('xpack.synthetics.statusRuleViz.monitorQueryIdsPopoverButton', {
+                    defaultMessage:
+                      '{total} existing {total, plural, one {monitor} other {monitors}}',
+                    values: { total: data?.monitors.length },
+                  })}
+                </EuiButtonEmpty>
+              )
             }
           >
             <EuiPopoverTitle>
