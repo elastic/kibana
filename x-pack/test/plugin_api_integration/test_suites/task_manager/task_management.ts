@@ -437,7 +437,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      expect(queryResult.body.apiKeys).to.be.empty();
+      const apiKeysLength = queryResult.body.apiKeys.length;
 
       await scheduleTaskWithApiKey({
         id: 'test-task-for-sample-task-plugin-to-test-task-api-key',
@@ -455,7 +455,13 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      expect(queryResult.body.apiKeys[0].id).eql(result.userScope?.apiKeyId);
+      expect(
+        queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+          return apiKey.id === result.userScope?.apiKeyId;
+        }).length
+      ).eql(1);
+
+      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
 
       await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
 
@@ -465,7 +471,13 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      expect(queryResult.body.apiKeys).to.be.empty();
+      expect(
+        queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+          return apiKey.id === result.userScope?.apiKeyId;
+        }).length
+      ).eql(0);
+
+      expect(queryResult.body.apiKeys.length).eql(apiKeysLength);
     });
 
     it('should return a task run result when asked to run a task now', async () => {
