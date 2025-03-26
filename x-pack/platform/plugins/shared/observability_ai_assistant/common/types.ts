@@ -62,6 +62,7 @@ export interface Conversation {
   numeric_labels: Record<string, number>;
   namespace: string;
   public: boolean;
+  archived?: boolean;
 }
 
 type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
