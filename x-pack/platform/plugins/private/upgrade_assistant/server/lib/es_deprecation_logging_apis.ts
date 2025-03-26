@@ -8,6 +8,7 @@
 import { get } from 'lodash';
 import moment from 'moment-timezone';
 import { IScopedClusterClient } from '@kbn/core/server';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DeprecationLoggingStatus } from '../../common/types';
 import {
   DEPRECATION_LOGS_INDEX,
@@ -98,9 +99,10 @@ export async function getRecentEsDeprecationLogs(
     });
 
     const logs = searchResponse.hits.hits.map((hit) => hit._source);
+
     return {
       logs,
-      count: searchResponse.hits.total.value,
+      count: (searchResponse.hits.total as SearchTotalHits)?.value,
     };
   } catch (error) {
     // If search fails, return empty results to avoid blocking the overall status

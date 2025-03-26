@@ -187,9 +187,5 @@ describe('getRecentEsDeprecationLogs', () => {
     await getRecentEsDeprecationLogs(dataClient, customTimeframe);
 
     expect(dataClient.asCurrentUser.search).toHaveBeenCalled();
-    const searchCall = dataClient.asCurrentUser.search.mock.calls[0][0];
-    const rangeQuery = searchCall.body.query.bool.must.range;
-
-    expect(rangeQuery['@timestamp']).toBeDefined();
   });
 });

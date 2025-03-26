@@ -142,7 +142,7 @@ describe('getKibanaUpgradeStatus', () => {
         message: 'testMessage',
         domainId: 'security',
       },
-    ];
+    ] as DomainDeprecationDetails[];
 
     deprecationsClient.getAllDeprecations.mockResolvedValue(apiDeprecations);
 
@@ -178,7 +178,7 @@ describe('getKibanaUpgradeStatus', () => {
         message: 'testMessage',
         domainId: 'security',
       },
-    ];
+    ] as DomainDeprecationDetails[];
 
     deprecationsClient.getAllDeprecations.mockResolvedValue([
       ...mockKibanaDeprecations(),
