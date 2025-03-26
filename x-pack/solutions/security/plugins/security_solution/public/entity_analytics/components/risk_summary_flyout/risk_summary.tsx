@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 
 import {
   useEuiTheme,
@@ -65,11 +65,23 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   isLinkEnabled,
   isPreviewMode,
 }: RiskSummaryProps<T>) => {
-  const { telemetry } = useKibana().services;
+  const { telemetry, spaces } = useKibana().services;
   const { data } = riskScoreData;
   const riskData = data && data.length > 0 ? data[0] : undefined;
   const entityData = getEntityData<T>(entityType, riskData);
   const { euiTheme } = useEuiTheme();
+  const [spaceId, setSpaceId] = useState('default');
+
+  useEffect(() => {
+    const fetchSpace = async () => {
+      if (spaces?.getActiveSpace) {
+        const space = await spaces.getActiveSpace();
+        setSpaceId(space.id);
+      }
+    };
+
+    fetchSpace();
+  }, [spaces]);
   const lensAttributes = useMemo(() => {
     const entityName = entityData?.name ?? '';
     const fieldName = EntityTypeToIdentifierField[entityType];
@@ -77,12 +89,12 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
     return getRiskScoreSummaryAttributes({
       severity: entityData?.risk?.calculated_level,
       query: `${fieldName}: ${entityName}`,
-      spaceId: 'default',
+      spaceId,
       riskEntity: entityType,
       // TODO: add in riskColors when severity palette agreed on.
       // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
     });
-  }, [entityData?.name, entityData?.risk?.calculated_level, entityType]);
+  }, [entityData?.name, entityData?.risk?.calculated_level, entityType, spaceId]);
   const xsFontSize = useEuiFontSize('xxs').fontSize;
   const rows = useMemo(() => getItems(entityData), [entityData]);
 
