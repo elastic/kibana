@@ -58,10 +58,17 @@ describe('fetchEsqlQuery', () => {
           services: {
             logger,
             scopedClusterClient,
-            share: {} as SharePluginStart,
+            share: {
+              url: {
+                locators: {
+                  get: jest.fn().mockReturnValue({
+                    getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+                  }),
+                },
+              },
+            } as unknown as SharePluginStart,
           },
           spacePrefix: '',
-          publicBaseUrl: '',
           dateStart: new Date().toISOString(),
           dateEnd: new Date().toISOString(),
         });

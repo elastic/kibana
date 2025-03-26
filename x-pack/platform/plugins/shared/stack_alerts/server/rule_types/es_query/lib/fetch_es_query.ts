@@ -14,6 +14,11 @@ import {
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
+import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
+import { v4 as uuidv4 } from 'uuid';
 import { getComparatorScript } from '../../../../common';
 import type { OnlyEsQueryRuleParams } from '../types';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
@@ -24,12 +29,12 @@ export interface FetchEsQueryOpts {
   name: string;
   params: OnlyEsQueryRuleParams;
   timestamp: string | undefined;
-  publicBaseUrl: string;
   spacePrefix: string;
   services: {
     scopedClusterClient: IScopedClusterClient;
     logger: Logger;
     ruleResultService?: PublicRuleResultService;
+    share: SharePluginStart;
   };
   alertLimit?: number;
   dateStart: string;
@@ -44,7 +49,6 @@ export async function fetchEsQuery({
   name,
   params,
   spacePrefix,
-  publicBaseUrl,
   timestamp,
   services,
   alertLimit,
@@ -145,7 +149,15 @@ export async function fetchEsQuery({
     ruleResultService.setLastRunOutcomeMessage(anyShardFailures);
   }
 
-  const link = `${publicBaseUrl}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`;
+  const link = generateLink(
+    services.share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!,
+    params.index,
+    params.timeField,
+    query,
+    dateStart,
+    dateEnd,
+    spacePrefix
+  );
 
   return {
     parsedResults: parseAggregationResults({
@@ -159,4 +171,41 @@ export async function fetchEsQuery({
     link,
     index: params.index,
   };
+}
+
+export function generateLink(
+  discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
+  index: string[],
+  timeField: string,
+  rawFilter: Record<string, unknown>,
+  dateStart: string,
+  dateEnd: string,
+  spacePrefix: string
+) {
+  const dataViewId = uuidv4();
+  const filter = buildCustomFilter(
+    dataViewId,
+    rawFilter,
+    false,
+    false,
+    'Rule query DSL',
+    FilterStateStore.APP_STATE
+  );
+  const redirectUrlParams: DiscoverAppLocatorParams = {
+    dataViewSpec: {
+      id: dataViewId,
+      title: index.join(','),
+      timeFieldName: timeField,
+    },
+    filters: [filter],
+    timeRange: { from: dateStart, to: dateEnd },
+    isAlertResults: true,
+  };
+
+  // use `lzCompress` flag for making the link readable during debugging/testing
+  // const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { lzCompress: false });
+  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
+  const [start, end] = redirectUrl.split('/app');
+
+  return start + spacePrefix + '/app' + end;
 }

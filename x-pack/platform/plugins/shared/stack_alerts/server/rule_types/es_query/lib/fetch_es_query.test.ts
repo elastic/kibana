@@ -12,6 +12,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { publicRuleResultServiceMock } from '@kbn/alerting-plugin/server/monitoring/rule_result_service.mock';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/common', () => {
   const actual = jest.requireActual('@kbn/triggers-actions-ui-plugin/common');
@@ -56,6 +57,15 @@ describe('fetchEsQuery', () => {
     scopedClusterClient: scopedClusterClientMock,
     logger,
     ruleResultService: mockRuleResultService,
+    share: {
+      url: {
+        locators: {
+          get: jest.fn().mockReturnValue({
+            getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+          }),
+        },
+      },
+    } as unknown as SharePluginStart,
   };
   it('should add time filter if timestamp if defined and excludeHitsFromPreviousRun is true', async () => {
     const params = defaultParams;
@@ -68,7 +78,6 @@ describe('fetchEsQuery', () => {
       timestamp: '2020-02-09T23:15:41.941Z',
       services,
       spacePrefix: '',
-      publicBaseUrl: '',
       dateStart: date,
       dateEnd: date,
     });
@@ -160,7 +169,6 @@ describe('fetchEsQuery', () => {
       timestamp: undefined,
       services,
       spacePrefix: '',
-      publicBaseUrl: '',
       dateStart: date,
       dateEnd: date,
     });
@@ -226,7 +234,6 @@ describe('fetchEsQuery', () => {
       timestamp: '2020-02-09T23:15:41.941Z',
       services,
       spacePrefix: '',
-      publicBaseUrl: '',
       dateStart: date,
       dateEnd: date,
     });
@@ -292,7 +299,6 @@ describe('fetchEsQuery', () => {
       timestamp: undefined,
       services,
       spacePrefix: '',
-      publicBaseUrl: '',
       dateStart: date,
       dateEnd: date,
     });
@@ -391,7 +397,6 @@ describe('fetchEsQuery', () => {
       timestamp: undefined,
       services,
       spacePrefix: '',
-      publicBaseUrl: '',
       dateStart: date,
       dateEnd: date,
     });
@@ -515,7 +520,6 @@ describe('fetchEsQuery', () => {
       timestamp: '2020-02-09T23:15:41.941Z',
       services,
       spacePrefix: '',
-      publicBaseUrl: '',
       dateStart: new Date().toISOString(),
       dateEnd: new Date().toISOString(),
     });
@@ -596,7 +600,6 @@ describe('fetchEsQuery', () => {
       timestamp: '2020-02-09T23:15:41.941Z',
       services,
       spacePrefix: '',
-      publicBaseUrl: '',
       dateStart: new Date().toISOString(),
       dateEnd: new Date().toISOString(),
     });

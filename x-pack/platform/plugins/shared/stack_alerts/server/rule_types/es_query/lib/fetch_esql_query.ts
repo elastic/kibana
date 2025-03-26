@@ -13,8 +13,7 @@ import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
-import type { Filter, Query } from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
 import type { EsqlTable } from '../../../../common';
 import { toEsQueryHits } from '../../../../common';
 import type { OnlyEsqlQueryRuleParams } from '../types';
@@ -24,7 +23,6 @@ export interface FetchEsqlQueryOpts {
   alertLimit: number | undefined;
   params: OnlyEsqlQueryRuleParams;
   spacePrefix: string;
-  publicBaseUrl: string;
   services: {
     logger: Logger;
     scopedClusterClient: IScopedClusterClient;
@@ -40,7 +38,6 @@ export async function fetchEsqlQuery({
   params,
   services,
   spacePrefix,
-  publicBaseUrl,
   dateStart,
   dateEnd,
 }: FetchEsqlQueryOpts) {
@@ -67,7 +64,13 @@ export async function fetchEsqlQuery({
   const hits = toEsQueryHits(response);
   const sourceFields = getSourceFields(response);
 
-  const link = `${publicBaseUrl}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`;
+  const link = generateLink(
+    { esql: query.query },
+    services.share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!,
+    dateStart,
+    dateEnd,
+    spacePrefix
+  );
 
   return {
     link,
@@ -132,24 +135,17 @@ export const getSourceFields = (results: EsqlTable) => {
   return intersectionBy(resultFields, ecsFields, 'label');
 };
 
-export async function generateLink(
-  esqlQuery: Query,
+export function generateLink(
+  esqlQuery: AggregateQuery,
   discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
-  dataViews: DataViewsContract,
-  dataViewToUpdate: DataView,
   dateStart: string,
   dateEnd: string,
-  spacePrefix: string,
-  filterToExcludeHitsFromPreviousRun: Filter | null
+  spacePrefix: string
 ) {
   const redirectUrlParams: DiscoverAppLocatorParams = {
-    filters: filterToExcludeHitsFromPreviousRun ? [filterToExcludeHitsFromPreviousRun] : [],
     timeRange: { from: dateStart, to: dateEnd },
     isAlertResults: true,
-    query: {
-      language: 'esql',
-      query: esqlQuery,
-    },
+    query: esqlQuery,
   };
 
   // use `lzCompress` flag for making the link readable during debugging/testing

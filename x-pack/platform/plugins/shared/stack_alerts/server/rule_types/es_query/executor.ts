@@ -36,7 +36,7 @@ import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import { fetchEsqlQuery } from './lib/fetch_esql_query';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE } from '..';
 
-export async function executor(core: CoreSetup, options: ExecutorOptions<EsQueryRuleParams>) {
+export async function executor(_: CoreSetup, options: ExecutorOptions<EsQueryRuleParams>) {
   const searchSourceRule = isSearchSourceRule(options.params.searchType);
   const esqlQueryRule = isEsqlQueryRule(options.params.searchType);
   const {
@@ -54,7 +54,6 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     throw new AlertsClientError();
   }
   const currentTimestamp = new Date().toISOString();
-  const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
   const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
   const alertLimit = alertsClient.getAlertLimitValue();
   const compareFn = ComparatorFns.get(params.thresholdComparator);
@@ -95,7 +94,6 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         alertLimit,
         params: params as OnlyEsqlQueryRuleParams,
         spacePrefix,
-        publicBaseUrl,
         services: {
           share,
           scopedClusterClient,
@@ -110,12 +108,12 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         alertLimit,
         params: params as OnlyEsQueryRuleParams,
         timestamp: latestTimestamp,
-        publicBaseUrl,
         spacePrefix,
         services: {
           scopedClusterClient,
           logger,
           ruleResultService,
+          share,
         },
         dateStart,
         dateEnd,
