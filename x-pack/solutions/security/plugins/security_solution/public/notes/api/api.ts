@@ -28,6 +28,12 @@ export const createNote = async ({ note }: { note: BareNote }) => {
     });
     return response.note;
   } catch (err) {
+    // NOTE: this statement covers the case where the error originates on the backend side
+    // and has a specific, custom message in the body that should be returned to the ui.
+    if (err?.body?.message) {
+      throw new Error(err.body.message);
+    }
+
     throw new Error(('message' in err && err.message) || 'Request failed');
   }
 };
