@@ -53,31 +53,40 @@ export class ProductInterceptPrompter {
       }>(TRIGGER_API_ENDPOINT)
       .then((response) => {
         if (typeof response !== 'undefined') {
-          let timerId: ReturnType<typeof setTimeout> | null = null;
+          const now = Date.now();
+          let diff = 0;
 
+          // Calculate the number of runs since the trigger was registered
           const runs = Math.floor(
-            (Date.now() - Date.parse(response.registeredAt)) / response.triggerIntervalInMs
+            (diff = now - Date.parse(response.registeredAt)) / response.triggerIntervalInMs
           );
 
-          this.userProfileSubscription = Rx.combineLatest([
-            userProfile.getEnabled$(),
-            userProfile.getUserProfile$(),
-          ]).subscribe(([enabled, profileData]) => {
-            // persist value, so that when the user profile is to be updated, we always have the latest value
-            this.userProfile = profileData;
+          // Calculate the time until the next run
+          const nextRun = (runs + 1) * response.triggerIntervalInMs - diff;
 
-            // we exclude anonymous users at the moment
-            if (
-              enabled &&
-              runs >= (profileData?.userSettings?.lastInteractedInterceptId ?? 0) &&
-              !timerId
-            ) {
-              timerId = setTimeout(() => {
-                const interceptId = runs;
-                this.registerIntercept(interceptId, notifications.intercepts, eventReporter);
-              }, response.triggerIntervalInMs);
-            }
-          });
+          let runCount = runs;
+
+          this.userProfileSubscription = Rx.timer(nextRun, response.triggerIntervalInMs)
+            .pipe(
+              Rx.switchMap(() =>
+                Rx.combineLatest([userProfile.getEnabled$(), userProfile.getUserProfile$()])
+              ),
+              Rx.take(1), // Ensure the timer emits only once
+              Rx.repeatWhen(
+                (completed) => completed.pipe(Rx.delay(response.triggerIntervalInMs)) // Requeue after the interval
+              )
+            )
+            .subscribe(([enabled, profileData]) => {
+              this.userProfile = profileData;
+
+              if (
+                enabled &&
+                runCount >= (profileData?.userSettings?.lastInteractedInterceptId ?? 0)
+              ) {
+                this.registerIntercept(runCount, notifications.intercepts, eventReporter);
+                runCount++;
+              }
+            });
         }
 
         return;
