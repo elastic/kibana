@@ -14,6 +14,7 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
     processPid={27244}
     processTitle="/lib/systemd/systemd-journald"
     result="success"
+    scopeId="test"
     secondary="root"
     session="242"
     text="generic-text-123"

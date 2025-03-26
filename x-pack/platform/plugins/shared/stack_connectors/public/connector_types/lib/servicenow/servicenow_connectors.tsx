@@ -21,12 +21,13 @@ import { snExternalServiceConfig } from '../../../../common/servicenow_config';
 import { DeprecatedCallout } from './deprecated_callout';
 import { useGetAppInfo } from './use_get_app_info';
 import { ApplicationRequiredCallout } from './application_required_callout';
-import { isRESTApiError } from './helpers';
+import { isCORSError, isRESTApiError } from './helpers';
 import { InstallationCallout } from './installation_callout';
 import { UpdateConnector, UpdateConnectorFormSchema } from './update_connector';
 import { Credentials } from './credentials';
 import * as i18n from './translations';
 import { ServiceNowActionConnector, ServiceNowConfig, ServiceNowSecrets } from './types';
+import { ErrorCallout } from './error_callout';
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };
@@ -41,20 +42,8 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
     notifications: { toasts },
   } = useKibana().services;
   const { updateFieldValues } = useFormContext();
-  const [{ id, isDeprecated, actionTypeId, name, config, secrets }] = useFormData<
-    ConnectorFormSchema<ServiceNowConfig, ServiceNowSecrets>
-  >({
-    watch: [
-      'id',
-      'isDeprecated',
-      'actionTypeId',
-      'name',
-      'config.apiUrl',
-      'config.isOAuth',
-      'secrets.username',
-      'secrets.password',
-    ],
-  });
+  const [{ id, isDeprecated, actionTypeId, name, config, secrets }] =
+    useFormData<ConnectorFormSchema<ServiceNowConfig, ServiceNowSecrets>>();
 
   const requiresNewApplication = isDeprecated != null ? !isDeprecated : true;
   const { isOAuth = false } = config ?? {};
@@ -97,13 +86,19 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
       try {
         await getApplicationInfo(action);
       } catch (error) {
+        if (isCORSError(error)) {
+          return {
+            message: (
+              <ApplicationRequiredCallout
+                appId={actionTypeId != null ? snExternalServiceConfig[actionTypeId]?.appId : ''}
+                message={error.message}
+              />
+            ),
+          };
+        }
+
         return {
-          message: (
-            <ApplicationRequiredCallout
-              appId={actionTypeId != null ? snExternalServiceConfig[actionTypeId]?.appId : ''}
-              message={error.message}
-            />
-          ),
+          message: <ErrorCallout message={error.message} />,
         };
       }
     }

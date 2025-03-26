@@ -33,7 +33,7 @@ export const scoutPageParallelFixture = base.extend<
     extendedPage.gotoApp = (appName: string, pathOptions?: PathOptions) =>
       page.goto(kbnUrl.app(appName, { space: scoutSpace.id, pathOptions }));
 
-    log.serviceLoaded(`scoutPage:${scoutSpace.id}`);
+    log.serviceLoaded(`scoutPage`);
     await use(extendedPage);
   },
 });

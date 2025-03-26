@@ -15,6 +15,12 @@ export function registerStatsRoutes({ log, router }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/stats/sync_jobs',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         query: schema.object({
           isCrawler: schema.maybe(schema.boolean()),

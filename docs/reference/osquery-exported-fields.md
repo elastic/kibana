@@ -250,7 +250,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **attributes** - keyword, text.text
 
-* *file.attributes* - File attrib string. See: [https://ss64.com/nt/attrib.html](https://ss64.com/nt/attrib.md)
+* *file.attributes* - File attrib string. See: [https://ss64.com/nt/attrib.html](https://ss64.com/nt/attrib.html)
 
 **audible_alarm** - keyword, text.text
 

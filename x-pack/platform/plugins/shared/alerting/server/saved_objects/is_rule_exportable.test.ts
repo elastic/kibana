@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { TaskRunnerFactory } from '../task_runner';
-import { RuleTypeRegistry, ConstructorOptions } from '../rule_type_registry';
+import type { ConstructorOptions } from '../rule_type_registry';
+import { RuleTypeRegistry } from '../rule_type_registry';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ILicenseState } from '../lib/license_state';
+import type { ILicenseState } from '../lib/license_state';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { isRuleExportable } from './is_rule_exportable';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { AlertingConfig } from '../config';
+import type { AlertingConfig } from '../config';
 import { RULE_SAVED_OBJECT_TYPE } from '.';
 
 let ruleTypeRegistryParams: ConstructorOptions;
@@ -59,6 +61,7 @@ describe('isRuleExportable', () => {
       executor: jest.fn(),
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       validate: {
         params: { validate: (params) => params },
       },
@@ -119,6 +122,7 @@ describe('isRuleExportable', () => {
       executor: jest.fn(),
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       validate: {
         params: { validate: (params) => params },
       },
@@ -182,6 +186,7 @@ describe('isRuleExportable', () => {
       executor: jest.fn(),
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       validate: {
         params: { validate: (params) => params },
       },

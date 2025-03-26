@@ -72,7 +72,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('With a test index', () => {
+    describe('With a test index', function () {
+      // see details: https://github.com/elastic/kibana/issues/215660
+      this.tags(['failsOnMKI']);
       before(async () => {
         await es.indices.create({ index: indexName });
       });

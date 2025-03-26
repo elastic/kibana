@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   useEuiTheme,
@@ -23,6 +24,7 @@ import { useGetMissingResources } from '../../service/hooks/use_get_missing_reso
 import * as i18n from './translations';
 import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
 import type { RuleMigrationStats } from '../../types';
+import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 
 interface RuleMigrationsUploadMissingPanelProps {
   migrationStats: RuleMigrationStats;
@@ -30,9 +32,6 @@ interface RuleMigrationsUploadMissingPanelProps {
 }
 export const RuleMigrationsUploadMissingPanel = React.memo<RuleMigrationsUploadMissingPanelProps>(
   ({ migrationStats, topSpacerSize }) => {
-    const { euiTheme } = useEuiTheme();
-    const { telemetry } = useKibana().services.siemMigrations.rules;
-    const { openFlyout } = useRuleMigrationDataInputContext();
     const [missingResources, setMissingResources] = useState<RuleMigrationResourceBase[]>([]);
     const { getMissingResources, isLoading } = useGetMissingResources(setMissingResources);
 
@@ -40,56 +39,94 @@ export const RuleMigrationsUploadMissingPanel = React.memo<RuleMigrationsUploadM
       getMissingResources(migrationStats.id);
     }, [getMissingResources, migrationStats.id]);
 
-    const onOpenFlyout = useCallback(() => {
-      openFlyout(migrationStats);
-      telemetry.reportSetupMigrationOpenResources({
-        migrationId: migrationStats.id,
-        missingResourcesCount: missingResources.length,
-      });
-    }, [migrationStats, openFlyout, missingResources, telemetry]);
-
     if (isLoading || missingResources.length === 0) {
       return null;
     }
+
     return (
-      <>
-        {topSpacerSize && <EuiSpacer size={topSpacerSize} />}
-        <EuiPanel
-          hasShadow={false}
-          hasBorder
-          paddingSize="s"
-          style={{ backgroundColor: euiTheme.colors.backgroundBasePrimary }}
-        >
-          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <AssistantIcon />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <PanelText size="s" semiBold>
-                {i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE}
-              </PanelText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <PanelText size="s" subdued>
-                {i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION}
-              </PanelText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                color="primary"
-                onClick={onOpenFlyout}
-                iconType="download"
-                iconSide="right"
-                size="s"
-              >
-                {i18n.RULE_MIGRATION_UPLOAD_BUTTON}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </>
+      <RuleMigrationsUploadMissingPanelContent
+        migrationStats={migrationStats}
+        topSpacerSize={topSpacerSize}
+        missingResources={missingResources}
+      />
     );
   }
 );
 RuleMigrationsUploadMissingPanel.displayName = 'RuleMigrationsUploadMissingPanel';
+
+interface RuleMigrationsUploadMissingPanelContentProps
+  extends RuleMigrationsUploadMissingPanelProps {
+  missingResources: RuleMigrationResourceBase[];
+}
+const RuleMigrationsUploadMissingPanelContent =
+  React.memo<RuleMigrationsUploadMissingPanelContentProps>(
+    ({ migrationStats, topSpacerSize, missingResources }) => {
+      const { euiTheme } = useEuiTheme();
+      const { telemetry } = useKibana().services.siemMigrations.rules;
+      const { openFlyout } = useRuleMigrationDataInputContext();
+
+      const { data: translationStats, isLoading: isLoadingTranslationStats } =
+        useGetMigrationTranslationStats(migrationStats.id);
+
+      const onOpenFlyout = useCallback(() => {
+        openFlyout(migrationStats);
+        telemetry.reportSetupMigrationOpenResources({
+          migrationId: migrationStats.id,
+          missingResourcesCount: missingResources.length,
+        });
+      }, [migrationStats, openFlyout, missingResources, telemetry]);
+
+      const totalRulesToRetry = useMemo(() => {
+        return (
+          (translationStats?.rules.failed ?? 0) +
+          (translationStats?.rules.success.result.partial ?? 0) +
+          (translationStats?.rules.success.result.untranslatable ?? 0)
+        );
+      }, [translationStats]);
+
+      return (
+        <>
+          {topSpacerSize && <EuiSpacer size={topSpacerSize} />}
+          <EuiPanel
+            hasShadow={false}
+            hasBorder
+            paddingSize="s"
+            style={{ backgroundColor: euiTheme.colors.backgroundBasePrimary }}
+          >
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <AssistantIcon />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <PanelText size="s" semiBold>
+                  {i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE}
+                </PanelText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                {isLoadingTranslationStats ? (
+                  <EuiLoadingSpinner size="s" />
+                ) : (
+                  <PanelText size="s" subdued>
+                    {i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION(totalRulesToRetry)}
+                  </PanelText>
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  color="primary"
+                  onClick={onOpenFlyout}
+                  iconType="download"
+                  iconSide="right"
+                  size="s"
+                >
+                  {i18n.RULE_MIGRATION_UPLOAD_BUTTON}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </>
+      );
+    }
+  );
+RuleMigrationsUploadMissingPanelContent.displayName = 'RuleMigrationsUploadMissingPanelContent';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AxiosError, AxiosResponse } from 'axios';
-import { Logger } from '@kbn/core/server';
+import type { AxiosError, AxiosResponse } from 'axios';
+import type { Logger } from '@kbn/core/server';
 import { isUndefined } from 'lodash';
 
 interface ConnectorUsage {

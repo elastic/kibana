@@ -7,7 +7,7 @@
 import React from 'react';
 import { ObsRectAnnotation } from './new_rect_annotation';
 import { ObsLineAnnotation } from './new_line_annotation';
-import { Annotation } from '../../../../common/annotations';
+import type { Annotation } from '../../../../common/annotations';
 
 export function ObsAnnotation({ annotation }: { annotation: Annotation }) {
   if (!annotation.event?.end || annotation.annotation.type === 'line') {

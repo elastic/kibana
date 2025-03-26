@@ -8,7 +8,7 @@
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 
 export function FieldUpgradeSideHeader({ children }: PropsWithChildren<{}>) {
   const { euiTheme } = useEuiTheme();

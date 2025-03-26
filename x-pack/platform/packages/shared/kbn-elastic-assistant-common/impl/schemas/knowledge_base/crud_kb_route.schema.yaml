@@ -75,13 +75,9 @@ paths:
                 properties:
                   elser_exists:
                     type: boolean
-                  index_exists:
-                    type: boolean
                   is_setup_available:
                     type: boolean
                   is_setup_in_progress:
-                    type: boolean
-                  pipeline_exists:
                     type: boolean
                   security_labs_exists:
                     type: boolean

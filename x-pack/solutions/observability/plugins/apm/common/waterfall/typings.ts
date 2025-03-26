@@ -62,6 +62,7 @@ export interface WaterfallSpan {
     sync?: boolean;
     duration: { us: number };
     links?: SpanLink[];
+    destination?: { service?: { resource?: string } };
   };
   transaction?: {
     id?: string;

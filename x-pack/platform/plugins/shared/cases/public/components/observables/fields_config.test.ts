@@ -5,142 +5,32 @@
  * 2.0.
  */
 
-import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/types';
-import { domainValidator, emailValidator, genericValidator, ipv4Validator } from './fields_config';
+import { normalizeValueType, fieldsConfig } from './fields_config';
+import { OBSERVABLE_TYPE_DOMAIN } from '../../../common/constants';
 
-describe('emailValidator', () => {
-  it('should return an error if the value is not a string', () => {
-    const result = emailValidator({
-      value: undefined,
-      path: 'email',
-    } as Parameters<ValidationFunc>[0]);
+describe('fields_config.ts', () => {
+  describe('normalizeValueType', () => {
+    it('should return the correct value type if it exists', () => {
+      expect(normalizeValueType(OBSERVABLE_TYPE_DOMAIN.key)).toEqual(OBSERVABLE_TYPE_DOMAIN.key);
+    });
 
-    expect(result).toEqual({
-      code: 'ERR_NOT_STRING',
-      message: 'Value should be a string',
-      path: 'email',
+    it('should return "generic" if value type does not exist', () => {
+      expect(normalizeValueType('nonExistentKey')).toEqual('generic');
     });
   });
 
-  it('should return an error if the value is not a valid email', () => {
-    const result = emailValidator({
-      value: 'invalid-email',
-      path: 'email',
-    } as Parameters<ValidationFunc>[0]);
-    expect(result).toEqual({
-      code: 'ERR_NOT_EMAIL',
-      message: 'Value should be a valid email',
-      path: 'email',
+  describe('fieldsConfig', () => {
+    it('should have correct default values for type key validation', () => {
+      const typeKeyValidations = fieldsConfig.typeKey.validations;
+
+      expect(typeKeyValidations.length).toBe(1);
+      expect(typeKeyValidations[0].validator).toBeDefined();
     });
-  });
 
-  it('should return undefined if the value is a valid email', () => {
-    const result = emailValidator({
-      value: 'test@example.com',
-      path: 'email',
-    } as Parameters<ValidationFunc>[0]);
-    expect(result).toBeUndefined();
-  });
-});
+    it('should have observable value field types defined', () => {
+      const valueConfigs = fieldsConfig.value;
 
-describe('genericValidator', () => {
-  it('should return an error if the value is not a string', () => {
-    const result = genericValidator({
-      value: 123,
-      path: 'generic',
-    } as Parameters<ValidationFunc>[0]);
-    expect(result).toEqual({
-      code: 'ERR_NOT_STRING',
-      message: 'Value should be a string',
-      path: 'generic',
-    });
-  });
-
-  it('should return an error if the value is not valid', () => {
-    const result = genericValidator({
-      value: 'invalid value!',
-      path: 'generic',
-    } as Parameters<ValidationFunc>[0]);
-    expect(result).toEqual({
-      code: 'ERR_NOT_VALID',
-      message: 'Value is invalid',
-      path: 'generic',
-    });
-  });
-
-  it('should return undefined if the value is valid', () => {
-    const result = genericValidator({
-      value: 'valid_value',
-      path: 'generic',
-    } as Parameters<ValidationFunc>[0]);
-    expect(result).toBeUndefined();
-  });
-});
-
-describe('domainValidator', () => {
-  it('should return undefined for a valid domain', () => {
-    const result = domainValidator({
-      value: 'example.com',
-      path: 'domain',
-    } as Parameters<ValidationFunc>[0]);
-    expect(result).toBeUndefined();
-  });
-
-  it('should return an error for an invalid domain', () => {
-    const result = domainValidator({
-      value: '-invalid.com',
-      path: 'domain',
-    } as Parameters<ValidationFunc>[0]);
-    expect(result).toEqual({
-      code: 'ERR_NOT_VALID',
-      message: 'Value is invalid',
-      path: 'domain',
-    });
-  });
-
-  it('should return an error for hyphen-spaced strings', () => {
-    const result = domainValidator({
-      value: 'test-test',
-      path: 'domain',
-    } as Parameters<ValidationFunc>[0]);
-    expect(result).toEqual({
-      code: 'ERR_NOT_VALID',
-      message: 'Value is invalid',
-      path: 'domain',
-    });
-  });
-
-  it('should return an error for a non-string value', () => {
-    const result = domainValidator({
-      value: 12345,
-      path: 'domain',
-    } as Parameters<ValidationFunc>[0]);
-    expect(result).toEqual({
-      code: 'ERR_NOT_STRING',
-      message: 'Value should be a string',
-      path: 'domain',
-    });
-  });
-});
-
-describe('ipv4Validator', () => {
-  it('should return undefined for a valid ipv4', () => {
-    const result = ipv4Validator({
-      value: '127.0.0.1',
-      path: 'ipv4',
-    } as Parameters<ValidationFunc>[0]);
-    expect(result).toBeUndefined();
-  });
-
-  it('should return an error for invalid ipv4', () => {
-    const result = domainValidator({
-      value: 'invalid ip',
-      path: 'ipv4',
-    } as Parameters<ValidationFunc>[0]);
-    expect(result).toEqual({
-      code: 'ERR_NOT_VALID',
-      message: 'Value is invalid',
-      path: 'ipv4',
+      expect(Object.keys(valueConfigs).length).toBeGreaterThan(0);
     });
   });
 });

@@ -9,10 +9,11 @@ import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import type { GetInputIndex } from './get_input_output_index';
-import { getInputIndex, DataViewError } from './get_input_output_index';
+import { getInputIndex } from './get_input_output_index';
 
 describe('get_input_output_index', () => {
   let servicesMock: RuleExecutorServicesMock;
@@ -181,7 +182,7 @@ describe('get_input_output_index', () => {
 
     test('Returns error if no matching data view found', async () => {
       servicesMock.savedObjectsClient.get.mockRejectedValue(
-        new Error('Saved object [index-pattern/12345] not found')
+        SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', '12345')
       );
       await expect(
         getInputIndex({
@@ -199,18 +200,21 @@ describe('get_input_output_index', () => {
 
     test('Returns error of DataViewErrorType', async () => {
       servicesMock.savedObjectsClient.get.mockRejectedValue(
-        new Error('Saved object [index-pattern/12345] not found')
+        SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', '12345')
       );
-      await expect(
-        getInputIndex({
+      expect.assertions(1);
+      try {
+        await getInputIndex({
           services: servicesMock,
           version: '8.0.0',
           index: [],
           dataViewId: '12345',
           ruleId: 'rule_1',
           logger,
-        })
-      ).rejects.toBeInstanceOf(DataViewError);
+        });
+      } catch (exc) {
+        expect(SavedObjectsErrorHelpers.isNotFoundError(exc)).toBeTruthy();
+      }
     });
   });
 });

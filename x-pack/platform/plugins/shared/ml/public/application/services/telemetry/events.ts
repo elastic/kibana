@@ -6,10 +6,12 @@
  */
 
 import type { SchemaObject } from '@elastic/ebt';
+import type { TrainedModelsModelTestedEbtProps } from './types';
 import {
   TrainedModelsTelemetryEventTypes,
   type TrainedModelsDeploymentEbtProps,
   type TrainedModelsTelemetryEvent,
+  type TrainedModelsModelDownloadEbtProps,
 } from './types';
 
 const trainedModelsDeploymentSchema: SchemaObject<TrainedModelsDeploymentEbtProps>['properties'] = {
@@ -64,13 +66,83 @@ const trainedModelsDeploymentSchema: SchemaObject<TrainedModelsDeploymentEbtProp
       optional: true,
     },
   },
+  result: {
+    type: 'keyword',
+    _meta: {
+      description: 'The result of the deployment',
+    },
+  },
 };
+
+const trainedModelsModelDownloadSchema: SchemaObject<TrainedModelsModelDownloadEbtProps>['properties'] =
+  {
+    model_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID of the trained model',
+      },
+    },
+    result: {
+      type: 'keyword',
+      _meta: {
+        description: 'The result of the model download',
+      },
+    },
+  };
+
+const trainedModelsModelTestedSchema: SchemaObject<TrainedModelsModelTestedEbtProps>['properties'] =
+  {
+    model_id: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID of the trained model',
+      },
+    },
+    model_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the trained model',
+        optional: true,
+      },
+    },
+    task_type: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the task',
+        optional: true,
+      },
+    },
+    result: {
+      type: 'keyword',
+      _meta: {
+        description: 'The result of the task',
+      },
+    },
+  };
 
 const trainedModelsDeploymentCreatedEventType: TrainedModelsTelemetryEvent = {
   eventType: TrainedModelsTelemetryEventTypes.DEPLOYMENT_CREATED,
   schema: trainedModelsDeploymentSchema,
 };
 
+const trainedModelsModelDownloadEventType: TrainedModelsTelemetryEvent = {
+  eventType: TrainedModelsTelemetryEventTypes.MODEL_DOWNLOAD,
+  schema: trainedModelsModelDownloadSchema,
+};
+
+const trainedModelsDeploymentUpdatedEventType: TrainedModelsTelemetryEvent = {
+  eventType: TrainedModelsTelemetryEventTypes.DEPLOYMENT_UPDATED,
+  schema: trainedModelsDeploymentSchema,
+};
+
+const trainedModelsModelTestedEventType: TrainedModelsTelemetryEvent = {
+  eventType: TrainedModelsTelemetryEventTypes.MODEL_TESTED,
+  schema: trainedModelsModelTestedSchema,
+};
+
 export const trainedModelsEbtEvents = {
   trainedModelsDeploymentCreatedEventType,
+  trainedModelsModelDownloadEventType,
+  trainedModelsDeploymentUpdatedEventType,
+  trainedModelsModelTestedEventType,
 };

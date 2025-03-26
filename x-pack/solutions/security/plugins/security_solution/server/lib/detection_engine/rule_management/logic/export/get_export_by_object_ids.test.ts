@@ -87,12 +87,21 @@ describe('getExportByObjectIds', () => {
     expect(exports.actionConnectors).toBe('');
   });
 
-  test('it DOES NOT export immutable rules', async () => {
+  test('it exports prebuilt rules', async () => {
     const rulesClient = rulesClientMock.create();
-    const immutableRule = getRuleMock(getQueryRuleParams({ ruleId: 'rule-1', immutable: true }));
+    const prebuiltRule = getRuleMock(
+      getQueryRuleParams({
+        ruleId: 'rule-1',
+        immutable: true,
+        ruleSource: {
+          type: 'external',
+          isCustomized: false,
+        },
+      })
+    );
 
-    rulesClient.get.mockResolvedValue(immutableRule);
-    rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [immutableRule] }));
+    rulesClient.get.mockResolvedValue(prebuiltRule);
+    rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [prebuiltRule] }));
 
     const ruleIds = ['rule-1'];
     const exports = await getExportByObjectIds(
@@ -105,13 +114,13 @@ describe('getExportByObjectIds', () => {
     );
 
     expect(JSON.parse(exports.exportDetails)).toMatchObject({
-      exported_count: 0,
-      exported_rules_count: 0,
-      missing_rules: [{ rule_id: 'rule-1' }],
-      missing_rules_count: 1,
+      exported_count: 1,
+      exported_rules_count: 1,
+      missing_rules: [],
+      missing_rules_count: 0,
     });
     expect(exports).toMatchObject({
-      rulesNdjson: '',
+      rulesNdjson: expect.any(String),
       exceptionLists: '',
       actionConnectors: '',
     });

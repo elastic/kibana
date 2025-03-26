@@ -203,9 +203,9 @@ export const FieldSummary = (props: FieldSummaryProps) => {
 
         <EuiHorizontalRule margin="xs" />
       </EuiFlexGroup>
-      {isEditing && stream.ingest.routing.length > 0 ? (
+      {isEditing && stream.ingest.wired.routing.length > 0 ? (
         <EuiFlexItem grow={false}>
-          <ChildrenAffectedCallout childStreams={stream.ingest.routing} />
+          <ChildrenAffectedCallout childStreams={stream.ingest.wired.routing} />
         </EuiFlexItem>
       ) : null}
     </>

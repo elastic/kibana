@@ -100,13 +100,13 @@
           },
           "; userProfile?: Pick<",
           "UserProfileService",
-          ", \"getUserProfile$\"> | undefined; modify?: ",
+          ", \"getUserProfile$\"> | undefined; colorMode?: ",
+          "EuiThemeColorMode",
+          " | undefined; modify?: ",
           "RecursivePartial",
           "<",
           "EuiThemeShape",
-          "> | undefined; colorMode?: ",
-          "EuiThemeColorMode",
-          " | undefined; }"
+          "> | undefined; }"
         ],
         "path": "src/platform/packages/shared/react/kibana_context/render/render_provider.tsx",
         "deprecated": false,

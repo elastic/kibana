@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { RewriteRequestCase } from '@kbn/actions-plugin/common';
-import { AggregateRulesResponseBody } from '@kbn/alerting-plugin/common/routes/rule/apis/aggregate';
-import { RuleStatus } from '../../../types';
+import type { HttpSetup } from '@kbn/core/public';
+import type { AggregateRulesResponseBody } from '@kbn/alerting-plugin/common/routes/rule/apis/aggregate';
+import type { RuleStatus } from '../../../types';
 
 export interface AggregateRulesResponse {
   ruleExecutionStatus: Record<string, number>;
@@ -43,21 +42,6 @@ export const rewriteBodyRes = ({
   ruleTags,
 });
 
-export interface GetRuleTagsResponse {
-  total: number;
-  page: number;
-  perPage: number;
-  data: string[];
-}
-
-export const rewriteTagsBodyRes: RewriteRequestCase<GetRuleTagsResponse> = ({
-  per_page: perPage,
-  ...rest
-}) => ({
-  perPage,
-  ...rest,
-});
-
 export interface LoadRuleAggregationsProps {
   http: HttpSetup;
   searchText?: string;
@@ -68,11 +52,4 @@ export interface LoadRuleAggregationsProps {
   tagsFilter?: string[];
   ruleTypeIds?: string[];
   consumers?: string[];
-}
-
-export interface LoadRuleTagsProps {
-  http: HttpSetup;
-  search?: string;
-  perPage?: number;
-  page: number;
 }

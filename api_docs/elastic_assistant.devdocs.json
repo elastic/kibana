@@ -1530,7 +1530,7 @@
               "SavedObjectsClientContract",
               ", request: ",
               "KibanaRequest",
-              "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; sampleSize: number; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string, state?: ",
+              "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; sampleSize: number; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string, state?: ",
               "AnomalyDetectionRuleState",
               " | undefined) => Promise<{ payload: ",
               "AnomalyDetectionAlertPayload",
@@ -2037,6 +2037,57 @@
               "trackAdoption": false
             }
           ]
+        },
+        {
+          "parentPluginId": "elasticAssistant",
+          "id": "def-server.ElasticAssistantPluginStart.registerCallback",
+          "type": "Function",
+          "tags": [],
+          "label": "registerCallback",
+          "description": [
+            "\nRegister a callback to be used by the elastic assistant."
+          ],
+          "signature": [
+            "(callbackId: ",
+            "CallbackIds",
+            ", callback: Function) => void"
+          ],
+          "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "elasticAssistant",
+              "id": "def-server.ElasticAssistantPluginStart.registerCallback.$1",
+              "type": "string",
+              "tags": [],
+              "label": "callbackId",
+              "description": [],
+              "signature": [
+                "CallbackIds"
+              ],
+              "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "elasticAssistant",
+              "id": "def-server.ElasticAssistantPluginStart.registerCallback.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "callback",
+              "description": [],
+              "signature": [
+                "Function"
+              ],
+              "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

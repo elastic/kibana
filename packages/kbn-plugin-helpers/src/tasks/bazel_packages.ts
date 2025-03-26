@@ -13,7 +13,7 @@ import { TaskContext } from '../task_context';
 export async function buildBazelPackages({ log, dist }: TaskContext) {
   log.info('run bazel and build required artifacts for the optimizer');
 
-  const args = [`--define=REACT_18=${Boolean(process.env.REACT_18)}`];
+  const args = [];
   if (dist) args.push('--define=dist=true');
   try {
     await runBazel(

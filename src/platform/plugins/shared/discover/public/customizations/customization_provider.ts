@@ -7,34 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isFunction } from 'lodash';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
+import useLatest from 'react-use/lib/useLatest';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 import type { CustomizationCallback } from './types';
-import {
-  createCustomizationService,
+import type {
   DiscoverCustomizationId,
   DiscoverCustomizationService,
 } from './customization_service';
+import { createCustomizationService } from './customization_service';
 
 const customizationContext = createContext(createCustomizationService());
 
 export const DiscoverCustomizationProvider = customizationContext.Provider;
 
 export const useDiscoverCustomizationService = ({
-  customizationCallbacks,
+  customizationCallbacks: originalCustomizationCallbacks,
   stateContainer,
 }: {
   customizationCallbacks: CustomizationCallback[];
-  stateContainer: DiscoverStateContainer;
+  stateContainer?: DiscoverStateContainer;
 }) => {
+  const customizationCallbacks = useLatest(originalCustomizationCallbacks);
   const [customizationService, setCustomizationService] = useState<DiscoverCustomizationService>();
 
-  useEffectOnce(() => {
+  useEffect(() => {
+    setCustomizationService(undefined);
+
+    if (!stateContainer) {
+      return;
+    }
+
     const customizations = createCustomizationService();
-    const callbacks = customizationCallbacks.map((callback) =>
+    const callbacks = customizationCallbacks.current.map((callback) =>
       Promise.resolve(callback({ customizations, stateContainer }))
     );
     const initialize = () => Promise.all(callbacks).then((result) => result.filter(isFunction));
@@ -48,11 +55,9 @@ export const useDiscoverCustomizationService = ({
         cleanups.forEach((cleanup) => cleanup());
       });
     };
-  });
+  }, [customizationCallbacks, stateContainer]);
 
-  const isInitialized = Boolean(customizationService);
-
-  return { customizationService, isInitialized };
+  return customizationService;
 };
 
 export const useDiscoverCustomization$ = <TCustomizationId extends DiscoverCustomizationId>(

@@ -6,7 +6,6 @@
  */
 import { FieldMap } from '@kbn/data-stream-adapter';
 
-export const ELSER_MODEL_2 = ['.elser_model_2', '.elser_model_2_linux-x86_64'];
 export const ASSISTANT_ELSER_INFERENCE_ID = 'elastic-security-ai-assistant-elser2';
 export const ELASTICSEARCH_ELSER_INFERENCE_ID = '.elser-2-elasticsearch';
 

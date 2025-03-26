@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ObjectType } from '@kbn/config-schema';
+import type { ObjectType } from '@kbn/config-schema';
 import type { RuleTypeParams, SanitizedRule } from '../../common';
-import { CombinedSummarizedAlerts } from '../types';
+import type { CombinedSummarizedAlerts } from '../types';
 
 type Rule = Pick<SanitizedRule<RuleTypeParams>, 'id' | 'name' | 'tags' | 'consumer'> & {
   producer: string;

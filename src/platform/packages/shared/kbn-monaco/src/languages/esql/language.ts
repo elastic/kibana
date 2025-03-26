@@ -19,7 +19,6 @@ import { WorkerProxyService } from '../../common/worker_proxy';
 import { buildESQLTheme } from './lib/esql_theme';
 import { ESQLAstAdapter } from './lib/esql_ast_provider';
 import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
-import { wrapAsMonacoCodeActions } from './lib/converters/actions';
 
 const workerProxyService = new WorkerProxyService<ESQLWorker>();
 const removeKeywordSuffix = (name: string) => {
@@ -147,27 +146,6 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
         }
 
         return item;
-      },
-    };
-  },
-
-  getCodeActionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CodeActionProvider => {
-    return {
-      async provideCodeActions(
-        model /** ITextModel*/,
-        range /** Range*/,
-        context /** CodeActionContext*/,
-        token /** CancellationToken*/
-      ) {
-        const astAdapter = new ESQLAstAdapter(
-          (...uris) => workerProxyService.getWorker(uris),
-          callbacks
-        );
-        const actions = await astAdapter.codeAction(model, range, context);
-        return {
-          actions: wrapAsMonacoCodeActions(model, actions),
-          dispose: () => {},
-        };
       },
     };
   },

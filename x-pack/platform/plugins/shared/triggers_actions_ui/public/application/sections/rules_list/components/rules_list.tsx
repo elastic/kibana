@@ -14,16 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
-import React, {
-  lazy,
-  useEffect,
-  useState,
-  ReactNode,
-  useCallback,
-  useMemo,
-  useRef,
-  Suspense,
-} from 'react';
+import React, { useEffect, useState, ReactNode, useCallback, useMemo, useRef } from 'react';
 import {
   EuiSpacer,
   EuiPageTemplate,
@@ -37,18 +28,16 @@ import { useHistory } from 'react-router-dom';
 
 import {
   RuleExecutionStatus,
-  ALERTING_FEATURE_ID,
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
 import {
   RuleCreationValidConsumer,
   ruleDetailsRoute as commonRuleDetailsRoute,
-  STACK_ALERTS_FEATURE_ID,
   getCreateRuleRoute,
   getEditRuleRoute,
 } from '@kbn/rule-data-utils';
-import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
+import { MaintenanceWindowCallout, useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import {
   Rule,
   RuleTableItem,
@@ -95,7 +84,6 @@ import { runRule } from '../../../lib/run_rule';
 
 import { useLoadActionTypesQuery } from '../../../hooks/use_load_action_types_query';
 import { useLoadRuleAggregationsQuery } from '../../../hooks/use_load_rule_aggregations_query';
-import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 import { useLoadRulesQuery } from '../../../hooks/use_load_rules_query';
 import { useLoadConfigQuery } from '../../../hooks/use_load_config_query';
 import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
@@ -110,11 +98,6 @@ import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';
 import { useRulesListFilterStore } from './hooks/use_rules_list_filter_store';
-
-// Directly lazy import the flyouts because the suspendedComponentWithProps component
-// cause a visual hitch due to the loading spinner
-const RuleAdd = lazy(() => import('../../rule_form/rule_add'));
-const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
 export interface RulesListProps {
   ruleTypeIds?: string[];
@@ -142,7 +125,6 @@ export interface RulesListProps {
   onRefresh?: (refresh: Date) => void;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
-  useNewRuleForm?: boolean;
 }
 
 export const percentileFields = {
@@ -184,8 +166,6 @@ export const RulesList = ({
   onTypeFilterChange,
   onRefresh,
   setHeaderActions,
-  initialSelectedConsumer = STACK_ALERTS_FEATURE_ID,
-  useNewRuleForm = false,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
@@ -205,10 +185,6 @@ export const RulesList = ({
   const [inputText, setInputText] = useState<string>(searchFilter);
 
   const [ruleTypeModalVisible, setRuleTypeModalVisibility] = useState<boolean>(false);
-  const [ruleTypeIdToCreate, setRuleTypeIdToCreate] = useState<string | undefined>(undefined);
-  const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
-  const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
-  const [currentRuleToEdit, setCurrentRuleToEdit] = useState<RuleTableItem | null>(null);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
@@ -216,8 +192,6 @@ export const RulesList = ({
   const cloneRuleId = useRef<null | string>(null);
 
   const isRuleStatusFilterEnabled = getIsExperimentalFeatureEnabled('ruleStatusFilter');
-  // TODO: Remove this when removing the v1 flyout code
-  const isUsingRuleCreateFlyout = false; // getIsExperimentalFeatureEnabled('isUsingRuleCreateFlyout');
 
   const [percentileOptions, setPercentileOptions] =
     useState<EuiSelectableOption[]>(initialPercentileOptions);
@@ -256,7 +230,11 @@ export const RulesList = ({
     authorizedToReadAnyRules,
     authorizedToCreateAnyRules,
     isSuccess: isLoadRuleTypesSuccess,
-  } = useLoadRuleTypesQuery({ filteredRuleTypes });
+  } = useGetRuleTypesPermissions({
+    http,
+    toasts,
+    filteredRuleTypes,
+  });
   // Fetch action types
   const { actionTypes } = useLoadActionTypesQuery();
 
@@ -317,23 +295,18 @@ export const RulesList = ({
     isLoadingRuleTypes: ruleTypesState.isLoading,
     isLoadingRules: rulesState.isLoading,
     hasData,
-    isInitialLoadingRuleTypes: ruleTypesState.initialLoad,
+    isInitialLoadingRuleTypes: ruleTypesState.isInitialLoad,
     isInitialLoadingRules: rulesState.initialLoad,
   });
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
-    if (!isUsingRuleCreateFlyout && useNewRuleForm) {
-      navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
-        state: {
-          returnApp: 'management',
-          returnPath: `insightsAndAlerting/triggersActions/rules`,
-        },
-      });
-    } else {
-      setEditFlyoutVisibility(true);
-      setCurrentRuleToEdit(ruleItem);
-    }
+    navigateToApp('management', {
+      path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
+      state: {
+        returnApp: 'management',
+        returnPath: `insightsAndAlerting/triggersActions/rules`,
+      },
+    });
   };
 
   const onRunRule = async (id: string) => {
@@ -363,7 +336,7 @@ export const RulesList = ({
   ]);
 
   const tableItems = useMemo(() => {
-    if (ruleTypesState.initialLoad) {
+    if (ruleTypesState.isInitialLoad) {
       return [];
     }
     return convertRulesToTableItems({
@@ -1030,54 +1003,15 @@ export const RulesList = ({
           <RuleTypeModal
             onClose={() => setRuleTypeModalVisibility(false)}
             onSelectRuleType={(ruleTypeId) => {
-              if (!isUsingRuleCreateFlyout) {
-                navigateToApp('management', {
-                  path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
-                });
-              } else {
-                setRuleTypeIdToCreate(ruleTypeId);
-                setRuleTypeModalVisibility(false);
-                setRuleFlyoutVisibility(true);
-              }
+              navigateToApp('management', {
+                path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+              });
             }}
             http={http}
             toasts={toasts}
             registeredRuleTypes={ruleTypeRegistry.list()}
             filteredRuleTypes={filteredRuleTypes}
           />
-        )}
-        {ruleFlyoutVisible && (
-          <Suspense fallback={<div />}>
-            <RuleAdd
-              consumer={ALERTING_FEATURE_ID}
-              onClose={() => {
-                setRuleFlyoutVisibility(false);
-              }}
-              actionTypeRegistry={actionTypeRegistry}
-              ruleTypeRegistry={ruleTypeRegistry}
-              ruleTypeIndex={ruleTypesState.data}
-              onSave={refreshRules}
-              initialSelectedConsumer={initialSelectedConsumer}
-              ruleTypeId={ruleTypeIdToCreate}
-              canChangeTrigger={false}
-            />
-          </Suspense>
-        )}
-        {editFlyoutVisible && currentRuleToEdit && (
-          <Suspense fallback={<div />}>
-            <RuleEdit
-              initialRule={currentRuleToEdit}
-              onClose={() => {
-                setEditFlyoutVisibility(false);
-              }}
-              actionTypeRegistry={actionTypeRegistry}
-              ruleTypeRegistry={ruleTypeRegistry}
-              ruleType={
-                ruleTypesState.data.get(currentRuleToEdit.ruleTypeId) as RuleType<string, string>
-              }
-              onSave={refreshRules}
-            />
-          </Suspense>
         )}
       </EuiPageTemplate.Section>
     </>

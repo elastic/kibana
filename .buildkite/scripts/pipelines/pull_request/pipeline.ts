@@ -127,36 +127,18 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/solutions\/observability\/plugins\/exploratory_view/])) ||
-      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml'));
-    }
-
-    if (
-      (await doAnyChangesMatch([
-        /^x-pack\/solutions\/observability\/plugins\/synthetics/,
-        /^x-pack\/solutions\/observability\/plugins\/exploratory_view/,
-      ])) ||
+      (await doAnyChangesMatch([/^x-pack\/solutions\/observability\/plugins/])) ||
       GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime_plugin.yml'));
-    }
-
-    if (
-      (await doAnyChangesMatch([
-        /^x-pack\/solutions\/observability\/plugins\/ux/,
-        /^x-pack\/solutions\/observability\/plugins\/exploratory_view/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
-    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
     }
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/plugins\/observability_solution/,
+        /^x-pack\/solutions\/observability\/plugins/,
         /^package.json/,
         /^yarn.lock/,
       ])) ||
@@ -281,6 +263,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/ai_assistant.yml')
       );
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution/ai4dsoc.yml'));
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/automatic_import.yml')
       );
@@ -458,13 +441,20 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/platform\/plugins\/private\/discover_enhanced\/ui_tests/,
-        /^x-pack\/solutions\/observability\/plugins\/observability_onboarding/,
         /^src\/platform\/packages\/shared\/kbn-scout/,
+        /^src\/platform\/packages\/private\/kbn-scout-info/,
+        /^src\/platform\/packages\/private\/kbn-scout-reporting/,
+        /^x-pack\/platform\/plugins\/shared\/maps/,
+        /^x-pack\/platform\/plugins\/private\/discover_enhanced/,
+        /^x-pack\/solutions\/observability\/packages\/kbn-scout-oblt/,
+        /^x-pack\/solutions\/observability\/plugins\/apm/,
+        /^x-pack\/solutions\/observability\/plugins\/observability_onboarding/,
+        /^x-pack\/solutions\/security\/packages\/kbn-scout-security/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:scout-ui-tests')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_ui_tests.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
