@@ -74,6 +74,7 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     // },
     userScope: {
       properties: {
+        // Indexing apiKeyId to query for mass deletion in the future
         apiKeyId: {
           type: 'keyword',
         },

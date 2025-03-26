@@ -6,14 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import {
   InferenceSimulator,
   inferenceSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/inference_simulation';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import { getEventLog } from '../../../../../common/lib';
 

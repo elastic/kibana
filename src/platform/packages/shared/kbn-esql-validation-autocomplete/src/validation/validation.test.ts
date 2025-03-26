@@ -799,6 +799,13 @@ describe('validation logic', () => {
         }
       }
 
+      for (const type of ['date', 'dateNanos']) {
+        testErrorsAndWarnings(
+          `from a_index | where ${type}Field > ?_tstart AND ${type}Field < ?_tend`,
+          []
+        );
+      }
+
       for (const nesting of NESTED_DEPTHS) {
         for (const evenOp of ['-', '+']) {
           for (const oddOp of ['-', '+']) {
