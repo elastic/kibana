@@ -36,6 +36,8 @@ interface Props {
   waterfall: IWaterfall;
   showCriticalPath: boolean;
   onNodeClick?: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
+  displayLimit?: number;
+  isEmbeddable?: boolean;
 }
 
 function getWaterfallMaxLevel(waterfall: IWaterfall) {
@@ -68,7 +70,14 @@ function getWaterfallMaxLevel(waterfall: IWaterfall) {
 
 const MAX_DEPTH_OPEN_LIMIT = 2;
 
-export function Waterfall({ waterfall, waterfallItemId, showCriticalPath, onNodeClick }: Props) {
+export function Waterfall({
+  waterfall,
+  waterfallItemId,
+  showCriticalPath,
+  onNodeClick,
+  displayLimit,
+  isEmbeddable,
+}: Props) {
   const { euiTheme } = useEuiTheme();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
 
@@ -154,6 +163,8 @@ export function Waterfall({ waterfall, waterfallItemId, showCriticalPath, onNode
             maxLevelOpen={
               waterfall.traceDocsTotal > 500 ? MAX_DEPTH_OPEN_LIMIT : waterfall.traceDocsTotal
             }
+            displayLimit={displayLimit}
+            isEmbeddable={isEmbeddable}
           />
         )}
       </WaterfallItemsContainer>

@@ -9,10 +9,13 @@ import type { SerializedTitles } from '@kbn/presentation-publishing';
 import { initializeTitleManager, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { ApmEmbeddableContext } from '../embeddable_context';
+import type { EmbeddableDeps } from '../types';
 import { APM_TRACE_WATERFALL_EMBEDDABLE } from './constant';
 import { TraceWaterfallEmbeddable } from './trace_waterfall_embeddable';
 
 export interface ApmTraceWaterfallEmbeddableProps extends SerializedTitles {
+  serviceName: string;
   traceId: string;
   entryTransactionId: string;
   rangeFrom: string;
@@ -20,7 +23,7 @@ export interface ApmTraceWaterfallEmbeddableProps extends SerializedTitles {
   displayLimit?: number;
 }
 
-export const getApmTraceWaterfallEmbeddableFactory = (deps: any) => {
+export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: ReactEmbeddableFactory<
     ApmTraceWaterfallEmbeddableProps,
     ApmTraceWaterfallEmbeddableProps,
@@ -32,6 +35,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: any) => {
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const titleManager = initializeTitleManager(state);
+      const serviceName$ = new BehaviorSubject(state.serviceName);
       const traceId$ = new BehaviorSubject(state.traceId);
       const entryTransactionId$ = new BehaviorSubject(state.entryTransactionId);
       const rangeFrom$ = new BehaviorSubject(state.rangeFrom);
@@ -45,6 +49,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: any) => {
             return {
               rawState: {
                 ...titleManager.serialize(),
+                serviceName: serviceName$.getValue(),
                 traceId: traceId$.getValue(),
                 entryTransactionId: entryTransactionId$.getValue(),
                 rangeFrom: rangeFrom$.getValue(),
@@ -56,6 +61,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: any) => {
         },
         {
           ...titleManager.comparators,
+          serviceName: [serviceName$, (value) => serviceName$.next(value)],
           traceId: [traceId$, (value) => traceId$.next(value)],
           entryTransactionId: [entryTransactionId$, (value) => entryTransactionId$.next(value)],
           rangeFrom: [rangeFrom$, (value) => rangeFrom$.next(value)],
@@ -67,8 +73,9 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: any) => {
       return {
         api,
         Component: () => {
-          const [traceId, entryTransactionId, rangeFrom, rangeTo, displayLimit] =
+          const [serviceName, traceId, entryTransactionId, rangeFrom, rangeTo, displayLimit] =
             useBatchedPublishingSubjects(
+              serviceName$,
               traceId$,
               entryTransactionId$,
               rangeFrom$,
@@ -77,13 +84,16 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: any) => {
             );
 
           return (
-            <TraceWaterfallEmbeddable
-              traceId={traceId}
-              entryTransactionId={entryTransactionId}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              displayLimit={displayLimit}
-            />
+            <ApmEmbeddableContext deps={deps} rangeFrom={rangeFrom} rangeTo={rangeTo}>
+              <TraceWaterfallEmbeddable
+                serviceName={serviceName}
+                traceId={traceId}
+                entryTransactionId={entryTransactionId}
+                rangeFrom={rangeFrom}
+                rangeTo={rangeTo}
+                displayLimit={displayLimit}
+              />
+            </ApmEmbeddableContext>
           );
         },
       };

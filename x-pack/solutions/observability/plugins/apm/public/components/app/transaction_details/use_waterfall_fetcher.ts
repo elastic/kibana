@@ -28,13 +28,11 @@ export function useWaterfallFetcher({
   transactionId,
   start,
   end,
-  displayLimit,
 }: {
   traceId?: string;
   transactionId?: string;
   start: string;
   end: string;
-  displayLimit?: number;
 }) {
   const {
     data = INITIAL_DATA,
@@ -58,10 +56,7 @@ export function useWaterfallFetcher({
     [traceId, start, end, transactionId]
   );
 
-  const waterfall = useMemo(
-    () => getWaterfall(traceId ? data : INITIAL_DATA, displayLimit),
-    [data, traceId, displayLimit]
-  );
+  const waterfall = useMemo(() => getWaterfall(traceId ? data : INITIAL_DATA), [data, traceId]);
 
   return { waterfall, status, error };
 }

@@ -24,6 +24,7 @@ import { useApmRouter } from '../../../../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 import { OrphanItemTooltipIcon } from './orphan_item_tooltip_icon';
 import { SpanMissingDestinationTooltip } from './span_missing_destination_tooltip';
+import { useWaterfallContext } from './context/use_waterfall';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -227,6 +228,7 @@ export function WaterfallItem({
   segments,
 }: IWaterfallItemProps) {
   const [widthFactor, setWidthFactor] = useState(1);
+  const { isEmbeddable } = useWaterfallContext();
   const waterfallItemRef: React.RefObject<any> = useRef(null);
   useEffect(() => {
     if (waterfallItemRef?.current && marginLeftLevel) {
@@ -293,7 +295,12 @@ export function WaterfallItem({
         <NameLabel item={item} />
 
         <Duration item={item} />
-        <RelatedErrors item={item} errorCount={errorCount} />
+        {isEmbeddable ? (
+          <FailureBadge outcome={item.doc.event?.outcome} />
+        ) : (
+          <RelatedErrors item={item} errorCount={errorCount} />
+        )}
+
         {item.docType === 'span' && (
           <SyncBadge sync={item.doc.span.sync} agentName={item.doc.agent.name} />
         )}

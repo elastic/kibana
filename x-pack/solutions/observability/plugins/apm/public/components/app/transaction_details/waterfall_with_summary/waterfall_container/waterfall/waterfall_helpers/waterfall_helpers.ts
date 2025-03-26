@@ -500,7 +500,7 @@ export function reparentOrphanItems(
   }, []);
 }
 
-export function getWaterfall(apiResponse: TraceAPIResponse, displayLimit?: number): IWaterfall {
+export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
   const { traceItems, entryTransaction } = apiResponse;
   if (isEmpty(traceItems.traceDocs) || !entryTransaction) {
     return {
@@ -536,8 +536,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse, displayLimit?: numbe
     reparentOrphanItems(orphanItemsIds, reparentSpans(waterfallItems), entryWaterfallTransaction)
   );
 
-  const orderedItems = getOrderedWaterfallItems(childrenByParentId, entryWaterfallTransaction);
-  const items = displayLimit ? orderedItems.slice(0, displayLimit) : orderedItems;
+  const items = getOrderedWaterfallItems(childrenByParentId, entryWaterfallTransaction);
   const errorItems = getWaterfallErrors(traceItems.errorDocs, items, entryWaterfallTransaction);
 
   const rootWaterfallTransaction = getRootWaterfallTransaction(childrenByParentId);

@@ -61,14 +61,6 @@ export function WaterfallContainer({
   }
   const { legends, colorBy, orphanTraceItemsCount } = waterfall;
 
-  const displayedLegends = legends.filter((legend) => legend.type === colorBy);
-
-  // default to serviceName if value is empty, e.g. for transactions (which don't
-  // have span.type or span.subtype)
-  const legendsWithFallbackLabel = displayedLegends.map((legend) => {
-    return { ...legend, value: !legend.value ? serviceName : legend.value };
-  });
-
   return (
     <EuiFlexGroup direction="column">
       {isCriticalPathFeatureEnabled ? (
@@ -97,7 +89,7 @@ export function WaterfallContainer({
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <WaterfallLegends legends={legendsWithFallbackLabel} type={colorBy} />
+            <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />
           </EuiFlexItem>
           {orphanTraceItemsCount > 0 ? (
             <EuiFlexItem grow={false}>

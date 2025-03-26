@@ -56,6 +56,6 @@ export async function registerEmbeddables(
       './trace_waterfall/react_embeddable_factory'
     );
 
-    return getApmTraceWaterfallEmbeddableFactory({});
+    return getApmTraceWaterfallEmbeddableFactory({ ...deps, coreStart, pluginsStart });
   });
 }

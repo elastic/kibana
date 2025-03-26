@@ -40,6 +40,8 @@ interface AccordionWaterfallProps {
   onClickWaterfallItem?: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
   showCriticalPath: boolean;
   maxLevelOpen: number;
+  displayLimit?: number;
+  isEmbeddable?: boolean;
 }
 
 type WaterfallProps = Omit<
@@ -58,6 +60,7 @@ export function AccordionWaterfall({
   showCriticalPath,
   waterfall,
   isOpen,
+  isEmbeddable = false,
   ...props
 }: AccordionWaterfallProps) {
   return (
@@ -66,6 +69,7 @@ export function AccordionWaterfall({
       showCriticalPath={showCriticalPath}
       waterfall={waterfall}
       isOpen={isOpen}
+      isEmbeddable={isEmbeddable}
     >
       <Waterfall {...props} />
     </WaterfallContextProvider>
@@ -76,6 +80,7 @@ function Waterfall(props: WaterfallProps) {
   const listRef = useRef<List>(null);
   const rowSizeMapRef = useRef(new Map<number, number>());
   const { traceList } = useWaterfallContext();
+  const visibleTraceList = props.displayLimit ? traceList.slice(0, props.displayLimit) : traceList;
 
   const onRowLoad = (index: number, size: number) => {
     rowSizeMapRef.current.set(index, size);
@@ -100,11 +105,11 @@ function Waterfall(props: WaterfallProps) {
               <List
                 ref={listRef}
                 style={{ height: '100%' }}
-                itemCount={traceList.length}
+                itemCount={visibleTraceList.length}
                 itemSize={getRowSize}
                 height={window.innerHeight}
                 width={width}
-                itemData={{ ...props, traceList, onLoad: onRowLoad }}
+                itemData={{ ...props, traceList: visibleTraceList, onLoad: onRowLoad }}
               >
                 {VirtualRow}
               </List>
