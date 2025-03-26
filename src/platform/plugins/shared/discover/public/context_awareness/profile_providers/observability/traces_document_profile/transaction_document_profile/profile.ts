@@ -11,45 +11,44 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { DATASTREAM_TYPE_FIELD, getFieldValue, PROCESSOR_EVENT_FIELD } from '@kbn/discover-utils';
 import type { DocumentProfileProvider } from '../../../../profiles';
 import { DocumentType } from '../../../../profiles';
-import type { ProfileProviderServices } from '../../../profile_provider_services';
 import { getDocViewer } from './accessors';
+import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 
 const OBSERVABILITY_TRACES_TRANSACTION_DOCUMENT_PROFILE_ID =
   'observability-traces-transaction-document-profile';
 
-export const createObservabilityTracesTransactionDocumentProfileProvider = (
-  services: ProfileProviderServices
-): DocumentProfileProvider => ({
-  isExperimental: true,
-  profileId: OBSERVABILITY_TRACES_TRANSACTION_DOCUMENT_PROFILE_ID,
-  profile: {
-    getDocViewer,
-  },
-  resolve: ({ record }) => {
-    const isApmEnabled = services.application.capabilities.apm?.show;
+export const createObservabilityTracesTransactionDocumentProfileProvider =
+  (): DocumentProfileProvider => ({
+    isExperimental: true,
+    profileId: OBSERVABILITY_TRACES_TRANSACTION_DOCUMENT_PROFILE_ID,
+    profile: {
+      getDocViewer,
+    },
+    resolve: ({ record, rootContext }) => {
+      const isObservabilitySolutionView = rootContext.profileId === OBSERVABILITY_ROOT_PROFILE_ID;
 
-    if (!isApmEnabled) {
-      return { isMatch: false };
-    }
+      if (!isObservabilitySolutionView) {
+        return { isMatch: false };
+      }
 
-    const isTransactionRecord = getIsTransactionRecord(record);
+      const isTransactionRecord = getIsTransactionRecord({
+        record,
+      });
 
-    if (!isTransactionRecord) {
-      return { isMatch: false };
-    }
+      if (!isTransactionRecord) {
+        return { isMatch: false };
+      }
 
-    return {
-      isMatch: true,
-      context: {
-        type: DocumentType.Transaction,
-      },
-    };
-  },
-});
+      return {
+        isMatch: true,
+        context: {
+          type: DocumentType.Transaction,
+        },
+      };
+    },
+  });
 
-const getIsTransactionRecord = (record: DataTableRecord) => {
-  // TODO add condition to check on the document _index against APM configured indexes, currently blocked by https://github.com/elastic/kibana/issues/211414
-  // this will be handled in https://github.com/elastic/kibana/issues/213112
+const getIsTransactionRecord = ({ record }: { record: DataTableRecord }) => {
   return isTransactionDocument(record);
 };
 

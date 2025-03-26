@@ -16,7 +16,7 @@ import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 import { discoverPlugins } from './discover_plugins';
 import { generatePluginList } from './generate_plugin_list';
 
-const OUTPUT_PATH = Path.resolve(REPO_ROOT, 'docs/developer/plugin-list.asciidoc');
+const OUTPUT_PATH = Path.resolve(REPO_ROOT, 'docs/extend/plugin-list.md');
 
 export function runPluginListCli() {
   run(async ({ log }) => {
