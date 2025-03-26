@@ -6738,6 +6738,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/response-ops-rules-apis@link:src/platform/packages/shared/response-ops/rules-apis":
+  version "0.0.0"
+  uid ""
+
 "@kbn/response-stream-plugin@link:examples/response_stream":
   version "0.0.0"
   uid ""
@@ -8107,20 +8111,20 @@
   resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.13.0.tgz#5fd767ec2369b8efb90d457f6d8b80856baba6a2"
   integrity sha512-cRoOQWBEOOynY3YDHIF4am1ZxiGu6MFK4v8WyNR0zN+nVjdQiuuyfAbHB//1Q0nrc1aB0flOy6e8C51eHy+VeA==
 
-"@launchdarkly/js-server-sdk-common@2.11.1":
-  version "2.11.1"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.11.1.tgz#a7ff4be6dfc78d4bfd6e2b875c9d1f39af89d3e1"
-  integrity sha512-mz5meN+tII/By8TjPRhuI5SSztFSIYXQpK1IlUX1uUlM8xDlS/HrzM4KcP7BRLpO0TQcZKl4roEkkoMBoukPsA==
+"@launchdarkly/js-server-sdk-common@2.12.1":
+  version "2.12.1"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.12.1.tgz#6789fd4c70858e3a96a26101a9a646488f4cebdb"
+  integrity sha512-QenqGCQcUu+jU8oX6/1vl1/jwHjtgdOoCDD5Mo8Ac+NLPJgigPPMk4HFY4S7HIN6ZSmSVSzgZ8vwIxpADy6XHQ==
   dependencies:
     "@launchdarkly/js-sdk-common" "2.13.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@^9.7.4":
-  version "9.7.4"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.7.4.tgz#1e9d188d782d63ca42183cc3c0c29d1e736588b3"
-  integrity sha512-bqu4oow2Onnc4lQkvL3aUSg0Zif25ZMjsS4PgUV6mjjxo2Hl4j8l5d2lEB9uTc7yXo6n6zmfZ0x84KtdPrZdmQ==
+"@launchdarkly/node-server-sdk@^9.7.5":
+  version "9.7.6"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.7.6.tgz#1860e71535b51da0f30e169389822e9506cfed9c"
+  integrity sha512-Sg71ks8EHykh6xHUgrCIOn8dXeY5dCa0UA+oQ6ttqxauz2Wvx9XJ1XlZowWOmUkdWrewri9ywrvLzaW2X0F5nQ==
   dependencies:
-    "@launchdarkly/js-server-sdk-common" "2.11.1"
+    "@launchdarkly/js-server-sdk-common" "2.12.1"
     https-proxy-agent "^5.0.1"
     launchdarkly-eventsource "2.0.3"
 
@@ -10159,6 +10163,16 @@
   integrity sha512-LYZsgZt5q3EZBkZjUEELh/5+TDnUP0njuQ5g6skyKil6vj9+2RI4/Vjodp+ni5+xct5aDhXavRyUnPRfclX/Cg==
   dependencies:
     "@storybook/global" "^5.0.0"
+
+"@storybook/addon-jest@8.6.3":
+  version "8.6.3"
+  resolved "https://registry.yarnpkg.com/@storybook/addon-jest/-/addon-jest-8.6.3.tgz#8f764bb82c959107c2ffad72e51eb50533c0fe12"
+  integrity sha512-HrX9z4EtEg6fwevcneT3BfIdQjCayNxxoeSr3mctRpoipm7Exo2fJ5RX/K8ePSObY2IDmK/OJZFeujplQ7MkjA==
+  dependencies:
+    "@storybook/global" "^5.0.0"
+    tiny-invariant "^1.3.1"
+    ts-dedent "^2.0.0"
+    upath "^2.0.1"
 
 "@storybook/addon-measure@8.6.3":
   version "8.6.3"
@@ -30591,6 +30605,11 @@ unzip-stream@^0.3.4:
   dependencies:
     binary "^0.3.0"
     mkdirp "^0.5.1"
+
+upath@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/upath/-/upath-2.0.1.tgz#50c73dea68d6f6b990f51d279ce6081665d61a8b"
+  integrity sha512-1uEe95xksV1O0CYKXo8vQvN1JEbtJp7lb7C5U9HMsIp6IVwntkH/oNUzyVNQSd4S1sYk2FpSSW44FqMc8qee5w==
 
 update-browserslist-db@^1.1.1:
   version "1.1.1"
