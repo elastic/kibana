@@ -5265,6 +5265,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/embeddable-alerts-table-plugin@link:x-pack/platform/plugins/shared/embeddable_alerts_table":
+  version "0.0.0"
+  uid ""
+
 "@kbn/embeddable-enhanced-plugin@link:x-pack/platform/plugins/shared/embeddable_enhanced":
   version "0.0.0"
   uid ""
@@ -6801,6 +6805,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/scout-security@link:x-pack/solutions/security/packages/kbn-scout-security":
+  version "0.0.0"
+  uid ""
+
 "@kbn/scout@link:src/platform/packages/shared/kbn-scout":
   version "0.0.0"
   uid ""
@@ -6882,6 +6890,10 @@
   uid ""
 
 "@kbn/search-playground@link:x-pack/solutions/search/plugins/search_playground":
+  version "0.0.0"
+  uid ""
+
+"@kbn/search-query-rules@link:x-pack/solutions/search/plugins/search_query_rules":
   version "0.0.0"
   uid ""
 
@@ -8681,12 +8693,12 @@
   resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.5.0.tgz#5fda73aa125dfb5729f5dd7362df00b6dca23a24"
   integrity sha512-dRBJjnYhEa6XoF9BNf9sW4sHuXmigfBbbatA5djbRXRBDExrXsMydMpEWQqKYhd7XwdwFatuh2q+UkVbXriUKA==
 
-"@openfeature/launchdarkly-client-provider@^0.3.1":
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/@openfeature/launchdarkly-client-provider/-/launchdarkly-client-provider-0.3.1.tgz#bc978efa17cd4a17a308d2ec4ed71ca3d72a895d"
-  integrity sha512-noMT21f0DB28qteUtj+Wy/D44XkARJg70FZWKeZ7IFyDxWOs7PTBoXU8gNbFGoCADfAj4QBfN/tg61jeqajmHA==
+"@openfeature/launchdarkly-client-provider@^0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@openfeature/launchdarkly-client-provider/-/launchdarkly-client-provider-0.3.2.tgz#0e4ca66da2a78ae70a5eae7143db88659f76af6f"
+  integrity sha512-wK/s4yBp5E+nBXJMVWRJOLqATOE1eReDkCHufjW6hJPy0rOJHTMaS52Tw5Qf2hZ3yGQOQos2iE9idm/QUZfsUQ==
   dependencies:
-    lodash.isempty "4.4.0"
+    lodash.isempty "^4.4.0"
 
 "@openfeature/server-sdk@^1.16.1":
   version "1.16.1"
@@ -10175,7 +10187,7 @@
   resolved "https://registry.yarnpkg.com/@storybook/global/-/global-5.0.0.tgz#b793d34b94f572c1d7d9e0f44fac4e0dbc9572ed"
   integrity sha512-FcOqPAXACP0I3oJ/ws6/rrPT9WGhu915Cg8D02a9YxLo0DE9zI+a9A5gRGvmQ09fiWPukqI8ZAEoQEdWUKMQdQ==
 
-"@storybook/icons@^1.2.12", "@storybook/icons@^1.3.2":
+"@storybook/icons@^1.2.12":
   version "1.3.2"
   resolved "https://registry.yarnpkg.com/@storybook/icons/-/icons-1.3.2.tgz#e9b92c35ca789ff79f9d0b3848829dd6490ca628"
   integrity sha512-t3xcbCKkPvqyef8urBM0j/nP6sKtnlRkVgC+8JTbTAZQjaTmOjes3byEgzs89p4B/K6cJsg9wLW2k3SknLtYJw==
@@ -13324,10 +13336,10 @@ axe-core@^4.2.0, axe-core@^4.6.2:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.7.2.tgz#040a7342b20765cb18bb50b628394c21bccc17a0"
   integrity sha512-zIURGIS1E1Q4pcrMjp+nnEh+16G56eG/MUllJH8yEvw7asDo7Ac9uhC9KIH5jzpITueEZolfYglnCGIuSBz39g==
 
-axios@^1.0.0, axios@^1.6.0, axios@^1.6.2, axios@^1.7.4, axios@^1.8.2:
-  version "1.8.2"
-  resolved "https://registry.yarnpkg.com/axios/-/axios-1.8.2.tgz#fabe06e241dfe83071d4edfbcaa7b1c3a40f7979"
-  integrity sha512-ls4GYBm5aig9vWx8AWDSGLpnpDQRtWAfrjU+EuytuODrFBkqesN2RkOQCBzrA1RQNHw1SmRMSDDDSwzNAYQ6Rg==
+axios@^1.0.0, axios@^1.6.0, axios@^1.6.2, axios@^1.7.4, axios@^1.8.3:
+  version "1.8.3"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.8.3.tgz#9ebccd71c98651d547162a018a1a95a4b4ed4de8"
+  integrity sha512-iP4DebzoNlP/YN2dpwCgb8zoCmhtkajzS48JvwmkSkXvPI3DHc7m+XYL5tGnSlJtR6nImXZmdCuN5aP8dh1d8A==
   dependencies:
     follow-redirects "^1.15.6"
     form-data "^4.0.0"
@@ -22273,7 +22285,7 @@ lodash.isboolean@^3.0.3:
   resolved "https://registry.yarnpkg.com/lodash.isboolean/-/lodash.isboolean-3.0.3.tgz#6c2e171db2a257cd96802fd43b01b20d5f5870f6"
   integrity sha512-Bz5mupy2SVbPHURB98VAcw+aHh4vRV5IPNhILUCsOzRmsTmSQ17jIuqopAentWoehktxGd9e/hbIXq980/1QJg==
 
-lodash.isempty@4.4.0, lodash.isempty@^4.4.0:
+lodash.isempty@^4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/lodash.isempty/-/lodash.isempty-4.4.0.tgz#6f86cbedd8be4ec987be9aaf33c9684db1b31e7e"
   integrity sha1-b4bL7di+TsmHvpqvM8loTbGzHn4=

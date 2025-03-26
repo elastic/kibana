@@ -77,7 +77,7 @@ export function createVegaRequestHandler(
 
     const esQueryConfigs = getEsQueryConfig(uiSettings);
     const filtersDsl = buildEsQuery(dataView, query, filters, esQueryConfigs);
-    const { VegaParser } = await import('./data_model/vega_parser');
+    const { VegaParser } = await import('./async_services');
     const vp = new VegaParser(visParams.spec, searchAPI, timeCache, filtersDsl, getServiceSettings);
 
     return await vp.parseAsync();
