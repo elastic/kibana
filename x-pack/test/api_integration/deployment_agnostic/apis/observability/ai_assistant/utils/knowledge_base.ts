@@ -206,7 +206,7 @@ export async function deleteKbIndices(es: Client) {
   }
 }
 
-export async function getWriteIndex(es: Client) {
+export async function getConcreteWriteIndex(es: Client) {
   const response = await es.indices.getAlias({ index: resourceNames.writeIndexAlias.kb });
   return Object.entries(response).find(
     ([index, aliasInfo]) => aliasInfo.aliases[resourceNames.writeIndexAlias.kb]?.is_write_index

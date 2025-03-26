@@ -9,7 +9,12 @@ import { errors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import moment from 'moment';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import {
+  InferenceInferenceEndpointInfo,
+  InferenceTaskType,
+  MlGetTrainedModelsStatsResponse,
+} from '@elastic/elasticsearch/lib/api/types';
+import pRetry from 'p-retry';
 import { ObservabilityAIAssistantConfig } from '../config';
 
 export const AI_ASSISTANT_KB_INFERENCE_ID = 'obs_ai_assistant_kb_inference';
@@ -82,9 +87,10 @@ export async function getInferenceEndpoint({
     inference_id: AI_ASSISTANT_KB_INFERENCE_ID,
   });
 
-  if (response.endpoints.length > 0) {
-    return response.endpoints[0];
+  if (response.endpoints.length === 0) {
+    throw new Error('Inference endpoint not found');
   }
+  return response.endpoints[0];
 }
 
 export function isInferenceEndpointMissingOrUnavailable(error: Error) {
@@ -104,31 +110,26 @@ export async function getKbModelStatus({
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
 }) {
-  let errorMessage = '';
-  const endpoint = await getInferenceEndpoint({
-    esClient,
-  }).catch((error) => {
+  const enabled = config.enableKnowledgeBase;
+
+  let endpoint: InferenceInferenceEndpointInfo;
+  try {
+    endpoint = await getInferenceEndpoint({ esClient });
+  } catch (error) {
     if (!isInferenceEndpointMissingOrUnavailable(error)) {
       throw error;
     }
-    errorMessage = error.message;
-  });
-
-  const enabled = config.enableKnowledgeBase;
-  if (!endpoint) {
-    return { ready: false, enabled, errorMessage };
+    return { ready: false, enabled, errorMessage: error.message };
   }
 
-  const modelId = endpoint.service_settings?.model_id;
-  const trainedModelStatsResponse = await esClient.asInternalUser.ml
-    .getTrainedModelsStats({ model_id: modelId })
-    .catch((error) => {
-      logger.debug(`Failed to get model stats: ${error.message}`);
-      errorMessage = error.message;
+  let trainedModelStatsResponse: MlGetTrainedModelsStatsResponse;
+  try {
+    trainedModelStatsResponse = await esClient.asInternalUser.ml.getTrainedModelsStats({
+      model_id: endpoint.service_settings?.model_id,
     });
-
-  if (!trainedModelStatsResponse) {
-    return { ready: false, enabled, errorMessage };
+  } catch (error) {
+    logger.debug(`Failed to get model stats: ${error.message}`);
+    return { ready: false, enabled, errorMessage: error.message };
   }
 
   const modelStats = trainedModelStatsResponse.trained_model_stats.find(
@@ -150,4 +151,25 @@ export async function getKbModelStatus({
       allocation_state: allocationState,
     },
   };
+}
+
+export async function waitForKbModel({
+  esClient,
+  logger,
+  config,
+}: {
+  esClient: { asInternalUser: ElasticsearchClient };
+  logger: Logger;
+  config: ObservabilityAIAssistantConfig;
+}) {
+  return pRetry(
+    async () => {
+      const { ready } = await getKbModelStatus({ esClient, logger, config });
+      if (!ready) {
+        logger.debug('Knowledge base model is not yet ready. Retrying...');
+        throw new Error('Knowledge base model is not yet ready');
+      }
+    },
+    { retries: 30, factor: 2, maxTimeout: 30_000 }
+  );
 }

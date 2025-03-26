@@ -12,7 +12,7 @@ import {
   addSampleDocsToInternalKb,
   deleteKnowledgeBaseModel,
   getKbIndices,
-  getWriteIndex,
+  getConcreteWriteIndex,
   reindexKnowledgeBase,
   setupKnowledgeBase,
 } from '../utils/knowledge_base';
@@ -52,7 +52,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('updates the write index to the new index', async () => {
-        expect(await getWriteIndex(es)).to.eql(targetIndex);
+        expect(await getConcreteWriteIndex(es)).to.eql(targetIndex);
       });
 
       it('creates a new target index and deletes the old one', async () => {
@@ -85,7 +85,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('does not update the write index', async () => {
-        expect(await getWriteIndex(es)).to.eql(oldIndex);
+        expect(await getConcreteWriteIndex(es)).to.eql(oldIndex);
       });
 
       it('does not delete the target index', async () => {

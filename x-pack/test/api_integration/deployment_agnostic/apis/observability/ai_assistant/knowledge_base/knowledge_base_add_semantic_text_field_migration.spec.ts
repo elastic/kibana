@@ -16,6 +16,7 @@ import {
   clearKnowledgeBase,
   setupKnowledgeBase,
 } from '../utils/knowledge_base';
+import { restoreIndexAssets } from '../utils/index_assets';
 
 interface InferenceChunk {
   text: string;
@@ -67,15 +68,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     this.tags(['skipServerless']);
 
     before(async () => {
+      await deleteKnowledgeBaseModel({ ml, es }).catch(() => {});
+      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
       await clearKnowledgeBase(es);
       await esArchiver.load(archive);
       await setupKnowledgeBase(getService);
     });
 
     after(async () => {
-      await clearKnowledgeBase(es);
-      await esArchiver.unload(archive);
       await deleteKnowledgeBaseModel({ ml, es });
+      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
     });
 
     describe('before migrating', () => {

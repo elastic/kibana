@@ -10,10 +10,11 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import pLimit from 'p-limit';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
+import { uniq } from 'lodash';
 import pRetry from 'p-retry';
 import { KnowledgeBaseEntry } from '../../../common';
 import { resourceNames } from '..';
-import { getKbModelStatus } from '../inference_endpoint';
+import { waitForKbModel } from '../inference_endpoint';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { reIndexKnowledgeBase } from '../knowledge_base_service/reindex_knowledge_base';
@@ -46,7 +47,10 @@ export async function registerAndScheduleKbSemanticTextMigrationTask({
   await indexAssetsUpdatedPromise;
 
   // schedule task
-  await scheduleKbSemanticTextMigrationTask({ taskManager: pluginsStart.taskManager, logger });
+  await scheduleKbSemanticTextMigrationTask({
+    taskManager: pluginsStart.taskManager,
+    logger,
+  });
 }
 
 function registerKbSemanticTextMigrationTask({
@@ -65,10 +69,10 @@ function registerKbSemanticTextMigrationTask({
     taskManager.registerTaskDefinitions({
       [TASK_TYPE]: {
         title: 'Add support for semantic_text in Knowledge Base',
-        description: `This task will reindex the knowledge base and populate the semantic_text fields for all entries without it.`,
+        description: `This task will re-index the knowledge base and populate the semantic_text fields for all entries without it.`,
         timeout: '1h',
         maxAttempts: 5,
-        createTaskRunner() {
+        createTaskRunner(context) {
           return {
             async run() {
               logger.debug(`Run task: "${TASK_TYPE}"`);
@@ -83,12 +87,12 @@ function registerKbSemanticTextMigrationTask({
                 return;
               }
 
-              if (config.disableKbSemanticTextMigration) {
-                logger.info(
-                  'Semantic text migration is disabled via config "xpack.observabilityAIAssistant.disableKbSemanticTextMigration=true". Skipping migration.'
-                );
-                return;
-              }
+              // if (config.disableKbSemanticTextMigration) {
+              //   logger.info(
+              //     'Semantic text migration is disabled via config "xpack.observabilityAIAssistant.disableKbSemanticTextMigration=true". Skipping migration.'
+              //   );
+              //   return;
+              // }
 
               await reIndexKnowledgeBaseAndPopulateMissingSemanticTextField({
                 esClient,
@@ -142,7 +146,12 @@ export async function reIndexKnowledgeBaseAndPopulateMissingSemanticTextField({
 
   try {
     await reIndexKnowledgeBaseIfSemanticTextIsUnsupported({ logger, esClient });
-    await populateMissingSemanticTextFieldRecursively({ esClient, logger, config });
+
+    await pRetry(
+      async () => populateMissingSemanticTextFieldRecursively({ esClient, logger, config }),
+      { retries: 5, minTimeout: 10_000 }
+    );
+
     logger.debug('Migration succeeded');
   } catch (e) {
     logger.error(`Migration failed: ${e.message}`);
@@ -185,9 +194,12 @@ async function populateMissingSemanticTextFieldRecursively({
     return;
   }
 
-  logger.debug(`Found ${response.hits.hits.length} entries to migrate`);
+  await waitForKbModel({ esClient, logger, config });
 
-  await waitForModel({ esClient, logger, config });
+  const indicesWithOutdatedEntries = uniq(response.hits.hits.map((hit) => hit._index));
+  logger.debug(
+    `Found ${response.hits.hits.length} entries without semantic_text field in "${indicesWithOutdatedEntries}". Updating now...`
+  );
 
   // Limit the number of concurrent requests to avoid overloading the cluster
   const limiter = pLimit(20);
@@ -210,31 +222,10 @@ async function populateMissingSemanticTextFieldRecursively({
   });
 
   await Promise.all(promises);
+  logger.debug(`Updated ${promises.length} entries`);
 
   await sleep(100);
-  logger.debug(`Populated ${promises.length} entries`);
   await populateMissingSemanticTextFieldRecursively({ esClient, logger, config });
-}
-
-async function waitForModel({
-  esClient,
-  logger,
-  config,
-}: {
-  esClient: { asInternalUser: ElasticsearchClient };
-  logger: Logger;
-  config: ObservabilityAIAssistantConfig;
-}) {
-  return pRetry(
-    async () => {
-      const { ready } = await getKbModelStatus({ esClient, logger, config });
-      if (!ready) {
-        logger.debug('Knowledge base model is not yet ready. Retrying...');
-        throw new Error('Knowledge base model is not yet ready');
-      }
-    },
-    { retries: 30, factor: 2, maxTimeout: 30_000 }
-  );
 }
 
 async function sleep(ms: number) {

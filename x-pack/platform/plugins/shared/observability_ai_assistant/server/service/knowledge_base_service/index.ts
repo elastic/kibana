@@ -61,7 +61,7 @@ function throwKnowledgeBaseNotReady(body: any) {
 export class KnowledgeBaseService {
   constructor(private readonly dependencies: Dependencies) {}
 
-  async setup(
+  async recreateInferenceEndpoint(
     esClient: {
       asCurrentUser: ElasticsearchClient;
       asInternalUser: ElasticsearchClient;
@@ -513,7 +513,7 @@ export class KnowledgeBaseService {
     }
   };
 
-  getStatus = async () => {
+  getModelStatus = async () => {
     return getKbModelStatus({
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,

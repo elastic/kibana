@@ -12,7 +12,7 @@ import path from 'path';
 import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from '../../../../default_configs/stateful.config.base';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { deleteKnowledgeBaseModel, setupKnowledgeBase } from '../utils/knowledge_base';
-import { createOrUpdateIndexAssets, restoreIndexAssets } from '../utils/index_assets';
+import { restoreIndexAssets } from '../utils/index_assets';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -37,12 +37,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     beforeEach(async () => {
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
       await restoreKbSnapshot();
-      await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
     });
 
     after(async () => {
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
-      await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
       await deleteKnowledgeBaseModel({ ml, es });
     });
 
@@ -97,8 +95,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   async function restoreKbSnapshot() {
     log.debug(
-      `Restoring snapshot of ${resourceNames.concreteWriteIndexName.kb} from ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`
+      `Restoring snapshot of "${resourceNames.concreteWriteIndexName.kb}" from ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`
     );
+
+    // delete existing write index
+    await es.indices.delete({
+      index: resourceNames.concreteWriteIndexName.kb,
+      ignore_unavailable: true,
+    });
+
     const snapshotRepoName = 'snapshot-repo-8-10';
     const snapshotName = 'my_snapshot';
     await es.snapshot.createRepository({

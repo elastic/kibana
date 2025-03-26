@@ -76,6 +76,7 @@ import { ObservabilityAIAssistantConfig } from '../../config';
 import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
 import { apmInstrumentation } from './operators/apm_instrumentation';
 import { reIndexKnowledgeBase } from '../knowledge_base_service/reindex_knowledge_base';
+import { waitForKbModel } from '../inference_endpoint';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -668,7 +669,7 @@ export class ObservabilityAIAssistantClient {
   };
 
   getKnowledgeBaseStatus = () => {
-    return this.dependencies.knowledgeBaseService.getStatus();
+    return this.dependencies.knowledgeBaseService.getModelStatus();
   };
 
   setupKnowledgeBase = async (
@@ -685,28 +686,37 @@ export class ObservabilityAIAssistantClient {
       taskType = 'sparse_embedding';
     }
 
-    // setup the knowledge base
-    const res = await knowledgeBaseService.setup(esClient, modelId, taskType);
+    this.dependencies.logger.debug(
+      `Setting up knowledge base with model_id: ${modelId} and task_type: ${taskType}`
+    );
 
-    // re-index knowledge base if there are existing entries
-    const hasEntries = await knowledgeBaseService.hasEntries();
-    if (hasEntries) {
-      await reIndexKnowledgeBase({ logger, esClient });
-    }
+    const inferenceEndpointResult = await knowledgeBaseService.recreateInferenceEndpoint(
+      esClient,
+      modelId,
+      taskType
+    );
 
-    core
-      .getStartServices()
-      .then(async ([_, pluginsStart]) => {
+    knowledgeBaseService
+      .hasEntries()
+      .then(async (hasEntries) => {
+        // re-index knowledge base if there are existing entries
+        if (hasEntries) {
+          await waitForKbModel({ esClient, logger, config: this.dependencies.config });
+          await reIndexKnowledgeBase({ logger, esClient });
+        }
+
+        // schedule a task to populate missing semantic_text field
+        const [_, pluginsStart] = await core.getStartServices();
         await scheduleKbSemanticTextMigrationTask({
           taskManager: pluginsStart.taskManager,
           logger,
         });
       })
       .catch((error) => {
-        logger.error(`Failed to schedule semantic text migration task: ${error}`);
+        logger.error(`Failed to re-index knowledge base: ${error}`);
       });
 
-    return res;
+    return inferenceEndpointResult;
   };
 
   resetKnowledgeBase = () => {
