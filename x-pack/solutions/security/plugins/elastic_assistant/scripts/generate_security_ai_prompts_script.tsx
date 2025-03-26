@@ -80,7 +80,7 @@ export const generateSavedObject = (prompt: Prompt): SecurityAiPromptSavedObject
   attributes: {
     ...prompt,
     prompt: {
-      default: `You always talk like a pirate. ${prompt.prompt.default}`,
+      default: `${prompt.prompt.default}`,
     },
   },
   id: `${SAVED_OBJECT_ID_PREFIX}${uuidv4()}`,
