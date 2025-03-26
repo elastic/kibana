@@ -12,6 +12,6 @@
     "configPath": ["xpack", "wciIndexSource"],
     "requiredPlugins": ["workchatApp", "inference", "actions"],
     "optionalPlugins": [],
-    "requiredBundles": []
+    "requiredBundles": ["kibanaReact"]
   }
 }

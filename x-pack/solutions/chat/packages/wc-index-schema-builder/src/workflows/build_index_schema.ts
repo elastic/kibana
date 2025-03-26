@@ -26,6 +26,7 @@ import {
 import {
   generateDescriptionPrompt,
   pickFilterFieldsPrompt,
+  pickQueryFieldsPrompt,
   pickContentFieldsPrompt,
   generateFilterPrompt,
 } from './prompts';
@@ -45,6 +46,7 @@ export const createSchemaGraph = async ({
     fieldTopValues: Annotation<Record<string, string[]>>,
     // temporary
     filterFields: Annotation<string[]>,
+    queryFields: Annotation<string[]>,
     contentFields: Annotation<string[]>,
     description: Annotation<string>(),
     // output
@@ -62,10 +64,6 @@ export const createSchemaGraph = async ({
   type BuildFilterStateType = StateType & {
     fieldName: string;
   };
-
-  const model = chatModel.withConfig({
-    tags: ['workflow', `build-index-schema`],
-  });
 
   const gatherIndexInfo = async (state: StateType) => {
     const indexInfo = await getIndexInformation({
@@ -163,10 +161,48 @@ export const createSchemaGraph = async ({
     };
   };
 
-  const pickContentFields = async (state: StateType) => {
+  const pickQueryFields = async (state: StateType) => {
     const structuredModel = chatModel.withStructuredOutput(
       z.object({
         fields: z.array(z.string()).describe('The list of fields to use as fulltext fields'),
+      })
+    );
+
+    const response = await structuredModel.invoke(
+      pickQueryFieldsPrompt({
+        indexName: state.indexName,
+        indexInfo: state.indexInfo,
+        sampleDocuments: state.sampleDocuments,
+      })
+    );
+
+    return { queryFields: response.fields };
+  };
+
+  const buildQueryFields = async (state: StateType) => {
+    const {
+      indexInfo: { mappings },
+    } = state;
+
+    const queryFields: IndexSourceQueryFields[] = state.queryFields.map((field) => {
+      return {
+        field,
+        type: getFieldTypeByPath({ fieldPath: field, mappings })!,
+      };
+    });
+
+    return {
+      generatedDefinition: {
+        queryFields,
+      },
+    };
+  };
+
+  ///////
+  const pickContentFields = async (state: StateType) => {
+    const structuredModel = chatModel.withStructuredOutput(
+      z.object({
+        fields: z.array(z.string()).describe('The list of fields to use as content fields'),
       })
     );
 
@@ -183,11 +219,10 @@ export const createSchemaGraph = async ({
 
   const buildContentFields = async (state: StateType) => {
     const {
-      contentFields,
       indexInfo: { mappings },
     } = state;
 
-    const queryFields: IndexSourceQueryFields[] = contentFields.map((field) => {
+    const contentFields: IndexSourceQueryFields[] = state.contentFields.map((field) => {
       return {
         field,
         type: getFieldTypeByPath({ fieldPath: field, mappings })!,
@@ -196,13 +231,20 @@ export const createSchemaGraph = async ({
 
     return {
       generatedDefinition: {
-        queryFields,
+        contentFields,
       },
     };
   };
+  ///////
 
   const generateDescription = async (state: StateType) => {
-    const response = await model.invoke(
+    const structuredModel = chatModel.withStructuredOutput(
+      z.object({
+        description: z.string().describe('The description for the tool'),
+      })
+    );
+
+    const response = await structuredModel.invoke(
       generateDescriptionPrompt({
         sourceDefinition: state.generatedDefinition,
         indexName: state.indexName,
@@ -210,21 +252,27 @@ export const createSchemaGraph = async ({
         sampleDocuments: state.sampleDocuments,
       })
     );
-    return { generatedDefinition: { description: response.content } };
+    return { generatedDefinition: { description: response.description } };
   };
 
   const graph = new StateGraph(StateAnnotation)
     // nodes
     .addNode('gather_index_info', gatherIndexInfo)
     .addNode('pick_filter_fields', pickFilterFields)
-    .addNode('pick_content_fields', pickContentFields)
-    .addNode('build_content_fields', buildContentFields)
+    .addNode('pick_query_fields', pickQueryFields)
+    .addNode('build_query_fields', buildQueryFields)
     .addNode('build_filter_field', buildFilterField)
     .addNode('generate_description', generateDescription)
+    .addNode('pick_content_fields', pickContentFields)
+    .addNode('build_content_fields', buildContentFields)
+
     // transitions
     .addEdge('__start__', 'gather_index_info')
     .addEdge('gather_index_info', 'pick_filter_fields')
+    .addEdge('gather_index_info', 'pick_query_fields')
     .addEdge('gather_index_info', 'pick_content_fields')
+    .addEdge('pick_query_fields', 'build_query_fields')
+    .addEdge('build_query_fields', 'generate_description')
     .addEdge('pick_content_fields', 'build_content_fields')
     .addEdge('build_content_fields', 'generate_description')
     .addEdge('generate_description', '__end__')

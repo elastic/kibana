@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getConnectorList } from './src/connectors';
+export { getConnectorList, getDefaultConnector } from './src/connectors';

@@ -204,7 +204,7 @@ export const generateFilterPrompt = ({
   ];
 };
 
-export const pickContentFieldsPrompt = ({
+export const pickQueryFieldsPrompt = ({
   indexName,
   indexInfo,
   sampleDocuments,
@@ -258,6 +258,61 @@ export const pickContentFieldsPrompt = ({
   ${JSON.stringify(sampleDocuments)}
 
   Given the previous information, please list the fields that you think would make the most sense to be used as full text fields.
+  `,
+    ],
+  ];
+};
+
+export const pickContentFieldsPrompt = ({
+  indexName,
+  indexInfo,
+  sampleDocuments,
+  maxFields = 10,
+}: {
+  indexName: string;
+  indexInfo: IndexInformation;
+  sampleDocuments: SampleDocument[];
+  maxFields?: number;
+}): BaseMessageLike[] => {
+  return [
+    [
+      'system',
+      `You are an helpful AI assistant, with expert knowledge of Elasticsearch and the Elastic stack.
+     Your current job is to generate schemas to describe Elasticsearch indices, following a predefined format.
+  `,
+    ],
+    [
+      'human',
+      `
+
+  ## Task description
+
+  We want to generate a schema for a tool that will then be used by a LLM to query the index ${indexName}. For that purpose,
+  you current task is to define the "content" fields, fields that will be returned by the tool as content for the LLM to use.
+
+  ## Additional directives
+
+  - do not include "meta" fields such as _inference_id or similar without real value
+  - please pick the fields that you think would be the most useful for the
+  - please pick no more than *${maxFields}* fields.
+
+  ## Index information
+
+  Here are some information to help you in your decision:
+
+  ### Base information:
+
+  - index name: ${indexName}
+
+  ### Mappings:
+
+  ${JSON.stringify(indexInfo.mappings)}
+
+  ### Sample documents:
+
+  ${JSON.stringify(sampleDocuments)}
+
+  Given the previous information, please list the fields that you think would make the most sense to be used as content fields.
   `,
     ],
   ];

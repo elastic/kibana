@@ -28,6 +28,10 @@ export interface IndexSourceDefinition {
    * List of possible filters when querying for the data
    */
   filterFields: IndexSourceFilter[];
+  /**
+   * List of fields that will be returned as content by the tool
+   */
+  contentFields: IndexSourceContentFields[];
 }
 
 export interface IndexSourceFilter {
@@ -56,6 +60,21 @@ export interface IndexSourceFilter {
  * Represents a field that will be used for full-text search.
  */
 export interface IndexSourceQueryFields {
+  /**
+   * The name / path to the field
+   * E.g. `content` or `reference.id`
+   */
+  field: string;
+  /**
+   * The type of field. Should be the same type as defined in the mappings
+   */
+  type: string;
+}
+
+/**
+ * Represents a field that will be used for full-text search.
+ */
+export interface IndexSourceContentFields {
   /**
    * The name / path to the field
    * E.g. `content` or `reference.id`

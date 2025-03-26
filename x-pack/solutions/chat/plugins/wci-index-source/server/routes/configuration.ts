@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { apiCapabilities } from '@kbn/workchat-app/common/features';
 import { buildSchema } from '@kbn/wc-index-schema-builder';
-import { getConnectorList } from '@kbn/wc-genai-utils';
+import { getConnectorList, getDefaultConnector } from '@kbn/wc-genai-utils';
 import type { GenerateConfigurationResponse } from '../../common/http_api/configuration';
 import type { RouteDependencies } from './types';
 
@@ -29,29 +29,38 @@ export const registerConfigurationRoutes = ({ router, core, logger }: RouteDepen
       },
     },
     async (ctx, request, res) => {
-      const [, { actions, inference }] = await core.getStartServices();
-      const { elasticsearch } = await ctx.core;
+      try {
+        const [, { actions, inference }] = await core.getStartServices();
+        const { elasticsearch } = await ctx.core;
 
-      const connectors = await getConnectorList({ actions, request });
-      const chatModel = await inference.getChatModel({
-        request,
-        connectorId: connectors[0].connectorId,
-        chatModelOptions: {},
-      });
+        const connectors = await getConnectorList({ actions, request });
+        const connector = getDefaultConnector({ connectors });
 
-      const { indexName } = request.body;
-      const definition = await buildSchema({
-        indexName,
-        chatModel,
-        esClient: elasticsearch.client.asCurrentUser,
-        logger,
-      });
+        console.log('using connector', connector);
 
-      return res.ok<GenerateConfigurationResponse>({
-        body: {
-          definition,
-        },
-      });
+        const chatModel = await inference.getChatModel({
+          request,
+          connectorId: connector.connectorId,
+          chatModelOptions: {},
+        });
+
+        const { indexName } = request.body;
+        const definition = await buildSchema({
+          indexName,
+          chatModel,
+          esClient: elasticsearch.client.asCurrentUser,
+          logger,
+        });
+
+        return res.ok<GenerateConfigurationResponse>({
+          body: {
+            definition,
+          },
+        });
+      } catch (e) {
+        logger.error(e);
+        throw e;
+      }
     }
   );
 };
