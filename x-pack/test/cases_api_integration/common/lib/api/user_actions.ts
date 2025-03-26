@@ -12,13 +12,14 @@ import {
   getCaseUsersUrl,
 } from '@kbn/cases-plugin/common/api';
 import type {
+  CaseUserActionDeprecatedResponse,
+  CaseUserActionsDeprecatedResponse,
   CaseUserActionStatsResponse,
   GetCaseUsersResponse,
   UserActionFindRequest,
   UserActionFindResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import type SuperTest from 'supertest';
-import type { UserAction } from '@kbn/cases-plugin/common/types/domain';
 import type { User } from '../authentication/types';
 
 import { superUser } from '../authentication/users';
