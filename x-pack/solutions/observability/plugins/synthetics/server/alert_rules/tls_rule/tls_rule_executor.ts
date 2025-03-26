@@ -34,7 +34,7 @@ import { monitorAttributes } from '../../../common/types/saved_objects';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { SyntheticsEsClient } from '../../lib';
 import { queryFilterMonitors } from '../status_rule/queries/filter_monitors';
-import { parseArrayFilters } from '../../routes/common';
+import { parseArrayFilters, parseLocationFilter } from '../../routes/common';
 
 export class TLSRuleExecutor {
   previousStartedAt: Date | null;
@@ -96,11 +96,20 @@ export class TLSRuleExecutor {
       return processMonitors([]);
     }
 
+    const locationIds = await parseLocationFilter(
+      {
+        savedObjectsClient: this.soClient,
+        server: this.server,
+        syntheticsMonitorClient: this.syntheticsMonitorClient,
+      },
+      this.params.locations
+    );
+
     const { filtersStr } = parseArrayFilters({
       configIds,
       filter: baseFilter,
       tags: this.params?.tags,
-      locations: this.params?.locations,
+      locations: locationIds,
       monitorTypes: this.params?.monitorTypes,
       monitorQueryIds: this.params?.monitorIds,
       projects: this.params?.projects,
@@ -110,7 +119,11 @@ export class TLSRuleExecutor {
       filter: filtersStr,
     });
 
-    this.debug(`Found ${this.monitors.length} monitors for params ${JSON.stringify(this.params)}`);
+    this.debug(
+      `Found ${this.monitors.length} monitors for params ${JSON.stringify(
+        this.params
+      )} | parsed location filter is ${JSON.stringify(locationIds)} `
+    );
 
     const {
       allIds,
