@@ -66,3 +66,8 @@ if (!Object.hasOwn(global, 'Worker')) {
     });
   }
 }
+
+// @elastic/elasticsearch imports undici that requires on MessagePort (even when unused in the tests)
+if (!Object.hasOwn(global, 'MessagePort')) {
+  global.MessagePort = {};
+}
