@@ -64973,7 +64973,6 @@ components:
         - host.name
         - user.name
         - service.name
-        - entity.id
       type: string
     Security_Entity_Analytics_API_IndexPattern:
       type: string
