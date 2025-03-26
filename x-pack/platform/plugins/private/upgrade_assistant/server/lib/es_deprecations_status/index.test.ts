@@ -309,7 +309,6 @@ describe('getESUpgradeStatus', () => {
           },
         ],
       },
-      // @ts-expect-error not in types yet
       ilm_policies: {},
       templates: {},
     });
