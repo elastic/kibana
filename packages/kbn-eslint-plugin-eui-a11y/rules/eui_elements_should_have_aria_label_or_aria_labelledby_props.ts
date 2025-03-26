@@ -11,7 +11,7 @@ import type { Rule } from 'eslint';
 import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
 import { Node } from 'estree';
 
-import { checkNodeForExistingAriaLabelProp } from '../helpers/check_node_for_existing_data_test_subj_prop';
+import { checkNodeForExistenceOfProps } from '../helpers/check_node_for_existence_of_props';
 import { getIntentFromNode } from '../helpers/get_intent_from_node';
 import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
 import { getFunctionName } from '../helpers/get_function_name';
@@ -23,8 +23,11 @@ export const EUI_ELEMENTS = [
   'EuiButtonEmpty',
   'EuiBetaBadge',
   'EuiSelect',
+  'EuiSuperSelect',
   'EuiSelectWithWidth',
 ];
+
+const PROP_NAMES = ['aria-label', 'aria-labelledby'];
 
 export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: Rule.RuleModule = {
   meta: {
@@ -48,8 +51,10 @@ export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: Rule.RuleModul
           return;
         }
 
-        const hasAriaLabelProp = checkNodeForExistingAriaLabelProp(parent, () =>
-          sourceCode.getScope(node as Node)
+        const hasAriaLabelProp = checkNodeForExistenceOfProps(
+          parent,
+          () => sourceCode.getScope(node as Node),
+          PROP_NAMES
         );
 
         if (hasAriaLabelProp) return; // JSXOpeningElement already has a prop for aria-label. Bail.
