@@ -3218,6 +3218,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | where dateField > ?_tstart AND dateField < ?_tend",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateNanosField > ?_tstart AND dateNanosField < ?_tend",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | where - doubleField > 0",
       "error": [],
       "warning": []

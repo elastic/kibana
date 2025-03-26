@@ -14,10 +14,10 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useDataViewContext } from '../../hooks/data_view_context';
-import type { AssetsURLQuery } from '../../hooks/use_asset_inventory_data_table';
+import type { AssetsURLQuery } from '../../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
 import { ASSET_INVENTORY_INDEX_PATTERN } from '../../constants';
-import { FilterGroupLoading } from './filters_loading';
-import { ASSET_INVENTORY_RULE_TYPE_IDS } from './rule_type_ids';
+import { FilterGroupLoading } from './asset_inventory_filters_loading';
+import { ASSET_INVENTORY_RULE_TYPE_IDS } from './asset_inventory_rule_type_ids';
 
 const DEFAULT_ASSET_INVENTORY_FILTERS: FilterControlConfig[] = [
   {
@@ -46,11 +46,11 @@ const DEFAULT_ASSET_INVENTORY_FILTERS: FilterControlConfig[] = [
   },
 ];
 
-export interface FiltersProps {
+export interface AssetInventoryFiltersProps {
   setQuery: (v: Partial<AssetsURLQuery>) => void;
 }
 
-export const Filters = ({ setQuery }: FiltersProps) => {
+export const AssetInventoryFilters = ({ setQuery }: AssetInventoryFiltersProps) => {
   const { dataView, dataViewIsLoading } = useDataViewContext();
   const spaceId = useSpaceId();
 
