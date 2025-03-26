@@ -19,6 +19,7 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
   const axios = Axios.create({
     headers: { 'kbn-xsrf': 'x-pack/ftr/services/spaces/space' },
     baseURL: url,
+    allowAbsoluteUrls: false,
     maxRedirects: 0,
     validateStatus: () => true, // we do our own validation below and throw better error messages
   });
