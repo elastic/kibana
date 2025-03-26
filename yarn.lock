@@ -18174,7 +18174,7 @@ fancy-log@^1.3.3:
     parse-node-version "^1.0.0"
     time-stamp "^1.0.0"
 
-"fast-check@^3.0.0 || ^4.0.0", fast-check@^4.0.0:
+"fast-check@^3.0.0 || ^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-4.0.0.tgz#a5aff60fb20728458c91d1ff98ca1b65d991abc5"
   integrity sha512-aXLyLemZ7qhLNn2oq+YpjT2Xed21+i29WGAYuyrGbU4r8oinB3i4XR4e62O3NY6qmm5qHEDoc/7d+gMsri3AfA==
