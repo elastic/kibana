@@ -34,25 +34,24 @@ export const ConfigSchema = schema.oneOf([
     defaultModel: schema.string(),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
-  // Added PKI OpenAI schema
   schema.object({
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.PkiOpenAi)]),
     apiUrl: schema.string(),
     defaultModel: schema.string({ defaultValue: DEFAULT_OPENAI_MODEL }),
-    certPath: schema.string({
-      validate: (value) => {
-        if (!value.endsWith('.pem')) {
-          return 'Certificate path must end with .pem';
-        }
-      }
-    }),
-    keyPath: schema.string({
-      validate: (value) => {
-        if (!value.endsWith('.pem')) {
-          return 'Private key path must end with .pem';
-        }
-      }
-    }),
+    certificateFile: schema.maybe(
+      schema.oneOf([
+        schema.string({ minLength: 1 }),
+        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+      ])
+    ),
+    certificateData: schema.maybe(schema.string({ minLength: 1 })),
+    privateKeyFile: schema.maybe(
+      schema.oneOf([
+        schema.string({ minLength: 1 }),
+        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+      ])
+    ),
+    privateKeyData: schema.maybe(schema.string({ minLength: 1 })),
     verificationMode: schema.oneOf([
       schema.literal('full'),
       schema.literal('certificate'),
