@@ -12,11 +12,9 @@ import { filterEventsAgainstList } from './large_list_filters/filter_events_agai
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
 import {
   createSearchAfterReturnType,
-  createSearchResultReturnType,
   createSearchAfterReturnTypeFromResponse,
   getTotalHitsValue,
   mergeReturns,
-  mergeSearchResults,
   getSafeSortIds,
 } from './utils';
 import type {
@@ -92,7 +90,6 @@ export const searchAfterAndBulkCreateFactory = async ({
 
     // sortId tells us where to start our next consecutive search_after query
     let sortIds: estypes.SortResults | undefined;
-    let hasSortId = true; // default to true so we execute the search on initial run
 
     if (tuple == null || tuple.to == null || tuple.from == null) {
       ruleExecutionLogger.error(
@@ -111,88 +108,69 @@ export const searchAfterAndBulkCreateFactory = async ({
     while (toReturn.createdSignalsCount <= maxSignals) {
       const cycleNum = `cycle ${searchingIteration++}`;
       try {
-        let mergedSearchResults = createSearchResultReturnType();
         ruleExecutionLogger.debug(
           `[${cycleNum}] Searching events${
             sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
           } in index pattern "${inputIndexPattern}"`
         );
 
-        if (hasSortId) {
-          const {
+        const {
+          searchResult,
+          searchDuration,
+          searchErrors,
+          loggedRequests: singleSearchLoggedRequests = [],
+        } = await singleSearchAfter({
+          searchAfterSortIds: sortIds,
+          index: inputIndexPattern,
+          runtimeMappings,
+          from: tuple.from.toISOString(),
+          to: tuple.to.toISOString(),
+          services,
+          ruleExecutionLogger,
+          filter,
+          pageSize: Math.ceil(Math.min(maxSignals, pageSize)),
+          primaryTimestamp,
+          secondaryTimestamp,
+          trackTotalHits,
+          sortOrder,
+          additionalFilters,
+          loggedRequestsConfig: createLoggedRequestsConfig(
+            isLoggedRequestsEnabled,
+            sortIds,
+            searchingIteration
+          ),
+        });
+        toReturn = mergeReturns([
+          toReturn,
+          createSearchAfterReturnTypeFromResponse({
             searchResult,
-            searchDuration,
-            searchErrors,
-            loggedRequests: singleSearchLoggedRequests = [],
-          } = await singleSearchAfter({
-            searchAfterSortIds: sortIds,
-            index: inputIndexPattern,
-            runtimeMappings,
-            from: tuple.from.toISOString(),
-            to: tuple.to.toISOString(),
-            services,
-            ruleExecutionLogger,
-            filter,
-            pageSize: Math.ceil(Math.min(maxSignals, pageSize)),
             primaryTimestamp,
-            secondaryTimestamp,
-            trackTotalHits,
-            sortOrder,
-            additionalFilters,
-            loggedRequestsConfig: createLoggedRequestsConfig(
-              isLoggedRequestsEnabled,
-              sortIds,
-              searchingIteration
-            ),
-          });
-          mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
-          toReturn = mergeReturns([
-            toReturn,
-            createSearchAfterReturnTypeFromResponse({
-              searchResult: mergedSearchResults,
-              primaryTimestamp,
-            }),
-            createSearchAfterReturnType({
-              searchAfterTimes: [searchDuration],
-              errors: searchErrors,
-            }),
-          ]);
-          loggedRequests.push(...singleSearchLoggedRequests);
-          // determine if there are any candidate signals to be processed
-          const totalHits = getTotalHitsValue(mergedSearchResults.hits.total);
-          const lastSortIds = getSafeSortIds(
-            searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort
+          }),
+          createSearchAfterReturnType({
+            searchAfterTimes: [searchDuration],
+            errors: searchErrors,
+          }),
+        ]);
+        loggedRequests.push(...singleSearchLoggedRequests);
+        // determine if there are any candidate signals to be processed
+        const totalHits = getTotalHitsValue(searchResult.hits.total);
+        const lastSortIds = getSafeSortIds(
+          searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort
+        );
+
+        if (totalHits === 0 || searchResult.hits.hits.length === 0) {
+          ruleExecutionLogger.debug(
+            `[${cycleNum}] Found 0 events ${
+              sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
+            }`
           );
-
-          if (totalHits === 0 || mergedSearchResults.hits.hits.length === 0) {
-            ruleExecutionLogger.debug(
-              `[${cycleNum}] Found 0 events ${
-                sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
-              }`
-            );
-            break;
-          } else {
-            ruleExecutionLogger.debug(
-              `[${cycleNum}] Found ${
-                mergedSearchResults.hits.hits.length
-              } of total ${totalHits} events${
-                sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
-              }, last cursor ${JSON.stringify(lastSortIds)}`
-            );
-          }
-
-          // ES can return negative sort id for date field, when sort order set to desc
-          // this could happen when event has empty sort field
-          // https://github.com/elastic/kibana/issues/174573 (happens to IM rule only since it uses desc order for events search)
-          // when negative sort id used in subsequent request it fails, so when negative sort value found we don't do next request
-          const hasNegativeNumber = lastSortIds?.some((val) => val < 0);
-
-          if (lastSortIds != null && lastSortIds.length !== 0 && !hasNegativeNumber) {
-            sortIds = lastSortIds;
-            hasSortId = true;
-          } else {
-            hasSortId = false;
-          }
+          break;
+        } else {
+          ruleExecutionLogger.debug(
+            `[${cycleNum}] Found ${searchResult.hits.hits.length} of total ${totalHits} events${
+              sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
+            }, last cursor ${JSON.stringify(lastSortIds)}`
+          );
         }
 
         // filter out the search results that match with the values found in the list.
@@ -202,7 +180,7 @@ export const searchAfterAndBulkCreateFactory = async ({
           listClient,
           exceptionsList,
           ruleExecutionLogger,
-          events: mergedSearchResults.hits.hits,
+          events: searchResult.hits.hits,
         });
 
         // only bulk create if there are filteredEvents leftover
@@ -233,7 +211,14 @@ export const searchAfterAndBulkCreateFactory = async ({
           }
         }
 
-        if (!hasSortId) {
+        // ES can return negative sort id for date field, when sort order set to desc
+        // this could happen when event has empty sort field
+        // https://github.com/elastic/kibana/issues/174573 (happens to IM rule only since it uses desc order for events search)
+        // when negative sort id used in subsequent request it fails, so when negative sort value found we don't do next request
+        const hasNegativeNumber = lastSortIds?.some((val) => val < 0);
+        if (lastSortIds != null && lastSortIds.length !== 0 && !hasNegativeNumber) {
+          sortIds = lastSortIds;
+        } else {
           ruleExecutionLogger.debug(`[${cycleNum}] Unable to fetch last event cursor`);
           break;
         }
