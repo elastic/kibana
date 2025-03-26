@@ -87,8 +87,9 @@ export class MlManagementLocatorInternal {
     const path = params ? this.getPath(params) : '';
     const url = await this._locator?.getUrl({
       sectionId: this._sectionId,
-      appId: `${appId}${path ? '/' + path : ''}`,
+      appId: `${appId}${path}`,
     });
+
     return { path, url };
   };
 
