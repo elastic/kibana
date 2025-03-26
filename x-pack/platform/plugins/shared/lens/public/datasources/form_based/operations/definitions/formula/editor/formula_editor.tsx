@@ -705,24 +705,40 @@ export function FormulaEditor({
           })}
         </EuiFormLabel>
       )}
-        <div className="lnsFormula"
-          css={css({
-            backgroundColor: euiTheme.colors.lightestShade,
-            border: isFullscreen ? 'none' : euiTheme.border.thin,
-            borderRadius: isFullscreen ? 0 : euiTheme.border.radius.medium,
-            height: isFullscreen ? '100%' : 'auto',
-          })}
-        >
-          <div className="lnsFormula__editor">
-            <div css={sharedEditorStyles.editorHeader(euiThemeContext)}>
-              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                <EuiFlexItem
-                  css={css`
-                    display: block;
-                  `}
+      <div
+        className="lnsFormula"
+        css={css({
+          backgroundColor: euiTheme.colors.lightestShade,
+          border: isFullscreen ? 'none' : euiTheme.border.thin,
+          borderRadius: isFullscreen ? 0 : euiTheme.border.radius.medium,
+          height: isFullscreen ? '100%' : 'auto',
+        })}
+      >
+        <div className="lnsFormula__editor">
+          <div css={sharedEditorStyles.editorHeader(euiThemeContext)}>
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem
+                css={css`
+                  display: block;
+                `}
+              >
+                <EuiToolTip
+                  content={
+                    isWordWrapped
+                      ? i18n.translate('xpack.lens.formula.disableWordWrapLabel', {
+                          defaultMessage: 'Disable word wrap',
+                        })
+                      : i18n.translate('xpack.lens.formulaEnableWordWrapLabel', {
+                          defaultMessage: 'Enable word wrap',
+                        })
+                  }
+                  position="top"
                 >
-                  <EuiToolTip
-                    content={
+                  <EuiButtonIcon
+                    iconType={isWordWrapped ? 'wordWrap' : 'wordWrapDisabled'}
+                    display={!isWordWrapped ? 'fill' : undefined}
+                    color={'text'}
+                    aria-label={
                       isWordWrapped
                         ? i18n.translate('xpack.lens.formula.disableWordWrapLabel', {
                             defaultMessage: 'Disable word wrap',
@@ -731,230 +747,213 @@ export function FormulaEditor({
                             defaultMessage: 'Enable word wrap',
                           })
                     }
-                    position="top"
-                  >
-                    <EuiButtonIcon
-                      iconType={isWordWrapped ? 'wordWrap' : 'wordWrapDisabled'}
-                      display={!isWordWrapped ? 'fill' : undefined}
-                      color={'text'}
-                      aria-label={
-                        isWordWrapped
-                          ? i18n.translate('xpack.lens.formula.disableWordWrapLabel', {
-                              defaultMessage: 'Disable word wrap',
-                            })
-                          : i18n.translate('xpack.lens.formulaEnableWordWrapLabel', {
-                              defaultMessage: 'Enable word wrap',
-                            })
-                      }
-                      isSelected={!isWordWrapped}
-                      onClick={() => {
-                        editor1.current?.updateOptions({
-                          wordWrap: isWordWrapped ? 'off' : 'on',
-                        });
-                        toggleWordWrap(!isWordWrapped);
-                      }}
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-
-                <EuiFlexItem
-                  css={css`
-                    display: block;
-                  `}
-                  grow={false}
-                >
-                  <EuiButtonEmpty
+                    isSelected={!isWordWrapped}
                     onClick={() => {
-                      toggleFullscreen();
-                      // Help text opens when entering full screen, and closes when leaving full screen
-                      setIsHelpOpen(!isFullscreen);
+                      editor1.current?.updateOptions({
+                        wordWrap: isWordWrapped ? 'off' : 'on',
+                      });
+                      toggleWordWrap(!isWordWrapped);
                     }}
-                    iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
-                    size="xs"
-                    color="text"
-                    flush="right"
-                    data-test-subj="lnsFormula-fullscreen"
-                  >
-                    {isFullscreen
-                      ? i18n.translate('xpack.lens.formula.fullScreenExitLabel', {
-                          defaultMessage: 'Collapse',
-                        })
-                      : i18n.translate('xpack.lens.formula.fullScreenEnterLabel', {
-                          defaultMessage: 'Expand',
-                        })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </div>
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
 
-            <div className="lnsFormula__editorContent">
-              <CodeEditor
-                {...codeEditorOptions}
-                options={{
-                  ...codeEditorOptions.options,
-                  // Shared model and overflow node
-                  overflowWidgetsDomNode: overflowDiv1.current,
-                }}
-                editorDidMount={(editor) => {
-                  editor1.current = editor;
-                  const model = editor.getModel();
-                  if (model) {
-                    editorModel.current = model;
-                  }
-                  // If we ever introduce a second Monaco editor, we need to toggle
-                  // the typing handler to the active editor to maintain the cursor
-                  disposables.current.push(
-                    editor.onDidChangeModelContent((e) => {
-                      onTypeHandler(e, editor);
-                    })
-                  );
-                }}
-              />
-
-              {!text ? (
-                <div css={sharedEditorStyles.editorPlaceholder(euiThemeContext)}>
-                  <EuiText color="subdued" size="s">
-                    {i18n.translate('xpack.lens.formulaPlaceholderText', {
-                      defaultMessage: 'Type a formula by combining functions with math, like:',
-                    })}
-                  </EuiText>
-                  <EuiSpacer size="s" />
-                  <pre>count() + 1</pre>
-                </div>
-              ) : null}
-            </div>
-
-            <div css={sharedEditorStyles.editorFooter(euiThemeContext)}>
-              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  {isFullscreen ? (
-                    <EuiToolTip
-                      content={
-                        isHelpOpen
-                          ? i18n.translate('xpack.lens.formula.editorHelpInlineHideToolTip', {
-                              defaultMessage: 'Hide function reference',
-                            })
-                          : i18n.translate('xpack.lens.formula.editorHelpInlineShowToolTip', {
-                              defaultMessage: 'Show function reference',
-                            })
-                      }
-                      delay="long"
-                      position="top"
-                    >
-                      <EuiLink
-                        aria-label={i18n.translate('xpack.lens.formula.editorHelpInlineHideLabel', {
-                          defaultMessage: 'Hide function reference',
-                        })}
-                        className="lnsFormula__editorHelp lnsFormula__editorHelp--inline"
-                        css={sharedEditorStyles.editorHelpLink(euiThemeContext)}
-                        color="text"
-                        onClick={() => setIsHelpOpen(!isHelpOpen)}
-                      >
-                        <EuiIcon type="documentation" />
-                        <EuiIcon type={isHelpOpen ? 'arrowDown' : 'arrowUp'} />
-                      </EuiLink>
-                    </EuiToolTip>
-                  ) : (
-                    <LanguageDocumentationPopover
-                      language="Formula"
-                      sections={documentationSections}
-                      buttonProps={{
-                        color: 'text',
-                        className: 'lnsFormula__editorHelp lnsFormula__editorHelp--overlay',
-                        'data-test-subj': 'ESQLEditor-documentation',
-                        'aria-label': i18n.translate(
-                          'xpack.lens.formula.editorHelpInlineShowToolTip',
-                          {
-                            defaultMessage: 'Show function reference',
-                          }
-                        ),
-                      }}
-                      isHelpMenuOpen={isHelpOpen}
-                      onHelpMenuVisibilityChange={setIsHelpOpen}
-                    />
-                  )}
-                </EuiFlexItem>
-
-                {errorCount || warningCount ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiPopover
-                      ownFocus={false}
-                      isOpen={isWarningOpen}
-                      closePopover={() => setIsWarningOpen(false)}
-                      button={
-                        <EuiButtonEmpty
-                          color={errorCount ? 'danger' : 'warning'}
-                          css={css`
-                            white-space: nowrap;
-                          `}
-                          className="lnsFormula__editorError"
-                          iconType="warning"
-                          size="xs"
-                          flush="right"
-                          onClick={() => {
-                            setIsWarningOpen(!isWarningOpen);
-                          }}
-                        >
-                          {errorCount
-                            ? i18n.translate('xpack.lens.formulaErrorCount', {
-                                defaultMessage:
-                                  '{count} {count, plural, one {error} other {errors}}',
-                                values: { count: errorCount },
-                              })
-                            : null}
-                          {warningCount
-                            ? i18n.translate('xpack.lens.formulaWarningCount', {
-                                defaultMessage:
-                                  '{count} {count, plural, one {warning} other {warnings}}',
-                                values: { count: warningCount },
-                              })
-                            : null}
-                        </EuiButtonEmpty>
-                      }
-                    >
-                      <div
-                        css={css`
-                          max-width: 400px;
-                        `}
-                      >
-                        {warnings.map(({ message, severity }, index) => (
-                          <div
-                            key={index}
-                            css={index !== 0 && sharedEditorStyles.warningText(euiThemeContext)}
-                          >
-                            <EuiText
-                              size="s"
-                              color={
-                                severity === monaco.MarkerSeverity.Warning ? 'warning' : 'danger'
-                              }
-                            >
-                              {message}
-                            </EuiText>
-                          </div>
-                        ))}
-                      </div>
-                    </EuiPopover>
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
-            </div>
+              <EuiFlexItem
+                css={css`
+                  display: block;
+                `}
+                grow={false}
+              >
+                <EuiButtonEmpty
+                  onClick={() => {
+                    toggleFullscreen();
+                    // Help text opens when entering full screen, and closes when leaving full screen
+                    setIsHelpOpen(!isFullscreen);
+                  }}
+                  iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
+                  size="xs"
+                  color="text"
+                  flush="right"
+                  data-test-subj="lnsFormula-fullscreen"
+                >
+                  {isFullscreen
+                    ? i18n.translate('xpack.lens.formula.fullScreenExitLabel', {
+                        defaultMessage: 'Collapse',
+                      })
+                    : i18n.translate('xpack.lens.formula.fullScreenEnterLabel', {
+                        defaultMessage: 'Expand',
+                      })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </div>
 
-          {/* fix the css here */}
-          {isFullscreen && isHelpOpen ? (
-            <div
-              className="documentation__docs--inline"
-              css={sharedEditorStyles.formulaDocs(euiThemeContext)}
-            >
-              <LanguageDocumentationPopoverContent
-                language="Formula"
-                sections={documentationSections}
-              />
-            </div>
-          ) : null}
-        </div>
-      </div>
+          <div className="lnsFormula__editorContent">
+            <CodeEditor
+              {...codeEditorOptions}
+              options={{
+                ...codeEditorOptions.options,
+                // Shared model and overflow node
+                overflowWidgetsDomNode: overflowDiv1.current,
+              }}
+              editorDidMount={(editor) => {
+                editor1.current = editor;
+                const model = editor.getModel();
+                if (model) {
+                  editorModel.current = model;
+                }
+                // If we ever introduce a second Monaco editor, we need to toggle
+                // the typing handler to the active editor to maintain the cursor
+                disposables.current.push(
+                  editor.onDidChangeModelContent((e) => {
+                    onTypeHandler(e, editor);
+                  })
+                );
+              }}
+            />
 
+            {!text ? (
+              <div css={sharedEditorStyles.editorPlaceholder(euiThemeContext)}>
+                <EuiText color="subdued" size="s">
+                  {i18n.translate('xpack.lens.formulaPlaceholderText', {
+                    defaultMessage: 'Type a formula by combining functions with math, like:',
+                  })}
+                </EuiText>
+                <EuiSpacer size="s" />
+                <pre>count() + 1</pre>
+              </div>
+            ) : null}
+          </div>
+
+          <div css={sharedEditorStyles.editorFooter(euiThemeContext)}>
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                {isFullscreen ? (
+                  <EuiToolTip
+                    content={
+                      isHelpOpen
+                        ? i18n.translate('xpack.lens.formula.editorHelpInlineHideToolTip', {
+                            defaultMessage: 'Hide function reference',
+                          })
+                        : i18n.translate('xpack.lens.formula.editorHelpInlineShowToolTip', {
+                            defaultMessage: 'Show function reference',
+                          })
+                    }
+                    delay="long"
+                    position="top"
+                  >
+                    <EuiLink
+                      aria-label={i18n.translate('xpack.lens.formula.editorHelpInlineHideLabel', {
+                        defaultMessage: 'Hide function reference',
+                      })}
+                      className="lnsFormula__editorHelp lnsFormula__editorHelp--inline"
+                      css={sharedEditorStyles.editorHelpLink(euiThemeContext)}
+                      color="text"
+                      onClick={() => setIsHelpOpen(!isHelpOpen)}
+                    >
+                      <EuiIcon type="documentation" />
+                      <EuiIcon type={isHelpOpen ? 'arrowDown' : 'arrowUp'} />
+                    </EuiLink>
+                  </EuiToolTip>
+                ) : (
+                  <LanguageDocumentationPopover
+                    language="Formula"
+                    sections={documentationSections}
+                    buttonProps={{
+                      color: 'text',
+                      className: 'lnsFormula__editorHelp lnsFormula__editorHelp--overlay',
+                      'data-test-subj': 'ESQLEditor-documentation',
+                      'aria-label': i18n.translate(
+                        'xpack.lens.formula.editorHelpInlineShowToolTip',
+                        {
+                          defaultMessage: 'Show function reference',
+                        }
+                      ),
+                    }}
+                    isHelpMenuOpen={isHelpOpen}
+                    onHelpMenuVisibilityChange={setIsHelpOpen}
+                  />
+                )}
+              </EuiFlexItem>
+
+              {errorCount || warningCount ? (
+                <EuiFlexItem grow={false}>
+                  <EuiPopover
+                    ownFocus={false}
+                    isOpen={isWarningOpen}
+                    closePopover={() => setIsWarningOpen(false)}
+                    button={
+                      <EuiButtonEmpty
+                        color={errorCount ? 'danger' : 'warning'}
+                        css={css`
+                          white-space: nowrap;
+                        `}
+                        className="lnsFormula__editorError"
+                        iconType="warning"
+                        size="xs"
+                        flush="right"
+                        onClick={() => {
+                          setIsWarningOpen(!isWarningOpen);
+                        }}
+                      >
+                        {errorCount
+                          ? i18n.translate('xpack.lens.formulaErrorCount', {
+                              defaultMessage: '{count} {count, plural, one {error} other {errors}}',
+                              values: { count: errorCount },
+                            })
+                          : null}
+                        {warningCount
+                          ? i18n.translate('xpack.lens.formulaWarningCount', {
+                              defaultMessage:
+                                '{count} {count, plural, one {warning} other {warnings}}',
+                              values: { count: warningCount },
+                            })
+                          : null}
+                      </EuiButtonEmpty>
+                    }
+                  >
+                    <div
+                      css={css`
+                        max-width: 400px;
+                      `}
+                    >
+                      {warnings.map(({ message, severity }, index) => (
+                        <div
+                          key={index}
+                          css={index !== 0 && sharedEditorStyles.warningText(euiThemeContext)}
+                        >
+                          <EuiText
+                            size="s"
+                            color={
+                              severity === monaco.MarkerSeverity.Warning ? 'warning' : 'danger'
+                            }
+                          >
+                            {message}
+                          </EuiText>
+                        </div>
+                      ))}
+                    </div>
+                  </EuiPopover>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </div>
+        </div>
+
+        {/* fix the css here */}
+        {isFullscreen && isHelpOpen ? (
+          <div
+            className="documentation__docs--inline"
+            css={sharedEditorStyles.formulaDocs(euiThemeContext)}
+          >
+            <LanguageDocumentationPopoverContent
+              language="Formula"
+              sections={documentationSections}
+            />
+          </div>
+        ) : null}
+      </div>
+    </div>
   );
 }
 
