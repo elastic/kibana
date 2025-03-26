@@ -1650,6 +1650,10 @@ module.exports = {
         'x-pack/platform/plugins/shared/stack_connectors/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/triggers_actions_ui/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/embeddable_alerts_table/**/*.{ts,tsx}',
+        'x-pack/test/alerting_api_integration/**/*.{ts, tsx}',
+        'x-pack/test/cases_api_integration/**/*.{ts, tsx}',
+        'x-pack/test/rule_registry/**/*.{ts, tsx}',
+        'x-pack/test/api_integration/apis/cases/**/*.{ts, tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
