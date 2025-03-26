@@ -28,7 +28,7 @@ export const ResizeHandle = React.memo(({ rowId, panelId }: { rowId: string; pan
       onMouseDown={startDrag}
       onTouchStart={startDrag}
       onKeyDown={startDrag}
-      className="kbnGridPanel__resizeHandle"
+      className="kbnGridPanel--resizeHandle"
       aria-label={i18n.translate('kbnGridLayout.resizeHandle.ariaLabel', {
         defaultMessage: 'Resize panel',
       })}

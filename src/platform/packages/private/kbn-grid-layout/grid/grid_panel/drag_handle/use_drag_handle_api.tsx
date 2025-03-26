@@ -42,7 +42,7 @@ export const useDragHandleApi = ({
         handle.addEventListener('mousedown', startDrag, { passive: true });
         handle.addEventListener('touchstart', startDrag, { passive: true });
         handle.addEventListener('keydown', startDrag);
-        handle.classList.add('kbnGridPanel__dragHandle');
+        handle.classList.add('kbnGridPanel--dragHandle');
       }
       removeEventListenersRef.current = () => {
         for (const handle of dragHandles) {

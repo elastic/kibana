@@ -69,15 +69,15 @@ describe('GridPanel', () => {
   describe('use custom drag handle', () => {
     it('renders default drag handle when `useCustomDragHandle` is false | undefined', () => {
       const panel = renderGridPanel();
-      expect(panel.queryByTestId('kbnGridPanel__dragHandle')).toBeInTheDocument();
+      expect(panel.queryByTestId('kbnGridPanel--dragHandle')).toBeInTheDocument();
 
       panel.rerender({ contextOverrides: { useCustomDragHandle: false } });
-      expect(panel.queryByTestId('kbnGridPanel__dragHandle')).toBeInTheDocument();
+      expect(panel.queryByTestId('kbnGridPanel--dragHandle')).toBeInTheDocument();
     });
 
     it('does not render default drag handle when `useCustomDragHandle` is true and calls setDragHandles', () => {
       const panel = renderGridPanel({ contextOverrides: { useCustomDragHandle: true } });
-      expect(panel.queryByTestId('kbnGridPanel__dragHandle')).not.toBeInTheDocument();
+      expect(panel.queryByTestId('kbnGridPanel--dragHandle')).not.toBeInTheDocument();
       expect(mockRenderPanelContents).toHaveBeenCalledWith('panel1', expect.any(Function));
     });
   });

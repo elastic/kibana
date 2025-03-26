@@ -22,7 +22,7 @@ export const DefaultDragHandle = React.memo(
         aria-label={i18n.translate('kbnGridLayout.dragHandle.ariaLabel', {
           defaultMessage: 'Drag to move',
         })}
-        className="kbnGridPanel__dragHandle"
+        className="kbnGridPanel--dragHandle"
         data-test-subj="kbnGridPanel--dragHandle"
         css={styles}
       >
