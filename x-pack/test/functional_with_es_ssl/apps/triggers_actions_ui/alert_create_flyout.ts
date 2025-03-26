@@ -614,9 +614,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }`;
 
       await filterBar.addDslFilter(filter);
-
       await pageObjects.header.waitUntilLoadingHasFinished();
-
       await filterBar.hasFilter('query', filter, true);
     });
   });
