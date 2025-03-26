@@ -3457,9 +3457,6 @@ paths:
       summary: Update the API key for a rule
       tags:
         - alerting
-<<<<<<< HEAD
-      x-beta: true
-=======
   /api/alerting/rule/{id}/snooze_schedule:
     post:
       description: When you snooze a rule, the rule checks continue to run but alerts will not generate actions. You can snooze for a specified period of time and schedule single or recurring downtimes.
@@ -3630,7 +3627,6 @@ paths:
       summary: Schedule a snooze for the rule
       tags:
         - alerting
->>>>>>> bce77d761a3 ([DOCS] Removes Serverless API x-beta overlay (#215587))
   /api/alerting/rule/{rule_id}/alert/{alert_id}/_mute:
     post:
       operationId: post-alerting-rule-rule-id-alert-alert-id-mute
@@ -3717,9 +3713,6 @@ paths:
       summary: Unmute an alert
       tags:
         - alerting
-<<<<<<< HEAD
-      x-beta: true
-=======
   /api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}:
     delete:
       operationId: delete-alerting-rule-ruleid-snooze-schedule-scheduleid
@@ -3755,7 +3748,6 @@ paths:
       summary: Delete a snooze schedule for a rule
       tags:
         - alerting
->>>>>>> bce77d761a3 ([DOCS] Removes Serverless API x-beta overlay (#215587))
   /api/alerting/rules/_find:
     get:
       operationId: get-alerting-rules-find
@@ -5080,9 +5072,6 @@ paths:
       summary: Get source maps
       tags:
         - APM sourcemaps
-<<<<<<< HEAD
-      x-beta: true
-=======
       x-codeSamples:
         - lang: Curl
           source: |
@@ -5090,7 +5079,6 @@ paths:
             -H 'Content-Type: application/json' \
             -H 'kbn-xsrf: true' \
             -H 'Authorization: ApiKey ${YOUR_API_KEY}'
->>>>>>> bce77d761a3 ([DOCS] Removes Serverless API x-beta overlay (#215587))
     post:
       description: Upload a source map for a specific service and version.
       operationId: uploadSourceMap
@@ -5143,9 +5131,6 @@ paths:
       summary: Upload source map
       tags:
         - APM sourcemaps
-<<<<<<< HEAD
-      x-beta: true
-=======
       x-codeSamples:
         - lang: Curl
           source: |
@@ -5157,7 +5142,6 @@ paths:
             -F 'service_version="1.0.0"' \
             -F 'bundle_filepath="/test/e2e/general-usecase/bundle.js"' \
             -F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"' 
->>>>>>> bce77d761a3 ([DOCS] Removes Serverless API x-beta overlay (#215587))
   /api/apm/sourcemaps/{id}:
     delete:
       description: Delete a previously uploaded source map.
@@ -5212,9 +5196,6 @@ paths:
       summary: Delete source map
       tags:
         - APM sourcemaps
-<<<<<<< HEAD
-      x-beta: true
-=======
       x-codeSamples:
         - lang: Curl
           source: |
@@ -5222,7 +5203,6 @@ paths:
             -H 'Content-Type: application/json' \
             -H 'kbn-xsrf: true' \
             -H 'Authorization: ApiKey ${YOUR_API_KEY}'
->>>>>>> bce77d761a3 ([DOCS] Removes Serverless API x-beta overlay (#215587))
   /api/asset_criticality:
     delete:
       description: Delete the asset criticality record for a specific entity.
@@ -5499,9 +5479,6 @@ paths:
       summary: List asset criticality records
       tags:
         - Security Entity Analytics API
-<<<<<<< HEAD
-      x-beta: true
-=======
   /api/dashboards/dashboard:
     get:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -7772,7 +7749,6 @@ paths:
       tags:
         - Dashboards
       x-state: Technical Preview
->>>>>>> bce77d761a3 ([DOCS] Removes Serverless API x-beta overlay (#215587))
   /api/data_views:
     get:
       operationId: getAllDataViewsDefault
@@ -24334,9 +24310,6 @@ paths:
       summary: Get a package file
       tags:
         - Elastic Package Manager (EPM)
-<<<<<<< HEAD
-      x-beta: true
-=======
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/kibana_assets:
     delete:
       description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
@@ -24460,7 +24433,6 @@ paths:
       summary: Install Kibana assets for a package
       tags:
         - Elastic Package Manager (EPM)
->>>>>>> bce77d761a3 ([DOCS] Removes Serverless API x-beta overlay (#215587))
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize:
     post:
       operationId: post-fleet-epm-packages-pkgname-pkgversion-transforms-authorize
@@ -39964,9 +39936,6 @@ paths:
       summary: Get Kibana's current status
       tags:
         - system
-<<<<<<< HEAD
-      x-beta: true
-=======
   /api/streams:
     get:
       description: Fetches list of all streams
@@ -42594,9 +42563,6 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
-<<<<<<< HEAD
->>>>>>> bce77d761a3 ([DOCS] Removes Serverless API x-beta overlay (#215587))
-=======
   /api/task_manager/_health:
     get:
       description: |
@@ -42615,7 +42581,6 @@ paths:
       summary: Get the task manager health
       tags:
         - task manager
->>>>>>> c9bfa082a07 ([DOCS] Add minimal task manager health APIs (#213862))
   /api/timeline:
     delete:
       description: Delete one or more Timelines or Timeline templates.
@@ -43701,9 +43666,6 @@ paths:
       summary: Enable an SLO
       tags:
         - slo
-<<<<<<< HEAD
-      x-beta: true
-=======
   /s/{spaceId}/internal/observability/slos/_definitions:
     get:
       description: |
@@ -43766,7 +43728,6 @@ paths:
       summary: Get the SLO definitions
       tags:
         - slo
->>>>>>> bce77d761a3 ([DOCS] Removes Serverless API x-beta overlay (#215587))
 components:
   examples:
     Data_views_create_data_view_request:
