@@ -59,8 +59,6 @@ export const canDisableEntityDiscovery = async (client: ElasticsearchClient) => 
 };
 
 export const entityDefinitionRuntimePrivileges = (sourceIndices: string[]) => {
-  console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
-  console.log(sourceIndices);
   return {
     cluster: ['manage_transform', 'manage_ingest_pipelines', 'manage_index_templates'],
     index: [
