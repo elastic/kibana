@@ -19,11 +19,12 @@ import {
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { safeDecode } from '@kbn/rison';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import type { DiscoverAppState } from '@kbn/discover-plugin/public';
-import type { DiscoverGlobalState } from '@kbn/discover-plugin/public/application/main/state_management/discover_global_state_container';
 import type { Filter } from '@kbn/es-query';
 import { type DataViewDataSource } from '@kbn/discover-plugin/common/data_sources';
+import type { QueryState } from '@kbn/data-plugin/common';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -86,21 +87,22 @@ export const LogsPageContent: React.FunctionComponent = () => {
             const g = searchParams.get('_g') || '';
             const a = searchParams.get('_a') || '';
 
-            const gState = (safeDecode(g) || {}) as unknown as DiscoverGlobalState;
-            const aState = (safeDecode(a) || {}) as unknown as DiscoverAppState;
+            const gState = (safeDecode(g) || {}) as QueryState;
+            const aState = (safeDecode(a) || {}) as DiscoverAppState;
 
             const dataViewId =
               aState.dataSource?.type === 'dataView'
                 ? (aState.dataSource as DataViewDataSource).dataViewId
                 : '';
 
-            const locatorParams = {
+            const locatorParams: DiscoverAppLocatorParams = {
               dataViewId,
               timeRange: gState.time || { from: 'now-15d', to: 'now' },
               filters: [
                 ...(Array.isArray(gState.filters) ? gState.filters : []),
                 ...(Array.isArray(aState.filters) ? aState.filters : []),
               ] as Filter[],
+              interval: aState.interval,
               query:
                 aState.query && typeof aState.query === 'object'
                   ? aState.query
@@ -109,7 +111,9 @@ export const LogsPageContent: React.FunctionComponent = () => {
               sort: Array.isArray(aState.sort) ? aState.sort : [['@timestamp', 'desc']],
             };
 
-            share.url.locators.get(DISCOVER_APP_LOCATOR)?.navigate(locatorParams);
+            share.url.locators
+              .get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR)
+              ?.navigate(locatorParams);
             return null;
           }}
         />
