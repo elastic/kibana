@@ -92,9 +92,12 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
       setIsCreateRuleLoading(false);
 
       notifications.toasts.addWarning({
-        title: kbnI18n.translate('xpack.csp.detectionRuleCounter.alerts.createRuleErrorTitle', {
-          defaultMessage: 'Coming Soon',
-        }),
+        title: kbnI18n.translate(
+          'xpack.securitySolution.detectionRuleCounter.alerts.createRuleErrorTitle',
+          {
+            defaultMessage: 'Coming Soon',
+          }
+        ),
         text: e.message,
       });
     }
@@ -115,7 +118,7 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
             {isCreateRuleLoading ? (
               <>
                 <FormattedMessage
-                  id="xpack.csp.findingsFlyout.alerts.creatingRule"
+                  id="xpack.securitySolution.findingsFlyout.alerts.creatingRule"
                   defaultMessage="Creating detection rule"
                 />{' '}
                 <EuiLoadingSpinner
@@ -130,12 +133,12 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
                   data-test-subj="csp:findings-flyout-create-detection-rule-link"
                 >
                   <FormattedMessage
-                    id="xpack.csp.findingsFlyout.alerts.createRuleAction"
+                    id="xpack.securitySolution.findingsFlyout.alerts.createRuleAction"
                     defaultMessage="Create a detection rule"
                   />
                 </EuiLink>{' '}
                 <FormattedMessage
-                  id="xpack.csp.findingsFlyout.alerts.createRuleDescription"
+                  id="xpack.securitySolution.findingsFlyout.alerts.createRuleDescription"
                   defaultMessage="to generate alerts."
                 />
               </>
@@ -146,13 +149,13 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
         <>
           <EuiLink onClick={alertsPageNavigation} data-test-subj="csp:findings-flyout-alert-count">
             <FormattedMessage
-              id="xpack.csp.findingsFlyout.alerts.alertCount"
+              id="xpack.securitySolution.findingsFlyout.alerts.alertCount"
               defaultMessage="{alertCount, plural, one {# alert} other {# alerts}}"
               values={{ alertCount: alertsData?.total || 0 }}
             />
           </EuiLink>{' '}
           <FormattedMessage
-            id="xpack.csp.findingsFlyout.alerts.detectedBy"
+            id="xpack.securitySolution.findingsFlyout.alerts.detectedBy"
             defaultMessage="detected by"
           />{' '}
           <EuiLink
@@ -160,7 +163,7 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
             data-test-subj="csp:findings-flyout-detection-rule-count"
           >
             <FormattedMessage
-              id="xpack.csp.findingsFlyout.alerts.detectionRuleCount"
+              id="xpack.securitySolution.findingsFlyout.alerts.detectionRuleCount"
               defaultMessage="{ruleCount, plural, one {# detection rule} other {# detection rules}}"
               values={{ ruleCount: rulesData?.total || 0 }}
             />

@@ -58,10 +58,10 @@ export const showCreateDetectionRuleErrorToast = (
   error: Error
 ) => {
   return cloudSecurityStartServices.notifications.toasts.addDanger({
-    title: kbnI18n.translate('xpack.csp.takeAction.createRuleErrorTitle', {
+    title: kbnI18n.translate('xpack.securitySolution.takeAction.createRuleErrorTitle', {
       defaultMessage: 'Unable to create detection rule',
     }),
-    text: kbnI18n.translate('xpack.csp.takeAction.createRuleErrorDescription', {
+    text: kbnI18n.translate('xpack.securitySolution.takeAction.createRuleErrorDescription', {
       defaultMessage: 'An error occurred while creating the detection rule: {errorMessage}.',
       values: { errorMessage: error.message },
     }),
@@ -88,13 +88,13 @@ export const showCreateDetectionRuleSuccessToast = (
           <strong data-test-subj="csp:toast-success-title">{ruleResponse.name}</strong>
           {` `}
           <FormattedMessage
-            id="xpack.csp.flyout.ruleCreatedToastTitle"
+            id="xpack.securitySolution.flyout.ruleCreatedToastTitle"
             defaultMessage="detection rule was created."
           />
         </EuiText>
         <EuiText size="s">
           <FormattedMessage
-            id="xpack.csp.flyout.ruleCreatedToast"
+            id="xpack.securitySolution.flyout.ruleCreatedToast"
             defaultMessage="Add rule actions to get notified when alerts are generated."
           />
         </EuiText>
@@ -111,7 +111,7 @@ export const showCreateDetectionRuleSuccessToast = (
               href={http.basePath.prepend(RULE_PAGE_PATH + ruleResponse.id)}
             >
               <FormattedMessage
-                id="xpack.csp.flyout.ruleCreatedToastViewRuleButton"
+                id="xpack.securitySolution.flyout.ruleCreatedToastViewRuleButton"
                 defaultMessage="View rule"
               />
             </EuiButton>
@@ -153,11 +153,14 @@ export const TakeAction = ({
       iconSide="right"
       onClick={() => setPopoverOpen(!isPopoverOpen)}
     >
-      <FormattedMessage id="xpack.csp.flyout.takeActionButton" defaultMessage="Take action" />
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.takeActionButton"
+        defaultMessage="Take action"
+      />
     </EuiButton>
   ) : (
     <EuiButtonIcon
-      aria-label={kbnI18n.translate('xpack.csp.flyout.moreActionsButton', {
+      aria-label={kbnI18n.translate('xpack.securitySolution.flyout.moreActionsButton', {
         defaultMessage: 'More actions',
       })}
       iconType="boxesHorizontal"
@@ -262,7 +265,7 @@ const CreateDetectionRule = ({
     >
       <FormattedMessage
         defaultMessage="Create a detection rule"
-        id="xpack.csp.createDetectionRuleButton"
+        id="xpack.securitySolution.createDetectionRuleButton"
       />
     </EuiContextMenuItem>
   );
@@ -288,7 +291,10 @@ const EnableBenchmarkRule = ({
       }}
       data-test-subj={'enable-benchmark-rule-take-action-button'}
     >
-      <FormattedMessage defaultMessage="Enable Rule" id="xpack.csp.enableBenchmarkRuleButton" />
+      <FormattedMessage
+        defaultMessage="Enable Rule"
+        id="xpack.securitySolution.enableBenchmarkRuleButton"
+      />
     </EuiContextMenuItem>
   );
 };
@@ -313,7 +319,10 @@ const DisableBenchmarkRule = ({
       }}
       data-test-subj={'disable-benchmark-rule-take-action-button'}
     >
-      <FormattedMessage defaultMessage="Disable Rule" id="xpack.csp.disableBenchmarkRuleButton" />
+      <FormattedMessage
+        defaultMessage="Disable Rule"
+        id="xpack.securitySolution.disableBenchmarkRuleButton"
+      />
     </EuiContextMenuItem>
   );
 };
