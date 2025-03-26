@@ -50,12 +50,12 @@ export const getPosition = (
     }
   }
 
+  if (innerText.match(/as\s+$/i)) {
+    return Position.AS_TYPE_COLUMN;
+  }
+
   if (isSingleItem(lastArg) && lastArg.name === 'as') {
-    // FIXME parser does not recognize AS with missing arguments
-    // if (innerText.match(/[,|as]\s+\S*$/i)) {
-    //   return Position.AS_TYPE_COLUMN;
-    // }
-    if (innerText.match(/[,|as]\s+\S+,\s*$/i)) {
+    if (innerText.match(/as\s+\S+,\s*$/i)) {
       return Position.AS_P_VALUE_COLUMN;
     }
 

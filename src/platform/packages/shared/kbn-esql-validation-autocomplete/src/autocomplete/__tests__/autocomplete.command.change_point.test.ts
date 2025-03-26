@@ -48,8 +48,9 @@ describe('autocomplete.suggest', () => {
       });
 
       it('suggests default field name for AS clauses', async () => {
-        // FIXME parser does not recognize AS with missing arguments
-        // await assertSuggestions(`from a | change_point value on field as /`, ['changePointType']);
+        await assertSuggestions(`from a | change_point value on field as / `, [
+          'changePointType, ',
+        ]);
 
         await assertSuggestions(`from a | change_point value on field as changePointType, /`, [
           'pValue',
