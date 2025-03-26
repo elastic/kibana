@@ -255,8 +255,35 @@ describe('Exception helpers', () => {
       const payload = [{ trusted: undefined, subject_name: undefined }] as unknown as Flattened<
         CodeSignature[]
       >;
-      const result = getCodeSignatureValue(payload);
+      const result = getCodeSignatureValue(payload, 'field');
       expect(result).toEqual([undefined]);
+    });
+
+    test('it should not return duplicate code signature entries', () => {
+      const payload = [
+        { subject_name: 'asdf', trusted: 'true' },
+        { subject_name: 'asdf', trusted: 'true' },
+      ];
+      expect(getCodeSignatureValue(payload, 'field')).toEqual([
+        {
+          field: 'field',
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'asdf',
+            },
+            {
+              field: 'trusted',
+              operator: 'included',
+              type: 'match',
+              value: 'true',
+            },
+          ],
+        },
+      ]);
     });
   });
 
@@ -1709,7 +1736,7 @@ describe('Exception helpers', () => {
         },
       ]);
     });
-    test('it should skip empty fields and trusted: false code signature fields', () => {
+    test('it should skip empty fields and "trusted: false" code signature fields', () => {
       const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
         rule: {

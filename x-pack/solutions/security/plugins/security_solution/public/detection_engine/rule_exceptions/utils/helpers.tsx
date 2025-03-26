@@ -297,10 +297,7 @@ export const lowercaseHashValues = (
  * `file.Ext.code_signature` or 'file.code_signature`
  * as long as the `trusted` field is `true`.
  */
-export const getFileCodeSignature = (
-  alertData: Flattened<Ecs>
-//) : MatchAndNestedEntriesArray | undefined => {
-) : EntriesArrayOrUndefined => {
+export const getFileCodeSignature = (alertData: Flattened<Ecs>): EntriesArrayOrUndefined => {
   const { file } = alertData;
   const codeSignature = file && file.Ext && file.Ext.code_signature;
 
@@ -329,9 +326,7 @@ export const getFileCodeSignature = (
  * `process.Ext.code_signature` or 'process.code_signature`
  * as long as the `trusted` field is `true`.
  */
-export const getProcessCodeSignature = (
-  alertData: Flattened<Ecs>
-): EntriesArrayOrUndefined => {
+export const getProcessCodeSignature = (alertData: Flattened<Ecs>): EntriesArrayOrUndefined => {
   const { process } = alertData;
   const codeSignature = process && process.Ext && process.Ext.code_signature;
   if (codeSignature) {
@@ -359,9 +354,7 @@ export const getProcessCodeSignature = (
  * `dll.Ext.code_signature` or 'dll.code_signature`
  * as long as the `trusted` field is `true`.
  */
-export const getDllCodeSignature = (
-  alertData: Flattened<Ecs>
-): EntriesArrayOrUndefined => {
+export const getDllCodeSignature = (alertData: Flattened<Ecs>): EntriesArrayOrUndefined => {
   const { dll } = alertData;
   const codeSignature = dll && dll.Ext && dll.Ext.code_signature;
   if (codeSignature) {
@@ -390,11 +383,14 @@ export const getDllCodeSignature = (
 export const getCodeSignatureValue = (
   codeSignature: Flattened<CodeSignature> | Flattened<CodeSignature[]> | undefined,
   field: string
-): Array<EntryNested> | undefined => {
+): EntryNested[] | undefined => {
   if (Array.isArray(codeSignature) && codeSignature.length > 0) {
-    const codeSignatureEntries: Array<EntryNested> = [];
+    const codeSignatureEntries: EntryNested[] = [];
+    const noDuplicates = new Set<string>();
     return codeSignature.reduce((acc, signature) => {
-      if (signature?.trusted === 'true') {
+      if (signature?.trusted === 'true' && !noDuplicates.has(signature?.subject_name)) {
+        noDuplicates.add(signature.subject_name);
+        console.log(noDuplicates);
         acc.push({
           field,
           type: 'nested',
@@ -453,10 +449,12 @@ export const getCodeSignatureValue = (
 function filterEmptyExceptionEntries(entries: EntriesArray): EntriesArray {
   const finalEntries: EntriesArray = [];
   for (const entry of entries) {
-    if ("entries" in entry && entry.entries !== undefined) {
-      entry.entries = entry.entries.filter((el) => "value" in el && el.value !== undefined && el.value.length > 0);
+    if ('entries' in entry && entry.entries !== undefined) {
+      entry.entries = entry.entries.filter(
+        (el) => 'value' in el && el.value !== undefined && el.value.length > 0
+      );
       finalEntries.push(entry);
-    } else if ("value" in entry && entry.value !== undefined && entry.value.length > 0) {
+    } else if ('value' in entry && entry.value !== undefined && entry.value.length > 0) {
       finalEntries.push(entry);
     }
   }
@@ -800,11 +798,20 @@ export const getPrepopulatedBehaviorException = ({
   ];
 
   const entriesToAdd = () => {
-    if (!isLinux && processCodeSignature !== undefined && dllCodeSignature !== undefined) {
-      return addIdToEntries(filterEmptyExceptionEntries(commonFields.concat(processCodeSignature, dllCodeSignature)));
-    } else {
-      return addIdToEntries(filterEmptyExceptionEntries(commonFields));
+    if (!isLinux) {
+      if (processCodeSignature !== undefined && dllCodeSignature !== undefined) {
+        return addIdToEntries(
+          filterEmptyExceptionEntries(commonFields.concat(processCodeSignature, dllCodeSignature))
+        );
+      } else if (processCodeSignature !== undefined) {
+        return addIdToEntries(
+          filterEmptyExceptionEntries(commonFields.concat(processCodeSignature))
+        );
+      } else if (dllCodeSignature !== undefined) {
+        return addIdToEntries(filterEmptyExceptionEntries(commonFields.concat(dllCodeSignature)));
+      }
     }
+    return addIdToEntries(filterEmptyExceptionEntries(commonFields));
   };
 
   return {
