@@ -5076,9 +5076,6 @@ paths:
       summary: Get source maps
       tags:
         - APM sourcemaps
-<<<<<<< HEAD
-      x-beta: true
-=======
       x-codeSamples:
         - lang: Curl
           source: |
@@ -5086,7 +5083,6 @@ paths:
             -H 'Content-Type: application/json' \
             -H 'kbn-xsrf: true' \
             -H 'Authorization: ApiKey ${YOUR_API_KEY}'
->>>>>>> bce77d761a3 ([DOCS] Removes Serverless API x-beta overlay (#215587))
     post:
       description: Upload a source map for a specific service and version.
       operationId: uploadSourceMap
@@ -5139,9 +5135,6 @@ paths:
       summary: Upload source map
       tags:
         - APM sourcemaps
-<<<<<<< HEAD
-      x-beta: true
-=======
       x-codeSamples:
         - lang: Curl
           source: |
@@ -5153,7 +5146,6 @@ paths:
             -F 'service_version="1.0.0"' \
             -F 'bundle_filepath="/test/e2e/general-usecase/bundle.js"' \
             -F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"' 
->>>>>>> bce77d761a3 ([DOCS] Removes Serverless API x-beta overlay (#215587))
   /api/apm/sourcemaps/{id}:
     delete:
       description: Delete a previously uploaded source map.
@@ -5208,9 +5200,6 @@ paths:
       summary: Delete source map
       tags:
         - APM sourcemaps
-<<<<<<< HEAD
-      x-beta: true
-=======
       x-codeSamples:
         - lang: Curl
           source: |
@@ -5218,7 +5207,6 @@ paths:
             -H 'Content-Type: application/json' \
             -H 'kbn-xsrf: true' \
             -H 'Authorization: ApiKey ${YOUR_API_KEY}'
->>>>>>> bce77d761a3 ([DOCS] Removes Serverless API x-beta overlay (#215587))
   /api/asset_criticality:
     delete:
       description: Delete the asset criticality record for a specific entity.
@@ -5495,9 +5483,6 @@ paths:
       summary: List asset criticality records
       tags:
         - Security Entity Analytics API
-<<<<<<< HEAD
-      x-beta: true
-=======
   /api/dashboards/dashboard:
     get:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -7768,7 +7753,6 @@ paths:
       tags:
         - Dashboards
       x-state: Technical Preview
->>>>>>> bce77d761a3 ([DOCS] Removes Serverless API x-beta overlay (#215587))
   /api/data_views:
     get:
       operationId: getAllDataViewsDefault
@@ -22939,9 +22923,6 @@ paths:
       summary: Get a package file
       tags:
         - Elastic Package Manager (EPM)
-<<<<<<< HEAD
-      x-beta: true
-=======
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/kibana_assets:
     delete:
       description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
@@ -23065,7 +23046,6 @@ paths:
       summary: Install Kibana assets for a package
       tags:
         - Elastic Package Manager (EPM)
->>>>>>> bce77d761a3 ([DOCS] Removes Serverless API x-beta overlay (#215587))
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize:
     post:
       operationId: post-fleet-epm-packages-pkgname-pkgversion-transforms-authorize
@@ -41418,9 +41398,6 @@ paths:
       summary: Enable an SLO
       tags:
         - slo
-<<<<<<< HEAD
-      x-beta: true
-=======
   /s/{spaceId}/internal/observability/slos/_definitions:
     get:
       description: |
@@ -41483,7 +41460,6 @@ paths:
       summary: Get the SLO definitions
       tags:
         - slo
->>>>>>> bce77d761a3 ([DOCS] Removes Serverless API x-beta overlay (#215587))
 components:
   examples:
     Data_views_create_data_view_request:
