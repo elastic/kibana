@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { BehaviorSubject } from 'rxjs';
 import {
@@ -100,13 +100,16 @@ export const useAssistantLastConversation = ({
     []
   );
 
-  const setLastConversation = (newConversation: LastConversation) => {
-    setLocalStorageLastConversation(newConversation); // Save to localStorage
-    lastConversationSubject$.next(newConversation); // Emit latest value
-  };
+  const setLastConversation = useCallback(
+    (newConversation: LastConversation) => {
+      setLocalStorageLastConversation(newConversation); // Save to localStorage
+      lastConversationSubject$.next(newConversation); // Emit latest value
+    },
+    [setLocalStorageLastConversation]
+  );
 
-  return {
-    getLastConversation,
-    setLastConversation,
-  };
+  return useMemo(
+    () => ({ getLastConversation, setLastConversation }),
+    [getLastConversation, setLastConversation]
+  );
 };

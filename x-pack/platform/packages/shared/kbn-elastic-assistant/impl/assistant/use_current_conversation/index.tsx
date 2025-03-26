@@ -34,7 +34,7 @@ export interface Props {
   refetchCurrentUserConversations: <TPageData>(
     options?: RefetchOptions & RefetchQueryFilters<TPageData>
   ) => Promise<QueryObserverResult<InfiniteData<FetchConversationsResponse>, unknown>>;
-  setLastConversation: Dispatch<SetStateAction<LastConversation | undefined>>;
+  setLastConversation: (lastConversation: LastConversation) => void;
 }
 
 interface UseCurrentConversation {

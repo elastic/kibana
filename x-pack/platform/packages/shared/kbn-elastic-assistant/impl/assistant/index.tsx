@@ -138,6 +138,10 @@ const AssistantComponent: React.FC<Props> = ({
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
   const spaceId = useAssistantSpaceId();
   const { getLastConversation, setLastConversation } = useAssistantLastConversation({ spaceId });
+  const lastConversationFromLocalStorage = useMemo(
+    () => getLastConversation(),
+    [getLastConversation]
+  );
 
   const {
     currentConversation,
@@ -156,7 +160,7 @@ const AssistantComponent: React.FC<Props> = ({
     defaultConnector,
     spaceId,
     refetchCurrentUserConversations,
-    lastConversation: lastConversation ?? getLastConversation(lastConversation),
+    lastConversation: lastConversation ?? lastConversationFromLocalStorage,
     mayUpdateConversations:
       isFetchedConnectors && isFetchedCurrentUserConversations && isFetchedPrompts,
     setLastConversation,

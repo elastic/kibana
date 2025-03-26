@@ -72,7 +72,12 @@ const renderAssistant = async (extraProps = {}) => {
   const chatSendSpy = jest.spyOn(all, 'useChatSend');
   const assistant = render(
     <TestProviders>
-      <Assistant chatHistoryVisible={true} setChatHistoryVisible={jest.fn()} {...extraProps} />
+      <Assistant
+        lastConversation={{ id: 'welcome_id' }}
+        chatHistoryVisible={true}
+        setChatHistoryVisible={jest.fn()}
+        {...extraProps}
+      />
     </TestProviders>
   );
   await waitFor(() => {
@@ -144,7 +149,7 @@ describe('Assistant', () => {
       .mockReturnValue(defaultFetchUserConversations as unknown as FetchCurrentUserConversations);
     jest
       .mocked(useLocalStorage)
-      .mockReturnValue([undefined, persistToLocalStorage] as unknown as ReturnType<
+      .mockReturnValue([mockData.welcome_id, persistToLocalStorage] as unknown as ReturnType<
         typeof useLocalStorage
       >);
     jest
