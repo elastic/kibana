@@ -10,7 +10,7 @@ import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { InfraWaffleMapNode } from '../../../../common/inventory/types';
 
-export const navigateToUptime = ({
+export const getUptimeUrl = ({
   uptimeLocator,
   nodeType,
   node,
@@ -19,5 +19,5 @@ export const navigateToUptime = ({
   nodeType: InventoryItemType;
   node: InfraWaffleMapNode;
 }) => {
-  return uptimeLocator.navigate({ [nodeType]: node.id, ip: node.ip });
+  return uptimeLocator.getRedirectUrl({ [nodeType]: node.id, ip: node.ip });
 };

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useEffect, useMemo } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
 import { useDataViewContext } from '../data_view_context';
-import type { AssetsBaseURLQuery } from './use_asset_inventory_data_table';
+import type { AssetsBaseURLQuery } from './use_asset_inventory_url_state';
 
 interface AssetsBaseESQueryConfig {
   config: EsQueryConfig;
