@@ -19,7 +19,7 @@ interface Props {
 
 export function BackLink({ queryParams, integrationsPath }: Props) {
   const {
-    application: { navigateToApp, getUrlForApp },
+    application: { navigateToApp },
   } = useStartServices();
   const { returnAppId, returnPath } = useMemo(() => {
     return {
@@ -36,12 +36,10 @@ export function BackLink({ queryParams, integrationsPath }: Props) {
 
   return (
     <>
-      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
       <EuiButtonEmpty
         iconType="arrowLeft"
         size="xs"
         flush="left"
-        href={getUrlForApp(appId, { path })}
         onClick={() => {
           navigateToApp(appId, { path });
         }}

@@ -17,7 +17,7 @@ jest.mock('../../../../../../../hooks', () => {
   return {
     ...jest.requireActual('../../../../../../../hooks'),
     useStartServices: jest.fn().mockReturnValue({
-      application: { navigateToApp: jest.fn(), getUrlForApp: jest.fn() },
+      application: { navigateToApp: jest.fn() },
     }),
   };
 });
