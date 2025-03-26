@@ -10,13 +10,17 @@
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { createInternalStateStore, createRuntimeStateManager, internalStateActions } from '.';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { mockCustomizationContext } from '../../../../customizations/__mocks__/customization_context';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 describe('InternalStateStore', () => {
   it('should set data view', () => {
     const runtimeStateManager = createRuntimeStateManager();
     const store = createInternalStateStore({
       services: createDiscoverServicesMock(),
+      customizationContext: mockCustomizationContext,
       runtimeStateManager,
+      urlStateStorage: createKbnUrlStateStorage(),
     });
     expect(store.getState().dataViewId).toBeUndefined();
     expect(runtimeStateManager.currentDataView$.value).toBeUndefined();
