@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
@@ -20,6 +19,7 @@ import {
 import type { Coordinate } from '../../../../typings/timeseries';
 import { ImpactBar } from '../impact_bar';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
+import type { ITableColumn } from '../managed_table';
 
 export interface SpanMetricGroup {
   latency: number | null;
@@ -49,7 +49,7 @@ export function getSpanMetricColumns({
 }: {
   comparisonFetchStatus: FETCH_STATUS;
   shouldShowSparkPlots: boolean;
-}): Array<EuiBasicTableColumn<SpanMetricGroup>> {
+}): Array<ITableColumn<SpanMetricGroup>> {
   const isLoading = isPending(comparisonFetchStatus);
 
   return [

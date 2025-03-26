@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { keyBy } from 'lodash';
 import React, { useEffect } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import type { EuiBasicTableColumn } from '@elastic/eui';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useSearchServiceDestinationMetrics } from '../../../../context/time_range_metadata/use_search_service_destination_metrics';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -19,7 +18,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { SpanMetricGroup } from '../../../shared/dependencies_table/get_span_metric_columns';
 import { getSpanMetricColumns } from '../../../shared/dependencies_table/get_span_metric_columns';
 import { EmptyMessage } from '../../../shared/empty_message';
-import { ManagedTable } from '../../../shared/managed_table';
+import { type ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { DependencyOperationDetailLink } from '../../dependency_operation_detail_view/dependency_operation_detail_link';
@@ -147,7 +146,7 @@ export function DependencyDetailOperationsList() {
     }
   }, [onPageReady, primaryStatsFetch, comparisonStatsFetch, rangeFrom, rangeTo]);
 
-  const columns: Array<EuiBasicTableColumn<OperationStatisticsItem>> = [
+  const columns: Array<ITableColumn<OperationStatisticsItem>> = [
     {
       name: i18n.translate('xpack.apm.dependencyDetailOperationsList.spanNameColumnLabel', {
         defaultMessage: 'Span name',

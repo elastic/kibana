@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { EuiBasicTableColumn, EuiTableFieldDataColumnType } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty, merge, orderBy } from 'lodash';
 import type { ReactNode } from 'react';
@@ -36,6 +36,7 @@ export interface ITableColumn<T extends object> {
   width?: string;
   sortable?: boolean;
   truncateText?: boolean;
+  nameTooltip?: EuiBasicTableColumn<T>['nameTooltip'];
   render?: (value: any, item: T) => unknown;
 }
 
@@ -68,7 +69,7 @@ export const shouldfetchServer = ({
 
 function UnoptimizedManagedTable<T extends object>(props: {
   items: T[];
-  columns: Array<EuiBasicTableColumn<T>>;
+  columns: Array<ITableColumn<T>>;
   rowHeader?: string | false;
   noItemsMessage?: React.ReactNode;
   isLoading?: boolean;
@@ -96,7 +97,6 @@ function UnoptimizedManagedTable<T extends object>(props: {
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const history = useHistory();
-  const firstField = (props.columns[0] as EuiTableFieldDataColumnType<T>)?.field as string;
 
   const {
     items,
@@ -110,7 +110,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
     pagination = true,
     initialPageIndex = 0,
     initialPageSize = 10,
-    initialSortField = firstField || '',
+    initialSortField = props.columns[0]?.field || '',
     initialSortDirection = 'asc',
     showPerPageOptions = true,
 
@@ -293,8 +293,8 @@ function UnoptimizedManagedTable<T extends object>(props: {
               : noItemsMessage
           }
           items={renderedItems}
-          columns={columns}
-          rowHeader={rowHeader === false ? undefined : rowHeader ?? firstField}
+          columns={columns as unknown as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
+          rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
           sorting={sorting}
           onChange={onTableChange}
           {...(paginationProps ? { pagination: paginationProps } : {})}
