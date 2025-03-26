@@ -38,6 +38,8 @@ export function useLoadAlertSummary({
   timeRange,
   filter,
 }: UseLoadAlertSummaryProps) {
+  // console.log('📡 Fetching alert summary with:', { ruleTypeIds, consumers, timeRange, filter });
+
   const { http } = useKibana().services;
   const [alertSummary, setAlertSummary] = useState<LoadAlertSummaryResponse>({
     isLoading: true,
@@ -87,12 +89,15 @@ export function useLoadAlertSummary({
       }
     }
   }, [ruleTypeIds, consumers, filter, http, timeRange]);
-
+  useEffect(() => {
+    // console.log('🔄 useEffect triggered - Calling loadAlertSummary');
+    loadAlertSummary();
+  }, [loadAlertSummary]);
   useEffect(() => {
     loadAlertSummary();
   }, [loadAlertSummary]);
 
-  return alertSummary;
+  return { alertSummary, loadAlertSummary };
 }
 
 async function fetchAlertSummary({

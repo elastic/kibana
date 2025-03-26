@@ -19,6 +19,9 @@ import {
   EuiTabbedContentTab,
   useEuiTheme,
   EuiFlexGroup,
+  EuiRange,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import {
   AlertStatus,
@@ -54,6 +57,8 @@ import { AlertOverview } from '../../components/alert_overview/alert_overview';
 import { CustomThresholdRule } from '../../components/custom_threshold/components/types';
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 import { AlertHistoryChart } from './components/alert_history';
+import useSensitiveRule from '../../hooks/use_sensitive_rule';
+import ZScoreChart from './components/sensitive_rule_chart';
 
 interface AlertDetailsPathParams {
   alertId: string;
@@ -110,9 +115,17 @@ export function AlertDetails() {
   const { rule } = useFetchRule({
     ruleId,
   });
+  const [sensitivity, setSensitivity] = useState('2');
+  const [executionLookBackWindow, setExecutionLookBackWindow] = useState('100');
+
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
-
+  const { ruleSensitivityHistory } = useSensitiveRule({
+    ruleId,
+    ruleTypeId: rule?.ruleTypeId,
+    sensitivity,
+    executionLookBackWindow,
+  });
   const [sources, setSources] = useState<AlertDetailsSource[]>();
   const [activeTabId, setActiveTabId] = useState<TabId>(() => {
     const searchParams = new URLSearchParams(search);
@@ -134,7 +147,6 @@ export function AlertDetails() {
     }
     history.replace({ search: searchParams.toString() });
   };
-
   useEffect(() => {
     if (!alertDetail || !observabilityAIAssistant) {
       return;
@@ -230,6 +242,57 @@ export function AlertDetails() {
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="column" gutterSize="m">
           <SourceBar alert={alertDetail.formatted} sources={sources} />
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiTitle size="s">
+              <h4>
+                {i18n.translate('xpack.observability.alertDetails.h2.thisIsTheDefaultLabel', {
+                  defaultMessage: 'Rule sensitivity',
+                })}
+              </h4>
+            </EuiTitle>
+            <EuiText size="s" color="subdued">
+              {i18n.translate('xpack.observability.alertDetails.h2.thisIsTheDefaultLabel', {
+                defaultMessage:
+                  'This chart and information reflect the behavior of the rule associated with this alert.',
+              })}
+            </EuiText>
+            <ZScoreChart ruleSensitivityHistory={ruleSensitivityHistory} />
+            <EuiFlexGroup direction="column">
+              <EuiText size="s" color="subdued">
+                {i18n.translate('xpack.observability.alertDetails.ruleSensitivityTextLabel', {
+                  defaultMessage: 'Rule sensitivity',
+                })}
+              </EuiText>
+              <EuiRange
+                id={'sensitivityRange'}
+                min={1}
+                max={3}
+                value={sensitivity}
+                onChange={(e) => setSensitivity(e.currentTarget.value)}
+                showLabels
+                showRange
+                showValue
+              />
+
+              <EuiText size="m" color="subdued">
+                {i18n.translate('xpack.observability.alertDetails.ruleSensitivityTextLabel', {
+                  defaultMessage: 'Rule sensitivity lookback-executions',
+                })}
+              </EuiText>
+              <EuiRange
+                id={'executionLookBackWindow'}
+                min={10}
+                max={1000}
+                value={executionLookBackWindow}
+                onChange={(e) => setExecutionLookBackWindow(e.currentTarget.value)}
+                showLabels
+                showRange
+                showValue
+                step={10}
+              />
+            </EuiFlexGroup>
+          </EuiFlexGroup>
+
           <AlertDetailContextualInsights alert={alertDetail} />
           {rule && alertDetail.formatted && (
             <>
@@ -239,6 +302,7 @@ export function AlertDetails() {
                 timeZone={timeZone}
                 setSources={setSources}
               />
+
               <AlertHistoryChart
                 alert={alertDetail.formatted}
                 rule={rule as unknown as CustomThresholdRule}
@@ -336,6 +400,7 @@ export function AlertDetails() {
       <StatusBar alert={alertDetail?.formatted ?? null} alertStatus={alertStatus} />
       <EuiSpacer size="l" />
       <HeaderMenu />
+
       <EuiTabbedContent
         data-test-subj="alertDetailsTabbedContent"
         tabs={tabs}
