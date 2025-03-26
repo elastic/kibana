@@ -581,9 +581,7 @@ export function transformOutputToFullPolicyOutput(
     ...((output.type === outputType.Kafka || output.type === outputType.Logstash) && ssl
       ? { ssl }
       : {}),
-    ...((output.type === outputType.Kafka || output.type === outputType.Logstash) && secrets
-      ? { secrets }
-      : {}),
+    ...(secrets ? { secrets } : {}),
   };
 
   if (proxy) {
