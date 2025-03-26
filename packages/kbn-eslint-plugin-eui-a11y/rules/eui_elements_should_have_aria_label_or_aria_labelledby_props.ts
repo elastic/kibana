@@ -82,10 +82,9 @@ export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: Rule.RuleModul
           .block as TSESTree.FunctionDeclaration;
         const functionName = getFunctionName(functionDeclaration);
 
-        const translationIdSuggestion = `${i18nAppId}.${functionName}.${intent.replaceAll(
-          ' ',
-          ''
-        )}ariaLabel`; // 'xpack.observability.overview.logs.loadMore.ariaLabel'
+        const translationIdSuggestion = `${i18nAppId}.${functionName}.${
+          element.charAt(0).toLowerCase() + element.slice(1)
+        }.${intent.replaceAll(' ', '')}ariaLabel`.replaceAll('..', '.'); // 'xpack.observability.overview.logs.loadMore.ariaLabel'
 
         // Check if i18n has already been imported into the file
         const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine, replaceMode } =
