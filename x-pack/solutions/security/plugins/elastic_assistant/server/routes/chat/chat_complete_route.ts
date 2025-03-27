@@ -61,14 +61,14 @@ export const chatCompleteRoute = (
         validate: {
           request: {
             body: buildRouteValidationWithZod(ChatCompleteProps),
-            query: buildRouteValidationWithZod(ChatCompleteRequestQuery)
+            query: buildRouteValidationWithZod(ChatCompleteRequestQuery),
           },
         },
       },
       async (context, request, response) => {
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
         const assistantResponse = buildResponse(response);
-        const { content_references_disabled } = request.query
+        const { content_references_disabled } = request.query;
         let telemetry;
         let actionTypeId;
         const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
