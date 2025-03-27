@@ -15,6 +15,11 @@ import { CommaSeparatedValues } from '../../../../detections/components/callouts
 
 interface MissingPrivilegesCalloutProps {
   privileges: EntityAnalyticsPrivileges;
+  /**
+   * Boolean value indicating whether to show the full view of the callout, defaults to false and shows partial text
+   * with Read more button
+   */
+  showFullView?: boolean;
 }
 
 /**
@@ -23,12 +28,87 @@ interface MissingPrivilegesCalloutProps {
  */
 const LINE_CLAMP_HEIGHT = '4.4em';
 
+const MissingPrivilegesCalloutContent = ({
+  privileges,
+  ...rest
+}: {
+  privileges: EntityAnalyticsPrivileges;
+}) => {
+  const id = `missing-entity-store-privileges`;
+
+  const missingPrivileges = getAllMissingPrivileges(privileges);
+  const indexPrivileges = missingPrivileges.elasticsearch.index ?? {};
+  const clusterPrivileges = missingPrivileges.elasticsearch.cluster ?? {};
+  const featurePrivileges = missingPrivileges.kibana;
+
+  return (
+    <EuiText size="s" {...rest}>
+      {indexPrivileges.length > 0 ? (
+        <>
+          <FormattedMessage
+            id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.indexPrivilegesTitle"
+            defaultMessage="Missing Elasticsearch index privileges:"
+          />
+          <ul>
+            {indexPrivileges.map(({ indexName, privileges: privilege }) => (
+              <li key={indexName} data-test-subj={`${id}-es-index-${indexName}`}>
+                <FormattedMessage
+                  id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.missingIndexPrivileges"
+                  defaultMessage="Missing {privileges} privileges for the {index} index."
+                  values={{
+                    privileges: <CommaSeparatedValues values={privilege} />,
+                    index: <EuiCode>{indexName}</EuiCode>,
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+
+      {clusterPrivileges.length > 0 ? (
+        <>
+          <FormattedMessage
+            id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.clusterPrivilegesTitle"
+            defaultMessage="Missing Elasticsearch cluster privileges:"
+          />
+          <ul data-test-subj={`${id}-es-cluster`}>
+            {clusterPrivileges.map((privilege) => (
+              <li key={privilege}>
+                <EuiCode>{privilege}</EuiCode>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+
+      {featurePrivileges.length > 0 ? (
+        <>
+          <FormattedMessage
+            id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.featurePrivilegesTitle"
+            defaultMessage="Missing Kibana feature privileges:"
+          />
+          <ul data-test-subj={`${id}-kibana-feature`}>
+            {featurePrivileges.map((feature) => (
+              <li key={feature}>
+                <FormattedMessage
+                  id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.missingFeaturePrivileges"
+                  defaultMessage="Missing privilege for the {feature} feature."
+                  values={{
+                    feature: <EuiCode>{feature}</EuiCode>,
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+    </EuiText>
+  );
+};
+
 export const MissingPrivilegesCallout = React.memo(
-  ({ privileges }: MissingPrivilegesCalloutProps) => {
-    const missingPrivileges = getAllMissingPrivileges(privileges);
-    const indexPrivileges = missingPrivileges.elasticsearch.index ?? {};
-    const clusterPrivileges = missingPrivileges.elasticsearch.cluster ?? {};
-    const featurePrivileges = missingPrivileges.kibana;
+  ({ privileges, showFullView = false }: MissingPrivilegesCalloutProps) => {
     const id = `missing-entity-store-privileges`;
     return (
       <EuiCallOut
@@ -43,70 +123,19 @@ export const MissingPrivilegesCallout = React.memo(
         data-test-subj={`callout-${id}`}
         data-test-messages={`[${id}]`}
       >
-        <LineClamp maxHeight="100%" lineClampHeight={LINE_CLAMP_HEIGHT}>
-          <EuiText size="s">
-            {indexPrivileges.length > 0 ? (
-              <>
-                <FormattedMessage
-                  id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.indexPrivilegesTitle"
-                  defaultMessage="Missing Elasticsearch index privileges:"
-                />
-                <ul>
-                  {indexPrivileges.map(({ indexName, privileges: privilege }) => (
-                    <li key={indexName}>
-                      <FormattedMessage
-                        id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.missingIndexPrivileges"
-                        defaultMessage="Missing {privileges} privileges for the {index} index."
-                        values={{
-                          privileges: <CommaSeparatedValues values={privilege} />,
-                          index: <EuiCode>{indexName}</EuiCode>,
-                        }}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </>
-            ) : null}
-
-            {clusterPrivileges.length > 0 ? (
-              <>
-                <FormattedMessage
-                  id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.clusterPrivilegesTitle"
-                  defaultMessage="Missing Elasticsearch cluster privileges:"
-                />
-                <ul>
-                  {clusterPrivileges.map((privilege) => (
-                    <li key={privilege}>
-                      <EuiCode>{privilege}</EuiCode>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            ) : null}
-
-            {featurePrivileges.length > 0 ? (
-              <>
-                <FormattedMessage
-                  id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.featurePrivilegesTitle"
-                  defaultMessage="Missing Kibana feature privileges:"
-                />
-                <ul>
-                  {featurePrivileges.map((feature) => (
-                    <li key={feature}>
-                      <FormattedMessage
-                        id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.missingFeaturePrivileges"
-                        defaultMessage="Missing privilege for the {feature} feature."
-                        values={{
-                          feature: <EuiCode>{feature}</EuiCode>,
-                        }}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </>
-            ) : null}
-          </EuiText>
-        </LineClamp>
+        {showFullView ? (
+          <MissingPrivilegesCalloutContent
+            privileges={privileges}
+            data-test-subj="show-full-view"
+          />
+        ) : (
+          <LineClamp maxHeight="100%" lineClampHeight={LINE_CLAMP_HEIGHT}>
+            <MissingPrivilegesCalloutContent
+              privileges={privileges}
+              data-test-subj="line-clamp-view"
+            />
+          </LineClamp>
+        )}
       </EuiCallOut>
     );
   }
