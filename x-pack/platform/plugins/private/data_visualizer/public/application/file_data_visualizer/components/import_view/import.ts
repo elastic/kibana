@@ -277,6 +277,7 @@ export async function createKibanaDataView(
     return {
       success: true,
       id: emptyPattern.id,
+      title: dataViewName,
     };
   } catch (error) {
     return {

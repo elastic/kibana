@@ -386,7 +386,14 @@ export class FileUploadManager {
     }
   }
 
-  public async import(indexName: string): Promise<FileUploadResults | null> {
+  public getAutoCreateDataView() {
+    return this.autoCreateDataView;
+  }
+
+  public async import(
+    indexName: string,
+    dataViewName?: string | null
+  ): Promise<FileUploadResults | null> {
     const mappings = this.getMappings();
 
     if (mappings === null || this.pipelines === null || this.commonFileFormat === null) {
@@ -533,15 +540,14 @@ export class FileUploadManager {
       }
     }
 
-    const dataView = '';
     let dataViewResp;
-    if (this.autoCreateDataView) {
+    if (this.autoCreateDataView && dataViewName !== null) {
       this.setStatus({
         dataViewCreated: STATUS.STARTED,
       });
-      const dataViewName = dataView === '' ? indexName : dataView;
+      const dataViewName2 = dataViewName === undefined ? indexName : dataViewName;
       dataViewResp = await createKibanaDataView(
-        dataViewName,
+        dataViewName2,
         this.dataViewsContract,
         this.timeFieldName ?? undefined
       );
@@ -571,7 +577,7 @@ export class FileUploadManager {
 
     return {
       index: indexName,
-      dataView: dataViewResp ? { id: dataViewResp.id!, title: dataView! } : undefined,
+      dataView: dataViewResp ? { id: dataViewResp.id!, title: dataViewResp.title! } : undefined,
       inferenceId: this.inferenceId ?? undefined,
       timeFieldName: this.timeFieldName ?? undefined,
       files: this.getFiles().map((file) => {

@@ -38,6 +38,7 @@ interface Props {
 
 export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose, reset }) => {
   const {
+    indexName,
     setIndexName,
     setIndexValidationStatus,
     deleteFile,
@@ -50,6 +51,9 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose, reset })
     mappings,
     settings,
     importResults,
+    dataViewName,
+    setDataViewName,
+    dataViewNameError,
   } = useFileUpload(fileUploadManager);
 
   // eslint-disable-next-line no-console
@@ -121,6 +125,10 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose, reset })
               setMappings={(m) => fileUploadManager.updateMappings(m)}
               settings={settings.json}
               setSettings={(s) => fileUploadManager.updateSettings(s)}
+              indexName={indexName}
+              dataViewName={dataViewName}
+              setDataViewName={setDataViewName}
+              dataViewNameError={dataViewNameError}
             />
 
             <EuiSpacer />

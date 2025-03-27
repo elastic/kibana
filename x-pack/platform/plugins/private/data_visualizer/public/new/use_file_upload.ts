@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FileUploadResults } from '@kbn/file-upload-common';
 import useObservable from 'react-use/lib/useObservable';
+import { i18n } from '@kbn/i18n';
 import type { FileUploadManager } from './file_manager/file_manager';
 import { STATUS } from './file_manager/file_manager';
 import { CLASH_ERROR_TYPE } from './file_manager/merge_tools';
@@ -20,6 +21,7 @@ export function useFileUpload(
   const {
     services: {
       application: { navigateToApp },
+      data: { dataViews },
     },
   } = useDataVisualizerKibana();
 
@@ -28,6 +30,14 @@ export function useFileUpload(
   const [indexName, setIndexName] = useState<string>(
     fileUploadManager.getExistingIndexName() ?? ''
   );
+  const [dataViewName, setDataViewName] = useState<string | null>(
+    fileUploadManager.getAutoCreateDataView() ? '' : null
+  );
+
+  const [existingDataViewNames, setExistingDataViewNames] = useState<string[]>([]);
+
+  const [dataViewNameError, setDataViewNameError] = useState<string>('');
+
   const [indexValidationStatus, setIndexValidationStatus] = useState<STATUS>(
     fileUploadManager.getExistingIndexName() ? STATUS.COMPLETED : STATUS.NOT_STARTED
   );
@@ -53,10 +63,25 @@ export function useFileUpload(
   );
 
   useEffect(() => {
+    dataViews.getTitles().then((titles) => {
+      setExistingDataViewNames(titles);
+    });
+  }, [dataViews]);
+
+  useEffect(() => {
     return () => {
       fileUploadManager.destroy();
     };
   }, [fileUploadManager]);
+
+  useEffect(() => {
+    if (dataViewName === null || dataViewName === '') {
+      setDataViewNameError('');
+      return;
+    }
+
+    setDataViewNameError(isDataViewNameValid(dataViewName, existingDataViewNames, indexName));
+  }, [dataViewName, existingDataViewNames, indexName]);
 
   const uploadInProgress =
     uploadStatus.overallImportStatus === STATUS.STARTED ||
@@ -64,13 +89,14 @@ export function useFileUpload(
     uploadStatus.overallImportStatus === STATUS.FAILED;
 
   const onImportClick = useCallback(() => {
-    fileUploadManager.import(indexName).then((res) => {
+    const dv = dataViewName === '' ? undefined : dataViewName;
+    fileUploadManager.import(indexName, dv).then((res) => {
       if (onUploadComplete && res) {
         onUploadComplete(res);
       }
       setImportResults(res);
     });
-  }, [fileUploadManager, indexName, onUploadComplete]);
+  }, [dataViewName, fileUploadManager, indexName, onUploadComplete]);
 
   const canImport = useMemo(() => {
     return (
@@ -79,9 +105,11 @@ export function useFileUpload(
       indexName !== '' &&
       uploadStatus.mappingsJsonValid === true &&
       uploadStatus.settingsJsonValid === true &&
-      uploadStatus.pipelinesJsonValid === true
+      uploadStatus.pipelinesJsonValid === true &&
+      dataViewNameError === ''
     );
   }, [
+    dataViewNameError,
     indexName,
     indexValidationStatus,
     uploadStatus.analysisStatus,
@@ -115,5 +143,42 @@ export function useFileUpload(
     mappings,
     settings,
     importResults,
+    dataViewName,
+    setDataViewName,
+    dataViewNameError,
   };
+}
+
+function isDataViewNameValid(name: string, dataViewNames: string[], index: string) {
+  // if a blank name is entered, the index name will be used so avoid validation
+  if (name === '') {
+    return '';
+  }
+
+  if (dataViewNames.find((i) => i === name)) {
+    return i18n.translate(
+      'xpack.dataVisualizer.file.importView.dataViewNameAlreadyExistsErrorMessage',
+      {
+        defaultMessage: 'Data view name already exists',
+      }
+    );
+  }
+
+  // escape . and + to stop the regex matching more than it should.
+  let newName = name.replace(/\./g, '\\.');
+  newName = newName.replace(/\+/g, '\\+');
+  // replace * with .* to make the wildcard match work.
+  newName = newName.replace(/\*/g, '.*');
+  const reg = new RegExp(`^${newName}$`);
+  if (index.match(reg) === null) {
+    // name should match index
+    return i18n.translate(
+      'xpack.dataVisualizer.file.importView.indexPatternDoesNotMatchDataViewErrorMessage',
+      {
+        defaultMessage: 'Data view does not match index name',
+      }
+    );
+  }
+
+  return '';
 }
