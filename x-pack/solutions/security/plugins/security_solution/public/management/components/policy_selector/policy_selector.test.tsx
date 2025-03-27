@@ -19,6 +19,7 @@ import { useUserPrivileges as _useUserPrivileges } from '../../../common/compone
 import { getPolicyDetailPath } from '../../common/routing';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import type { BulkGetPackagePoliciesRequestBody } from '@kbn/fleet-plugin/common/types';
+import { policySelectorMocks } from './mocks';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -33,36 +34,8 @@ describe('PolicySelector component', () => {
   let props: PolicySelectorProps;
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
-
-  const clickOnPolicy = (policyId: string = testPolicyId1) => {
-    act(() => {
-      fireEvent.click(renderResult.getByTestId(`test-policy-${policyId}`));
-    });
-  };
-
-  const clickOnSelectAll = () => {
-    act(() => {
-      fireEvent.click(renderResult.getByTestId(`test-selectAllButton`));
-    });
-  };
-
-  const clickOnUnSelectAll = () => {
-    act(() => {
-      fireEvent.click(renderResult.getByTestId(`test-unselectAllButton`));
-    });
-  };
-
-  const clickOnViewSelected = () => {
-    act(() => {
-      fireEvent.click(renderResult.getByTestId(`test-viewSelectedButton`));
-    });
-  };
-
-  const waitForDataToLoad = async () => {
-    await waitFor(() => {
-      expect(renderResult.queryByTestId('test-isFetching')).toBeNull();
-    });
-  };
+  // Note: testUtils will only be set after render()
+  let testUtils: ReturnType<typeof policySelectorMocks.getTestHelpers>;
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
@@ -115,11 +88,12 @@ describe('PolicySelector component', () => {
 
     render = async (): Promise<ReturnType<AppContextTestRender['render']>> => {
       renderResult = mockedContext.render(<PolicySelector {...props} />);
+      testUtils = policySelectorMocks.getTestHelpers(props['data-test-subj']!, renderResult);
 
       // Wait for API to be called
       await waitFor(async () => {
         expect(apiMocks.responseProvider.packagePolicies).toHaveBeenCalled();
-        await waitForDataToLoad();
+        await testUtils.waitForDataToLoad();
       });
 
       return renderResult;
@@ -140,7 +114,7 @@ describe('PolicySelector component', () => {
 
   it('should enable the selected policies button when policies are selected', async () => {
     const { getByTestId } = await render();
-    clickOnPolicy();
+    testUtils.clickOnPolicy(testPolicyId1);
 
     expect(getByTestId('test-viewSelectedButton').textContent).toEqual('1 selected');
     expect((getByTestId('test-viewSelectedButton') as HTMLButtonElement).disabled).toBe(false);
@@ -149,7 +123,7 @@ describe('PolicySelector component', () => {
 
   it('should select all policies displayed when "select all" is clicked', async () => {
     const { getByTestId } = await render();
-    clickOnSelectAll();
+    testUtils.clickOnSelectAll();
 
     expect(getByTestId('test-viewSelectedButton').textContent).toEqual('3 selected');
     expect(props.onChange).toHaveBeenCalledWith([testPolicyId1, testPolicyId2, testPolicyId3], []);
@@ -166,7 +140,7 @@ describe('PolicySelector component', () => {
       'true'
     );
 
-    clickOnUnSelectAll();
+    testUtils.clickOnUnSelectAll();
 
     expect(getByTestId('test-viewSelectedButton').textContent).toEqual('0 selected');
     expect(props.onChange).toHaveBeenCalledWith([], []);
@@ -286,7 +260,7 @@ describe('PolicySelector component', () => {
       const renderComponent = render;
       render = () =>
         renderComponent().then(async (result) => {
-          clickOnViewSelected();
+          testUtils.clickOnViewSelected();
 
           // Wait for API to be called
           await waitFor(() => {
@@ -330,7 +304,7 @@ describe('PolicySelector component', () => {
 
     it('should remove item from the list when it is unselected', async () => {
       const { queryByTestId, getByTestId } = await render();
-      clickOnPolicy(testPolicyId2);
+      testUtils.clickOnPolicy(testPolicyId2);
 
       expect(getByTestId('test-viewSelectedButton').textContent).toEqual('1 selected');
       expect(props.onChange).toHaveBeenCalledWith([testPolicyId1], []);
@@ -341,8 +315,8 @@ describe('PolicySelector component', () => {
 
     it('should revert back to the full policy list when all items are unselected', async () => {
       const { getByTestId } = await render();
-      clickOnUnSelectAll();
-      await waitForDataToLoad();
+      testUtils.clickOnUnSelectAll();
+      await testUtils.waitForDataToLoad();
 
       expect(props.onChange).toHaveBeenCalledWith([], []);
       expect((getByTestId('test-searchbar') as HTMLInputElement).disabled).toBe(false);
@@ -376,8 +350,8 @@ describe('PolicySelector component', () => {
 
     it('should show custom items in the selected items', async () => {
       const { getByTestId, queryByTestId } = await render();
-      clickOnViewSelected();
-      await waitForDataToLoad();
+      testUtils.clickOnViewSelected();
+      await testUtils.waitForDataToLoad();
 
       expect(getByTestId('customItem1')).toBeTruthy();
       expect(queryByTestId('customItem2')).toBeNull();
@@ -477,8 +451,8 @@ describe('PolicySelector component', () => {
     });
 
     // Click the selected policies and check that onFetch is called with the results from the Bulk Get API
-    clickOnViewSelected();
-    await waitForDataToLoad();
+    testUtils.clickOnViewSelected();
+    await testUtils.waitForDataToLoad();
 
     expect(props.onFetch).toHaveBeenCalledWith({
       data: expect.objectContaining({
@@ -536,8 +510,8 @@ describe('PolicySelector component', () => {
     expect((getByTestId('pagination-button-next') as HTMLButtonElement).disabled).toBe(false);
 
     // should still be able to see selected, but they also would be disabled
-    clickOnViewSelected();
-    await waitForDataToLoad();
+    testUtils.clickOnViewSelected();
+    await testUtils.waitForDataToLoad();
 
     expect((getByTestId('test-unselectAllButton') as HTMLButtonElement).disabled).toBe(true);
     expect(getByTestId(`test-policy-${testPolicyId1}`).getAttribute('aria-disabled')).toEqual(

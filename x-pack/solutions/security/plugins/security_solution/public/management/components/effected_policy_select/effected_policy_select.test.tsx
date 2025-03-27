@@ -21,6 +21,7 @@ import type { LicenseService } from '../../../../common/license';
 import { buildPerPolicyTag } from '../../../../common/endpoint/service/artifacts/utils';
 import { ARTIFACT_POLICIES_NOT_ACCESSIBLE_IN_ACTIVE_SPACE_MESSAGE } from '../../common/translations';
 import { allFleetHttpMocks } from '../../mocks';
+import { policySelectorMocks } from '../policy_selector/mocks';
 
 jest.mock('../../../common/components/user_privileges');
 jest.mock('../../../common/hooks/use_license');
@@ -37,6 +38,8 @@ describe('when using EffectedPolicySelect component', () => {
     props?: Partial<EffectedPolicySelectProps>
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
   let policyId: string;
+  // Note: testUtils will only be set after render()
+  let policySelectorTestUtils: ReturnType<typeof policySelectorMocks.getTestHelpers>;
 
   let resetHTMLElementOffsetWidth: () => void;
 
@@ -73,6 +76,10 @@ describe('when using EffectedPolicySelect component', () => {
         ...props,
       };
       renderResult = mockedContext.render(<EffectedPolicySelect {...componentProps} />);
+      policySelectorTestUtils = policySelectorMocks.getTestHelpers(
+        componentProps['data-test-subj']!,
+        renderResult
+      );
 
       return renderResult;
     };
@@ -84,14 +91,6 @@ describe('when using EffectedPolicySelect component', () => {
     handleOnChange.mockClear();
   });
 
-  const waitForPoliciesToLoad = async () => {
-    await waitFor(() => {
-      expect(
-        renderResult.container.querySelectorAll('.euiSelectableListItem').length
-      ).toBeGreaterThan(0);
-    });
-  };
-
   const clickOnGlobalButton = () => {
     act(() => {
       fireEvent.click(renderResult.getByTestId('test-global'));
@@ -101,12 +100,6 @@ describe('when using EffectedPolicySelect component', () => {
   const clickOnPerPolicyButton = () => {
     act(() => {
       fireEvent.click(renderResult.getByTestId('test-perPolicy'));
-    });
-  };
-
-  const clickOnPolicy = () => {
-    act(() => {
-      fireEvent.click(renderResult.getByTestId(`test-policiesSelector-policy-${policyId}`));
     });
   };
 
@@ -138,7 +131,7 @@ describe('when using EffectedPolicySelect component', () => {
   it('should show policy items when user clicks per-policy', async () => {
     const { getByTestId } = await render();
     clickOnPerPolicyButton();
-    await waitForPoliciesToLoad();
+    await policySelectorTestUtils.waitForDataToLoad();
 
     expect(getByTestId('test-policiesSelector')).not.toBeNull();
   });
@@ -162,7 +155,7 @@ describe('when using EffectedPolicySelect component', () => {
   it('should call onChange when artifact is set to Per-Policy', async () => {
     await render();
     clickOnPerPolicyButton();
-    await waitForPoliciesToLoad();
+    await policySelectorTestUtils.waitForDataToLoad();
 
     expect(handleOnChange).toHaveBeenCalledWith(expect.objectContaining({ tags: [] }));
   });
@@ -180,8 +173,8 @@ describe('when using EffectedPolicySelect component', () => {
   it('should call onChange when policy selection changes', async () => {
     componentProps.item.tags = [];
     await render();
-    await waitForPoliciesToLoad();
-    clickOnPolicy();
+    await policySelectorTestUtils.waitForDataToLoad();
+    policySelectorTestUtils.clickOnPolicy(policyId);
 
     expect(handleOnChange).toHaveBeenCalledWith(
       expect.objectContaining({ tags: [buildPerPolicyTag(policyId)] })
@@ -225,8 +218,8 @@ describe('when using EffectedPolicySelect component', () => {
       await waitFor(() => {
         expect(getByTestId('test-unAccessiblePoliciesCallout'));
       });
-      await waitForPoliciesToLoad();
-      clickOnPolicy();
+      await policySelectorTestUtils.waitForDataToLoad();
+      policySelectorTestUtils.clickOnPolicy(policyId);
 
       expect(handleOnChange).toHaveBeenLastCalledWith(
         expect.objectContaining({
