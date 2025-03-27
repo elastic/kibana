@@ -26,7 +26,6 @@ import {
   apiPublishesUnsavedChanges,
   apiHasSerializableState,
   getTitle,
-  SerializedPanelState,
 } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
