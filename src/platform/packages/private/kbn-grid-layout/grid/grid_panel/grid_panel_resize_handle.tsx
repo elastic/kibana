@@ -47,7 +47,6 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     maxHeight: '100%',
     height: euiTheme.size.l,
     zIndex: euiTheme.levels.toast,
-    touchAction: 'none',
     scrollMarginBottom: euiTheme.size.s,
     '&:hover, &:focus': {
       cursor: 'se-resize',

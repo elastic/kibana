@@ -8,18 +8,8 @@
  */
 
 import { GridLayoutStateManager } from '../../types';
+import { updateClientY } from '../keyboard_utils';
 import { KeyboardCode, UserKeyboardEvent } from '../sensors/keyboard/types';
-
-const updateClientY = (currentY: number, stepY: number, isCloseToEdge: boolean, type = 'drag') => {
-  if (isCloseToEdge && type === 'resize') {
-    setTimeout(() => document.activeElement?.scrollIntoView({ behavior: 'smooth', block: 'end' }));
-  }
-  if (isCloseToEdge && type === 'drag') {
-    window.scrollTo({ top: window.scrollY + stepY, behavior: 'smooth' });
-    return currentY;
-  }
-  return currentY + stepY;
-};
 
 export const getNextKeyboardPosition = (
   ev: UserKeyboardEvent,

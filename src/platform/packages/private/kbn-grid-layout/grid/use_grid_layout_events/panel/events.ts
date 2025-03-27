@@ -22,12 +22,15 @@ import {
 } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
 import { getNextKeyboardPositionForPanel } from './utils';
-import { isLayoutInteractive } from '../state_manager_selectors';
+import {
+  hasPanelInteractionStartedWithKeyboard,
+  isLayoutInteractive,
+} from '../state_manager_selectors';
 /*
  * This hook sets up and manages drag/resize interaction logic for grid panels.
  * It initializes event handlers to start, move, and commit the interaction,
  * ensuring responsive updates to the panel's position and grid layout state.
- * The interaction behavior is dynamic and adapts to the input type (mouse or touch).
+ * The interaction behavior is dynamic and adapts to the input type (mouse, touch, or keyboard).
  */
 export const useGridLayoutPanelEvents = ({
   interactionType,
@@ -71,20 +74,28 @@ export const useGridLayoutPanelEvents = ({
   const onMove = useCallback(
     (ev: UserInteractionEvent) => {
       if (isMouseEvent(ev) || isTouchEvent(ev)) {
-        pointerPixel.current = getSensorPosition(ev);
-      } else if (isKeyboardEvent(ev)) {
+        return moveAction(
+          ev,
+          gridLayoutStateManager,
+          getSensorPosition(ev),
+          lastRequestedPanelPosition
+        );
+      } else if (
+        isKeyboardEvent(ev) &&
+        hasPanelInteractionStartedWithKeyboard(gridLayoutStateManager)
+      ) {
         pointerPixel.current = getNextKeyboardPositionForPanel(
           ev,
           gridLayoutStateManager,
           pointerPixel.current
         );
+        return moveAction(
+          ev,
+          gridLayoutStateManager,
+          pointerPixel.current,
+          lastRequestedPanelPosition
+        );
       }
-      return moveAction(
-        ev,
-        gridLayoutStateManager,
-        pointerPixel.current,
-        lastRequestedPanelPosition
-      );
     },
     [gridLayoutStateManager]
   );

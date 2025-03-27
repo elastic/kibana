@@ -13,7 +13,7 @@ import { MutableRefObject } from 'react';
 
 import { GridLayoutStateManager } from '../../types';
 import { getRowKeysInOrder } from '../../utils/resolve_grid_row';
-import { getSensorPosition } from '../sensors';
+import { getSensorPosition, getSensorType } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
 
 export const startAction = (
@@ -30,6 +30,7 @@ export const startAction = (
   gridLayoutStateManager.activeRowEvent$.next({
     id: rowId,
     startingPosition,
+    sensorType: getSensorType(e),
     translate: {
       top: 0,
       left: 0,

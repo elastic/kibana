@@ -21,14 +21,17 @@ import {
   startTouchInteraction,
 } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
-import { isLayoutInteractive } from '../state_manager_selectors';
+import {
+  hasRowInteractionStartedWithKeyboard,
+  isLayoutInteractive,
+} from '../state_manager_selectors';
 import { getNextKeyboardPosition } from './utils';
 
 /*
  * This hook sets up and manages interaction logic for dragging grid rows.
  * It initializes event handlers to start, move, and commit the interaction,
  * ensuring responsive updates to the panel's position and grid layout state.
- * The interaction behavior is dynamic and adapts to the input type (mouse or touch).
+ * The interaction behavior is dynamic and adapts to the input type (mouse, touch, or keyboard).
  */
 export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
@@ -50,15 +53,19 @@ export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
       const onMove = (ev: UserInteractionEvent) => {
         if (isMouseEvent(ev) || isTouchEvent(ev)) {
           pointerPixel.current = getSensorPosition(ev);
-        } else if (isKeyboardEvent(ev)) {
+          moveAction(gridLayoutStateManager, startingPointer.current, pointerPixel.current);
+        } else if (
+          isKeyboardEvent(ev) &&
+          hasRowInteractionStartedWithKeyboard(gridLayoutStateManager)
+        ) {
           pointerPixel.current = getNextKeyboardPosition(
             ev,
             gridLayoutStateManager,
             pointerPixel.current,
             rowId
           );
+          moveAction(gridLayoutStateManager, startingPointer.current, pointerPixel.current);
         }
-        moveAction(gridLayoutStateManager, startingPointer.current, pointerPixel.current);
       };
 
       if (isMouseEvent(e)) {

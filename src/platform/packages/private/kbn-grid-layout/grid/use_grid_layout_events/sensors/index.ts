@@ -26,3 +26,14 @@ export function getSensorPosition(e: UserInteractionEvent) {
   }
   throw new Error('Invalid event type');
 }
+
+export function getSensorType(e: UserInteractionEvent) {
+  if (isMouseEvent(e)) {
+    return 'mouse';
+  } else if (isTouchEvent(e)) {
+    return 'touch';
+  } else if (isKeyboardEvent(e)) {
+    return 'keyboard';
+  }
+  throw new Error('Invalid event type');
+}

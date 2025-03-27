@@ -10,6 +10,7 @@ import type { GridLayoutStateManager, PanelInteractionEvent } from '../../types'
 import type { UserInteractionEvent, PointerPosition } from '../types';
 import { KeyboardCode, type UserKeyboardEvent } from '../sensors/keyboard/types';
 import { getSensorPosition, isKeyboardEvent, isMouseEvent, isTouchEvent } from '../sensors';
+import { updateClientY } from '../keyboard_utils';
 
 // Calculates the preview rect coordinates for a resized panel
 export const getResizePreviewRect = ({
@@ -62,19 +63,6 @@ export function getSensorOffsets(e: UserInteractionEvent, { top, left, right, bo
   };
 }
 
-const KEYBOARD_DRAG_BOTTOM_LIMIT = 8; // The offset from the bottom of the page to ensure the dragged handle doesn't look 'glued' to the page
-
-const updateClientY = (currentY: number, stepY: number, isCloseToEdge: boolean, type = 'drag') => {
-  if (isCloseToEdge && type === 'resize') {
-    setTimeout(() => document.activeElement?.scrollIntoView({ behavior: 'smooth', block: 'end' }));
-  }
-  if (isCloseToEdge && type === 'drag') {
-    window.scrollTo({ top: window.scrollY + stepY, behavior: 'smooth' });
-    return currentY;
-  }
-  return currentY + stepY;
-};
-
 export const getNextKeyboardPositionForPanel = (
   ev: UserKeyboardEvent,
   gridLayoutStateManager: GridLayoutStateManager,
@@ -126,7 +114,7 @@ export const getNextKeyboardPositionForPanel = (
       // if we're at the end of the scroll of the page, the dragged handle can go down even more so we can reorder with the last row
       const bottomMaxPosition = bottomOfPageReached
         ? panelPosition.bottom + stepY - (panelPosition.bottom - panelPosition.top) * 0.5
-        : panelPosition.bottom + stepY + KEYBOARD_DRAG_BOTTOM_LIMIT;
+        : panelPosition.bottom + stepY;
 
       const isCloseToBottom = bottomMaxPosition > window.innerHeight;
 

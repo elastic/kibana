@@ -15,3 +15,9 @@ export const isLayoutInteractive = (gridLayoutStateManager: GridLayoutStateManag
     gridLayoutStateManager.accessMode$.getValue() === 'EDIT'
   );
 };
+
+export const hasPanelInteractionStartedWithKeyboard = (manager: GridLayoutStateManager) =>
+  manager.interactionEvent$.value?.sensorType === 'keyboard';
+
+export const hasRowInteractionStartedWithKeyboard = (manager: GridLayoutStateManager) =>
+  manager.activeRowEvent$.value?.sensorType === 'keyboard';

@@ -9,4 +9,4 @@
 
 export const DASHBOARD_GRID_HEIGHT = 20;
 export const DASHBOARD_MARGIN_SIZE = 8;
-export const DASHBOARD_DRAG_TOP_OFFSET = 200;
+export const DASHBOARD_DRAG_TOP_OFFSET = 120;

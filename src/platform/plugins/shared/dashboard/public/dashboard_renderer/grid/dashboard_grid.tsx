@@ -24,7 +24,6 @@ import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import {
   DASHBOARD_GRID_HEIGHT,
   DASHBOARD_MARGIN_SIZE,
-  DASHBOARD_DRAG_TOP_OFFSET,
 } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useLayoutStyles } from './use_layout_styles';
@@ -139,7 +138,7 @@ export const DashboardGrid = ({
           gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
           rowHeight: DASHBOARD_GRID_HEIGHT,
           columnCount: DASHBOARD_GRID_COLUMN_COUNT,
-          keyboardDragTopLimit: DASHBOARD_DRAG_TOP_OFFSET,
+          keyboardDragTopLimit: dashboardContainerRef?.current?.getBoundingClientRect().top || 120,
         }}
         useCustomDragHandle={true}
         renderPanelContents={renderPanelContents}

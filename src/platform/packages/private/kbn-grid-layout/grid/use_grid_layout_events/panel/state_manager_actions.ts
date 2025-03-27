@@ -15,7 +15,7 @@ import { getDragPreviewRect, getSensorOffsets, getResizePreviewRect } from './ut
 import { resolveGridRow } from '../../utils/resolve_grid_row';
 import { isGridDataEqual } from '../../utils/equality_checks';
 import { PointerPosition, UserInteractionEvent } from '../types';
-import { isKeyboardEvent } from '../sensors';
+import { getSensorType, isKeyboardEvent } from '../sensors';
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -34,6 +34,7 @@ export const startAction = (
     id: panelId,
     panelDiv: panelRef,
     targetRow: rowId,
+    sensorType: getSensorType(e),
     sensorOffsets: getSensorOffsets(e, panelRect),
   });
 
