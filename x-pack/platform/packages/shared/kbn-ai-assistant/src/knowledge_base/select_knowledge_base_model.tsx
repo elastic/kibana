@@ -46,7 +46,7 @@ export function SelectKnowledgeBaseModel({
   return (
     <EuiSelect
       fullWidth
-      data-test-subj="observabilityAiAssistantAlertConnectorSelect"
+      data-test-subj="observabilityAiAssistantKbModelSelect"
       options={kbModels.map(({ label, modelId }) => ({ value: modelId, text: label }))}
       onChange={(event) => {
         const selectedModel = kbModels.find(({ modelId }) => modelId === event.target.value)!;
