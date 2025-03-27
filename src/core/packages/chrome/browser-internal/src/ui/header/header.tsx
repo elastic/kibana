@@ -35,6 +35,8 @@ import type {
 } from '@kbn/core-chrome-browser';
 import { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { css } from '@emotion/react';
 import type { OnIsLockedUpdate } from './types';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
@@ -47,8 +49,6 @@ import { BreadcrumbsWithExtensionsWrapper } from './breadcrumbs_with_extensions'
 import { HeaderTopBanner } from './header_top_banner';
 import { HeaderMenuButton } from './header_menu_button';
 import { ScreenReaderRouteAnnouncements, SkipToMainContent } from './screen_reader_a11y';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { css } from '@emotion/react';
 
 export interface HeaderProps {
   kibanaVersion: string;
