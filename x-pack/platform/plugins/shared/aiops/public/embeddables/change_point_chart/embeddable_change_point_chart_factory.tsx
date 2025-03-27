@@ -9,10 +9,8 @@ import {
   CHANGE_POINT_CHART_DATA_VIEW_REF_NAME,
   EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
 } from '@kbn/aiops-change-point-detection/constants';
-import type { Reference } from '@kbn/content-management-utils';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -37,6 +35,7 @@ import type {
   ChangePointEmbeddableRuntimeState,
   ChangePointEmbeddableState,
 } from './types';
+import { getDataviewReferences } from '../get_dataview_references';
 
 export type EmbeddableChangePointChartType = typeof EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
 
@@ -116,15 +115,6 @@ export const getChangePointChartEmbeddableFactory = (
           dataViews$,
           serializeState: () => {
             const dataViewId = changePointControlsApi.dataViewId.getValue();
-            const references: Reference[] = dataViewId
-              ? [
-                  {
-                    type: DATA_VIEW_SAVED_OBJECT_TYPE,
-                    name: CHANGE_POINT_CHART_DATA_VIEW_REF_NAME,
-                    id: dataViewId,
-                  },
-                ]
-              : [];
             return {
               rawState: {
                 timeRange: undefined,
@@ -132,7 +122,7 @@ export const getChangePointChartEmbeddableFactory = (
                 ...timeRangeManager.serialize(),
                 ...serializeChangePointChartState(),
               },
-              references,
+              references: getDataviewReferences(dataViewId, CHANGE_POINT_CHART_DATA_VIEW_REF_NAME),
             };
           },
         },

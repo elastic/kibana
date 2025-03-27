@@ -67,52 +67,44 @@ export function initializePanelsManager(
   // Place the incoming embeddable if there is one
   // --------------------------------------------------------------------------------------
   if (incomingEmbeddable) {
-    const incomingPanelId = incomingEmbeddable.embeddableId ?? v4();
-    let incomingPanelState: DashboardPanelState;
-    if (incomingEmbeddable.embeddableId && Boolean(panels$.value[incomingPanelId])) {
-      // this embeddable already exists, just update the explicit input.
-      incomingPanelState = panels$.value[incomingPanelId];
-      const sameType = incomingPanelState.type === incomingEmbeddable.type;
+    const { serializedState, size, type } = incomingEmbeddable;
+    const newId = incomingEmbeddable.embeddableId ?? v4();
+    const existingPanel: DashboardPanelState | undefined = panels$.value[newId];
+    const sameType = existingPanel?.type === type;
 
-      incomingPanelState.type = incomingEmbeddable.type;
-      setRuntimeStateForChild(incomingPanelId, {
-        // if the incoming panel is the same type as what was there before we can safely spread the old panel's explicit input
-        ...(sameType ? incomingPanelState.explicitInput : {}),
-
-        ...incomingEmbeddable.input,
-
-        // maintain hide panel titles setting.
-        hidePanelTitles: (incomingPanelState.explicitInput as { hidePanelTitles?: boolean })
-          .hidePanelTitles,
-      });
-      incomingPanelState.explicitInput = {};
-    } else {
-      // otherwise this incoming embeddable is brand new.
-      setRuntimeStateForChild(incomingPanelId, incomingEmbeddable.input);
+    const placeIncomingPanel = () => {
       const { newPanelPlacement } = runPanelPlacementStrategy(
         PanelPlacementStrategy.findTopLeftMostOpenSpace,
         {
-          width: incomingEmbeddable.size?.width ?? DEFAULT_PANEL_WIDTH,
-          height: incomingEmbeddable.size?.height ?? DEFAULT_PANEL_HEIGHT,
+          width: size?.width ?? DEFAULT_PANEL_WIDTH,
+          height: size?.height ?? DEFAULT_PANEL_HEIGHT,
           currentPanels: panels$.value,
         }
       );
-      incomingPanelState = {
-        explicitInput: {},
-        type: incomingEmbeddable.type,
-        gridData: {
-          ...newPanelPlacement,
-          i: incomingPanelId,
-        },
-      };
+      return { ...newPanelPlacement, i: newId };
+    };
+    if (serializedState?.references && serializedState.references.length > 0) {
+      pushReferences(prefixReferencesFromPanel(newId, serializedState.references ?? []));
     }
+
+    const gridData = existingPanel ? existingPanel.gridData : placeIncomingPanel();
+    const explicitInput = {
+      ...(sameType ? existingPanel?.explicitInput : {}),
+      ...serializedState.rawState,
+    };
+
+    const incomingPanelState: DashboardPanelState = {
+      type,
+      explicitInput,
+      gridData,
+    };
 
     setPanels({
       ...panels$.value,
-      [incomingPanelId]: incomingPanelState,
+      [newId]: incomingPanelState,
     });
-    trackPanel.setScrollToPanelId(incomingPanelId);
-    trackPanel.setHighlightPanelId(incomingPanelId);
+    trackPanel.setScrollToPanelId(newId);
+    trackPanel.setHighlightPanelId(newId);
   }
 
   async function untilEmbeddableLoaded<ApiType>(id: string): Promise<ApiType | undefined> {

@@ -87,7 +87,7 @@ export function getDashboardApi({
   const panelsManager = initializePanelsManager(
     incomingEmbeddable,
     initialState.panels,
-    initialPanelsRuntimeState ?? {},
+    incomingEmbeddable || !initialPanelsRuntimeState ? {} : initialPanelsRuntimeState,
     trackPanel,
     getPanelReferences,
     pushPanelReferences

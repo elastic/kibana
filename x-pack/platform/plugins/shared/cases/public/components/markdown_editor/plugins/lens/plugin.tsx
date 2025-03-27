@@ -45,9 +45,7 @@ const DEFAULT_TIMERANGE: TimeRange = {
   mode: 'relative',
 };
 
-type LensIncomingEmbeddablePackage = Omit<EmbeddablePackageState, 'input'> & {
-  input: TypedLensByValueInput;
-};
+type LensIncomingEmbeddablePackage = EmbeddablePackageState<TypedLensByValueInput>;
 
 type LensEuiMarkdownEditorUiPlugin = EuiMarkdownEditorUiPlugin<{
   timeRange: TypedLensByValueInput['timeRange'];
@@ -253,7 +251,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
 
     if (
       incomingEmbeddablePackage?.type === 'lens' &&
-      incomingEmbeddablePackage?.input?.attributes
+      incomingEmbeddablePackage?.serializedState?.rawState?.attributes
     ) {
       const lensTime = timefilter.getTime();
       const newTimeRange =
@@ -269,7 +267,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
 
       if (draftComment?.position) {
         handleUpdate(
-          incomingEmbeddablePackage?.input.attributes,
+          incomingEmbeddablePackage.serializedState.rawState.attributes,
           newTimeRange,
           draftComment.position
         );
@@ -277,7 +275,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       }
 
       if (draftComment) {
-        handleAdd(incomingEmbeddablePackage?.input.attributes, newTimeRange);
+        handleAdd(incomingEmbeddablePackage.serializedState.rawState.attributes, newTimeRange);
       }
     }
   }, [embeddable, storage, timefilter, currentAppId, handleAdd, handleUpdate, draftComment]);
