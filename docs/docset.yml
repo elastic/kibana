@@ -14,6 +14,7 @@ toc:
   - toc: extend
 subs:
   ecloud:   "Elastic Cloud"
+  ech:   "Elastic Cloud Hosted"
   ess:   "Elasticsearch Service"
   ece:   "Elastic Cloud Enterprise"
   serverless-full:   "Elastic Cloud Serverless"
