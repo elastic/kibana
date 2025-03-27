@@ -37,7 +37,11 @@ import { DiscoverMainProvider } from '../../state_management/discover_state_prov
 import { act } from 'react-dom/test-utils';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
+import {
+  CurrentTabProvider,
+  RuntimeStateProvider,
+  internalStateActions,
+} from '../../state_management/redux';
 
 function getStateContainer(savedSearch?: SavedSearch) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true, savedSearch });
@@ -151,11 +155,13 @@ const mountComponent = async ({
   const component = mountWithIntl(
     <KibanaRenderContextProvider {...services.core}>
       <KibanaContextProvider services={services}>
-        <DiscoverMainProvider value={stateContainer}>
-          <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
-            <DiscoverHistogramLayout {...props} />
-          </RuntimeStateProvider>
-        </DiscoverMainProvider>
+        <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
+          <DiscoverMainProvider value={stateContainer}>
+            <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
+              <DiscoverHistogramLayout {...props} />
+            </RuntimeStateProvider>
+          </DiscoverMainProvider>
+        </CurrentTabProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
   );

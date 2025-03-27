@@ -27,7 +27,7 @@ import { dataViewAdHoc } from '../../../__mocks__/data_view_complex';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { omit } from 'lodash';
-import { internalStateActions } from '../state_management/redux';
+import { CurrentTabProvider, internalStateActions } from '../state_management/redux';
 
 async function getHookProps(
   query: AggregateQuery | Query | undefined,
@@ -82,9 +82,11 @@ const getDataViewsService = () => {
 
 const getHookContext = (stateContainer: DiscoverStateContainer) => {
   return ({ children }: React.PropsWithChildren) => (
-    <DiscoverMainProvider value={stateContainer}>
-      <>{children}</>
-    </DiscoverMainProvider>
+    <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
+      <DiscoverMainProvider value={stateContainer}>
+        <>{children}</>
+      </DiscoverMainProvider>
+    </CurrentTabProvider>
   );
 };
 const renderHookWithContext = async (

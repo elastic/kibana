@@ -30,7 +30,7 @@ import { createCustomizationService } from '../../../../customizations/customiza
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { ProfilesManager } from '../../../../context_awareness';
-import { internalStateActions } from '../../state_management/redux';
+import { CurrentTabProvider, internalStateActions } from '../../state_management/redux';
 
 const customisationService = createCustomizationService();
 
@@ -83,11 +83,13 @@ async function mountComponent(
       services={{ ...services, profilesManager: profilesManager ?? services.profilesManager }}
     >
       <DiscoverCustomizationProvider value={customisationService}>
-        <DiscoverMainProvider value={stateContainer}>
+        <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
+          <DiscoverMainProvider value={stateContainer}>
           <EuiProvider highContrastMode={false}>
-            <DiscoverDocuments {...props} />
-          </EuiProvider>
-        </DiscoverMainProvider>
+              <DiscoverDocuments {...props} />
+            </EuiProvider>
+          </DiscoverMainProvider>
+        </CurrentTabProvider>
       </DiscoverCustomizationProvider>
     </KibanaContextProvider>
   );

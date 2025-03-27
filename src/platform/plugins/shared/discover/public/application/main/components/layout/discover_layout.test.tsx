@@ -40,7 +40,11 @@ import { act } from 'react-dom/test-utils';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
+import {
+  CurrentTabProvider,
+  RuntimeStateProvider,
+  internalStateActions,
+} from '../../state_management/redux';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -131,13 +135,15 @@ async function mountComponent(
 
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>
-      <DiscoverMainProvider value={stateContainer}>
-        <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
+      <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
+        <DiscoverMainProvider value={stateContainer}>
+          <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
           <EuiProvider highContrastMode={false}>
-            <DiscoverLayout {...props} />
-          </EuiProvider>
-        </RuntimeStateProvider>
-      </DiscoverMainProvider>
+              <DiscoverLayout {...props} />
+            </EuiProvider>
+          </RuntimeStateProvider>
+        </DiscoverMainProvider>
+      </CurrentTabProvider>
     </KibanaContextProvider>,
     mountOptions
   );
