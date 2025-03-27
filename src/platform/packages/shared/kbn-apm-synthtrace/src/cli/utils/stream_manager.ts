@@ -115,8 +115,13 @@ export class StreamManager {
       });
 
       currentStream.on('error', (err) => {
-        pull(streams, currentStream);
         generatorStream.destroy(err);
+        clientStream.destroy(err);
+        streams.forEach((stream) => {
+          stream.destroy(err);
+        });
+
+        pull(streams, currentStream);
       });
     });
 
