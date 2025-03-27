@@ -116,8 +116,9 @@ export function useConversationContextMenu({
   };
 
   const handleArchiveConversation = async (id: string, isArchived: boolean) => {
+    setIsUpdatingConversationList(true);
+
     try {
-      setIsUpdatingConversationList(true);
       const archivedConversation = await service.callApi(
         `PATCH /internal/observability_ai_assistant/conversation/{conversationId}`,
         {
@@ -134,6 +135,7 @@ export function useConversationContextMenu({
       );
 
       refreshConversations();
+      setIsUpdatingConversationList(false);
 
       notifications!.toasts.addSuccess({
         title: isArchived
@@ -156,10 +158,11 @@ export function useConversationContextMenu({
               defaultMessage: 'Could not unarchive conversation',
             }),
       });
+
+      setIsUpdatingConversationList(false);
+
       throw err;
     }
-
-    setIsUpdatingConversationList(false);
   };
 
   return {

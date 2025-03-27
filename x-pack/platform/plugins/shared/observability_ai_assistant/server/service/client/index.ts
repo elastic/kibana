@@ -390,6 +390,7 @@ export class ObservabilityAIAssistantClient {
                       numeric_labels: {},
                       systemMessage,
                       messages: initialMessagesWithAddedMessages,
+                      archived: false,
                     })
                   ).pipe(
                     map((conversationCreated): ConversationCreateEvent => {

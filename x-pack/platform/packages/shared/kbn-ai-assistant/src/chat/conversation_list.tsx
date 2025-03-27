@@ -38,9 +38,9 @@ const panelClassName = css`
   padding-top: 56px;
 `;
 
-const scrollSectionClass = (maxHeightPx: number, scrollBarStyles: string) => css`
+const scrollSectionClass = (scrollBarStyles: string) => css`
   overflow-y: auto;
-  max-height: ${maxHeightPx}px;
+  max-height: ${Math.floor(window.innerHeight * 0.7)}px;
   ${scrollBarStyles}
 `;
 
@@ -198,9 +198,6 @@ export function ConversationList({
     );
   };
 
-  const conversationsMaxHeight = Math.floor(window.innerHeight * 0.7); // todo
-  const archivedMaxHeight = Math.floor(window.innerHeight * 0.7); // todo
-
   const toggleConversationsSection = (isOpen: boolean) => {
     setIsConversationsOpen(isOpen);
 
@@ -302,7 +299,7 @@ export function ConversationList({
                       forceState={isConversationsOpen ? 'open' : 'closed'}
                       isDisabled={!activeConversations.length}
                     >
-                      <div className={scrollSectionClass(conversationsMaxHeight, scrollBarStyles)}>
+                      <div className={scrollSectionClass(scrollBarStyles)}>
                         {isLoading ? loader : null}
                         <EuiFlexGroup direction="column" gutterSize="xs">
                           {renderCategorizedList(categorizedActiveConversations)}
@@ -325,7 +322,7 @@ export function ConversationList({
                       borders="horizontal"
                       isDisabled={!archivedConversations.length}
                     >
-                      <div className={scrollSectionClass(archivedMaxHeight, scrollBarStyles)}>
+                      <div className={scrollSectionClass(scrollBarStyles)}>
                         {isLoading ? loader : null}
                         <EuiFlexGroup direction="column" gutterSize="xs">
                           {renderCategorizedList(categorizedArchivedConversations)}

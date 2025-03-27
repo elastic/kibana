@@ -15,9 +15,11 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { SupertestReturnType } from '../../../../services/observability_ai_assistant_api';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { clearConversations } from '../utils/conversation';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+  const es = getService('es');
 
   const conversationCreate: ConversationCreateRequest = {
     '@timestamp': new Date().toISOString(),
@@ -37,6 +39,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       },
     ],
     public: false,
+    archived: false,
   };
 
   const conversationUpdate: ConversationUpdateRequest = merge({}, conversationCreate, {
@@ -141,6 +144,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           messages: conversationCreate.messages,
           namespace: 'default',
           public: conversationCreate.public,
+          archived: conversationCreate.archived,
         });
       });
 
@@ -689,13 +693,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       after(async () => {
-        const { status } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
-          params: {
-            path: { conversationId: createdConversationId },
-          },
-        });
-        expect(status).to.be(200);
+        await clearConversations(es);
       });
 
       it('allows the owner to update the access of their conversation', async () => {
@@ -822,6 +820,66 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         expect(ownerDeleteResponse.status).to.be(200);
+      });
+    });
+
+    describe('conversation archiving', () => {
+      let createdConversationId: string;
+
+      before(async () => {
+        const { status, body } = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'POST /internal/observability_ai_assistant/conversation',
+          params: {
+            body: {
+              conversation: conversationCreate,
+            },
+          },
+        });
+
+        expect(status).to.be(200);
+        createdConversationId = body.conversation.id;
+      });
+
+      after(async () => {
+        await clearConversations(es);
+      });
+
+      it('allows the owner to archive a conversation', async () => {
+        const archiveResponse = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'PATCH /internal/observability_ai_assistant/conversation/{conversationId}',
+          params: {
+            path: { conversationId: createdConversationId },
+            body: { archived: true },
+          },
+        });
+
+        expect(archiveResponse.status).to.be(200);
+        expect(archiveResponse.body.archived).to.be(true);
+      });
+
+      it('allows the owner to unarchive a conversation', async () => {
+        const unarchiveResponse = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'PATCH /internal/observability_ai_assistant/conversation/{conversationId}',
+          params: {
+            path: { conversationId: createdConversationId },
+            body: { archived: false },
+          },
+        });
+
+        expect(unarchiveResponse.status).to.be(200);
+        expect(unarchiveResponse.body.archived).to.be(false);
+      });
+
+      it('returns 404 when trying to archive a non-existing conversation', async () => {
+        const response = await observabilityAIAssistantAPIClient.editor({
+          endpoint: 'PATCH /internal/observability_ai_assistant/conversation/{conversationId}',
+          params: {
+            path: { conversationId: 'non-existing-conversation-id' },
+            body: { archived: true },
+          },
+        });
+
+        expect(response.status).to.be(404);
       });
     });
   });
