@@ -1190,6 +1190,7 @@ describe('current status route', () => {
           syntheticsEsClient,
           savedObjectsClient: savedObjectsClientMock.create(),
           server: serverMock,
+          request: { query: { locations } },
         } as unknown as RouteContext,
         {
           locations,
@@ -1255,6 +1256,7 @@ describe('current status route', () => {
           {
             syntheticsEsClient,
             savedObjectsClient: savedObjectsClientMock.create(),
+            request: { query: { locations } },
           } as unknown as RouteContext,
           {
             locations,
