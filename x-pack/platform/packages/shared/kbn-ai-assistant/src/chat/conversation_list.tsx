@@ -25,7 +25,12 @@ import { i18n } from '@kbn/i18n';
 import React, { MouseEvent, useEffect, useMemo, useState } from 'react';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { UseConversationListResult } from '../hooks/use_conversation_list';
-import { useConfirmModal, useConversationsByDate, useConversationContextMenu } from '../hooks';
+import {
+  useConfirmModal,
+  useConversationsByDate,
+  useConversationContextMenu,
+  useGenAIConnectors,
+} from '../hooks';
 import { DATE_CATEGORY_LABELS } from '../i18n';
 import { NewChatButton } from '../buttons/new_chat_button';
 import { ConversationListItemLabel } from './conversation_list_item_label';
@@ -88,6 +93,7 @@ export function ConversationList({
 }) {
   const euiTheme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(euiTheme);
+  const { connectors } = useGenAIConnectors();
 
   const [allConversations, activeConversations, archivedConversations] = useMemo(() => {
     const conversationList = conversations.value?.conversations ?? [];
@@ -330,18 +336,20 @@ export function ConversationList({
             </>
           ) : null}
 
-          <EuiFlexItem grow={false}>
-            <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem grow className={newChatButtonWrapperClassName}>
-                  <NewChatButton
-                    href={newConversationHref}
-                    onClick={(event) => onClickConversation(event)}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
+          {connectors?.length ? (
+            <EuiFlexItem grow={false}>
+              <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem grow className={newChatButtonWrapperClassName}>
+                    <NewChatButton
+                      href={newConversationHref}
+                      onClick={(event) => onClickConversation(event)}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       </EuiPanel>
       {confirmDeleteElement}

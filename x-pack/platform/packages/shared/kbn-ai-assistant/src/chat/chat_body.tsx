@@ -18,7 +18,7 @@ import {
   useEuiTheme,
   UseEuiTheme,
 } from '@elastic/eui';
-import { css, keyframes } from '@emotion/css';
+import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type {
   Conversation,
@@ -72,11 +72,6 @@ const promptEditorClassname = (euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 `;
 
-const incorrectLicenseContainer = (euiTheme: UseEuiTheme['euiTheme']) => css`
-  height: 100%;
-  padding: ${euiTheme.size.base};
-`;
-
 const chatBodyContainerClassNameWithError = css`
   align-self: center;
   margin: 12px;
@@ -87,24 +82,9 @@ const promptEditorContainerClassName = css`
   padding-bottom: 8px;
 `;
 
-const fadeInAnimation = keyframes`
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-`;
-
 const animClassName = (euiTheme: UseEuiTheme['euiTheme']) => css`
+  display: flex;
   height: 100%;
-  opacity: 0;
-  ${euiCanAnimate} {
-    animation: ${fadeInAnimation} ${euiTheme.animation.normal} ${euiTheme.animation.bounce}
-      ${euiTheme.animation.normal} forwards;
-  }
 `;
 
 const containerClassName = css`
@@ -462,33 +442,17 @@ export function ChatBody({
   }
 
   let footer: React.ReactNode;
+
   if (!hasCorrectLicense && !initialConversationId) {
     footer = (
-      <>
-        <EuiFlexItem grow className={incorrectLicenseContainer(euiTheme)}>
-          <IncorrectLicensePanel />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiHorizontalRule margin="none" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-            <PromptEditor
-              hidden={connectors.loading || connectors.connectors?.length === 0}
-              loading={isLoading}
-              disabled
-              onChangeHeight={setPromptEditorHeight}
-              onSubmit={(message) => {
-                next(messages.concat(message));
-              }}
-              onSendTelemetry={(eventWithPayload) =>
-                chatService.sendAnalyticsEvent(eventWithPayload)
-              }
-            />
-            <EuiSpacer size="s" />
-          </EuiPanel>
-        </EuiFlexItem>
-      </>
+      <EuiFlexItem
+        grow
+        css={css`
+          justify-content: center;
+        `}
+      >
+        <IncorrectLicensePanel />
+      </EuiFlexItem>
     );
   } else if (!conversation.value && conversation.loading) {
     footer = null;

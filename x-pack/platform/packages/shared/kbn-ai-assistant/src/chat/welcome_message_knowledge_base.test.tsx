@@ -11,6 +11,10 @@ import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/publi
 
 import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { coreMock } from '@kbn/core/public/mocks';
+
+const corePluginMock = coreMock.createStart();
 
 describe('WelcomeMessageKnowledgeBase', () => {
   afterEach(() => {
@@ -38,7 +42,11 @@ describe('WelcomeMessageKnowledgeBase', () => {
   }
 
   function renderComponent(kb: UseKnowledgeBaseResult) {
-    return render(<WelcomeMessageKnowledgeBase knowledgeBase={kb} />);
+    return render(
+      <KibanaRenderContextProvider {...corePluginMock}>
+        <WelcomeMessageKnowledgeBase knowledgeBase={kb} />
+      </KibanaRenderContextProvider>
+    );
   }
 
   it('renders install message if isInstalling', () => {
@@ -56,8 +64,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     });
     renderComponent(kb);
 
-    expect(screen.getByText(/We are setting up your knowledge base/i)).toBeInTheDocument();
-    expect(screen.getByText(/Setting up Knowledge base/i)).toBeInTheDocument();
+    expect(screen.getByText(/Installing Knowledge Base/i)).toBeInTheDocument();
   });
 
   it('renders the success banner after a transition from installing to not installing with no error', async () => {
@@ -71,10 +78,10 @@ describe('WelcomeMessageKnowledgeBase', () => {
         refresh: jest.fn(),
       },
     });
-    const { rerender } = renderComponent(kb);
+    const { rerender, container } = renderComponent(kb);
 
     // Should not see success banner initially
-    expect(screen.queryByText(/Knowledge base successfully installed/i)).toBeNull();
+    expect(container).not.toBeEmptyDOMElement();
 
     kb = {
       ...kb,
@@ -98,7 +105,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     });
 
     // Now we should see success banner
-    expect(screen.getByText(/Knowledge base successfully installed/i)).toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('renders "We are setting up your knowledge base" with the inspect button', () => {
@@ -128,8 +135,10 @@ describe('WelcomeMessageKnowledgeBase', () => {
     });
     renderComponent(kb);
 
-    expect(screen.getByText(/We are setting up your knowledge base/i)).toBeInTheDocument();
-    expect(screen.getByText(/Inspect/i)).toBeInTheDocument();
+    expect(screen.getByText(/You have not set up a Knowledge Base yet./i)).toBeInTheDocument();
+    expect(screen.getByText(/Install Knowledge base/i)).toBeInTheDocument();
+    // Because we have an installError, we also see "Inspect issues" button
+    expect(screen.getByText(/Inspect issues/i)).toBeInTheDocument();
   });
 
   it('renders "Base setup failed" with inspect issues', () => {
@@ -185,7 +194,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     });
     renderComponent(kb);
 
-    expect(screen.getByText(/Your Knowledge base hasn't been set up/i)).toBeInTheDocument();
+    expect(screen.getByText(/You have not set up a Knowledge Base yet./i)).toBeInTheDocument();
     expect(screen.getByText(/Install Knowledge base/i)).toBeInTheDocument();
     expect(screen.queryByText(/Inspect/i)).toBeNull();
   });
@@ -220,8 +229,9 @@ describe('WelcomeMessageKnowledgeBase', () => {
     });
     renderComponent(kb);
 
-    expect(screen.getByText(/We are setting up your knowledge base/i)).toBeInTheDocument();
-    expect(screen.getByText(/Inspect/i)).toBeInTheDocument();
+    expect(screen.getByText(/You have not set up a Knowledge Base yet./i)).toBeInTheDocument();
+    expect(screen.getByText(/Install Knowledge base/i)).toBeInTheDocument();
+    expect(screen.getByText(/Inspect issues/i)).toBeInTheDocument();
   });
 
   it('renders nothing if the knowledge base is already installed', () => {
@@ -241,7 +251,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     renderComponent(kb);
 
     expect(screen.queryByText(/We are setting up your knowledge base/i)).toBeNull();
-    expect(screen.queryByText(/Your Knowledge base hasn't been set up/i)).toBeNull();
+    expect(screen.queryByText(/You have not set up a Knowledge Base yet./i)).toBeNull();
     expect(screen.queryByText(/Knowledge base successfully installed/i)).toBeNull();
   });
 });

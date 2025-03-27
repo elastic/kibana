@@ -11,7 +11,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DATE_CATEGORY_LABELS } from '../i18n';
 import { ConversationList } from './conversation_list';
 import { UseConversationListResult } from '../hooks/use_conversation_list';
-import { useConversationsByDate, useConversationContextMenu } from '../hooks';
+import { useConversationsByDate, useConversationContextMenu, useGenAIConnectors } from '../hooks';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getDisplayedConversation } from '../hooks/use_conversations_by_date.test';
 
@@ -29,6 +29,12 @@ jest.mock('../hooks/use_confirm_modal', () => ({
 jest.mock('../hooks/use_conversation_context_menu', () => ({
   useConversationContextMenu: jest.fn().mockReturnValue({
     deleteConversation: jest.fn(() => Promise.resolve(true)),
+  }),
+}));
+
+jest.mock('../hooks/use_genai_connectors', () => ({
+  useGenAIConnectors: jest.fn().mockReturnValue({
+    connectors: ['connector_1', 'connector_2'],
   }),
 }));
 
@@ -237,6 +243,12 @@ describe('ConversationList', () => {
     const newChatBtn = screen.getByTestId('observabilityAiAssistantNewChatButton');
     fireEvent.click(newChatBtn);
     expect(defaultProps.onConversationSelect).toHaveBeenCalledWith(undefined);
+  });
+
+  it('does not render a new chat button if no connectors are configured', () => {
+    (useGenAIConnectors as jest.Mock).mockReturnValue({ connectors: [] });
+    render(<ConversationList {...defaultProps} />);
+    expect(screen.queryByTestId('observabilityAiAssistantNewChatButton')).not.toBeInTheDocument();
   });
 
   it('defaults to archived section open if selected conversation is archived', () => {

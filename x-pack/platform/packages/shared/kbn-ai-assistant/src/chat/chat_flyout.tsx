@@ -245,7 +245,7 @@ export function ChatFlyout({
                   refreshConversations={refreshConversations}
                   updateDisplayedConversation={updateDisplayedConversation}
                 />
-              ) : (
+              ) : connectors.connectors?.length ? (
                 <EuiPopover
                   anchorPosition="downLeft"
                   button={
@@ -271,7 +271,7 @@ export function ChatFlyout({
                   }
                   className={newChatButtonClassName}
                 />
-              )}
+              ) : null}
             </EuiFlexItem>
           ) : null}
 

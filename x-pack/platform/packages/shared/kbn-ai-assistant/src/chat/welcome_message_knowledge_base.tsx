@@ -8,7 +8,6 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,31 +19,10 @@ import {
 import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 import usePrevious from 'react-use/lib/usePrevious';
 
+import { InstallKnowledgeBase } from '@kbn/ai-assistant-cta';
+import { css } from '@emotion/react';
 import { WelcomeMessageKnowledgeBaseSetupErrorPanel } from './welcome_message_knowledge_base_setup_error_panel';
 import { UseKnowledgeBaseResult } from '../hooks';
-
-const SettingUpKnowledgeBase = () => (
-  <>
-    <EuiText color="subdued" size="s">
-      {i18n.translate('xpack.aiAssistant.welcomeMessage.weAreSettingUpTextLabel', {
-        defaultMessage:
-          'We are setting up your knowledge base. This may take a few minutes. You can continue to use the Assistant while this process is underway.',
-      })}
-    </EuiText>
-
-    <EuiSpacer size="m" />
-
-    <EuiButtonEmpty
-      data-test-subj="observabilityAiAssistantWelcomeMessageSettingUpKnowledgeBaseButton"
-      isLoading
-      onClick={() => {}}
-    >
-      {i18n.translate('xpack.aiAssistant.welcomeMessage.div.settingUpKnowledgeBaseLabel', {
-        defaultMessage: 'Setting up Knowledge base',
-      })}
-    </EuiButtonEmpty>
-  </>
-);
 
 const InspectKnowledgeBasePopover = ({
   knowledgeBase,
@@ -60,7 +38,13 @@ const InspectKnowledgeBasePopover = ({
   };
 
   return knowledgeBase.status.value?.modelStats ? (
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem
+      grow={false}
+      css={({ euiTheme }) => css`
+        text-align: center;
+        margin-top: -${euiTheme.size.xxxxl};
+      `}
+    >
       <EuiPopover
         button={
           <EuiButtonEmpty
@@ -69,7 +53,7 @@ const InspectKnowledgeBasePopover = ({
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           >
             {i18n.translate('xpack.aiAssistant.welcomeMessage.inspectErrorsButtonEmptyLabel', {
-              defaultMessage: 'Inspect',
+              defaultMessage: 'Inspect issues',
             })}
           </EuiButtonEmpty>
         }
@@ -100,53 +84,25 @@ export function WelcomeMessageKnowledgeBase({
     }
   }, [knowledgeBase.isInstalling, prevIsInstalling]);
 
-  const install = async () => {
-    await knowledgeBase.install();
-  };
-
-  if (knowledgeBase.isInstalling) return <SettingUpKnowledgeBase />;
-
+  // If we are installing at any step (POST /setup + model deployment)
   switch (knowledgeBase.status.value?.kbState) {
     case KnowledgeBaseState.NOT_INSTALLED:
+    case KnowledgeBaseState.DEPLOYING_MODEL:
+    case KnowledgeBaseState.PENDING_MODEL_DEPLOYMENT:
+    case KnowledgeBaseState.ERROR:
       return (
         <>
-          <EuiText color="subdued" size="s">
-            {i18n.translate(
-              'xpack.aiAssistant.welcomeMessageKnowledgeBase.yourKnowledgeBaseIsNotSetUpCorrectlyLabel',
-              { defaultMessage: `Your Knowledge base hasn't been set up.` }
-            )}
-          </EuiText>
-
-          <EuiSpacer size="m" />
-
-          <EuiFlexGroup justifyContent="center">
+          <EuiFlexGroup justifyContent="center" direction="column">
             <EuiFlexItem grow={false}>
-              <div>
-                <EuiButton
-                  color="primary"
-                  data-test-subj="observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton"
-                  fill
-                  isLoading={false}
-                  iconType="importAction"
-                  onClick={install}
-                >
-                  {i18n.translate('xpack.aiAssistant.welcomeMessage.retryButtonLabel', {
-                    defaultMessage: 'Install Knowledge base',
-                  })}
-                </EuiButton>
-              </div>
+              <InstallKnowledgeBase
+                onInstallKnowledgeBase={knowledgeBase.install}
+                isInstalling={knowledgeBase.isInstalling || knowledgeBase.isPolling}
+              />
             </EuiFlexItem>
+            <InspectKnowledgeBasePopover knowledgeBase={knowledgeBase} />
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
-        </>
-      );
-    case KnowledgeBaseState.DEPLOYING_MODEL:
-    case KnowledgeBaseState.PENDING_MODEL_DEPLOYMENT:
-      return (
-        <>
-          <SettingUpKnowledgeBase />
-          <InspectKnowledgeBasePopover knowledgeBase={knowledgeBase} />
         </>
       );
     case KnowledgeBaseState.READY:
@@ -167,17 +123,6 @@ export function WelcomeMessageKnowledgeBase({
           </EuiFlexGroup>
         </div>
       ) : null;
-    case KnowledgeBaseState.ERROR:
-      return (
-        <>
-          <EuiText color="subdued" size="s">
-            {i18n.translate('xpack.aiAssistant.welcomeMessage.SettingUpFailTextLabel', {
-              defaultMessage: `Knowledge Base setup failed. Check 'Inspect' for details.`,
-            })}
-          </EuiText>
-          <InspectKnowledgeBasePopover knowledgeBase={knowledgeBase} />
-        </>
-      );
     default:
       return null;
   }

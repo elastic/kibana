@@ -6,7 +6,8 @@
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop"
+      "@emotion/react/types/css-prop",
+      "../../../../../typings/emotion.d.ts",
     ]
   },
   "include": [
@@ -19,7 +20,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core-http-browser",
     "@kbn/i18n",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/actions-plugin",
@@ -42,5 +42,7 @@
     "@kbn/ai-assistant-icon",
     "@kbn/datemath",
     "@kbn/security-plugin-types-common",
+    "@kbn/ai-assistant-cta",
+    "@kbn/react-kibana-context-render",
   ]
 }
