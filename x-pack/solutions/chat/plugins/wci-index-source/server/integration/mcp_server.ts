@@ -40,7 +40,8 @@ export async function createMcpServer({
     field: field.field,
     description: field.description,
     values: [],
-    type: field.type,
+    // filters are only a subset of field types
+    type: field.type as SearchFilter['type'],
   }));
 
   const aggFields = fields.filterFields
