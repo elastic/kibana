@@ -61,6 +61,8 @@ import { CspInlineDescriptionList } from '../../../components/csp_inline_descrip
 
 const FINDINGS_MISCONFIGS_FLYOUT_DESCRIPTION_LIST = 'misconfigs-findings-flyout-description-list';
 
+const FINDINGS_FLYOUT = 'findings_flyout';
+
 const createGetMisconfigurationFindingsQuery = (resourceId?: string, ruleId?: string) => {
   return {
     bool: {
@@ -265,7 +267,7 @@ export const FindingsRuleFlyout = ({ ruleId, resourceId }: FindingMisconfigurati
 
   return (
     <>
-      <EuiFlyoutHeader>
+      <EuiFlyoutHeader data-test-subj={FINDINGS_FLYOUT}>
         <EuiPanel hasShadow={false}>
           <EuiSpacer />
           <EuiFlexGroup alignItems="center">
