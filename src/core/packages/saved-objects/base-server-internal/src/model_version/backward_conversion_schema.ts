@@ -27,10 +27,14 @@ export const convertModelVersionBackwardConversionSchema = (
 ): ConvertedSchema => {
   if (isObjectType(schema)) {
     return (doc) => {
-      const attrs = schema.validate(doc.attributes, {});
+      const originalAttrs = doc.attributes as object;
+      // Get the validated object, with possible stripping of unknown keys
+      const validatedAttrs = schema.validate(doc.attributes);
+      // Use the validated attrs object to pick values from the original attrs.
+      const convertedAttrs = pickValuesBasedOnStructure(validatedAttrs, originalAttrs);
       return {
         ...doc,
-        attributes: pickValuesBasedOnStructure(attrs, doc.attributes as object),
+        attributes: convertedAttrs,
       };
     };
   } else {

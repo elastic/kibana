@@ -88,7 +88,7 @@ describe('convertModelVersionBackwardConversionSchema', () => {
       const output = converted(doc);
 
       expect(validateSpy).toHaveBeenCalledTimes(1);
-      expect(validateSpy).toHaveBeenCalledWith({ foo: 'bar' }, {});
+      expect(validateSpy).toHaveBeenCalledWith({ foo: 'bar' });
       expect(output).toEqual(doc);
     });
 
