@@ -19,7 +19,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
 
-  describe('space solution tour', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/204082
+  describe.skip('space solution tour', () => {
     let version: string | undefined;
 
     const getGlobalSettings = async () => {

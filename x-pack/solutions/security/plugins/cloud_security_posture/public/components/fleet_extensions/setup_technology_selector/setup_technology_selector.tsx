@@ -17,6 +17,8 @@ import {
   EuiTitle,
   EuiRadioGroupOption,
   EuiText,
+  EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '../../test_subjects';
 
@@ -96,6 +98,23 @@ export const SetupTechnologySelector = ({
     );
   };
 
+  const limitationsMessage = (
+    <FormattedMessage
+      id="xpack.csp.setupTechnologySelector.comingSoon"
+      defaultMessage="Agentless deployment is not supported if you are using {link}."
+      values={{
+        link: (
+          <EuiLink
+            href="https://www.elastic.co/guide/en/cloud-enterprise/current/ece-traffic-filtering-deployment-configuration.html"
+            target="_blank"
+          >
+            Traffic filtering
+          </EuiLink>
+        ),
+      }}
+    />
+  );
+
   return (
     <>
       <EuiSpacer size="l" />
@@ -107,7 +126,9 @@ export const SetupTechnologySelector = ({
           />
         </h2>
       </EuiTitle>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
+      <EuiCallOut title={limitationsMessage} color="warning" iconType="alert" size="m" />
+      <EuiSpacer size="m" />
       <EuiRadioGroup
         disabled={disabled}
         data-test-subj={SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ}
