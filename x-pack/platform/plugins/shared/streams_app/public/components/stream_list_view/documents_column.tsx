@@ -6,13 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiI18nNumber,
-  EuiSkeletonRectangle,
-  EuiDelayRender,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiI18nNumber, EuiSkeletonRectangle } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
 import {
@@ -95,14 +89,14 @@ export function DocumentsColumn({
       `}
     >
       {histogramQueryFetch.loading ? (
-        <EuiDelayRender delay={300}>
+        <>
           <EuiFlexItem>
-            <EuiSkeletonRectangle isLoading width="100%" height={euiThemeVars.euiFontSizeS} />
+            <EuiSkeletonRectangle isLoading width="100%" height={euiThemeVars.euiSizeL} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiSkeletonRectangle isLoading width="100%" height={euiThemeVars.euiSizeL} />
           </EuiFlexItem>
-        </EuiDelayRender>
+        </>
       ) : (
         <>
           <EuiFlexItem
