@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { getCaseCommentsUrl } from '@kbn/cases-plugin/common/api';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { postCaseReq, getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 import {
