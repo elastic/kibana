@@ -44,10 +44,10 @@ function allTestsAreSkipped(suite) {
   return childrenSkipped;
 }
 
-function createErrorPauseHandler(lifecycle) {
-  return async (err, test) => {
+function createErrorPauseHandler() {
+  return async (err, test, callback) => {
     // Check if pauseOnError is enabled globally or for this specific test
-    if (testConfig.pauseOnError || test.pauseOnError) {
+    if (testConfig.pauseOnError) {
       // Create a more informative pause message
       const pauseMessage = chalk.bold.yellow(`
         !!!!! ${chalk.red('TEST PAUSED ON ERROR')} !!!!!
@@ -82,7 +82,7 @@ function createErrorPauseHandler(lifecycle) {
     }
 
     // Always trigger the existing test failure lifecycle hook
-    await lifecycle.testFailure.trigger(err, test);
+    await callback();
   };
 }
 
@@ -183,7 +183,14 @@ export function decorateMochaUi(lifecycle, context, { rootTags }) {
    *  @return {Function}
    */
   function wrapTestFunction(name, fn) {
-    return wrapNonSuiteFunction(name, wrapRunnableArgs(fn, lifecycle, errorPauseHandler));
+    return wrapNonSuiteFunction(
+      name,
+      wrapRunnableArgs(fn, lifecycle, async (err, test) => {
+        await errorPauseHandler(err, test, async () => {
+          await lifecycle.testFailure.trigger(err, test);
+        });
+      })
+    );
   }
 
   /**
@@ -196,7 +203,14 @@ export function decorateMochaUi(lifecycle, context, { rootTags }) {
    *  @return {Function}
    */
   function wrapTestHookFunction(name, fn) {
-    return wrapNonSuiteFunction(name, wrapRunnableArgs(fn, lifecycle, errorPauseHandler));
+    return wrapNonSuiteFunction(
+      name,
+      wrapRunnableArgs(fn, lifecycle, async (err, test) => {
+        await errorPauseHandler(err, test, async () => {
+          await lifecycle.testHookFailure.trigger(err, test);
+        });
+      })
+    );
   }
 
   /**
