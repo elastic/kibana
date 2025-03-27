@@ -412,7 +412,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       compatibleWithSampling:
         getSamplingValue(state.layers[layerId]) === 1 ||
         (definition.getUnsupportedSettings?.()?.sampling ?? true),
-      quickFunctionDocumentation: definition.quickFunctionDocumentation
+      documentation: definition.quickFunctionDocumentation
     };
   });
 
@@ -426,7 +426,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     (selectedColumn?.operationType != null && isQuickFunction(selectedColumn?.operationType));
 
   const sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
-    ({ operationType, compatibleWithCurrentField, disabledStatus, compatibleWithSampling, quickFunctionDocumentation }) => {
+    ({ operationType, compatibleWithCurrentField, disabledStatus, compatibleWithSampling, documentation }) => {
       const isActive = Boolean(
         incompleteOperation === operationType ||
           (!incompleteOperation && selectedColumn && selectedColumn.operationType === operationType)
@@ -574,7 +574,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               }),
             }
           : undefined,
-        toolTipText: quickFunctionDocumentation,
+        toolTipText: documentation,
         onClick() {
           if (
             ['none', 'fullReference', 'managedReference'].includes(
