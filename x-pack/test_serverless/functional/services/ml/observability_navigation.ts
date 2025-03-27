@@ -18,7 +18,7 @@ export function MachineLearningNavigationProviderObservability({
   async function navigateToArea(id: string, expectedTestSubject: string) {
     await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
     await retry.tryForTime(5 * 1000, async () => {
-      await svlCommonNavigation.sidenav.clickLink({ navId: 'stack_management' });
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
       await svlCommonNavigation.sidenav.clickPanelLink(id);
       await testSubjects.existOrFail(expectedTestSubject, { timeout: 2500 });
     });
