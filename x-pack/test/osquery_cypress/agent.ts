@@ -14,9 +14,8 @@ import {
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
 
 import chalk from 'chalk';
-import { getLatestVersion } from './artifact_manager';
 import { Manager } from './resource_manager';
-import { generateRandomString } from './utils';
+import { generateRandomString, getLatestAvailableAgentVersion } from './utils';
 
 export class AgentManager extends Manager {
   private readonly log: ToolingLog;
@@ -41,7 +40,9 @@ export class AgentManager extends Manager {
   public async setup() {
     this.log.info(chalk.bold('Setting up Agent'));
 
-    const artifact = `docker.elastic.co/elastic-agent/elastic-agent:${await getLatestVersion()}`;
+    const artifact = `docker.elastic.co/elastic-agent/elastic-agent:${await getLatestAvailableAgentVersion(
+      this.kbnClient
+    )}`;
     this.log.indent(4, () => this.log.info(`Image: ${artifact}`));
     const containerName = generateRandomString(12);
     const fleetServerUrl =
