@@ -19,12 +19,8 @@ import {
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { safeDecode } from '@kbn/rison';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import type { DiscoverAppState } from '@kbn/discover-plugin/public';
-import type { Filter } from '@kbn/es-query';
-import { type DataViewDataSource } from '@kbn/discover-plugin/common/data_sources';
-import type { QueryState } from '@kbn/data-plugin/common';
+import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import { LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -82,38 +78,22 @@ export const LogsPageContent: React.FunctionComponent = () => {
         <Route
           path="/stream"
           exact
-          render={({ location }) => {
-            const searchParams = new URLSearchParams(location.search);
-            const g = searchParams.get('_g') || '';
-            const a = searchParams.get('_a') || '';
+          render={(props) => {
+            const searchParams = new URLSearchParams(props.location.search);
+            const logFilterEncoded = searchParams.get('logFilter');
+            let locatorParams: LogsLocatorParams = {};
 
-            const gState = (safeDecode(g) || {}) as QueryState;
-            const aState = (safeDecode(a) || {}) as DiscoverAppState;
+            if (logFilterEncoded) {
+              const logFilter = safeDecode(logFilterEncoded) as LogsLocatorParams;
 
-            const dataViewId =
-              aState.dataSource?.type === 'dataView'
-                ? (aState.dataSource as DataViewDataSource).dataViewId
-                : '';
+              locatorParams = {
+                timeRange: logFilter?.timeRange,
+                query: logFilter?.query,
+                filters: logFilter?.filters,
+              };
+            }
 
-            const locatorParams: DiscoverAppLocatorParams = {
-              dataViewId,
-              timeRange: gState.time || { from: 'now-15d', to: 'now' },
-              filters: [
-                ...(Array.isArray(gState.filters) ? gState.filters : []),
-                ...(Array.isArray(aState.filters) ? aState.filters : []),
-              ] as Filter[],
-              interval: aState.interval,
-              query:
-                aState.query && typeof aState.query === 'object'
-                  ? aState.query
-                  : { language: 'kuery', query: '' },
-              columns: Array.isArray(aState.columns) ? aState.columns : [],
-              sort: Array.isArray(aState.sort) ? aState.sort : [['@timestamp', 'desc']],
-            };
-
-            share.url.locators
-              .get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR)
-              ?.navigate(locatorParams);
+            share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID)?.navigate(locatorParams);
             return null;
           }}
         />
@@ -122,7 +102,9 @@ export const LogsPageContent: React.FunctionComponent = () => {
         <RedirectWithQueryParams from={'/analysis'} to={routes.logsAnomalies.path} exact />
         <RedirectWithQueryParams from={'/log-rate'} to={routes.logsAnomalies.path} exact />
         <RedirectWithQueryParams from={'/'} to={routes.logsAnomalies.path} exact />
-        // Legacy renders and redirects
+        {i18n.translate('xpack.infra.logsPageContent.routes.LegacyRendersAndLabel', {
+          defaultMessage: '// Legacy renders and redirects',
+        })}
         <Route
           path="/settings"
           exact
