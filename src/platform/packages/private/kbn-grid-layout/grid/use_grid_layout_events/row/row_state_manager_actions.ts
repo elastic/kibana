@@ -9,24 +9,21 @@
 
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep, pick } from 'lodash';
-import { MutableRefObject } from 'react';
 
 import { GridLayoutStateManager } from '../../types';
 import { getRowKeysInOrder } from '../../utils/resolve_grid_row';
-import { getSensorPosition, getSensorType } from '../sensors';
+import { getSensorType } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
 
 export const startAction = (
   e: UserInteractionEvent,
   gridLayoutStateManager: GridLayoutStateManager,
-  rowId: string,
-  startingPointer: MutableRefObject<PointerPosition>
+  rowId: string
 ) => {
   const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
   if (!headerRef) return;
 
   const startingPosition = pick(headerRef.getBoundingClientRect(), ['top', 'left']);
-  startingPointer.current = getSensorPosition(e);
   gridLayoutStateManager.activeRowEvent$.next({
     id: rowId,
     startingPosition,

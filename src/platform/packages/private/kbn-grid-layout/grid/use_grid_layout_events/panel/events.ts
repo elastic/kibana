@@ -20,7 +20,7 @@ import {
   startKeyboardInteraction,
   isKeyboardEvent,
 } from '../sensors';
-import { PointerPosition, UserInteractionEvent } from '../types';
+import { UserInteractionEvent } from '../types';
 import { getNextKeyboardPositionForPanel } from './utils';
 import {
   hasPanelInteractionStartedWithKeyboard,
@@ -44,7 +44,6 @@ export const useGridLayoutPanelEvents = ({
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   const lastRequestedPanelPosition = useRef<GridPanelData | undefined>(undefined);
-  const pointerPixel = useRef<PointerPosition>({ clientX: 0, clientY: 0 });
 
   const onStart = useCallback(
     (ev: UserInteractionEvent) => {
@@ -84,17 +83,12 @@ export const useGridLayoutPanelEvents = ({
         isKeyboardEvent(ev) &&
         hasPanelInteractionStartedWithKeyboard(gridLayoutStateManager)
       ) {
-        pointerPixel.current = getNextKeyboardPositionForPanel(
+        const pointerPixel = getNextKeyboardPositionForPanel(
           ev,
           gridLayoutStateManager,
-          pointerPixel.current
+          getSensorPosition(ev)
         );
-        return moveAction(
-          ev,
-          gridLayoutStateManager,
-          pointerPixel.current,
-          lastRequestedPanelPosition
-        );
+        return moveAction(ev, gridLayoutStateManager, pointerPixel, lastRequestedPanelPosition);
       }
     },
     [gridLayoutStateManager]
@@ -103,7 +97,6 @@ export const useGridLayoutPanelEvents = ({
   const startInteraction = useCallback(
     (e: UserInteractionEvent) => {
       if (!isLayoutInteractive(gridLayoutStateManager)) return;
-      pointerPixel.current = getSensorPosition(e);
       if (isMouseEvent(e)) {
         e.stopPropagation();
         startMouseInteraction({

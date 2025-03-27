@@ -35,8 +35,6 @@ import { getNextKeyboardPosition } from './utils';
  */
 export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
-
-  const pointerPixel = useRef<PointerPosition>({ clientX: 0, clientY: 0 });
   const startingPointer = useRef<PointerPosition>({ clientX: 0, clientY: 0 });
 
   const onEnd = useCallback(() => commitAction(gridLayoutStateManager), [gridLayoutStateManager]);
@@ -47,24 +45,25 @@ export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
   const startInteraction = useCallback(
     (e: UserInteractionEvent) => {
       if (!isLayoutInteractive(gridLayoutStateManager)) return;
-      pointerPixel.current = getSensorPosition(e);
-      const onStart = () => startAction(e, gridLayoutStateManager, rowId, startingPointer);
+      const onStart = () => {
+        startingPointer.current = getSensorPosition(e);
+        startAction(e, gridLayoutStateManager, rowId);
+      };
 
       const onMove = (ev: UserInteractionEvent) => {
         if (isMouseEvent(ev) || isTouchEvent(ev)) {
-          pointerPixel.current = getSensorPosition(ev);
-          moveAction(gridLayoutStateManager, startingPointer.current, pointerPixel.current);
+          moveAction(gridLayoutStateManager, startingPointer.current, getSensorPosition(ev));
         } else if (
           isKeyboardEvent(ev) &&
           hasRowInteractionStartedWithKeyboard(gridLayoutStateManager)
         ) {
-          pointerPixel.current = getNextKeyboardPosition(
+          const pointerPixel = getNextKeyboardPosition(
             ev,
             gridLayoutStateManager,
-            pointerPixel.current,
+            getSensorPosition(e),
             rowId
           );
-          moveAction(gridLayoutStateManager, startingPointer.current, pointerPixel.current);
+          moveAction(gridLayoutStateManager, startingPointer.current, pointerPixel);
         }
       };
 

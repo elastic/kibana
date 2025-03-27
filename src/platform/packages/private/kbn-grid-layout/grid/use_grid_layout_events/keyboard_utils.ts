@@ -15,16 +15,13 @@ export const updateClientY = (
 ) => {
   if (isCloseToEdge) {
     switch (type) {
-      case 'resize': {
-        // update after the position is updated, that's why we use setTimeout
+      case 'drag':
+        window.scrollTo({ top: window.scrollY + stepY, behavior: 'smooth' });
+        return currentY;
+      case 'resize':
         setTimeout(() =>
           document.activeElement?.scrollIntoView({ behavior: 'smooth', block: 'end' })
         );
-      }
-      case 'drag': {
-        window.scrollTo({ top: window.scrollY + stepY, behavior: 'smooth' });
-        return currentY;
-      }
     }
   }
   return currentY + stepY;
