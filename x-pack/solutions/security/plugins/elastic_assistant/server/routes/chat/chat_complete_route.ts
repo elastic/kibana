@@ -68,7 +68,7 @@ export const chatCompleteRoute = (
       async (context, request, response) => {
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
         const assistantResponse = buildResponse(response);
-        const { content_references_disabled } = request.query
+        const { content_references_disabled: contentReferencesDisabled } = request.query
         let telemetry;
         let actionTypeId;
         const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
@@ -186,7 +186,7 @@ export const chatCompleteRoute = (
             : undefined;
 
           const contentReferencesStore = newContentReferencesStore({
-            disabled: content_references_disabled ?? false,
+            disabled: contentReferencesDisabled ?? false,
           });
 
           const onLlmResponse = async (
