@@ -105,3 +105,17 @@ export const CONFIG_EDITOR_EDITOR_SAVE_LABEL = i18n.translate(
     defaultMessage: 'Save',
   }
 );
+
+export const NO_AUTHORIZED_RULE_TYPE_PROMPT_TITLE = i18n.translate(
+  'xpack.embeddableAlertsTable.noAuthorizedRuleTypePromptTitle',
+  {
+    defaultMessage: 'Missing alerting authorizations',
+  }
+);
+
+export const getSolutionRuleTypesAuthPromptBody = (solution: string) =>
+  i18n.translate('xpack.embeddableAlertsTable.noAuthorizedRuleTypePromptBody', {
+    defaultMessage:
+      'Cannot display this panel without access to {solution} alerting rules. Contact your system administrator for more information.',
+    values: { solution },
+  });

@@ -20,7 +20,12 @@ import { ALERT_TIME_RANGE, TIMESTAMP } from '@kbn/rule-data-utils';
 import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { GENERAL_CASES_OWNER } from '@kbn/cases-plugin/common';
-import { RULE_TYPES_LOAD_ERROR_DESCRIPTION, RULE_TYPES_LOAD_ERROR_TITLE } from '../translations';
+import {
+  getSolutionRuleTypesAuthPromptBody,
+  NO_AUTHORIZED_RULE_TYPE_PROMPT_TITLE,
+  RULE_TYPES_LOAD_ERROR_DESCRIPTION,
+  RULE_TYPES_LOAD_ERROR_TITLE,
+} from '../translations';
 
 export interface EmbeddableAlertsTableProps {
   id: string;
@@ -91,6 +96,16 @@ export const EmbeddableAlertsTable = ({
         body={<p>{RULE_TYPES_LOAD_ERROR_DESCRIPTION}</p>}
         color="danger"
         iconType="error"
+      />
+    );
+  }
+
+  if (solution && !ruleTypeIds.length) {
+    return (
+      <EuiEmptyPrompt
+        title={<h2>{NO_AUTHORIZED_RULE_TYPE_PROMPT_TITLE}</h2>}
+        body={<p>{getSolutionRuleTypesAuthPromptBody(solution)}</p>}
+        iconType="securityApp"
       />
     );
   }

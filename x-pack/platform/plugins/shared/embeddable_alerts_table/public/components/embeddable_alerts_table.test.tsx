@@ -24,7 +24,12 @@ const queryClient = new QueryClient({
 });
 
 const core = coreMock.createStart();
-core.http.get.mockResolvedValue([]);
+core.http.get.mockResolvedValue([
+  {
+    id: 'o11y-rule-type',
+    solution: 'observability',
+  },
+]);
 const services = core as unknown as AlertsTableProps['services'];
 
 jest.mock('@kbn/response-ops-alerts-table', () => ({
@@ -74,6 +79,24 @@ describe('EmbeddableAlertsTable', () => {
     );
 
     expect(await screen.findByText('Cannot load rule types')).toBeInTheDocument();
+  });
+
+  it('should show a missing auth prompt if the solution rule types are not accessible', async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <EmbeddableAlertsTable
+          id={TABLE_ID}
+          solution="security"
+          timeRange={{
+            from: '2025-01-01T00:00:00.000Z',
+            to: '2025-01-01T01:00:00.000Z',
+          }}
+          services={services}
+        />
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByText('Missing alerting authorizations')).toBeInTheDocument();
   });
 
   it('should render the alerts table with the correct time range and base props', async () => {
