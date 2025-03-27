@@ -217,12 +217,12 @@ const chatRecallRoute = createObservabilityAIAssistantServerRoute({
         signal,
       })
     ).pipe(
-      map(({ scores, suggestions, relevantDocuments }) => {
+      map(({ llmScores, suggestions, relevantDocuments }) => {
         return createFunctionResponseMessage({
           name: 'context',
           data: {
             suggestions,
-            scores,
+            llmScores,
           },
           content: {
             relevantDocuments,
