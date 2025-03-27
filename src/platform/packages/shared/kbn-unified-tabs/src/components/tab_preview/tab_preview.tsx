@@ -29,12 +29,12 @@ import { PREVIEW_WIDTH } from '../../constants';
 import type { TabPreviewData, TabItem } from '../../types';
 import { TabStatus } from '../../types';
 
-interface TabPreviewProps {
+export interface TabPreviewProps {
   children: React.ReactNode;
   showPreview: boolean;
   setShowPreview: (show: boolean) => void;
   tabItem: TabItem;
-  tabPreviewData: TabPreviewData;
+  getPreviewData: (item: TabItem) => TabPreviewData;
   stopPreviewOnHover?: boolean;
   previewDelay?: number;
 }
@@ -60,7 +60,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   showPreview,
   setShowPreview,
   tabItem,
-  tabPreviewData,
+  getPreviewData,
   stopPreviewOnHover,
   previewDelay = 500,
 }) => {
@@ -68,6 +68,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   const [previewTimer, setPreviewTimer] = useState<NodeJS.Timeout | null>(null);
   const tabRef = useRef<HTMLSpanElement>(null);
   const [tabPosition, setTabPosition] = useState({ top: 0, left: 0 });
+  const [tabPreviewData, setTabPreviewData] = useState<TabPreviewData | null>(null);
 
   useEffect(() => {
     if (showPreview && tabRef.current) {
@@ -85,12 +86,14 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
         leftPosition = windowWidth - PREVIEW_WIDTH + window.scrollX;
       }
 
+      setTabPreviewData(getPreviewData(tabItem));
+
       setTabPosition({
         top: rect.bottom + window.scrollY,
         left: leftPosition,
       });
     }
-  }, [showPreview]);
+  }, [showPreview, getPreviewData, tabItem]);
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -141,36 +144,40 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
           css={getPreviewContainerCss(euiTheme, showPreview, tabPosition)}
           data-test-subj={`unifiedTabs_tabPreview_${tabItem.id}`}
         >
-          <EuiSplitPanel.Inner paddingSize="none" css={getSplitPanelCss(euiTheme)}>
-            <EuiCodeBlock
-              language={getQueryLanguage(tabPreviewData)}
-              transparentBackground
-              paddingSize="none"
-            >
-              {getPreviewQuery(tabPreviewData)}
-            </EuiCodeBlock>
-          </EuiSplitPanel.Inner>
-          <EuiSplitPanel.Inner
-            grow={false}
-            color="subdued"
-            paddingSize="none"
-            css={getSplitPanelCss(euiTheme)}
-          >
-            {tabPreviewData.status === TabStatus.RUNNING ? (
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText>{tabItem.label}</EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <EuiHealth color={tabPreviewData.status} textSize="m">
-                {tabItem.label}
-              </EuiHealth>
-            )}
-          </EuiSplitPanel.Inner>
+          {showPreview && !!tabPreviewData && (
+            <>
+              <EuiSplitPanel.Inner paddingSize="none" css={getSplitPanelCss(euiTheme)}>
+                <EuiCodeBlock
+                  language={getQueryLanguage(tabPreviewData)}
+                  transparentBackground
+                  paddingSize="none"
+                >
+                  {getPreviewQuery(tabPreviewData)}
+                </EuiCodeBlock>
+              </EuiSplitPanel.Inner>
+              <EuiSplitPanel.Inner
+                grow={false}
+                color="subdued"
+                paddingSize="none"
+                css={getSplitPanelCss(euiTheme)}
+              >
+                {tabPreviewData.status === TabStatus.RUNNING ? (
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiLoadingSpinner />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiText>{tabItem.label}</EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ) : (
+                  <EuiHealth color={tabPreviewData.status} textSize="m">
+                    {tabItem.label}
+                  </EuiHealth>
+                )}
+              </EuiSplitPanel.Inner>
+            </>
+          )}
         </EuiSplitPanel.Outer>
       </EuiPortal>
     </div>
