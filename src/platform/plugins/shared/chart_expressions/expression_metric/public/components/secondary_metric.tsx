@@ -132,6 +132,7 @@ function SecondaryMetricValue({
         iconType={icon}
         iconSide="left"
         color={translatedColor}
+        data-test-subj={`expressionMetricVis-secondaryMetric-badge-${rawValue}`}
         css={css(`
           font-size: inherit;
           line-height: inherit;
@@ -189,7 +190,14 @@ function SecondaryMetricValue({
     );
   }
   if (color) {
-    return <EuiBadge color={color}>{formattedValue}</EuiBadge>;
+    return (
+      <EuiBadge
+        color={color}
+        data-test-subj={`expressionMetricVis-secondaryMetric-badge-${rawValue}`}
+      >
+        {formattedValue}
+      </EuiBadge>
+    );
   }
   return formattedValue;
 }
