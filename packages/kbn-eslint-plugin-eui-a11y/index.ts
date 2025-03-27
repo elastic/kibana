@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { setupGetFieldSuggestions } from './field';
-export { setupGetValueSuggestions } from './value';
-export { setupGetOperatorSuggestions } from './operator';
-export { setupGetConjunctionSuggestions } from './conjunction';
+import { EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps } from './rules/eui_elements_should_have_aria_label_or_aria_labelledby_props';
+
+/**
+ * Custom ESLint rules, add `'@kbn/eslint-plugin-eui-a11y'` to your eslint config to use them
+ * @internal
+ */
+export const rules = {
+  eui_elements_should_have_aria_label_or_aria_labelledby_props:
+    EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps,
+};

@@ -7,25 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { IncompatibleActionError, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-// for cleanup esFilters need to fix the issue https://github.com/elastic/kibana/issues/131292
 import { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
-import type { Filter, RangeFilter } from '@kbn/es-query';
-import { getIndexPatterns } from '../services';
-import { applyFiltersPopover } from '../apply_filters';
-
-export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
+import type { Filter } from '@kbn/es-query';
+import { convertRangeFilterToTimeRange, extractTimeFilter } from '@kbn/es-query';
+import { getIndexPatterns } from '../../services';
+import { ApplyFiltersPopoverContent } from './apply_filter_popover_content';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../constants';
 
 export interface ApplyGlobalFilterActionContext {
   filters: Filter[];
   timeFieldName?: string;
-  // Need to make this unknown to prevent circular dependencies.
-  // Apps using this property will need to cast to `IEmbeddable`.
-  // TODO: We should consider moving these commonly used types into a separate package to avoid circular dependencies
-  // https://github.com/elastic/kibana/issues/163994
   embeddable?: unknown;
   // controlledBy is an optional key in filter.meta that identifies the owner of a filter
   // Pass controlledBy to cleanup an existing filter(s) owned by embeddable prior to adding new filters
@@ -39,7 +35,7 @@ async function isCompatible(context: ApplyGlobalFilterActionContext) {
 export function createFilterAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract,
-  core: CoreSetup,
+  coreStart: CoreStart,
   id: string = ACTION_GLOBAL_APPLY_FILTER,
   type: string = ACTION_GLOBAL_APPLY_FILTER
 ): UiActionsActionDefinition<ApplyGlobalFilterActionContext> {
@@ -66,7 +62,6 @@ export function createFilterAction(
       let selectedFilters: Filter[] = filters;
 
       if (selectedFilters.length > 1) {
-        const [coreStart] = await core.getStartServices();
         const indexPatterns = await Promise.all(
           filters.map((filter) => {
             return getIndexPatterns().get(filter.meta.index!);
@@ -76,18 +71,18 @@ export function createFilterAction(
         const filterSelectionPromise: Promise<Filter[]> = new Promise((resolve) => {
           const overlay = coreStart.overlays.openModal(
             toMountPoint(
-              applyFiltersPopover(
-                filters,
-                indexPatterns,
-                () => {
+              <ApplyFiltersPopoverContent
+                indexPatterns={indexPatterns}
+                filters={filters}
+                onCancel={() => {
                   overlay.close();
                   resolve([]);
-                },
-                (filterSelection: Filter[]) => {
+                }}
+                onSubmit={(filterSelection: Filter[]) => {
                   overlay.close();
                   resolve(filterSelection);
-                }
-              ),
+                }}
+              />,
               coreStart
             ),
             {
@@ -109,23 +104,17 @@ export function createFilterAction(
       }
 
       if (timeFieldName) {
-        const { extractTimeFilter } = await import('@kbn/es-query');
         const { timeRangeFilter, restOfFilters } = extractTimeFilter(
           timeFieldName,
           selectedFilters
         );
         filterManager.addFilters(restOfFilters);
         if (timeRangeFilter) {
-          changeTimeFilter(timeFilter, timeRangeFilter);
+          timeFilter.setTime(convertRangeFilterToTimeRange(timeRangeFilter));
         }
       } else {
         filterManager.addFilters(selectedFilters);
       }
     },
   };
-}
-
-async function changeTimeFilter(timeFilter: TimefilterContract, filter: RangeFilter) {
-  const { convertRangeFilterToTimeRange } = await import('@kbn/es-query');
-  timeFilter.setTime(convertRangeFilterToTimeRange(filter));
 }
