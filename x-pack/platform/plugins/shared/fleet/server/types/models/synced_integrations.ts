@@ -9,13 +9,17 @@ import { schema } from '@kbn/config-schema';
 
 const RemoteSyncedIntegrationsBaseSchema = schema.object({
   id: schema.maybe(schema.string()),
-  name: schema.maybe(schema.string()),
-  version: schema.maybe(schema.string()),
+  package_name: schema.maybe(schema.string()),
+  package_version: schema.maybe(schema.string()),
+});
+
+export const RemoteSyncedIntegrationsStatusSchema = RemoteSyncedIntegrationsBaseSchema.extends({
+  sync_status: schema.boolean(),
+  error: schema.maybe(schema.string()),
+  updated_at: schema.maybe(schema.string()),
 });
 
 export const GetRemoteSyncedIntegrationsStatusResponseSchema = schema.object({
-  items: RemoteSyncedIntegrationsBaseSchema.extends({
-    sync_status: schema.boolean(),
-    error: schema.maybe(schema.string()),
-  }),
+  items: schema.arrayOf(RemoteSyncedIntegrationsStatusSchema),
+  error: schema.maybe(schema.string()),
 });

@@ -24,7 +24,7 @@ import { FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX } from '../../services/setup
 
 import type { Installation } from '../../types';
 
-import type { RemoteSyncedIntegrationsStatus } from '../../../common/types';
+import type { RemoteSyncedIntegrationsStatus, GetRemoteSyncedIntegrationsStatusResponse } from '../../../common/types';
 
 import type { SyncIntegrationsData } from './model';
 import { installCustomAsset } from './custom_assets';
@@ -240,6 +240,7 @@ export const compareSyncedIntegrations = async (
   logger: Logger
 ) => {
   try {
+
     const searchRes = await esClient.search<SyncIntegrationsData>({
       index,
       size: 50, // ?
@@ -251,8 +252,20 @@ export const compareSyncedIntegrations = async (
         },
       ],
     });
+    if (searchRes.hits.hits[0]?._source === undefined) {
+      return {
+        items: [],
+        error: `No integrations found on ${index}`
+      }
+    }
     const ccrIntegrations = searchRes.hits.hits[0]?._source?.integrations;
     const installedIntegrations = await getPackageSavedObjects(savedObjectsClient);
+    if (!installedIntegrations) {
+      return {
+        items: [],
+        error: `No integrations installed on remote`
+      }
+    }
 
     const installedIntegrationsByName = (installedIntegrations?.saved_objects || []).reduce(
       (acc, integration) => {
@@ -295,7 +308,7 @@ export const compareSyncedIntegrations = async (
         };
       }
     );
-    return integrationsStatus;
+    return {items: integrationsStatus};
   } catch (err) {
     logger.error('error', err.message);
     throw err;
@@ -306,20 +319,21 @@ export const getRemoteSyncedIntegrationsStatus = async (
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   outputId: string
-) => {
+): Promise<GetRemoteSyncedIntegrationsStatusResponse> => {
   const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
   const logger = appContextService.getLogger();
 
   if (!enableSyncIntegrationsOnRemote) {
-    return [];
+    return { items: [] };
   }
   const index = `${FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX}`.replace('*', outputId);
   try {
     const info = await getFollowerIndexInfo(esClient, index, logger);
-    let res: RemoteSyncedIntegrationsStatus[] = [];
-    if (info?.status === 'active') {
-      res = (await compareSyncedIntegrations(esClient, soClient, index, logger)) ?? [];
+
+    if (info?.status !== 'active') {
+      return { items: [] };
     }
+    const res = await compareSyncedIntegrations(esClient, soClient, index, logger);
     return res;
   } catch (err) {
     throw err;

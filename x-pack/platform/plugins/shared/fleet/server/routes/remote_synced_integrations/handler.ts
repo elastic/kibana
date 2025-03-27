@@ -22,15 +22,13 @@ export const getRemoteSyncedIntegrationsStatusHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
 
   try {
-    const res = await getRemoteSyncedIntegrationsStatus(
+    const res: GetRemoteSyncedIntegrationsStatusResponse = await getRemoteSyncedIntegrationsStatus(
       esClient,
       soClient,
       request.params.outputId
     );
-    const body: GetRemoteSyncedIntegrationsStatusResponse = {
-      items: res,
-    };
-    return response.ok({ body });
+
+    return response.ok({ body: res });
   } catch (error) {
     throw error;
   }

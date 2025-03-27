@@ -8,4 +8,5 @@ import type { RemoteSyncedIntegrationsStatus } from '../models';
 
 export interface GetRemoteSyncedIntegrationsStatusResponse {
   items: RemoteSyncedIntegrationsStatus[];
+  error?: string;
 }
