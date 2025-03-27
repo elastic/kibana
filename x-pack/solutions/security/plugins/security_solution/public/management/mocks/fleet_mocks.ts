@@ -24,6 +24,7 @@ import {
   EPM_API_ROUTES,
   PACKAGE_POLICY_API_ROUTES,
 } from '@kbn/fleet-plugin/common';
+import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
 import {
   composeHttpHandlerMocks,
@@ -294,7 +295,7 @@ export const fleetBulkGetAgentPolicyListHttpMock =
   ]);
 
 export type FleetBulkGetPackagePoliciesListHttpMockInterface = ResponseProvidersInterface<{
-  bulkPackagePolicies: () => BulkGetPackagePoliciesResponse;
+  bulkPackagePolicies: (options?: HttpFetchOptionsWithPath) => BulkGetPackagePoliciesResponse;
 }>;
 export const fleetBulkGetPackagePoliciesListHttpMock =
   httpHandlerMockFactory<FleetBulkGetPackagePoliciesListHttpMockInterface>([
@@ -302,7 +303,7 @@ export const fleetBulkGetPackagePoliciesListHttpMock =
       id: 'bulkPackagePolicies',
       path: PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN,
       method: 'post',
-      handler: ({ body }) => {
+      handler: (_) => {
         const generator = new EndpointDocGenerator('seed');
         const fleetPackagePolicyGenerator = new FleetPackagePolicyGenerator('seed');
         const endpointMetadata = generator.generateHostMetadata();
@@ -320,13 +321,6 @@ export const fleetBulkGetPackagePoliciesListHttpMock =
           // FIXME: remove hard-coded IDs below and get them from the new FleetPackagePolicyGenerator (#2262)
           'ddf6570b-9175-4a6d-b288-61a09771c647',
           'b8e616ae-44fc-4be7-846c-ce8fa5c082dd',
-
-          // And finally, include any kql filters for package policies ids
-          ...getPackagePoliciesFromKueryString(
-            `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${(
-              JSON.parse(body?.toString() ?? '{}')?.ids as string[]
-            ).join(' or ')} )`
-          ),
         ];
 
         return {

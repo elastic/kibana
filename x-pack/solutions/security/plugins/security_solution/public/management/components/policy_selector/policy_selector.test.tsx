@@ -18,6 +18,7 @@ import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_ge
 import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
 import { getPolicyDetailPath } from '../../common/routing';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import type { BulkGetPackagePoliciesRequestBody } from '@kbn/fleet-plugin/common/types';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -26,14 +27,14 @@ const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 describe('PolicySelector component', () => {
   let mockedContext: AppContextTestRender;
   let apiMocks: ReturnType<typeof allFleetHttpMocks>;
-  let testPolicyId: string;
+  let testPolicyId1: string;
+  let testPolicyId2: string;
+  let testPolicyId3: string;
   let props: PolicySelectorProps;
-  let render: (
-    props?: Partial<PolicySelectorProps>
-  ) => Promise<ReturnType<AppContextTestRender['render']>>;
+  let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
 
-  const clickOnPolicy = (policyId: string = testPolicyId) => {
+  const clickOnPolicy = (policyId: string = testPolicyId1) => {
     act(() => {
       fireEvent.click(renderResult.getByTestId(`test-policy-${policyId}`));
     });
@@ -51,12 +52,49 @@ describe('PolicySelector component', () => {
     });
   };
 
+  const clickOnViewSelected = () => {
+    act(() => {
+      fireEvent.click(renderResult.getByTestId(`test-viewSelectedButton`));
+    });
+  };
+
+  const waitForDataToLoad = async () => {
+    await waitFor(() => {
+      expect(renderResult.queryByTestId('test-isFetching')).toBeNull();
+    });
+  };
+
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     apiMocks = allFleetHttpMocks(mockedContext.coreStart.http);
 
-    testPolicyId = apiMocks.responseProvider.packagePolicies().items[0].id;
+    const apiPolicies = apiMocks.responseProvider.packagePolicies().items;
+    testPolicyId1 = apiPolicies[0].id;
+    testPolicyId2 = apiPolicies[1].id;
+    testPolicyId3 = apiPolicies[2].id;
     apiMocks.responseProvider.packagePolicies.mockClear();
+
+    // Mock API to have a total count that will trigger multiple pages in the UI
+    const generatePackagePoliciesResponse =
+      apiMocks.responseProvider.packagePolicies.getMockImplementation()!;
+    apiMocks.responseProvider.packagePolicies.mockImplementation(() => {
+      return {
+        ...generatePackagePoliciesResponse(),
+        total: 50,
+      };
+    });
+
+    // Mock the BulkGet API to return a record for each policy id that was requested
+    apiMocks.responseProvider.bulkPackagePolicies.mockImplementation(
+      ({ body } = { body: JSON.stringify({ ids: [] }), path: '' }) => {
+        const reqBody = JSON.parse(body as string) as BulkGetPackagePoliciesRequestBody;
+        const fleetPackagePolicyGenerator = new FleetPackagePolicyGenerator('seed');
+
+        return {
+          items: reqBody.ids.map((id) => fleetPackagePolicyGenerator.generate({ id })),
+        };
+      }
+    );
 
     props = {
       selectedPolicyIds: [],
@@ -68,7 +106,9 @@ describe('PolicySelector component', () => {
           additionalListItems: updatedAdditionalItems,
         };
 
-        renderResult.rerender(<PolicySelector {...updatedProps} />);
+        act(() => {
+          renderResult.rerender(<PolicySelector {...updatedProps} />);
+        });
       }),
       'data-test-subj': 'test',
     };
@@ -77,9 +117,9 @@ describe('PolicySelector component', () => {
       renderResult = mockedContext.render(<PolicySelector {...props} />);
 
       // Wait for API to be called
-      await waitFor(() => {
+      await waitFor(async () => {
         expect(apiMocks.responseProvider.packagePolicies).toHaveBeenCalled();
-        expect(renderResult.queryByTestId('test-isFetching')).toBeNull();
+        await waitForDataToLoad();
       });
 
       return renderResult;
@@ -94,8 +134,8 @@ describe('PolicySelector component', () => {
     expect((getByTestId('test-viewSelectedButton') as HTMLButtonElement).disabled).toBe(true);
     expect(getByTestId('test-policyFetchTotal')).toBeTruthy();
     expect(getByTestId('test-pagination')).toBeTruthy();
-    expect(queryByTestId(`test-policy-${testPolicyId}-checkbox`)).toBeNull();
-    expect(queryByTestId(`test-policy-${testPolicyId}-policyLink`)).toBeNull();
+    expect(queryByTestId(`test-policy-${testPolicyId1}-checkbox`)).toBeNull();
+    expect(queryByTestId(`test-policy-${testPolicyId1}-policyLink`)).toBeNull();
   });
 
   it('should enable the selected policies button when policies are selected', async () => {
@@ -104,7 +144,7 @@ describe('PolicySelector component', () => {
 
     expect(getByTestId('test-viewSelectedButton').textContent).toEqual('1 selected');
     expect((getByTestId('test-viewSelectedButton') as HTMLButtonElement).disabled).toBe(false);
-    expect(props.onChange).toHaveBeenCalledWith([testPolicyId], []);
+    expect(props.onChange).toHaveBeenCalledWith([testPolicyId1], []);
   });
 
   it('should select all policies displayed when "select all" is clicked', async () => {
@@ -112,24 +152,19 @@ describe('PolicySelector component', () => {
     clickOnSelectAll();
 
     expect(getByTestId('test-viewSelectedButton').textContent).toEqual('3 selected');
-    expect(props.onChange).toHaveBeenCalledWith(
-      [
-        testPolicyId,
-        'ddf6570b-9175-4a6d-b288-61a09771c647',
-        'b8e616ae-44fc-4be7-846c-ce8fa5c082dd',
-      ],
-      []
-    );
+    expect(props.onChange).toHaveBeenCalledWith([testPolicyId1, testPolicyId2, testPolicyId3], []);
   });
 
   it('should un-select all policies displayed when "un-select all" is clicked', async () => {
-    props.selectedPolicyIds = [testPolicyId, 'ddf6570b-9175-4a6d-b288-61a09771c647'];
+    props.selectedPolicyIds = [testPolicyId1, testPolicyId2];
     const { getByTestId } = await render();
 
-    expect(getByTestId(`test-policy-${testPolicyId}`).getAttribute('aria-checked')).toEqual('true');
-    expect(
-      getByTestId(`test-policy-ddf6570b-9175-4a6d-b288-61a09771c647`).getAttribute('aria-checked')
-    ).toEqual('true');
+    expect(getByTestId(`test-policy-${testPolicyId1}`).getAttribute('aria-checked')).toEqual(
+      'true'
+    );
+    expect(getByTestId(`test-policy-${testPolicyId2}`).getAttribute('aria-checked')).toEqual(
+      'true'
+    );
 
     clickOnUnSelectAll();
 
@@ -166,7 +201,7 @@ describe('PolicySelector component', () => {
     props.useCheckbox = true;
     const { getByTestId } = await render();
 
-    expect(getByTestId(`test-policy-${testPolicyId}-checkbox`)).toBeTruthy();
+    expect(getByTestId(`test-policy-${testPolicyId1}-checkbox`)).toBeTruthy();
   });
 
   describe('and when "showPolicyLink" prop is true', () => {
@@ -245,42 +280,308 @@ describe('PolicySelector component', () => {
   });
 
   describe('and when the "Selected" policies button is clicked', () => {
-    it.todo('should displayed selected policies');
+    beforeEach(() => {
+      props.selectedPolicyIds = [testPolicyId1, testPolicyId2];
 
-    it.todo('should disable search field');
+      const renderComponent = render;
+      render = () =>
+        renderComponent().then(async (result) => {
+          clickOnViewSelected();
 
-    it.todo('should display total policies currently selected');
+          // Wait for API to be called
+          await waitFor(() => {
+            expect(apiMocks.responseProvider.bulkPackagePolicies).toHaveBeenCalled();
+            expect(renderResult.queryByTestId('test-isFetching')).toBeNull();
+          });
 
-    it.todo('should display "un-select all" button');
+          return result;
+        });
+    });
 
-    it.todo('should NOT display "select all" button');
+    it('should displayed selected policies', async () => {
+      const { getByTestId } = await render();
 
-    it.todo('should remove item from the list when it is unselected');
+      expect(getByTestId('test-policyFetchTotal').textContent).toEqual('2 policies selected');
+      expect(getByTestId(`test-policy-${testPolicyId1}`).getAttribute('aria-checked')).toEqual(
+        'true'
+      );
+      expect(getByTestId(`test-policy-${testPolicyId2}`).getAttribute('aria-checked')).toEqual(
+        'true'
+      );
+    });
 
-    it.todo('should revert back to the full policy list when all items are unselected');
+    it('should disable search field', async () => {
+      const { getByTestId } = await render();
+
+      expect((getByTestId('test-searchbar') as HTMLInputElement).disabled).toBe(true);
+    });
+
+    it('should display "un-select all" button', async () => {
+      const { getByTestId } = await render();
+
+      expect(getByTestId('test-unselectAllButton')).toBeTruthy();
+    });
+
+    it('should NOT display "select all" button', async () => {
+      const { queryByTestId } = await render();
+
+      expect(queryByTestId('test-selectAllButton')).toBeNull();
+    });
+
+    it('should remove item from the list when it is unselected', async () => {
+      const { queryByTestId, getByTestId } = await render();
+      clickOnPolicy(testPolicyId2);
+
+      expect(getByTestId('test-viewSelectedButton').textContent).toEqual('1 selected');
+      expect(props.onChange).toHaveBeenCalledWith([testPolicyId1], []);
+      await waitFor(() => {
+        expect(queryByTestId(`test-policy-${testPolicyId2}`)).toBeNull();
+      });
+    });
+
+    it('should revert back to the full policy list when all items are unselected', async () => {
+      const { getByTestId } = await render();
+      clickOnUnSelectAll();
+      await waitForDataToLoad();
+
+      expect(props.onChange).toHaveBeenCalledWith([], []);
+      expect((getByTestId('test-searchbar') as HTMLInputElement).disabled).toBe(false);
+      expect(getByTestId('test-viewSelectedButton').textContent).toEqual('0 selected');
+    });
   });
 
   describe('and "additionalListItems" prop is provided', () => {
-    it.todo('should display the additional items on the list');
+    beforeEach(() => {
+      props.additionalListItems = [
+        {
+          label: 'Item 1',
+          checked: 'on', // << This one is selected
+          'data-test-subj': 'customItem1',
+        },
+        {
+          label: 'Item 2',
+          checked: undefined,
+          'data-test-subj': 'customItem2',
+        },
+      ];
+    });
 
-    it.todo('should include selection updates to additional items in the call to onChange');
+    it('should display the additional items on the list', async () => {
+      const { getByTestId } = await render();
 
-    it.todo('should display with a checkbox when "useCheckbox" prop is true');
+      expect(getByTestId('customItem1')).toBeTruthy();
+      expect(getByTestId('customItem2')).toBeTruthy();
+      expect(getByTestId('test-viewSelectedButton').textContent).toEqual('1 selected');
+    });
+
+    it('should show custom items in the selected items', async () => {
+      const { getByTestId, queryByTestId } = await render();
+      clickOnViewSelected();
+      await waitForDataToLoad();
+
+      expect(getByTestId('customItem1')).toBeTruthy();
+      expect(queryByTestId('customItem2')).toBeNull();
+    });
+
+    it('should include selection updates to additional items in the call to onChange', async () => {
+      const { getByTestId } = await render();
+      act(() => {
+        fireEvent.click(getByTestId(`customItem1`));
+      });
+
+      expect(props.onChange).toHaveBeenCalledWith(
+        [],
+        [
+          {
+            label: 'Item 1',
+            checked: undefined,
+            'data-test-subj': 'customItem1',
+          },
+          {
+            label: 'Item 2',
+            checked: undefined,
+            'data-test-subj': 'customItem2',
+          },
+        ]
+      );
+    });
+
+    it('should display with a checkbox when "useCheckbox" prop is true', async () => {
+      props.useCheckbox = true;
+      const { getByTestId } = await render();
+
+      expect(getByTestId('test-customItem1-checkbox')).toBeTruthy();
+      expect(getByTestId('test-customItem2-checkbox')).toBeTruthy();
+    });
   });
 
-  it.todo('should use defined "queryOptions" in API call to fleet');
+  it('should default queryOptions.kuery to endpoint packages filter', async () => {
+    await render();
 
-  it.todo('should call "onChange" when policy selection changes');
+    expect(mockedContext.coreStart.http.get).toHaveBeenCalledWith(
+      packagePolicyRouteService.getListPath(),
+      {
+        query: {
+          kuery: 'ingest-package-policies.package.name: endpoint',
+          page: 1,
+          perPage: 20,
+          sortField: 'name',
+          sortOrder: 'asc',
+          withAgentCount: false,
+        },
+        version: '2023-10-31',
+      }
+    );
+  });
 
-  it.todo('should call "onFetch" when ever the Fleet API is called');
+  it('should use defined "queryOptions" in API call to fleet', async () => {
+    props.queryOptions = {
+      kuery: '',
+      perPage: 100,
+      sortField: 'description',
+      sortOrder: 'desc',
+      withAgentCount: true,
+    };
+    await render();
 
-  it.todo('should allow policy display configuration via "policyDisplayOptions" prop');
+    expect(mockedContext.coreStart.http.get).toHaveBeenCalledWith(
+      packagePolicyRouteService.getListPath(),
+      {
+        query: {
+          kuery: '',
+          page: 1,
+          perPage: 100,
+          sortField: 'description',
+          sortOrder: 'desc',
+          withAgentCount: true,
+        },
+        version: '2023-10-31',
+      }
+    );
+  });
 
-  it.todo('should display as readonly when "isDisabled" prop is true');
+  it('should call "onFetch" after having queried Fleet API', async () => {
+    props.selectedPolicyIds = [testPolicyId1];
+    props.onFetch = jest.fn();
+    await render();
 
-  it.todo('should display no policies found empty state');
+    expect(props.onFetch).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        page: 1,
+        perPage: 10,
+        total: 50,
+        items: expect.any(Array),
+      }),
+      type: 'search',
+      filtered: false,
+    });
 
-  it.todo('should display progress animation while fetching data from fleet');
+    // Click the selected policies and check that onFetch is called with the results from the Bulk Get API
+    clickOnViewSelected();
+    await waitForDataToLoad();
 
-  it.todo('should display API errors via a toast message');
+    expect(props.onFetch).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        page: 1,
+        perPage: 20,
+        total: 1,
+        items: expect.any(Array),
+      }),
+      type: 'selected',
+      filtered: false,
+    });
+  });
+
+  it('should allow policy display configuration via "policyDisplayOptions" prop', async () => {
+    props.policyDisplayOptions = jest.fn((_policy) => {
+      return { disabled: true };
+    });
+    const { getByTestId } = await render();
+
+    expect(getByTestId(`test-policy-${testPolicyId1}`).getAttribute('aria-disabled')).toEqual(
+      'true'
+    );
+    expect(getByTestId(`test-policy-${testPolicyId2}`).getAttribute('aria-disabled')).toEqual(
+      'true'
+    );
+    expect(getByTestId(`test-policy-${testPolicyId3}`).getAttribute('aria-disabled')).toEqual(
+      'true'
+    );
+  });
+
+  it('should display as readonly when "isDisabled" prop is true', async () => {
+    props.isDisabled = true;
+    props.useCheckbox = true;
+    props.selectedPolicyIds = [testPolicyId1];
+    props.additionalListItems = [{ label: 'custom item 1', 'data-test-subj': 'customItem1' }];
+    const { getByTestId } = await render();
+
+    [testPolicyId2, testPolicyId3].forEach((policyId) => {
+      expect(getByTestId(`test-policy-${policyId}`).getAttribute('aria-disabled')).toEqual('true');
+      expect((getByTestId(`test-policy-${policyId}-checkbox`) as HTMLInputElement).disabled).toBe(
+        true
+      );
+    });
+
+    // We don't disable custom items since those can be fully controlled by the caller of the component
+    expect(getByTestId('customItem1').getAttribute('aria-disabled')).toEqual('true');
+    expect((getByTestId('test-customItem1-checkbox') as HTMLInputElement).disabled).toBe(true);
+
+    expect((getByTestId('test-searchbar') as HTMLInputElement).disabled).toBe(true);
+    expect((getByTestId('test-selectAllButton') as HTMLButtonElement).disabled).toBe(true);
+    expect((getByTestId('test-unselectAllButton') as HTMLButtonElement).disabled).toBe(true);
+
+    // Pagination and View Selected button should NOT be disabled
+    expect((getByTestId('test-viewSelectedButton') as HTMLButtonElement).disabled).toBe(false);
+    expect((getByTestId('pagination-button-next') as HTMLButtonElement).disabled).toBe(false);
+
+    // should still be able to see selected, but they also would be disabled
+    clickOnViewSelected();
+    await waitForDataToLoad();
+
+    expect((getByTestId('test-unselectAllButton') as HTMLButtonElement).disabled).toBe(true);
+    expect(getByTestId(`test-policy-${testPolicyId1}`).getAttribute('aria-disabled')).toEqual(
+      'true'
+    );
+    expect(
+      (getByTestId(`test-policy-${testPolicyId1}-checkbox`) as HTMLInputElement).disabled
+    ).toBe(true);
+  });
+
+  it('should allow additionalListItems to override the isDisabled prop default', async () => {
+    props.isDisabled = true;
+    props.useCheckbox = true;
+    props.additionalListItems = [
+      { label: 'custom item 1', 'data-test-subj': 'customItem1', disabled: false },
+    ];
+    const { getByTestId } = await render();
+
+    expect(getByTestId('customItem1').getAttribute('aria-disabled')).toEqual('false');
+    expect((getByTestId('test-customItem1-checkbox') as HTMLInputElement).disabled).toBe(false);
+  });
+
+  it('should display no policies found empty state', async () => {
+    apiMocks.responseProvider.packagePolicies.mockReturnValue({
+      items: [],
+      page: 1,
+      perPage: 20,
+      total: 0,
+    });
+    const { getByTestId } = await render();
+
+    expect(getByTestId('test-noPolicies').textContent).toEqual('No policies found');
+  });
+
+  it('should display API errors via a toast message', async () => {
+    const err = new Error('something failed!');
+    apiMocks.responseProvider.packagePolicies.mockImplementation(() => {
+      throw err;
+    });
+    await render();
+
+    expect(mockedContext.coreStart.notifications.toasts.addError).toHaveBeenCalledWith(err, {
+      title: 'Failed to fetch list of policies',
+      toastMessage: undefined,
+    });
+  });
 });

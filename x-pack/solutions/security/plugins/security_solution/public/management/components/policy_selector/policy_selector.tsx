@@ -348,6 +348,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
             )
             .map((additionalItem) => {
               return {
+                disabled: isDisabled,
                 ...additionalItem,
                 'data-type': 'customItem',
                 prepend: useCheckbox ? (
@@ -357,7 +358,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
                     checked={additionalItem.checked === 'on'}
                     disabled={additionalItem.disabled ?? isDisabled}
                     data-test-subj={getTestId(
-                      `${additionalItem['data-test-subj'] ?? getTestId('additionalItem')}-checkbox`
+                      `${additionalItem['data-test-subj'] ?? 'additionalItem'}-checkbox`
                     )}
                   />
                 ) : null,
