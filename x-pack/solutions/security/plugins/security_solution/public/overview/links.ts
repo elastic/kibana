@@ -13,6 +13,7 @@ import {
   OVERVIEW_PATH,
   SecurityPageName,
   SECURITY_FEATURE_ID,
+  PRIV_USER_MON_PATH,
 } from '../../common/constants';
 import { DATA_QUALITY, DETECTION_RESPONSE, OVERVIEW, ENTITY_ANALYTICS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
@@ -65,6 +66,18 @@ export const entityAnalyticsLinks: LinkItem = {
       'Entity analytics, anomalies, and threats to narrow down the monitoring surface area.',
   }),
   path: ENTITY_ANALYTICS_PATH,
+  capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
+  isBeta: false,
+  licenseType: 'platinum',
+  globalSearchKeywords: [ENTITY_ANALYTICS],
+};
+
+export const privmonLinks: LinkItem = {
+  id: SecurityPageName.privilegedUserMonitoring,
+  title: 'Priv Mon',
+  landingImage: entityAnalyticsDashboard,
+  description: 'privileged user monitoring',
+  path: PRIV_USER_MON_PATH,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   isBeta: false,
   licenseType: 'platinum',

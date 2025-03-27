@@ -22,6 +22,7 @@ import {
   getNetworkDetailsPageFilter,
   fieldNameExistsFilter,
 } from './utils';
+import { buildESQLWithKQLQuery } from '../../utils/esql';
 
 export const useLensAttributes = ({
   applyGlobalQueriesAndFilters = true,
@@ -32,6 +33,7 @@ export const useLensAttributes = ({
   scopeId = SourcererScopeName.default,
   stackByField,
   title,
+  esql,
 }: UseLensAttributesProps): LensAttributes | null => {
   const { euiTheme } = useEuiTheme();
   const { selectedPatterns, dataViewId, indicesExist } = useSourcererDataView(scopeId);
@@ -40,7 +42,7 @@ export const useLensAttributes = ({
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
   );
-  const query = useDeepEqualSelector(getGlobalQuerySelector);
+  const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
   const [{ detailName, pageName, tabName }] = useRouteSpy();
 
@@ -70,13 +72,23 @@ export const useLensAttributes = ({
     return [];
   }, [detailName, pageName]);
 
+  const esqlQuery = useMemo(
+    () => (esql ? buildESQLWithKQLQuery(esql, globalQuery.query as string) : undefined),
+    [esql, globalQuery.query]
+  );
+
   const attrs: LensAttributes = useMemo(
     () =>
       lensAttributes ??
       ((getLensAttributes &&
         stackByField !== null &&
-        getLensAttributes({ stackByField, euiTheme, extraOptions })) as LensAttributes),
-    [euiTheme, extraOptions, getLensAttributes, lensAttributes, stackByField]
+        getLensAttributes({
+          stackByField,
+          euiTheme,
+          extraOptions,
+          esql: esqlQuery,
+        })) as LensAttributes),
+    [euiTheme, extraOptions, getLensAttributes, lensAttributes, stackByField, esqlQuery]
   );
 
   const hasAdHocDataViews = Object.values(attrs?.state?.adHocDataViews ?? {}).length > 0;
@@ -90,6 +102,8 @@ export const useLensAttributes = ({
     }
 
     const indexFilters = hasAdHocDataViews ? [] : getIndexFilters(selectedPatterns);
+    const query = esqlQuery ? { esql: esqlQuery } : globalQuery;
+
     return {
       ...attrs,
       ...(title != null ? { title } : {}),
@@ -110,20 +124,21 @@ export const useLensAttributes = ({
       })),
     } as LensAttributes;
   }, [
+    lensAttributes,
+    getLensAttributes,
+    stackByField,
+    hasAdHocDataViews,
+    selectedPatterns,
+    esqlQuery,
+    globalQuery,
+    attrs,
+    title,
     applyGlobalQueriesAndFilters,
     applyPageAndTabsFilters,
-    attrs,
-    dataViewId,
-    filters,
-    getLensAttributes,
-    hasAdHocDataViews,
-    lensAttributes,
     pageFilters,
-    query,
-    selectedPatterns,
-    stackByField,
     tabsFilters,
-    title,
+    filters,
+    dataViewId,
   ]);
   return hasAdHocDataViews || (!hasAdHocDataViews && indicesExist)
     ? lensAttrsWithInjectedData

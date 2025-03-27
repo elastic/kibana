@@ -29,6 +29,7 @@ export type GetLensAttributes = (params: {
   stackByField?: string;
   euiTheme: EuiThemeComputed;
   extraOptions?: ExtraOptions;
+  esql?: string;
 }) => LensAttributes;
 
 export interface UseLensAttributesProps {
@@ -40,6 +41,7 @@ export interface UseLensAttributesProps {
   scopeId?: SourcererScopeName;
   stackByField?: string;
   title?: string;
+  esql?: string;
 }
 
 export enum VisualizationContextMenuActions {
@@ -114,6 +116,11 @@ export interface LensEmbeddableComponentProps {
    * Metadata for cases Attachable visualization.
    */
   casesAttachmentMetadata?: LensProps['metadata'];
+
+  /**
+   * When provided it will render an visualization where the query is ESQL.
+   */
+  esql?: string;
 }
 
 export enum RequestStatus {

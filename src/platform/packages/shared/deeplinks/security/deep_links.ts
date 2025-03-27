@@ -80,6 +80,7 @@ export enum SecurityPageName {
   usersEvents = 'users-events',
   usersRisk = 'users-risk',
   entityAnalytics = 'entity_analytics',
+  privilegedUserMonitoring = 'privileged_user_monitoring',
   entityAnalyticsManagement = 'entity_analytics-management',
   entityAnalyticsAssetClassification = 'entity_analytics-asset-classification',
   entityAnalyticsEntityStoreManagement = 'entity_analytics-entity_store_management',
