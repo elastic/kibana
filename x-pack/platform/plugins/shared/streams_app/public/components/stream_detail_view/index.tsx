@@ -62,6 +62,7 @@ export function StreamDetailViewContent({ name, tab }: { name: string; tab: stri
       label: i18n.translate('xpack.streams.streamDetailView.significantEventsTab', {
         defaultMessage: 'Significant events',
       }),
+      background: true,
     },
     {
       name: 'management',

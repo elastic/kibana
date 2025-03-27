@@ -17,7 +17,6 @@ import { disableStreams, enableStreams, getQueries, putStream } from './helpers/
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const esClient = getService('es');
   let apiClient: StreamsSupertestRepositoryClient;
 
   const STREAM_NAME = 'logs.queries-test';
