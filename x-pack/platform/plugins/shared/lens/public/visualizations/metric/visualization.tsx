@@ -92,6 +92,7 @@ const getMetricLayerConfiguration = (
   };
 
   const isBucketed = (op: OperationMetadata) => op.isBucketed;
+  const canCollapseBy = isMetricNumeric && props.state.collapseFn;
 
   return {
     groups: [
@@ -182,7 +183,7 @@ const getMetricLayerConfiguration = (
           ? [
               {
                 columnId: props.state.breakdownByAccessor,
-                triggerIconType: props.state.collapseFn ? ('aggregate' as const) : undefined,
+                triggerIconType: canCollapseBy ? ('aggregate' as const) : undefined,
               },
             ]
           : [],

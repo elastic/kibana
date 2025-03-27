@@ -82,7 +82,7 @@ export function DimensionEditor(props: Props) {
   }
 }
 
-function BreakdownByEditor({ setState, state }: SubProps) {
+function BreakdownByEditor({ setState, state, datasource }: SubProps) {
   const setMaxCols = useCallback(
     (columns: string) => {
       setState({ ...state, maxCols: parseInt(columns, 10) });
@@ -95,6 +95,8 @@ function BreakdownByEditor({ setState, state }: SubProps) {
       onChange: setMaxCols,
       value: String(state.maxCols ?? DEFAULT_MAX_COLUMNS),
     });
+
+  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
 
   return (
     <>
@@ -113,15 +115,18 @@ function BreakdownByEditor({ setState, state }: SubProps) {
           onChange={({ target: { value } }) => handleMaxColsChange(value)}
         />
       </EuiFormRow>
-      <CollapseSetting
-        value={state.collapseFn || ''}
-        onChange={(collapseFn) => {
-          setState({
-            ...state,
-            collapseFn,
-          });
-        }}
-      />
+      {isMetricNumeric ? (
+        <CollapseSetting
+          display="columnCompressed"
+          value={state.collapseFn || ''}
+          onChange={(collapseFn) => {
+            setState({
+              ...state,
+              collapseFn,
+            });
+          }}
+        />
+      ) : null}
     </>
   );
 }
