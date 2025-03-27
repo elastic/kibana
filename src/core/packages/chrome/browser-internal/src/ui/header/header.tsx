@@ -47,6 +47,8 @@ import { BreadcrumbsWithExtensionsWrapper } from './breadcrumbs_with_extensions'
 import { HeaderTopBanner } from './header_top_banner';
 import { HeaderMenuButton } from './header_menu_button';
 import { ScreenReaderRouteAnnouncements, SkipToMainContent } from './screen_reader_a11y';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { css } from '@emotion/react';
 
 export interface HeaderProps {
   kibanaVersion: string;
@@ -203,11 +205,18 @@ export function Header({
 
               <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
             </EuiHeaderSection>
-            <BreadcrumbsWithExtensionsWrapper
-              breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
+            <RedirectAppLinks
+              coreStart={{ application }}
+              css={css`
+                min-width: 0; // enable text truncation for long breadcrumb titles
+              `}
             >
-              {Breadcrumbs}
-            </BreadcrumbsWithExtensionsWrapper>
+              <BreadcrumbsWithExtensionsWrapper
+                breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
+              >
+                {Breadcrumbs}
+              </BreadcrumbsWithExtensionsWrapper>
+            </RedirectAppLinks>
 
             <HeaderBadge badge$={observables.badge$} />
 
