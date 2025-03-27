@@ -95,7 +95,7 @@ export function GoodBadEventsChart({
 
   return (
     <>
-      {isLoading && <EuiLoadingChart size="m" mono data-test-subj="sliEventsChartLoading" />}
+      {isLoading && <EuiLoadingChart size="m" data-test-subj="sliEventsChartLoading" />}
 
       {!isLoading && (
         <Chart size={{ height: 200, width: '100%' }} ref={chartRef}>
