@@ -55,12 +55,7 @@ export class ChatService {
   private readonly conversationService: ConversationService;
   private readonly agentFactory: AgentFactory;
 
-  constructor({
-    inference,
-    logger,
-    conversationService,
-    agentFactory,
-  }: ChatServiceOptions) {
+  constructor({ inference, logger, conversationService, agentFactory }: ChatServiceOptions) {
     this.inference = inference;
     this.logger = logger;
     this.conversationService = conversationService;
