@@ -38,7 +38,6 @@ export class RuleMigrationsDataClient {
       dependencies
     );
     this.rules = new RuleMigrationsDataRulesClient(
-      this.migrations,
       indexNameProviders.rules,
       currentUser,
       esScopedClient,
