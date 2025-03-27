@@ -50,8 +50,7 @@ const asyncNoop = async () => {};
 
 export class StreamManager {
   private readonly clientStreams: Map<SynthtraceEsClient<Fields>, PassThrough> = new Map();
-  private readonly trackedStreams: Readable[] = [];
-  private readonly trackedGeneratorStream: Writable[] = [];
+  private readonly trackedGeneratorStreams: Writable[] = [];
   private readonly trackedWorkers: Worker[] = [];
 
   constructor(
@@ -101,21 +100,22 @@ export class StreamManager {
     const clientStream = this.createOrReuseClientStream(client);
     const generatorStream = new PassThrough({ objectMode: true });
     const generatorArray = castArray(generator);
+    const streams: Readable[] = [];
 
     generatorArray.reverse().forEach((current) => {
       const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
       currentStream.pipe(generatorStream, { end: false });
-      this.trackedStreams.push(currentStream);
+      streams.push(currentStream);
 
       currentStream.on('end', () => {
-        pull(this.trackedStreams, currentStream);
-        if (this.trackedStreams.length === 0) {
+        pull(streams, currentStream);
+        if (streams.length === 0) {
           generatorStream.end();
         }
       });
 
       currentStream.on('error', (err) => {
-        pull(this.trackedStreams, currentStream);
+        pull(streams, currentStream);
         generatorStream.destroy(err);
       });
     });
@@ -126,10 +126,10 @@ export class StreamManager {
     generatorStream.pipe(clientStream, { end: false });
 
     // track the stream for later to end it if needed
-    this.trackedGeneratorStream.push(generatorStream);
+    this.trackedGeneratorStreams.push(generatorStream);
 
     await awaitStream(generatorStream).finally(() => {
-      pull(this.trackedStreams, generatorStream);
+      pull(streams, generatorStream);
     });
   }
 
@@ -171,18 +171,11 @@ export class StreamManager {
       });
     }
 
-    if (this.trackedGeneratorStream.length) {
+    if (this.trackedGeneratorStreams.length) {
       // ending generator streams
-      this.logger.debug(`Ending ${this.trackedGeneratorStream.length} generator streams`);
+      this.logger.debug(`Ending ${this.trackedGeneratorStreams.length} generator streams`);
 
-      await Promise.all(this.trackedGeneratorStream.map(endStream));
-    }
-
-    if (this.trackedStreams.length) {
-      // ending generator streams
-      this.logger.debug(`Ending ${this.trackedStreams.length} tracked streams`);
-
-      await Promise.all(this.trackedStreams.map(endStream));
+      await Promise.all(this.trackedGeneratorStreams.map(endStream));
     }
 
     if (this.trackedWorkers.length) {
