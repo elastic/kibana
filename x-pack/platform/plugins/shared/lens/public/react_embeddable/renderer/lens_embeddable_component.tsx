@@ -7,9 +7,8 @@
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
-import { LensApi } from '../..';
 import { ExpressionWrapper } from '../expression_wrapper';
-import { LensInternalApi } from '../types';
+import { LensInternalApi, LensApi } from '../types';
 import { UserMessages } from '../user_messages/container';
 import { useMessages, useDispatcher } from './hooks';
 import { getViewMode } from '../helper';
@@ -34,8 +33,6 @@ export function LensEmbeddableComponent({
     blockingErrors,
     // has the render completed?
     hasRendered,
-    // has view mode changed?
-    latestViewMode,
   ] = useBatchedPublishingSubjects(
     internalApi.expressionParams$,
     internalApi.renderCount$,
@@ -43,7 +40,7 @@ export function LensEmbeddableComponent({
     api.rendered$,
     api.viewMode$
   );
-  const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(latestViewMode) === 'edit');
+  const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(api) === 'edit');
 
   const [warningOrErrors, infoMessages] = useMessages(internalApi);
 

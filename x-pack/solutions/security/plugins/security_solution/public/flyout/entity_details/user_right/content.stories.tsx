@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { EuiFlyout } from '@elastic/eui';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
@@ -16,17 +16,24 @@ import { UserPanelContent } from './content';
 
 const riskScoreData = { ...mockRiskScoreState, data: [] };
 
-storiesOf('Components/UserPanelContent', module)
-  .addDecorator((storyFn) => (
-    <StorybookProviders>
-      <TestProvider>
-        <EuiFlyout size="m" onClose={() => {}}>
-          {storyFn()}
-        </EuiFlyout>
-      </TestProvider>
-    </StorybookProviders>
-  ))
-  .add('default', () => (
+export default {
+  title: 'Components/UserPanelContent',
+
+  decorators: [
+    (storyFn) => (
+      <StorybookProviders>
+        <TestProvider>
+          <EuiFlyout size="m" onClose={() => {}}>
+            {storyFn()}
+          </EuiFlyout>
+        </TestProvider>
+      </StorybookProviders>
+    ),
+  ],
+} as Meta;
+
+export const Default = {
+  render: () => (
     <UserPanelContent
       managedUser={mockManagedUserData}
       observedUser={mockObservedUser}
@@ -40,8 +47,13 @@ storiesOf('Components/UserPanelContent', module)
       recalculatingScore={false}
       isLinkEnabled={true}
     />
-  ))
-  .add('integration disabled', () => (
+  ),
+
+  name: 'default',
+};
+
+export const IntegrationDisabled = {
+  render: () => (
     <UserPanelContent
       managedUser={{
         data: undefined,
@@ -59,8 +71,13 @@ storiesOf('Components/UserPanelContent', module)
       recalculatingScore={false}
       isLinkEnabled={true}
     />
-  ))
-  .add('no managed data', () => (
+  ),
+
+  name: 'integration disabled',
+};
+
+export const NoManagedData = {
+  render: () => (
     <UserPanelContent
       managedUser={{
         data: undefined,
@@ -78,8 +95,13 @@ storiesOf('Components/UserPanelContent', module)
       recalculatingScore={false}
       isLinkEnabled={true}
     />
-  ))
-  .add('no observed data', () => (
+  ),
+
+  name: 'no managed data',
+};
+
+export const NoObservedData = {
+  render: () => (
     <UserPanelContent
       managedUser={mockManagedUserData}
       observedUser={{
@@ -117,8 +139,13 @@ storiesOf('Components/UserPanelContent', module)
       recalculatingScore={false}
       isLinkEnabled={true}
     />
-  ))
-  .add('loading', () => (
+  ),
+
+  name: 'no observed data',
+};
+
+export const Loading = {
+  render: () => (
     <UserPanelContent
       managedUser={{
         data: undefined,
@@ -160,4 +187,7 @@ storiesOf('Components/UserPanelContent', module)
       recalculatingScore={false}
       isLinkEnabled={true}
     />
-  ));
+  ),
+
+  name: 'loading',
+};

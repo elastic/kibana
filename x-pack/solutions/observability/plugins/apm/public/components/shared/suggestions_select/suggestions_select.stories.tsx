@@ -6,14 +6,15 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import type { Meta, Story } from '@storybook/react';
+import type { StoryObj, Meta } from '@storybook/react';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
+import type { SuggestionsSelectProps } from '.';
 import { SuggestionsSelect } from '.';
 
-interface Args {
+interface Args extends SuggestionsSelectProps {
   allOption: EuiComboBoxOptionOption<string>;
   customOptionText: string;
   field: string;
@@ -52,23 +53,26 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example: Story<Args> = ({ allOption, customOptionText, field, placeholder }) => {
-  return (
-    <SuggestionsSelect
-      customOptions={[allOption]}
-      customOptionText={customOptionText}
-      fieldName={field}
-      onChange={() => {}}
-      placeholder={placeholder}
-      start={'2022-04-13T10:29:28.541Z'}
-      end={'2021-04-13T10:29:28.541Z'}
-    />
-  );
-};
-Example.args = {
-  allOption: { label: 'All the things', value: 'ALL_THE_THINGS' },
-  terms: ['thing1', 'thing2'],
-  customOptionText: 'Add {searchValue} as a new thing',
-  field: 'test.field',
-  placeholder: 'Select thing',
+export const Example: StoryObj<Args> = {
+  render: ({ allOption, customOptionText, field, placeholder }) => {
+    return (
+      <SuggestionsSelect
+        customOptions={[allOption]}
+        customOptionText={customOptionText}
+        fieldName={field}
+        onChange={() => {}}
+        placeholder={placeholder}
+        start={'2022-04-13T10:29:28.541Z'}
+        end={'2021-04-13T10:29:28.541Z'}
+      />
+    );
+  },
+
+  args: {
+    allOption: { label: 'All the things', value: 'ALL_THE_THINGS' },
+    terms: ['thing1', 'thing2'],
+    customOptionText: 'Add {searchValue} as a new thing',
+    field: 'test.field',
+    placeholder: 'Select thing',
+  },
 };
