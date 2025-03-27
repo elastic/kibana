@@ -16,7 +16,7 @@ import { useLLMsModels } from '../hooks/use_llms_models';
 
 type PartialChatForm = Partial<ChatForm>;
 export const LOCAL_STORAGE_KEY = 'search_playground_session';
-export const LOCAL_STORAGE_DEBOUNCE_OPTIONS = { wait: 500 };
+export const LOCAL_STORAGE_DEBOUNCE_OPTIONS = { wait: 100 };
 
 const DEFAULT_FORM_VALUES: PartialChatForm = {
   prompt: 'You are an assistant for question-answering tasks.',
