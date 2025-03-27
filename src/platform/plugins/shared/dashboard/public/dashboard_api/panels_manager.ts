@@ -389,7 +389,8 @@ export function initializePanelsManager(
           const serializeResult = apiHasSerializableState(childApi)
             ? childApi.serializeState()
             : getDashboardBackupService().getSerializedPanelBackup(id, dashboardId) ?? {
-                rawState: {},
+                rawState: panels$.value[id].explicitInput ?? {},
+                references: getReferencesForPanelId(id),
               };
           acc[id] = { ...panels$.value[id], explicitInput: { ...serializeResult.rawState, id } };
 
