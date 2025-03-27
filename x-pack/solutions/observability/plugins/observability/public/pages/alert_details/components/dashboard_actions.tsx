@@ -5,67 +5,78 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonIcon,
-  EuiButtonIconProps,
-  EuiPopover,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiContextMenuItem, EuiContextMenuPanel } from '@elastic/eui';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
+import { useKibana } from '../../../utils/kibana_react';
 
 interface DashboardActionsProps {
   dashboardId: string;
-  buttonProps?: Partial<EuiButtonIconProps>;
 }
 
-export function DashboardActions({ dashboardId, btnProps }: DashboardActionsProps) {
+export function DashboardActions({ dashboardId }: DashboardActionsProps) {
+  const {
+    services: {
+      share: { url: urlService },
+    },
+  } = useKibana();
+
+  const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
+
+  const handleGoToDashboard = async () => {
+    const dashboardLocator = urlService.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
+    if (!dashboardLocator) {
+      return undefined;
+    }
+    dashboardLocator.navigate({ dashboardId });
+  };
+
+  const handleUnlinkDashboard = () => {};
+
+  const handleDuplicateDashboard = () => {};
+
   const btn = (
     <EuiButtonIcon
       data-test-subj="o11ySloListItemButton"
-      aria-label={i18n.translate('xpack.slo.item.actions.button', {
+      aria-label={i18n.translate('xpack.observability.item.actions.button', {
         defaultMessage: 'Actions',
       })}
       color="text"
       display="empty"
-      iconType="boxesVertical"
+      iconType="boxesHorizontal"
       size="s"
-      onClick={() => {}}
-      {...btnProps}
+      onClick={() => setIsActionsPopoverOpen(!isActionsPopoverOpen)}
     />
   );
 
   return (
     <EuiPopover
-      anchorPosition="downRight"
+      anchorPosition="downLeft"
       button={btn}
       panelPaddingSize="none"
-      panelClassName="euiContextMenuPanel--fixed"
-      repositionOnScroll
+      isOpen={isActionsPopoverOpen}
     >
       <EuiContextMenuPanel
         items={[
-          <EuiContextMenuItem
-            key="viewDashboard"
-            icon="dashboardApp"
-            onClick={() => {
-              window.location.href = `#/dashboards/view/${dashboardId}`;
-            }}
-          >
+          <EuiContextMenuItem key="viewDashboard" icon="dashboardApp" onClick={handleGoToDashboard}>
             {i18n.translate('xpack.observability.dashboardActions.viewDashboard', {
-              defaultMessage: 'View dashboard',
+              defaultMessage: 'Go to dashboard',
             })}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
-            key="editDashboard"
-            icon="pencil"
-            onClick={() => {
-              window.location.href = `#/dashboards/edit/${dashboardId}`;
-            }}
+            key="duplicateDashboard"
+            icon="copy"
+            onClick={handleDuplicateDashboard}
           >
-            {i18n.translate('xpack.observability.dashboardActions.editDashboard', {
-              defaultMessage: 'Edit dashboard',
+            {i18n.translate('xpack.observability.dashboardActions.duplicateDashboard', {
+              defaultMessage: 'Duplicate dashboard',
+            })}
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem key="unlinkDashboard" icon="unlink" onClick={handleUnlinkDashboard}>
+            {i18n.translate('xpack.observability.dashboardActions.unlinkDashboard', {
+              defaultMessage: 'Remove from linked dashboards',
             })}
           </EuiContextMenuItem>,
         ]}

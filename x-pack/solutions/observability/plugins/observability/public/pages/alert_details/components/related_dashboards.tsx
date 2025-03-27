@@ -27,7 +27,9 @@ interface RelatedDashboardsProps {
 }
 
 export function RelatedDashboards({ alert, relatedDashboards }: RelatedDashboardsProps) {
-  const [dashboardTitles, setDashboardTitles] = useState<Array<{ id: string; title: string }>>([]);
+  const [dashboardsMeta, setDashboardsMeta] = useState<
+    Array<{ id: string; title: string; description: string }>
+  >([]);
 
   const {
     services: {
@@ -40,8 +42,8 @@ export function RelatedDashboards({ alert, relatedDashboards }: RelatedDashboard
 
   useEffect(() => {
     if ((relatedDashboards ?? []).length > 0 && dashboardService) {
-      const fetchDashboardTitles = async () => {
-        const dashboardsWithTitles = await Promise.all(
+      const fetchDashboards = async () => {
+        const dashboards = await Promise.all(
           (relatedDashboards ?? []).map(async (dashboard) => {
             const findDashboardsService = await dashboardService.findDashboardsService();
             const response = await findDashboardsService.findById(dashboard.id);
@@ -51,14 +53,15 @@ export function RelatedDashboards({ alert, relatedDashboards }: RelatedDashboard
             return {
               id: dashboard.id,
               title: response.attributes.title,
+              description: response.attributes.description,
             };
           })
         );
-        setDashboardTitles(dashboardsWithTitles);
+        setDashboardsMeta(dashboards);
       };
-      fetchDashboardTitles();
+      fetchDashboards();
     }
-  }, [relatedDashboards, dashboardService, setDashboardTitles]);
+  }, [relatedDashboards, dashboardService, setDashboardsMeta]);
 
   return (
     <div>
@@ -77,7 +80,7 @@ export function RelatedDashboards({ alert, relatedDashboards }: RelatedDashboard
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />
-      {dashboardTitles.map((dashboard) => (
+      {dashboardsMeta.map((dashboard) => (
         <>
           <EuiFlexGroup gutterSize="xs" responsive={false} key={dashboard.id}>
             <EuiFlexItem key={dashboard.id}>
@@ -99,36 +102,12 @@ export function RelatedDashboards({ alert, relatedDashboards }: RelatedDashboard
                   {dashboard.title}
                 </a>
               </EuiText>
+              <EuiText color={'subdued'} size="s">
+                {dashboard.description}
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <DashboardActions
-                dashboardId={dashboard.id}
-                btnProps={{
-                  iconType: 'boxesHorizontal',
-                  color: 'primary',
-                  display: 'empty',
-                }}
-              />
-              {/* <EuiText size="s">
-                <a
-                  href="#"
-                  onClick={async (e) => {
-                    e.preventDefault();
-                    if (dashboardLocator) {
-                      const url = await dashboardLocator.getUrl({
-                        dashboardId: dashboard.id,
-                      });
-                      window.open(url, '_blank');
-                    } else {
-                      console.error('Dashboard locator is not available');
-                    }
-                  }}
-                >
-                  {i18n.translate('xpack.observability.alertDetails.viewDashboard', {
-                    defaultMessage: 'View dashboard',
-                  })}
-                </a>
-              </EuiText> */}
+              <DashboardActions dashboardId={dashboard.id} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiHorizontalRule margin="xs" />
