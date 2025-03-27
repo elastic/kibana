@@ -81,7 +81,7 @@ export class ProductInterceptPrompter {
 
               if (
                 enabled &&
-                runCount >= (profileData?.userSettings?.lastInteractedInterceptId ?? 0)
+                runCount !== (profileData?.userSettings?.lastInteractedInterceptId ?? 0)
               ) {
                 this.registerIntercept(runCount, notifications.intercepts, eventReporter);
                 runCount++;
