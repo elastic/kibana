@@ -74,10 +74,7 @@ describe('.execute() & getHref', () => {
     const navigateToApp = jest.fn();
     const getUrlForApp = jest.fn((app, opt) => `${app}/${opt.path}`);
     const savedObjectsClient = savedObjectsServiceMock.createStartContract().client;
-    const definition = new DashboardAppLocatorDefinition({
-      useHashedUrl: false,
-      getDashboardFilterFields: async () => [],
-    });
+    const definition = new DashboardAppLocatorDefinition(false);
     const getLocationSpy = jest.spyOn(definition, 'getLocation');
     const drilldown = new EmbeddableToDashboardDrilldown({
       start: (() => ({
