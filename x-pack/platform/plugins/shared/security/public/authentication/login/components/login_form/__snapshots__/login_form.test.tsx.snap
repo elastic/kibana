@@ -51,6 +51,7 @@ exports[`LoginForm properly switches to login help: Login Help 1`] = `
 exports[`LoginForm renders as expected 1`] = `
 <Fragment>
   <EuiPanel
+    color="transparent"
     data-test-subj="loginForm"
   >
     <form
@@ -106,13 +107,12 @@ exports[`LoginForm renders as expected 1`] = `
         gutterSize="s"
         responsive={false}
       >
-        <EuiFlexItem
-          grow={false}
-        >
+        <EuiFlexItem>
           <EuiButton
             color="primary"
             data-test-subj="loginSubmit"
             fill={true}
+            fullWidth={true}
             isDisabled={false}
             isLoading={false}
             onClick={[Function]}

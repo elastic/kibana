@@ -6,8 +6,8 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
+import type { Meta } from '@storybook/react';
 import { ExpressionAstExpression } from '../../../../../types';
 
 import { ExtendedTemplate } from '../extended_template';
@@ -46,27 +46,39 @@ class Interactive extends React.Component<{}, typeof defaultValues> {
   }
 }
 
-storiesOf('arguments/AxisConfig', module)
-  .addDecorator((story) => (
-    <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-  ))
-  .add('extended', () => <Interactive />);
+export default {
+  title: 'arguments/AxisConfig',
 
-storiesOf('arguments/AxisConfig/components', module)
-  .addDecorator((story) => (
-    <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>
-  ))
-  .add('extended disabled', () => (
+  decorators: [
+    (story) => <div style={{ width: '323px', padding: '16px', background: '#fff' }}>{story()}</div>,
+  ],
+} as Meta;
+
+export const Extended = {
+  render: () => <Interactive />,
+  name: 'extended',
+};
+
+export const ExtendedDisabled = {
+  render: () => (
     <ExtendedTemplate
       onValueChange={action('onValueChange')}
       argValue={false}
       typeInstance={{ name: 'yaxis' }}
     />
-  ))
-  .add('extended', () => (
+  ),
+
+  name: 'extended disabled',
+};
+
+export const _Extended = {
+  render: () => (
     <ExtendedTemplate
       onValueChange={action('onValueChange')}
       argValue={defaultExpression}
       typeInstance={{ name: 'yaxis' }}
     />
-  ));
+  ),
+
+  name: 'extended',
+};

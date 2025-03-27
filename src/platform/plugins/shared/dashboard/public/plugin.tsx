@@ -29,7 +29,7 @@ import {
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { type EmbeddableSetup, type EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -61,10 +61,7 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
-import {
-  DashboardAppLocatorDefinition,
-  type DashboardAppLocator,
-} from './dashboard_app/locator/locator';
+import { DashboardAppLocatorDefinition } from './dashboard_app/locator/locator';
 import { DashboardMountContextProps } from './dashboard_app/types';
 import {
   DASHBOARD_APP_ID,
@@ -80,11 +77,8 @@ import type { FindDashboardsService } from './services/dashboard_content_managem
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
-import { PresentationPanelStart } from '@kbn/presentation-panel-plugin/public';
-
-export interface DashboardFeatureFlagConfig {
-  allowByValueEmbeddables: boolean;
-}
+import type { ConfigSchema } from '../server/config';
+import type { PresentationPanelStart } from '@kbn/presentation-panel-plugin/public';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -127,31 +121,16 @@ export interface DashboardStartDependencies {
   presentationPanel: PresentationPanelStart;
 }
 
-export interface DashboardSetup {
-  /**
-   * @deprecated
-   *
-   * Use `shareStartService.url.locators.get(DASHBOARD_APP_LOCATOR)` instead.
-   */
-  locator?: DashboardAppLocator;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface DashboardSetup {}
 
 export interface DashboardStart {
-  /**
-   * @deprecated
-   *
-   * Use `shareStartService.url.locators.get(DASHBOARD_APP_LOCATOR)` instead.
-   */
-  locator?: DashboardAppLocator;
-  dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   findDashboardsService: () => Promise<FindDashboardsService>;
   registerDashboardPanelPlacementSetting: <SerializedState extends object = object>(
     embeddableType: string,
     getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState>
   ) => void;
 }
-
-export let resolveServicesReady: () => void;
 
 export class DashboardPlugin
   implements
@@ -164,23 +143,18 @@ export class DashboardPlugin
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
-  private dashboardFeatureFlagConfig?: DashboardFeatureFlagConfig;
-  private locator?: DashboardAppLocator;
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
     { share, embeddable, home, urlForwarding, data, contentManagement }: DashboardSetupDependencies
-  ): DashboardSetup {
-    this.dashboardFeatureFlagConfig =
-      this.initializerContext.config.get<DashboardFeatureFlagConfig>();
-
+  ) {
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',
       schema: {},
     });
 
     if (share) {
-      this.locator = share.url.locators.create(
+      share.url.locators.create(
         new DashboardAppLocatorDefinition({
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
@@ -338,9 +312,7 @@ export class DashboardPlugin
       name: dashboardAppTitle,
     });
 
-    return {
-      locator: this.locator,
-    };
+    return {};
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
@@ -349,13 +321,12 @@ export class DashboardPlugin
     untilPluginStartServicesReady().then(() => {
       registerActions({
         plugins,
-        allowByValueEmbeddables: this.dashboardFeatureFlagConfig?.allowByValueEmbeddables,
+        allowByValueEmbeddables:
+          this.initializerContext.config.get<ConfigSchema>()?.allowByValueEmbeddables ?? true,
       });
     });
 
     return {
-      locator: this.locator,
-      dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       registerDashboardPanelPlacementSetting,
       findDashboardsService: async () => {
         const { getDashboardContentManagementService } = await import(

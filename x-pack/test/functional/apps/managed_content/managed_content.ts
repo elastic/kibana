@@ -29,13 +29,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Managed Content', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/managed_content');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/managed_content'
+      );
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/managed_content'
+        'src/platform/test/functional/fixtures/kbn_archiver/managed_content'
       );
       await kibanaServer.importExport.savedObjects.clean({ types: ['dashboard'] }); // we do create a new dashboard in this test
     });

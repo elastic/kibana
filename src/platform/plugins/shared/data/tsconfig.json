@@ -55,6 +55,9 @@
     "@kbn/esql-utils",
     "@kbn/shared-ux-table-persist",
     "@kbn/core-deprecations-common",
+    "@kbn/core-execution-context-common",
+    "@kbn/logging",
+    "@kbn/core-execution-context-server",
   ],
   "exclude": [
     "target/**/*",

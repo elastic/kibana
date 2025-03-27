@@ -11,7 +11,7 @@ import {
   type CoreQueryParams,
 } from '@kbn/response-ops-rule-params/index_threshold';
 import { MAX_GROUPS } from '@kbn/response-ops-rule-params/common';
-import { ObjectType, TypeOf } from '@kbn/config-schema';
+import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
 import { Comparator } from '../../../common/comparator_types';
 

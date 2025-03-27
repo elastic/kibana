@@ -24,6 +24,7 @@ import type {
 
 export * from './utils';
 export { getServiceMapNodes } from './get_service_map_nodes';
+export { getPaths } from './get_paths';
 
 export type {
   Connection,

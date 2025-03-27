@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/types';
-import {
-  AvgActionRunOutcomeByConnectorTypeBucket,
-  parseActionRunOutcomeByConnectorTypesBucket,
-} from './lib/parse_connector_type_bucket';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/types';
+import type { AvgActionRunOutcomeByConnectorTypeBucket } from './lib/parse_connector_type_bucket';
+import { parseActionRunOutcomeByConnectorTypesBucket } from './lib/parse_connector_type_bucket';
 import { AlertHistoryEsIndexConnectorId } from '../../common';
-import { ActionResult, InMemoryConnector } from '../types';
+import type { ActionResult, InMemoryConnector } from '../types';
 import {
   getInMemoryActions,
   getActions,
@@ -207,7 +205,7 @@ export async function getInUseTotalCount(
     },
   ] as QueryDslQueryContainer[];
 
-  if (!!referenceType) {
+  if (referenceType) {
     mustQuery.push({
       term: { type: referenceType },
     });

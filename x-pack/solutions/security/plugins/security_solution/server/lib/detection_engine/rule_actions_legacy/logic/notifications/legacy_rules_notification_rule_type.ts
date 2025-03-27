@@ -44,6 +44,7 @@ export const legacyRulesNotificationRuleType = ({
   defaultActionGroupId: 'default',
   category: DEFAULT_APP_CATEGORIES.security.id,
   producer: SERVER_APP_ID,
+  solution: 'security',
   validate: {
     params: legacyRulesNotificationParams,
   },

@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('saved objects management with hidden types', () => {
     before(async () => {
       await esArchiver.load(
-        'test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
+        'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
       );
       await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('management');
@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload(
-        'test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
+        'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
       );
       await kibanaServer.savedObjects.cleanStandardList();
     });

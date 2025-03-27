@@ -37,7 +37,7 @@ import { layerTypes } from '../../common/layer_types';
 describe('lensSlice', () => {
   let store: EnhancedStore<{ lens: LensAppState }>;
   beforeEach(() => {
-    store = makeLensStore({}).store;
+    store = makeLensStore().store;
     jest.clearAllMocks();
   });
   const customQuery = { query: 'custom' } as Query;
