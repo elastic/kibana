@@ -11,6 +11,7 @@ import { IngestStreamGetResponse, isWiredStreamDefinition } from '@kbn/streams-s
 import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 
 import { computeInterval } from '@kbn/visualization-utils';
+import moment, { DurationInputArg1, DurationInputArg2 } from 'moment';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
@@ -155,6 +156,8 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
 
   const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
 
+  const [value, unit] = bucketSize.split(' ') as [DurationInputArg1, DurationInputArg2];
+
   return (
     <>
       <EuiFlexGroup direction="column">
@@ -210,7 +213,11 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
               <StreamChartPanel
                 histogramQueryFetch={histogramQueryFetch}
                 discoverLink={discoverLink}
-                timerange={{ start, end }}
+                xDomain={{
+                  min: start,
+                  max: end,
+                  minInterval: moment.duration(value, unit).asMilliseconds(),
+                }}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

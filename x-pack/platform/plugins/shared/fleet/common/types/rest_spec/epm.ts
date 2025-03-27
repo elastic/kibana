@@ -157,6 +157,23 @@ export interface BulkInstallPackagesResponse {
   items: Array<BulkInstallPackageInfo | IBulkInstallPackageHTTPError>;
 }
 
+export interface BulkUpgradePackagesRequest {
+  packages: Array<{ name: string; version?: string }>;
+  upgrade_package_policies?: boolean;
+  force?: boolean;
+  prerelease?: boolean;
+}
+
+export interface BulkUpgradePackagesResponse {
+  taskId: string;
+}
+
+export interface GetOneBulkUpgradePackagesResponse {
+  status: string;
+  error?: { message: string };
+  results?: Array<{ success?: boolean; error?: { message: string } }>;
+}
+
 export interface BulkInstallPackagesRequest {
   body: {
     packages: string[];

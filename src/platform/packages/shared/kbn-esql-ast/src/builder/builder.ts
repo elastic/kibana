@@ -40,6 +40,8 @@ import {
   ESQLNullLiteral,
   BinaryExpressionOperator,
   ESQLParamKinds,
+  ESQLMap,
+  ESQLMapEntry,
 } from '../types';
 import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
@@ -439,6 +441,42 @@ export namespace Builder {
         };
       };
     }
+
+    export const map = (
+      template: Omit<AstNodeTemplate<ESQLMap>, 'name' | 'entries'> &
+        Partial<Pick<ESQLMap, 'entries'>> = {},
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLMap => {
+      const entries = template.entries ?? [];
+
+      return {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        name: '',
+        type: 'map',
+        entries,
+      };
+    };
+
+    export const entry = (
+      key: string | ESQLMapEntry['key'],
+      value: ESQLMapEntry['value'],
+      fromParser?: Partial<AstNodeParserFields>,
+      template?: Omit<AstNodeTemplate<ESQLMapEntry>, 'key' | 'value'>
+    ): ESQLMapEntry => {
+      if (typeof key === 'string') {
+        key = Builder.expression.literal.string(key);
+      }
+
+      return {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        name: '',
+        type: 'map-entry',
+        key,
+        value,
+      };
+    };
   }
 
   export const identifier = (
