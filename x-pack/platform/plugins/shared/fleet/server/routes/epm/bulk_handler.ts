@@ -27,7 +27,7 @@ import {
   scheduleBulkUpgrade,
   getBulkOperationTaskResults,
 } from '../../tasks/packages_bulk_operations';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 async function validateInstalledPackages(
   savedObjectsClient: SavedObjectsClientContract,
