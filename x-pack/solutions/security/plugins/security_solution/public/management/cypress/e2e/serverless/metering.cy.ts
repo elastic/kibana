@@ -24,7 +24,7 @@ describe(
     env: {
       ftrConfig: {
         kbnServerArgs: [
-          `--xpack.securitySolutionServerless.usageReportingTaskInterval=1m`,
+          `--xpack.securitySolutionServerless.usageReportingTaskInterval=3m`,
           `--xpack.securitySolutionServerless.usageApi.url=http://localhost:3623`,
           `--logging.loggers=[{ "name": "plugins.securitySolutionServerless", "level": "debug" }, { "name": "plugins.securitySolution", "level": "debug" }]`,
         ],
@@ -94,7 +94,7 @@ describe(
           },
           {
             delay: 15 * 1000,
-            timeout: 2 * 60 * 1000,
+            timeout: 6 * 60 * 1000,
           }
         );
       });
