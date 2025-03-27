@@ -230,6 +230,7 @@ export function ChatBody({
         namespace,
         public: isPublic,
         '@timestamp': timestamp,
+        archived,
       } = conversation.value;
 
       const conversationWithoutMessagesAndTitle: ChatFeedback['conversation'] = {
@@ -239,6 +240,7 @@ export function ChatBody({
         numeric_labels: numericLabels,
         namespace,
         public: isPublic,
+        archived,
         conversation: { id, last_updated: lastUpdated },
       };
 
