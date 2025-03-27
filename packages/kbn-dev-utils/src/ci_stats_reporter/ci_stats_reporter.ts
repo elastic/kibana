@@ -341,6 +341,7 @@ export class CiStatsReporter {
           method: 'POST',
           url: path,
           baseURL: BASE_URL,
+          allowAbsoluteUrls: false,
           headers,
           data: body,
           params: query,

@@ -9273,6 +9273,7 @@ class CiStatsReporter {
           method: 'POST',
           url: path,
           baseURL: BASE_URL,
+          allowAbsoluteUrls: false,
           headers,
           data: body,
           params: query,
@@ -18809,7 +18810,7 @@ module.exports = require("zlib");
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "VERSION", function() { return VERSION; });
-const VERSION = "1.8.2";
+const VERSION = "1.8.3";
 
 /***/ }),
 /* 239 */
@@ -19676,7 +19677,7 @@ __webpack_require__.r(__webpack_exports__);
 
   newConfig.headers = headers = _core_AxiosHeaders_js__WEBPACK_IMPORTED_MODULE_6__["default"].from(headers);
 
-  newConfig.url = Object(_buildURL_js__WEBPACK_IMPORTED_MODULE_7__["default"])(Object(_core_buildFullPath_js__WEBPACK_IMPORTED_MODULE_4__["default"])(newConfig.baseURL, newConfig.url), config.params, config.paramsSerializer);
+  newConfig.url = Object(_buildURL_js__WEBPACK_IMPORTED_MODULE_7__["default"])(Object(_core_buildFullPath_js__WEBPACK_IMPORTED_MODULE_4__["default"])(newConfig.baseURL, newConfig.url, newConfig.allowAbsoluteUrls), config.params, config.paramsSerializer);
 
   // HTTP basic authentication
   if (auth) {
