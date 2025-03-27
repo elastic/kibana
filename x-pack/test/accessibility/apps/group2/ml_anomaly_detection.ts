@@ -49,7 +49,12 @@ export default function ({ getService }: FtrProviderContext) {
       describe('with no data loaded', function () {
         it('anomaly detection page', async () => {
           await ml.navigation.navigateToMl();
-          await ml.navigation.navigateToAnomalyDetection();
+          await a11y.testAppSnapshot();
+
+          await ml.navigation.navigateToAnomalyExplorerWithSideNav();
+          await a11y.testAppSnapshot();
+
+          await ml.navigation.navigateToSingleMetricViewerWithSideNav();
           await a11y.testAppSnapshot();
         });
 
@@ -245,8 +250,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('anomaly detection jobs list page', async () => {
-          await ml.navigation.navigateToMl();
-          await ml.navigation.navigateToAnomalyDetection();
+          await ml.navigation.navigateToJobManagement();
           await a11y.testAppSnapshot();
         });
 
@@ -303,7 +307,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('anomaly detection create multi metric job and move to time range step', async () => {
           // Proceed all the way to the step for selecting the time range
           // as the other steps have already been tested for the single metric job
-          await ml.navigation.navigateToAnomalyDetection();
+          await ml.navigation.navigateToJobManagement();
           await ml.jobManagement.navigateToNewJobSourceSelection();
           await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(fqIndexName);
           await ml.jobTypeSelection.selectMultiMetricJob();
@@ -577,8 +581,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('anomaly detection Single Metric Viewer page', async () => {
-          await ml.navigation.navigateToMl();
-          await ml.navigation.navigateToAnomalyDetection();
+          await ml.navigation.navigateToJobManagement();
           await ml.jobTable.clickOpenJobInSingleMetricViewerButton(adJobId);
           await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
 
