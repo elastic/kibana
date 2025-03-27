@@ -79,6 +79,11 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
 
   let content: React.ReactNode | undefined;
 
+  const createTemplateLink = locator?.getRedirectUrl({
+    page: 'create_component_template',
+    componentTemplate: decodedComponentTemplateName,
+  });
+
   if (isLoading) {
     content = (
       <SectionLoading>
@@ -114,20 +119,14 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
               }}
             />
           </p>
-          <EuiButton
-            color="warning"
-            href={
-              locator?.getRedirectUrl({
-                page: 'create_component_template',
-                componentTemplate: decodedComponentTemplateName,
-              }) || ''
-            }
-          >
-            <FormattedMessage
-              id="xpack.idxMgmt.componentTemplateDetails.createMissingIntegrationTemplate.button"
-              defaultMessage="Create component template"
-            />
-          </EuiButton>
+          {createTemplateLink && (
+            <EuiButton color="warning" href={createTemplateLink}>
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplateDetails.createMissingIntegrationTemplate.button"
+                defaultMessage="Create component template"
+              />
+            </EuiButton>
+          )}
         </EuiCallOut>
       );
     } else {

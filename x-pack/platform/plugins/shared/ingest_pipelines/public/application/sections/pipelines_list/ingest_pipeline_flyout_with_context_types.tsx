@@ -8,7 +8,7 @@
 import { IngestPipelineFlyoutProps } from '../../../types';
 import { AppServices, CoreServices } from '../..';
 
-export type IngestPipelineFlyoutWithContextProps = {
+export interface IngestPipelineFlyoutWithContextProps extends IngestPipelineFlyoutProps {
   services: AppServices;
   coreServices: CoreServices;
-} & IngestPipelineFlyoutProps;
+}

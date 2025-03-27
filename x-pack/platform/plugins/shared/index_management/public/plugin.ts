@@ -45,6 +45,7 @@ import { IndexManagementLocatorDefinition } from './locator';
 import { ComponentTemplateFlyout } from './application/components/component_templates/component_templates_flyout_embeddable';
 import { DataStreamFlyout } from './application/sections/home/data_stream_list/data_stream_detail_panel/data_stream_flyout_embeddable';
 import { IndexTemplateFlyout } from './application/sections/home/template_list/template_details/index_template_flyout_embeddable';
+import React from 'react';
 
 export class IndexMgmtUIPlugin
   implements
@@ -248,7 +249,7 @@ export class IndexMgmtUIPlugin
       },
       getIndexSettingsComponent: (deps: { history: ScopedHistory<unknown> }) => {
         return (props: IndexSettingProps) => {
-          return IndexSettings({
+          return React.createElement(IndexSettings, {
             ...this.buildComponentDependencies(coreStart, plugins, deps),
             ...props,
           });
@@ -256,7 +257,7 @@ export class IndexMgmtUIPlugin
       },
       getComponentTemplateFlyoutComponent: (deps: { history: ScopedHistory<unknown> }) => {
         return (props: ComponentTemplateFlyoutProps) => {
-          return ComponentTemplateFlyout({
+          return React.createElement(ComponentTemplateFlyout, {
             ...this.buildComponentDependencies(coreStart, plugins, deps),
             ...props,
           });
@@ -264,7 +265,7 @@ export class IndexMgmtUIPlugin
       },
       getIndexTemplateFlyoutComponent: (deps: { history: ScopedHistory<unknown> }) => {
         return (props: IndexTemplateFlyoutProps) => {
-          return IndexTemplateFlyout({
+          return React.createElement(IndexTemplateFlyout, {
             ...this.buildComponentDependencies(coreStart, plugins, deps),
             ...props,
           });
@@ -272,7 +273,7 @@ export class IndexMgmtUIPlugin
       },
       getDatastreamFlyoutComponent: (deps: { history: ScopedHistory<unknown> }) => {
         return (props: DatastreamFlyoutProps) => {
-          return DataStreamFlyout({
+          return React.createElement(DataStreamFlyout, {
             ...this.buildComponentDependencies(coreStart, plugins, deps),
             ...props,
           });

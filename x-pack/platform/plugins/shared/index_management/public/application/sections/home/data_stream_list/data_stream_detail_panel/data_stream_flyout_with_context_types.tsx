@@ -11,7 +11,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { AppDependencies } from '../../../../app_context';
 import { ExtensionsService } from '../../../../../services/extensions_service';
 
-export type DataStreamFlyoutWithContextProps = {
+export interface DataStreamFlyoutWithContextProps extends DatastreamFlyoutProps {
   core: CoreStart;
   // omitting services here to constitute them inside the component
   // this helps reduce bundle size significantly
@@ -19,4 +19,4 @@ export type DataStreamFlyoutWithContextProps = {
     services: { extensionsService: ExtensionsService };
   };
   usageCollection: UsageCollectionSetup;
-} & DatastreamFlyoutProps;
+};

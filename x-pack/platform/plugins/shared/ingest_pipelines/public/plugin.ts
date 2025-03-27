@@ -33,6 +33,7 @@ import type {
 } from './types';
 import { IngestPipelinesLocatorDefinition } from './locator';
 import { IngestPipelineFlyout } from './application/sections/pipelines_list/ingest_pipeline_flyout_embeddable';
+import React from 'react';
 
 export class IngestPipelinesPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
@@ -130,7 +131,7 @@ export class IngestPipelinesPlugin
         };
 
         return (props: IngestPipelineFlyoutProps) => {
-          return IngestPipelineFlyout({
+          return React.createElement(IngestPipelineFlyout, {
             services,
             coreServices: core,
             ...props,

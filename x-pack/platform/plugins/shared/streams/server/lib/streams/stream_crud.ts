@@ -191,7 +191,7 @@ interface ReadUnmanagedAssetsDetailsParams extends BaseParams {
   assets: UnmanagedElasticsearchAssets;
 }
 
-export interface UnmanagedComponentTemplateDetails extends ClusterComponentTemplate {
+export type UnmanagedComponentTemplateDetails = (ClusterComponentTemplate | { name: string; component_template: undefined }) & {
   used_by: string[];
 }
 
@@ -202,49 +202,77 @@ export interface UnmanagedElasticsearchAssetDetails {
   dataStream: IndicesDataStream;
 }
 
+async function fetchComponentTemplate(
+  scopedClusterClient: IScopedClusterClient,
+  name: string
+): Promise<ClusterComponentTemplate | { name: string; component_template: undefined }> {
+  try {
+    const response = await scopedClusterClient.asCurrentUser.cluster.getComponentTemplate({ name });
+    return response.component_templates.find((template) => template.name === name) ?? {
+      name,
+      component_template: undefined,
+    };
+  } catch (e) {
+    if (e.meta?.statusCode === 404) {
+      return { name, component_template: undefined };
+    }
+    throw e;
+  }
+}
+
+async function fetchComponentTemplates(
+  scopedClusterClient: IScopedClusterClient,
+  names: string[],
+  allIndexTemplates: IndicesGetIndexTemplateIndexTemplateItem[]
+): Promise<UnmanagedComponentTemplateDetails[]> {
+  const templates = await Promise.all(
+    names.map((name) => fetchComponentTemplate(scopedClusterClient, name))
+  );
+
+  return templates
+    .filter((template): template is ClusterComponentTemplate | { name: string; component_template: undefined } => 
+      template !== undefined
+    )
+    .map((componentTemplate) => ({
+      ...componentTemplate,
+      used_by: allIndexTemplates
+        .filter((template) => template.index_template.composed_of.includes(componentTemplate.name))
+        .map((template) => template.name),
+    }));
+}
+
+async function fetchIngestPipeline(
+  scopedClusterClient: IScopedClusterClient,
+  pipelineId: string | undefined
+): Promise<(IngestPipeline & { name: string }) | undefined> {
+  if (!pipelineId) return undefined;
+  const response = await scopedClusterClient.asCurrentUser.ingest.getPipeline({ id: pipelineId });
+  return { ...response[pipelineId], name: pipelineId };
+}
+
 export async function getUnmanagedElasticsearchAssetDetails({
   scopedClusterClient,
   assets,
 }: ReadUnmanagedAssetsDetailsParams): Promise<UnmanagedElasticsearchAssetDetails> {
   const allIndexTemplates = (await scopedClusterClient.asCurrentUser.indices.getIndexTemplate())
     .index_templates;
-  const [ingestPipeline, componentTemplates, indexTemplate, dataStream] = await Promise.all([
-    assets.ingestPipeline
-      ? scopedClusterClient.asCurrentUser.ingest.getPipeline({ id: assets.ingestPipeline })
-      : undefined,
-    (
-      await Promise.all(
-        assets.componentTemplates.map(async (name) => {
-          try {
-            return (
-              await scopedClusterClient.asCurrentUser.cluster.getComponentTemplate({ name })
-            ).component_templates.find((template) => template.name === name);
-          } catch (e) {
-            if (e.meta?.statusCode === 404) {
-              // fall through and throw not found
-              return undefined;
-            } else {
-              throw e;
-            }
-          }
-        })
-      )
-    ).flatMap((template) => (template ? [template] : [])),
-    allIndexTemplates.find((template) => template.name === assets.indexTemplate),
+
+  const [ingestPipeline, componentTemplates, dataStreamResponse] = await Promise.all([
+    fetchIngestPipeline(scopedClusterClient, assets.ingestPipeline),
+    fetchComponentTemplates(scopedClusterClient, assets.componentTemplates, allIndexTemplates),
     scopedClusterClient.asCurrentUser.indices.getDataStream({ name: assets.dataStream }),
   ]);
+
+  const indexTemplate = allIndexTemplates.find((template) => template.name === assets.indexTemplate);
+  if (!indexTemplate) {
+    throw new Error(`Index template ${assets.indexTemplate} not found`);
+  }
+
   return {
-    ingestPipeline: assets.ingestPipeline
-      ? { ...ingestPipeline?.[assets.ingestPipeline], name: assets.ingestPipeline }
-      : undefined,
-    componentTemplates: componentTemplates.map((componentTemplate) => ({
-      ...componentTemplate,
-      used_by: allIndexTemplates
-        .filter((template) => template.index_template.composed_of.includes(componentTemplate.name))
-        .map((template) => template.name),
-    })),
-    indexTemplate: indexTemplate!,
-    dataStream: dataStream.data_streams[0],
+    ingestPipeline,
+    componentTemplates,
+    indexTemplate,
+    dataStream: dataStreamResponse.data_streams[0],
   };
 }
 

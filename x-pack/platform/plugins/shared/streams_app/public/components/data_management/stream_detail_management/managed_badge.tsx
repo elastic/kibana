@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 
 interface ManagedBadgeProps {
   meta?: {
@@ -16,16 +17,19 @@ interface ManagedBadgeProps {
 }
 
 export const ManagedBadge: React.FC<ManagedBadgeProps> = ({ meta }) => {
+  const theme = useEuiTheme();
   if (!meta?.managed) return null;
 
   return (
-    <>
-      {' '}
-      <EuiBadge color="hollow">
-        {i18n.translate('xpack.streams.streamDetailView.managed', {
-          defaultMessage: 'Managed',
-        })}
-      </EuiBadge>
-    </>
+    <EuiBadge
+      color="hollow"
+      className={css`
+        margin-left: ${theme.euiTheme.size.s};
+      `}
+    >
+      {i18n.translate('xpack.streams.streamDetailView.managed', {
+        defaultMessage: 'Managed',
+      })}
+    </EuiBadge>
   );
 };
