@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import {
   useEuiTheme,
@@ -34,6 +34,7 @@ import { VisualizationEmbeddable } from '../../../common/components/visualizatio
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 
 import {
   columnsArray,
@@ -70,18 +71,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   const riskData = data && data.length > 0 ? data[0] : undefined;
   const entityData = getEntityData<T>(entityType, riskData);
   const { euiTheme } = useEuiTheme();
-  const [spaceId, setSpaceId] = useState('default');
-
-  useEffect(() => {
-    const fetchSpace = async () => {
-      if (spaces?.getActiveSpace) {
-        const space = await spaces.getActiveSpace();
-        setSpaceId(space.id);
-      }
-    };
-
-    fetchSpace();
-  }, [spaces]);
+  const spaceId = useSpaceId();
   const lensAttributes = useMemo(() => {
     const entityName = entityData?.name ?? '';
     const fieldName = EntityTypeToIdentifierField[entityType];
