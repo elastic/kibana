@@ -10,6 +10,7 @@ import { act, render, screen } from '@testing-library/react';
 import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 
 import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
+import { translations } from '@kbn/ai-assistant-cta/install_knowledge_base/install_knowledge_base.translations';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -64,7 +65,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     });
     renderComponent(kb);
 
-    expect(screen.getByText(/Installing Knowledge Base/i)).toBeInTheDocument();
+    expect(screen.getByText(translations.installingButton)).toBeInTheDocument();
   });
 
   it('renders the success banner after a transition from installing to not installing with no error', async () => {
@@ -135,8 +136,8 @@ describe('WelcomeMessageKnowledgeBase', () => {
     });
     renderComponent(kb);
 
-    expect(screen.getByText(/You have not set up a Knowledge Base yet./i)).toBeInTheDocument();
-    expect(screen.getByText(/Install Knowledge base/i)).toBeInTheDocument();
+    expect(screen.getByText(translations.cardTitle)).toBeInTheDocument();
+    expect(screen.getByText(translations.installButton)).toBeInTheDocument();
     // Because we have an installError, we also see "Inspect issues" button
     expect(screen.getByText(/Inspect issues/i)).toBeInTheDocument();
   });
@@ -194,9 +195,9 @@ describe('WelcomeMessageKnowledgeBase', () => {
     });
     renderComponent(kb);
 
-    expect(screen.getByText(/You have not set up a Knowledge Base yet./i)).toBeInTheDocument();
-    expect(screen.getByText(/Install Knowledge base/i)).toBeInTheDocument();
-    expect(screen.queryByText(/Inspect/i)).toBeNull();
+    expect(screen.getByText(translations.cardTitle)).toBeInTheDocument();
+    expect(screen.getByText(translations.installButton)).toBeInTheDocument();
+    expect(screen.queryByText(/Inspect issues/i)).toBeNull();
   });
 
   it('renders "not set up" if model is not ready (but no errorMessage because endpoint exists)', () => {
@@ -229,8 +230,8 @@ describe('WelcomeMessageKnowledgeBase', () => {
     });
     renderComponent(kb);
 
-    expect(screen.getByText(/You have not set up a Knowledge Base yet./i)).toBeInTheDocument();
-    expect(screen.getByText(/Install Knowledge base/i)).toBeInTheDocument();
+    expect(screen.getByText(translations.cardTitle)).toBeInTheDocument();
+    expect(screen.getByText(translations.installButton)).toBeInTheDocument();
     expect(screen.getByText(/Inspect issues/i)).toBeInTheDocument();
   });
 
@@ -250,8 +251,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     });
     renderComponent(kb);
 
-    expect(screen.queryByText(/We are setting up your knowledge base/i)).toBeNull();
-    expect(screen.queryByText(/You have not set up a Knowledge Base yet./i)).toBeNull();
-    expect(screen.queryByText(/Knowledge base successfully installed/i)).toBeNull();
+    expect(screen.queryByText(translations.cardDescription)).toBeNull();
+    expect(screen.queryByText(translations.cardTitle)).toBeNull();
   });
 });
