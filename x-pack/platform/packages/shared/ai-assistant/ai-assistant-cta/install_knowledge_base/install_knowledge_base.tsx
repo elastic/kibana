@@ -12,6 +12,7 @@ import { AssistantCallToAction, type AssistantCallToActionProps } from '../call_
 import { translations } from './install_knowledge_base.translations';
 import { CallToActionCard } from '../call_to_action_panel';
 
+/** Data test subject for the install knowledge base button. */
 export const DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON = 'aiCTAInstallKnowledgeBaseButton';
 
 /**

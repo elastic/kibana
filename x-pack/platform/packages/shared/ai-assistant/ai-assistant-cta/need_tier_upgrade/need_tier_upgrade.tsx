@@ -13,6 +13,7 @@ import { AssistantCallToAction, type AssistantCallToActionProps } from '../call_
 import { translations } from './need_tier_upgrade.translations';
 import { CallToActionCard } from '../call_to_action_panel';
 
+/** Data test subject for the manage subscription button. */
 export const DATA_TEST_SUBJ_MANAGE_SUBSCRIPTION_BUTTON = 'aiCTAManageSubscriptionButton';
 
 /**

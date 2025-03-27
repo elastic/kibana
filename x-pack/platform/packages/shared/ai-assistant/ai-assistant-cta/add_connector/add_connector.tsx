@@ -11,6 +11,7 @@ import { EuiButton } from '@elastic/eui';
 import { AssistantCallToAction, type AssistantCallToActionProps } from '../call_to_action';
 import { translations } from './add_connector.translations';
 
+/** Data test subject for the add connector button. */
 export const DATA_TEST_SUBJ_ADD_CONNECTOR_BUTTON = 'aiCTAAddConnectorButton';
 
 /**

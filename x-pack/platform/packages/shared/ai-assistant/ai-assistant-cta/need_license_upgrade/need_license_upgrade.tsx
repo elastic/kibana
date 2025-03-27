@@ -12,6 +12,7 @@ import { AssistantCallToAction, type AssistantCallToActionProps } from '../call_
 
 import { translations } from './need_license_upgrade.translations';
 
+/** Data test subject for the manage license button. */
 export const DATA_TEST_SUBJ_MANAGE_LICENSE_BUTTON = 'aiCTAManageLicenseButton';
 
 /**

@@ -12,7 +12,9 @@ import { AssistantCallToAction, type AssistantCallToActionProps } from '../call_
 import { translations } from './no_connector_access.translations';
 import { CallToActionCard } from '../call_to_action_panel';
 
+/** Props for the `NoConnectorAccess` CTA component. */
 type NoConnectorAccessProps = Pick<AssistantCallToActionProps, 'data-test-subj' | 'centered'>;
+
 /**
  * A call to action that is displayed if the user does not have permission or ability to add a connector.
  */
