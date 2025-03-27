@@ -68,15 +68,32 @@ export const ProcessorFieldSelector = () => {
             margin-bottom: ${euiTheme.size.m};
           `}
         >
-          <p>Using field names with dots may lead to misleading simulation results.</p>
           <p>
-            Currently, our tool does not fully support this scenario, which combines nested fields
-            and dotted field names.
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorUnsupportedDottedFieldsWarning.p1',
+              {
+                defaultMessage:
+                  'Using field names with dots may lead to misleading simulation results.',
+              }
+            )}
           </p>
           <p>
-            We are working to improve support for such cases. For accurate results, consider
-            avoiding dotted field names or expanding them into nested objects until this feature is
-            fully implemented.
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorUnsupportedDottedFieldsWarning.p2',
+              {
+                defaultMessage:
+                  'Currently, our tool does not fully support this scenario, which combines nested fields and dotted field names.',
+              }
+            )}
+          </p>
+          <p>
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorUnsupportedDottedFieldsWarning.p3',
+              {
+                defaultMessage:
+                  'We are working to improve support for such cases. For accurate results, consider avoiding dotted field names or expanding them into nested objects until this feature is fully implemented.',
+              }
+            )}
           </p>
         </EuiCallOut>
       )}
