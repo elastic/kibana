@@ -58,13 +58,13 @@ async function getRootTransaction({
   );
 }
 
-export interface TransactionWithOnlyDuration {
+export interface Transaction {
   duration: number;
 }
 
 const useRootTransaction = ({ traceId, indexPattern }: UseRootTransactionParams) => {
   const { core, data } = getUnifiedDocViewerServices();
-  const [transaction, setTransaction] = useState<TransactionWithOnlyDuration | null>(null);
+  const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
