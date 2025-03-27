@@ -16,19 +16,19 @@ import { z } from '@kbn/zod';
 import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
 import { createServerRoute } from '../create_server_route';
 
-interface ListQueriesResponse {
+export interface ListQueriesResponse {
   queries: StreamQuery[];
 }
 
-interface UpsertQueryResponse {
+export interface UpsertQueryResponse {
   acknowledged: boolean;
 }
 
-interface DeleteQueryResponse {
+export interface DeleteQueryResponse {
   acknowledged: boolean;
 }
 
-type BulkUpdateAssetsResponse = { acknowledged: boolean } | { errors: ErrorCause[] };
+export type BulkUpdateAssetsResponse = { acknowledged: boolean } | { errors: ErrorCause[] };
 
 const listQueriesRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/queries 2023-10-31',
