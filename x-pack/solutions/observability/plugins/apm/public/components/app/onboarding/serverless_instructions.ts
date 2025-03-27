@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { ConfigSchema } from '../../..';
 import type { AgentInstructions, AgentApiKey } from './instruction_variants';
 import { INSTRUCTION_VARIANT } from './instruction_variants';
@@ -21,7 +22,9 @@ import {
   createOpenTelemetryAgentInstructions,
 } from './instructions';
 
-const DEFAULT_INSTRUCTION_TITLE = 'APM Agents';
+const DEFAULT_INSTRUCTION_TITLE = i18n.translate('xpack.apm.onboarding.defaultTitle', {
+  defaultMessage: 'APM Agents',
+});
 
 function convertApmServerUrlToOtlpServiceUrl(apmServerUrl: string) {
   if (!apmServerUrl) {
