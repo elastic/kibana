@@ -112,7 +112,6 @@ export const BuildPackages: Task = {
     await buildWebpackBundles(log, {
       quiet: false,
       dist: true,
-      reactVersion: process.env.REACT_18 ? '18' : '17',
     });
 
     const transformConfig: TransformConfig = {
@@ -313,7 +312,7 @@ export const BuildPackages: Task = {
 
 export async function buildWebpackBundles(
   log: ToolingLog,
-  { quiet, dist, reactVersion }: { quiet: boolean; dist: boolean; reactVersion: string }
+  { quiet, dist }: { quiet: boolean; dist: boolean }
 ) {
   async function buildPackage(packagePath: string) {
     const stdioOptions: Array<'ignore' | 'pipe' | 'inherit'> = quiet
@@ -324,7 +323,6 @@ export async function buildWebpackBundles(
       cwd: path.resolve(REPO_ROOT, packagePath),
       env: {
         ...process.env,
-        REACT_VERSION: reactVersion,
       },
       stdio: stdioOptions,
     });

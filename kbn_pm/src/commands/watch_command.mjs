@@ -31,7 +31,6 @@ export const command = {
       watchesFinished.push(
         watchPackage(packageName, {
           quiet: false,
-          reactVersion: process.env.REACT_18 ? '18' : '17',
         })
       );
     }

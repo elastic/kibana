@@ -14,15 +14,14 @@ import path from 'path';
 /**
  * Builds a single package using its npm build script
  * @param {string} packageName
- * @param {{quiet: boolean, reactVersion: string}} options
+ * @param {{quiet: boolean}} options
  * @returns {Promise<void>}
  */
-export async function buildPackage(packageName, { quiet, reactVersion }) {
+export async function buildPackage(packageName, { quiet }) {
   await run('yarn', ['build'], {
     env: {
       ...process.env,
       REPO_ROOT,
-      REACT_VERSION: reactVersion,
     },
     cwd: path.resolve(REPO_ROOT, packageName),
     pipe: !quiet,
@@ -32,15 +31,11 @@ export async function buildPackage(packageName, { quiet, reactVersion }) {
 /**
  * Runs the build script in watch mode for a single package
  * @param {string} packageName
- * @param {{quiet: boolean, reactVersion: string}} options
+ * @param {{quiet: boolean}} options
  * @returns {Promise<void>}
  */
-export async function watchPackage(packageName, { quiet, reactVersion }) {
+export async function watchPackage(packageName, { quiet }) {
   await run('yarn', ['build', '--watch'], {
-    env: {
-      ...process.env,
-      REACT_VERSION: reactVersion,
-    },
     cwd: path.resolve(REPO_ROOT, 'packages', packageName),
     pipe: !quiet,
   });

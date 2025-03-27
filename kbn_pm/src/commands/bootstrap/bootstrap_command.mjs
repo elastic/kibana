@@ -57,7 +57,6 @@ export const command = {
     const offline = args.getBooleanValue('offline') ?? false;
     const validate = args.getBooleanValue('validate') ?? true;
     const quiet = args.getBooleanValue('quiet') ?? false;
-    const reactVersion = process.env.REACT_18 ? '18' : '17';
     const vscodeConfig =
       args.getBooleanValue('vscode') ?? (process.env.KBN_BOOTSTRAP_NO_VSCODE ? false : true);
 
@@ -100,7 +99,7 @@ export const command = {
         'src/platform/packages/shared/kbn-monaco',
       ];
       for (const pkg of packageNames) {
-        await buildPackage(pkg, { quiet, reactVersion });
+        await buildPackage(pkg, { quiet });
       }
       log.success('build required webpack bundles for packages');
     });
