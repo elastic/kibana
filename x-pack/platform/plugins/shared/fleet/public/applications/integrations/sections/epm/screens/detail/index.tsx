@@ -622,6 +622,12 @@ export function Detail() {
       return [];
     }
     const packageInfoKey = pkgKeyFromPackageInfo(packageInfo);
+    const pathValues = {
+      pkgkey: packageInfoKey,
+      ...(integration ? { integration } : {}),
+      ...(returnAppId ? { returnAppId } : {}),
+      ...(returnPath ? { returnPath } : {}),
+    };
 
     const tabs: WithHeaderLayoutProps['tabs'] = [
       {
@@ -634,10 +640,7 @@ export function Detail() {
         ),
         isSelected: panel === 'overview',
         'data-test-subj': `tab-overview`,
-        href: getHref('integration_details_overview', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: getHref('integration_details_overview', pathValues),
       },
     ];
 
@@ -652,10 +655,7 @@ export function Detail() {
         ),
         isSelected: panel === 'policies',
         'data-test-subj': `tab-policies`,
-        href: getHref('integration_details_policies', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: getHref('integration_details_policies', pathValues),
       });
     }
 
@@ -676,10 +676,7 @@ export function Detail() {
         ),
         isSelected: panel === 'assets',
         'data-test-subj': `tab-assets`,
-        href: getHref('integration_details_assets', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: getHref('integration_details_assets', pathValues),
       });
     }
 
@@ -694,10 +691,7 @@ export function Detail() {
         ),
         isSelected: panel === 'settings',
         'data-test-subj': `tab-settings`,
-        href: getHref('integration_details_settings', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: getHref('integration_details_settings', pathValues),
       });
     }
 
@@ -712,10 +706,7 @@ export function Detail() {
         ),
         isSelected: panel === 'configs',
         'data-test-subj': `tab-configs`,
-        href: getHref('integration_details_configs', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: getHref('integration_details_configs', pathValues),
       });
     }
 
@@ -730,10 +721,7 @@ export function Detail() {
         ),
         isSelected: panel === 'custom',
         'data-test-subj': `tab-custom`,
-        href: getHref('integration_details_custom', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: getHref('integration_details_custom', pathValues),
       });
     }
 
@@ -748,16 +736,15 @@ export function Detail() {
         ),
         isSelected: panel === 'api-reference',
         'data-test-subj': `tab-api-reference`,
-        href: getHref('integration_details_api_reference', {
-          pkgkey: packageInfoKey,
-          ...(integration ? { integration } : {}),
-        }),
+        href: getHref('integration_details_api_reference', pathValues),
       });
     }
 
     return tabs;
   }, [
     packageInfo,
+    returnAppId,
+    returnPath,
     panel,
     getHref,
     integration,
