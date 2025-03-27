@@ -17,7 +17,11 @@ export const registerDeprecatedRoute = (router: IRouter) => {
       path: DEPRECATED_ROUTES.DEPRECATED_ROUTE,
       validate: false,
       security: {
-        authz: { enabled: false, reason: 'This route is opted out of authorization because it is only intended for test use' },
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out of authorization because it is only intended for test use',
+        },
       },
       options: {
         access: 'public',
@@ -42,7 +46,11 @@ export const registerDeprecatedRoute = (router: IRouter) => {
       path: DEPRECATED_ROUTES.REMOVED_ROUTE,
       validate: false,
       security: {
-        authz: { enabled: false, reason: 'This route is opted out of authorization because it is only intended for test use' },
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out of authorization because it is only intended for test use',
+        },
       },
       options: {
         access: 'public',
@@ -64,7 +72,11 @@ export const registerDeprecatedRoute = (router: IRouter) => {
     {
       path: DEPRECATED_ROUTES.MIGRATED_ROUTE,
       security: {
-        authz: { enabled: false, reason: 'This route is opted out of authorization because it is only intended for test use' },
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out of authorization because it is only intended for test use',
+        },
       },
       validate: {
         body: schema.object({

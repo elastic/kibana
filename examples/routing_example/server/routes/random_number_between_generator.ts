@@ -20,7 +20,11 @@ export function registerGetRandomNumberBetweenRoute(router: IRouter) {
     {
       path: RANDOM_NUMBER_BETWEEN_ROUTE_PATH,
       security: {
-        authz: { enabled: false, reason: 'This route is opted out of authorization because it is only intended for test use' },
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out of authorization because it is only intended for test use',
+        },
       },
       validate: {
         query: schema.object({
