@@ -62,7 +62,13 @@ export const ProcessorFieldSelector = () => {
         <EuiCallOut
           color="warning"
           iconType="alert"
-          title="Dot-separated field names are partially supported."
+          title={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorUnsupportedDottedFieldsWarning.title',
+            {
+              defaultMessage:
+                'Dot-separated field names are partially supported.',
+            }
+          )}
           css={css`
             margin-top: ${euiTheme.size.s};
             margin-bottom: ${euiTheme.size.m};
