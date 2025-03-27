@@ -500,9 +500,6 @@ $$$timelion-targetbuckets$$$`timelion:target_buckets`
 
 ### Visualization [kibana-visualization-settings]
 
-$$$visualization-colormapping$$$`visualization:colorMapping`
-:   [7.11.0] Maps values to specific colors in charts using the **Compatibility** palette.
-
 $$$visualization-uselegacytimeaxis$$$`visualization:useLegacyTimeAxis`
 :   [8.10.0] Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
 
