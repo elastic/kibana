@@ -8,20 +8,26 @@
 import { z } from '@kbn/zod';
 import type { SavedObject } from '@kbn/core/server';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
+import type { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common/data_views';
+import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 
 interface ContentPack {
+  name: string;
   content: string;
 }
 
 const contentPackSchema: z.Schema<ContentPack> = z.object({
+  name: z.string(),
   content: z.string(),
 });
 
-interface ContentPackSavedObject<T = unknown> {
+interface ContentPackSavedObject<
+  T = DashboardAttributes | LensAttributes | DataViewSavedObjectAttrs
+> {
   type: 'saved_object';
   content: SavedObject<T>;
 }
 
-type ContentPackObject = ContentPackSavedObject<DashboardAttributes>;
+type ContentPackObject = ContentPackSavedObject;
 
 export { contentPackSchema, type ContentPack, type ContentPackObject, type ContentPackSavedObject };

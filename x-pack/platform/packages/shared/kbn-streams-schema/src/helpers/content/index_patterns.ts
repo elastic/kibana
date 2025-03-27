@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mapValues, uniq } from 'lodash';
+import { cloneDeep, mapValues, uniq } from 'lodash';
 import { ESQLSource, EsqlQuery } from '@kbn/esql-ast';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { ContentPackSavedObject } from '@kbn/streams-schema';
@@ -21,12 +21,15 @@ export const INDEX_PLACEHOLDER = '<stream_name_placeholder>';
 
 export const isIndexPlaceholder = (index: string) => index.startsWith(INDEX_PLACEHOLDER);
 
-export function findIndexPatterns(
-  savedObject: ContentPackSavedObject<DashboardAttributes>['content']
-) {
+interface TraverseOptions {
+  esqlQuery(query: string): string;
+  indexPattern<T extends { name?: string; title?: string }>(pattern: T): T;
+}
+
+export function findIndexPatterns(savedObject: ContentPackSavedObject) {
   const patterns: string[] = [];
 
-  traversePanels(savedObject, {
+  locateIndexPatterns(savedObject, {
     esqlQuery(query: string) {
       patterns.push(...getIndexPatternFromESQLQuery(query).split(','));
       return query;
@@ -43,86 +46,105 @@ export function findIndexPatterns(
 }
 
 export function replaceIndexPatterns(
-  savedObject: ContentPackSavedObject<DashboardAttributes>['content'],
+  savedObject: ContentPackSavedObject,
   replacements: Record<string, string>
 ) {
-  const updatedPanels = traversePanels(savedObject, {
+  return locateIndexPatterns(cloneDeep(savedObject), {
     esqlQuery(query: string) {
       return replaceESQLIndexPattern(query, replacements);
     },
-    indexPattern<T extends { title?: string }>(pattern: T) {
+    indexPattern<T extends { name?: string; title?: string }>(pattern: T) {
+      const updatedPattern = pattern.title
+        ?.split(',')
+        .map((index) => replacements[index] ?? index)
+        .join(',');
+
       return {
         ...pattern,
-        title: pattern.title
-          ?.split(',')
-          .map((index) => replacements[index] ?? index)
-          .join(','),
+        name: updatedPattern,
+        title: updatedPattern,
       };
     },
   });
-
-  return {
-    ...savedObject,
-    attributes: { ...savedObject.attributes, panelsJSON: JSON.stringify(updatedPanels) },
-  };
 }
 
-export function traversePanels(
-  savedObject: ContentPackSavedObject<DashboardAttributes>['content'],
-  options: {
-    esqlQuery(query: string): string;
-    indexPattern<T extends { title?: string }>(pattern: T): T;
+function locateIndexPatterns(
+  object: ContentPackSavedObject,
+  options: TraverseOptions
+): ContentPackSavedObject {
+  const content = object.content;
+
+  if (content.type === 'index-pattern') {
+    content.attributes = options.indexPattern(content.attributes);
   }
-) {
-  const attributes = savedObject.attributes as DashboardAttributes;
-  const panels = JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[];
 
-  for (let i = 0; i < panels.length; i++) {
-    const panel = panels[i];
-    if (panel.type === 'lens') {
-      const { query: rootQuery, attributes: lensAttributes } =
-        panel.embeddableConfig as LensSerializedState;
-      if (rootQuery && 'esql' in rootQuery) {
-        rootQuery.esql = options.esqlQuery(rootQuery.esql);
-      }
+  if (content.type === 'lens') {
+    traverseLensPanel(content.attributes as LensAttributes, options);
+  }
 
-      const state = (lensAttributes as LensAttributes).state;
+  if (content.type === 'dashboard') {
+    const attributes = content.attributes as DashboardAttributes;
+    const panels = (JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[]).map((panel) =>
+      traversePanel(panel, options)
+    );
 
-      if (state.adHocDataViews) {
-        state.adHocDataViews = mapValues(state.adHocDataViews, (dataView) =>
-          options.indexPattern(dataView)
-        );
-      }
+    attributes.panelsJSON = JSON.stringify(panels);
+  }
 
-      const {
-        query: stateQuery,
-        datasourceStates: { textBased },
-      } = state;
+  return object;
+}
 
-      if (stateQuery && 'esql' in stateQuery) {
-        stateQuery.esql = options.esqlQuery(stateQuery.esql);
-      }
+function traversePanel(panel: SavedDashboardPanel, options: TraverseOptions) {
+  if (panel.type === 'lens') {
+    const config = panel.embeddableConfig as LensSerializedState;
+    if (config.query && 'esql' in config.query) {
+      config.query.esql = options.esqlQuery(config.query.esql);
+    }
 
-      if (textBased) {
-        Object.values(textBased.layers).forEach((layer) => {
-          if (layer.query?.esql) {
-            layer.query.esql = options.esqlQuery(layer.query.esql);
-          }
-        });
-
-        if ('indexPatternRefs' in textBased) {
-          textBased.indexPatternRefs = (textBased.indexPatternRefs as IndexPatternRef[]).map(
-            (ref) => options.indexPattern(ref)
-          );
-        }
-      }
+    if (config.attributes) {
+      traverseLensPanel(config.attributes as LensAttributes, options);
     }
   }
 
-  return panels;
+  return panel;
 }
 
-const replaceESQLIndexPattern = (esql: string, replacements: Record<string, string>) => {
+function traverseLensPanel(panel: LensAttributes, options: TraverseOptions) {
+  const state = panel.state;
+
+  if (state.adHocDataViews) {
+    state.adHocDataViews = mapValues(state.adHocDataViews, (dataView) =>
+      options.indexPattern(dataView)
+    );
+  }
+
+  const {
+    query: stateQuery,
+    datasourceStates: { textBased },
+  } = state;
+
+  if (stateQuery && 'esql' in stateQuery) {
+    stateQuery.esql = options.esqlQuery(stateQuery.esql);
+  }
+
+  if (textBased) {
+    Object.values(textBased.layers).forEach((layer) => {
+      if (layer.query?.esql) {
+        layer.query.esql = options.esqlQuery(layer.query.esql);
+      }
+    });
+
+    if ('indexPatternRefs' in textBased) {
+      textBased.indexPatternRefs = (textBased.indexPatternRefs as IndexPatternRef[]).map((ref) =>
+        options.indexPattern(ref)
+      );
+    }
+  }
+
+  return panel;
+}
+
+function replaceESQLIndexPattern(esql: string, replacements: Record<string, string>) {
   const query = EsqlQuery.fromSrc(esql);
   const sourceCommand = query.ast.commands.find(({ name }) => ['from', 'metrics'].includes(name));
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
@@ -132,4 +154,4 @@ const replaceESQLIndexPattern = (esql: string, replacements: Record<string, stri
     }
   });
   return query.print();
-};
+}

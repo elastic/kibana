@@ -7,6 +7,7 @@
 
 import { Readable } from 'stream';
 import { z } from '@kbn/zod';
+import { v4 } from 'uuid';
 import {
   createConcatStream,
   createFilterStream,
@@ -16,14 +17,13 @@ import {
 } from '@kbn/utils';
 import {
   ContentPack,
-  ContentPackObject,
+  ContentPackSavedObject,
   INDEX_PLACEHOLDER,
   contentPackSchema,
   findIndexPatterns,
   replaceIndexPatterns,
 } from '@kbn/streams-schema';
 import { SavedObject, SavedObjectsExportResultDetails } from '@kbn/core/server';
-import { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 
@@ -71,8 +71,12 @@ const exportContentRoute = createServerRoute({
         (savedObject) =>
           (savedObject as SavedObjectsExportResultDetails).exportedCount === undefined
       ),
-      createMapStream((savedObject: SavedObject<DashboardAttributes>) => {
-        const patterns = findIndexPatterns(savedObject);
+      createMapStream((savedObject: ContentPackSavedObject['content']) => {
+        const contentPackObject: ContentPackSavedObject = {
+          type: 'saved_object',
+          content: savedObject,
+        };
+        const patterns = findIndexPatterns(contentPackObject);
         const replacements = patterns
           .filter((pattern) => pattern.startsWith(params.path.name))
           .reduce((acc, pattern) => {
@@ -80,19 +84,20 @@ const exportContentRoute = createServerRoute({
             return acc;
           }, {} as Record<string, string>);
 
-        return JSON.stringify({
-          type: 'saved_object',
-          content:
-            patterns.length > 0 ? replaceIndexPatterns(savedObject, replacements) : savedObject,
-        });
+        return JSON.stringify(
+          patterns.length > 0
+            ? replaceIndexPatterns(contentPackObject, replacements)
+            : contentPackObject
+        );
       }),
       createConcatStream([]),
     ]);
 
+    const contentPack: ContentPack = { name: params.path.name, content: savedObjects.join('\n') };
     return response.ok({
-      body: { content: savedObjects.join('\n') },
+      body: contentPack,
       headers: {
-        'Content-Disposition': `attachment; filename="content.json"`,
+        'Content-Disposition': `attachment; filename="${contentPack.name}.json"`,
         'Content-Type': 'application/json',
       },
     });
@@ -148,8 +153,8 @@ const importContentRoute = createServerRoute({
       .split('\n')
       .map((object) => JSON.parse(object))
       .filter((object) => object.type === 'saved_object')
-      .map((object: ContentPackObject) => {
-        const patterns = findIndexPatterns(object.content);
+      .map((object: ContentPackSavedObject) => {
+        const patterns = findIndexPatterns(object);
         const replacements = patterns
           .filter((pattern) => pattern.startsWith(INDEX_PLACEHOLDER))
           .reduce((acc, pattern) => {
@@ -157,23 +162,25 @@ const importContentRoute = createServerRoute({
             return acc;
           }, {} as Record<string, string>);
 
-        return patterns.length > 0
-          ? replaceIndexPatterns(object.content, replacements)
-          : object.content;
+        if (patterns.length === 0) {
+          return object.content;
+        }
+
+        return replaceIndexPatterns(object, replacements).content;
       });
 
     const importer = (await context.core).savedObjects.getImporter(soClient);
     const { successResults, errors } = await importer.import({
-      readStream: createListStream(savedObjects),
-      createNewCopies: true,
-      overwrite: true,
+      readStream: createListStream(replaceReferences(savedObjects)),
+      createNewCopies: false,
+      overwrite: false,
     });
 
     const createdAssets = (successResults ?? [])
       .filter((savedObject) => savedObject.type === 'dashboard')
       .map((dashboard) => ({
         assetType: 'dashboard' as const,
-        assetId: dashboard.destinationId ?? dashboard.id,
+        assetId: dashboard.id,
       }));
 
     if (createdAssets.length > 0) {
@@ -188,6 +195,22 @@ const importContentRoute = createServerRoute({
     return { errors, created: createdAssets };
   },
 });
+
+function replaceReferences(savedObjects: ContentPackSavedObject['content'][]) {
+  const idReplacements = savedObjects.reduce((acc, object) => {
+    acc[object.id] = v4();
+    return acc;
+  }, {} as Record<string, string>);
+
+  savedObjects.forEach((object) => {
+    object.id = idReplacements[object.id];
+    object.references.forEach((ref) => {
+      ref.id = idReplacements[ref.id];
+    });
+  });
+
+  return savedObjects;
+}
 
 export const contentRoutes = {
   ...exportContentRoute,
