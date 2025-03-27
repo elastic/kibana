@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-export const useUserData = jest.fn().mockReturnValue([
-  {
-    loading: false,
-    isSignalIndexExists: true,
-    isAuthenticated: true,
-    hasEncryptionKey: true,
-    canUserCRUD: true,
-    canUserREAD: true,
-    hasIndexManage: true,
-    hasIndexMaintenance: true,
-    hasIndexWrite: true,
-    hasIndexRead: true,
-    hasIndexUpdateDelete: true,
-    signalIndexName: true,
-    signalIndexMappingOutdated: true,
-  },
-]);
+export const initialState = {
+  loading: false,
+  isSignalIndexExists: true,
+  isAuthenticated: true,
+  hasEncryptionKey: true,
+  canUserCRUD: true,
+  canUserREAD: true,
+  hasIndexManage: true,
+  hasIndexMaintenance: true,
+  hasIndexWrite: true,
+  hasIndexRead: true,
+  hasIndexUpdateDelete: true,
+  signalIndexName: true,
+  signalIndexMappingOutdated: true,
+};
+
+export const useUserData = jest.fn().mockReturnValue([initialState]);
+
+export const useUserInfo = jest.fn().mockReturnValue(initialState);
