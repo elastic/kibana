@@ -15,7 +15,7 @@ import { HttpInfoSummaryItem } from './http_info_summary_item';
 import { TransactionResultSummaryItem } from './transaction_result_summary_item';
 import { UserAgentSummaryItem } from './user_agent_summary_item';
 import { ColdStartBadge } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/badge/cold_start_badge';
-import { buildUrl } from './build_url';
+import { buildUrl } from '../../../utils/build_url';
 
 interface Props {
   transaction: Transaction;
@@ -26,14 +26,14 @@ interface Props {
 
 function getTransactionResultSummaryItem(transaction: Transaction) {
   const result = transaction.transaction.result;
-  const method = transaction.http?.request?.method;
-  const status = transaction.http?.response?.status_code;
   const urlFull = transaction.url?.full || transaction.transaction?.page?.url;
 
-  const urlFromFields = buildUrl(transaction, urlFull);
+  const url = urlFull ?? buildUrl(transaction);
 
-  if (urlFromFields || method || status) {
-    return <HttpInfoSummaryItem method={method} status={status} url={urlFromFields} />;
+  if (url) {
+    const method = transaction.http?.request?.method;
+    const status = transaction.http?.response?.status_code;
+    return <HttpInfoSummaryItem method={method} status={status} url={url} />;
   }
 
   if (result) {

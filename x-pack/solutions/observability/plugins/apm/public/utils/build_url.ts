@@ -5,25 +5,24 @@
  * 2.0.
  */
 import url from 'url';
-import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import type { Span } from '../../../../typings/es_schemas/ui/span';
-import type { APMError } from '../../../../typings/es_schemas/ui/apm_error';
+import type { Transaction } from '../../typings/es_schemas/ui/transaction';
+import type { Span } from '../../typings/es_schemas/ui/span';
+import type { APMError } from '../../typings/es_schemas/ui/apm_error';
 
-export const buildUrl = (item: Transaction | Span | APMError, urlFull: string | undefined) => {
-  if (urlFull) return urlFull;
+export const buildUrl = (item: Transaction | Span | APMError) => {
   // URL fields from Otel
   const urlScheme = item?.url?.scheme;
   const urlPath = item?.url?.path;
   const serverAddress = item?.server?.address;
   const serverPort = item?.server?.port;
 
-  const hasURLFromFields = urlScheme && serverAddress && serverPort;
+  const hasURLFromFields = urlScheme && serverAddress;
 
   return hasURLFromFields
     ? url.format({
         protocol: urlScheme, // 'https',
         hostname: serverAddress, // 'example.com',
-        port: serverPort, // 443,
+        ...(serverPort && { port: serverPort }), // 443,
         pathname: urlPath ?? '', // '/some/path',
       })
     : undefined;
