@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const retry = getService('retry');
   const inspector = getService('inspector');
+  const find = getService('find');
 
   const inspectorTrendlineData = [
     ['2015-09-19 06:00', '-'],
@@ -368,6 +369,75 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Extract the numeric decimals from the value without any compact suffix like k or m
       const decimals = (value?.split(`.`)[1] || '').match(/(\d)+/)?.[0];
       expect(decimals).have.length(3);
+    });
+
+    it('should show a badge for the secondary metric', async () => {
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+      await lens.switchToVisualization('lnsMetric', 'Metric');
+
+      // start with a numeric primary metric
+      await lens.configureDimension({
+        dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      // now add a secondary metric
+      await lens.configureDimension({
+        dimension: 'lnsMetric_secondaryMetricDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+        keepOpen: true,
+      });
+
+      // make sure there's no badge
+      expect(
+        await find.existsByCssSelector(
+          `[data-test-subj^="expressionMetricVis-secondaryMetric-badge-"]`
+        )
+      ).to.be(false);
+
+      // now configure a static badge color
+      await testSubjects.click('lnsMetric_color_mode_static');
+      expect(
+        await find.existsByCssSelector(
+          `[data-test-subj^="expressionMetricVis-secondaryMetric-badge-"]`
+        )
+      ).to.be(true);
+
+      // now change to dynamic badge color
+      await testSubjects.click('lnsMetric_color_mode_dynamic');
+      // and check for both the badge and the icon
+      expect(
+        await find.existsByCssSelector(
+          `[data-test-subj^="expressionMetricVis-secondaryMetric-badge-"] svg`
+        )
+      ).to.be(true);
+
+      // now show value only
+      await testSubjects.click('lnsMetric_secondary_trend_display_value');
+      // badge is there
+      expect(
+        await find.existsByCssSelector(
+          `[data-test-subj^="expressionMetricVis-secondaryMetric-badge-"]`
+        )
+      ).to.be(true);
+      // icon is not there any more
+      expect(
+        await find.existsByCssSelector(
+          `[data-test-subj^="expressionMetricVis-secondaryMetric-badge-"] svg`
+        )
+      ).to.be(false);
+
+      // enable the Primary metric baseline
+      await testSubjects.click('lnsMetric_secondary_trend_baseline_primary');
+      // and that the badge is still there
+      expect(
+        await find.existsByCssSelector(
+          `[data-test-subj^="expressionMetricVis-secondaryMetric-badge-"]`
+        )
+      ).to.be(true);
     });
   });
 }
