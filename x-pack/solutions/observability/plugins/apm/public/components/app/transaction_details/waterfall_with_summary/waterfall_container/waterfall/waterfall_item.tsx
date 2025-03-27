@@ -49,7 +49,7 @@ const Container = styled.div<IContainerStyleProps>`
   margin-right: ${(props) => props.timelineMargins.right}px;
   margin-left: ${(props) =>
     props.hasToggle
-      ? props.timelineMargins.left - 30 // fix margin if there is a toggle
+      ? props.timelineMargins.left - 20 // fix margin if there is a toggle (toggle width is 20px)
       : props.timelineMargins.left}px;
   background-color: ${({ isSelected, theme }) =>
     isSelected ? theme.euiTheme.colors.lightestShade : 'initial'};
@@ -242,6 +242,7 @@ export function WaterfallItem({
 
   const width = (item.duration / totalDuration) * widthFactor * 100;
   const left = (((item.offset + item.skew) / totalDuration) * widthFactor - widthFactor + 1) * 100;
+  console.log('### caue left:', item.id, left);
 
   const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
 
