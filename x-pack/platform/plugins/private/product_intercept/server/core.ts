@@ -171,15 +171,20 @@ export class ProductInterceptTriggerCore {
     }
 
     if (!existingTriggerDef) {
-      await this.savedObjectsClient?.create<InterceptTriggerRecord>(
-        interceptTriggerRecordSavedObject.name,
-        {
-          firstRegisteredAt: new Date().toISOString(),
-          triggerInterval: this.interceptTriggerInterval!,
-          installedOn: this.kibanaVersion!,
-        },
-        { id: this.defId }
-      );
+      await this.savedObjectsClient
+        ?.create<InterceptTriggerRecord>(
+          interceptTriggerRecordSavedObject.name,
+          {
+            firstRegisteredAt: new Date().toISOString(),
+            triggerInterval: this.interceptTriggerInterval!,
+            installedOn: this.kibanaVersion!,
+          },
+          { id: this.defId }
+        )
+        .catch((err) => {
+          // TODO: handle error properly
+          this.logger?.error(err);
+        });
     }
   }
 
