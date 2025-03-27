@@ -20,6 +20,7 @@ import {
 } from './types';
 import { AlertsTableCellValue } from './common/cell_value';
 import { AlertsFlyoutBody } from '../alerts_flyout/alerts_flyout_body';
+import { AlertsFlyoutHeader } from '../alerts_flyout/alerts_flyout_header';
 import { AlertsFlyoutFooter } from '../alerts_flyout/alerts_flyout_footer';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { getColumns } from './common/get_columns';
@@ -67,6 +68,7 @@ export function ObservabilityAlertsTable(props: Omit<ObservabilityAlertsTablePro
       renderCellValue={AlertsTableCellValue}
       renderActionsCell={AlertActions}
       actionsColumnWidth={120}
+      renderFlyoutHeader={AlertsFlyoutHeader}
       renderFlyoutBody={AlertsFlyoutBody}
       renderFlyoutFooter={AlertsFlyoutFooter}
       showAlertStatusWithFlapping
