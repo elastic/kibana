@@ -27,7 +27,7 @@ export const createAgentRunner = async ({
   chatModel: InferenceChatModel;
   integrationsSession: IntegrationsSession;
 }): Promise<AgentRunner> => {
-  const integrationTools = await getLCTools(integrationsSession);
+  const integrationTools = await getLCTools({ session: integrationsSession, logger });
 
   const agentGraph = await createAgentGraph({ agent, chatModel, integrationTools });
 

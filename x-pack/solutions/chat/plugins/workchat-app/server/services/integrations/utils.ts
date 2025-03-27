@@ -6,18 +6,28 @@
  */
 
 import { StructuredTool, tool as toTool } from '@langchain/core/tools';
+import { Logger } from '@kbn/core/server';
 import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import { IntegrationTool } from './types';
 import { IntegrationsSession } from './integrations_session';
 
-export async function getLCTools(
-  integrationsSession: IntegrationsSession
-): Promise<StructuredTool[]> {
-  const tools = await integrationsSession.getAllTools();
+export async function getLCTools({
+  session,
+  logger,
+}: {
+  session: IntegrationsSession;
+  logger: Logger;
+}): Promise<StructuredTool[]> {
+  const tools = await session.getAllTools();
   return tools.map((tool) =>
     convertToLCTool(tool, async (input) => {
-      const result = await integrationsSession.executeTool(tool.name, input);
-      return JSON.stringify(result);
+      try {
+        const result = await session.executeTool(tool.name, input);
+        return JSON.stringify(result);
+      } catch (e) {
+        logger.warn(`error calling tool ${tool.name}: ${e.message}`);
+        throw e;
+      }
     })
   );
 }

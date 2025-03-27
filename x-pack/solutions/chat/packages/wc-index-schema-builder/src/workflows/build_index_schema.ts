@@ -9,6 +9,7 @@ import { z } from '@kbn/zod';
 import { StateGraph, Annotation, Send } from '@langchain/langgraph';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { InferenceChatModel } from '@kbn/inference-langchain';
+import { getFieldTypeByPath, getFieldsTopValues } from '@kbn/wc-integration-utils';
 import type {
   IndexSourceDefinition,
   IndexSourceFilter,
@@ -18,8 +19,6 @@ import {
   getIndexInformation,
   getSampleDocuments,
   getLeafFields,
-  getFieldsTopValues,
-  getFieldTypeByPath,
   type IndexInformation,
   type SampleDocument,
 } from '../utils';

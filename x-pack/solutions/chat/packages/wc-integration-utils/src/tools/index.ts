@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { getIndexInformation, type IndexInformation } from './get_index_information';
-export { getLeafFields } from './get_leaf_fields';
-export { getSampleDocuments, type SampleDocument } from './get_sample_documents';
+export { generateSearchSchema, type SearchFilter } from './generate_search_schema';
+export { createFilterClauses } from './create_filter_clauses';
+export { hitToContent } from './hit_to_content';

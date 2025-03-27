@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { getIndexInformation, type IndexInformation } from './get_index_information';
-export { getLeafFields } from './get_leaf_fields';
-export { getSampleDocuments, type SampleDocument } from './get_sample_documents';
+export { getFieldsTopValues, getFieldTypeByPath } from './src/elasticsearch';
+export {
+  generateSearchSchema,
+  type SearchFilter,
+  createFilterClauses,
+  hitToContent,
+} from './src/tools';

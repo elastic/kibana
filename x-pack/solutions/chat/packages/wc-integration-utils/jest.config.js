@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { getIndexInformation, type IndexInformation } from './get_index_information';
-export { getLeafFields } from './get_leaf_fields';
-export { getSampleDocuments, type SampleDocument } from './get_sample_documents';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/chat/packages/wc-integration-utils'],
+};

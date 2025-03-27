@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { AggregationsStringTermsAggregate } from '@elastic/elasticsearch/lib/api/types';
+import {
+  getFieldsTopValues,
+  generateSearchSchema,
+  createFilterClauses,
+  hitToContent,
+  type SearchFilter,
+} from '@kbn/wc-integration-utils';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WCIIndexSourceConfiguration } from '../../common/types';
 
@@ -31,124 +36,69 @@ export async function createMcpServer({
 
   const { index, fields } = configuration;
 
-  const aggFields = fields.filterFields.filter((field) => field.getValues);
-  let fieldValues = fields.filterFields.map((field) => ({
+  const searchFilters = fields.filterFields.map<SearchFilter>((field) => ({
     field: field.field,
-    values: [] as string[],
     description: field.description,
+    values: [],
     type: field.type,
-    aggs: field.getValues,
   }));
 
+  const aggFields = fields.filterFields
+    .filter((field) => field.getValues)
+    .map((field) => field.field);
   if (aggFields.length > 0) {
-    try {
-      const aggResult = await elasticsearchClient.search({
-        index,
-        size: 0,
-        aggs: Object.fromEntries(
-          aggFields.map((field) => [
-            field.field,
-            {
-              terms: {
-                field: field.field,
-                size: 20, // Limit to top 100 values
-              },
-            },
-          ])
-        ),
-      });
+    const topValues = await getFieldsTopValues({
+      indexName: index,
+      fieldNames: aggFields.map((field) => field),
+      esClient: elasticsearchClient,
+    });
 
-      fieldValues = fieldValues.map((fieldValue) => {
-        const buckets = (
-          aggResult.aggregations?.[fieldValue.field] as AggregationsStringTermsAggregate
-        )?.buckets;
-        if (buckets) {
-          return {
-            ...fieldValue,
-            // @ts-ignore
-            values: buckets.map((bucket) => bucket.key as string) as unknown as string[],
-          };
-        }
-        return fieldValue;
-      });
-    } catch (error) {
-      logger.error(`Failed to get aggregations: ${error}`);
-    }
+    searchFilters.forEach((fieldValue) => {
+      fieldValue.values = topValues[fieldValue.field];
+    });
   }
 
-  const filterSchema = fieldValues.reduce(
-    (acc, field) => {
-      if (field.type === 'keyword' && field.aggs && field.values.length > 0) {
-        return {
-          ...acc,
-          [field.field]: z
-            .string()
-            .describe(field.description + '. (one of ' + field.values.join(', ') + ')')
-            .optional(),
-        };
-      } else if (field.type === 'keyword' && !field.aggs) {
-        return {
-          ...acc,
-          [field.field]: z.string().describe(field.description),
-        };
-      } else if (field.type === 'date' && field.values.length > 0) {
-        return {
-          ...acc,
-          [field.field]: z.date().describe(field.description),
-        };
-      }
-      return {
-        ...acc,
-      };
-    },
-    {
-      query: z.string().describe('The query to search for').optional(),
-    }
-  );
+  const toolSchema = generateSearchSchema({ filters: searchFilters });
 
-  server.tool('search', description, filterSchema, async ({ query, ...filters }) => {
-    logger.info(`Searching for "${query}" in index "${index}"`);
+  server.tool('search', description, toolSchema, async ({ query, ...filterValues }) => {
+    logger.info(
+      () =>
+        `Searching for "${query}" in index "${index} with filters: ${JSON.stringify(filterValues)}"`
+    );
 
     let result = null;
 
-    const esFilters =
-      Object.entries(filters).map(([field, value]) => {
-        const fieldConfig = fields.filterFields.find((f) => f.field === field);
-        if (fieldConfig?.type === 'keyword') {
-          return {
-            term: { [field]: value },
-          };
-        }
-      }) || [];
+    const esFilters = createFilterClauses({ filters: searchFilters, values: filterValues });
+    const contentFields = fields.contextFields.map((field) => field.field);
 
     try {
-      const queryClause = query
-        ? JSON.parse(configuration.queryTemplate.replace('{query}', query))
-        : {
-            match_all: {},
-          };
+      const queryClause =
+        query && configuration.queryTemplate
+          ? JSON.parse(configuration.queryTemplate.replace('{query}', query))
+          : {
+              match_all: {},
+            };
 
       result = await elasticsearchClient.search<SearchResult>({
         index,
         query: {
-          // @ts-ignore esFilter length issue
           bool: {
             must: [queryClause],
             ...(esFilters.length > 0 ? { filter: esFilters } : {}),
           },
         },
         _source: {
-          includes: fields.contextFields.map((field) => field.field),
+          includes: contentFields,
         },
         highlight: {
-          fields: fields.contextFields.reduce((acc: Record<string, any>, field) => {
+          fields: fields.contextFields.reduce((acc, field) => {
             if (field.type === 'semantic') {
               acc[field.field] = {
                 type: 'semantic',
               };
             }
             return acc;
-          }, {}),
+          }, {} as Record<string, any>),
         },
       });
     } catch (error) {
@@ -163,25 +113,15 @@ export async function createMcpServer({
 
     logger.info(`Found ${result.hits.hits.length} hits`);
 
-    const contentFragments = result.hits.hits.map((hit) => {
-      const highlightField = Object.keys(hit.highlight || {})[0];
+    const documents = result.hits.hits.map((hit) => {
       return {
         type: 'text' as const,
-        text: configuration.fields.contextFields
-          .map((field) => {
-            if (field.type === 'semantic') {
-              return `${field.field}: ${hit.highlight?.[highlightField]?.flat().join('\n') || ''}`;
-            } else {
-              // @ts-ignore
-              return `${field.field}: ${hit._source?.[field.field] || ''}`;
-            }
-          })
-          .join('\n'),
+        text: JSON.stringify(hitToContent({ hit, fields: contentFields })),
       };
     });
 
     return {
-      content: contentFragments,
+      content: documents,
     };
   });
 
