@@ -482,7 +482,7 @@ export class KnowledgeBaseService {
           });
 
         throw serverUnavailable(
-          'The knowledge base is currently being re-indexed. Please try again later'
+          `The index "${resourceNames.writeIndexAlias.kb}" does not support semantic text and must be reindexed. This re-index operation has been scheduled and will be started automatically. Please try again later.`
         );
       }
 
