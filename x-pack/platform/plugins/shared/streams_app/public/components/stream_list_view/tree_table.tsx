@@ -89,7 +89,10 @@ export function StreamsTreeTable({
       ]}
       itemId="name"
       items={items}
-      pagination={true}
+      pagination={{
+        initialPageSize: 25,
+        pageSizeOptions: [25, 50, 100],
+      }}
       search={{
         box: {
           incremental: true,
@@ -147,8 +150,8 @@ export function asTrees(streams: ListStreamDetail[]) {
         type: isUnwiredStreamDefinition(streamDetail.stream)
           ? 'classic'
           : isRootStreamDefinition(streamDetail.stream)
-          ? 'root'
-          : 'wired',
+            ? 'root'
+            : 'wired',
       };
       currentTree.push(newNode);
     }
