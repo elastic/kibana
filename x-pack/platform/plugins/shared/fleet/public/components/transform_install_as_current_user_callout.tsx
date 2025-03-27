@@ -30,6 +30,7 @@ export const TransformInstallWithCurrentUserPermissionCallout: React.FunctionCom
   count: number;
 }> = ({ count }) => {
   const { docLinks } = useStartServices();
+  count = 2;
   return (
     <EuiCallOut color="primary" iconType="iInCircle">
       <FormattedMessage
@@ -38,6 +39,8 @@ export const TransformInstallWithCurrentUserPermissionCallout: React.FunctionCom
         values={{ count, docsLink: (
           <EuiLink
             href={docLinks.links.transforms.overview}
+            target="_blank"
+            external 
           >
             <FormattedMessage
               id="xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout.linkText"
