@@ -73,16 +73,17 @@ export const useDebounceWithOptions = (
  * so it can be displayed in the editor.
  **/
 const quotedWarningMessageRegexp = /"([^"\\]|\\.)*"/g;
-const warningItemLength = 200;
+const maxWarningLength = 1000;
 
 export const parseWarning = (warning: string): MonacoMessage[] => {
-  if (quotedWarningMessageRegexp.test(warning)) {
-    const matches = warning.match(quotedWarningMessageRegexp);
+  // we limit the length to reduce ReDoS risks
+  const truncatedWarning = warning.substring(0, maxWarningLength);
+  if (quotedWarningMessageRegexp.test(truncatedWarning)) {
+    const matches = truncatedWarning.match(quotedWarningMessageRegexp);
     if (matches) {
       return matches.map((message) => {
         // replaces the quotes only if they are not escaped,
-        // we limit the length to 200 characters to reduce ReDoS risks
-        let warningMessage = message.substring(0, warningItemLength).replace(/(?<!\\)"|\\/g, '');
+        let warningMessage = message.replace(/(?<!\\)"|\\/g, '');
         let startColumn = 1;
         let startLineNumber = 1;
         // initialize the length to 10 in case no error word found
