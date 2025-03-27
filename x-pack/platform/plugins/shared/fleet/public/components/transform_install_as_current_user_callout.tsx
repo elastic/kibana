@@ -30,7 +30,6 @@ export const TransformInstallWithCurrentUserPermissionCallout: React.FunctionCom
   count: number;
 }> = ({ count }) => {
   const { docLinks } = useStartServices();
-  count = 2;
   return (
     <EuiCallOut color="primary" iconType="iInCircle">
       <FormattedMessage
@@ -47,9 +46,9 @@ export const TransformInstallWithCurrentUserPermissionCallout: React.FunctionCom
               defaultMessage="{count, plural, one {transform asset} other {transform assets}}"
               values={{ count }}
               />
-          </EuiLink>
-        )
-       }}
+            </EuiLink>
+          ),
+        }}
       />
     </EuiCallOut>
   );
