@@ -417,8 +417,13 @@ export const createParser = () => {
           // snap
           const remainingText = text.substr(at);
           const nextMethodIndex = remainingText.search(/^\s*(POST|HEAD|GET|PUT|DELETE|PATCH)\b/mi);
-          if (nextMethodIndex < 1) return;
-          at += nextMethodIndex;
+          const nextCommentLine = remainingText.search(/^\s*(#|\/\*|\/\/).*$/m);
+          if (nextMethodIndex === -1 && nextCommentLine === -1) {
+            // If there are no comments or other requests after the error, there is no point in parsing more so we stop here
+            return;
+          }
+          // Reset parser at the next request or the next comment, whichever comes first
+          at += Math.min(...[nextMethodIndex, nextCommentLine].filter(i => i !== -1));
           reset(at);
         }
       }
