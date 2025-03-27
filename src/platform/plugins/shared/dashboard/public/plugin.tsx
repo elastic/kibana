@@ -232,13 +232,11 @@ export class DashboardPlugin
       mount: async (params: AppMountParameters) => {
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
-        const [coreStart, { embeddable: embeddableStart, presentationPanel }] = await core.getStartServices();
         const start = performance.now();
-        const [{ mountApp }] = await Promise.all([
+        const [{ mountApp }, [coreStart]] = await Promise.all([
           import('./dashboard_app/dashboard_router'),
+          core.getStartServices(),
           untilPluginStartServicesReady(),
-          presentationPanel.preloadPresentationPanelChunks(),
-          embeddableStart.preloadEmbeddableChunks(['control_group']),
         ]);
         const stop = performance.now();
         const duration = stop - start;

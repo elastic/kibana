@@ -14,7 +14,7 @@ import { getDashboardContentManagementService } from '../services/dashboard_cont
 import { DashboardCreationOptions, DashboardState, UnsavedPanelState } from './types';
 import { getDashboardApi } from './get_dashboard_api';
 import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
-import { coreServices, embeddableService } from '../services/kibana_services';
+import { coreServices, embeddableService, presentationPanelService } from '../services/kibana_services';
 import { logger } from '../services/logger';
 import {
   PANELS_CONTROL_GROUP_KEY,
@@ -32,9 +32,13 @@ export async function loadDashboardApi({
   const creationStartTime = performance.now();
   const creationOptions = await getCreationOptions?.();
   const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
-  const savedObjectResult = await getDashboardContentManagementService().loadDashboardState({
-    id: savedObjectId,
-  });
+  const [savedObjectResult] = await Promise.all([
+    getDashboardContentManagementService().loadDashboardState({
+      id: savedObjectId,
+    }),
+    presentationPanelService.preloadPresentationPanelChunks(),
+    embeddableService.preloadEmbeddableChunks(['control_group', 'lens']),
+  ])
 
   // --------------------------------------------------------------------------------------
   // Run validation.
@@ -108,9 +112,9 @@ export async function loadDashboardApi({
     ...combinedSessionState,
     ...overrideState,
   };
-  await embeddableService.preloadEmbeddableChunks(
+  /*await embeddableService.preloadEmbeddableChunks(
     uniq(Object.values(initialState.panels).map((panel) => panel.type))
-  );
+  );*/
   const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
     incomingEmbeddable,
