@@ -10,9 +10,12 @@
 const TOAST_ERROR_NAME = 'ToastError';
 
 export class ToastError<T extends Error> extends Error {
+  private original_name: string;
+
   constructor(message: string, originalError: T) {
     super(message);
     this.name = TOAST_ERROR_NAME;
+    this.original_name = originalError.name;
     if (originalError.stack) {
       this.stack = originalError.stack;
     }
