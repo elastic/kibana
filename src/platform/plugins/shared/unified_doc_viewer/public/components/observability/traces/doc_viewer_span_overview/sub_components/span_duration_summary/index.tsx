@@ -17,8 +17,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Duration } from '@kbn/apm-ui-shared';
 import { useTransactionContext } from '../../hooks/use_transaction';
-import { Duration } from '../../../components/duration';
 
 export interface SpanDurationSummaryProps {
   duration: number;
