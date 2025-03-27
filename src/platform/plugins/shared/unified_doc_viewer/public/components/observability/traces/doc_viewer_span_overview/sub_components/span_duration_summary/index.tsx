@@ -73,7 +73,6 @@ export function SpanDurationSummary({ duration }: SpanDurationSummaryProps) {
             <EuiText size="xs">
               <Duration
                 duration={duration}
-                showParentDuration={true}
                 parent={{ loading, duration: transaction?.duration, type: 'transaction' }}
               />
             </EuiText>

@@ -14,7 +14,6 @@ import { PercentOfParent } from './percent_of_parent';
 
 export interface DurationProps {
   duration: number;
-  showParentDuration?: boolean;
   parent?: {
     duration: number | undefined;
     type: 'trace' | 'transaction';
@@ -25,8 +24,8 @@ export interface DurationProps {
 // TODO: Move this component to a shared library for use here in Discover and in APM.
 // https://github.com/elastic/kibana/issues/211781
 
-export function Duration({ duration, showParentDuration = false, parent }: DurationProps) {
-  if (!showParentDuration || (showParentDuration && !parent)) {
+export function Duration({ duration, parent }: DurationProps) {
+  if (!parent) {
     <EuiText size="xs">{asDuration(duration)}</EuiText>;
   }
   return (

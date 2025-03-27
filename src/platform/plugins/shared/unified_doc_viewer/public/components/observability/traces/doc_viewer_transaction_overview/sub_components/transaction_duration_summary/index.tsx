@@ -73,7 +73,6 @@ export function TransactionDurationSummary({ duration }: TransactionDurationSumm
             <EuiText size="xs">
               <Duration
                 duration={duration}
-                showParentDuration={true} // REMOVE THIS AND USE THE PARENT OBJECT AS CHECK?
                 parent={{ type: 'trace', duration: transaction?.duration, loading }}
               />
             </EuiText>
