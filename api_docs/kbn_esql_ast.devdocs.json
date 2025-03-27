@@ -2139,6 +2139,10 @@
               " | ",
               "ESQLUnknownItem",
               " | ",
+              "ESQLMap",
+              " | ",
+              "ESQLMapEntry",
+              " | ",
               {
                 "pluginId": "@kbn/esql-ast",
                 "scope": "common",
@@ -2255,6 +2259,10 @@
                   "ESQLOrderExpression",
                   " | ",
                   "ESQLUnknownItem",
+                  " | ",
+                  "ESQLMap",
+                  " | ",
+                  "ESQLMapEntry",
                   " | ",
                   {
                     "pluginId": "@kbn/esql-ast",
@@ -6254,6 +6262,10 @@
           " | ",
           "ESQLUnknownItem",
           " | ",
+          "ESQLMap",
+          " | ",
+          "ESQLMapEntry",
+          " | ",
           {
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
@@ -6391,7 +6403,11 @@
           "> | ",
           "ESQLOrderExpression",
           " | ",
-          "ESQLUnknownItem"
+          "ESQLUnknownItem",
+          " | ",
+          "ESQLMap",
+          " | ",
+          "ESQLMapEntry"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
         "deprecated": false,
