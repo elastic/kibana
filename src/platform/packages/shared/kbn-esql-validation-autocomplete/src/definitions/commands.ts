@@ -647,7 +647,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
           text: i18n.translate(
             'kbn-esql-validation-autocomplete.esql.validation.changePointOnFieldMissing',
             {
-              defaultMessage: 'Default {defaultOnColumnName} column is missing',
+              defaultMessage: '[CHANGE_POINT] Default {defaultOnColumnName} column is missing',
               values: { defaultOnColumnName },
             }
           ),
