@@ -266,7 +266,7 @@ export const EntityStoreManagementPage = () => {
                 </p>
               </EuiCallOut>
             )}
-            {callouts}
+            {selectedTabId === TabId.Import && callouts}
             {selectedTabId === TabId.Import && <WhatIsAssetCriticalityPanel />}
           </EuiFlexGroup>
         </EuiFlexItem>
