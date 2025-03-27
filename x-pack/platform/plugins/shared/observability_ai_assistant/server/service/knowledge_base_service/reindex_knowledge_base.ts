@@ -27,9 +27,10 @@ export async function reIndexKnowledgeBase({
     logger.info('Re-indexing knowledge base completed successfully.');
   } catch (error) {
     logger.error(`Re-indexing knowledge base failed: ${error.message}`);
+    throw error;
+  } finally {
+    await removeIndexWriteBlock({ esClient, index: resourceNames.writeIndexAlias.kb });
   }
-
-  await removeIndexWriteBlock({ esClient, index: resourceNames.writeIndexAlias.kb });
 }
 
 async function _reIndexKnowledgeBase({
@@ -63,28 +64,23 @@ async function _reIndexKnowledgeBase({
     }
   }
 
-  try {
-    logger.info(
-      `Re-indexing knowledge base from "${currentWriteIndexName}" to index "${nextWriteIndexName}"...`
-    );
+  logger.info(
+    `Re-indexing knowledge base from "${currentWriteIndexName}" to index "${nextWriteIndexName}"...`
+  );
 
-    const reindexResponse = await esClient.asInternalUser.reindex({
-      source: { index: currentWriteIndexName },
-      dest: { index: nextWriteIndexName },
-      refresh: true,
-      wait_for_completion: false,
-    });
+  const reindexResponse = await esClient.asInternalUser.reindex({
+    source: { index: currentWriteIndexName },
+    dest: { index: nextWriteIndexName },
+    refresh: true,
+    wait_for_completion: false,
+  });
 
-    const taskId = reindexResponse.task?.toString();
-    if (taskId) {
-      await waitForReIndexTaskToComplete({ esClient, taskId, logger });
-    } else {
-      throw new Error('ID for re-indexing task was not found. Aborting re-indexing.');
-    }
-  } catch (error) {
-    throw new Error(
-      `An error occurred while re-indexing from "${currentWriteIndexName}" to "${nextWriteIndexName}": ${error.message}`
-    );
+  const taskId = reindexResponse.task?.toString();
+  if (taskId) {
+    await waitForReIndexTaskToComplete({ esClient, taskId, logger });
+  } else {
+    logger.error('ID for re-indexing task was not found. Aborting re-indexing.');
+    return;
   }
 
   // Delete original index

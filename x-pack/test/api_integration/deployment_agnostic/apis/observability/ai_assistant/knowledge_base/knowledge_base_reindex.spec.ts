@@ -12,9 +12,12 @@ import {
   addSampleDocsToInternalKb,
   deleteKnowledgeBaseModel,
   getKbIndices,
-  getConcreteWriteIndex,
-  reindexKnowledgeBase,
+  getConcreteWriteIndexFromAlias,
+  reIndexKnowledgeBase,
   setupKnowledgeBase,
+  hasIndexWriteBlock,
+  clearKnowledgeBase,
+  getAllKbEntries,
 } from '../utils/knowledge_base';
 import { restoreIndexAssets } from '../utils/index_assets';
 
@@ -25,90 +28,150 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
   const ml = getService('ml');
+  const retry = getService('retry');
 
-  describe('knowledge base reindex', function () {
-    // Intentionally skipped in all serverless environnments (local and MKI)
-    // because the migration scenario being tested is not relevant to MKI and Serverless.
+  describe('POST /internal/observability_ai_assistant/kb/reindex', function () {
+    // Skip in environments where migration is not applicable.
     this.tags(['skipServerless']);
 
     before(async () => {
-      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
       await setupKnowledgeBase(getService);
     });
 
     after(async () => {
       await deleteKnowledgeBaseModel({ ml, es });
-      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
     });
 
     describe('when reindexing is successful', () => {
       before(async () => {
         await addSampleDocs();
-        await reindexKnowledgeBase(observabilityAIAssistantAPIClient);
+        // Invoke the API to trigger re-indexing.
+        await reIndexKnowledgeBase(observabilityAIAssistantAPIClient);
       });
 
       after(async () => {
+        // Restore the original state after reindexing.
         await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
       });
 
-      it('updates the write index to the new index', async () => {
-        expect(await getConcreteWriteIndex(es)).to.eql(targetIndex);
+      it('updates the write index alias to the new index', async () => {
+        const currentWriteIndex = await getConcreteWriteIndexFromAlias(es);
+        expect(currentWriteIndex).to.be(targetIndex);
       });
 
-      it('creates a new target index and deletes the old one', async () => {
+      it('creates the target index and removes the old index', async () => {
         const indices = await getKbIndices(es);
-        expect(indices).to.contain(targetIndex);
+        // The target index should exist and the old one should not.
+        expect(indices).to.eql([targetIndex]);
         expect(indices).to.not.contain(oldIndex);
       });
 
-      it('moves the documents to the target index', async () => {
-        const entries = await getAllKbEntries();
+      it('moves all documents to the new target index', async () => {
+        const entries = await getAllKbEntries(es);
+        // Each document should now be in the new target index.
         const allDocsInTargetIndex = entries.every((doc) => doc._index === targetIndex);
         expect(allDocsInTargetIndex).to.be(true);
       });
 
-      it('ensures document count remains the same', async () => {
-        const newDocs = (await getAllKbEntries()).length;
-        expect(newDocs).to.eql(2);
+      it('ensures the document count remains the same', async () => {
+        const entries = await getAllKbEntries(es);
+        expect(entries).to.have.length(2);
+      });
+
+      it('does not add an index block to the target index', async () => {
+        expect(await hasIndexWriteBlock(es, targetIndex)).to.be(false);
+      });
+    });
+
+    describe('during reindexing', () => {
+      let result: Promise<unknown>;
+      before(async () => {
+        await addSampleDocs();
+        result = reIndexKnowledgeBase(observabilityAIAssistantAPIClient);
+      });
+
+      after(async () => {
+        await result;
+        await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
+      });
+
+      it('adds an index block to the write index and removes it again', async () => {
+        await retry.try(async () => {
+          const isBlocked = await hasIndexWriteBlock(es, resourceNames.writeIndexAlias.kb);
+          expect(isBlocked).to.be(true);
+        });
+
+        await retry.try(async () => {
+          const isBlocked = await hasIndexWriteBlock(es, resourceNames.writeIndexAlias.kb);
+          expect(isBlocked).to.be(false);
+        });
       });
     });
 
     describe('when target index already exists', () => {
       before(async () => {
+        // Pre-create the target index to simulate the error scenario.
         await es.indices.create({ index: targetIndex });
         await addSampleDocs();
-        await reindexKnowledgeBase(observabilityAIAssistantAPIClient);
+        await reIndexKnowledgeBase(observabilityAIAssistantAPIClient);
       });
 
       after(async () => {
         await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
       });
 
-      it('does not update the write index', async () => {
-        expect(await getConcreteWriteIndex(es)).to.eql(oldIndex);
+      it('does not update the write index alias', async () => {
+        const currentWriteIndex = await getConcreteWriteIndexFromAlias(es);
+        expect(currentWriteIndex).to.be(oldIndex);
       });
 
-      it('does not delete the target index', async () => {
+      it('preserves the target index without deleting it', async () => {
         const indices = await getKbIndices(es);
+        // Both the old index and the pre-existing target index remain.
+        expect(indices).to.eql([oldIndex, targetIndex]);
         expect(indices).to.contain(targetIndex);
       });
 
-      it('does not move the documents', async () => {
-        const entries = await getAllKbEntries();
+      it('keeps the documents in the original index', async () => {
+        const entries = await getAllKbEntries(es);
         const allDocsInOldIndex = entries.every((doc) => doc._index === oldIndex);
         expect(allDocsInOldIndex).to.be(true);
       });
+
+      it('removes the write block after the reindexing attempt', async () => {
+        expect(await hasIndexWriteBlock(es, oldIndex)).to.be(false);
+        expect(await hasIndexWriteBlock(es, targetIndex)).to.be(false);
+      });
+    });
+
+    describe('when the knowledge base is empty', () => {
+      before(async () => {
+        await clearKnowledgeBase(es);
+        await reIndexKnowledgeBase(observabilityAIAssistantAPIClient);
+      });
+
+      after(async () => {
+        await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
+      });
+
+      it('creates a new target index, deletes the old index and updates the alias', async () => {
+        const currentWriteIndex = await getConcreteWriteIndexFromAlias(es);
+        expect(currentWriteIndex).to.be(targetIndex);
+
+        const indices = await getKbIndices(es);
+        expect(indices).to.eql([targetIndex]);
+      });
+
+      it('has no documents in the new target index', async () => {
+        const entries = await getAllKbEntries(es);
+        expect(entries).to.have.length(0);
+      });
+
+      it('removes the write block after reindexing', async () => {
+        expect(await hasIndexWriteBlock(es, targetIndex)).to.be(false);
+      });
     });
   });
-
-  async function getAllKbEntries() {
-    const response = await es.search({
-      index: `${resourceNames.indexPatterns.kb}`,
-      query: { match_all: {} },
-    });
-
-    return response.hits.hits;
-  }
 
   async function addSampleDocs() {
     const sampleDocs = [
@@ -123,7 +186,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         text: 'Hello world',
       },
     ];
-
     await addSampleDocsToInternalKb(getService, sampleDocs);
   }
 }

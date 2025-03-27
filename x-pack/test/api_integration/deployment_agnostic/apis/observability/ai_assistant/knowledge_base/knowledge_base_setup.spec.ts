@@ -11,7 +11,8 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 import {
   TINY_ELSER,
   deleteKnowledgeBaseModel,
-  getConcreteWriteIndex,
+  getConcreteWriteIndexFromAlias,
+  hasIndexWriteBlock,
   setupKnowledgeBase,
 } from '../utils/knowledge_base';
 import { restoreIndexAssets } from '../utils/index_assets';
@@ -62,17 +63,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         // index block should be added
         await retry.try(async () => {
-          const isBlocked = await hasIndexWriteBlock(resourceNames.writeIndexAlias.kb);
+          const isBlocked = await hasIndexWriteBlock(es, resourceNames.writeIndexAlias.kb);
           expect(isBlocked).to.be(true);
         });
 
         // index block should be removed
         await retry.try(async () => {
-          const isBlocked = await hasIndexWriteBlock(resourceNames.writeIndexAlias.kb);
+          const isBlocked = await hasIndexWriteBlock(es, resourceNames.writeIndexAlias.kb);
           expect(isBlocked).to.be(false);
         });
 
-        const writeIndex = await getConcreteWriteIndex(es);
+        const writeIndex = await getConcreteWriteIndexFromAlias(es);
         expect(writeIndex).to.be(`${resourceNames.writeIndexAlias.kb}-000002`);
       });
 
@@ -80,7 +81,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await setupKnowledgeBase(getService);
         await setupKnowledgeBase(getService, { deployModel: false });
 
-        const writeIndex = await getConcreteWriteIndex(es);
+        const writeIndex = await getConcreteWriteIndexFromAlias(es);
         expect(writeIndex).to.eql(`${resourceNames.writeIndexAlias.kb}-000001`);
       });
     });
@@ -99,12 +100,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
   });
-
-  async function hasIndexWriteBlock(index: string) {
-    const response = await es.indices.getSettings({ index });
-    const writeBlockSetting = Object.values(response)[0]?.settings?.index?.blocks?.write;
-    return writeBlockSetting === 'true' || writeBlockSetting === true;
-  }
 
   function addKbEntry() {
     return observabilityAIAssistantAPIClient.editor({

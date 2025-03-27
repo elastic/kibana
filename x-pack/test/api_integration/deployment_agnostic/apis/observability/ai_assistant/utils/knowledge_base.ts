@@ -68,7 +68,7 @@ export async function setupKnowledgeBase(
   return { status, body };
 }
 
-export async function reindexKnowledgeBase(
+export async function reIndexKnowledgeBase(
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient
 ) {
   return observabilityAIAssistantAPIClient.admin({
@@ -120,6 +120,14 @@ export async function clearKnowledgeBase(es: Client) {
     query: { match_all: {} },
     refresh: true,
   });
+}
+
+export async function getAllKbEntries(es: Client) {
+  const response = await es.search({
+    index: resourceNames.indexPatterns.kb,
+    query: { match_all: {} },
+  });
+  return response.hits.hits;
 }
 
 export async function deleteInferenceEndpoint({
@@ -206,9 +214,15 @@ export async function deleteKbIndices(es: Client) {
   }
 }
 
-export async function getConcreteWriteIndex(es: Client) {
+export async function getConcreteWriteIndexFromAlias(es: Client) {
   const response = await es.indices.getAlias({ index: resourceNames.writeIndexAlias.kb });
   return Object.entries(response).find(
     ([index, aliasInfo]) => aliasInfo.aliases[resourceNames.writeIndexAlias.kb]?.is_write_index
   )?.[0];
+}
+
+export async function hasIndexWriteBlock(es: Client, index: string) {
+  const response = await es.indices.getSettings({ index });
+  const writeBlockSetting = Object.values(response)[0]?.settings?.index?.blocks?.write;
+  return writeBlockSetting === 'true' || writeBlockSetting === true;
 }
