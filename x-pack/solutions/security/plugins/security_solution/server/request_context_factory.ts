@@ -108,6 +108,16 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     const getAuditLogger = () => security?.audit.asScoped(request);
 
+    const getEntityStoreApiKeyManager = () =>
+      getApiKeyManager({
+        core: coreStart,
+        logger: options.logger,
+        security: startPlugins.security,
+        encryptedSavedObjects: startPlugins.encryptedSavedObjects,
+        request,
+        namespace: getSpaceId(),
+      });
+
     // List of endpoint authz for the current request's user. Will be initialized the first
     // time it is requested (see `getEndpointAuthz()` below)
     let endpointAuthz: Immutable<EndpointAuthz>;
@@ -143,6 +153,8 @@ export class RequestContextFactory implements IRequestContextFactory {
       getAuditLogger,
 
       getDataViewsService: () => dataViewsService,
+
+      getEntityStoreApiKeyManager,
 
       getDetectionRulesClient: memoize(() => {
         const mlAuthz = buildMlAuthz({
@@ -257,14 +269,9 @@ export class RequestContextFactory implements IRequestContextFactory {
           experimentalFeatures: config.experimentalFeatures,
           telemetry: core.analytics,
           config: config.entityAnalytics.entityStore,
-          apiKeyManager: getApiKeyManager({
-            core: coreStart,
-            logger,
-            security: startPlugins.security,
-            encryptedSavedObjects: startPlugins.encryptedSavedObjects,
-            request,
-            namespace: getSpaceId(),
-          }),
+          apiKeyManager: getEntityStoreApiKeyManager(),
+          security: startPlugins.security,
+          request,
         });
       }),
     };
