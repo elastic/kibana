@@ -4,3 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { i18n } from '@kbn/i18n';
+
+export const BASIC_RULES = i18n.translate(
+  'xpack.securitySolution.configurations.tabs.basic_rules',
+  {
+    defaultMessage: 'Rules',
+  }
+);
+export const KNOWLEDGE_SOURCES = i18n.translate(
+  'xpack.securitySolution.configurations.tabs.knowledge_sources',
+  {
+    defaultMessage: 'Rules',
+  }
+);
+export const INTEGRATIONS = i18n.translate(
+  'xpack.securitySolution.configurations.tabs.integrations',
+  {
+    defaultMessage: 'Rules',
+  }
+);

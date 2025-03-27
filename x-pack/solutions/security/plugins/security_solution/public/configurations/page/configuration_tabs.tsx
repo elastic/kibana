@@ -9,13 +9,12 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import { CONFIGURATIONS_PATH } from '../../../common/constants';
-
+import * as i18n from '../translations';
 export enum ConfigurationTabs {
   integrations = 'integrations',
   basicRules = 'basic_rules',
   knowledgeSources = 'knowledge_sources',
 }
-const getConfigurationTabUrls = (tabName: ConfigurationTabs) => `${CONFIGURATIONS_PATH}/${tabName}`;
 
 export const ConfigurationsTabs = React.memo(() => {
   const history = useHistory();
@@ -25,22 +24,22 @@ export const ConfigurationsTabs = React.memo(() => {
     () => ({
       [ConfigurationTabs.integrations]: {
         id: ConfigurationTabs.integrations,
-        name: 'Integrations',
+        name: i18n.INTEGRATIONS,
         disabled: false,
-        href: getConfigurationTabUrls(ConfigurationTabs.integrations),
+        href: `${CONFIGURATIONS_PATH}/${ConfigurationTabs.integrations}`,
       },
 
       [ConfigurationTabs.knowledgeSources]: {
         id: ConfigurationTabs.knowledgeSources,
-        name: 'Knowledge Sources',
+        name: i18n.KNOWLEDGE_SOURCES,
         disabled: false,
-        href: getConfigurationTabUrls(ConfigurationTabs.knowledgeSources),
+        href: `${CONFIGURATIONS_PATH}/${ConfigurationTabs.knowledgeSources}`,
       },
       [ConfigurationTabs.basicRules]: {
         id: ConfigurationTabs.basicRules,
-        name: 'Rules',
+        name: i18n.BASIC_RULES,
         disabled: false,
-        href: getConfigurationTabUrls(ConfigurationTabs.basicRules),
+        href: `${CONFIGURATIONS_PATH}/${ConfigurationTabs.basicRules}`,
       },
     }),
     []
