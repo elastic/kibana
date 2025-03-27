@@ -16,12 +16,13 @@ import {
   LlmProxy,
   createLlmProxy,
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { chatComplete } from '../../utils/conversation';
+import { chatComplete, clearConversations } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+  const es = getService('es');
 
   describe('when calling the title_conversation function', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
@@ -51,6 +52,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let conversationId: string;
 
       before(async () => {
+        await clearConversations(es);
         void llmProxy.interceptTitle(TITLE);
         void llmProxy.interceptConversation('The sky is blue because of Rayleigh scattering.');
 
@@ -68,15 +70,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       after(async () => {
-        const { status } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
-          params: {
-            path: {
-              conversationId,
-            },
-          },
-        });
-        expect(status).to.be(200);
+        await clearConversations(es);
       });
 
       it('makes 2 requests to the LLM', () => {
