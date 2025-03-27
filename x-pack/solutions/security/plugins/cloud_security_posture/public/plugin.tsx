@@ -9,7 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
+import type { CspClientPluginStartDeps, FindingMisconfigurationFlyoutProps } from '@kbn/cloud-security-posture';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { CspLoadingState } from './components/csp_loading_state';
 import type { CspRouterProps } from './application/csp_router';
@@ -29,6 +29,10 @@ const LazyCspPolicyTemplateForm = lazy(
 
 const LazyCspCustomAssets = lazy(
   () => import('./components/fleet_extensions/custom_assets_extension')
+);
+
+const LazyCspFindingsMisconfigurationFlyout = lazy(
+  () => import('./pages/configurations/findings_flyout/findings_flyout')
 );
 
 const CspRouterLazy = lazy(() => import('./application/csp_router'));
@@ -101,6 +105,7 @@ export class CspPlugin
 
     return {
       getCloudSecurityPostureRouter: () => App,
+      getCloudSecurityPostureMisconfigurationFlyout: ({ruleId, resourceId}: FindingMisconfigurationFlyoutProps) => <LazyCspFindingsMisconfigurationFlyout ruleId={ruleId} resourceId={resourceId} />
     };
   }
 

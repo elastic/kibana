@@ -58,6 +58,8 @@ import type { ServicePanelExpandableFlyoutProps } from './entity_details/service
 import { ServicePanel } from './entity_details/service_right';
 import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/service_details_left';
 import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/service_details_left';
+import { FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
+import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/helper';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -185,6 +187,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: UniversalEntityPanelKey,
     component: (props) => (
       <UniversalEntityPanel {...(props as UniversalEntityPanelExpandableFlyoutProps).params} />
+    ),
+  },
+  {
+    key: 'findings-misconfiguration-panel',
+    component: (props) => (
+      <FindingsMisconfigurationPanel
+        {...(props as FindingsMisconfigurationPanelExpandableFlyoutProps).params}
+      />
     ),
   },
 ];
