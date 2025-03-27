@@ -123,6 +123,8 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       ...(!!options.includeOutdatedOnly && {
         filter: `slo.attributes.version < ${SLO_MODEL_VERSION}`,
       }),
+      sortField: 'id',
+      sortOrder: 'asc',
     });
 
     return {

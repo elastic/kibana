@@ -14,6 +14,7 @@ export interface Section {
   title: string;
   icon: string;
   description: string;
+  showInServerless: boolean;
   href?: string;
   linkTitle?: string;
   target?: '_blank';
