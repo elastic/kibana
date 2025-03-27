@@ -28,8 +28,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./get_alerts_index'));
     loadTestFile(require.resolve('./find_alerts'));
     loadTestFile(require.resolve('./search_strategy'));
-    loadTestFile(require.resolve('./get_browser_fields_by_rule_type_ids'));
+    loadTestFile(require.resolve('./get_alert_fields_by_rule_type_ids'));
     loadTestFile(require.resolve('./get_alert_summary'));
-    loadTestFile(require.resolve('./get_aad_fields_by_rule_type'));
   });
 };

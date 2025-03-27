@@ -14,7 +14,7 @@ import { requestMock, serverMock } from './__mocks__/server';
 describe('getAlertFieldsByRuleTypeId', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  const path = `${BASE_RAC_ALERTS_API_PATH}/browser_fields`;
+  const path = `${BASE_RAC_ALERTS_API_PATH}/alert_fields`;
 
   beforeEach(async () => {
     server = serverMock.create();

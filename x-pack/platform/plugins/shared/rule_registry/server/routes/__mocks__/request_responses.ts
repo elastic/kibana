@@ -43,15 +43,8 @@ export const getFindRequest = () =>
 export const getO11yBrowserFields = () =>
   requestMock.create({
     method: 'get',
-    path: `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
+    path: `${BASE_RAC_ALERTS_API_PATH}/alert_fields`,
     query: { ruleTypeIds: ['apm.anomaly', 'logs.alert.document.count'] },
-  });
-
-export const getMetricThresholdAADFields = () =>
-  requestMock.create({
-    method: 'get',
-    path: `${BASE_RAC_ALERTS_API_PATH}/aad_fields`,
-    query: { ruleTypeId: 'metrics.alert.threshold' },
   });
 
 export const getAlertsGroupAggregationsRequest = () =>

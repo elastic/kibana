@@ -12,7 +12,7 @@ import { fetchAlertsFields } from '.';
 
 describe('fetchAlertsFields', () => {
   const http = httpServiceMock.createStartContract();
-  test('should call the browser_fields API with the correct parameters', async () => {
+  test('should call the alert_fields API with the correct parameters', async () => {
     const ruleTypeIds = ['.es-query'];
 
     http.get.mockResolvedValueOnce({
@@ -32,7 +32,7 @@ describe('fetchAlertsFields', () => {
         },
       ],
     });
-    expect(http.get).toHaveBeenLastCalledWith('/internal/rac/alerts/browser_fields', {
+    expect(http.get).toHaveBeenLastCalledWith('/internal/rac/alerts/alert_fields', {
       query: { ruleTypeIds },
     });
   });

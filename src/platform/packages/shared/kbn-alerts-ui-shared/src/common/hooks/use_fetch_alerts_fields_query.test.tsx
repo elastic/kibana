@@ -153,7 +153,7 @@ describe('useFetchAlertsFieldsQuery', () => {
 
     await waitFor(() => {
       expect(mockHttpGet).toHaveBeenCalledTimes(1);
-      expect(mockHttpGet).toHaveBeenCalledWith('/internal/rac/alerts/browser_fields', {
+      expect(mockHttpGet).toHaveBeenCalledWith('/internal/rac/alerts/alert_fields', {
         query: { ruleTypeIds: ['apm', 'logs'] },
       });
     });
