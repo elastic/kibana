@@ -21,7 +21,7 @@ import {
   closeOtherTabs,
   closeTabsToTheRight,
 } from '../../utils/manage_tabs';
-import type { TabItem, TabsServices } from '../../types';
+import type { TabItem, TabsServices, TabPreviewData } from '../../types';
 
 export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> {
   initialItems: TabItem[];
@@ -31,6 +31,7 @@ export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> 
   renderContent: (selectedItem: TabItem) => React.ReactNode;
   createItem: () => TabItem;
   onChanged: (state: TabbedContentState) => void;
+  getPreviewData: (item: TabItem) => TabPreviewData;
 }
 
 export interface TabbedContentState {
@@ -46,6 +47,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   renderContent,
   createItem,
   onChanged,
+  getPreviewData,
 }) => {
   const [tabContentId] = useState(() => htmlIdGenerator()());
   const [state, _setState] = useState<TabbedContentState>(() => {
@@ -134,6 +136,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           onLabelEdited={onLabelEdited}
           onSelect={onSelect}
           onClose={onClose}
+          getPreviewData={getPreviewData}
         />
       </EuiFlexItem>
       {selectedItem ? (
