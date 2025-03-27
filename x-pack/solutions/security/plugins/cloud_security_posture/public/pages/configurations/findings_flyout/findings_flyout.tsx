@@ -267,7 +267,8 @@ export const FindingsRuleFlyout = ({ ruleId, resourceId }: FindingMisconfigurati
 
   return (
     <>
-      <EuiFlyoutHeader data-test-subj={FINDINGS_FLYOUT}>
+    <div data-test-subj={FINDINGS_FLYOUT}>
+      <EuiFlyoutHeader>
         <EuiPanel hasShadow={false}>
           <EuiSpacer />
           <EuiFlexGroup alignItems="center">
@@ -332,6 +333,7 @@ export const FindingsRuleFlyout = ({ ruleId, resourceId }: FindingMisconfigurati
           </EuiFlexGroup>
         </EuiPanel>
       </EuiFlyoutFooter>
+      </div>
     </>
   );
 };
