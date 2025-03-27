@@ -6545,6 +6545,9 @@ paths:
                                       type: number
                                     i:
                                       type: string
+                                    sectionId:
+                                      description: The unique ID of the section
+                                      type: string
                                     w:
                                       default: 24
                                       description: The width of the panel in grid units
@@ -6628,6 +6631,26 @@ paths:
                             required:
                               - pause
                               - value
+                          sections:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                collapsed:
+                                  type: boolean
+                                id:
+                                  type: string
+                                order:
+                                  minimum: 1
+                                  type: number
+                                title:
+                                  type: string
+                              required:
+                                - id
+                                - order
+                                - title
+                                - collapsed
+                            type: array
                           timeFrom:
                             description: An ISO string indicating when to restore time from
                             type: string
@@ -7011,6 +7034,9 @@ paths:
                               i:
                                 description: The unique identifier of the panel
                                 type: string
+                              sectionId:
+                                description: The unique ID of the section
+                                type: string
                               w:
                                 default: 24
                                 description: The width of the panel in grid units
@@ -7093,6 +7119,26 @@ paths:
                       required:
                         - pause
                         - value
+                    sections:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          collapsed:
+                            type: boolean
+                          id:
+                            type: string
+                          order:
+                            minimum: 1
+                            type: number
+                          title:
+                            type: string
+                        required:
+                          - id
+                          - order
+                          - title
+                          - collapsed
+                      type: array
                     timeFrom:
                       description: An ISO string indicating when to restore time from
                       type: string
@@ -7398,6 +7444,9 @@ paths:
                                       type: number
                                     i:
                                       type: string
+                                    sectionId:
+                                      description: The unique ID of the section
+                                      type: string
                                     w:
                                       default: 24
                                       description: The width of the panel in grid units
@@ -7481,6 +7530,26 @@ paths:
                             required:
                               - pause
                               - value
+                          sections:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                collapsed:
+                                  type: boolean
+                                id:
+                                  type: string
+                                order:
+                                  minimum: 1
+                                  type: number
+                                title:
+                                  type: string
+                              required:
+                                - id
+                                - order
+                                - title
+                                - collapsed
+                            type: array
                           timeFrom:
                             description: An ISO string indicating when to restore time from
                             type: string
@@ -7844,6 +7913,9 @@ paths:
                               i:
                                 description: The unique identifier of the panel
                                 type: string
+                              sectionId:
+                                description: The unique ID of the section
+                                type: string
                               w:
                                 default: 24
                                 description: The width of the panel in grid units
@@ -7926,6 +7998,26 @@ paths:
                       required:
                         - pause
                         - value
+                    sections:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          collapsed:
+                            type: boolean
+                          id:
+                            type: string
+                          order:
+                            minimum: 1
+                            type: number
+                          title:
+                            type: string
+                        required:
+                          - id
+                          - order
+                          - title
+                          - collapsed
+                      type: array
                     timeFrom:
                       description: An ISO string indicating when to restore time from
                       type: string
@@ -8227,6 +8319,9 @@ paths:
                                       type: number
                                     i:
                                       type: string
+                                    sectionId:
+                                      description: The unique ID of the section
+                                      type: string
                                     w:
                                       default: 24
                                       description: The width of the panel in grid units
@@ -8310,6 +8405,26 @@ paths:
                             required:
                               - pause
                               - value
+                          sections:
+                            items:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                collapsed:
+                                  type: boolean
+                                id:
+                                  type: string
+                                order:
+                                  minimum: 1
+                                  type: number
+                                title:
+                                  type: string
+                              required:
+                                - id
+                                - order
+                                - title
+                                - collapsed
+                            type: array
                           timeFrom:
                             description: An ISO string indicating when to restore time from
                             type: string
