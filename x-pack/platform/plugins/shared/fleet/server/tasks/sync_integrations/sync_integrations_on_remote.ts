@@ -5,18 +5,28 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClient, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  SavedObjectsClient,
+  Logger,
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
+} from '@kbn/core/server';
 
 import semverGte from 'semver/functions/gte';
 
 import type { PackageClient } from '../../services';
 import { outputService, appContextService } from '../../services';
+import { getPackageSavedObjects } from '../../services/epm/packages/get';
 
 import { PackageNotFoundError, IndexNotFoundError } from '../../errors';
+import { FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX } from '../../services/setup/fleet_synced_integrations';
+
+import type { Installation } from '../../types';
+
+import type { RemoteSyncedIntegrationsStatus } from '../../../common/types';
 
 import type { SyncIntegrationsData } from './model';
-
-const FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX = 'fleet-synced-integrations-ccr-*';
 
 const MAX_RETRY_ATTEMPTS = 5;
 const RETRY_BACKOFF_MINUTES = [5, 10, 20, 40, 60];
@@ -92,10 +102,12 @@ async function installPackageIfNotInstalled(
     installation?.install_status === 'installed' &&
     semverGte(installation.version, pkg.package_version)
   ) {
+    logger.debug(`installPackageIfNotInstalled - ${pkg.package_name} already installed`);
     return;
   }
 
   if (installation?.install_status === 'installing') {
+    logger.debug(`installPackageIfNotInstalled - ${pkg.package_name} status installing`);
     return;
   }
 
@@ -103,6 +115,9 @@ async function installPackageIfNotInstalled(
     const attempt = installation.latest_install_failed_attempts?.length ?? 0;
 
     if (attempt >= MAX_RETRY_ATTEMPTS) {
+      logger.debug(
+        `installPackageIfNotInstalled - too many retry attempts at installing ${pkg.package_name}`
+      );
       return;
     }
     const lastRetryAttemptTime = installation.latest_install_failed_attempts?.[0].created_at;
@@ -178,24 +193,123 @@ export const syncIntegrationsOnRemote = async (
   }
 };
 
-export const getFollowerIndexInfo = async (esClient: ElasticsearchClient, outputId: string) => {
-  const logger = appContextService.getLogger();
-  const index = `${FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX}`.replace('*', outputId);
-
+export const getFollowerIndexInfo = async (
+  esClient: ElasticsearchClient,
+  index: string,
+  logger: Logger
+) => {
+  if (!index) {
+    throw new IndexNotFoundError(`Follower index ${index} not found`);
+  }
   try {
     const res = await esClient.ccr.followInfo({
       index,
     });
     if (!res?.follower_indices || res.follower_indices.length === 0)
-      throw new IndexNotFoundError(`Follower index ${index} not found`); // 404
+      throw new IndexNotFoundError(`Follower index ${index} not available`);
 
-    // if (res.follower_indices[0]?.status === 'paused') {
-    //   throw new IndexNotFoundError(`Follower index ${index} paused`); // error code ?
-    // }
-    // indices comparison
-    return res.follower_indices;
+    if (res.follower_indices[0]?.status === 'paused') {
+      throw new IndexNotFoundError(`Follower index ${index} paused`); // error code ?
+    }
+    return res.follower_indices[0];
+  } catch (err) {
+    if (err?.body?.error?.type === 'index_not_found_exception')
+      throw new IndexNotFoundError(`Index ${index} not found`);
+
+    logger.error('error', err.message);
+    throw err;
+  }
+};
+
+export const compareSyncedIntegrations = async (
+  esClient: ElasticsearchClient,
+  savedObjectsClient: SavedObjectsClientContract,
+  index: string,
+  logger: Logger
+) => {
+  try {
+    const searchRes = await esClient.search<SyncIntegrationsData>({
+      index,
+      size: 50, // ?
+      sort: [
+        {
+          'integrations.updated_at': {
+            order: 'desc',
+          },
+        },
+      ],
+    });
+    const ccrIntegrations = searchRes.hits.hits[0]?._source?.integrations;
+    const installedIntegrations = await getPackageSavedObjects(savedObjectsClient);
+
+    const installedIntegrationsByName = (installedIntegrations?.saved_objects || []).reduce(
+      (acc, integration) => {
+        if (integration?.id) {
+          acc[integration.id] = integration;
+        }
+        return acc;
+      },
+      {} as Record<string, SavedObjectsFindResult<Installation>>
+    );
+
+    const integrationsStatus: RemoteSyncedIntegrationsStatus[] | undefined = ccrIntegrations?.map(
+      (ccrIntegration) => {
+        const localIntegrationSO = installedIntegrationsByName[ccrIntegration.package_name];
+        if (!localIntegrationSO) {
+          return {
+            ...ccrIntegration,
+            sync_status: false,
+            error: `Installation not found`,
+          };
+        }
+        if (ccrIntegration.package_version !== localIntegrationSO?.attributes.version) {
+          return {
+            ...ccrIntegration,
+            sync_status: false,
+            error: `Installed version: ${localIntegrationSO?.attributes.version}`,
+          };
+        }
+        if (localIntegrationSO?.attributes.install_status !== 'installed') {
+          return {
+            ...ccrIntegration,
+            sync_status: false,
+            error: `Installation status: ${localIntegrationSO?.attributes.install_status}`,
+          };
+        }
+        return {
+          ...ccrIntegration,
+          sync_status: true,
+          updated_at: localIntegrationSO?.updated_at,
+        };
+      }
+    );
+    return integrationsStatus;
   } catch (err) {
     logger.error('error', err.message);
+    throw err;
+  }
+};
+
+export const getRemoteSyncedIntegrationsStatus = async (
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  outputId: string
+) => {
+  const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
+  const logger = appContextService.getLogger();
+
+  if (!enableSyncIntegrationsOnRemote) {
+    return [];
+  }
+  const index = `${FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX}`.replace('*', outputId);
+  try {
+    const info = await getFollowerIndexInfo(esClient, index, logger);
+    let res: RemoteSyncedIntegrationsStatus[] = [];
+    if (info?.status === 'active') {
+      res = (await compareSyncedIntegrations(esClient, soClient, index, logger)) ?? [];
+    }
+    return res;
+  } catch (err) {
     throw err;
   }
 };

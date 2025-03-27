@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { RemoteSyncedIntegrationsBase } from '../models';
+import type { RemoteSyncedIntegrationsStatus } from '../models';
 
-export interface GetOneRemoteSyncedIntegrationsResponse {
-  item: RemoteSyncedIntegrationsBase;
+export interface GetRemoteSyncedIntegrationsStatusResponse {
+  items: RemoteSyncedIntegrationsStatus[];
 }

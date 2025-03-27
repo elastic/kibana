@@ -6,6 +6,11 @@
  */
 export interface RemoteSyncedIntegrationsBase {
   id?: string;
-  name?: string;
-  version?: string;
+  package_name: string;
+  package_version: string;
+}
+export interface RemoteSyncedIntegrationsStatus extends RemoteSyncedIntegrationsBase {
+  sync_status: boolean;
+  error?: string;
+  updated_at?: string;
 }

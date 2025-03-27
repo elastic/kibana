@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from '@kbn/core/server';
 
-import type { getOneRemoteSyncedIntegrationsRequestSchema } from '../../types';
+import type { GetRemoteSyncedIntegrationsStatusRequestSchema } from '../../types';
 
-import type { GetOneRemoteSyncedIntegrationsResponse } from '../../../common/types';
-import { getFollowerIndexInfo } from '../../tasks/sync_integrations_on_remote';
-import { appContextService } from '../../services';
+import type { GetRemoteSyncedIntegrationsStatusResponse } from '../../../common/types';
 
-export const getRemoteSyncedIntegrationsInfoHandler: RequestHandler<
-  TypeOf<typeof getOneRemoteSyncedIntegrationsRequestSchema.params>
+import { getRemoteSyncedIntegrationsStatus } from '../../tasks/sync_integrations/sync_integrations_on_remote';
+
+export const getRemoteSyncedIntegrationsStatusHandler: RequestHandler<
+  TypeOf<typeof GetRemoteSyncedIntegrationsStatusRequestSchema.params>
 > = async (context, request, response) => {
-  const esClient = (await context.core).elasticsearch.client.asInternalUser;
-  const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
 
-  if (!enableSyncIntegrationsOnRemote) {
-    return;
-  }
   try {
-    const info = await getFollowerIndexInfo(esClient, request.params.outputId);
-
-    const body: GetOneRemoteSyncedIntegrationsResponse = {
-      item: {},
+    const res = await getRemoteSyncedIntegrationsStatus(
+      esClient,
+      soClient,
+      request.params.outputId
+    );
+    const body: GetRemoteSyncedIntegrationsStatusResponse = {
+      items: res,
     };
-
     return response.ok({ body });
   } catch (error) {
     throw error;

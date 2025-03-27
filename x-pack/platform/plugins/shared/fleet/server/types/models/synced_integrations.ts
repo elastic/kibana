@@ -13,6 +13,9 @@ const RemoteSyncedIntegrationsBaseSchema = schema.object({
   version: schema.maybe(schema.string()),
 });
 
-export const getOneRemoteSyncedIntegrationsResponseSchema = schema.object({
-  item: RemoteSyncedIntegrationsBaseSchema,
+export const GetRemoteSyncedIntegrationsStatusResponseSchema = schema.object({
+  items: RemoteSyncedIntegrationsBaseSchema.extends({
+    sync_status: schema.boolean(),
+    error: schema.maybe(schema.string()),
+  }),
 });

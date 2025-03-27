@@ -11,6 +11,7 @@ import { FleetSetupError } from '../../errors';
 import { appContextService } from '../app_context';
 
 export const FLEET_SYNCED_INTEGRATIONS_INDEX_NAME = 'fleet-synced-integrations';
+export const FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX = 'fleet-synced-integrations-ccr-*';
 
 export const FLEET_SYNCED_INTEGRATIONS_INDEX_CONFIG = {
   settings: {

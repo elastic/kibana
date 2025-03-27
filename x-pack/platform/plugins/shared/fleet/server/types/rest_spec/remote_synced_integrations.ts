@@ -6,7 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 
-export const getOneRemoteSyncedIntegrationsRequestSchema = {
+export const GetRemoteSyncedIntegrationsStatusRequestSchema = {
   params: schema.object({
     outputId: schema.string(),
   }),
