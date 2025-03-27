@@ -14,12 +14,12 @@ The {{sn-itom}} connector uses the [event API](https://docs.servicenow.com/bundl
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. You must choose whether to use OAuth for authentication.
 
-:::{image} ../../images/servicenow-itom-connector-basic.png
+:::{image} ../images/servicenow-itom-connector-basic.png
 :alt: {{sn-itom}} connector using basic auth
 :class: screenshot
 :::
 
-:::{image} ../../images/servicenow-itom-connector-oauth.png
+:::{image} ../images/servicenow-itom-connector-oauth.png
 :alt: {{sn-itom}} connector using OAuth
 :class: screenshot
 :::
@@ -64,7 +64,7 @@ Username
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../../images/servicenow-itom-params-test.png
+:::{image} ../images/servicenow-itom-params-test.png
 :alt: {{sn-itom}} params test
 :class: screenshot
 :::
@@ -172,7 +172,7 @@ This step is required to use OAuth for authentication between Elastic and {{sn}}
     * **Name**: Name the certificate.
     * **PEM Certificate**: Copy the generated public key into this text field.
 
-    :::{image} ../../images/servicenow-new-certificate.png
+    :::{image} ../images/servicenow-new-certificate.png
     :alt: Shows new certificate form in ServiceNow
     :class: screenshot
     :::
@@ -187,7 +187,7 @@ This step is required to use OAuth for authentication between Elastic and {{sn}}
 1. In your {{sn}} instance, go to **Application Registry** and select **New**.
 2. Select **Create an OAuth JWT API endpoint for external clients** from the list of options.
 
-    :::{image} ../../images/servicenow-jwt-endpoint.png
+    :::{image} ../images/servicenow-jwt-endpoint.png
     :alt: Shows application type selection
     :class: screenshot
     :::
@@ -197,7 +197,7 @@ This step is required to use OAuth for authentication between Elastic and {{sn}}
     * **Name**: Name the application.
     * **User field**: Select the field to use as the user identifier.
 
-    :::{image} ../../images/servicenow-new-application.png
+    :::{image} ../images/servicenow-new-application.png
     :alt: Shows new application form in ServiceNow
     :class: screenshot
     :::
@@ -214,7 +214,7 @@ This step is required to use OAuth for authentication between Elastic and {{sn}}
     * **Name**: Name the JWT Verifier Map.
     * **Sys certificate**: Click the search icon and select the name of the certificate created in the previous step.
 
-    :::{image} ../../images/servicenow-new-jwt-verifier-map.png
+    :::{image} ../images/servicenow-new-jwt-verifier-map.png
     :alt: Shows new JWT Verifier Map form in ServiceNow
     :class: screenshot
     :::
@@ -222,7 +222,7 @@ This step is required to use OAuth for authentication between Elastic and {{sn}}
 8. Click **Submit** to create the verifier map.
 9. Note the **Client ID**, **Client Secret** and **JWT Key ID**. You will need these values to create your {{sn}} connector.
 
-    :::{image} ../../images/servicenow-oauth-values.png
+    :::{image} ../images/servicenow-oauth-values.png
     :alt: Shows where to find OAuth values in ServiceNow
     :class: screenshot
     :::

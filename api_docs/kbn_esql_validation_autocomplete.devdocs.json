@@ -557,6 +557,10 @@
           "ESQLOrderExpression",
           " | ",
           "ESQLUnknownItem",
+          " | ",
+          "ESQLMap",
+          " | ",
+          "ESQLMapEntry",
           " | undefined; option: ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -703,6 +707,10 @@
           "ESQLOrderExpression",
           " | ",
           "ESQLUnknownItem",
+          " | ",
+          "ESQLMap",
+          " | ",
+          "ESQLMapEntry",
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/context.ts",
@@ -2143,13 +2151,12 @@
           },
           {
             "parentPluginId": "@kbn/esql-validation-autocomplete",
-            "id": "def-common.CommandDefinition.examples",
-            "type": "Array",
+            "id": "def-common.CommandDefinition.description",
+            "type": "string",
             "tags": [],
-            "label": "examples",
-            "description": [],
-            "signature": [
-              "string[]"
+            "label": "description",
+            "description": [
+              "\nA description of what the command does. Displayed in the autocomplete."
             ],
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
@@ -2162,7 +2169,23 @@
             "tags": [],
             "label": "declaration",
             "description": [
-              "\nThe pattern for declaring this command statement."
+              "\nThe pattern for declaring this command statement. Displayed in the autocomplete."
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.CommandDefinition.examples",
+            "type": "Array",
+            "tags": [],
+            "label": "examples",
+            "description": [
+              "\nA list of examples of how to use the command. Displayed in the autocomplete."
+            ],
+            "signature": [
+              "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
@@ -2181,31 +2204,6 @@
               "CommandTypeDefinition",
               "[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-validation-autocomplete",
-            "id": "def-common.CommandDefinition.alias",
-            "type": "string",
-            "tags": [],
-            "label": "alias",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-validation-autocomplete",
-            "id": "def-common.CommandDefinition.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2233,7 +2231,7 @@
             "tags": [],
             "label": "hidden",
             "description": [
-              "\nWhether to show or hide in autocomplete suggestion list"
+              "\nWhether to show or hide in autocomplete suggestion list. We generally use\nthis for commands that are not yet ready to be advertised."
             ],
             "signature": [
               "boolean | undefined"
@@ -2367,23 +2365,6 @@
                 "trackAdoption": false
               }
             ]
-          },
-          {
-            "parentPluginId": "@kbn/esql-validation-autocomplete",
-            "id": "def-common.CommandDefinition.signature",
-            "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "signature",
-            "description": [],
-            "signature": [
-              "{ multipleParams: boolean; params: { name: string; type: string; optional?: boolean | undefined; innerTypes?: (\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"policy\" | \"unsigned_long\" | \"unsupported\" | \"null\" | \"any\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"time_literal\" | \"time_duration\" | \"date_period\")[] | undefined; values?: string[] | undefined; valueDescriptions?: string[] | undefined; constantOnly?: boolean | undefined; wildcards?: boolean | undefined; }[]; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
-            "deprecated": true,
-            "trackAdoption": false,
-            "references": []
           }
         ],
         "initialIsOpen": false
@@ -3352,7 +3333,7 @@
             "label": "unsupportedColumnTypeForCommand",
             "description": [],
             "signature": [
-              "{ message: string; type: { command: string; type: string; typeCount: number; givenType: string; column: string; }; }"
+              "{ message: string; type: { command: string; type: string; givenType: string; column: string; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
