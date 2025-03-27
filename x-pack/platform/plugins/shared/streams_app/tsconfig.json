@@ -62,5 +62,6 @@
     "@kbn/discover-utils",
     "@kbn/discover-shared-plugin",
     "@kbn/core-analytics-browser",
+    "@kbn/deeplinks-observability",
   ]
 }

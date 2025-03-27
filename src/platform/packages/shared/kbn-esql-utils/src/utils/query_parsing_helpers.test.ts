@@ -21,6 +21,7 @@ import {
   mapVariableToColumn,
   getValuesFromQueryField,
 } from './query_parsing_helpers';
+import { monaco } from '@kbn/monaco';
 
 describe('esql query helpers', () => {
   describe('getIndexPatternFromESQLQuery', () => {
@@ -66,11 +67,11 @@ describe('esql query helpers', () => {
       const idxPattern14 = getIndexPatternFromESQLQuery('METRICS tsdb');
       expect(idxPattern14).toBe('tsdb');
 
-      const idxPattern15 = getIndexPatternFromESQLQuery('METRICS tsdb max(cpu) BY host');
+      const idxPattern15 = getIndexPatternFromESQLQuery('METRICS tsdb | STATS max(cpu) BY host');
       expect(idxPattern15).toBe('tsdb');
 
       const idxPattern16 = getIndexPatternFromESQLQuery(
-        'METRICS pods load=avg(cpu), writes=max(rate(indexing_requests)) BY pod | SORT pod'
+        'METRICS pods | STATS load=avg(cpu), writes=max(rate(indexing_requests)) BY pod | SORT pod'
       );
       expect(idxPattern16).toBe('pods');
 
@@ -148,7 +149,7 @@ describe('esql query helpers', () => {
     });
 
     it('should return true for metrics with aggregations', () => {
-      expect(hasTransformationalCommand('metrics a var = avg(b)')).toBeTruthy();
+      expect(hasTransformationalCommand('metrics a | stats var = avg(b)')).toBeTruthy();
     });
   });
 
@@ -181,6 +182,14 @@ describe('esql query helpers', () => {
           'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?_tstart, ?_tend)'
         )
       ).toBe('event.timefield');
+    });
+
+    it('should return the time field if the column is casted', () => {
+      expect(
+        getTimeFieldFromESQLQuery(
+          'from a | WHERE date_nanos::date >= ?_tstart AND date_nanos::date <= ?_tend'
+        )
+      ).toBe('date_nanos');
     });
   });
 
@@ -548,9 +557,27 @@ describe('esql query helpers', () => {
       expect(values).toEqual('my_field');
     });
 
+    it('should return the values from the query field when cursor is not at the end', () => {
+      const queryString = 'FROM my_index | WHERE my_field >= | STATS COUNT(*)';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 33,
+      } as monaco.Position);
+      expect(values).toEqual('my_field');
+    });
+
     it('should return the values from the query field with new lines', () => {
       const queryString = 'FROM my_index \n| WHERE my_field >=';
       const values = getValuesFromQueryField(queryString);
+      expect(values).toEqual('my_field');
+    });
+
+    it('should return the values from the query field with new lines when cursor is not at the end', () => {
+      const queryString = 'FROM my_index \n| WHERE my_field >= \n| STATS COUNT(*)';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 2,
+        column: 36,
+      } as monaco.Position);
       expect(values).toEqual('my_field');
     });
   });
