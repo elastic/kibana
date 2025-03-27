@@ -6,7 +6,13 @@
  */
 
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import type { MappingProperties } from './get_leaf_fields';
+
+interface MappingProperties {
+  [key: string]: {
+    type?: string;
+    properties?: MappingProperties;
+  };
+}
 
 export const getFieldTypeByPath = ({
   fieldPath,
