@@ -41,7 +41,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('returns error message if model is not deployed', async () => {
-      const res = await setupKnowledgeBase(getService, { shouldDeployModel: false });
+      const res = await setupKnowledgeBase(getService, { deployModel: false });
 
       expect(res.status).to.be(500);
 
@@ -58,7 +58,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       it('re-indexes KB if it has existing entries', async () => {
         await setupKnowledgeBase(getService);
         await addKbEntry();
-        setupKnowledgeBase(getService, { shouldDeployModel: false });
+        setupKnowledgeBase(getService, { deployModel: false });
 
         // index block should be added
         await retry.try(async () => {
@@ -78,7 +78,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('does not re-index if KB is empty', async () => {
         await setupKnowledgeBase(getService);
-        await setupKnowledgeBase(getService, { shouldDeployModel: false });
+        await setupKnowledgeBase(getService, { deployModel: false });
 
         const writeIndex = await getConcreteWriteIndex(es);
         expect(writeIndex).to.eql(`${resourceNames.writeIndexAlias.kb}-000001`);

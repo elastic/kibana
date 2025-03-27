@@ -11,8 +11,12 @@ import AdmZip from 'adm-zip';
 import path from 'path';
 import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from '../../../../default_configs/stateful.config.base';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { deleteKnowledgeBaseModel, setupKnowledgeBase } from '../utils/knowledge_base';
-import { restoreIndexAssets } from '../utils/index_assets';
+import {
+  deleteKbIndices,
+  deleteKnowledgeBaseModel,
+  setupKnowledgeBase,
+} from '../utils/knowledge_base';
+import { createOrUpdateIndexAssets, restoreIndexAssets } from '../utils/index_assets';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -31,12 +35,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       log.debug(`Unzipping ${zipFilePath} to ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`);
       new AdmZip(zipFilePath).extractAllTo(path.dirname(AI_ASSISTANT_SNAPSHOT_REPO_PATH), true);
 
-      await setupKnowledgeBase(getService);
+      await setupKnowledgeBase(getService).catch(() => {});
     });
 
     beforeEach(async () => {
-      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
+      await deleteKbIndices(es);
       await restoreKbSnapshot();
+      await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
     });
 
     after(async () => {
@@ -49,19 +54,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(await getKbIndexCreatedVersion()).to.be.lessThan(8110000);
       });
     });
-
-    function createKnowledgeBaseEntry() {
-      const knowledgeBaseEntry = {
-        id: 'my-doc-id-1',
-        title: 'My title',
-        text: 'My content',
-      };
-
-      return observabilityAIAssistantAPIClient.editor({
-        endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
-        params: { body: knowledgeBaseEntry },
-      });
-    }
 
     it('cannot add new entries to KB', async () => {
       const { status, body } = await createKnowledgeBaseEntry();
@@ -82,6 +74,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(status).to.be(200);
       });
     });
+
+    function createKnowledgeBaseEntry() {
+      const knowledgeBaseEntry = {
+        id: 'my-doc-id-1',
+        title: 'My title',
+        text: 'My content',
+      };
+
+      return observabilityAIAssistantAPIClient.editor({
+        endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
+        params: { body: knowledgeBaseEntry },
+      });
+    }
   });
 
   async function getKbIndexCreatedVersion() {
@@ -97,12 +102,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     log.debug(
       `Restoring snapshot of "${resourceNames.concreteWriteIndexName.kb}" from ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`
     );
-
-    // delete existing write index
-    await es.indices.delete({
-      index: resourceNames.concreteWriteIndexName.kb,
-      ignore_unavailable: true,
-    });
 
     const snapshotRepoName = 'snapshot-repo-8-10';
     const snapshotName = 'my_snapshot';

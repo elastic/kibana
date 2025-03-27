@@ -38,9 +38,9 @@ export async function importTinyElserModel(ml: ReturnType<typeof MachineLearning
 export async function setupKnowledgeBase(
   getService: DeploymentAgnosticFtrProviderContext['getService'],
   {
-    shouldDeployModel = true,
+    deployModel: deployModel = true,
   }: {
-    shouldDeployModel?: boolean;
+    deployModel?: boolean;
   } = {}
 ) {
   const log = getService('log');
@@ -48,7 +48,7 @@ export async function setupKnowledgeBase(
   const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  if (shouldDeployModel) {
+  if (deployModel) {
     await importTinyElserModel(ml);
   }
 
@@ -61,7 +61,7 @@ export async function setupKnowledgeBase(
     },
   });
 
-  if (shouldDeployModel) {
+  if (deployModel) {
     await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
   }
 

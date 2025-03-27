@@ -87,12 +87,12 @@ function registerKbSemanticTextMigrationTask({
                 return;
               }
 
-              // if (config.disableKbSemanticTextMigration) {
-              //   logger.info(
-              //     'Semantic text migration is disabled via config "xpack.observabilityAIAssistant.disableKbSemanticTextMigration=true". Skipping migration.'
-              //   );
-              //   return;
-              // }
+              if (config.disableKbSemanticTextMigration) {
+                logger.info(
+                  'Semantic text migration is disabled via config "xpack.observabilityAIAssistant.disableKbSemanticTextMigration=true". Skipping migration.'
+                );
+                return;
+              }
 
               await reIndexKnowledgeBaseAndPopulateMissingSemanticTextField({
                 esClient,

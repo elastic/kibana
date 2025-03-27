@@ -34,12 +34,16 @@ export async function restoreIndexAssets(
   await deleteWriteIndices(es);
 
   // delete index templates
-  await es.indices.deleteIndexTemplate({ name: Object.values(resourceNames.indexTemplate) });
+  await es.indices.deleteIndexTemplate(
+    { name: Object.values(resourceNames.indexTemplate) },
+    { ignore: [404] }
+  );
 
   // delete component templates
-  await es.cluster.deleteComponentTemplate({
-    name: Object.values(resourceNames.componentTemplate),
-  });
+  await es.cluster.deleteComponentTemplate(
+    { name: Object.values(resourceNames.componentTemplate) },
+    { ignore: [404] }
+  );
 
   // create index assets from scratch
   await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
