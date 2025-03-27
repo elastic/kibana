@@ -64,7 +64,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector(
         '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
       );
-      await testSubjects.click('create-connector-flyout-save-btn');
     });
 
     const toastTitle = await toasts.getTitleAndDismiss();
@@ -120,9 +119,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   }
 
   // Failing: See https://github.com/elastic/kibana/issues/196153
-  // Failing: See https://github.com/elastic/kibana/issues/196153
-  // Failing: See https://github.com/elastic/kibana/issues/202328
-  describe.skip('create alert', function () {
+  describe('create alert', function () {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     const webhookConnectorName = 'webhook-test';
     before(async () => {
