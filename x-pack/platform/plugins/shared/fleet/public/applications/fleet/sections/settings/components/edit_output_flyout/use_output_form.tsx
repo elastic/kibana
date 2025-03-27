@@ -955,12 +955,12 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                       (val) => val !== ''
                     ),
                   }
-                : undefined,
+                : null,
               ...(!sslKeyInput.value &&
                 sslKeySecretInput.value && {
                   secrets: {
                     ssl: {
-                      key: sslKeySecretInput.value,
+                      ...(logstashEnableSSLInput.value && { key: sslKeySecretInput.value }),
                     },
                   },
                 }),
