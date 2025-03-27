@@ -22,6 +22,7 @@ export interface ResolvedLogView {
   timestampField: string;
   tiebreakerField: string;
   messageField: string[];
+  // TODO test removing it
   fields: ResolvedLogViewField[];
   runtimeMappings: estypes.MappingRuntimeFields;
   columns: LogViewColumnConfiguration[];
@@ -41,8 +42,8 @@ export const resolveLogView = (
       logViewId,
       logViewAttributes,
       dataViewsService,
-      confi,
-      useDataViewLazyg
+      config,
+      useDataViewLazy
     );
   } else if (logViewAttributes.logIndices.type === 'data_view') {
     return resolveDataViewReference(logViewAttributes, dataViewsService);
