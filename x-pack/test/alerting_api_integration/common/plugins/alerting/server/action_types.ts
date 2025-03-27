@@ -6,8 +6,8 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { ActionType } from '@kbn/actions-plugin/server';
 import type { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 import {

@@ -43,9 +43,6 @@ export interface RulesSettingsAlertDeletionProperties {
   categoryIds?: string[] | null;
 }
 
-export type RulesSettingsAlertDeletion = RulesSettingsAlertDeletionProperties &
-  RulesSettingsModificationMetadata;
-
 export interface RulesSettingsProperties {
   flapping?: RulesSettingsFlappingProperties;
   queryDelay?: RulesSettingsQueryDelayProperties;

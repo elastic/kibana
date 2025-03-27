@@ -29,10 +29,7 @@ import type {
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import type {
-  RulesSettingsAlertDeletion,
-  RulesSettingsAlertDeletionProperties,
-} from '@kbn/alerting-types';
+import type { RulesSettingsAlertDeletionProperties } from '@kbn/alerting-types';
 import type { GetAlertIndicesAlias } from '../lib';
 import { AlertAuditAction, alertAuditEvent, alertAuditSystemEvent } from '../lib';
 import type { RuleTypeRegistry } from '../types';
@@ -277,7 +274,7 @@ export class AlertDeletionClient {
   };
 
   private async deleteAlertsForSpace(
-    settings: RulesSettingsAlertDeletion,
+    settings: RulesSettingsAlertDeletionProperties,
     spaceId: string,
     abortController: AbortController
   ): Promise<{ numAlertsDeleted: number; errors?: string[] }> {

@@ -26,7 +26,6 @@ export type {
   RulesSettingsAlertDeletionProperties,
   RulesSettingsFlapping,
   RulesSettingsQueryDelay,
-  RulesSettingsAlertDeletion,
   RulesSettingsProperties,
   RulesSettings,
 } from '@kbn/alerting-types';
