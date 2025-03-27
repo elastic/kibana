@@ -18,8 +18,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import assert from 'assert';
-import type { Stored, SiemRuleMigrationsClientDependencies } from '../types';
-import type { IndexNameProvider } from './rule_migrations_data_client';
+import type { IndexNameProvider, SiemRuleMigrationsClientDependencies, Stored } from '../types';
 
 const DEFAULT_PIT_KEEP_ALIVE: Duration = '30s' as const;
 

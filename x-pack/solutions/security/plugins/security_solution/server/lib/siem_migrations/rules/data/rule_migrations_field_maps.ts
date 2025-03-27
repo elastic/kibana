@@ -6,10 +6,7 @@
  */
 
 import type { FieldMap, SchemaFieldMapKeys } from '@kbn/data-stream-adapter';
-import type {
-  RuleMigration,
-  RuleMigrationResource,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationResource } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationIntegration, RuleMigrationPrebuiltRule } from '../types';
 
 export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigration, 'id'>>> = {
@@ -75,4 +72,11 @@ export const prebuiltRulesFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigrationPre
   elser_embedding: { type: 'semantic_text', required: true },
   rule_id: { type: 'keyword', required: true },
   mitre_attack_ids: { type: 'keyword', array: true, required: false },
+};
+
+export const migrationsFieldMaps = {
+  migration_id: { type: 'keyword', required: true },
+  // rule or dashboard
+  type: { type: 'keyword', required: true },
+  vendor: { type: 'keyword', required: true },
 };
