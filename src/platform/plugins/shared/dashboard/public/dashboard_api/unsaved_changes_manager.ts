@@ -93,18 +93,6 @@ export function initializeUnsavedChangesManager({
         hasUnsavedChanges$.next(hasUnsavedChanges);
       }
 
-      // keep runtime state for children in sync with react embeddable changes
-      const reactEmbeddableChanges = unsavedPanelState ? { ...unsavedPanelState } : {};
-      if (controlGroupChanges) {
-        reactEmbeddableChanges[PANELS_CONTROL_GROUP_KEY] = controlGroupChanges;
-      }
-      Object.keys(panelsManager.api.children$.getValue()).forEach((embeddableId) => {
-        panelsManager.api.setRuntimeStateForChild(
-          embeddableId,
-          reactEmbeddableChanges[embeddableId] ?? {}
-        );
-      });
-
       // backup unsaved changes if configured to do so
       if (creationOptions?.useSessionStorageIntegration) {
         const dashboardBackupService = getDashboardBackupService();
