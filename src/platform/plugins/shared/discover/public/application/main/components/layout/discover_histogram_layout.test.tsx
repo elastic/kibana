@@ -50,16 +50,20 @@ function getStateContainer(savedSearch?: SavedSearch) {
 
   stateContainer.appState.update(appState);
 
-  stateContainer.internalState.dispatch(internalStateActions.setDataView(dataView));
   stateContainer.internalState.dispatch(
-    internalStateActions.setDataRequestParams({
-      timeRangeAbsolute: {
-        from: '2020-05-14T11:05:13.590',
-        to: '2020-05-14T11:20:13.590',
-      },
-      timeRangeRelative: {
-        from: '2020-05-14T11:05:13.590',
-        to: '2020-05-14T11:20:13.590',
+    stateContainer.injectCurrentTab(internalStateActions.setDataView)({ dataView })
+  );
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.setDataRequestParams)({
+      dataRequestParams: {
+        timeRangeAbsolute: {
+          from: '2020-05-14T11:05:13.590',
+          to: '2020-05-14T11:20:13.590',
+        },
+        timeRangeRelative: {
+          from: '2020-05-14T11:05:13.590',
+          to: '2020-05-14T11:20:13.590',
+        },
       },
     })
   );

@@ -391,9 +391,11 @@ describe('useDiscoverHistogram', () => {
       const timeRangeAbs = { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
       const timeRangeRel = { from: 'now-15m', to: 'now' };
       stateContainer.internalState.dispatch(
-        internalStateActions.setDataRequestParams({
-          timeRangeAbsolute: timeRangeAbs,
-          timeRangeRelative: timeRangeRel,
+        stateContainer.injectCurrentTab(internalStateActions.setDataRequestParams)({
+          dataRequestParams: {
+            timeRangeAbsolute: timeRangeAbs,
+            timeRangeRelative: timeRangeRel,
+          },
         })
       );
       const { hook } = await renderUseDiscoverHistogram({ stateContainer });

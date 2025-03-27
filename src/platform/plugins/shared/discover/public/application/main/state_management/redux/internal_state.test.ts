@@ -28,14 +28,15 @@ describe('InternalStateStore', () => {
       runtimeStateManager,
       urlStateStorage: createKbnUrlStateStorage(),
     });
-    expect(selectTab(store.getState()).dataViewId).toBeUndefined();
+    const tabId = store.getState().tabs.allIds[0];
+    expect(selectTab(store.getState(), tabId).dataViewId).toBeUndefined();
     expect(
-      selectTabRuntimeState(store.getState(), runtimeStateManager).currentDataView$.value
+      selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value
     ).toBeUndefined();
-    store.dispatch(internalStateActions.setDataView(dataViewMock));
-    expect(selectTab(store.getState()).dataViewId).toBe(dataViewMock.id);
-    expect(
-      selectTabRuntimeState(store.getState(), runtimeStateManager).currentDataView$.value
-    ).toBe(dataViewMock);
+    store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
+    expect(selectTab(store.getState(), tabId).dataViewId).toBe(dataViewMock.id);
+    expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value).toBe(
+      dataViewMock
+    );
   });
 });

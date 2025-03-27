@@ -105,9 +105,13 @@ async function mountComponent(
     interval: 'auto',
     query,
   });
-  stateContainer.internalState.dispatch(internalStateActions.setDataView(dataView));
   stateContainer.internalState.dispatch(
-    internalStateActions.setDataRequestParams({ timeRangeAbsolute: time, timeRangeRelative: time })
+    stateContainer.injectCurrentTab(internalStateActions.setDataView)({ dataView })
+  );
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.setDataRequestParams)({
+      dataRequestParams: { timeRangeAbsolute: time, timeRangeRelative: time },
+    })
   );
 
   const props = {

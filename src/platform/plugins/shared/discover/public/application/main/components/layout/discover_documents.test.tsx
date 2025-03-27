@@ -54,14 +54,16 @@ async function mountComponent(
     dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
   });
   stateContainer.internalState.dispatch(
-    internalStateActions.setDataRequestParams({
-      timeRangeRelative: {
-        from: '2020-05-14T11:05:13.590',
-        to: '2020-05-14T11:20:13.590',
-      },
-      timeRangeAbsolute: {
-        from: '2020-05-14T11:05:13.590',
-        to: '2020-05-14T11:20:13.590',
+    stateContainer.injectCurrentTab(internalStateActions.setDataRequestParams)({
+      dataRequestParams: {
+        timeRangeRelative: {
+          from: '2020-05-14T11:05:13.590',
+          to: '2020-05-14T11:20:13.590',
+        },
+        timeRangeAbsolute: {
+          from: '2020-05-14T11:05:13.590',
+          to: '2020-05-14T11:20:13.590',
+        },
       },
     })
   );
