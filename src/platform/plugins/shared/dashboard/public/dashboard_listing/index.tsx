@@ -21,7 +21,7 @@ const LazyDashboardListing = React.lazy(async () => {
   debugger;
   const [{ DashboardListingTable }] = await Promise.all([
     import('../dashboard_renderer/dashboard_module'),
-    untilPluginStartServicesReady()
+    untilPluginStartServicesReady(),
   ]);
   return { default: DashboardListingTable };
 });

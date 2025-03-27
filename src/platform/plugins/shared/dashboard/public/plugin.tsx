@@ -233,8 +233,8 @@ export class DashboardPlugin
         const [{ mountApp }] = await Promise.all([
           import('./dashboard_app/dashboard_router'),
           import('./dashboard_renderer/dashboard_module'),
-          untilPluginStartServicesReady()
-        ])
+          untilPluginStartServicesReady(),
+        ]);
         appMounted();
 
         const [coreStart] = await core.getStartServices();
