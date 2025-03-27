@@ -33,7 +33,12 @@ export const createGetDocViewer =
           ),
           order: 0,
           component: (props) => {
-            return <UnifiedDocViewerObservabilityTracesTransactionOverview {...props} />;
+            return (
+              <UnifiedDocViewerObservabilityTracesTransactionOverview
+                {...props}
+                tracesIndexPattern={tracesIndexPattern}
+              />
+            );
           },
         });
 
