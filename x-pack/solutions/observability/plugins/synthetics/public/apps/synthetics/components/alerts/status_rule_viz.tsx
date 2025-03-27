@@ -90,7 +90,7 @@ export const StatusRuleViz = ({
               })}
             </EuiPopoverTitle>
             {i18n.translate('xpack.synthetics.statusRuleViz.ruleAppliesToFollowingPopoverLabel', {
-              defaultMessage: 'Rule applies to following existing monitors.',
+              defaultMessage: 'Rule applies to the following monitors.',
             })}
             <EuiSpacer size="s" />
             <RuleMonitorsTable />
