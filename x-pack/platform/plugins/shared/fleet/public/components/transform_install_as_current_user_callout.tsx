@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { uniqBy } from 'lodash';
 
 import type { PackageInfo } from '../../common';
+import { useStartServices } from '../hooks';
 
 export const getNumTransformAssets = (assets?: PackageInfo['assets']) => {
   if (
@@ -28,12 +29,24 @@ export const getNumTransformAssets = (assets?: PackageInfo['assets']) => {
 export const TransformInstallWithCurrentUserPermissionCallout: React.FunctionComponent<{
   count: number;
 }> = ({ count }) => {
+  const { docLinks } = useStartServices();
   return (
     <EuiCallOut color="primary" iconType="iInCircle">
       <FormattedMessage
         id="xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout"
-        defaultMessage="This package has {count, plural, one {one transform asset} other {# transform assets}} which will be created and started with the same roles as the user installing the package."
-        values={{ count }}
+        defaultMessage="This package has {count, plural, one {one} other {#}} {docsLink} which will be created and started with the same roles as the user installing the package."
+        values={{ count, isSingular: count === 1, docsLink: (
+          <EuiLink
+            href={docLinks.links.transforms.overview}
+          >
+            <FormattedMessage
+              id="xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout.linkText"
+              defaultMessage="{count, plural, one {transform asset} other {transform assets}}"
+              values={{ count }}
+              />
+          </EuiLink>
+        )
+       }}
       />
     </EuiCallOut>
   );
