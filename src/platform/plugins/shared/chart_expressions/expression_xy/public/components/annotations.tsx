@@ -6,9 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import './annotations.scss';
-
 import React, { Fragment } from 'react';
 import { snakeCase } from 'lodash';
 import {
@@ -27,6 +24,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  UseEuiTheme,
 } from '@elastic/eui';
 import type {
   EventAnnotationOutput,
@@ -38,6 +36,7 @@ import { defaultAnnotationColor, defaultAnnotationRangeColor } from '@kbn/event-
 import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common/manual_event_annotation/types';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import type { MergedAnnotation } from '../../common';
 import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';
 import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers';
@@ -66,11 +65,11 @@ const TooltipAnnotationDetails = ({
   }>;
 }) => {
   return extraFields.length > 0 ? (
-    <div className="xyAnnotationTooltip__extraFields">
+    <div css={styles.tooltipExtraFields}>
       {extraFields.map((field) => (
         <EuiFlexGroup gutterSize="s" key={`${field.key}-${field.name}`}>
-          <EuiFlexItem className="xyAnnotationTooltip__extraFieldsKey">{field.name}:</EuiFlexItem>
-          <EuiFlexItem className="xyAnnotationTooltip__extraFieldsValue">
+          <EuiFlexItem css={styles.tooltipExtraFieldsKey}>{field.name}:</EuiFlexItem>
+          <EuiFlexItem css={styles.tooltipExtraFieldsValue}>
             {field.formatter ? field.formatter.convert(row[field.key]) : row[field.key]}
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -119,9 +118,9 @@ const createCustomTooltip =
         hasBorder={false}
         paddingSize="none"
         borderRadius="none"
-        className="xyAnnotationTooltip"
+        css={styles.tooltip}
       >
-        <div className="xyAnnotationTooltip__rows">
+        <div css={styles.tooltipRows}>
           {rows.slice(0, DISPLAYED_COUNT_OF_ROWS).map((row, index) => {
             const extraFields = getExtraFields(row, formatFactory, columns);
 
@@ -134,7 +133,7 @@ const createCustomTooltip =
                     <EuiSpacer size="xs" />
                   </>
                 )}
-                <div className="xyAnnotationTooltip__row">
+                <div css={styles.tooltipRow}>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
                       <AnnotationIcon
@@ -160,11 +159,11 @@ const createCustomTooltip =
           })}
         </div>
         {skippedCount ? (
-          <div className="xyAnnotationTooltip__skippedCount">
+          <div css={styles.tooltipSkippedCount}>
             <EuiSpacer size="xs" />
             <EuiHorizontalRule margin="none" />
             <EuiSpacer size="xs" />
-            <div className="xyAnnotationTooltip__row ">
+            <div css={styles.tooltipRow}>
               <FormattedMessage
                 id="expressionXY.annotations.skippedCount"
                 defaultMessage="+{value} more…"
@@ -358,9 +357,9 @@ export const Annotations = ({
                 hasBorder={false}
                 paddingSize="none"
                 borderRadius="none"
-                className="xyAnnotationTooltip"
+                css={styles.tooltip}
               >
-                <div className="xyAnnotationTooltip__row">
+                <div css={styles.tooltipRow}>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
                       <EuiIcon type="stopFilled" color={color} />
@@ -394,4 +393,40 @@ export const Annotations = ({
       })}
     </>
   );
+};
+
+const styles = {
+  tooltip: css({
+    borderRadius: '0 !important',
+  }),
+  tooltipRows: css({
+    // maxHeight: '60vh',
+    overflowY: 'hidden',
+  }),
+  tooltipRow: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      fontWeight: euiTheme.font.weight.regular,
+      padding: `${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.s} ${euiTheme.size.s}`,
+      borderRadius: '0 !important',
+    }),
+  tooltipExtraFields: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.darkShade,
+      marginTop: euiTheme.size.s,
+    }),
+  tooltipExtraFieldsKey: css({
+    overflowWrap: 'anywhere',
+    hyphens: 'auto',
+  }),
+  tooltipExtraFieldsValue: css({
+    textAlign: 'right',
+    overflowWrap: 'anywhere',
+    hyphens: 'auto',
+  }),
+  tooltipSkippedCount: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'relative',
+      textAlign: 'right',
+      fontWeight: euiTheme.font.weight.regular,
+    }),
 };

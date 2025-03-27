@@ -9,14 +9,13 @@
 import type {
   ESQLAstItem,
   ESQLCommand,
-  ESQLCommandOption,
   ESQLFunction,
   ESQLMessage,
   ESQLSource,
 } from '@kbn/esql-ast';
 import { ESQLControlVariable } from '@kbn/esql-types';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type { ESQLPolicy } from '../validation/types';
+import type { ESQLPolicy, ReferenceMaps } from '../validation/types';
 import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 
 /**
@@ -177,6 +176,103 @@ export enum FunctionDefinitionTypes {
   GROUPING = 'grouping',
 }
 
+/**
+ * This is a list of locations within an ES|QL query.
+ *
+ * It is currently used to suggest appropriate functions and
+ * operators given the location of the cursor.
+ */
+export enum Location {
+  /**
+   * In the top-level EVAL command
+   */
+  EVAL = 'eval',
+
+  /**
+   * In the top-level WHERE command
+   */
+  WHERE = 'where',
+
+  /**
+   * In the top-level ROW command
+   */
+  ROW = 'row',
+
+  /**
+   * In the top-level SORT command
+   */
+  SORT = 'sort',
+
+  /**
+   * In the top-level STATS command
+   */
+  STATS = 'stats',
+
+  /**
+   * In a grouping clause
+   */
+  STATS_BY = 'stats_by',
+
+  /**
+   * In a per-agg filter
+   */
+  STATS_WHERE = 'stats_where',
+
+  /**
+   * Top-level ENRICH command
+   */
+  ENRICH = 'enrich',
+
+  /**
+   * ENRICH...WITH clause
+   */
+  ENRICH_WITH = 'enrich_with',
+
+  /**
+   * In the top-level DISSECT command (used only for
+   * assignment in APPEND_SEPARATOR)
+   */
+  DISSECT = 'dissect',
+
+  /**
+   * In RENAME (used only for AS)
+   */
+  RENAME = 'rename',
+
+  /**
+   * In the JOIN command (used only for AS)
+   */
+  JOIN = 'join',
+
+  /**
+   * In the SHOW command
+   */
+  SHOW = 'show',
+}
+
+const commandOptionNameToLocation: Record<string, Location> = {
+  eval: Location.EVAL,
+  where: Location.WHERE,
+  row: Location.ROW,
+  sort: Location.SORT,
+  stats: Location.STATS,
+  by: Location.STATS_BY,
+  enrich: Location.ENRICH,
+  with: Location.ENRICH_WITH,
+  dissect: Location.DISSECT,
+  rename: Location.RENAME,
+  join: Location.JOIN,
+  show: Location.SHOW,
+};
+
+/**
+ * Pause before using this in new places. Where possible, use the Location enum directly.
+ *
+ * This is primarily around for backwards compatibility with the old system of command and option names.
+ */
+export const getLocationFromCommandOrOptionName = (name: string) =>
+  commandOptionNameToLocation[name];
+
 export interface FunctionDefinition {
   type: FunctionDefinitionTypes;
   preview?: boolean;
@@ -184,8 +280,7 @@ export interface FunctionDefinition {
   name: string;
   alias?: string[];
   description: string;
-  supportedCommands: string[];
-  supportedOptions?: string[];
+  locationsAvailable: Location[];
   signatures: Signature[];
   examples?: string[];
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
@@ -280,43 +375,51 @@ export type CommandSuggestFunction<CommandName extends string> = (
   params: CommandSuggestParams<CommandName>
 ) => Promise<SuggestionRawDefinition[]> | SuggestionRawDefinition[];
 
-/**
- * @deprecated — use CommandDefinition instead
- */
-export interface CommandBaseDefinition<CommandName extends string> {
+export interface CommandDefinition<CommandName extends string> {
   name: CommandName;
+
+  /**
+   * A description of what the command does. Displayed in the autocomplete.
+   */
+  description: string;
+
+  /**
+   * The pattern for declaring this command statement. Displayed in the autocomplete.
+   */
+  declaration: string;
+
+  /**
+   * A list of examples of how to use the command. Displayed in the autocomplete.
+   */
+  examples: string[];
 
   /**
    * Command name prefix, such as "LEFT" or "RIGHT" for JOIN command.
    */
   types?: CommandTypeDefinition[];
 
-  alias?: string;
-  description: string;
   /**
    * Displays a Technical preview label in the autocomplete
    */
   preview?: boolean;
+
   /**
-   * Whether to show or hide in autocomplete suggestion list
+   * Whether to show or hide in autocomplete suggestion list. We generally use
+   * this for commands that are not yet ready to be advertised.
    */
   hidden?: boolean;
-  /** @deprecated this property will disappear in the future */
-  signature: {
-    multipleParams: boolean;
-    // innerTypes here is useful to drill down the type in case of "column"
-    // i.e. column of type string
-    params: Array<{
-      name: string;
-      type: string;
-      optional?: boolean;
-      innerTypes?: Array<SupportedDataType | 'any' | 'policy'>;
-      values?: string[];
-      valueDescriptions?: string[];
-      constantOnly?: boolean;
-      wildcards?: boolean;
-    }>;
-  };
+
+  /**
+   * This method is run when the command is being validated, but it does not
+   * prevent the default behavior. If you need a full override, we are currently
+   * doing those directly in the validateCommand function in the validation module.
+   */
+  validate?: (command: ESQLCommand<CommandName>, references: ReferenceMaps) => ESQLMessage[];
+
+  /**
+   * This method is called to load suggestions when the cursor is within this command.
+   */
+  suggest: CommandSuggestFunction<CommandName>;
 }
 
 export interface CommandTypeDefinition {
@@ -324,47 +427,9 @@ export interface CommandTypeDefinition {
   description?: string;
 }
 
-/**
- * @deprecated options are going away
- */
-export interface CommandOptionsDefinition<CommandName extends string = string>
-  extends CommandBaseDefinition<CommandName> {
-  wrapped?: string[];
-  optional: boolean;
-  skipCommonValidation?: boolean;
-  validate?: (
-    option: ESQLCommandOption,
-    command: ESQLCommand,
-    references?: unknown
-  ) => ESQLMessage[];
-}
-
-export interface CommandModeDefinition {
-  name: string;
-  description: string;
-  values: Array<{ name: string; description: string }>;
-  prefix?: string;
-}
-
-export interface CommandDefinition<CommandName extends string>
-  extends CommandBaseDefinition<CommandName> {
-  examples: string[];
-  validate?: (option: ESQLCommand) => ESQLMessage[];
-  suggest: CommandSuggestFunction<CommandName>;
-  /** @deprecated this property will disappear in the future */
-  modes: CommandModeDefinition[];
-  /** @deprecated this property will disappear in the future */
-  options: CommandOptionsDefinition[];
-}
-
 export interface Literals {
   name: string;
   description: string;
 }
-
-export type SignatureType =
-  | FunctionDefinition['signatures'][number]
-  | CommandOptionsDefinition['signature'];
-export type SignatureArgType = SignatureType['params'][number];
 
 export type FunctionParameter = FunctionDefinition['signatures'][number]['params'][number];

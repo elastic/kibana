@@ -63,7 +63,43 @@
               "section": "def-common.RouteRepositoryClient",
               "text": "RouteRepositoryClient"
             },
-            "<{ \"PUT /api/streams/{name}/_group 2023-10-31\": ",
+            "<{ \"POST /api/streams/{name}/content/import 2023-10-31\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /api/streams/{name}/content/import 2023-10-31\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; body: Zod.ZodObject<{ content: Zod.ZodType<",
+            "Readable",
+            ", Zod.ZodTypeDef, ",
+            "Readable",
+            ">; }, \"strip\", Zod.ZodTypeAny, { content: ",
+            "Readable",
+            "; }, { content: ",
+            "Readable",
+            "; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; body: { content: ",
+            "Readable",
+            "; }; }, { path: { name: string; }; body: { content: ",
+            "Readable",
+            "; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", { errors: ",
+            "SavedObjectsImportFailure",
+            "[] | undefined; created: { assetType: \"dashboard\"; assetId: string; }[]; }, undefined>; \"POST /api/streams/{name}/content/export 2023-10-31\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /api/streams/{name}/content/export 2023-10-31\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; }, { path: { name: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "IKibanaResponse",
+            "<{ content: string; }>, undefined>; \"PUT /api/streams/{name}/_group 2023-10-31\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -711,7 +747,25 @@
               "section": "def-common.RecursiveRecord",
               "text": "RecursiveRecord"
             },
-            "[]; }, undefined>; \"GET /internal/streams/{name}/_details\": ",
+            "[]; }, undefined>; \"GET /internal/streams/_resolve_index\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /internal/streams/_resolve_index\", Zod.ZodObject<{ query: Zod.ZodObject<{ index: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { index: string; }, { index: string; }>; }, \"strip\", Zod.ZodTypeAny, { query: { index: string; }; }, { query: { index: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", { stream?: ",
+            {
+              "pluginId": "@kbn/streams-schema",
+              "scope": "common",
+              "docId": "kibKbnStreamsSchemaPluginApi",
+              "section": "def-common.StreamDefinition",
+              "text": "StreamDefinition"
+            },
+            " | undefined; }, undefined>; \"GET /internal/streams/{name}/_details\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -798,7 +852,43 @@
         "label": "StreamsRouteRepository",
         "description": [],
         "signature": [
-          "{ \"PUT /api/streams/{name}/_group 2023-10-31\": ",
+          "{ \"POST /api/streams/{name}/content/import 2023-10-31\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /api/streams/{name}/content/import 2023-10-31\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; body: Zod.ZodObject<{ content: Zod.ZodType<",
+          "Readable",
+          ", Zod.ZodTypeDef, ",
+          "Readable",
+          ">; }, \"strip\", Zod.ZodTypeAny, { content: ",
+          "Readable",
+          "; }, { content: ",
+          "Readable",
+          "; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; body: { content: ",
+          "Readable",
+          "; }; }, { path: { name: string; }; body: { content: ",
+          "Readable",
+          "; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", { errors: ",
+          "SavedObjectsImportFailure",
+          "[] | undefined; created: { assetType: \"dashboard\"; assetId: string; }[]; }, undefined>; \"POST /api/streams/{name}/content/export 2023-10-31\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /api/streams/{name}/content/export 2023-10-31\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; }, { path: { name: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "IKibanaResponse",
+          "<{ content: string; }>, undefined>; \"PUT /api/streams/{name}/_group 2023-10-31\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1446,7 +1536,25 @@
             "section": "def-common.RecursiveRecord",
             "text": "RecursiveRecord"
           },
-          "[]; }, undefined>; \"GET /internal/streams/{name}/_details\": ",
+          "[]; }, undefined>; \"GET /internal/streams/_resolve_index\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/streams/_resolve_index\", Zod.ZodObject<{ query: Zod.ZodObject<{ index: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { index: string; }, { index: string; }>; }, \"strip\", Zod.ZodTypeAny, { query: { index: string; }; }, { query: { index: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", { stream?: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.StreamDefinition",
+            "text": "StreamDefinition"
+          },
+          " | undefined; }, undefined>; \"GET /internal/streams/{name}/_details\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
