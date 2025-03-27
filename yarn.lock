@@ -6677,6 +6677,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/response-ops-rules-apis@link:src/platform/packages/shared/response-ops/rules-apis":
+  version "0.0.0"
+  uid ""
+
 "@kbn/response-stream-plugin@link:examples/response_stream":
   version "0.0.0"
   uid ""
