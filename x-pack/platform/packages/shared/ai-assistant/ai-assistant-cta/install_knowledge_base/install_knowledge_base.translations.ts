@@ -36,7 +36,7 @@ const installingButton = i18n.translate(
 const unavailableTooltip = i18n.translate(
   'xpack.aiAssistant.callToAction.installKnowledgeBase.installingButtonUnavailablToolTip',
   {
-    defaultMessage: 'Knowledge Base unavailable, please see documentation for more details.',
+    defaultMessage: 'Knowledge Base unavailable, check the documentation for more details.',
   }
 );
 
