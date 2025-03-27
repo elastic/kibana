@@ -1133,7 +1133,9 @@
     "scheduledAt",
     "scope",
     "status",
-    "taskType"
+    "taskType",
+    "userScope",
+    "userScope.apiKeyId"
   ],
   "telemetry": [],
   "threshold-explorer-view": [],

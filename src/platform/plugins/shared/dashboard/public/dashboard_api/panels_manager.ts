@@ -45,6 +45,7 @@ import { DASHBOARD_UI_METRIC_ID } from '../utils/telemetry_constants';
 import { arePanelLayoutsEqual } from './are_panel_layouts_equal';
 import type { initializeTrackPanel } from './track_panel';
 import { DashboardState, UnsavedPanelState } from './types';
+import { getDashboardBackupService } from '../services/dashboard_backup_service';
 
 export function initializePanelsManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
@@ -53,7 +54,8 @@ export function initializePanelsManager(
   initialSections: DashboardSectionMap | undefined,
   trackPanel: ReturnType<typeof initializeTrackPanel>,
   getReferencesForPanelId: (id: string) => Reference[],
-  pushReferences: (references: Reference[]) => void
+  pushReferences: (references: Reference[]) => void,
+  dashboardId?: string
 ) {
   const children$ = new BehaviorSubject<{
     [key: string]: unknown;
@@ -433,8 +435,12 @@ export function initializePanelsManager(
           const panel = panels$.value[id];
           const serializeResult = apiHasSerializableState(childApi)
             ? childApi.serializeState()
-            : { rawState: panel?.explicitInput ?? {} };
+            : getDashboardBackupService().getSerializedPanelBackup(id, dashboardId) ?? {
+                rawState: panel.explicitInput ?? {},
+                references: getReferencesForPanelId(id),
+              };
           acc[id] = { ...panel, explicitInput: { ...serializeResult.rawState, id } };
+
           references.push(...prefixReferencesFromPanel(id, serializeResult.references ?? []));
 
           return acc;
