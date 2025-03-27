@@ -26,6 +26,7 @@ describe('row state manager actions', () => {
           top: 0,
           left: 0,
         },
+        sensorType: 'mouse',
       });
       gridLayoutStateManager.rowRefs.current = {
         first: {} as any as HTMLDivElement,

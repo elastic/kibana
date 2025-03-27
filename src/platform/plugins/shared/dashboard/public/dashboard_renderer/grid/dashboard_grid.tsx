@@ -156,6 +156,7 @@ export const DashboardGrid = ({
     onLayoutChange,
     expandedPanelId,
     viewMode,
+    dashboardContainerRef,
   ]);
 
   const { dashboardClasses, dashboardStyles } = useMemo(() => {
