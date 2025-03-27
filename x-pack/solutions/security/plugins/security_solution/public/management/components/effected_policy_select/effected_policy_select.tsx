@@ -158,7 +158,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
     );
 
     return (
-      <EffectivePolicyFormContainer>
+      <EffectivePolicyFormContainer data-test-subj={getTestId()}>
         <EuiText size="xs">
           <h3>
             <FormattedMessage
