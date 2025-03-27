@@ -31,7 +31,11 @@ export function registerPostMessageRoute(router: IRouter) {
     {
       path: `${POST_MESSAGE_ROUTE_PATH}/{id}`,
       security: {
-        authz: { enabled: false, reason: 'This route is opted out of authorization because...' },
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out of authorization because it is only intended for test use',
+        },
       },
       validate: {
         params: schema.object({
@@ -67,7 +71,11 @@ export function registerGetMessageByIdRoute(router: IRouter) {
     {
       path: `${INTERNAL_GET_MESSAGE_BY_ID_ROUTE}/{id}`,
       security: {
-        authz: { enabled: false, reason: 'This route is opted out of authorization because...' },
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out of authorization because it is only intended for test use',
+        },
       },
       options: {
         access: 'internal',
