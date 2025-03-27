@@ -19,7 +19,7 @@ export async function reIndexKnowledgeBase({
   logger: Logger;
   esClient: { asInternalUser: ElasticsearchClient };
 }): Promise<void> {
-  logger.debug('Initializing re-index of knowledge base...');
+  logger.debug('Initializing re-indexing of knowledge base...');
   await waitForWriteBlockToBeRemoved({ esClient, logger, index: resourceNames.writeIndexAlias.kb });
   await addIndexWriteBlock({ esClient, index: resourceNames.writeIndexAlias.kb });
 
@@ -270,7 +270,7 @@ async function waitForReIndexTaskToComplete({
       const taskResponse = await esClient.asInternalUser.tasks.get({
         task_id: taskId,
         wait_for_completion: false,
-      });
+      }); 
 
       if (!taskResponse.completed) {
         logger.debug(`Waiting for re-indexing task "${taskId}" to complete...`);
