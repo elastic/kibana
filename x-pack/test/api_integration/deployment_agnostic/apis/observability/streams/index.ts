@@ -21,5 +21,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./lifecycle'));
     loadTestFile(require.resolve('./significant_events'));
     loadTestFile(require.resolve('./queries'));
+    loadTestFile(require.resolve('./discover'));
   });
 }

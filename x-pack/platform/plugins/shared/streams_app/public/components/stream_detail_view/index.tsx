@@ -46,6 +46,7 @@ export function StreamDetailViewContent({ name, tab }: { name: string; tab: stri
       label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
         defaultMessage: 'Overview',
       }),
+      background: false,
     },
     {
       name: 'dashboards',
@@ -53,6 +54,7 @@ export function StreamDetailViewContent({ name, tab }: { name: string; tab: stri
       label: i18n.translate('xpack.streams.streamDetailView.dashboardsTab', {
         defaultMessage: 'Dashboards',
       }),
+      background: true,
     },
     {
       name: 'significant_events',
@@ -67,6 +69,7 @@ export function StreamDetailViewContent({ name, tab }: { name: string; tab: stri
       label: i18n.translate('xpack.streams.streamDetailView.managementTab', {
         defaultMessage: 'Management',
       }),
+      background: true,
     },
   ];
 

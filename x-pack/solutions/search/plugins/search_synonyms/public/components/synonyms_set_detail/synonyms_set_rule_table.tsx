@@ -141,6 +141,7 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
           icon: 'trash',
           color: 'danger',
           type: 'icon',
+          'data-test-subj': 'searchSynonymsSynonymsSetTableDeleteRuleButton',
           onClick: (synonymRule: SynonymsSynonymRule) => {
             if (synonymRule.id) {
               setSynonymRuleToDelete(synonymRule.id);
@@ -159,6 +160,7 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
           ),
           icon: 'pencil',
           type: 'icon',
+          'data-test-subj': 'searchSynonymsSynonymsSetTableEditRuleButton',
           onClick: (synonymRule: SynonymsSynonymRule) => {
             if (synonymRule.id) {
               setSynonymsRuleToEdit(synonymRule.id);

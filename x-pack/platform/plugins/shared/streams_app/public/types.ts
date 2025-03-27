@@ -23,6 +23,12 @@ import { AppMountParameters } from '@kbn/core/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import { IngestPipelinesPluginStart } from '@kbn/ingest-pipelines-plugin/public';
+import {
+  DiscoverSharedPublicSetup,
+  DiscoverSharedPublicStart,
+} from '@kbn/discover-shared-plugin/public';
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
@@ -38,6 +44,7 @@ export interface StreamsAppSetupDependencies {
   streams: StreamsPluginSetup;
   data: DataPublicPluginSetup;
   dataViews: DataViewsPublicPluginSetup;
+  discoverShared: DiscoverSharedPublicSetup;
   unifiedSearch: {};
   share: SharePublicSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
@@ -54,8 +61,11 @@ export interface StreamsAppStartDependencies {
   savedObjectsTagging: SavedObjectTaggingPluginStart;
   navigation: NavigationPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  discoverShared: DiscoverSharedPublicStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   licensing: LicensingPluginStart;
+  indexManagement: IndexManagementPluginStart;
+  ingestPipelines: IngestPipelinesPluginStart;
 }
 
 export interface StreamsAppPublicSetup {}
