@@ -62,6 +62,8 @@
     "@kbn/discover-shared-plugin",
     "@kbn/visualization-utils",
     "@kbn/core-analytics-browser",
+    "@kbn/index-management-shared-types",
+    "@kbn/ingest-pipelines-plugin",
     "@kbn/deeplinks-observability",
   ]
 }
