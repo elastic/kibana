@@ -86,6 +86,7 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
         globalStyles,
         utilityClasses: globalStyles,
         theme: EuiThemeAmsterdam,
+        highContrastMode: false,
       }}
     >
       {children}
