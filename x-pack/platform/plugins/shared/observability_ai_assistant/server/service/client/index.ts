@@ -674,16 +674,12 @@ export class ObservabilityAIAssistantClient {
 
   setupKnowledgeBase = async (
     modelId: string | undefined,
-    taskType: InferenceTaskType | undefined
+    taskType: InferenceTaskType | undefined = 'sparse_embedding'
   ) => {
     const { esClient, core, logger, knowledgeBaseService } = this.dependencies;
 
     if (!modelId) {
       modelId = await getElserModelId({ core, logger });
-    }
-
-    if (!taskType) {
-      taskType = 'sparse_embedding';
     }
 
     this.dependencies.logger.debug(
