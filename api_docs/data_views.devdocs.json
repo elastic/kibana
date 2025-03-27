@@ -13636,11 +13636,11 @@
               },
               {
                 "plugin": "unifiedSearch",
-                "path": "src/platform/plugins/shared/unified_search/public/query_string_input/fetch_index_patterns.ts"
+                "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/change_dataview.tsx"
               },
               {
                 "plugin": "unifiedSearch",
-                "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/change_dataview.tsx"
+                "path": "src/platform/plugins/shared/unified_search/public/query_string_input/fetch_index_patterns.ts"
               },
               {
                 "plugin": "@kbn/unified-field-list",
