@@ -29,13 +29,8 @@ export async function removeYarnIntegrityFileIfExists() {
   }
 }
 
-// yarn integration checkers
-async function areNodeModulesPresent() {
+export async function areNodeModulesPresent() {
   return await isDirectory(Path.resolve(REPO_ROOT, 'node_modules'));
-}
-
-export async function haveNodeModulesBeenManuallyDeleted() {
-  return !(await areNodeModulesPresent());
 }
 
 /**
@@ -51,7 +46,23 @@ export async function yarnInstallDeps(log, { offline, quiet }) {
   if (quiet) args.push('--silent');
   await run('yarn', args, { cwd: process.cwd(), pipe: true });
 
-  // await run('yarn', ['playwright', 'install'], { cwd: process.cwd(), pipe: true });
+  await run('yarn', ['playwright', 'install'], { cwd: process.cwd(), pipe: true });
+  log.success('Playwright browsers installed');
+}
 
-  // log.success('Playwright browsers installed');
+/**
+ * Checks if the installed state adheres to the integrity checksums from the yarn.lock file
+ * @param {import('@kbn/some-dev-log').SomeDevLog} log
+ * @returns {Promise<boolean>}
+ */
+export async function checkYarnIntegrity(log) {
+  try {
+    await run('yarn', ['check', '--integrity'], { cwd: process.cwd() });
+    log.success('yarn.lock integrity check passed - no need to update');
+    return true;
+  } catch (error) {
+    log.warning(`yarn.lock integrity didn't check out, reinstalling...`);
+    log.debug('yarn check error:', error);
+    return false;
+  }
 }

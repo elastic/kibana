@@ -12,7 +12,8 @@ import External from '../../lib/external_packages.js';
 import { buildPackage } from '../../lib/webpack.mjs';
 
 import {
-  haveNodeModulesBeenManuallyDeleted,
+  areNodeModulesPresent,
+  checkYarnIntegrity,
   removeYarnIntegrityFileIfExists,
   yarnInstallDeps,
 } from './yarn.mjs';
@@ -23,7 +24,7 @@ import { regenerateBaseTsconfig } from './regenerate_base_tsconfig.mjs';
 import { discovery } from './discovery.mjs';
 import { updatePackageJson } from './update_package_json.mjs';
 
-/** @type {import('../../lib/command').Command} */
+/** @type {import("../../lib/command").Command} */
 export const command = {
   name: 'bootstrap',
   intro: 'Bootstrap the Kibana repository, installs all dependencies and builds all packages',
@@ -57,16 +58,14 @@ export const command = {
     const offline = args.getBooleanValue('offline') ?? false;
     const validate = args.getBooleanValue('validate') ?? true;
     const quiet = args.getBooleanValue('quiet') ?? false;
-    const vscodeConfig =
-      args.getBooleanValue('vscode') ?? (process.env.KBN_BOOTSTRAP_NO_VSCODE ? false : true);
-
-    // Force install is set in case a flag is passed into yarn kbn bootstrap, or node_modules have been removed
-    const forceInstall =
-      args.getBooleanValue('force-install') ?? (await haveNodeModulesBeenManuallyDeleted());
+    const vscodeConfig = args.getBooleanValue('vscode') ?? !process.env.KBN_BOOTSTRAP_NO_VSCODE;
+    const forceInstall = args.getBooleanValue('force-install');
+    const shouldInstall =
+      forceInstall || !(await areNodeModulesPresent()) || !(await checkYarnIntegrity(log));
 
     const { packageManifestPaths, tsConfigRepoRels } = await time('discovery', discovery);
 
-    // generate the package map and package.json file, if necessary
+    // generate the package map and update package.json file, if necessary
     const [packages] = await Promise.all([
       time('regenerate package map', async () => {
         return await regeneratePackageMap(log, packageManifestPaths);
@@ -85,9 +84,11 @@ export const command = {
       }),
     ]);
 
-    if (forceInstall) {
-      await time('force install dependencies', async () => {
-        await removeYarnIntegrityFileIfExists();
+    if (shouldInstall) {
+      await time('install dependencies', async () => {
+        if (forceInstall) {
+          await removeYarnIntegrityFileIfExists();
+        }
         await yarnInstallDeps(log, { offline, quiet });
       });
     }
@@ -104,10 +105,11 @@ export const command = {
       log.success('build required webpack bundles for packages');
     });
 
+    await time('sort package json', async () => {
+      await sortPackageJson(log);
+    });
+
     await Promise.all([
-      time('sort package json', async () => {
-        await sortPackageJson(log);
-      }),
       validate
         ? time('validate dependencies', async () => {
             // now that deps are installed we can import `@kbn/yarn-lock-validator`
