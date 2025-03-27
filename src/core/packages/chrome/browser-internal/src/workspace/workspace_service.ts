@@ -21,6 +21,7 @@ import {
   type WorkspaceTool,
   type WorkspaceStart,
   WORKSPACE_KNOWN_TOOLS,
+  ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
 import React from 'react';
 import { Provider, type ProviderProps } from 'react-redux';
@@ -33,10 +34,13 @@ import {
   setHomeHref,
   setIconType,
   createStore,
+  setHasBanner,
 } from '@kbn/core-workspace-state';
 import { ApplicationStart } from '@kbn/core-application-browser';
 import { RecentlyAccessed } from '@kbn/recently-accessed';
+import { css } from '@emotion/css';
 import { ProjectNavigationService } from '../project_navigation';
+import { HeaderExtension } from '../ui/header/header_extension';
 
 const isKnownTool = (toolId: string): toolId is WorkspaceKnownTool => {
   return WORKSPACE_KNOWN_TOOLS.includes(toolId as WorkspaceKnownTool);
@@ -74,6 +78,7 @@ export interface WorkspaceServiceStartDeps {
   projectNavigation: ReturnType<ProjectNavigationService['start']>;
   isVisible$: Observable<boolean>;
   recentlyAccessed: RecentlyAccessed;
+  banner$: Observable<ChromeUserBanner | undefined>;
 }
 
 /** @internal */
@@ -83,6 +88,7 @@ export class WorkspaceService {
   private isVisible$: Subscription | null = null;
   private homeHref$: Subscription | null = null;
   private iconType$: Subscription | null = null;
+  private banner$: Subscription | null = null;
   private search: JSX.Element | null = null;
 
   public start({
@@ -91,6 +97,7 @@ export class WorkspaceService {
     customBranding,
     projectNavigation,
     isVisible$,
+    banner$,
   }: WorkspaceServiceStartDeps): WorkspaceStart {
     const store = createStore();
     const tools$ = new BehaviorSubject<ReadonlySet<WorkspaceTool>>(new Set());
@@ -132,6 +139,10 @@ export class WorkspaceService {
       tools$.next(new Set([...tools$.value.values(), tool]));
     };
 
+    this.banner$ = banner$.subscribe((banner) => {
+      store.dispatch(setHasBanner(Boolean(banner)));
+    });
+
     return {
       getStateProvider:
         () =>
@@ -140,6 +151,22 @@ export class WorkspaceService {
       isEnabled: () => featureFlags.getBooleanValue('workbench', false),
       header: {
         getBreadcrumbs$: () => breadcrumbs$,
+      },
+      banner: {
+        getBanner$: () =>
+          banner$.pipe(
+            map((banner) => {
+              // TODO: This is a hack to make the banner a ReactNode
+              return banner
+                ? React.createElement(HeaderExtension, {
+                    extension: banner.content,
+                    containerClassName: css`
+                      height: 100%;
+                    `,
+                  })
+                : null;
+            })
+          ),
       },
       toolbox: {
         registerTool,
@@ -171,5 +198,6 @@ export class WorkspaceService {
     this.isVisible$?.unsubscribe();
     this.homeHref$?.unsubscribe();
     this.iconType$?.unsubscribe();
+    this.banner$?.unsubscribe();
   }
 }
