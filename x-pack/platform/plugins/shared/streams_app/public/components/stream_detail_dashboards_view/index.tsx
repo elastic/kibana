@@ -13,6 +13,8 @@ import { AddDashboardFlyout } from './add_dashboard_flyout';
 import { DashboardsTable } from './dashboard_table';
 import { useDashboardsApi } from '../../hooks/use_dashboards_api';
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
+import { ImportContentPackFlyout } from './import_content_pack_flyout';
+import { ExportContentPackFlyout } from './export_content_pack_flyout';
 
 export function StreamDetailDashboardsView({
   definition,
@@ -22,6 +24,8 @@ export function StreamDetailDashboardsView({
   const [query, setQuery] = useState('');
 
   const [isAddDashboardFlyoutOpen, setIsAddDashboardFlyoutOpen] = useState(false);
+  const [isImportFlyoutOpen, setIsImportFlyoutOpen] = useState(false);
+  const [isExportFlyoutOpen, setIsExportFlyoutOpen] = useState(false);
 
   const dashboardsFetch = useDashboardsFetch(definition?.stream.name);
   const { addDashboards, removeDashboards } = useDashboardsApi(definition?.stream.name);
@@ -67,6 +71,19 @@ export function StreamDetailDashboardsView({
               })}
             </EuiButton>
           )}
+
+          <EuiButton
+            data-test-subj="streamsAppStreamDetailExportContentPackButton"
+            iconType="trash"
+            onClick={() => {
+              setIsExportFlyoutOpen(true);
+            }}
+          >
+            {i18n.translate('xpack.streams.streamDetailDashboardView.exportContentPackButton', {
+              defaultMessage: 'Export content pack',
+            })}
+          </EuiButton>
+
           <EuiSearchBar
             query={query}
             box={{
@@ -76,6 +93,7 @@ export function StreamDetailDashboardsView({
               setQuery(nextQuery.queryText);
             }}
           />
+
           <EuiButton
             data-test-subj="streamsAppStreamDetailAddDashboardButton"
             iconType="plusInCircle"
@@ -87,6 +105,21 @@ export function StreamDetailDashboardsView({
               defaultMessage: 'Add a dashboard',
             })}
           </EuiButton>
+
+          <EuiButton
+            data-test-subj="streamsAppStreamDetailImportContentPackButton"
+            iconType="importAction"
+            onClick={() => {
+              setIsImportFlyoutOpen(true);
+            }}
+          >
+            {i18n.translate(
+              'xpack.streams.streamDetailDashboardView.importContentPackButtonLabel',
+              {
+                defaultMessage: 'Import from content pack',
+              }
+            )}
+          </EuiButton>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
@@ -97,6 +130,7 @@ export function StreamDetailDashboardsView({
           selectedDashboards={selectedDashboards}
           setSelectedDashboards={setSelectedDashboards}
         />
+
         {definition && isAddDashboardFlyoutOpen ? (
           <AddDashboardFlyout
             linkedDashboards={linkedDashboards}
@@ -108,6 +142,31 @@ export function StreamDetailDashboardsView({
             }}
             onClose={() => {
               setIsAddDashboardFlyoutOpen(false);
+            }}
+          />
+        ) : null}
+
+        {definition && isImportFlyoutOpen ? (
+          <ImportContentPackFlyout
+            definition={definition}
+            onImport={() => {
+              dashboardsFetch.refresh();
+              setIsImportFlyoutOpen(false);
+            }}
+            onClose={() => {
+              setIsImportFlyoutOpen(false);
+            }}
+          />
+        ) : null}
+
+        {definition && isExportFlyoutOpen ? (
+          <ExportContentPackFlyout
+            definition={definition}
+            onExport={() => {
+              setIsExportFlyoutOpen(false);
+            }}
+            onClose={() => {
+              setIsExportFlyoutOpen(false);
             }}
           />
         ) : null}

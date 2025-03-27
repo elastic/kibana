@@ -7,14 +7,23 @@
 
 import { Readable } from 'stream';
 import { z } from '@kbn/zod';
+import { v4 } from 'uuid';
 import {
   createConcatStream,
+  createFilterStream,
   createListStream,
   createMapStream,
   createPromiseFromStreams,
 } from '@kbn/utils';
-import { createSavedObjectsStreamFromNdJson } from '@kbn/core-saved-objects-server-internal/src/routes/utils';
-import { ContentPack, contentPackSchema } from '@kbn/streams-schema';
+import {
+  ContentPack,
+  ContentPackSavedObject,
+  INDEX_PLACEHOLDER,
+  contentPackSchema,
+  findIndexPatterns,
+  replaceIndexPatterns,
+} from '@kbn/streams-schema';
+import { SavedObject, SavedObjectsExportResultDetails } from '@kbn/core/server';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 
@@ -58,16 +67,37 @@ const exportContentRoute = createServerRoute({
 
     const savedObjects: string[] = await createPromiseFromStreams([
       exportStream,
-      createMapStream((savedObject) => {
-        return JSON.stringify(savedObject);
+      createFilterStream<SavedObject | SavedObjectsExportResultDetails>(
+        (savedObject) =>
+          (savedObject as SavedObjectsExportResultDetails).exportedCount === undefined
+      ),
+      createMapStream((savedObject: ContentPackSavedObject['content']) => {
+        const contentPackObject: ContentPackSavedObject = {
+          type: 'saved_object',
+          content: savedObject,
+        };
+        const patterns = findIndexPatterns(contentPackObject);
+        const replacements = patterns
+          .filter((pattern) => pattern.startsWith(params.path.name))
+          .reduce((acc, pattern) => {
+            acc[pattern] = pattern.replace(params.path.name, INDEX_PLACEHOLDER);
+            return acc;
+          }, {} as Record<string, string>);
+
+        return JSON.stringify(
+          patterns.length > 0
+            ? replaceIndexPatterns(contentPackObject, replacements)
+            : contentPackObject
+        );
       }),
       createConcatStream([]),
     ]);
 
+    const contentPack: ContentPack = { name: params.path.name, content: savedObjects.join('\n') };
     return response.ok({
-      body: { content: savedObjects.join('\n') },
+      body: contentPack,
       headers: {
-        'Content-Disposition': `attachment; filename="content.json"`,
+        'Content-Disposition': `attachment; filename="${contentPack.name}.json"`,
         'Content-Type': 'application/json',
       },
     });
@@ -119,23 +149,38 @@ const importContentRoute = createServerRoute({
       params.body.content.on('error', (error) => reject(error));
     });
 
-    const updatedSavedObjectsStream = await createPromiseFromStreams([
-      await createSavedObjectsStreamFromNdJson(Readable.from(body.content)),
-      createConcatStream([]),
-    ]);
+    const savedObjects = body.content
+      .split('\n')
+      .map((object) => JSON.parse(object))
+      .filter((object) => object.type === 'saved_object')
+      .map((object: ContentPackSavedObject) => {
+        const patterns = findIndexPatterns(object);
+        const replacements = patterns
+          .filter((pattern) => pattern.startsWith(INDEX_PLACEHOLDER))
+          .reduce((acc, pattern) => {
+            acc[pattern] = pattern.replace(INDEX_PLACEHOLDER, params.path.name);
+            return acc;
+          }, {} as Record<string, string>);
+
+        if (patterns.length === 0) {
+          return object.content;
+        }
+
+        return replaceIndexPatterns(object, replacements).content;
+      });
 
     const importer = (await context.core).savedObjects.getImporter(soClient);
     const { successResults, errors } = await importer.import({
-      readStream: createListStream(updatedSavedObjectsStream),
-      createNewCopies: true,
-      overwrite: true,
+      readStream: createListStream(replaceReferences(savedObjects)),
+      createNewCopies: false,
+      overwrite: false,
     });
 
     const createdAssets = (successResults ?? [])
       .filter((savedObject) => savedObject.type === 'dashboard')
       .map((dashboard) => ({
         assetType: 'dashboard' as const,
-        assetId: dashboard.destinationId ?? dashboard.id,
+        assetId: dashboard.id,
       }));
 
     if (createdAssets.length > 0) {
@@ -150,6 +195,22 @@ const importContentRoute = createServerRoute({
     return { errors, created: createdAssets };
   },
 });
+
+function replaceReferences(savedObjects: ContentPackSavedObject['content'][]) {
+  const idReplacements = savedObjects.reduce((acc, object) => {
+    acc[object.id] = v4();
+    return acc;
+  }, {} as Record<string, string>);
+
+  savedObjects.forEach((object) => {
+    object.id = idReplacements[object.id];
+    object.references.forEach((ref) => {
+      ref.id = idReplacements[ref.id];
+    });
+  });
+
+  return savedObjects;
+}
 
 export const contentRoutes = {
   ...exportContentRoute,
