@@ -239,6 +239,9 @@ export class MonacoEditorActionsProvider {
     endLineNumber: number
   ): Promise<ErrorAnnotation[]> {
     const model = this.editor.getModel();
+    if (!model) {
+      return [];
+    }
     const parsedErrors = await this.parsedRequestsProvider.getErrors();
     const selectedErrors: ErrorAnnotation[] = [];
     for (const parsedError of parsedErrors) {
@@ -300,8 +303,8 @@ export class MonacoEditorActionsProvider {
       const selectedRequests = await this.getSelectedParsedRequests();
       if (selectedRequests.length) {
         const selectedErrors = await this.getErrorsBetweenLines(
-          selectedRequests.at(0).startLineNumber,
-          selectedRequests.at(-1).endLineNumber
+          selectedRequests.at(0)!.startLineNumber,
+          selectedRequests.at(-1)!.endLineNumber
         );
         if (selectedErrors.length) {
           toasts.addDanger(
