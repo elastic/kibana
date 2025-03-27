@@ -8,7 +8,7 @@
  */
 
 import fastIsEqual from 'fast-deep-equal';
-import { filter, map, max, omit } from 'lodash';
+import { filter, map, max } from 'lodash';
 import { BehaviorSubject, merge } from 'rxjs';
 import { v4 as uuidv4, v4 } from 'uuid';
 
