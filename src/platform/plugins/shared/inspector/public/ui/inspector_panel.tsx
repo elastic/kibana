@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './inspector_panel.scss';
 import { i18n } from '@kbn/i18n';
 import React, { Component, Suspense } from 'react';
 import PropTypes from 'prop-types';
@@ -28,6 +27,7 @@ import {
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { css } from '@emotion/react';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
@@ -143,7 +143,25 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody className="insInspectorPanel__flyoutBody">
+        <EuiFlyoutBody
+          className="insInspectorPanel__flyoutBody"
+          css={css`
+            .euiFlyoutBody__overflowContent {
+              height: 100%;
+              display: flex;
+              flex-wrap: nowrap;
+              flex-direction: column;
+
+              > div {
+                flex-grow: 0;
+              }
+
+              .insRequestCodeViewer {
+                flex-grow: 1;
+              }
+            }
+          `}
+        >
           {this.renderSelectedPanel()}
         </EuiFlyoutBody>
       </KibanaContextProvider>
