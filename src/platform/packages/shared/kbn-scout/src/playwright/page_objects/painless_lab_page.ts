@@ -12,7 +12,11 @@ import { ScoutPage } from '..';
 const DEFAULT_LOADING_TIMEOUT = 10_000;
 
 export class PainlessLab {
-  constructor(private readonly page: ScoutPage) {}
+  public outputValueElement: Locator;
+
+  constructor(private readonly page: ScoutPage) {
+    this.outputValueElement = this.page.testSubj.locator('painlessTabs');
+  }
 
   async goto() {
     return this.page.gotoApp('dev_tools', { hash: 'painless_lab' });
@@ -25,26 +29,18 @@ export class PainlessLab {
       .waitFor({ timeout: DEFAULT_LOADING_TIMEOUT });
   }
 
-  async getCodeEditorValue(nthIndex: string = 0) {
-    let values: string[] = [];
-    values = await page.evaluate(
-      () =>
-        // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
-        window
-          .MonacoEnvironment!.monaco!.editor.getModels()
-          .map((model: any) => model.getValue()) as string[]
-    );
-    return values[nthIndex] as string;
+  async outputValue() {
+    return this.outputValueElement;
   }
 
-  async setCodeEditorValue(value: string, nthIndex?: number = 0) {
-    await page.evaluate(
+  async setCodeEditorValue(value: string, nthIndex?: number) {
+    await this.page.evaluate(
       ([editorIndex, codeEditorValue]) => {
         // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
         const editor = window.MonacoEnvironment!.monaco!.editor;
         const textModels = editor.getModels();
 
-        if (editorIndex) {
+        if (editorIndex !== undefined) {
           textModels[editorIndex].setValue(codeEditorValue);
         } else {
           // when specific model instance is unknown, update all models returned

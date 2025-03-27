@@ -18,15 +18,15 @@ for (int i = 0; i < 10; ++i) {
 return total;
 `.trim();
 
-test.describe('test scenario', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
-  test.beforeEach(async ({ browserAuth, pageObject }) => {
+test.describe('test scenario', { tag: tags.ESS_ONLY }, () => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
-    await pageObject.painlessLab.goto();
-    await pageObject.painlessLab.waitForRenderComplete();
+    await pageObjects.painlessLab.goto();
+    await pageObjects.painlessLab.waitForRenderComplete();
   });
 
-  test('validate painless lab editor', async ({ pageObject }) => {
-    pageObject.painlessLab.setCodeEditorValue(TEST_SCRIPT);
-    await expect(pageObject.painlessLab.getCodeEditorValue()).toContainText(TEST_SCRIPT_RESULT);
+  test('validate painless lab editor', async ({ pageObjects }) => {
+    pageObjects.painlessLab.setCodeEditorValue(TEST_SCRIPT);
+    await expect(pageObjects.painlessLab.outputValue()).toHaveText(TEST_SCRIPT_RESULT);
   });
 });
