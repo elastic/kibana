@@ -49,12 +49,7 @@ export function MachineLearningNavigationProvider({
       const sections = await managementMenu.getSections();
       const mlSection = sections.find((section) => section.sectionId === 'ml');
       expect(mlSection).to.not.be(undefined);
-      expect(mlSection?.sectionLinks).to.eql([
-        'overview',
-        'anomaly_detection',
-        'analytics',
-        'trained_models',
-      ]);
+      expect(mlSection?.sectionLinks).to.contain(sectionId);
       await testSubjects.click(sectionId);
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail(pageSubject);

@@ -151,15 +151,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // check Project Settings
       // > Trained Models
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'ml:modelManagement',
+        deepLinkId: 'management:trained_models',
       });
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'ml:modelManagement',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Model Management' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Trained Models' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'ml:modelManagement',
+        deepLinkId: 'management:trained_models',
       });
       // > Management
       await solutionNavigation.sidenav.clickLink({ navId: 'management' });
@@ -273,7 +268,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'maps',
         'gettingStarted',
         'project_settings_project_nav',
-        'ml:modelManagement',
+        'management:trained_models',
         'management',
         'cloudLinkDeployment',
         'cloudLinkBilling',

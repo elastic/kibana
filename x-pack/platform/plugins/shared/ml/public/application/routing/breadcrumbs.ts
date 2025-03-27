@@ -57,7 +57,7 @@ export const TRAINED_MODELS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
   }),
   appId: 'trained_models',
   path: '',
-  deepLinkId: 'ml:modelManagement',
+  deepLinkId: 'management:trained_models',
 };
 
 export const SUPPLIED_CONFIGURATIONS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {

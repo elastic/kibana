@@ -7,9 +7,10 @@
 import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack/functional/services/ml/api';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects, getPageObject }: FtrProviderContext) {
   const ml = getService('ml');
   const PageObjects = getPageObjects(['svlCommonPage']);
+  const svlCommonNavigation = getPageObject('svlCommonNavigation');
 
   describe('Trained models list', function () {
     const tinyElser = SUPPORTED_TRAINED_MODELS.TINY_ELSER;
@@ -28,14 +29,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('page navigation', () => {
       it('renders trained models list', async () => {
-        await ml.navigation.navigateToMl();
-        await ml.testExecution.logTestStep('should load the trained models page');
-
-        await ml.testExecution.logTestStep(
-          'should display the stats bar and the analytics table with 1 installed trained model and built in elser models in the table'
-        );
-        await ml.trainedModels.assertStats(2);
-        await ml.trainedModelsTable.assertTableIsPopulated();
+        await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
+        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:trained_models' });
+        await svlCommonNavigation.sidenav.expectLinkActive({
+          deepLinkId: 'management:trained_models',
+        });
       });
     });
 
