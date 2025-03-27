@@ -7840,7 +7840,12 @@ components:
       type: string
     RuleObjectId:
       $ref: '#/components/schemas/UUID'
-      description: The unique identifier for the rule object.
+      description: >-
+        A dynamic unique identifier for the rule object. It is randomly
+        generated when a rule is created and cannot be changed after that. It is
+        always a UUID. It is unique within a given Kibana space. The same
+        prebuilt Elastic rule, when installed in two different Kibana spaces or
+        two different Elastic environments, will have different object `id`s.
     RulePatchProps:
       anyOf:
         - $ref: '#/components/schemas/EqlRulePatchProps'
@@ -7940,8 +7945,12 @@ components:
       type: integer
     RuleSignatureId:
       description: >-
-        A unique identifier for the rule, which could be any string, not
-        necessarily a UUID.
+        A stable unique identifier for the rule object. It can be assigned
+        during rule creation. It can be any string, but often is a UUID. It
+        should be unique not only within a given Kibana space, but also across
+        spaces and Elastic environments. The same prebuilt Elastic rule, when
+        installed in two different Kibana spaces or two different Elastic
+        environments, will have the same `rule_id`s.
       type: string
     RuleSource:
       description: >-
