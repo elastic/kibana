@@ -49,17 +49,17 @@ export function getFlattenedKeys(obj: object): string[] {
  *
  * @example
  * ```ts
- * const keySource = { a: 1, b: [1] };
- * const target = { a: 2, b: [2, 3] };
+ * const keySource = { a: 1, b: [{ a: 1 }, { a: 2 }] };
+ * const target = { a: 2, b: [{ a: 2, b: 3 }, { a: 3, b: 4 }] };
  * pickValuesBasedOnStructure(keySource, target);
- * // => { a: 2, b: [2] }
+ * // => { a: 2, b: [{ a: 2 }, { a: 3 }] }
  * ```
  *
  * @note This is intended to specifically be used in the application forward
  *       compatibility schemas when loading a saved object from the database,
  *       downgrading it and keeping only the known, validated subset of values.
  */
-export function pickValuesBasedOnStructure(keySource: object, target: object): object {
-  const keys = getFlattenedKeys(keySource);
+export function pickValuesBasedOnStructure(structuralSource: object, target: object): object {
+  const keys = getFlattenedKeys(structuralSource);
   return pick(target, keys);
 }

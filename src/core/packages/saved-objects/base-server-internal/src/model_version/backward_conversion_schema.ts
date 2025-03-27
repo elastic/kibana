@@ -31,6 +31,9 @@ export const convertModelVersionBackwardConversionSchema = (
       // Get the validated object, with possible stripping of unknown keys
       const validatedAttrs = schema.validate(doc.attributes);
       // Use the validated attrs object to pick values from the original attrs.
+      //
+      // If we reversed this, validation conversion would be returned in the
+      // converted attrs, for example: { duration: '1m' } => { duration: moment.Duration }
       const convertedAttrs = pickValuesBasedOnStructure(validatedAttrs, originalAttrs);
       return {
         ...doc,
