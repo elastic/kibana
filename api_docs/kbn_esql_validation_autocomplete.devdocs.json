@@ -557,6 +557,10 @@
           "ESQLOrderExpression",
           " | ",
           "ESQLUnknownItem",
+          " | ",
+          "ESQLMap",
+          " | ",
+          "ESQLMapEntry",
           " | undefined; option: ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -703,6 +707,10 @@
           "ESQLOrderExpression",
           " | ",
           "ESQLUnknownItem",
+          " | ",
+          "ESQLMap",
+          " | ",
+          "ESQLMapEntry",
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/context.ts",
