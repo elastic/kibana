@@ -41,7 +41,7 @@ export const AnomalyValueDisplay: FC<AnomalyDateValueProps> = ({
   );
 
   return (
-    <EuiToolTip content={tooltipContent}>
+    <EuiToolTip content={tooltipContent} position="left">
       <>
         {formattedTime}
         {dayOffset !== undefined && dayOffset !== 0 && (
