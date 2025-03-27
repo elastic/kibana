@@ -9,11 +9,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useKibana } from '../../../../common/lib/kibana';
-import { AlertSelection } from '../alert_selection';
-import { DEFAULT_STACK_BY_FIELD } from '..';
 
 import * as i18n from './translations';
+
+import { useKibana } from '../../../../common/lib/kibana';
+import { DEFAULT_STACK_BY_FIELD } from '..';
+import { AlertSelection } from '../alert_selection';
 import type { AlertsSelectionSettings } from '../types';
 
 export interface UseSettingsView {

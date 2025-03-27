@@ -10,12 +10,12 @@ import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-li
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
 
+import type { UseEditFormProps } from './use_edit_form';
+import { useEditForm } from './use_edit_form';
+
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { TestProviders } from '../../../../../common/mock';
-
-import type { UseEditFormProps } from './use_edit_form';
-import { useEditForm } from './use_edit_form';
 
 const mockConnectors: unknown[] = [
   {

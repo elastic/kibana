@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 
+import type { AttackDiscoveryScheduleSchema } from './types';
 import { debouncedValidateRuleActionsField } from '../../../../../common/containers/rule_actions/validate_rule_actions_field';
 import type { FormSchema } from '../../../../../shared_imports';
 import { FIELD_TYPES, fieldValidators } from '../../../../../shared_imports';
-import type { AttackDiscoveryScheduleSchema } from './types';
 
 const { emptyField } = fieldValidators;
 

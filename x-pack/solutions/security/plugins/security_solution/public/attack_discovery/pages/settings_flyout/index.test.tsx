@@ -7,16 +7,16 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
+import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 
 import { SettingsFlyout } from '.';
+import { ATTACK_DISCOVERY_SETTINGS } from './translations';
+import { getDefaultQuery } from '../helpers';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 import { useSourcererDataView } from '../../../sourcerer/containers';
-import { ATTACK_DISCOVERY_SETTINGS } from './translations';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
-import { getDefaultQuery } from '../helpers';
-import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../common/lib/kibana');

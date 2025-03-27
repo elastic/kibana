@@ -16,12 +16,12 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
+import * as i18n from './translations';
+
 import { Footer } from '../../footer';
 import { MIN_FLYOUT_WIDTH } from '../../constants';
 import { useEditForm } from '../hooks/use_edit_form';
 import type { AttackDiscoveryScheduleSchema } from '../hooks/types';
-
-import * as i18n from './translations';
 
 interface Props {
   onClose: () => void;

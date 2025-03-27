@@ -13,8 +13,9 @@ import { AlertSelectionQuery } from './alert_selection_query';
 import { AlertSelectionRange } from './alert_selection_range';
 import { getTabs } from './helpers/get_tabs';
 import * as i18n from './translations';
-import type { AlertsSelectionSettings } from '../types';
 import { getMaxAlerts } from './helpers/get_max_alerts';
+
+import type { AlertsSelectionSettings } from '../types';
 
 interface Props {
   alertsPreviewStackBy0: string;

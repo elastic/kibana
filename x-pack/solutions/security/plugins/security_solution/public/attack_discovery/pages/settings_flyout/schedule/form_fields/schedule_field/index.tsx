@@ -8,8 +8,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
-import { type FieldHook, getFieldValidityAndErrorMessage } from '../../../../../../shared_imports';
 import { TIME_UNITS, getTimeOptions } from './get_time_options';
+import { type FieldHook, getFieldValidityAndErrorMessage } from '../../../../../../shared_imports';
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
 const MIN_TIME_VALUE = 1;

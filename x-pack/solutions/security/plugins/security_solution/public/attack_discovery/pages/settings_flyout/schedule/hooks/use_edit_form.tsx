@@ -11,19 +11,20 @@ import { css } from '@emotion/react';
 
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
-import { RuleActionsField } from '../../../../../common/components/rule_actions_field';
-import type { FormSubmitHandler } from '../../../../../shared_imports';
-import { Field, Form, UseField, getUseField, useForm } from '../../../../../shared_imports';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { getDefaultQuery } from '../../../helpers';
-import { useSettingsView } from '../../hooks/use_settings_view';
 
 import { getSchema } from './schema';
 import * as i18n from './translations';
 import type { AttackDiscoveryScheduleSchema } from './types';
+
 import { ConnectorSelectorField } from '../form_fields/connector_selector_field';
 import { ScheduleField } from '../form_fields/schedule_field';
+import { useSettingsView } from '../../hooks/use_settings_view';
 import type { AlertsSelectionSettings } from '../../types';
+import { getDefaultQuery } from '../../../helpers';
+import { RuleActionsField } from '../../../../../common/components/rule_actions_field';
+import { useKibana } from '../../../../../common/lib/kibana';
+import type { FormSubmitHandler } from '../../../../../shared_imports';
+import { Field, Form, UseField, getUseField, useForm } from '../../../../../shared_imports';
 
 const CommonUseField = getUseField({ component: Field });
 

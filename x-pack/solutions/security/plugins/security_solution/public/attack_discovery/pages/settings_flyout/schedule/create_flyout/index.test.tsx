@@ -7,15 +7,14 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 
 import { CreateFlyout } from '.';
+import * as i18n from './translations';
+
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
-
-import * as i18n from './translations';
 
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../sourcerer/containers');
