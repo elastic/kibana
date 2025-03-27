@@ -18,6 +18,7 @@
     "@kbn/i18n",
     "@kbn/shared-ux-router",
     "@kbn/deeplinks-analytics",
+    "@kbn/rison",
   ],
   "exclude": ["target/**/*"]
 }
