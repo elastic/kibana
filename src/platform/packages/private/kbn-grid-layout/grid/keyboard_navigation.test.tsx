@@ -39,13 +39,8 @@ const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
 
 const getPanelHandle = (panelId: string, interactionType: 'resize' | 'drag' = 'drag') => {
   const gridPanel = screen.getByText(`panel content ${panelId}`).closest('div')!;
-  const handleText = new RegExp(interactionType === 'resize' ? /resize to move/i : /drag to move/i);
+  const handleText = new RegExp(interactionType === 'resize' ? /resize panel/i : /drag to move/i);
   return within(gridPanel).getByRole('button', { name: handleText });
-};
-
-const focusHandle = (panelId: string, type: 'resize' | 'drag') => {
-  const panelHandle = getPanelHandle(panelId);
-  panelHandle.focus();
 };
 
 describe('Keyboard navigation', () => {
@@ -64,7 +59,7 @@ describe('Keyboard navigation', () => {
   it('should show the panel active when during interaction for drag handle', async () => {
     renderGridLayout();
     const panelHandle = getPanelHandle('panel1');
-    focusHandle('panel1', 'drag');
+    panelHandle.focus();
     expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass('kbnGridPanel', {
       exact: true,
     });
@@ -82,8 +77,8 @@ describe('Keyboard navigation', () => {
   });
   it('should show the panel active when during interaction for resize handle', async () => {
     renderGridLayout();
-    const panelHandle = getPanelHandle('panel5');
-    focusHandle('panel5', 'resize');
+    const panelHandle = getPanelHandle('panel5', 'resize');
+    panelHandle.focus();
     expect(screen.getByLabelText('panelId:panel5').closest('div')).toHaveClass('kbnGridPanel', {
       exact: true,
     });

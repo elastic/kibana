@@ -34,13 +34,13 @@ export const startTouchInteraction = ({
   e: UserTouchEvent;
   onStart: (e: UserInteractionEvent) => void;
   onMove: (e: UserInteractionEvent) => void;
-  onEnd: (e: UserInteractionEvent) => void;
+  onEnd: () => void;
 }) => {
   if (e.touches.length > 1) return;
 
   const handleEnd = () => {
     e.target!.removeEventListener('touchmove', onMove);
-    onEnd(e);
+    onEnd();
   };
 
   e.target!.addEventListener('touchmove', onMove);

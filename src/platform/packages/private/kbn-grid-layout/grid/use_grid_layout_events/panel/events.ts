@@ -104,7 +104,6 @@ export const useGridLayoutPanelEvents = ({
     (e: UserInteractionEvent) => {
       if (!isLayoutInteractive(gridLayoutStateManager)) return;
       pointerPixel.current = getSensorPosition(e);
-
       if (isMouseEvent(e)) {
         e.stopPropagation();
         startMouseInteraction({

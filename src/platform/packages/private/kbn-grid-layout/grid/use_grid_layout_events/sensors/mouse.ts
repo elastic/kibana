@@ -38,7 +38,7 @@ export const startMouseInteraction = ({
   e: UserMouseEvent;
   onStart: (e: UserInteractionEvent) => void;
   onMove: (e: UserInteractionEvent) => void;
-  onEnd: (e: UserInteractionEvent) => void;
+  onEnd: () => void;
 }) => {
   if (e.button !== MOUSE_BUTTON_LEFT) return;
   startAutoScroll();
@@ -52,7 +52,7 @@ export const startMouseInteraction = ({
     document.removeEventListener('scroll', onMove);
     document.removeEventListener('mousemove', handleMouseMove);
     stopAutoScroll();
-    onEnd(ev);
+    onEnd();
   };
 
   document.addEventListener('scroll', onMove, { passive: true });
