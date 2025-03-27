@@ -104,6 +104,11 @@ export function ChatContextMenu({
           onArchiveConversation();
           setIsPopoverOpen(false);
         }}
+        data-test-subj={
+          !isArchived
+            ? 'observabilityAiAssistantContextMenuArchive'
+            : 'observabilityAiAssistantContextMenuUnarchive'
+        }
       >
         {!isArchived
           ? i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.archiveConversation', {
