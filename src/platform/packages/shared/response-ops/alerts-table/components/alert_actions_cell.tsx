@@ -44,6 +44,11 @@ export const AlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (props)
         key="defaultRowActions"
         onActionExecuted={closeActionsPopover}
         isAlertDetailsEnabled={false}
+        resolveRulePagePath={(alertRuleId) =>
+          alertRuleId
+            ? `/app/management/insightsAndAlerting/triggersActions/rule/${alertRuleId}`
+            : null
+        }
         {...props}
       />
     ),
