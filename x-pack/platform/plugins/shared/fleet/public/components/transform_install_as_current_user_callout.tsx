@@ -42,7 +42,7 @@ export const TransformInstallWithCurrentUserPermissionCallout: React.FunctionCom
             external 
           >
             <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout.linkText"
+              id="xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCalloutLinkText"
               defaultMessage="{count, plural, one {transform asset} other {transform assets}}"
               values={{ count }}
               />
