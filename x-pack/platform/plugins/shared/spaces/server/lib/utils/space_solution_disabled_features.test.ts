@@ -83,7 +83,7 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
         spaceSolution
       );
 
-      expect(result).toEqual(['feature1', 'feature2']); // "baz" from the spaceDisabledFeatures should not be removed
+      expect(result).toEqual(['feature1']); // "baz" from the spaceDisabledFeatures should not be removed
     });
   });
 });
