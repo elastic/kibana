@@ -34,17 +34,11 @@ interface EndpointHeartbeat {
 export const indexEndpointHeartbeats = async (
   esClient: Client,
   log: ToolingLog,
-  startTimestamp?: number,
   count: number = 1,
   unbilledCount: number = 1
 ): Promise<IndexedEndpointHeartbeats> => {
-  const startTime = startTimestamp ? new Date(startTimestamp) : new Date();
-
-  log.debug(
-    `Indexing ${count} endpoint heartbeats with times ${new Date(
-      startTime.getTime()
-    ).toISOString()} ... ${new Date(startTime.getTime() + count - 1).toISOString()}`
-  );
+  const startTime = new Date();
+  log.debug(`Indexing ${count} endpoint heartbeats with startTime = ${startTime}`);
 
   const docs: EndpointHeartbeat[] = Array.from({ length: count }).map((_, i) => {
     const ingested = new Date(startTime.getTime() + i).toISOString();
