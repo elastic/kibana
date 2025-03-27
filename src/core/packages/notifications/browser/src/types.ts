@@ -157,5 +157,5 @@ export interface Intercept {
 }
 
 export interface IInterceptPublicApi {
-  add(productIntercept: Omit<Intercept, 'id'> & Partial<Pick<Intercept, 'id'>>): string;
+  add(productIntercept: Intercept): string;
 }
