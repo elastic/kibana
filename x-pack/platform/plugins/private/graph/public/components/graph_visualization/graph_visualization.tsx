@@ -192,6 +192,7 @@ export function GraphVisualization({
                         css`
                           stroke-width: ${euiThemeContext.euiTheme.size.xs};
                           stroke: ${euiThemeContext.euiTheme.colors.borderBasePrimary};
+                          paint-order: stroke;
                         `,
                     ]}
                   />
