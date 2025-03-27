@@ -15,6 +15,7 @@ import type {
   ScopedHistory,
 } from '@kbn/core/public';
 
+import React from 'react';
 import { PLUGIN_ID } from '../common/constants';
 import {
   uiMetricService,
@@ -33,7 +34,6 @@ import type {
 } from './types';
 import { IngestPipelinesLocatorDefinition } from './locator';
 import { IngestPipelineFlyout } from './application/sections/pipelines_list/ingest_pipeline_flyout_embeddable';
-import React from 'react';
 
 export class IngestPipelinesPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>

@@ -19,4 +19,4 @@ export interface DataStreamFlyoutWithContextProps extends DatastreamFlyoutProps 
     services: { extensionsService: ExtensionsService };
   };
   usageCollection: UsageCollectionSetup;
-};
+}

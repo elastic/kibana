@@ -19,4 +19,4 @@ export interface ComponentTemplatesFlyoutWithContextProps extends ComponentTempl
     services: { extensionsService: ExtensionsService };
   };
   usageCollection: UsageCollectionSetup;
-};
+}

@@ -191,9 +191,12 @@ interface ReadUnmanagedAssetsDetailsParams extends BaseParams {
   assets: UnmanagedElasticsearchAssets;
 }
 
-export type UnmanagedComponentTemplateDetails = (ClusterComponentTemplate | { name: string; component_template: undefined }) & {
+export type UnmanagedComponentTemplateDetails = (
+  | ClusterComponentTemplate
+  | { name: string; component_template: undefined }
+) & {
   used_by: string[];
-}
+};
 
 export interface UnmanagedElasticsearchAssetDetails {
   ingestPipeline?: IngestPipeline & { name: string };
@@ -208,10 +211,12 @@ async function fetchComponentTemplate(
 ): Promise<ClusterComponentTemplate | { name: string; component_template: undefined }> {
   try {
     const response = await scopedClusterClient.asCurrentUser.cluster.getComponentTemplate({ name });
-    return response.component_templates.find((template) => template.name === name) ?? {
-      name,
-      component_template: undefined,
-    };
+    return (
+      response.component_templates.find((template) => template.name === name) ?? {
+        name,
+        component_template: undefined,
+      }
+    );
   } catch (e) {
     if (e.meta?.statusCode === 404) {
       return { name, component_template: undefined };
@@ -230,8 +235,11 @@ async function fetchComponentTemplates(
   );
 
   return templates
-    .filter((template): template is ClusterComponentTemplate | { name: string; component_template: undefined } => 
-      template !== undefined
+    .filter(
+      (
+        template
+      ): template is ClusterComponentTemplate | { name: string; component_template: undefined } =>
+        template !== undefined
     )
     .map((componentTemplate) => ({
       ...componentTemplate,
@@ -263,7 +271,9 @@ export async function getUnmanagedElasticsearchAssetDetails({
     scopedClusterClient.asCurrentUser.indices.getDataStream({ name: assets.dataStream }),
   ]);
 
-  const indexTemplate = allIndexTemplates.find((template) => template.name === assets.indexTemplate);
+  const indexTemplate = allIndexTemplates.find(
+    (template) => template.name === assets.indexTemplate
+  );
   if (!indexTemplate) {
     throw new Error(`Index template ${assets.indexTemplate} not found`);
   }

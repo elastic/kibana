@@ -7,11 +7,11 @@
 import React, { FunctionComponent } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlyout } from '@elastic/eui';
 import { SectionLoading, useKibana } from '../../../shared_imports';
 import { Pipeline } from '../../../../common/types';
 import { PipelineDetailsFlyout } from './details_flyout';
 import { PipelineNotFoundFlyout } from './not_found_flyout';
-import { EuiFlyout } from '@elastic/eui';
 
 export interface Props {
   pipeline: string | string[] | null | undefined;

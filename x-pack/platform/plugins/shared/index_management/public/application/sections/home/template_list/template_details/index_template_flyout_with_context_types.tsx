@@ -19,4 +19,4 @@ export interface IndexTemplateFlyoutWithContextProps extends IndexTemplateFlyout
     services: { extensionsService: ExtensionsService };
   };
   usageCollection: UsageCollectionSetup;
-};
+}
