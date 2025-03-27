@@ -36,7 +36,9 @@ describe('NoDataFound Component', () => {
   it('should render the No Data Found related content when spaceId is available', () => {
     renderWithTestProvider(<NoDataFound />);
 
-    expect(screen.getByText(/start onboarding your assets/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /connect sources to discover assets/i })
+    ).toBeInTheDocument();
 
     expect(screen.getByTestId('onboarding-grid')).toBeInTheDocument();
   });

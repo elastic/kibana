@@ -28,18 +28,13 @@ describe('PermissionDenied Component', () => {
       has_write_permissions: false,
       privileges: {
         elasticsearch: {
-          cluster: {
-            manage_transform: false,
-          },
+          index: { 'logs-*': { read: false, view_index_metadata: false } },
         },
       },
     };
 
     renderWithTestProvider(<PermissionDenied privileges={privileges} />);
 
-    expect(screen.getByText(/insufficient permissions/i)).toBeInTheDocument();
-
-    expect(screen.getByText(/missing elasticsearch cluster privileges/i)).toBeInTheDocument();
-    expect(screen.getByText(/manage_transform/i)).toBeInTheDocument();
+    expect(screen.getByText(/missing elasticsearch index privileges/i)).toBeInTheDocument();
   });
 });
