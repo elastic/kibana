@@ -76,11 +76,13 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
         label: GLOBAL_ENTRIES,
         data: { id: 'global' },
         checked: initiallySelectedPolicies.includes('global') ? 'on' : undefined,
+        'data-test-subj': 'globalOption',
       },
       {
         label: UNASSIGNED_ENTRIES,
         data: { id: 'unassigned' },
         checked: initiallySelectedPolicies.includes('unassigned') ? 'on' : undefined,
+        'data-test-subj': 'unassignedOption',
       },
     ]);
 
