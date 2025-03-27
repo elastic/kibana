@@ -60,6 +60,7 @@ export function initializePanelsManager(
   const children$ = new BehaviorSubject<{
     [key: string]: unknown;
   }>({});
+  console.log('initialPanels', initialPanels);
   const panels$ = new BehaviorSubject(initialPanels);
   function setPanels(panels: DashboardPanelMap) {
     if (panels !== panels$.value) panels$.next(panels);
@@ -182,6 +183,8 @@ export function initializePanelsManager(
         panelPackage: PanelPackage,
         displaySuccessMessage?: boolean
       ) => {
+        console.log('currentPanels', panels$.value);
+
         const { panelType: type, serializedState, initialState } = panelPackage;
 
         usageCollectionService?.reportUiCounter(DASHBOARD_UI_METRIC_ID, METRIC_TYPE.CLICK, type);
@@ -197,7 +200,12 @@ export function initializePanelsManager(
         const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
           customPlacementSettings?.strategy ?? PanelPlacementStrategy.findTopLeftMostOpenSpace,
           {
-            currentPanels: panels$.value,
+            // only decide positioning of new panel based on panels in **first section**
+            currentPanels: Object.keys(panels$.value).reduce((prev, panelId) => {
+              const panel = panels$.value[panelId];
+              if (panel.gridData.sectionId === undefined) return { ...prev, [panelId]: panel };
+              return prev;
+            }, {}),
             height: customPlacementSettings?.height ?? DEFAULT_PANEL_HEIGHT,
             width: customPlacementSettings?.width ?? DEFAULT_PANEL_WIDTH,
           }
@@ -259,7 +267,7 @@ export function initializePanelsManager(
           title: dashboardClonePanelActionStrings.getSuccessMessage(),
           'data-test-subj': 'addObjectToContainerSuccess',
         });
-
+        console.log(panels$.value);
         const { newPanelPlacement, otherPanels } = placeClonePanel({
           width: panelToClone.gridData.w,
           height: panelToClone.gridData.h,
