@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
+import pRetry from 'p-retry';
+import { syncSpaceGlobalParams } from '../../../synthetics_service/sync_global_params';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
@@ -35,7 +37,14 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       }),
     },
   },
-  handler: async ({ savedObjectsClient, request, response }) => {
+  handler: async ({
+    savedObjectsClient,
+    request,
+    response,
+    server,
+    spaceId,
+    syntheticsMonitorClient,
+  }) => {
     const { ids } = request.body ?? {};
     const { id: paramId } = request.params ?? {};
 
@@ -61,6 +70,18 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       idsToDelete.map((id) => ({ type: syntheticsParamType, id })),
       { force: true }
     );
+
+    void pRetry(
+      async () =>
+        await syncSpaceGlobalParams({
+          spaceId,
+          logger: server.logger,
+          encryptedSavedObjects: server.encryptedSavedObjects,
+          savedObjects: server.coreStart.savedObjects,
+          syntheticsMonitorClient,
+        })
+    );
+
     return result.statuses.map(({ id, success }) => ({ id, deleted: success }));
   },
 });

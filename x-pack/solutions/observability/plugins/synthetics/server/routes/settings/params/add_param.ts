@@ -9,6 +9,8 @@ import { schema } from '@kbn/config-schema';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import pRetry from 'p-retry';
+import { syncSpaceGlobalParams } from '../../../synthetics_service/sync_global_params';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import {
   SyntheticsParamRequest,
@@ -41,7 +43,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       body: schema.oneOf([ParamsObjectSchema, schema.arrayOf(ParamsObjectSchema)]),
     },
   },
-  handler: async ({ request, response, server, savedObjectsClient }) => {
+  handler: async ({ request, response, server, savedObjectsClient, syntheticsMonitorClient }) => {
     try {
       const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
         id: DEFAULT_SPACE_ID,
@@ -54,6 +56,17 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
 
       const result = await savedObjectsClient.bulkCreate<Omit<SyntheticsParamSOAttributes, 'id'>>(
         savedObjectsData
+      );
+
+      void pRetry(
+        async () =>
+          await syncSpaceGlobalParams({
+            spaceId,
+            logger: server.logger,
+            encryptedSavedObjects: server.encryptedSavedObjects,
+            savedObjects: server.coreStart.savedObjects,
+            syntheticsMonitorClient,
+          })
       );
 
       if (savedObjectsData.length > 1) {
