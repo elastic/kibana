@@ -136,9 +136,11 @@ export function ChatHeader({
                 size={breakpoint === 'xs' ? 'xs' : 's'}
                 value={newTitle}
                 className={css`
-                  color: ${!conversation?.archived
-                    ? theme.euiTheme.colors.textParagraph
-                    : theme.euiTheme.colors.textSubdued};
+                  .euiTitle {
+                    color: ${!conversation?.archived
+                      ? theme.euiTheme.colors.textParagraph
+                      : theme.euiTheme.colors.textSubdued};
+                  }
                 `}
                 inputAriaLabel={i18n.translate(
                   'xpack.aiAssistant.chatHeader.editConversationInput',
@@ -151,7 +153,8 @@ export function ChatHeader({
                   !connectors.selectedConnector ||
                   licenseInvalid ||
                   !Boolean(onSaveTitle) ||
-                  !isConversationOwnedByCurrentUser
+                  !isConversationOwnedByCurrentUser ||
+                  conversation?.archived
                 }
                 onChange={(e) => {
                   setNewTitle(e.currentTarget.nodeValue || '');
