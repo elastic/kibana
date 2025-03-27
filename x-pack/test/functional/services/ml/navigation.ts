@@ -271,8 +271,13 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('~mlMainTab & ~nodesOverview', 'mlNodesTableContainer');
     },
 
-    async navigateToDataVisualizer() {
+    async navigateToDataVisualizer(nav: boolean = false) {
       await this.navigateToMl();
+      await this.navigateToArea('~mlMainTab & ~dataVisualizer', 'mlPageDataVisualizerSelector');
+    },
+
+    async navigateToDataVisualizerFromAppsMenu() {
+      await this.navigateToMlViaAppsMenu();
       await this.navigateToArea('~mlMainTab & ~dataVisualizer', 'mlPageDataVisualizerSelector');
     },
 
