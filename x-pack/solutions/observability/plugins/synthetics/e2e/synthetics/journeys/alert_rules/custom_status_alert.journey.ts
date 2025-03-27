@@ -56,8 +56,9 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
         requestMade = true;
       }
     });
-    await page.waitForSelector('[data-test-subj="saveRuleButton"]');
-    await page.getByTestId('saveRuleButton').click();
+    await page.getByTestId('ruleFormStep-details').click();
+    await page.waitForSelector('[data-test-subj="ruleFlyoutFooterSaveButton"]');
+    await page.getByTestId('ruleFlyoutFooterSaveButton').click();
     await page.getByTestId('confirmModalConfirmButton').click();
     expect(requestMade).toBe(true);
   });

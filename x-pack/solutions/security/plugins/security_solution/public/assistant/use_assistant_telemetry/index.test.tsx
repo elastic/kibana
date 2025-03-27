@@ -7,20 +7,10 @@
 
 import { renderHook } from '@testing-library/react';
 import { useAssistantTelemetry } from '.';
-import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
 import { createTelemetryServiceMock } from '../../common/lib/telemetry/telemetry_service.mock';
 import { AssistantEventTypes } from '../../common/lib/telemetry';
 
 const customId = `My Convo`;
-const mockedConversations = {
-  ...BASE_SECURITY_CONVERSATIONS,
-  [customId]: {
-    id: customId,
-    apiConfig: {},
-    replacements: {},
-    messages: [],
-  },
-};
 
 const mockedTelemetry = {
   ...createTelemetryServiceMock(),
@@ -67,42 +57,14 @@ describe('useAssistantTelemetry', () => {
   });
 
   describe.each(trackingFns)('Handles %s id masking', (fn) => {
-    it('Should call tracking with appropriate id when tracking is called with an isDefault=true conversation id', async () => {
-      const { result } = renderHook(() => useAssistantTelemetry());
-      const validId = Object.keys(mockedConversations)[0];
-      // @ts-ignore
-      const trackingFn = result.current[fn.name];
-      await trackingFn({ conversationId: validId, invokedBy: 'shortcut' });
-      // @ts-ignore
-      const trackingMockedFn = mockedTelemetry.reportEvent;
-      expect(trackingMockedFn).toHaveBeenCalledWith(fn.eventType, {
-        conversationId: validId,
-        invokedBy: 'shortcut',
-      });
-    });
-
-    it('Should call tracking with "Custom" id when tracking is called with an isDefault=false conversation id', async () => {
+    it('Should call tracking function', async () => {
       const { result } = renderHook(() => useAssistantTelemetry());
       // @ts-ignore
       const trackingFn = result.current[fn.name];
-      await trackingFn({ conversationId: customId, invokedBy: 'shortcut' });
+      await trackingFn({ invokedBy: 'shortcut' });
       // @ts-ignore
       const trackingMockedFn = mockedTelemetry.reportEvent;
       expect(trackingMockedFn).toHaveBeenCalledWith(fn.eventType, {
-        conversationId: 'Custom',
-        invokedBy: 'shortcut',
-      });
-    });
-
-    it('Should call tracking with "Custom" id when tracking is called with an unknown conversation id', async () => {
-      const { result } = renderHook(() => useAssistantTelemetry());
-      // @ts-ignore
-      const trackingFn = result.current[fn.name];
-      await trackingFn({ conversationId: '123', invokedBy: 'shortcut' });
-      // @ts-ignore
-      const trackingMockedFn = mockedTelemetry.reportEvent;
-      expect(trackingMockedFn).toHaveBeenCalledWith(fn.eventType, {
-        conversationId: 'Custom',
         invokedBy: 'shortcut',
       });
     });

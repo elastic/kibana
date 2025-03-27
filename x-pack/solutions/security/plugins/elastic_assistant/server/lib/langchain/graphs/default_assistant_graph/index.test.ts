@@ -25,6 +25,7 @@ import { AssistantTool, AssistantToolParams } from '../../../..';
 import { promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptDictionary } from '../../../prompt';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
+
 jest.mock('./graph');
 jest.mock('./helpers');
 jest.mock('langchain/agents');
@@ -85,6 +86,13 @@ describe('callAssistantGraph', () => {
     traceOptions: {},
     responseLanguage: 'English',
     contentReferencesStore: newContentReferencesStoreMock(),
+    core: {
+      uiSettings: {
+        client: {
+          get: jest.fn().mockResolvedValue('Browser'),
+        },
+      },
+    },
   } as unknown as AgentExecutorParams<boolean>;
 
   beforeEach(() => {

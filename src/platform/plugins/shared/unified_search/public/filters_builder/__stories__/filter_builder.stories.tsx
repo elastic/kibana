@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
-import { ComponentStory } from '@storybook/react';
+import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiForm } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { action } from '@storybook/addon-actions';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Filter } from '@kbn/es-query';
+import type { StoryObj } from '@storybook/react';
 import { getFiltersMock, getFiltersMockOrHide } from '../__mock__/filters';
-import FiltersBuilder, { FiltersBuilderProps } from '../filters_builder';
+import { FiltersBuilder } from '../filters_builder';
 
 export default {
   title: 'Filters Builder',
@@ -24,20 +24,7 @@ export default {
   decorators: [(story: Function) => <EuiForm>{story()}</EuiForm>],
 };
 
-const Template: ComponentStory<FC<FiltersBuilderProps>> = (args) => <FiltersBuilder {...args} />;
-
-export const Default = Template.bind({});
-
-Default.decorators = [
-  (Story) => (
-    <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <Story />
-      </KibanaContextProvider>
-    </I18nProvider>
-  ),
-];
-
+const filters = getFiltersMock();
 const mockedDataView = {
   id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
   title: 'logstash-*',
@@ -53,27 +40,38 @@ const mockedDataView = {
   ],
 } as DataView;
 
-const filters = getFiltersMock();
+export const Default: StoryObj = {
+  decorators: [
+    (Story) => (
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <Story />
+        </KibanaContextProvider>
+      </I18nProvider>
+    ),
+  ],
 
-Default.args = {
-  filters,
-  dataView: mockedDataView,
-  onChange: (f: Filter[]) => {},
-  hideOr: false,
+  args: {
+    filters,
+    dataView: mockedDataView,
+    onChange: (f: Filter[]) => {},
+    hideOr: false,
+  },
 };
 
-export const withoutOR = Template.bind({});
-withoutOR.args = { ...Default.args, filters: getFiltersMockOrHide(), hideOr: true };
+export const withoutOR: StoryObj = {
+  args: { ...Default.args, filters: getFiltersMockOrHide(), hideOr: true },
 
-withoutOR.decorators = [
-  (Story) => (
-    <I18nProvider>
-      <KibanaContextProvider services={services}>
-        <Story />
-      </KibanaContextProvider>
-    </I18nProvider>
-  ),
-];
+  decorators: [
+    (Story) => (
+      <I18nProvider>
+        <KibanaContextProvider services={services}>
+          <Story />
+        </KibanaContextProvider>
+      </I18nProvider>
+    ),
+  ],
+};
 
 const createMockWebStorage = () => ({
   clear: action('clear'),

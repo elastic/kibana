@@ -35,7 +35,6 @@ export const MSearchTable = () => {
       },
       contentTypes: [
         { contentTypeId: 'map' },
-        { contentTypeId: 'dashboard' },
         { contentTypeId: 'visualization' },
         { contentTypeId: 'lens' },
         { contentTypeId: 'search' },

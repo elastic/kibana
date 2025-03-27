@@ -12,7 +12,7 @@ export const useCardCallOutStyles = () => {
   const { euiTheme } = useEuiTheme();
   return css`
     padding: ${euiTheme.size.s};
-    border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.backgroundBaseSubdued};
+    border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
     border-radius: ${euiTheme.size.s};
   `;
 };

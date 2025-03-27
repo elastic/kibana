@@ -16,7 +16,6 @@ import { SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 
 export interface SLORepository {
-  exists(id: string): Promise<boolean>;
   create(slo: SLODefinition): Promise<SLODefinition>;
   update(slo: SLODefinition): Promise<SLODefinition>;
   findAllByIds(ids: string[]): Promise<SLODefinition[]>;
@@ -31,16 +30,6 @@ export interface SLORepository {
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
   constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
-
-  async exists(id: string) {
-    const findResponse = await this.soClient.find<StoredSLODefinition>({
-      type: SO_SLO_TYPE,
-      perPage: 0,
-      filter: `slo.attributes.id:(${id})`,
-    });
-
-    return findResponse.total > 0;
-  }
 
   async create(slo: SLODefinition): Promise<SLODefinition> {
     await this.soClient.create<StoredSLODefinition>(SO_SLO_TYPE, toStoredSLO(slo));
@@ -134,6 +123,8 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       ...(!!options.includeOutdatedOnly && {
         filter: `slo.attributes.version < ${SLO_MODEL_VERSION}`,
       }),
+      sortField: 'id',
+      sortOrder: 'asc',
     });
 
     return {
@@ -166,7 +157,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     });
 
     if (isLeft(result)) {
-      this.logger.error(`Invalid stored SLO with id [${storedSLO.id}]`);
+      this.logger.debug(`Invalid stored SLO with id [${storedSLO.id}]`);
       return undefined;
     }
 

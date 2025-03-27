@@ -15,3 +15,9 @@ export function kibanaHeaders() {
     'elastic-api-version': '2023-10-31',
   };
 }
+
+export function internalKibanaHeaders() {
+  return {
+    'x-elastic-internal-origin': 'kibana',
+  };
+}

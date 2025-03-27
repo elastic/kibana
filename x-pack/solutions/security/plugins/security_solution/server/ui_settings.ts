@@ -19,7 +19,6 @@ import {
   DEFAULT_INDEX_PATTERN,
   DEFAULT_INTERVAL_PAUSE,
   DEFAULT_INTERVAL_VALUE,
-  DEFAULT_MAX_UNASSOCIATED_NOTES,
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
@@ -29,7 +28,6 @@ import {
   ENABLE_NEWS_FEED_SETTING,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
-  MAX_UNASSOCIATED_NOTES,
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   ENABLE_CCS_READ_WARNING_SETTING,
@@ -42,6 +40,7 @@ import {
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
   ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
   ENABLE_GRAPH_VISUALIZATION_SETTING,
+  ENABLE_ASSET_INVENTORY_SETTING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -253,6 +252,23 @@ export const initUiSettings = (
       schema: schema.boolean(),
       solution: 'security',
     },
+    [ENABLE_ASSET_INVENTORY_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
+        defaultMessage: 'Enable Security Asset Inventory',
+      }),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enableAssetInventoryDescription',
+        {
+          defaultMessage: `<em>[technical preview]</em> Enable the Asset Inventory experience within the Security Solution. When enabled, you can access the new Inventory feature through the Security Solution navigation. Note: Disabling this setting will not disable the Entity Store or clear persistent Entity metadata. To manage or disable the Entity Store, please visit the Entity Store Management page.`,
+          values: { em: (chunks) => `<em>${chunks}</em>` },
+        }
+      ),
+      type: 'boolean',
+      value: false,
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
     [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.rulesTableRefresh', {
         defaultMessage: 'Rules auto refresh',
@@ -364,28 +380,6 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.arrayOf(schema.string()),
-      solution: 'security',
-    },
-    [MAX_UNASSOCIATED_NOTES]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.maxUnassociatedNotesLabel', {
-        defaultMessage: 'Maximum amount of unassociated notes',
-      }),
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.maxUnassociatedNotesDescription',
-        {
-          defaultMessage:
-            'Defines the maximum amount of unassociated notes (notes that are not assigned to a timeline) that can be created.',
-        }
-      ),
-      type: 'number',
-      value: DEFAULT_MAX_UNASSOCIATED_NOTES,
-      schema: schema.number({
-        min: 1,
-        max: 1000,
-        defaultValue: DEFAULT_MAX_UNASSOCIATED_NOTES,
-      }),
-      category: [APP_ID],
-      requiresPageReload: false,
       solution: 'security',
     },
     [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: {

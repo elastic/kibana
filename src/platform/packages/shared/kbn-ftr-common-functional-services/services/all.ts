@@ -21,6 +21,7 @@ import { RandomnessService } from './randomness';
 import { SupertestWithoutAuthProvider } from './supertest_without_auth';
 import { SamlAuthProvider } from './saml_auth';
 import { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './supertest';
+import { SecurityServiceProvider } from './security';
 
 export const services = {
   es: EsProvider,
@@ -38,4 +39,5 @@ export const services = {
   supertest: KibanaSupertestProvider,
   esSupertest: ElasticsearchSupertestProvider,
   supertestWithoutAuth: SupertestWithoutAuthProvider,
+  security: SecurityServiceProvider,
 };

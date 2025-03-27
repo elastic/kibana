@@ -10,7 +10,9 @@ import { isUndefined, omitBy } from 'lodash';
 import type {
   PartialRuleDiff,
   RuleResponse,
+  UpgradeConflictResolution,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { UpgradeConflictResolutionEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ModeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   ThreeWayDiffConflict,
@@ -78,6 +80,7 @@ type ExpectedDiffOutcome =
   | {
       expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate;
       expectedFieldDiffValues: MissingHistoricalRuleVersionsFieldDiffValueVersions;
+      isMergableField?: boolean;
     };
 
 /**
@@ -160,6 +163,7 @@ export function testFieldUpgradeReview(
         expectMissingBaseABFieldDiff(diff, {
           diffableRuleFieldName: params.diffableRuleFieldName,
           valueVersions: params.expectedFieldDiffValues,
+          isMergableField: params.isMergableField,
         });
         break;
     }
@@ -168,6 +172,7 @@ export function testFieldUpgradeReview(
 
 interface TestFieldUpgradesToMergedValueParams {
   ruleUpgradeAssets: TestFieldRuleUpgradeAssets;
+  onConflict?: UpgradeConflictResolution;
   diffableRuleFieldName: string;
   expectedFieldsAfterUpgrade: Partial<RuleResponse>;
 }
@@ -185,6 +190,7 @@ interface TestFieldUpgradesToMergedValueParams {
 export function testFieldUpgradesToMergedValue(
   {
     ruleUpgradeAssets,
+    onConflict = UpgradeConflictResolutionEnum.SKIP,
     diffableRuleFieldName,
     expectedFieldsAfterUpgrade,
   }: TestFieldUpgradesToMergedValueParams,
@@ -213,6 +219,7 @@ export function testFieldUpgradesToMergedValue(
 
     const response = await performUpgradePrebuiltRules(es, supertest, {
       mode: ModeEnum.SPECIFIC_RULES,
+      on_conflict: onConflict,
       rules: [
         {
           rule_id: ruleUpgradeAssets.upgrade.rule_id ?? DEFAULT_TEST_RULE_ID,
@@ -495,6 +502,7 @@ function expectMissingBaseAAFieldDiff(
 interface MissingBaseFieldAssertParams {
   diffableRuleFieldName: string;
   valueVersions: MissingHistoricalRuleVersionsFieldDiffValueVersions;
+  isMergableField?: boolean;
 }
 
 /**
@@ -518,7 +526,9 @@ function expectMissingBaseABFieldDiff(
         target_version: fieldAssertParams.valueVersions.target,
         merged_version: fieldAssertParams.valueVersions.merged,
         diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-        merge_outcome: ThreeWayMergeOutcome.Target,
+        merge_outcome: fieldAssertParams.isMergableField
+          ? ThreeWayMergeOutcome.Merged
+          : ThreeWayMergeOutcome.Target,
         conflict: ThreeWayDiffConflict.SOLVABLE,
       },
       isUndefined

@@ -31,6 +31,8 @@ import {
   AttackDiscoveryUpsellingPageLazy,
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
+  SiemMigrationsStartUpsellSectionLazy,
+  SiemMigrationsTranslatedRulesUpsellPageLazy,
 } from './lazy_upselling';
 
 interface UpsellingsConfig {
@@ -101,6 +103,12 @@ export const upsellingPages: UpsellingPages = [
     minimumLicenseRequired: 'enterprise',
     component: AttackDiscoveryUpsellingPageLazy,
   },
+
+  {
+    pageName: SecurityPageName.siemMigrationsRules,
+    minimumLicenseRequired: 'enterprise',
+    component: SiemMigrationsTranslatedRulesUpsellPageLazy,
+  },
 ];
 
 // Upsellings for sections, linked by arbitrary ids
@@ -110,6 +118,11 @@ export const upsellingSections: UpsellingSections = [
     id: 'entity_analytics_panel',
     minimumLicenseRequired: 'platinum',
     component: EntityAnalyticsUpsellingSectionLazy,
+  },
+  {
+    id: 'siem_migrations_start',
+    minimumLicenseRequired: 'enterprise',
+    component: SiemMigrationsStartUpsellSectionLazy,
   },
 ];
 

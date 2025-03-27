@@ -35,6 +35,7 @@ export interface ChatItemProps extends Omit<ChatTimelineItem, 'message'> {
   onRegenerateClick: () => void;
   onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
   onStopGeneratingClick: () => void;
+  isConversationOwnedByCurrentUser: boolean;
 }
 
 const moreCompactHeaderClassName = css`
@@ -87,6 +88,7 @@ export function ChatItem({
   error,
   loading,
   title,
+  isConversationOwnedByCurrentUser,
   onActionClick,
   onEditSubmit,
   onFeedbackClick,
@@ -167,7 +169,11 @@ export function ChatItem({
   return (
     <EuiComment
       timelineAvatar={<ChatItemAvatar loading={loading} currentUser={currentUser} role={role} />}
-      username={getRoleTranslation(role)}
+      username={getRoleTranslation({
+        role,
+        isCurrentUser: isConversationOwnedByCurrentUser,
+        username: currentUser?.username,
+      })}
       event={title}
       actions={
         <ChatItemActions

@@ -8,10 +8,10 @@
 import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
 
 import type { agentPolicyStatuses } from '../../constants';
-import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
+import type { BaseSSLSecrets, MonitoringType, PolicySecretReference, ValueOf } from '..';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
-import type { Output, OutputSecret } from './output';
+import type { Output } from './output';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -126,6 +126,7 @@ export interface FullAgentPolicyInput {
   };
   streams?: FullAgentPolicyInputStream[];
   processors?: FullAgentPolicyAddFields[];
+  ssl?: BaseSSLConfig;
   [key: string]: any;
 }
 
@@ -145,6 +146,7 @@ export type FullAgentPolicyOutputPermissions = Record<string, SecurityRoleDescri
 export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256'> & {
   proxy_url?: string;
   proxy_headers?: any;
+  ssl?: BaseSSLConfig;
   [key: string]: any;
 };
 
@@ -175,6 +177,11 @@ export interface FullAgentPolicyMonitoring {
     };
   };
 }
+export interface FullAgentPolicyDownload {
+  sourceURI: string;
+  ssl?: BaseSSLConfig;
+  secrets?: BaseSSLSecrets;
+}
 
 export interface FullAgentPolicy {
   id: string;
@@ -194,7 +201,7 @@ export interface FullAgentPolicy {
   revision?: number;
   agent?: {
     monitoring: FullAgentPolicyMonitoring;
-    download: { sourceURI: string };
+    download: FullAgentPolicyDownload;
     features: Record<string, { enabled: boolean }>;
     protection?: {
       enabled: boolean;
@@ -221,20 +228,21 @@ export interface FullAgentPolicy {
   };
 }
 
+export interface BaseSSLConfig {
+  verification_mode?: string;
+  certificate_authorities?: string[];
+  renegotiation?: string;
+  certificate?: string;
+  key?: string;
+  client_authentication?: string;
+}
+
 export interface FullAgentPolicyFleetConfig {
   hosts: string[];
   proxy_url?: string;
   proxy_headers?: any;
-  ssl?: {
-    verification_mode?: string;
-    certificate_authorities?: string[];
-    renegotiation?: string;
-    certificate?: string;
-    key?: OutputSecret;
-  };
-  secrets?: {
-    ssl?: { key?: OutputSecret };
-  };
+  ssl?: BaseSSLConfig;
+  secrets?: BaseSSLSecrets;
 }
 
 export interface FullAgentPolicyKibanaConfig {

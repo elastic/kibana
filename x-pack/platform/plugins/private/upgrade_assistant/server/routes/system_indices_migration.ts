@@ -52,16 +52,7 @@ export function registerSystemIndicesMigrationRoutes({
 
   // POST starts the system indices migration
   router.post(
-    {
-      path: `${API_BASE_PATH}/system_indices_migration`,
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'Relies on es client for authorization',
-        },
-      },
-      validate: false,
-    },
+    { path: `${API_BASE_PATH}/system_indices_migration`, validate: false },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
       try {
         const {

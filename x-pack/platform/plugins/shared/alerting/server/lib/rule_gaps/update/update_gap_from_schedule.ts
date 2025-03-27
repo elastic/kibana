@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Gap } from '../gap';
+import type { Gap } from '../gap';
 import { adHocRunStatus } from '../../../../common/constants';
 import { parseDuration } from '../../../../common';
-import { BackfillSchedule } from '../../../application/backfill/result/types';
+import type { BackfillSchedule } from '../../../application/backfill/result/types';
 
 export const updateGapFromSchedule = ({
   gap,

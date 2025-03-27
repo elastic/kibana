@@ -28,6 +28,7 @@ import type { PageDependencies } from './routing/router';
 import { EnabledFeaturesContextProvider, MlServerInfoContextProvider } from './contexts/ml';
 import type { StartServices } from './contexts/kibana';
 import { getMlGlobalServices } from './util/get_services';
+import { MlTelemetryContextProvider } from './contexts/ml/ml_telemetry_context';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
@@ -101,6 +102,7 @@ const App: FC<AppProps> = ({
       usageCollection: deps.usageCollection,
       mlServices: getMlGlobalServices(coreStart, deps.data.dataViews, deps.usageCollection),
       spaces: deps.spaces,
+      fieldsMetadata: deps.fieldsMetadata,
     };
   }, [deps, coreStart]);
 
@@ -154,7 +156,9 @@ const App: FC<AppProps> = ({
                 experimentalFeatures={experimentalFeatures}
               >
                 <MlServerInfoContextProvider nlpSettings={nlpSettings}>
-                  <MlRouter pageDeps={pageDeps} />
+                  <MlTelemetryContextProvider telemetryClient={deps.telemetry}>
+                    <MlRouter pageDeps={pageDeps} />
+                  </MlTelemetryContextProvider>
                 </MlServerInfoContextProvider>
               </EnabledFeaturesContextProvider>
             </DatePickerContextProvider>

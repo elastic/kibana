@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 
 import type { GridData } from '../../server/content_management';
@@ -33,5 +32,3 @@ export interface DashboardPanelState<PanelState = object> {
    */
   references?: Reference[];
 }
-
-export type DashboardContainerByReferenceInput = SavedObjectEmbeddableInput;

@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiToolTip, EuiToolTipProps } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 
 interface ManagementBottomBarProps {
   confirmButtonText?: string;
-  confirmTooltip?: Partial<EuiToolTipProps>;
   disabled?: boolean;
   isLoading?: boolean;
   onCancel: () => void;
@@ -21,7 +20,6 @@ interface ManagementBottomBarProps {
 
 export function ManagementBottomBar({
   confirmButtonText = defaultConfirmButtonText,
-  confirmTooltip,
   disabled = false,
   isLoading = false,
   onCancel,
@@ -34,31 +32,11 @@ export function ManagementBottomBar({
     cancelButtonText: keepEditingLabel,
   });
 
-  const confirmButtonContent = (
-    <EuiButton
-      data-test-subj="streamsAppManagementBottomBarButton"
-      disabled={disabled}
-      color="primary"
-      fill
-      size="s"
-      iconType="check"
-      onClick={onConfirm}
-      isLoading={isLoading}
-    >
-      {confirmButtonText}
-    </EuiButton>
-  );
-
-  const confirmButton = confirmTooltip ? (
-    <EuiToolTip {...confirmTooltip}>{confirmButtonContent}</EuiToolTip>
-  ) : (
-    confirmButtonContent
-  );
-
   return (
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} gutterSize="s">
       <EuiButtonEmpty
         data-test-subj="streamsAppManagementBottomBarCancelChangesButton"
+        disabled={disabled}
         color="text"
         size="s"
         iconType="cross"
@@ -68,7 +46,18 @@ export function ManagementBottomBar({
           defaultMessage: 'Cancel changes',
         })}
       </EuiButtonEmpty>
-      {confirmButton}
+      <EuiButton
+        data-test-subj="streamsAppManagementBottomBarButton"
+        disabled={disabled}
+        color="primary"
+        fill
+        size="s"
+        iconType="check"
+        onClick={onConfirm}
+        isLoading={isLoading}
+      >
+        {confirmButtonText}
+      </EuiButton>
     </EuiFlexGroup>
   );
 }

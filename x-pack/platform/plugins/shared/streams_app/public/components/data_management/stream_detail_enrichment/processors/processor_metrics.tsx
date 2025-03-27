@@ -20,7 +20,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
 import { css } from '@emotion/react';
-import { ProcessorMetrics } from '../hooks/use_processing_simulator';
+import { ProcessorMetrics } from '../state_management/simulation_state_machine';
 
 type ProcessorMetricBadgesProps = ProcessorMetrics;
 
@@ -32,10 +32,12 @@ const formatter = new Intl.NumberFormat('en-US', {
 export const ProcessorMetricBadges = ({
   detected_fields,
   failure_rate,
+  skipped_rate,
   success_rate,
 }: ProcessorMetricBadgesProps) => {
   const detectedFieldsCount = detected_fields.length;
   const failureRate = failure_rate > 0 ? formatter.format(failure_rate) : null;
+  const skippedRate = skipped_rate > 0 ? formatter.format(skipped_rate) : null;
   const successRate = success_rate > 0 ? formatter.format(success_rate) : null;
 
   return (
@@ -51,6 +53,19 @@ export const ProcessorMetricBadges = ({
           })}
         >
           {failureRate}
+        </EuiBadge>
+      )}
+      {skippedRate && (
+        <EuiBadge
+          color="hollow"
+          iconType="minus"
+          title={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.skippedRate', {
+            defaultMessage:
+              '{skippedRate} of the sampled documents were skipped due to the set condition',
+            values: { skippedRate },
+          })}
+        >
+          {skippedRate}
         </EuiBadge>
       )}
       {successRate && (
@@ -101,7 +116,9 @@ export const ProcessorErrors = ({ metrics }: { metrics: ProcessorMetrics }) => {
   const shouldDisplayErrorToggle = remainingCount > 0;
 
   const getCalloutProps = (type: ProcessorMetrics['errors'][number]['type']): EuiCallOutProps => {
-    const isWarningError = type === 'generic_processor_failure' && success_rate > 0;
+    const isWarningError =
+      type === 'non_additive_processor_failure' ||
+      (type === 'generic_processor_failure' && success_rate > 0);
 
     return {
       color: isWarningError ? 'warning' : 'danger',

@@ -44,7 +44,6 @@ export const getTranslateRuleNode = ({
 
     const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1].trim() ?? '';
     const translationSummary = response.match(/## Translation Summary[\s\S]*$/)?.[0] ?? '';
-
     return {
       response,
       comments: [generateAssistantComment(cleanMarkdown(translationSummary))],

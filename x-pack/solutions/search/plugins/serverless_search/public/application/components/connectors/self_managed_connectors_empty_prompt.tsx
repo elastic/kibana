@@ -35,16 +35,13 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
   return (
     <SearchEmptyPrompt
       icon="plugs"
-      title={i18n.translate('xpack.serverlessSearch.elasticManagedConnectorEmpty.title', {
-        defaultMessage: 'Elastic managed connectors',
+      title={i18n.translate('xpack.serverlessSearch.selfManagedConnectorEmpty.title', {
+        defaultMessage: 'Set up a connector',
       })}
-      description={i18n.translate(
-        'xpack.serverlessSearch.elasticManagedConnectorEmpty.description',
-        {
-          defaultMessage:
-            "We're actively developing Elastic managed connectors, that won't require any self-managed infrastructure. You'll be able to handle all configuration in the UI. This will simplify syncing your data into a serverless Elasticsearch project. This new workflow will have two steps:",
-        }
-      )}
+      description={i18n.translate('xpack.serverlessSearch.selfManagedConnectorEmpty.description', {
+        defaultMessage:
+          "To set up and deploy a connector you'll be working between data source, your terminal, and the Kibana UI. The high level process looks like this:",
+      })}
       body={
         <EuiFlexGroup
           alignItems="stretch"
@@ -179,7 +176,7 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
                           <EuiIcon size="m" type="sortRight" />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type="logoElastic" />
+                          <EuiIcon color="primary" size="l" type="logoElasticsearch" />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>

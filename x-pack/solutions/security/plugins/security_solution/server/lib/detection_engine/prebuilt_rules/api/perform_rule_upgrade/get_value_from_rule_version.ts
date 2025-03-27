@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type {
-  RuleFieldsToUpgrade,
-  AllFieldsDiff,
+import {
+  type RuleFieldsToUpgrade,
+  type AllFieldsDiff,
+  type UpgradeConflictResolution,
+  UpgradeConflictResolutionEnum,
 } from '../../../../../../common/api/detection_engine';
 import { RULE_DEFAULTS } from '../../../rule_management/logic/detection_rules_client/mergers/apply_rule_defaults';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
@@ -24,11 +26,13 @@ export const getValueFromMergedVersion = ({
   upgradeableRule,
   fieldUpgradeSpecifier,
   ruleFieldsDiff,
+  onConflict,
 }: {
   fieldName: keyof PrebuiltRuleAsset;
   upgradeableRule: RuleTriad;
   fieldUpgradeSpecifier: NonNullable<RuleFieldsToUpgrade[keyof RuleFieldsToUpgrade]>;
   ruleFieldsDiff: AllFieldsDiff;
+  onConflict?: UpgradeConflictResolution;
 }) => {
   const ruleId = upgradeableRule.target.rule_id;
   const diffableRuleFieldName = mapRuleFieldToDiffableRuleField({
@@ -39,7 +43,11 @@ export const getValueFromMergedVersion = ({
   if (fieldUpgradeSpecifier.pick_version === 'MERGED') {
     const ruleFieldDiff = ruleFieldsDiff[diffableRuleFieldName];
 
-    if (ruleFieldDiff && ruleFieldDiff.conflict !== 'NONE') {
+    if (
+      ruleFieldDiff && onConflict === UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE
+        ? ruleFieldDiff.conflict !== 'NONE' && ruleFieldDiff.conflict !== 'SOLVABLE'
+        : ruleFieldDiff.conflict !== 'NONE'
+    ) {
       throw new Error(
         `Automatic merge calculation for field '${diffableRuleFieldName}' in rule of rule_id ${ruleId} resulted in a conflict. Please resolve the conflict manually or choose another value for 'pick_version'.`
       );

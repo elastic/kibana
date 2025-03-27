@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/public';
+import type { SavedSearchByValueAttributes } from '@kbn/saved-search-plugin/public';
 import { extract, inject } from './search_inject_extract';
 
 describe('search inject extract', () => {

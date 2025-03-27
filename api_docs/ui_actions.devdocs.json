@@ -307,14 +307,6 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "unifiedSearch",
-                "path": "src/platform/plugins/shared/unified_search/public/plugin.ts"
-              },
-              {
-                "plugin": "unifiedSearch",
-                "path": "src/platform/plugins/shared/unified_search/public/plugin.ts"
-              },
-              {
                 "plugin": "uiActionsEnhanced",
                 "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts"
               },
@@ -735,10 +727,6 @@
                 "path": "x-pack/platform/plugins/shared/aiops/public/ui_actions/index.ts"
               },
               {
-                "plugin": "discover",
-                "path": "src/platform/plugins/shared/discover/public/plugin.tsx"
-              },
-              {
                 "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/public/plugin.ts"
               },
@@ -785,6 +773,14 @@
               {
                 "plugin": "inputControlVis",
                 "path": "src/platform/plugins/private/input_control_vis/public/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/plugin_functional/plugins/kbn_sample_panel_action/public/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/plugin_functional/plugins/kbn_sample_panel_action/public/plugin.ts"
               }
             ],
             "children": [

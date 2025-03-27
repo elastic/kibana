@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleAction } from '@kbn/alerting-plugin/common';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
@@ -13,9 +13,7 @@ import type { TriggersAndActionsUIPublicPluginStart } from './plugin';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
-import { getAddRuleFlyoutLazy } from './common/get_add_rule_flyout';
-import { getEditRuleFlyoutLazy } from './common/get_edit_rule_flyout';
-import {
+import type {
   ActionTypeModel,
   RuleTypeModel,
   RuleTagBadgeOptions,
@@ -33,17 +31,17 @@ import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_lo
 import { getRulesListLazy } from './common/get_rules_list';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
 import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
-import { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
-import { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
-import { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
+import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
+import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
+import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import { getActionFormLazy } from './common/get_action_form';
-import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
+import type { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
 import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
-import { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
+import type { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -72,22 +70,6 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
       return getEditConnectorFlyoutLazy({
         ...props,
         actionTypeRegistry,
-        connectorServices,
-      });
-    },
-    getAddRuleFlyout: (props) => {
-      return getAddRuleFlyoutLazy({
-        ...props,
-        actionTypeRegistry,
-        ruleTypeRegistry,
-        connectorServices,
-      });
-    },
-    getEditRuleFlyout: (props) => {
-      return getEditRuleFlyoutLazy({
-        ...props,
-        actionTypeRegistry,
-        ruleTypeRegistry,
         connectorServices,
       });
     },

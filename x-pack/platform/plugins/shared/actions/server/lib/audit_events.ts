@@ -6,8 +6,8 @@
  */
 
 import type { EcsEvent } from '@kbn/core/server';
-import { AuditEvent } from '@kbn/security-plugin/server';
-import { ArrayElement } from '@kbn/utility-types';
+import type { AuditEvent } from '@kbn/security-plugin/server';
+import type { ArrayElement } from '@kbn/utility-types';
 
 export enum ConnectorAuditAction {
   CREATE = 'connector_create',

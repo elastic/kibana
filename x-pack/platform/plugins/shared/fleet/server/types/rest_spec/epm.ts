@@ -33,6 +33,7 @@ export const GetPackagesRequestSchema = {
     category: schema.maybe(schema.string()),
     prerelease: schema.maybe(schema.boolean()),
     excludeInstallStatus: schema.maybe(schema.boolean({ defaultValue: false })),
+    withPackagePoliciesCount: schema.maybe(schema.boolean({ defaultValue: false })),
   }),
 };
 
@@ -121,8 +122,8 @@ export const InstallationInfoSchema = schema.object({
   ),
   latest_executed_state: schema.maybe(
     schema.object({
-      name: schema.string(),
-      started_at: schema.string(),
+      name: schema.maybe(schema.string()),
+      started_at: schema.maybe(schema.string()),
       error: schema.maybe(schema.string()),
     })
   ),
@@ -590,10 +591,18 @@ export const InstallKibanaAssetsRequestSchema = {
     pkgName: schema.string(),
     pkgVersion: schema.string(),
   }),
-  // body is deprecated on delete request
   body: schema.nullable(
     schema.object({
       force: schema.maybe(schema.boolean()),
+      space_ids: schema.maybe(
+        schema.arrayOf(schema.string(), {
+          minSize: 1,
+          meta: {
+            description:
+              'When provided install assets in the specified spaces instead of the current space.',
+          },
+        })
+      ),
     })
   ),
 };

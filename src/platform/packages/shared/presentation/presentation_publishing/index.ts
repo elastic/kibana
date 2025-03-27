@@ -60,6 +60,10 @@ export {
 } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export {
+  hasReadOnlyCapabilities,
+  type HasReadOnlyCapabilities,
+} from './interfaces/has_read_only_capabilities';
+export {
   apiHasExecutionContext,
   type HasExecutionContext,
 } from './interfaces/has_execution_context';

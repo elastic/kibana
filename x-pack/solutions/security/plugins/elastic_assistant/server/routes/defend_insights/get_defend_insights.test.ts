@@ -8,12 +8,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
-import type { DefendInsightsDataClient } from '../../ai_assistant_data_clients/defend_insights';
-
-import { transformESSearchToDefendInsights } from '../../ai_assistant_data_clients/defend_insights/helpers';
+import type { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';
+import { transformESSearchToDefendInsights } from '../../lib/defend_insights/persistence/helpers';
 import { getDefendInsightsSearchEsMock } from '../../__mocks__/defend_insights_schema.mock';
 import { getDefendInsightsRequest } from '../../__mocks__/request';
 import {

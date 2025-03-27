@@ -172,9 +172,10 @@ export default ({ getService }: FtrProviderContext) => {
           const url = await browser.getCurrentUrl();
           const from = 'rangeFrom:now-30d';
           const to = 'rangeTo:now';
+          const status = 'selectedOptions:!(active),title:Status';
 
           expect(url.includes('tabId=alerts')).to.be(true);
-          expect(url.includes('status%3Aactive')).to.be(true);
+          expect(url.includes(status.replaceAll(':', '%3A').replaceAll(',', '%2C'))).to.be(true);
           expect(url.includes(from.replaceAll(':', '%3A'))).to.be(true);
           expect(url.includes(to.replaceAll(':', '%3A'))).to.be(true);
         });
@@ -189,9 +190,10 @@ export default ({ getService }: FtrProviderContext) => {
           const url = await browser.getCurrentUrl();
           const from = 'rangeFrom:now-30d';
           const to = 'rangeTo:now';
+          const status = 'selectedOptions:!(),title:Status';
 
           expect(url.includes('tabId=alerts')).to.be(true);
-          expect(url.includes('status%3Aall')).to.be(true);
+          expect(url.includes(status.replaceAll(':', '%3A').replaceAll(',', '%2C'))).to.be(true);
           expect(url.includes(from.replaceAll(':', '%3A'))).to.be(true);
           expect(url.includes(to.replaceAll(':', '%3A'))).to.be(true);
         });

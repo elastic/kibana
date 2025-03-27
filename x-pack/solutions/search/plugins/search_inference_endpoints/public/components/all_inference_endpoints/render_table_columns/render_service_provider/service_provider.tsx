@@ -5,21 +5,16 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import React from 'react';
-import {
-  ELASTIC_MODEL_DEFINITIONS,
-  InferenceAPIConfigResponse,
-} from '@kbn/ml-trained-models-utils';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import * as i18n from './translations';
+import { EndpointModelInfo, EndpointModelInfoProps } from './endpoint_model_info';
 
-interface ServiceProviderProps {
-  providerEndpoint: InferenceAPIConfigResponse;
+interface ServiceProviderProps extends EndpointModelInfoProps {
+  service: ServiceProviderKeys;
 }
 
-export const ServiceProvider: React.FC<ServiceProviderProps> = ({ providerEndpoint }) => {
-  const { service } = providerEndpoint;
+export const ServiceProvider: React.FC<ServiceProviderProps> = ({ service, endpointInfo }) => {
   const provider = SERVICE_PROVIDERS[service];
 
   return provider ? (
@@ -39,7 +34,7 @@ export const ServiceProvider: React.FC<ServiceProviderProps> = ({ providerEndpoi
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EndpointModelInfo providerEndpoint={providerEndpoint} />
+            <EndpointModelInfo endpointInfo={endpointInfo} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -48,77 +43,3 @@ export const ServiceProvider: React.FC<ServiceProviderProps> = ({ providerEndpoi
     <span>{service}</span>
   );
 };
-
-const EndpointModelInfo: React.FC<ServiceProviderProps> = ({ providerEndpoint }) => {
-  const serviceSettings = providerEndpoint.service_settings;
-  const modelId =
-    'model_id' in serviceSettings
-      ? serviceSettings.model_id
-      : 'model' in serviceSettings
-      ? serviceSettings.model
-      : undefined;
-
-  const isEligibleForMITBadge = modelId && ELASTIC_MODEL_DEFINITIONS[modelId]?.license === 'MIT';
-
-  return (
-    <EuiFlexGroup gutterSize="xs" direction="column">
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="xs" direction="row">
-          <EuiFlexItem grow={0}>
-            {modelId && (
-              <EuiText size="s" color="subdued">
-                {modelId}
-              </EuiText>
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={0}>
-            {isEligibleForMITBadge ? (
-              <EuiBadge
-                color="hollow"
-                iconType="popout"
-                iconSide="right"
-                href={ELASTIC_MODEL_DEFINITIONS[modelId].licenseUrl ?? ''}
-                target="_blank"
-                data-test-subj={'mit-license-badge'}
-              >
-                {i18n.MIT_LICENSE}
-              </EuiBadge>
-            ) : null}{' '}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>{endpointModelAtrributes(providerEndpoint)}</EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-
-function endpointModelAtrributes(endpoint: InferenceAPIConfigResponse) {
-  switch (endpoint.service) {
-    case ServiceProviderKeys.hugging_face:
-      return huggingFaceAttributes(endpoint);
-    case ServiceProviderKeys.azureaistudio:
-      return azureOpenAIStudioAttributes(endpoint);
-    case ServiceProviderKeys.azureopenai:
-      return azureOpenAIAttributes(endpoint);
-    default:
-      return null;
-  }
-}
-
-function huggingFaceAttributes(endpoint: InferenceAPIConfigResponse) {
-  const serviceSettings = endpoint.service_settings;
-  const url = 'url' in serviceSettings ? serviceSettings.url : null;
-
-  return url;
-}
-
-function azureOpenAIStudioAttributes(endpoint: InferenceAPIConfigResponse) {
-  const serviceSettings = endpoint.service_settings;
-  return 'provider' in serviceSettings ? serviceSettings?.provider : undefined;
-}
-
-function azureOpenAIAttributes(endpoint: InferenceAPIConfigResponse) {
-  const serviceSettings = endpoint.service_settings;
-
-  return 'resource_name' in serviceSettings ? serviceSettings.resource_name : undefined;
-}

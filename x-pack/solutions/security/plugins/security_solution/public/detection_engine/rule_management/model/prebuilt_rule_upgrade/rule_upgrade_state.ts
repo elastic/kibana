@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { type RuleUpgradeInfoForReview } from '../../../../../common/api/detection_engine';
+import {
+  type ThreeWayDiffConflict,
+  type RuleUpgradeInfoForReview,
+} from '../../../../../common/api/detection_engine';
 import type { FieldsUpgradeState } from './fields_upgrade_state';
 
 export interface RuleUpgradeState extends RuleUpgradeInfoForReview {
+  /**
+   * Original rule conflict state calculated from fields diff.
+   */
+  conflict: ThreeWayDiffConflict;
   /**
    * Stores a record of customizable field names mapped to field upgrade state.
    */
@@ -17,4 +24,8 @@ export interface RuleUpgradeState extends RuleUpgradeInfoForReview {
    * Indicates whether there are conflicts blocking rule upgrading.
    */
   hasUnresolvedConflicts: boolean;
+  /**
+   * Indicates whether there are non-solvable conflicts blocking rule upgrading.
+   */
+  hasNonSolvableUnresolvedConflicts: boolean;
 }

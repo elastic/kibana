@@ -13,7 +13,7 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.endpointDetails.o
 
 export const WORKFLOW_INSIGHTS = {
   title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.sectionTitle', {
-    defaultMessage: 'Endpoint Insights',
+    defaultMessage: 'Automatic Troubleshooting',
   }),
   titleRight: i18n.translate(
     'xpack.securitySolution.endpointDetails.workflowInsights.extraAction',
@@ -23,7 +23,7 @@ export const WORKFLOW_INSIGHTS = {
   ),
   scan: {
     title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.scan.title', {
-      defaultMessage: 'Endpoint Insights scan',
+      defaultMessage: 'Automatic Troubleshooting',
     }),
     button: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.scan.button', {
       defaultMessage: 'Scan',

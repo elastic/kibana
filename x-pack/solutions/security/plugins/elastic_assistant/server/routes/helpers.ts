@@ -21,10 +21,11 @@ import {
   Message,
   Replacements,
   replaceAnonymizedValuesWithOriginalValues,
-  DEFEND_INSIGHTS_TOOL_ID,
+  DEFEND_INSIGHTS_ID,
   ContentReferencesStore,
   ContentReferences,
   MessageMetadata,
+  ScreenContext,
 } from '@kbn/elastic-assistant-common';
 import { ILicense } from '@kbn/licensing-plugin/server';
 import { i18n } from '@kbn/i18n';
@@ -252,6 +253,7 @@ export interface LangChainExecuteParams {
   response: KibanaResponseFactory;
   responseLanguage?: string;
   savedObjectsClient: SavedObjectsClientContract;
+  screenContext?: ScreenContext;
   systemPrompt?: string;
 }
 export const langChainExecute = async ({
@@ -277,6 +279,7 @@ export const langChainExecute = async ({
   responseLanguage,
   isStream = true,
   savedObjectsClient,
+  screenContext,
   systemPrompt,
 }: LangChainExecuteParams) => {
   // Fetch any tools registered by the request's originating plugin
@@ -287,7 +290,7 @@ export const langChainExecute = async ({
   });
   const assistantContext = context.elasticAssistant;
   // We don't (yet) support invoking these tools interactively
-  const unsupportedTools = new Set(['attack-discovery', DEFEND_INSIGHTS_TOOL_ID]);
+  const unsupportedTools = new Set(['attack-discovery', DEFEND_INSIGHTS_ID]);
   const assistantTools = assistantContext
     .getRegisteredTools(pluginName)
     .filter((tool) => !unsupportedTools.has(tool.id));
@@ -318,6 +321,7 @@ export const langChainExecute = async ({
     abortSignal,
     dataClients,
     alertsIndexPattern: request.body.alertsIndexPattern,
+    core: context.core,
     actionsClient,
     assistantTools,
     conversationId,
@@ -337,6 +341,7 @@ export const langChainExecute = async ({
     replacements,
     responseLanguage,
     savedObjectsClient,
+    screenContext,
     size: request.body.size,
     systemPrompt,
     telemetry,

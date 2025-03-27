@@ -11,13 +11,14 @@ import { useHistory } from 'react-router-dom';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
 import { createGlobalStyle } from 'styled-components';
 import type { ScopedHistory } from '@kbn/core/public';
-import type { Subscription } from 'rxjs';
+import { from, type Subscription } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
+import { APP_STATE_URL_KEY } from '@kbn/discover-plugin/common';
 import { updateSavedSearchId } from '../../../../store/actions';
 import { useDiscoverInTimelineContext } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
@@ -204,7 +205,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
       const hasESQLUrlState = (stateContainer.appState.getState()?.query as { esql: string })?.esql;
 
-      if (stateContainer.appState.isEmptyURL() || !hasESQLUrlState) {
+      if (!stateContainer.stateStorage.get(APP_STATE_URL_KEY) || !hasESQLUrlState) {
         if (savedSearchAppState?.savedSearch.timeRange) {
           stateContainer.globalState.set({
             ...stateContainer.globalState.get(),
@@ -219,7 +220,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         next: setDiscoverAppState,
       });
 
-      const internalStateSubscription = stateContainer.internalState.state$.subscribe({
+      const internalStateSubscription = from(stateContainer.internalState).subscribe({
         next: setDiscoverInternalState,
       });
 

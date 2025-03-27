@@ -32,6 +32,7 @@ export type RuleTypeWithDescription = RuleType<string, string> & { description?:
 export type RuleTypeIndexWithDescriptions = Map<string, RuleTypeWithDescription>;
 
 export type RuleTypeParams = Record<string, unknown>;
+export type RuleTypeMetaData = Record<string, unknown>;
 
 export interface RuleFormBaseErrors {
   name?: string[];
@@ -104,7 +105,7 @@ export interface RuleTypeParamsExpressionProps<
   metadata?: MetaData;
   charts: ChartsPluginSetup;
   data: DataPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
+  dataViews?: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 

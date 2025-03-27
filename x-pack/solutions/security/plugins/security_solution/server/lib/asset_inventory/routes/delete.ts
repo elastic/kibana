@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { ASSET_INVENTORY_DELETE_API_PATH } from '../../../../common/api/asset_inventory/constants';
 import { API_VERSIONS } from '../../../../common/constants';
 import type { AssetInventoryRoutesDeps } from '../types';
 
@@ -18,7 +19,7 @@ export const deleteAssetInventoryRoute = (
   router.versioned
     .delete({
       access: 'public',
-      path: '/api/asset_inventory/delete',
+      path: ASSET_INVENTORY_DELETE_API_PATH,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution'],

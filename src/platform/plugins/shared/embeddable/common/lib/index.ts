@@ -12,5 +12,3 @@ export { getInjectFunction } from './inject';
 export type { MigrateFunction } from './migrate';
 export { getMigrateFunction } from './migrate';
 export { getTelemetryFunction } from './telemetry';
-export type { SavedObjectEmbeddableInput } from './saved_object_embeddable';
-export { isSavedObjectEmbeddableInput } from './saved_object_embeddable';

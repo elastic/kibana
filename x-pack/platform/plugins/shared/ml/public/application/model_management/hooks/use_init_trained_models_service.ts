@@ -9,39 +9,51 @@ import { useEffect, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { useStorage } from '@kbn/ml-local-storage';
 import { ML_SCHEDULED_MODEL_DEPLOYMENTS } from '../../../../common/types/storage';
-import type { TrainedModelsService } from '../trained_models_service';
+import type { ScheduledDeployment, TrainedModelsService } from '../trained_models_service';
 import { useMlKibana } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
-import { useSavedObjectsApiService } from '../../services/ml_api_service/saved_objects';
-import type { StartAllocationParams } from '../../services/ml_api_service/trained_models';
+import { useEnabledFeatures, useMlServerInfo } from '../../contexts/ml';
+import { useCloudCheck } from '../../components/node_available_warning/hooks';
+import { getNewJobLimits } from '../../services/ml_server_info';
+import { DeploymentParamsMapper } from '../deployment_params_mapper';
+import { useMlTelemetryClient } from '../../contexts/ml/ml_telemetry_context';
 
 /**
  * Hook that initializes the shared TrainedModelsService instance with storage
  * for tracking active operations. The service is destroyed when no components
  * are using it and all operations are complete.
  */
-export function useInitTrainedModelsService(
-  canManageSpacesAndSavedObjects: boolean
-): TrainedModelsService {
+export function useInitTrainedModelsService(): TrainedModelsService {
   const {
     services: {
       mlServices: { trainedModelsService },
     },
   } = useMlKibana();
 
+  const { telemetryClient } = useMlTelemetryClient();
+
   const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
 
-  const savedObjectsApiService = useSavedObjectsApiService();
+  const { showNodeInfo } = useEnabledFeatures();
+  const { nlpSettings } = useMlServerInfo();
+  const cloudInfo = useCloudCheck();
+  const mlServerLimits = getNewJobLimits();
+
+  const deploymentParamsMapper = useMemo(
+    () => new DeploymentParamsMapper(mlServerLimits, cloudInfo, showNodeInfo, nlpSettings),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   const defaultScheduledDeployments = useMemo(() => [], []);
 
   const [scheduledDeployments, setScheduledDeployments] = useStorage<
     typeof ML_SCHEDULED_MODEL_DEPLOYMENTS,
-    StartAllocationParams[]
+    ScheduledDeployment[]
   >(ML_SCHEDULED_MODEL_DEPLOYMENTS, defaultScheduledDeployments);
 
   const scheduledDeployments$ = useMemo(
-    () => new BehaviorSubject<StartAllocationParams[]>(scheduledDeployments),
+    () => new BehaviorSubject<ScheduledDeployment[]>(scheduledDeployments),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
@@ -52,8 +64,8 @@ export function useInitTrainedModelsService(
       setScheduledDeployments,
       displayErrorToast,
       displaySuccessToast,
-      savedObjectsApiService,
-      canManageSpacesAndSavedObjects,
+      telemetryService: telemetryClient,
+      deploymentParamsMapper,
     });
 
     return () => {

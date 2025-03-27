@@ -6,8 +6,9 @@
  */
 
 import { random, mean } from 'lodash';
-import { SanitizedRule, AlertSummary } from '../types';
-import { IValidatedEvent, millisToNanos, nanosToMillis } from '@kbn/event-log-plugin/server';
+import type { SanitizedRule, AlertSummary } from '../types';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { millisToNanos, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';
 import { alertSummaryFromEventLog } from './alert_summary_from_event_log';
 

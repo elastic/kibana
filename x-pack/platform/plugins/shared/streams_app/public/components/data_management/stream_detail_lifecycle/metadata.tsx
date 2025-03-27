@@ -31,13 +31,14 @@ import {
   EuiPanel,
   EuiPopover,
   EuiText,
+  formatNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LifecycleEditAction } from './modal';
 import { IlmLink } from './ilm_link';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { DataStreamStats } from './hooks/use_data_stream_stats';
-import { formatBytes } from './helpers/format_bytes';
+import { formatIngestionRate } from './helpers/format_bytes';
 
 export function RetentionMetadata({
   definition,
@@ -103,7 +104,7 @@ export function RetentionMetadata({
   ) : null;
 
   const lifecycleOrigin = isInheritLifecycle(definition.stream.ingest.lifecycle) ? (
-    <EuiText>
+    <EuiText size="s">
       {i18n.translate('xpack.streams.streamDetailLifecycle.inheritedFrom', {
         defaultMessage: 'Inherited from',
       })}{' '}
@@ -127,9 +128,11 @@ export function RetentionMetadata({
       )}
     </EuiText>
   ) : (
-    i18n.translate('xpack.streams.streamDetailLifecycle.localOverride', {
-      defaultMessage: 'Local override',
-    })
+    <EuiText size="s">
+      {i18n.translate('xpack.streams.streamDetailLifecycle.localOverride', {
+        defaultMessage: 'Local override',
+      })}
+    </EuiText>
   );
 
   return (
@@ -201,7 +204,7 @@ export function RetentionMetadata({
           ) : isLoadingStats || !stats ? (
             <EuiLoadingSpinner size="s" />
           ) : (
-            stats.totalDocs
+            formatNumber(stats.totalDocs, '0,0')
           )
         }
       />
@@ -240,9 +243,3 @@ function MetadataRow({
     </EuiFlexGroup>
   );
 }
-
-const formatIngestionRate = (bytesPerDay: number) => {
-  const perDay = formatBytes(bytesPerDay);
-  const perMonth = formatBytes(bytesPerDay * 30);
-  return `${perDay} / Day - ${perMonth} / Month`;
-};

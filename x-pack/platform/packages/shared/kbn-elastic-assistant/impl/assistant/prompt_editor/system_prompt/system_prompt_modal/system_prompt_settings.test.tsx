@@ -10,34 +10,27 @@ import { fireEvent, render } from '@testing-library/react';
 import { SystemPromptSettings } from './system_prompt_settings';
 import { TestProviders } from '../../../../mock/test_providers/test_providers';
 import { alertConvo, welcomeConvo } from '../../../../mock/conversation';
-import { mockSystemPrompts } from '../../../../mock/system_prompt';
+import { mockSystemPromptSettings } from '../../../../mock/system_prompt';
 import { TEST_IDS } from '../../../constants';
 
-const onSelectedSystemPromptChange = jest.fn();
-const setUpdatedSystemPromptSettings = jest.fn().mockImplementation((fn) => {
-  return fn(mockSystemPrompts);
-});
-const setConversationSettings = jest.fn().mockImplementation((fn) => {
-  return fn({
-    [welcomeConvo.title]: welcomeConvo,
-    [alertConvo.title]: alertConvo,
-  });
-});
+const onSystemPromptSelect = jest.fn();
+const onPromptContentChange = jest.fn();
+const onConversationSelectionChange = jest.fn();
+const onNewConversationDefaultChange = jest.fn();
 
 const testProps = {
-  connectors: [],
-  conversationSettings: {
+  conversations: {
     [welcomeConvo.title]: welcomeConvo,
   },
-  onSelectedSystemPromptChange,
-  selectedSystemPrompt: mockSystemPrompts[0],
-  setUpdatedSystemPromptSettings,
-  setConversationSettings,
-  systemPromptSettings: mockSystemPrompts,
-  conversationsSettingsBulkActions: {},
-  setConversationsSettingsBulkActions: jest.fn(),
-  promptsBulkActions: {},
-  setPromptsBulkActions: jest.fn(),
+  onConversationSelectionChange,
+  onNewConversationDefaultChange,
+  onPromptContentChange,
+  onSystemPromptDelete: jest.fn(),
+  onSystemPromptSelect,
+  resetSettings: jest.fn(),
+  selectedSystemPrompt: mockSystemPromptSettings[0],
+  systemPromptSettings: mockSystemPromptSettings,
+  setPaginationObserver: jest.fn(),
 };
 
 jest.mock('./system_prompt_selector/system_prompt_selector', () => ({
@@ -47,12 +40,12 @@ jest.mock('./system_prompt_selector/system_prompt_selector', () => ({
       <button
         type="button"
         data-test-subj="delete-sp"
-        onClick={() => onSystemPromptDeleted(mockSystemPrompts[1].name)}
+        onClick={() => onSystemPromptDeleted(mockSystemPromptSettings[1].name)}
       />
       <button
         type="button"
         data-test-subj="change-sp"
-        onClick={() => onSystemPromptSelectionChange(mockSystemPrompts[1])}
+        onClick={() => onSystemPromptSelectionChange(mockSystemPromptSettings[1])}
       />
       <button
         type="button"
@@ -65,13 +58,9 @@ jest.mock('./system_prompt_selector/system_prompt_selector', () => ({
 const mockConvos = [alertConvo, welcomeConvo];
 jest.mock('./conversation_multi_selector/conversation_multi_selector', () => ({
   // @ts-ignore
-  ConversationMultiSelector: ({ onConversationSelectionChange }) => (
+  ConversationMultiSelector: ({ onConversationSelectionChange: onChange }) => (
     <>
-      <button
-        type="button"
-        data-test-subj="change-multi"
-        onClick={() => onConversationSelectionChange(mockConvos)}
-      />
+      <button type="button" data-test-subj="change-multi" onClick={() => onChange(mockConvos)} />
     </>
   ),
 }));
@@ -87,8 +76,7 @@ describe('SystemPromptSettings', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId('change-sp'));
-    expect(setUpdatedSystemPromptSettings).toHaveReturnedWith(mockSystemPrompts);
-    expect(onSelectedSystemPromptChange).toHaveBeenCalledWith(mockSystemPrompts[1]);
+    expect(onSystemPromptSelect).toHaveBeenCalledWith(mockSystemPromptSettings[1]);
   });
   it('Entering a custom system prompt creates a new system prompt', () => {
     const { getByTestId } = render(
@@ -97,17 +85,10 @@ describe('SystemPromptSettings', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId('change-sp-custom'));
-    const customOption = {
-      consumer: 'test',
-      content: '',
-      id: 'sooper custom prompt',
-      name: 'sooper custom prompt',
-      promptType: 'system',
-    };
-    expect(setUpdatedSystemPromptSettings).toHaveReturnedWith([...mockSystemPrompts, customOption]);
-    expect(onSelectedSystemPromptChange).toHaveBeenCalledWith(customOption);
+
+    expect(onSystemPromptSelect).toHaveBeenCalledWith('sooper custom prompt');
   });
-  it('Updating the current prompt input updates the prompt', () => {
+  it('Updating the current prompt input updates the prompt', async () => {
     const { getByTestId } = render(
       <TestProviders>
         <SystemPromptSettings {...testProps} />
@@ -116,15 +97,9 @@ describe('SystemPromptSettings', () => {
     fireEvent.change(getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.PROMPT_TEXT), {
       target: { value: 'what does this do' },
     });
-    const mutatableQuickPrompts = [...mockSystemPrompts];
-    const previousFirstElementOfTheArray = mutatableQuickPrompts.shift();
-
-    expect(setUpdatedSystemPromptSettings).toHaveReturnedWith([
-      { ...previousFirstElementOfTheArray, content: 'what does this do' },
-      ...mutatableQuickPrompts,
-    ]);
+    expect(onPromptContentChange).toHaveBeenCalledWith('what does this do');
   });
-  it('Updating prompt contexts updates the categories of the prompt', () => {
+  it('onConversationSelectionChange is called when conversations are selected from ConversationMultiSelector', () => {
     const { getByTestId } = render(
       <TestProviders>
         <SystemPromptSettings {...testProps} />
@@ -132,22 +107,7 @@ describe('SystemPromptSettings', () => {
     );
     fireEvent.click(getByTestId('change-multi'));
 
-    expect(setConversationSettings).toHaveReturnedWith({
-      [welcomeConvo.id]: {
-        ...welcomeConvo,
-        apiConfig: {
-          ...welcomeConvo.apiConfig,
-          defaultSystemPromptId: 'mock-system-prompt-1',
-        },
-      },
-      [alertConvo.id]: {
-        ...alertConvo,
-        apiConfig: {
-          ...alertConvo.apiConfig,
-          defaultSystemPromptId: 'mock-system-prompt-1',
-        },
-      },
-    });
+    expect(onConversationSelectionChange).toHaveBeenCalledWith(mockConvos);
   });
   it('Toggle default conversation checkbox works', () => {
     const { getByTestId } = render(
@@ -156,12 +116,7 @@ describe('SystemPromptSettings', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId(TEST_IDS.SYSTEM_PROMPT_MODAL.TOGGLE_ALL_DEFAULT_CONVERSATIONS));
-    const mutatableQuickPrompts = [...mockSystemPrompts];
-    const previousFirstElementOfTheArray = mutatableQuickPrompts.shift();
 
-    expect(setUpdatedSystemPromptSettings).toHaveReturnedWith([
-      { ...previousFirstElementOfTheArray, isNewConversationDefault: true },
-      ...mutatableQuickPrompts.map((p) => ({ ...p, isNewConversationDefault: false })),
-    ]);
+    expect(onNewConversationDefaultChange).toHaveBeenCalledWith(true);
   });
 });

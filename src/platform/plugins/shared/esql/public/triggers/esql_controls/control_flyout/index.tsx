@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { monaco } from '@kbn/monaco';
 import type { ESQLControlState } from '../types';
@@ -69,6 +69,7 @@ export function ESQLControlsFlyout({
         onCreateControl={onCreateControl}
         onEditControl={onEditControl}
         search={search}
+        cursorPosition={cursorPosition}
       />
     );
   } else if (

@@ -17,7 +17,7 @@ import { inputsFormat } from '../../../common/constants';
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
-import { appContextService, agentPolicyService } from '../../services';
+import { appContextService, agentPolicyService, packagePolicyService } from '../../services';
 import { type AgentClient, getLatestAvailableAgentVersion } from '../../services/agents';
 import {
   AGENTS_PREFIX,
@@ -40,12 +40,14 @@ import type {
   GetAgentPolicyOutputsRequestSchema,
   GetListAgentPolicyOutputsRequestSchema,
   GetAutoUpgradeAgentsStatusRequestSchema,
+  CreateAgentAndPackagePolicyRequestSchema,
 } from '../../types';
 
 import type {
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
   GetOneAgentPolicyResponse,
+  CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
   UpdateAgentPolicyResponse,
   CopyAgentPolicyResponse,
@@ -56,6 +58,7 @@ import type {
   BulkGetAgentPoliciesResponse,
   GetAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsResponse,
+  CreatePackagePolicyRequest,
 } from '../../../common/types';
 import { AgentPolicyNotFoundError, FleetUnauthorizedError, FleetError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
@@ -63,6 +66,8 @@ import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
 import { packagePolicyToSimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { getAutoUpgradeAgentsStatus } from '../../services/agents';
+
+import { createPackagePolicyHandler } from '../package_policy/handlers';
 
 export async function populateAssignedAgentsCount(
   agentClient: AgentClient,
@@ -387,6 +392,116 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       });
     }
     throw error;
+  }
+};
+
+export const createAgentAndPackagePoliciesHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof CreateAgentAndPackagePolicyRequestSchema.query>,
+  TypeOf<typeof CreateAgentAndPackagePolicyRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const logger = appContextService.getLogger();
+  logger.debug('Creating agent and package policies');
+
+  // Try to create the agent policy
+  const { package_policies: packagePolicies, ...agentPolicyWithoutPackagePolicies } = request.body;
+  const agentPolicyRequest = {
+    ...request,
+    body: agentPolicyWithoutPackagePolicies,
+    query: request.query satisfies CreateAgentPolicyRequest['query'],
+  };
+  const agentPolicyResult = await createAgentPolicyHandler(context, agentPolicyRequest, response);
+  const createdAgentPolicy: CreateAgentPolicyResponse['item'] = agentPolicyResult.options.body.item;
+  const createdPackagePolicyIds = [];
+
+  if (agentPolicyRequest.body.id && agentPolicyRequest.body.id !== createdAgentPolicy.id) {
+    logger.warn(
+      `Agent policy created with id ${createdAgentPolicy.id} instead of requested id ${agentPolicyRequest.body.id}`
+    );
+  }
+
+  // Try to create the package policies
+  try {
+    for (const packagePolicy of packagePolicies) {
+      // Extract the original agent policy ID from the request in order to replace it with the created agent policy ID
+      const {
+        policy_id: agentPolicyId,
+        policy_ids: agentPolicyIds,
+        ...restOfPackagePolicy
+      } = packagePolicy;
+
+      // Warn if the requested agent policy ID does not match the created agent policy ID
+      if (agentPolicyId && agentPolicyId !== createdAgentPolicy.id) {
+        logger.warn(
+          `Creating package policy with agent policy ID ${createdAgentPolicy.id} instead of requested id ${agentPolicyId}`
+        );
+      }
+      if (
+        agentPolicyIds &&
+        agentPolicyIds.length > 0 &&
+        (!agentPolicyIds.includes(createdAgentPolicy.id) || agentPolicyIds.length > 1)
+      ) {
+        logger.warn(
+          `Creating package policy with agent policy ID ${
+            createdAgentPolicy.id
+          } instead of requested id(s) ${agentPolicyIds.join(',')}`
+        );
+      }
+
+      const packagePolicyRequest = {
+        ...request,
+        body: {
+          ...restOfPackagePolicy,
+          policy_ids: [createdAgentPolicy.id],
+        },
+        query: request.query satisfies CreatePackagePolicyRequest['query'],
+      };
+      const packagePolicyResult = await createPackagePolicyHandler(
+        context,
+        packagePolicyRequest,
+        response
+      );
+      createdPackagePolicyIds.push(packagePolicyResult.options.body.item.id);
+    }
+
+    // Return the created agent policy with full package policy details
+    return getOneAgentPolicyHandler(
+      context,
+      {
+        ...request,
+        body: {},
+        params: { agentPolicyId: createdAgentPolicy.id },
+      },
+      response
+    );
+  } catch (e) {
+    // If there is an error creating package policies, delete any created package policy
+    // and the parent agent policy
+    if (createdPackagePolicyIds.length > 0) {
+      await packagePolicyService.delete(
+        coreContext.savedObjects.client,
+        coreContext.elasticsearch.client.asInternalUser,
+        createdPackagePolicyIds,
+        {
+          force: true,
+          skipUnassignFromAgentPolicies: true,
+        }
+      );
+    }
+    if (createdAgentPolicy) {
+      await agentPolicyService.delete(
+        coreContext.savedObjects.client,
+        coreContext.elasticsearch.client.asInternalUser,
+        createdAgentPolicy.id,
+        {
+          force: true,
+        }
+      );
+    }
+
+    // Rethrow
+    throw e;
   }
 };
 

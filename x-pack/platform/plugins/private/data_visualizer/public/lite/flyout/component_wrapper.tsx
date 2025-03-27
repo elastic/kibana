@@ -10,6 +10,7 @@ import React from 'react';
 
 import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import type { FileUploadResults } from '@kbn/file-upload-common';
+import type { FlyoutContent } from '@kbn/file-upload-common/src/types';
 import type { ResultLinks } from '../../../common/app';
 
 const FileDataVisualizerLiteComponent = React.lazy(() => import('../file_upload_lite'));
@@ -20,6 +21,8 @@ export const FileDataVisualizerLiteWrapper: FC<{
   autoAddInference?: string;
   autoCreateDataView?: boolean;
   indexSettings?: IndicesIndexSettings;
+  initialIndexName?: string;
+  flyoutContent?: FlyoutContent;
   onClose?: () => void;
 }> = ({
   resultLinks,
@@ -27,6 +30,8 @@ export const FileDataVisualizerLiteWrapper: FC<{
   autoAddInference,
   autoCreateDataView,
   indexSettings,
+  initialIndexName,
+  flyoutContent,
   onClose,
 }) => {
   return (
@@ -37,6 +42,8 @@ export const FileDataVisualizerLiteWrapper: FC<{
         autoAddInference={autoAddInference}
         autoCreateDataView={autoCreateDataView}
         indexSettings={indexSettings}
+        initialIndexName={initialIndexName}
+        flyoutContent={flyoutContent}
         onClose={onClose}
       />
     </React.Suspense>
@@ -49,6 +56,8 @@ export function getFileDataVisualizerLiteWrapper(
   autoAddInference?: string,
   autoCreateDataView?: boolean,
   indexSettings?: IndicesIndexSettings,
+  initialIndexName?: string,
+  flyoutContent?: FlyoutContent,
   onClose?: () => void
 ) {
   return (
@@ -58,6 +67,8 @@ export function getFileDataVisualizerLiteWrapper(
       autoAddInference={autoAddInference}
       autoCreateDataView={autoCreateDataView}
       indexSettings={indexSettings}
+      initialIndexName={initialIndexName}
+      flyoutContent={flyoutContent}
       onClose={onClose}
     />
   );

@@ -6,7 +6,6 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
@@ -15,10 +14,11 @@ import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { DataViewContext } from './hooks/data_view_context';
-import { useDataView } from './hooks/use_asset_inventory_data_table/use_data_view';
+import { useDataView } from './hooks/use_data_view';
+import { AssetInventoryLoading } from './components/asset_inventory_loading';
 import { ASSET_INVENTORY_INDEX_PATTERN } from './constants';
 
-const AllAssetsLazy = lazy(() => import('./pages/all_assets'));
+const AssetsPageLazy = lazy(() => import('./pages'));
 
 // Initializing react-query
 const queryClient = new QueryClient({
@@ -47,8 +47,8 @@ export const AssetInventoryRoutes = () => {
         <SecurityRoutePageWrapper pageName={SecurityPageName.assetInventory}>
           <DataViewContext.Provider value={dataViewContextValue}>
             <SecuritySolutionPageWrapper noPadding>
-              <Suspense fallback={<EuiLoadingSpinner />}>
-                <AllAssetsLazy />
+              <Suspense fallback={<AssetInventoryLoading />}>
+                <AssetsPageLazy />
               </Suspense>
             </SecuritySolutionPageWrapper>
           </DataViewContext.Provider>

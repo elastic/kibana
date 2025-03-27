@@ -16,7 +16,7 @@ import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
 import { StartServerOptions } from './flags';
 import { loadServersConfig } from '../config';
-import { getEsClient, silence } from '../common';
+import { silence } from '../common';
 
 export async function startServers(log: ToolingLog, options: StartServerOptions) {
   const runStartTime = Date.now();
@@ -30,14 +30,6 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       log,
       esFrom: options.esFrom,
       logsDir: options.logsDir,
-    });
-
-    log.info('Enable authc debug logs for ES');
-    const client = getEsClient(config.getScoutTestConfig(), log);
-    await client.cluster.putSettings({
-      persistent: {
-        'logger.org.elasticsearch.xpack.security.authc': 'debug',
-      },
     });
 
     await runKibanaServer({
@@ -60,7 +52,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       '\n\n' +
         dedent`
           Elasticsearch and Kibana are ready for functional testing.
-          Use 'npx playwright test --config <path_to_Playwright.config.ts>' to run tests'
+          Use 'npx playwright test --config <path_to_Playwright.config.ts> --project local' to run tests'
         ` +
         '\n\n'
     );

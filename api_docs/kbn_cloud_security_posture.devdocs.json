@@ -236,21 +236,46 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.getNormalizedSeverity",
+        "type": "Function",
+        "tags": [],
+        "label": "getNormalizedSeverity",
+        "description": [],
+        "signature": [
+          "(severity?: string | undefined) => string | undefined"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/get_normalized_severity.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.getNormalizedSeverity.$1",
+            "type": "string",
+            "tags": [],
+            "label": "severity",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/get_normalized_severity.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.getSeverityStatusColor",
         "type": "Function",
         "tags": [],
         "label": "getSeverityStatusColor",
         "description": [],
         "signature": [
-          "(severity: ",
-          {
-            "pluginId": "@kbn/cloud-security-posture-common",
-            "scope": "common",
-            "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
-            "section": "def-common.VulnSeverity",
-            "text": "VulnSeverity"
-          },
-          ", euiTheme: ",
+          "(severity: string, euiTheme: ",
           "EuiThemeComputed",
           "<{}>) => string"
         ],
@@ -261,18 +286,12 @@
           {
             "parentPluginId": "@kbn/cloud-security-posture",
             "id": "def-public.getSeverityStatusColor.$1",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "severity",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/cloud-security-posture-common",
-                "scope": "common",
-                "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
-                "section": "def-common.VulnSeverity",
-                "text": "VulnSeverity"
-              }
+              "string"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/get_finding_colors.ts",
             "deprecated": false,
@@ -558,6 +577,42 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.BaseEsQuery",
+        "type": "Interface",
+        "tags": [],
+        "label": "BaseEsQuery",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.BaseEsQuery.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "{ bool: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.BoolQuery",
+                "text": "BoolQuery"
+              },
+              "; } | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.CspBaseEsQuery",
@@ -1057,42 +1112,6 @@
               "<",
               "AggregationsStringRareTermsBucketKeys",
               ">"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.FindingsBaseEsQuery",
-        "type": "Interface",
-        "tags": [],
-        "label": "FindingsBaseEsQuery",
-        "description": [],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.FindingsBaseEsQuery.query",
-            "type": "Object",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              "{ bool: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.BoolQuery",
-                "text": "BoolQuery"
-              },
-              "; } | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
             "deprecated": false,

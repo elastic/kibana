@@ -18,9 +18,8 @@ import { validateIndexPatterns } from '../utils';
 
 export const createThresholdAlertType = (
   createOptions: CreateRuleOptions
-): SecurityAlertType<ThresholdRuleParams, ThresholdAlertState, {}, 'default'> => {
-  const { version, licensing, experimentalFeatures, scheduleNotificationResponseActionsService } =
-    createOptions;
+): SecurityAlertType<ThresholdRuleParams, ThresholdAlertState> => {
+  const { licensing, scheduleNotificationResponseActionsService } = createOptions;
   return {
     id: THRESHOLD_RULE_TYPE_ID,
     name: 'Threshold Rule',
@@ -59,50 +58,15 @@ export const createThresholdAlertType = (
     isExportable: false,
     category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
+    solution: 'security',
     async executor(execOptions) {
-      const {
-        runOpts: {
-          bulkCreate,
-          completeRule,
-          tuple,
-          wrapHits,
-          ruleDataClient,
-          inputIndex,
-          runtimeMappings,
-          primaryTimestamp,
-          secondaryTimestamp,
-          ruleExecutionLogger,
-          aggregatableTimestampField,
-          exceptionFilter,
-          unprocessedExceptions,
-        },
-        services,
-        startedAt,
-        state,
-        spaceId,
-      } = execOptions;
+      const { sharedParams, services, startedAt, state } = execOptions;
       const result = await thresholdExecutor({
-        completeRule,
-        tuple,
-        ruleExecutionLogger,
+        sharedParams,
         services,
-        version,
         startedAt,
         state,
-        bulkCreate,
-        wrapHits,
-        ruleDataClient,
-        inputIndex,
-        runtimeMappings,
-        primaryTimestamp,
-        secondaryTimestamp,
-        aggregatableTimestampField,
-        exceptionFilter,
-        unprocessedExceptions,
-        spaceId,
-        runOpts: execOptions.runOpts,
         licensing,
-        experimentalFeatures,
         scheduleNotificationResponseActionsService,
       });
       return result;

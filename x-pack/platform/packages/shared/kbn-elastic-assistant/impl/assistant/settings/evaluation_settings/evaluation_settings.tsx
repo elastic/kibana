@@ -34,6 +34,7 @@ import type {
 } from '@kbn/elastic-assistant-common';
 import { isEmpty } from 'lodash/fp';
 
+import moment from 'moment';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '../../../assistant_context/constants';
@@ -210,6 +211,9 @@ export const EvaluationSettings: React.FC = React.memo(() => {
       langSmithProject,
       runName,
       size: Number(size),
+      screenContext: {
+        timeZone: moment.tz.guess(),
+      },
     };
     performEvaluation(evalParams);
   }, [

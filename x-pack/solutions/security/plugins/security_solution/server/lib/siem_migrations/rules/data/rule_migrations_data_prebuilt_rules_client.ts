@@ -71,10 +71,17 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
               },
             ]),
           },
-          { requestTimeout: 10 * 60 * 1000 }
+          { requestTimeout: 10 * 60 * 1000 } // 10 minutes
         )
+        .then((response) => {
+          if (response.errors) {
+            // use the first error to throw
+            const reason = response.items.find((item) => item.update?.error)?.update?.error?.reason;
+            throw new Error(reason ?? 'Unknown error');
+          }
+        })
         .catch((error) => {
-          this.logger.error(`Error preparing prebuilt rules for SIEM migration: ${error.message}`);
+          this.logger.error(`Error indexing prebuilt rules embeddings: ${error.message}`);
           throw error;
         });
     }

@@ -31,6 +31,8 @@ export function UptimeMLAnomalyProvider({ getService }: FtrProviderContext) {
     async cancelAlertFlyout() {
       if (await testSubjects.exists('euiFlyoutCloseButton'))
         await testSubjects.click('euiFlyoutCloseButton', 60 * 1000);
+      if (await testSubjects.exists('ruleFlyoutConfirmCancelConfirmButton'))
+        await testSubjects.click('ruleFlyoutConfirmCancelConfirmButton', 60 * 1000);
     },
 
     async alreadyHasJob() {

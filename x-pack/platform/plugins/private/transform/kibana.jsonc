@@ -30,7 +30,8 @@
       "charts",
       "savedObjectsFinder",
       "savedObjectsManagement",
-      "contentManagement"
+      "contentManagement",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "dataViewEditor",
