@@ -386,11 +386,7 @@ export function generateFleetConfig(
     // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
     if (output?.secrets) {
       config.secrets = {
-        ssl: {
-          ...(output.secrets?.ssl?.key && {
-            key: output.secrets.ssl.key,
-          }),
-        },
+        ...output?.secrets,
       };
     }
   }
@@ -581,9 +577,7 @@ export function transformOutputToFullPolicyOutput(
     ...((output.type === outputType.Kafka || output.type === outputType.Logstash) && ssl
       ? { ssl }
       : {}),
-    ...((output.type === outputType.Kafka || output.type === outputType.Logstash) && secrets
-      ? { secrets }
-      : {}),
+    ...(secrets ? { secrets } : {}),
   };
 
   if (proxy) {
