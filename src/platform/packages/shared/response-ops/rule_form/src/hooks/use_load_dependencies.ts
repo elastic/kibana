@@ -14,7 +14,7 @@ import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { useMemo } from 'react';
 import {
   useHealthCheck,
-  useLoadRuleTypesQuery,
+  useGetRuleTypesPermissions,
   useFetchFlappingSettings,
 } from '@kbn/alerts-ui-shared';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -81,7 +81,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
       isLoading: isLoadingRuleTypes,
       isInitialLoad: isInitialLoadingRuleTypes,
     },
-  } = useLoadRuleTypesQuery({
+  } = useGetRuleTypesPermissions({
     http,
     toasts,
     filteredRuleTypes,

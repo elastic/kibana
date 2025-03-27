@@ -81,7 +81,7 @@ export const ruleTypesIndex = new Map([
       name: 'Index threshold',
       category: 'management',
       producer: 'stackAlerts',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -157,7 +157,7 @@ export const ruleTypesIndex = new Map([
       name: 'Tracking containment',
       category: 'management',
       producer: 'stackAlerts',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -233,7 +233,7 @@ export const ruleTypesIndex = new Map([
       name: 'Elasticsearch query',
       category: 'management',
       producer: 'stackAlerts',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -309,7 +309,7 @@ export const ruleTypesIndex = new Map([
       name: 'Transform health',
       category: 'management',
       producer: 'stackAlerts',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -385,7 +385,7 @@ export const ruleTypesIndex = new Map([
       name: 'Anomaly detection',
       category: 'management',
       producer: 'ml',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -461,7 +461,7 @@ export const ruleTypesIndex = new Map([
       name: 'Anomaly detection jobs health',
       category: 'management',
       producer: 'ml',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -625,7 +625,7 @@ export const ruleTypesIndex = new Map([
       name: 'Uptime TLS (Legacy)',
       category: 'observability',
       producer: 'uptime',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -701,7 +701,7 @@ export const ruleTypesIndex = new Map([
       name: 'Uptime TLS',
       category: 'observability',
       producer: 'uptime',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -777,7 +777,7 @@ export const ruleTypesIndex = new Map([
       name: 'Uptime monitor status',
       category: 'observability',
       producer: 'uptime',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -853,7 +853,7 @@ export const ruleTypesIndex = new Map([
       name: 'Uptime Duration Anomaly',
       category: 'observability',
       producer: 'uptime',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -929,7 +929,7 @@ export const ruleTypesIndex = new Map([
       name: 'Synthetics monitor status',
       category: 'observability',
       producer: 'uptime',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -1005,7 +1005,7 @@ export const ruleTypesIndex = new Map([
       name: 'Synthetics TLS certificate',
       category: 'observability',
       producer: 'uptime',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -1089,6 +1089,7 @@ export const ruleTypesIndex = new Map([
       name: 'Metric threshold',
       category: 'observability',
       producer: 'infrastructure',
+      fieldsForAAD: ['cloud.*', 'host.*', 'orchestrator.*', 'container.*', 'labels.*', 'tags'],
       is_exportable: true,
     },
   ],
@@ -1169,7 +1170,7 @@ export const ruleTypesIndex = new Map([
       name: 'Inventory',
       category: 'observability',
       producer: 'infrastructure',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -1249,7 +1250,7 @@ export const ruleTypesIndex = new Map([
       name: 'Custom threshold (Beta)',
       category: 'observability',
       producer: 'observability',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -1325,7 +1326,7 @@ export const ruleTypesIndex = new Map([
       name: 'Log threshold',
       category: 'observability',
       producer: 'logs',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -1401,7 +1402,7 @@ export const ruleTypesIndex = new Map([
       name: 'License expiration',
       category: 'management',
       producer: 'monitoring',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -1477,7 +1478,7 @@ export const ruleTypesIndex = new Map([
       name: 'Cluster health',
       category: 'management',
       producer: 'monitoring',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -1553,7 +1554,7 @@ export const ruleTypesIndex = new Map([
       name: 'CPU Usage',
       category: 'management',
       producer: 'monitoring',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -1629,7 +1630,7 @@ export const ruleTypesIndex = new Map([
       name: 'Disk Usage',
       category: 'management',
       producer: 'monitoring',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -1705,7 +1706,7 @@ export const ruleTypesIndex = new Map([
       name: 'Nodes changed',
       category: 'management',
       producer: 'monitoring',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -1781,7 +1782,7 @@ export const ruleTypesIndex = new Map([
       name: 'Elasticsearch version mismatch',
       category: 'management',
       producer: 'monitoring',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -1857,7 +1858,7 @@ export const ruleTypesIndex = new Map([
       name: 'Kibana version mismatch',
       category: 'management',
       producer: 'monitoring',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -1933,7 +1934,7 @@ export const ruleTypesIndex = new Map([
       name: 'Logstash version mismatch',
       category: 'management',
       producer: 'monitoring',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -2009,7 +2010,7 @@ export const ruleTypesIndex = new Map([
       name: 'Memory Usage (JVM)',
       category: 'management',
       producer: 'monitoring',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -2085,7 +2086,7 @@ export const ruleTypesIndex = new Map([
       name: 'Missing monitoring data',
       category: 'management',
       producer: 'monitoring',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -2161,7 +2162,7 @@ export const ruleTypesIndex = new Map([
       name: 'Thread pool search rejections',
       category: 'management',
       producer: 'monitoring',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -2237,7 +2238,7 @@ export const ruleTypesIndex = new Map([
       name: 'Thread pool write rejections',
       category: 'management',
       producer: 'monitoring',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -2313,7 +2314,7 @@ export const ruleTypesIndex = new Map([
       name: 'CCR read exceptions',
       category: 'management',
       producer: 'monitoring',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -2389,7 +2390,7 @@ export const ruleTypesIndex = new Map([
       name: 'Shard size',
       category: 'management',
       producer: 'monitoring',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -2465,7 +2466,7 @@ export const ruleTypesIndex = new Map([
       name: 'Error count threshold',
       category: 'observability',
       producer: 'apm',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -2541,7 +2542,7 @@ export const ruleTypesIndex = new Map([
       name: 'Failed transaction rate threshold',
       category: 'observability',
       producer: 'apm',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -2617,7 +2618,7 @@ export const ruleTypesIndex = new Map([
       name: 'Latency threshold',
       category: 'observability',
       producer: 'apm',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -2693,7 +2694,7 @@ export const ruleTypesIndex = new Map([
       name: 'APM Anomaly',
       category: 'observability',
       producer: 'apm',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -2769,7 +2770,7 @@ export const ruleTypesIndex = new Map([
       name: 'Security Solution notification (Legacy)',
       category: 'securitySolution',
       producer: 'siem',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -2845,7 +2846,7 @@ export const ruleTypesIndex = new Map([
       name: 'ES|QL Rule',
       category: 'securitySolution',
       producer: 'siem',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -2921,7 +2922,7 @@ export const ruleTypesIndex = new Map([
       name: 'Event Correlation Rule',
       category: 'securitySolution',
       producer: 'siem',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -2997,7 +2998,7 @@ export const ruleTypesIndex = new Map([
       name: 'Indicator Match Rule',
       category: 'securitySolution',
       producer: 'siem',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -3073,7 +3074,7 @@ export const ruleTypesIndex = new Map([
       name: 'Machine Learning Rule',
       category: 'securitySolution',
       producer: 'siem',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -3149,7 +3150,7 @@ export const ruleTypesIndex = new Map([
       name: 'Custom Query Rule',
       category: 'securitySolution',
       producer: 'siem',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -3225,7 +3226,7 @@ export const ruleTypesIndex = new Map([
       name: 'Saved Query Rule',
       category: 'securitySolution',
       producer: 'siem',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -3301,7 +3302,7 @@ export const ruleTypesIndex = new Map([
       name: 'Threshold Rule',
       category: 'securitySolution',
       producer: 'siem',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
   [
@@ -3377,7 +3378,7 @@ export const ruleTypesIndex = new Map([
       name: 'New Terms Rule',
       category: 'securitySolution',
       producer: 'siem',
-      is_exportable: false,
+      isExportable: false,
     },
   ],
 ]) as unknown as RuleTypeIndex;

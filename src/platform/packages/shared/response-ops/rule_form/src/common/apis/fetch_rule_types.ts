@@ -28,6 +28,7 @@ const rewriteBodyReq: RewriteRequestCase<RuleType> = ({
   does_set_recovery_context: doesSetRecoveryContext,
   default_schedule_interval: defaultScheduleInterval,
   has_alerts_mappings: hasAlertsMappings,
+  is_exportable: isExportable,
   ...rest
 }: AsApiContract<RuleType>) => ({
   enabledInLicense,
@@ -41,6 +42,7 @@ const rewriteBodyReq: RewriteRequestCase<RuleType> = ({
   doesSetRecoveryContext,
   defaultScheduleInterval,
   hasAlertsMappings,
+  isExportable,
   ...rest,
 });
 
