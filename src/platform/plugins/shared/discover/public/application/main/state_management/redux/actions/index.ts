@@ -8,3 +8,4 @@
  */
 
 export * from './data_views';
+export * from './initialize_session';

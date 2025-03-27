@@ -2838,6 +2838,23 @@
           },
           {
             "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getEntityStoreApiKeyManager",
+            "type": "Function",
+            "tags": [],
+            "label": "getEntityStoreApiKeyManager",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ApiKeyManager"
+            ],
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-server.SecuritySolutionApiRequestHandlerContext.getExceptionListClient",
             "type": "Function",
             "tags": [],

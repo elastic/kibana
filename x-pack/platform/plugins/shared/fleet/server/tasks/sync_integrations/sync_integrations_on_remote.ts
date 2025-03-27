@@ -27,6 +27,7 @@ import type { Installation } from '../../types';
 import type { RemoteSyncedIntegrationsStatus } from '../../../common/types';
 
 import type { SyncIntegrationsData } from './model';
+import { installCustomAsset } from './custom_assets';
 
 const MAX_RETRY_ATTEMPTS = 5;
 const RETRY_BACKOFF_MINUTES = [5, 10, 20, 40, 60];
@@ -190,6 +191,17 @@ export const syncIntegrationsOnRemote = async (
       throw new Error('Task was aborted');
     }
     await installPackageIfNotInstalled(pkg, packageClient, logger, abortController);
+  }
+
+  for (const customAsset of Object.values(syncIntegrationsDoc?.custom_assets ?? {})) {
+    if (abortController.signal.aborted) {
+      throw new Error('Task was aborted');
+    }
+    try {
+      await installCustomAsset(customAsset, esClient, abortController, logger);
+    } catch (error) {
+      logger.error(`Failed to install ${customAsset.type} ${customAsset.name}, error: ${error}`);
+    }
   }
 };
 
