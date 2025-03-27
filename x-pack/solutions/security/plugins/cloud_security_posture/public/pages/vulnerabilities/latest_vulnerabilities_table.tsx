@@ -28,13 +28,13 @@ import { ErrorCallout } from '../configurations/layout/error_callout';
 import { createDetectionRuleFromVulnerabilityFinding } from './utils/create_detection_rule_from_vulnerability';
 import { vulnerabilitiesTableFieldLabels } from './vulnerabilities_table_field_labels';
 import { FindingsMultiValueCellRender } from '../../components/findings_table_multi_value_cell_render';
-import { getMultiValueFieldAriaLabel } from './translations';
 import { FindingsBaseURLQuery } from '../../common/types';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { useDataViewContext } from '../../common/contexts/data_view_context';
 import { usePersistedQuery } from '../../common/hooks/use_cloud_posture_data_table';
 import { useUrlQuery } from '../../common/hooks/use_url_query';
-import { ClickableBadge } from '../../common/component/clickable_badge';
+import { ActionableBadge, MultiValueCellAction } from '../../common/component/actionable_badge';
+import { findReferenceLink } from './utils/find_reference_link.util';
 
 type URLQuery = FindingsBaseURLQuery & Record<string, any>;
 
@@ -127,15 +127,44 @@ export const LatestVulnerabilitiesTable = ({
   );
 
   const renderItem = useCallback(
-    (item: string, i: number, field: string) => (
-      <ClickableBadge
-        key={`${item}-${i}`}
-        item={item}
-        index={i}
-        onClickAriaLabel={getMultiValueFieldAriaLabel(item, i)}
-        onClick={() => onAddFilter(field, item, '+')}
-      />
-    ),
+    (item: string, i: number, field: string, finding: CspVulnerabilityFinding) => {
+      const references = Array.isArray(finding.vulnerability.reference)
+        ? finding.vulnerability.reference
+        : [finding.vulnerability.reference];
+
+      const actions: MultiValueCellAction[] = [
+        {
+          onClick: () => onAddFilter(field, item, '+'),
+          iconType: 'plusInCircle',
+          ariaLabel: i18n.translate('xpack.csp.findings.latestVulnerabilities.table.addFilter', {
+            defaultMessage: 'Add filter',
+          }),
+        },
+        {
+          onClick: () => onAddFilter(field, item, '-'),
+          iconType: 'minusInCircle',
+          ariaLabel: i18n.translate('xpack.csp.findings.latestVulnerabilities.table.removeFilter', {
+            defaultMessage: 'Remove filter',
+          }),
+        },
+        ...(field === 'vulnerability.id' && findReferenceLink(references, item)
+          ? [
+              {
+                onClick: () => window.open(findReferenceLink(references, item)!, '_blank'),
+                iconType: 'popout',
+                ariaLabel: i18n.translate(
+                  'xpack.csp.findings.latestVulnerabilities.table.openReference',
+                  {
+                    defaultMessage: 'Open reference URL',
+                  }
+                ),
+              },
+            ]
+          : []),
+      ];
+
+      return <ActionableBadge key={`${item}-${i}`} item={item} index={i} actions={actions} />;
+    },
     [onAddFilter]
   );
 
