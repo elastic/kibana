@@ -144,23 +144,22 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
           </EuiFlexGroup>
         </EuiFlyoutHeader>
         <EuiFlyoutBody
-          className="insInspectorPanel__flyoutBody"
-          css={css`
-            .euiFlyoutBody__overflowContent {
-              height: 100%;
-              display: flex;
-              flex-wrap: nowrap;
-              flex-direction: column;
+          css={css({
+            '.euiFlyoutBody__overflowContent': {
+              height: '100%',
+              display: 'flex',
+              flexWrap: 'nowrap',
+              flexDirection: 'column',
 
-              > div {
-                flex-grow: 0;
-              }
+              '> div': {
+                flexGrow: 0,
+              },
 
-              .insRequestCodeViewer {
-                flex-grow: 1;
-              }
-            }
-          `}
+              '.insRequestCodeViewer': {
+                flexGrow: 1,
+              },
+            },
+          })}
         >
           {this.renderSelectedPanel()}
         </EuiFlyoutBody>

@@ -8,6 +8,7 @@
  */
 
 import React, { Component } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiIcon,
   EuiIconTip,
@@ -18,9 +19,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
-import { Request, RequestStatistic } from '../../../../../common/adapters/request/types';
 import { DetailViewProps } from './types';
+import { Request, RequestStatistic } from '../../../../../common/adapters/request/types';
 
 // TODO: Replace by property once available
 interface RequestDetailsStatRow extends RequestStatistic {
@@ -34,11 +34,7 @@ const StatRow = ({ stat }: { stat: RequestDetailsStatRow }) => {
       <EuiTableRowCell>
         {stat.label}
 
-        <span
-          css={css`
-            margin-left: ${euiTheme.size.xs};
-          `}
-        >
+        <span css={css({ marginLeft: euiTheme.size.xs })}>
           {stat.description ? (
             <EuiIconTip
               aria-label={i18n.translate('inspector.requests.descriptionRowIconAriaLabel', {

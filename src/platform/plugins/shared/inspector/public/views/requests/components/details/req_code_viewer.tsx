@@ -38,11 +38,11 @@ export const RequestCodeViewer = ({ value, actions }: RequestCodeViewerProps) =>
       wrap={false}
       responsive={false}
       className="insRequestCodeViewer"
-      css={css`
-        .react-monaco-editor-container {
-          flex-grow: 1; // Ensure the editor takes the full height of its flex container on Safari.
-        }
-      `}
+      css={css({
+        '.react-monaco-editor-container': {
+          flexGrow: 1, // Ensure the editor takes the full height of its flex container on Safari.
+        },
+      })}
     >
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
