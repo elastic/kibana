@@ -12,8 +12,7 @@ import type { InstallParams } from '@kbn/index-adapter';
 import { IndexPatternAdapter, IndexAdapter } from '@kbn/index-adapter';
 import { loggerMock } from '@kbn/logging-mocks';
 import { Subject } from 'rxjs';
-import type { SiemRuleMigrationsClientDependencies } from '../types';
-import type { IndexNameProviders } from './rule_migrations_data_client';
+import type { IndexNameProviders, SiemRuleMigrationsClientDependencies } from '../types';
 import { INDEX_PATTERN, RuleMigrationsDataService } from './rule_migrations_data_service';
 
 jest.mock('@kbn/index-adapter');
