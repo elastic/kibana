@@ -38,16 +38,7 @@ export function hasTransformationalCommand(esql?: string) {
   const hasAtLeastOneTransformationalCommand = transformationalCommands.some((command) =>
     ast.find(({ name }) => name === command)
   );
-  if (hasAtLeastOneTransformationalCommand) {
-    return true;
-  }
-  const metricsCommand = ast.find(({ name }) => name === 'metrics');
-
-  if (metricsCommand && 'aggregates' in metricsCommand) {
-    return true;
-  }
-
-  return false;
+  return hasAtLeastOneTransformationalCommand;
 }
 
 export function getLimitFromESQLQuery(esql: string): number {
