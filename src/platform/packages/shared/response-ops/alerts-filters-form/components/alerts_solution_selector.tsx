@@ -19,8 +19,12 @@ import { capitalize } from 'lodash';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
 import { RuleTypeSolution } from '@kbn/alerting-types';
-import { i18n } from '@kbn/i18n';
 import { SOLUTION_SELECTOR_SUBJ } from '../constants';
+import {
+  RULE_TYPES_LOAD_ERROR_MESSAGE,
+  SOLUTION_SELECTOR_LABEL,
+  SOLUTION_SELECTOR_PLACEHOLDER,
+} from '../translations';
 
 export interface AlertsSolutionSelectorProps {
   solution?: RuleTypeSolution;
@@ -94,27 +98,17 @@ export const AlertsSolutionSelector = ({
 
   return (
     <EuiFormRow
-      label={i18n.translate('alertsFiltersForm.solutionSelectorLabel', {
-        defaultMessage: 'Solution',
-      })}
+      label={SOLUTION_SELECTOR_LABEL}
       isInvalid={isError}
       isDisabled={isError}
-      error={
-        isError
-          ? i18n.translate('alertsFiltersForm.solutionSelectorError', {
-              defaultMessage: 'Cannot load rule types',
-            })
-          : undefined
-      }
+      error={isError ? RULE_TYPES_LOAD_ERROR_MESSAGE : undefined}
       fullWidth
       data-test-subj={SOLUTION_SELECTOR_SUBJ}
     >
       <EuiSuperSelect
         isLoading={isLoading}
         isInvalid={isError}
-        placeholder={i18n.translate('alertsFiltersForm.solutionSelectorPlaceholder', {
-          defaultMessage: 'Select solution',
-        })}
+        placeholder={SOLUTION_SELECTOR_PLACEHOLDER}
         options={options}
         valueOfSelected={solution}
         onChange={(newSol) => onSolutionChange(newSol)}

@@ -9,11 +9,10 @@
 
 import React, { useMemo } from 'react';
 import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_item';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { alertsFiltersMetadata } from '../filters';
 import { AlertsFilterComponentType, AlertsFiltersFormItemType } from '../types';
+import { FORM_ITEM_FILTER_BY_LABEL, FORM_ITEM_OPTIONAL_CAPTION } from '../translations';
 
 export interface AlertsFiltersFormItemProps<T> {
   type?: AlertsFiltersFormItemType;
@@ -49,12 +48,10 @@ export const AlertsFiltersFormItem = <T,>({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('alertsFiltersForm.formItem.label', {
-          defaultMessage: 'Filter by',
-        })}
+        label={FORM_ITEM_FILTER_BY_LABEL}
         labelAppend={
           <EuiText size="xs" color="subdued">
-            <FormattedMessage id="alertsFiltersForm.formItem.optional" defaultMessage="Optional" />
+            {FORM_ITEM_OPTIONAL_CAPTION}
           </EuiText>
         }
         fullWidth

@@ -8,7 +8,6 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -19,7 +18,6 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import {
   AlertsFiltersExpression,
@@ -27,7 +25,12 @@ import {
   AlertsFilter,
   FlattenedExpressionItem,
 } from '../types';
-import { DELETE_OPERAND_LABEL } from '../translations';
+import {
+  ADD_OPERATION_LABEL,
+  AND_OPERATOR,
+  DELETE_OPERAND_LABEL,
+  OR_OPERATOR,
+} from '../translations';
 import { AlertsFiltersFormItem } from './alerts_filters_form_item';
 import {
   flattenFiltersExpression,
@@ -168,9 +171,7 @@ export const AlertsFiltersForm = ({
           alignItems="center"
           gutterSize="s"
           role="group"
-          aria-label={i18n.translate('alertsFiltersForm.addLabel', {
-            defaultMessage: 'Add boolean operation',
-          })}
+          aria-label={ADD_OPERATION_LABEL}
         >
           <EuiFlexItem grow>
             <Separator />
@@ -183,7 +184,7 @@ export const AlertsFiltersForm = ({
               isDisabled={isDisabled}
               data-test-subj={ADD_OR_OPERATION_BUTTON_SUBJ}
             >
-              <FormattedMessage id="alertsFiltersForm.orOperator" defaultMessage="OR" />
+              {OR_OPERATOR}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -194,7 +195,7 @@ export const AlertsFiltersForm = ({
               isDisabled={isDisabled}
               data-test-subj={ADD_AND_OPERATION_BUTTON_SUBJ}
             >
-              <FormattedMessage id="alertsFiltersForm.andOperator" defaultMessage="AND" />
+              {AND_OPERATOR}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow>

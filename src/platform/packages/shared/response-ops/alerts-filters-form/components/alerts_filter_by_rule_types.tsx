@@ -9,14 +9,13 @@
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
 import { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
 import { SetRequired } from 'type-fest';
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { AlertsFilterComponentType, AlertsFilterMetadata } from '../types';
 import { useAlertsFiltersFormContext } from '../contexts/alerts_filters_form_context';
-import { RULE_TYPES_FILTER_LABEL } from '../translations';
+import { RULE_TYPES_FILTER_LABEL, RULE_TYPES_LOAD_ERROR_MESSAGE } from '../translations';
 
 /**
  * Filters by one or more rule tags
@@ -65,9 +64,7 @@ export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
       label={RULE_TYPES_FILTER_LABEL}
       isDisabled={isDisabled || isError}
       isInvalid={isError}
-      error={i18n.translate('alertsFiltersForm.ruleTypes.errorDescription', {
-        defaultMessage: 'Cannot load available rule types',
-      })}
+      error={RULE_TYPES_LOAD_ERROR_MESSAGE}
       fullWidth
     >
       <EuiComboBox

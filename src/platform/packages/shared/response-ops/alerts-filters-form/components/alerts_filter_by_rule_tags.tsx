@@ -10,10 +10,9 @@
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
 import React, { useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
 import { ALERT_RULE_TAGS } from '@kbn/rule-data-utils';
-import { RULE_TAGS_FILTER_LABEL } from '../translations';
+import { RULE_TAGS_FILTER_LABEL, RULE_TAGS_LOAD_ERROR_MESSAGE } from '../translations';
 import { useAlertsFiltersFormContext } from '../contexts/alerts_filters_form_context';
 import { AlertsFilterComponentType, AlertsFilterMetadata } from '../types';
 
@@ -65,9 +64,7 @@ export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
       label={RULE_TAGS_FILTER_LABEL}
       isDisabled={isDisabled || isError}
       isInvalid={isError}
-      error={i18n.translate('alertsFiltersForm.ruleTags.errorDescription', {
-        defaultMessage: 'Cannot load available rule tags',
-      })}
+      error={RULE_TAGS_LOAD_ERROR_MESSAGE}
       fullWidth
     >
       <EuiComboBox
