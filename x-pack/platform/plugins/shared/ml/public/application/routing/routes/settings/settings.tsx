@@ -14,7 +14,11 @@ import type { MlRoute } from '../../router';
 import { PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
-import { type NavigateToApp, getStackManagementBreadcrumb } from '../../breadcrumbs';
+import {
+  type NavigateToApp,
+  getStackManagementBreadcrumb,
+  getMlManagementBreadcrumb,
+} from '../../breadcrumbs';
 
 const Settings = dynamic(async () => ({
   default: (await import('../../../settings')).Settings,
@@ -29,6 +33,7 @@ export const settingsRouteFactory = (navigateToApp: NavigateToApp): MlRoute => (
   render: () => <PageWrapper />,
   breadcrumbs: [
     getStackManagementBreadcrumb(navigateToApp),
+    getMlManagementBreadcrumb('ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB', navigateToApp),
     {
       text: i18n.translate('xpack.ml.settingsLabel', {
         defaultMessage: 'Anomaly Detection Settings',

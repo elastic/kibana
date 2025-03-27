@@ -19,7 +19,7 @@ import { useRouteResolver } from '../../use_resolver';
 import {
   type NavigateToApp,
   getMlManagementBreadcrumb,
-  getStackManagementBreadcrumb,
+  getADSettingsBreadcrumbs,
 } from '../../breadcrumbs';
 
 enum MODE {
@@ -42,8 +42,7 @@ export const newFilterListRouteFactory = (navigateToApp: NavigateToApp): MlRoute
   }),
   render: (props, deps) => <PageWrapper {...props} mode={MODE.NEW} deps={deps} />,
   breadcrumbs: [
-    getStackManagementBreadcrumb(navigateToApp),
-    getMlManagementBreadcrumb('SETTINGS_MANAGEMENT_BREADCRUMB', navigateToApp),
+    ...getADSettingsBreadcrumbs(navigateToApp),
     getMlManagementBreadcrumb('FILTER_LISTS_MANAGEMENT_BREADCRUMB', navigateToApp),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.createLabel', {
@@ -60,9 +59,7 @@ export const editFilterListRouteFactory = (navigateToApp: NavigateToApp): MlRout
   }),
   render: (props, deps) => <PageWrapper {...props} mode={MODE.EDIT} deps={deps} />,
   breadcrumbs: [
-    getStackManagementBreadcrumb(navigateToApp),
-    getMlManagementBreadcrumb('SETTINGS_MANAGEMENT_BREADCRUMB', navigateToApp),
-    getMlManagementBreadcrumb('FILTER_LISTS_MANAGEMENT_BREADCRUMB', navigateToApp),
+    ...getADSettingsBreadcrumbs(navigateToApp),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.editLabel', {
         defaultMessage: 'Edit',

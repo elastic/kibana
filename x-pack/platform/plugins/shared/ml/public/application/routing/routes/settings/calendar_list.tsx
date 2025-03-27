@@ -16,11 +16,7 @@ import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
-import {
-  type NavigateToApp,
-  getStackManagementBreadcrumb,
-  getMlManagementBreadcrumb,
-} from '../../breadcrumbs';
+import { type NavigateToApp, getADSettingsBreadcrumbs } from '../../breadcrumbs';
 
 const CalendarsList = dynamic(async () => ({
   default: (await import('../../../settings/calendars')).CalendarsList,
@@ -33,8 +29,7 @@ export const calendarListRouteFactory = (navigateToApp: NavigateToApp): MlRoute 
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} isDst={false} />,
   breadcrumbs: [
-    getStackManagementBreadcrumb(navigateToApp),
-    getMlManagementBreadcrumb('SETTINGS_MANAGEMENT_BREADCRUMB', navigateToApp),
+    ...getADSettingsBreadcrumbs(navigateToApp),
     {
       text: i18n.translate('xpack.ml.anomalyDetection.calendarManagementLabel', {
         defaultMessage: 'Calendar management',
@@ -50,8 +45,7 @@ export const calendarDstListRouteFactory = (navigateToApp: NavigateToApp): MlRou
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} isDst={true} />,
   breadcrumbs: [
-    getStackManagementBreadcrumb(navigateToApp),
-    getMlManagementBreadcrumb('SETTINGS_MANAGEMENT_BREADCRUMB', navigateToApp),
+    ...getADSettingsBreadcrumbs(navigateToApp),
     {
       text: i18n.translate('xpack.ml.anomalyDetection.dstCalendarManagementLabel', {
         defaultMessage: 'DST Calendar management',

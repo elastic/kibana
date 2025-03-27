@@ -45,18 +45,6 @@ const jobsManageParamsGroupId = {
   },
 };
 
-const fullJobsManageParams = {
-  page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-  pageState: {
-    jobId: jobIds[0],
-    groupIds,
-    globalState: {
-      time: { from: 'now-1h', to: 'now' },
-      refreshInterval: { pause: true, value: 10000 },
-    },
-  },
-};
-
 const anomalyDetectionAppId = 'anomaly_detection';
 
 describe('ML management internal locator', () => {

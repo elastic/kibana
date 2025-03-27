@@ -260,3 +260,11 @@ export const getMlManagementBreadcrumb = (
     ...(deepLinkId ? { deepLinkId } : {}),
   };
 };
+
+export const getADSettingsBreadcrumbs = (navigateToApp: NavigateToApp) => {
+  return [
+    getStackManagementBreadcrumb(navigateToApp),
+    getMlManagementBreadcrumb('ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB', navigateToApp),
+    getMlManagementBreadcrumb('SETTINGS_MANAGEMENT_BREADCRUMB', navigateToApp),
+  ];
+};

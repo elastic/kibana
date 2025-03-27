@@ -16,11 +16,7 @@ import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
-import {
-  type NavigateToApp,
-  getMlManagementBreadcrumb,
-  getStackManagementBreadcrumb,
-} from '../../breadcrumbs';
+import { type NavigateToApp, getADSettingsBreadcrumbs } from '../../breadcrumbs';
 
 const FilterLists = dynamic(async () => ({
   default: (await import('../../../settings/filter_lists')).FilterLists,
@@ -33,8 +29,7 @@ export const filterListRouteFactory = (navigateToApp: NavigateToApp): MlRoute =>
   }),
   render: () => <PageWrapper />,
   breadcrumbs: [
-    getStackManagementBreadcrumb(navigateToApp),
-    getMlManagementBreadcrumb('SETTINGS_MANAGEMENT_BREADCRUMB', navigateToApp),
+    ...getADSettingsBreadcrumbs(navigateToApp),
     {
       text: i18n.translate('xpack.ml.anomalyDetection.filterListsManagementLabel', {
         defaultMessage: 'Filter lists',

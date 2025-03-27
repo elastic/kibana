@@ -15,7 +15,7 @@ import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import {
   type NavigateToApp,
-  getStackManagementBreadcrumb,
+  getADSettingsBreadcrumbs,
   getMlManagementBreadcrumb,
 } from '../../breadcrumbs';
 import { ML_PAGES } from '../../../../../common/constants/locator';
@@ -42,8 +42,7 @@ export const newCalendarRouteFactory = (navigateToApp: NavigateToApp): MlRoute =
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.NEW} isDst={false} />,
   breadcrumbs: [
-    getStackManagementBreadcrumb(navigateToApp),
-    getMlManagementBreadcrumb('SETTINGS_MANAGEMENT_BREADCRUMB', navigateToApp),
+    ...getADSettingsBreadcrumbs(navigateToApp),
     getMlManagementBreadcrumb('CALENDAR_LISTS_MANAGEMENT_BREADCRUMB', navigateToApp),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.createLabel', {
@@ -60,8 +59,7 @@ export const editCalendarRouteFactory = (navigateToApp: NavigateToApp): MlRoute 
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.EDIT} isDst={false} />,
   breadcrumbs: [
-    getStackManagementBreadcrumb(navigateToApp),
-    getMlManagementBreadcrumb('SETTINGS_MANAGEMENT_BREADCRUMB', navigateToApp),
+    ...getADSettingsBreadcrumbs(navigateToApp),
     getMlManagementBreadcrumb('CALENDAR_LISTS_MANAGEMENT_BREADCRUMB', navigateToApp),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.editLabel', {
@@ -78,8 +76,7 @@ export const newCalendarDstRouteFactory = (navigateToApp: NavigateToApp): MlRout
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.NEW} isDst={true} />,
   breadcrumbs: [
-    getStackManagementBreadcrumb(navigateToApp),
-    getMlManagementBreadcrumb('SETTINGS_MANAGEMENT_BREADCRUMB', navigateToApp),
+    ...getADSettingsBreadcrumbs(navigateToApp),
     getMlManagementBreadcrumb('CALENDAR_DST_LISTS_MANAGEMENT_BREADCRUMB', navigateToApp),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.createLabel', {
@@ -96,8 +93,7 @@ export const editCalendarDstRouteFactory = (navigateToApp: NavigateToApp): MlRou
   }),
   render: (props, deps) => <PageWrapper {...props} deps={deps} mode={MODE.EDIT} isDst={true} />,
   breadcrumbs: [
-    getStackManagementBreadcrumb(navigateToApp),
-    getMlManagementBreadcrumb('SETTINGS_MANAGEMENT_BREADCRUMB', navigateToApp),
+    ...getADSettingsBreadcrumbs(navigateToApp),
     getMlManagementBreadcrumb('CALENDAR_DST_LISTS_MANAGEMENT_BREADCRUMB', navigateToApp),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagement.editLabel', {
