@@ -47,7 +47,7 @@ describe('FieldsTable', () => {
     render(<FieldsTable document={documentWithUndefined} />);
 
     expect(screen.getByText('field1')).toBeInTheDocument();
-    expect(screen.getByText('undefined')).toBeInTheDocument();
+    expect(screen.getAllByText('undefined').length).toBe(2); // one rendered as field value, one rendered as icon tooltip value
   });
 
   it('renders object values correctly', () => {
@@ -61,7 +61,7 @@ describe('FieldsTable', () => {
   it('pins a field when pin button is clicked', () => {
     render(<FieldsTable document={mockDocument} tableStorageKey={mockStorageKey} />);
 
-    const pinButton = screen.getByLabelText('Pin field');
+    const pinButton = screen.getAllByLabelText('Pin field')[0];
     expect(pinButton).toBeInTheDocument();
     fireEvent.click(pinButton);
 
@@ -73,7 +73,7 @@ describe('FieldsTable', () => {
 
     render(<FieldsTable document={mockDocument} tableStorageKey={mockStorageKey} />);
 
-    const pinButton = screen.getByLabelText('Unpin field');
+    const pinButton = screen.getAllByLabelText('Unpin field')[0];
     expect(pinButton).toBeInTheDocument();
     expect(pinButton.getAttribute('aria-label')).toBe('Unpin field');
   });

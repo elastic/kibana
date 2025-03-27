@@ -20,7 +20,7 @@ import { NoDataFound } from './no_data_found';
  */
 export const AssetInventoryOnboarding: FC<PropsWithChildren> = ({ children }) => {
   const { data, isLoading } = useAssetInventoryStatus();
-  return children;
+
   if (isLoading || !data) {
     return <AssetInventoryLoading />;
   }

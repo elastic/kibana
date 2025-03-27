@@ -1,5 +1,5 @@
 ---
-navigation_title: "Kibana"
+navigation_title: "Known issues"
 ---
 
 # Kibana known issues
