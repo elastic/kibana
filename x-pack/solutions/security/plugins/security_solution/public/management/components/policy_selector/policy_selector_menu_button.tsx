@@ -58,6 +58,7 @@ export const PolicySelectorMenuButton = memo<PolicySelectorMenuButtonProps>((pro
         numFilters={countOfPolicies > 0 ? countOfPolicies : undefined}
         hasActiveFilters={countOfSelectedPolicies > 0}
         numActiveFilters={countOfSelectedPolicies}
+        disabled={props.isDisabled}
       >
         <EuiText>
           <FormattedMessage
@@ -67,7 +68,7 @@ export const PolicySelectorMenuButton = memo<PolicySelectorMenuButtonProps>((pro
         </EuiText>
       </EuiFilterButton>
     ),
-    [getTestId, isPopoverOpen, countOfPolicies, countOfSelectedPolicies]
+    [getTestId, isPopoverOpen, countOfPolicies, countOfSelectedPolicies, props.isDisabled]
   );
 
   const closePopover = useCallback(() => {
