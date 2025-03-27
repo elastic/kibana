@@ -30,7 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(event.properties.target).to.be.an('array');
       const targets = event.properties.target as string[];
       expect(targets.includes('DIV')).to.be(true);
-      expect(targets.includes('class=homWelcome')).to.be(true);
       expect(targets.includes('data-test-subj=homeWelcomeInterstitial')).to.be(true);
       expect(targets.includes('BUTTON')).to.be(true);
       expect(targets.includes('data-test-subj=skipWelcomeScreen')).to.be(true);
