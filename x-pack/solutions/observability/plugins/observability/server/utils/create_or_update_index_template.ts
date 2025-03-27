@@ -44,8 +44,9 @@ export async function createOrUpdateIndexTemplate({
       },
       {
         onFailedAttempt: (e) => {
-          logger.warn(`Could not create index template: '${indexTemplate.name}'. Retrying...`);
-          logger.warn(e);
+          logger.warn(`Could not create index template: '${indexTemplate.name}'. Retrying...`, {
+            error: e,
+          });
         },
       }
     );
