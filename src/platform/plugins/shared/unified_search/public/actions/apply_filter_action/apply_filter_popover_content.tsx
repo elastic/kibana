@@ -28,7 +28,7 @@ import {
 } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FilterContent } from '../filter_badge';
+import { FilterContent } from '../../filter_badge';
 
 interface Props {
   filters: Filter[];
@@ -42,9 +42,7 @@ interface State {
   fieldLabel?: string;
 }
 
-// Needed for React.lazy
-// eslint-disable-next-line import/no-default-export
-export default class ApplyFiltersPopoverContent extends Component<Props, State> {
+export class ApplyFiltersPopoverContent extends Component<Props, State> {
   public static defaultProps = {
     filters: [],
   };
