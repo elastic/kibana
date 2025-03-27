@@ -5,22 +5,26 @@
  * 2.0.
  */
 
+import React from 'react';
+import * as Rx from 'rxjs';
+
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
-import * as Rx from 'rxjs';
+import {
+  ExternalPageName,
+  NavigationProvider,
+  SECURITY_UI_APP_ID,
+  SecurityPageName,
+} from '@kbn/security-solution-navigation';
+import { LinkButton } from '@kbn/security-solution-navigation/links';
 import { type Services } from '../common/services';
 
-const SOLUTION_NAME = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.projectType.title',
-  { defaultMessage: 'Security' }
-);
+export const SOLUTION_NAME = i18n.translate('xpack.securitySolutionEss.nav.solutionName', {
+  defaultMessage: 'Security',
+});
 
-const PROJECT_SETTINGS_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.projectSettings.title',
-  { defaultMessage: 'Project Settings' }
-);
-
-const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
+const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTreeDefinition> => {
   return Rx.of({
     body: [
       {
@@ -83,16 +87,15 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
               {
                 id: 'rules-landing',
                 link: 'securitySolutionUI:rules-landing',
-                title: i18n.translate('xpack.securitySolutionServerless.navLinks.rules', {
+                title: i18n.translate('xpack.securitySolutionEss.nav.rules', {
                   defaultMessage: 'Rules',
                 }),
                 children: [
                   {
                     id: 'category-management',
-                    title: i18n.translate(
-                      'xpack.securitySolutionServerless.navLinks.rules.management',
-                      { defaultMessage: 'Management' }
-                    ),
+                    title: i18n.translate('xpack.securitySolutionEss.nav.rules.management', {
+                      defaultMessage: 'Management',
+                    }),
                     breadcrumbStatus: 'hidden',
                     children: [
                       {
@@ -122,7 +125,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                         id: 'siem_migrations-rules',
                         link: 'securitySolutionUI:siem_migrations-rules',
                         title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.rules.management.siemRuleMigrations',
+                          'xpack.securitySolutionEss.nav.rules.management.siemRuleMigrations',
                           { defaultMessage: 'SIEM rule migrations' }
                         ),
                       },
@@ -130,10 +133,9 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                   },
                   {
                     id: 'category-discover',
-                    title: i18n.translate(
-                      'xpack.securitySolutionServerless.navLinks.rules.discover',
-                      { defaultMessage: 'Discover' }
-                    ),
+                    title: i18n.translate('xpack.securitySolutionEss.nav.rules.discover', {
+                      defaultMessage: 'Discover',
+                    }),
                     breadcrumbStatus: 'hidden',
                     children: [
                       {
@@ -182,7 +184,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
               {
                 id: 'investigations',
                 link: 'securitySolutionUI:investigations',
-                title: i18n.translate('xpack.securitySolutionServerless.navLinks.investigations', {
+                title: i18n.translate('xpack.securitySolutionEss.nav.investigations', {
                   defaultMessage: 'Investigations',
                 }),
                 children: [
@@ -218,7 +220,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
               {
                 id: 'explore',
                 link: 'securitySolutionUI:explore',
-                title: i18n.translate('xpack.securitySolutionServerless.navLinks.explore', {
+                title: i18n.translate('xpack.securitySolutionEss.nav.explore', {
                   defaultMessage: 'Explore',
                 }),
                 children: [
@@ -339,17 +341,16 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
               {
                 id: 'assets',
                 link: 'securitySolutionUI:assets',
-                title: i18n.translate('xpack.securitySolutionServerless.navLinks.assets', {
+                title: i18n.translate('xpack.securitySolutionEss.nav.assets', {
                   defaultMessage: 'Assets',
                 }),
                 children: [
                   {
                     id: 'fleet:',
                     link: 'fleet',
-                    title: i18n.translate(
-                      'xpack.securitySolutionServerless.navLinks.assets.fleet',
-                      { defaultMessage: 'Fleet' }
-                    ),
+                    title: i18n.translate('xpack.securitySolutionEss.nav.assets.fleet', {
+                      defaultMessage: 'Fleet',
+                    }),
                     children: [
                       {
                         id: 'fleet:agents',
@@ -359,7 +360,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                         id: 'fleet:policies',
                         link: 'fleet:policies',
                         title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.assets.fleetPolicies',
+                          'xpack.securitySolutionEss.nav.assets.fleet.policies',
                           { defaultMessage: 'Policies' }
                         ),
                       },
@@ -384,10 +385,9 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                   {
                     id: 'endpoints',
                     link: 'securitySolutionUI:endpoints',
-                    title: i18n.translate(
-                      'xpack.securitySolutionServerless.navLinks.assets.endpoints',
-                      { defaultMessage: 'Endpoints' }
-                    ),
+                    title: i18n.translate('xpack.securitySolutionEss.nav.assets.endpoints', {
+                      defaultMessage: 'Endpoints',
+                    }),
                     children: [
                       {
                         id: 'endpoints',
@@ -420,6 +420,46 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                       },
                     ],
                   },
+                  {
+                    id: 'assets_custom',
+                    title: '',
+                    renderItem: () => {
+                      return (
+                        <>
+                          <EuiSpacer />
+                          <EuiCallOut
+                            iconType="cluster"
+                            title={i18n.translate(
+                              'xpack.securitySolutionEss.nav.assets.integrationsCallout.title',
+                              { defaultMessage: 'Integrations' }
+                            )}
+                          >
+                            <p>
+                              {i18n.translate(
+                                'xpack.securitySolutionEss.nav.assets.integrationsCallout.body',
+                                {
+                                  defaultMessage:
+                                    'Choose an integration to start collecting and analyzing your data.',
+                                }
+                              )}
+                            </p>
+                            <EuiFlexGroup>
+                              <EuiFlexItem>
+                                <NavigationProvider core={services}>
+                                  <LinkButton id={ExternalPageName.integrationsSecurity} fill>
+                                    {i18n.translate(
+                                      'xpack.securitySolutionEss.nav.assets.integrationsCallout.button',
+                                      { defaultMessage: 'Browse integrations' }
+                                    )}
+                                  </LinkButton>
+                                </NavigationProvider>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          </EuiCallOut>
+                        </>
+                      );
+                    },
+                  },
                 ],
                 renderAs: 'panelOpener',
               },
@@ -431,7 +471,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
               {
                 id: 'machine_learning-landing',
                 link: 'securitySolutionUI:machine_learning-landing',
-                title: i18n.translate('xpack.securitySolutionServerless.navLinks.ml', {
+                title: i18n.translate('xpack.securitySolutionEss.nav.ml', {
                   defaultMessage: 'Machine learning',
                 }),
                 children: [
@@ -441,42 +481,38 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                       {
                         id: 'ml:overview',
                         link: 'ml:overview',
-                        title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.overview',
-                          { defaultMessage: 'Overview' }
-                        ),
+                        title: i18n.translate('xpack.securitySolutionEss.nav.ml.overview', {
+                          defaultMessage: 'Overview',
+                        }),
                       },
                       {
                         id: 'ml:notifications',
                         link: 'ml:notifications',
-                        title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.notifications',
-                          { defaultMessage: 'Notifications' }
-                        ),
+                        title: i18n.translate('xpack.securitySolutionEss.nav.ml.notifications', {
+                          defaultMessage: 'Notifications',
+                        }),
                       },
                       {
                         id: 'ml:memoryUsage',
                         link: 'ml:memoryUsage',
-                        title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.memoryUsage',
-                          { defaultMessage: 'Memory usage' }
-                        ),
+                        title: i18n.translate('xpack.securitySolutionEss.nav.ml.memoryUsage', {
+                          defaultMessage: 'Memory usage',
+                        }),
                       },
                     ],
                   },
                   {
                     id: 'category-anomaly_detection',
-                    title: i18n.translate(
-                      'xpack.securitySolutionServerless.navLinks.ml.anomalyDetection',
-                      { defaultMessage: 'Anomaly detection' }
-                    ),
+                    title: i18n.translate('xpack.securitySolutionEss.nav.ml.anomalyDetection', {
+                      defaultMessage: 'Anomaly detection',
+                    }),
                     breadcrumbStatus: 'hidden',
                     children: [
                       {
                         id: 'ml:anomalyDetection',
                         link: 'ml:anomalyDetection',
                         title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.anomalyDetection.jobs',
+                          'xpack.securitySolutionEss.nav.anomalyDetection.jobs',
                           { defaultMessage: 'Jobs' }
                         ),
                       },
@@ -484,7 +520,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                         id: 'ml:anomalyExplorer',
                         link: 'ml:anomalyExplorer',
                         title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.anomalyDetection.anomalyExplorer',
+                          'xpack.securitySolutionEss.nav.ml.anomalyDetection.anomalyExplorer',
                           { defaultMessage: 'Anomaly explorer' }
                         ),
                       },
@@ -492,7 +528,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                         id: 'ml:singleMetricViewer',
                         link: 'ml:singleMetricViewer',
                         title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.anomalyDetection.singleMetricViewer',
+                          'xpack.securitySolutionEss.nav.ml.anomalyDetection.singleMetricViewer',
                           { defaultMessage: 'Single metric viewer' }
                         ),
                       },
@@ -500,7 +536,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                         id: 'ml:suppliedConfigurations',
                         link: 'ml:suppliedConfigurations',
                         title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.anomalyDetection.suppliedConfigurations',
+                          'xpack.securitySolutionEss.nav.ml.anomalyDetection.suppliedConfigurations',
                           { defaultMessage: 'Supplied configurations' }
                         ),
                       },
@@ -508,7 +544,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                         id: 'ml:settings',
                         link: 'ml:settings',
                         title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.anomalyDetection.settings',
+                          'xpack.securitySolutionEss.nav.ml.anomalyDetection.settings',
                           { defaultMessage: 'Settings' }
                         ),
                       },
@@ -516,17 +552,16 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                   },
                   {
                     id: 'category-data_frame analytics',
-                    title: i18n.translate(
-                      'xpack.securitySolutionServerless.navLinks.ml.dataFrameAnalytics',
-                      { defaultMessage: 'Data frame analytics' }
-                    ),
+                    title: i18n.translate('xpack.securitySolutionEss.nav.ml.dataFrameAnalytics', {
+                      defaultMessage: 'Data frame analytics',
+                    }),
                     breadcrumbStatus: 'hidden',
                     children: [
                       {
                         id: 'ml:dataFrameAnalytics',
                         link: 'ml:dataFrameAnalytics',
                         title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.dataFrameAnalytics.jobs',
+                          'xpack.securitySolutionEss.nav.ml.dataFrameAnalytics.jobs',
                           { defaultMessage: 'Jobs' }
                         ),
                       },
@@ -534,7 +569,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                         id: 'ml:resultExplorer',
                         link: 'ml:resultExplorer',
                         title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.dataFrameAnalytics.resultExplorer',
+                          'xpack.securitySolutionEss.nav.ml.dataFrameAnalytics.resultExplorer',
                           { defaultMessage: 'Result explorer' }
                         ),
                       },
@@ -542,7 +577,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                         id: 'ml:analyticsMap',
                         link: 'ml:analyticsMap',
                         title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.dataFrameAnalytics.analyticsMap',
+                          'xpack.securitySolutionEss.nav.ml.dataFrameAnalytics.analyticsMap',
                           { defaultMessage: 'Analytics map' }
                         ),
                       },
@@ -550,17 +585,16 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                   },
                   {
                     id: 'category-model_management',
-                    title: i18n.translate(
-                      'xpack.securitySolutionServerless.navLinks.ml.modelManagement',
-                      { defaultMessage: 'Model management' }
-                    ),
+                    title: i18n.translate('xpack.securitySolutionEss.nav.ml.modelManagement', {
+                      defaultMessage: 'Model management',
+                    }),
                     breadcrumbStatus: 'hidden',
                     children: [
                       {
                         id: 'ml:nodesOverview',
                         link: 'ml:nodesOverview',
                         title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.modelManagement.trainedModels',
+                          'xpack.securitySolutionEss.nav.ml.modelManagement.trainedModels',
                           { defaultMessage: 'Trained models' }
                         ),
                       },
@@ -568,17 +602,16 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                   },
                   {
                     id: 'category-data_visualizer',
-                    title: i18n.translate(
-                      'xpack.securitySolutionServerless.navLinks.ml.dataVisualizer',
-                      { defaultMessage: 'Data visualizer' }
-                    ),
+                    title: i18n.translate('xpack.securitySolutionEss.nav.ml.dataVisualizer', {
+                      defaultMessage: 'Data visualizer',
+                    }),
                     breadcrumbStatus: 'hidden',
                     children: [
                       {
                         id: 'ml:fileUpload',
                         link: 'ml:fileUpload',
                         title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.dataVisualizer.fileDataVisualizer',
+                          'xpack.securitySolutionEss.nav.ml.dataVisualizer.fileDataVisualizer',
                           { defaultMessage: 'File data visualizer' }
                         ),
                       },
@@ -586,7 +619,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                         id: 'ml:indexDataVisualizer',
                         link: 'ml:indexDataVisualizer',
                         title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.dataVisualizer.dataViewDataVisualizer',
+                          'xpack.securitySolutionEss.nav.ml.dataVisualizer.dataViewDataVisualizer',
                           { defaultMessage: 'Data view data visualizer' }
                         ),
                       },
@@ -594,7 +627,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                         id: 'ml:esqlDataVisualizer',
                         link: 'ml:esqlDataVisualizer',
                         title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.dataVisualizer.esqlDataVisualizer',
+                          'xpack.securitySolutionEss.nav.ml.dataVisualizer.esqlDataVisualizer',
                           { defaultMessage: 'ES|QL data visualizer' }
                         ),
                       },
@@ -602,7 +635,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                         id: 'ml:dataDrift',
                         link: 'ml:dataDrift',
                         title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.dataVisualizer.dataDrift',
+                          'xpack.securitySolutionEss.nav.ml.dataVisualizer.dataDrift',
                           { defaultMessage: 'Data drift' }
                         ),
                       },
@@ -610,25 +643,24 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                   },
                   {
                     id: 'category-aiops_labs',
-                    title: i18n.translate(
-                      'xpack.securitySolutionServerless.navLinks.ml.aiopsLabs',
-                      { defaultMessage: 'Aiops labs' }
-                    ),
+                    title: i18n.translate('xpack.securitySolutionEss.nav.ml.aiopsLabs', {
+                      defaultMessage: 'Aiops labs',
+                    }),
                     breadcrumbStatus: 'hidden',
                     children: [
                       {
                         id: 'ml:logRateAnalysis',
                         link: 'ml:logRateAnalysis',
                         title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.aiopsLabs.logRateAnalysis',
-                          { defaultMessage: 'Log Rate Analysis' }
+                          'xpack.securitySolutionEss.nav.ml.aiopsLabs.logRateAnalysis',
+                          { defaultMessage: 'Log rate analysis' }
                         ),
                       },
                       {
                         id: 'ml:logPatternAnalysis',
                         link: 'ml:logPatternAnalysis',
                         title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.aiopsLabs.logPatternAnalysis',
+                          'xpack.securitySolutionEss.nav.ml.aiopsLabs.logPatternAnalysis',
                           { defaultMessage: 'Log pattern analysis' }
                         ),
                       },
@@ -636,7 +668,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                         id: 'ml:changePointDetections',
                         link: 'ml:changePointDetections',
                         title: i18n.translate(
-                          'xpack.securitySolutionServerless.navLinks.ml.aiopsLabs.changePointDetection',
+                          'xpack.securitySolutionEss.nav.ml.aiopsLabs.changePointDetection',
                           { defaultMessage: 'Change point detection' }
                         ),
                       },
@@ -653,7 +685,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
               {
                 id: 'entity_analytics-management',
                 link: 'securitySolutionUI:entity_analytics-management',
-                title: i18n.translate('xpack.securitySolutionServerless.navLinks.entityRiskScore', {
+                title: i18n.translate('xpack.securitySolutionEss.nav.entityRiskScore', {
                   defaultMessage: 'Entity Risk Score',
                 }),
                 sideNavStatus: 'hidden',
@@ -661,7 +693,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
               {
                 id: 'entity_analytics-entity_store_management',
                 link: 'securitySolutionUI:entity_analytics-entity_store_management',
-                title: i18n.translate('xpack.securitySolutionServerless.navLinks.entityStore', {
+                title: i18n.translate('xpack.securitySolutionEss.nav.entityStore', {
                   defaultMessage: 'Entity Store',
                 }),
                 sideNavStatus: 'hidden',
@@ -681,7 +713,7 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
       {
         type: 'navItem',
         link: 'dev_tools',
-        title: i18n.translate('xpack.securitySolutionServerless.navLinks.devTools', {
+        title: i18n.translate('xpack.securitySolutionEss.nav.devTools', {
           defaultMessage: 'Developer tools',
         }),
         icon: 'editorCodeBlock',
@@ -689,12 +721,14 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
       {
         type: 'navGroup',
         id: 'category-management',
-        title: PROJECT_SETTINGS_TITLE,
+        title: i18n.translate('xpack.securitySolutionEss.nav.management', {
+          defaultMessage: 'Management',
+        }),
         icon: 'gear',
         breadcrumbStatus: 'hidden',
         children: [
           {
-            title: i18n.translate('xpack.securitySolutionServerless.navLinks.stackManagement', {
+            title: i18n.translate('xpack.securitySolutionEss.nav.stackManagement', {
               defaultMessage: 'Stack Management',
             }),
             renderAs: 'panelOpener',
@@ -702,125 +736,128 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
             spaceBefore: null,
             children: [
               {
-                title: i18n.translate(
-                  'xpack.securitySolutionServerless.navLinks.projectSettings.mngt.data',
-                  { defaultMessage: 'Data' }
-                ),
-                breadcrumbStatus: 'hidden',
+                title: i18n.translate('xpack.securitySolutionEss.nav.stackManagement.ingest', {
+                  defaultMessage: 'Ingest',
+                }),
                 children: [
                   {
-                    link: 'management:index_management',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:transform',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
                     link: 'management:ingest_pipelines',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:dataViews',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:jobsListLink',
-                    breadcrumbStatus: 'hidden',
                   },
                   {
                     link: 'management:pipelines',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:data_quality',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:data_usage',
-                    breadcrumbStatus: 'hidden',
                   },
                 ],
               },
               {
-                title: i18n.translate(
-                  'xpack.securitySolutionServerless.navLinks.projectSettings.mngt.access',
-                  { defaultMessage: 'Access' }
-                ),
-                breadcrumbStatus: 'hidden',
+                title: i18n.translate('xpack.securitySolutionEss.nav.stackManagement.data', {
+                  defaultMessage: 'Data',
+                }),
                 children: [
                   {
-                    link: 'management:api_keys',
-                    breadcrumbStatus: 'hidden',
+                    link: 'management:index_management',
                   },
                   {
-                    link: 'management:roles',
-                    breadcrumbStatus: 'hidden',
+                    link: 'management:index_lifecycle_management',
                   },
                   {
-                    cloudLink: 'userAndRoles',
-                    title: i18n.translate(
-                      'xpack.securitySolutionServerless.navLinks.projectSettings.mngt.usersAndRoles',
-                      { defaultMessage: 'Manage organization members' }
-                    ),
+                    link: 'management:snapshot_restore',
+                  },
+                  {
+                    link: 'management:rollup_jobs',
+                  },
+                  {
+                    link: 'management:transform',
+                  },
+                  {
+                    link: 'management:cross_cluster_replication',
+                  },
+                  {
+                    link: 'management:remote_clusters',
+                  },
+                  {
+                    link: 'management:migrate_data',
                   },
                 ],
               },
               {
                 title: i18n.translate(
-                  'xpack.securitySolutionServerless.navLinks.projectSettings.mngt.alertsAndInsights',
+                  'xpack.securitySolutionEss.nav.stackManagement.alertsAndInsights',
                   { defaultMessage: 'Alerts and Insights' }
                 ),
-                breadcrumbStatus: 'hidden',
                 children: [
                   {
                     link: 'management:triggersActions',
-                    breadcrumbStatus: 'hidden',
+                  },
+                  {
+                    link: 'management:cases',
                   },
                   {
                     link: 'management:triggersActionsConnectors',
-                    breadcrumbStatus: 'hidden',
+                  },
+                  {
+                    link: 'management:reporting',
+                  },
+                  {
+                    link: 'management:jobsListLink',
+                  },
+                  {
+                    link: 'management:watcher',
                   },
                   {
                     link: 'management:maintenanceWindows',
-                    breadcrumbStatus: 'hidden',
                   },
                   {
                     link: 'securitySolutionUI:entity_analytics-management',
-                    breadcrumbStatus: 'hidden',
                   },
                   {
                     link: 'securitySolutionUI:entity_analytics-entity_store_management',
-                    breadcrumbStatus: 'hidden',
                   },
                 ],
               },
               {
-                title: i18n.translate(
-                  'xpack.securitySolutionServerless.navLinks.projectSettings.mngt.content',
-                  { defaultMessage: 'Content' }
-                ),
-                breadcrumbStatus: 'hidden',
+                title: i18n.translate('xpack.securitySolutionEss.nav.stackManagement.security', {
+                  defaultMessage: 'Security',
+                }),
                 children: [
                   {
-                    link: 'management:spaces',
-                    breadcrumbStatus: 'hidden',
+                    link: 'management:users',
                   },
                   {
-                    link: 'management:objects',
-                    breadcrumbStatus: 'hidden',
+                    link: 'management:roles',
+                  },
+                  {
+                    link: 'management:api_keys',
+                  },
+                  {
+                    link: 'management:role_mappings',
+                  },
+                ],
+              },
+              {
+                title: i18n.translate('xpack.securitySolutionEss.nav.stackManagement.kibana', {
+                  defaultMessage: 'Kibana',
+                }),
+                children: [
+                  {
+                    link: 'management:dataViews',
                   },
                   {
                     link: 'management:filesManagement',
-                    breadcrumbStatus: 'hidden',
                   },
                   {
-                    link: 'management:reporting',
-                    breadcrumbStatus: 'hidden',
+                    link: 'management:objects',
                   },
                   {
                     link: 'management:tags',
-                    breadcrumbStatus: 'hidden',
+                  },
+                  {
+                    link: 'management:search_sessions',
+                  },
+                  {
+                    link: 'management:aiAssistantManagementSelection',
+                  },
+                  {
+                    link: 'management:spaces',
                   },
                   {
                     link: 'maps',
@@ -828,26 +865,43 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
                   {
                     link: 'visualize',
                   },
+                  {
+                    link: 'graph',
+                  },
+                  {
+                    link: 'canvas',
+                  },
+                  {
+                    link: 'management:settings',
+                  },
                 ],
               },
               {
-                title: i18n.translate(
-                  'xpack.securitySolutionServerless.navLinks.projectSettings.mngt.other',
-                  { defaultMessage: 'Other' }
-                ),
-                breadcrumbStatus: 'hidden',
+                title: i18n.translate('xpack.securitySolutionEss.nav.stackManagement.stack', {
+                  defaultMessage: 'Stack',
+                }),
                 children: [
                   {
-                    link: 'management:settings',
-                    breadcrumbStatus: 'hidden',
+                    link: 'management:license_management',
                   },
                   {
-                    link: 'management:securityAiAssistantManagement',
-                    breadcrumbStatus: 'hidden',
+                    link: 'management:upgrade_assistant',
                   },
                 ],
               },
             ],
+          },
+          {
+            title: i18n.translate('xpack.securitySolutionEss.nav.stackMonitoring', {
+              defaultMessage: 'Stack Monitoring',
+            }),
+            link: 'monitoring',
+          },
+          {
+            title: i18n.translate('xpack.securitySolutionEss.nav.integrations', {
+              defaultMessage: 'Integrations',
+            }),
+            link: 'integrations',
           },
         ],
       },
@@ -856,9 +910,18 @@ const createNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
 };
 
 export const initSideNavigation = async (services: Services) => {
-  services.securitySolution.setIsSolutionNavigationEnabled(true);
+  const { securitySolution, navigation } = services;
 
-  services.serverless.initNavigation('security', createNavigationTree$(), {
+  navigation.isSolutionNavEnabled$.subscribe((isSolutionNavigationEnabled) => {
+    securitySolution.setIsSolutionNavigationEnabled(isSolutionNavigationEnabled);
+  });
+
+  navigation.addSolutionNavigation({
+    id: 'security',
+    homePage: `${SECURITY_UI_APP_ID}:${SecurityPageName.landing}`,
+    title: SOLUTION_NAME,
+    icon: 'logoSecurity',
+    navigationTree$: createNavigationTree$(services),
     dataTestSubj: 'securitySolutionSideNav',
   });
 };
