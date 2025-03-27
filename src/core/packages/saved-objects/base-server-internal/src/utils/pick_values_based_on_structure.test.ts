@@ -58,6 +58,19 @@ describe('pickValuesBasedOnStructure', () => {
     expect(pickValuesBasedOnStructure(a, b)).toEqual({ v1: 'b', v2: [{ c: 2, d: 2 }] });
   });
 
+  test('special case: empty arrays and objects', () => {
+    const a = { v1: 'a', v2: [], v3: {} };
+    const b = {
+      v1: 'b',
+      v2: [{ c: 2, d: 2 }, { e: 4 }],
+      v3: { a: 1 },
+      another: 'value',
+      anArray: [1, 2, 3],
+    };
+
+    expect(pickValuesBasedOnStructure(a, b)).toEqual({ v1: 'b', v2: [], v3: {} });
+  });
+
   test('can extract structure map when present in target', () => {
     /**
      * The `keys` `Arbitrary` represents words with possible numbers like `loremv123`
