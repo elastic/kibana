@@ -21,14 +21,19 @@ import { v4 } from 'uuid';
 import { css } from '@emotion/react';
 import { createPortal } from 'react-dom';
 
-interface ClickableBadgeProps {
-  item: string;
-  onClickAriaLabel?: string;
+export interface MultiValueCellAction {
+  iconType: string;
   onClick?: () => void;
-  index: number;
+  ariaLabel: string;
 }
 
-export const ClickableBadge = ({ item, onClickAriaLabel, onClick, index }: ClickableBadgeProps) => {
+interface ActionableBadgeProps {
+  item: string;
+  index: number;
+  actions?: MultiValueCellAction[];
+}
+
+export const ActionableBadge = ({ item, index, actions = [] }: ActionableBadgeProps) => {
   const [isTextCopied, setIsTextCopied] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
@@ -95,28 +100,19 @@ export const ClickableBadge = ({ item, onClickAriaLabel, onClick, index }: Click
         left: buttonPosition.left,
       }}
     >
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          css={css`
-            color: ${euiTheme.colors.vis.euiColorVisCool0};
-          `}
-          size="xs"
-          onClick={onClick}
-          iconType="plusInCircle"
-          aria-label={i18n.translate('xpack.csp.addFilter', { defaultMessage: 'Add filter' })}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          css={css`
-            color: ${euiTheme.colors.vis.euiColorVisCool0};
-          `}
-          size="xs"
-          iconType="minusInCircle"
-          aria-label={i18n.translate('xpack.csp.removeFilter', { defaultMessage: 'Remove filter' })}
-          onClick={() => {}}
-        />
-      </EuiFlexItem>
+      {actions.map((action, actionIndex) => (
+        <EuiFlexItem grow={false} key={actionIndex}>
+          <EuiButtonIcon
+            css={css`
+              color: ${euiTheme.colors.vis.euiColorVisCool0};
+            `}
+            size="xs"
+            onClick={action.onClick}
+            iconType={action.iconType}
+            aria-label={action.ariaLabel}
+          />
+        </EuiFlexItem>
+      ))}
       <EuiFlexItem grow={false}>
         <EuiToolTip
           content={

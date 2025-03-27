@@ -15,7 +15,12 @@ import { PopoverTableItems } from './popover_table_items';
 interface FindingsMultiValueCellRenderProps {
   finding: CspVulnerabilityFinding;
   multiValueField: VulnerabilityGroupingMultiValueOptions;
-  renderItem: (item: string, i: number, field: string) => React.ReactNode;
+  renderItem: (
+    item: string,
+    i: number,
+    field: string,
+    finding: CspVulnerabilityFinding
+  ) => React.ReactNode;
 }
 
 const FindingsMultiValueCellRenderComponent = ({
@@ -35,7 +40,7 @@ const FindingsMultiValueCellRenderComponent = ({
         <EuiFlexItem grow={false}>
           <PopoverTableItems
             items={value}
-            renderItem={(item, index) => renderItem(item, index, multiValueField)}
+            renderItem={(item, index) => renderItem(item, index, multiValueField, finding)}
             field={multiValueField}
           />
         </EuiFlexItem>
