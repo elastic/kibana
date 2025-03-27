@@ -27,6 +27,7 @@ export interface PanelPlacementProps {
   width: number;
   height: number;
   currentPanels: { [key: string]: DashboardPanelState };
+  sectionId?: string; // section where panel is being placed
 }
 
 export type GetPanelPlacementSettings<SerializedState extends object = object> = (
