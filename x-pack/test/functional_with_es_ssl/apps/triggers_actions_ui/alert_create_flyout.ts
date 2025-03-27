@@ -119,7 +119,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await rules.common.cancelRuleCreation();
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/202328
   describe('create alert', function () {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     const webhookConnectorName = 'webhook-test';
@@ -179,7 +178,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('rulesTab');
     });
 
-    it('should delete the right action when the same action has been added twice', async () => {
+    // Failing: See https://github.com/elastic/kibana/issues/202328
+    it.skip('should delete the right action when the same action has been added twice', async () => {
       // create a new rule
       const ruleName = generateUniqueKey();
       await rules.common.defineIndexThresholdAlert(ruleName);
