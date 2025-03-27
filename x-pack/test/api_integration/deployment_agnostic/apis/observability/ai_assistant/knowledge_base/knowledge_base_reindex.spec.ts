@@ -35,6 +35,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     this.tags(['skipServerless']);
 
     before(async () => {
+      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
       await setupKnowledgeBase(getService);
     });
 
@@ -75,7 +76,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('ensures the document count remains the same', async () => {
         const entries = await getAllKbEntries(es);
-        expect(entries).to.have.length(2);
+        expect(entries).to.have.length(4);
       });
 
       it('does not add an index block to the target index', async () => {
@@ -171,6 +172,33 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(await hasIndexWriteBlock(es, targetIndex)).to.be(false);
       });
     });
+
+    describe('when multiple re-index operations run simultaneously', () => {
+      before(async () => {
+        await addSampleDocs();
+        await Promise.all([
+          reIndexKnowledgeBase(observabilityAIAssistantAPIClient),
+          reIndexKnowledgeBase(observabilityAIAssistantAPIClient),
+          reIndexKnowledgeBase(observabilityAIAssistantAPIClient),
+        ]);
+      });
+
+      after(async () => {
+        await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
+      });
+
+      it('only one of them is executed', async () => {
+        const currentWriteIndex = await getConcreteWriteIndexFromAlias(es);
+        expect(currentWriteIndex).to.be(targetIndex);
+
+        const indices = await getKbIndices(es);
+        expect(indices).to.eql([targetIndex]);
+      });
+
+      it('removes the write block after reindexing', async () => {
+        expect(await hasIndexWriteBlock(es, targetIndex)).to.be(false);
+      });
+    });
   });
 
   async function addSampleDocs() {
@@ -184,6 +212,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         id: 'miscellaneous',
         title: 'Miscellaneous Note',
         text: 'Hello world',
+      },
+      {
+        id: 'johndoe',
+        title: 'Just a dude',
+        text: 'John Doe is a common placeholder name.',
+      },
+      {
+        id: 'janedoe',
+        title: 'Just a lady',
+        text: 'Jane Doe is a common placeholder name.',
       },
     ];
     await addSampleDocsToInternalKb(getService, sampleDocs);

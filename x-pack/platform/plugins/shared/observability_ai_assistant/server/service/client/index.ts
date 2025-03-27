@@ -701,6 +701,9 @@ export class ObservabilityAIAssistantClient {
       .then(async (hasEntries) => {
         // re-index knowledge base if there are existing entries
         if (hasEntries) {
+          logger.debug(
+            `The knowledge base contains existing entries and will therefore be re-indexed.`
+          );
           await waitForKbModel({ esClient, logger, config: this.dependencies.config });
           await reIndexKnowledgeBase({ logger, esClient });
         }

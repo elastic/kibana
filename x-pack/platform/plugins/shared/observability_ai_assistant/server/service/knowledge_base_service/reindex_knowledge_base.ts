@@ -19,6 +19,7 @@ export async function reIndexKnowledgeBase({
   logger: Logger;
   esClient: { asInternalUser: ElasticsearchClient };
 }): Promise<void> {
+  logger.debug('Initializing re-index of knowledge base...');
   await waitForWriteBlockToBeRemoved({ esClient, logger, index: resourceNames.writeIndexAlias.kb });
   await addIndexWriteBlock({ esClient, index: resourceNames.writeIndexAlias.kb });
 
@@ -26,6 +27,11 @@ export async function reIndexKnowledgeBase({
     await _reIndexKnowledgeBase({ logger, esClient });
     logger.info('Re-indexing knowledge base completed successfully.');
   } catch (error) {
+    if (error instanceof ReIndexAbortedError) {
+      logger.warn(`Re-indexing knowledge base aborted: ${error.message}`);
+      return;
+    }
+
     logger.error(`Re-indexing knowledge base failed: ${error.message}`);
     throw error;
   } finally {
@@ -40,29 +46,10 @@ async function _reIndexKnowledgeBase({
   logger: Logger;
   esClient: { asInternalUser: ElasticsearchClient };
 }): Promise<void> {
-  const currentWriteIndexName = await getCurrentWriteIndexName(esClient);
-  const nextWriteIndexName = getNextWriteIndexName(currentWriteIndexName);
-  if (!currentWriteIndexName || !nextWriteIndexName) {
-    logger.info(
-      `"${currentWriteIndexName}" is not a valid write index name. Skipping re-indexing of knowledge base.`
-    );
-    return;
-  }
-
-  try {
-    logger.debug(`Creating new KB index "${nextWriteIndexName}"...`);
-    await esClient.asInternalUser.indices.create({ index: nextWriteIndexName });
-  } catch (error) {
-    if (
-      error instanceof EsErrors.ResponseError &&
-      error?.body?.error?.type === 'resource_already_exists_exception'
-    ) {
-      logger.error(
-        `Re-index of knowledge base cannot continue since the target index "${nextWriteIndexName}" already exists. Please delete it or update the alias "${resourceNames.writeIndexAlias.kb}" to point to "${nextWriteIndexName}". Aborting.`
-      );
-      return;
-    }
-  }
+  const { currentWriteIndexName, nextWriteIndexName } = await getCurrentAndNextWriteIndexNames({
+    esClient,
+    logger,
+  });
 
   logger.info(
     `Re-indexing knowledge base from "${currentWriteIndexName}" to index "${nextWriteIndexName}"...`
@@ -79,15 +66,15 @@ async function _reIndexKnowledgeBase({
   if (taskId) {
     await waitForReIndexTaskToComplete({ esClient, taskId, logger });
   } else {
-    logger.error('ID for re-indexing task was not found. Aborting re-indexing.');
-    return;
+    throw new ReIndexAbortedError(`'ID for re-indexing task was not found`);
   }
 
   // Delete original index
-  logger.debug(`Deleting original write index "${currentWriteIndexName}"`);
+  logger.debug(`Deleting write index "${currentWriteIndexName}"`);
   await esClient.asInternalUser.indices.delete({ index: currentWriteIndexName });
 
   // Point write index alias to the new index
+  logger.debug(`Updating write index alias to "${nextWriteIndexName}"`);
   await esClient.asInternalUser.indices.updateAliases({
     actions: [
       {
@@ -142,6 +129,47 @@ export function isKnowledgeBaseIndexWriteBlocked(error: any) {
   );
 }
 
+async function getCurrentAndNextWriteIndexNames({
+  esClient,
+  logger,
+}: {
+  esClient: { asInternalUser: ElasticsearchClient };
+  logger: Logger;
+}) {
+  const currentWriteIndexName = await getCurrentWriteIndexName(esClient);
+  const nextWriteIndexName = getNextWriteIndexName(currentWriteIndexName);
+  if (!currentWriteIndexName || !nextWriteIndexName) {
+    throw new ReIndexAbortedError(
+      `"${currentWriteIndexName}" is not a valid write index name. Skipping re-indexing of knowledge base.`
+    );
+  }
+
+  try {
+    logger.debug(`Creating new write index "${nextWriteIndexName}"`);
+    await esClient.asInternalUser.indices.create({ index: nextWriteIndexName });
+  } catch (error) {
+    if (
+      error instanceof EsErrors.ResponseError &&
+      error?.body?.error?.type === 'resource_already_exists_exception'
+    ) {
+      const existingTaskId = await getOngoingReindexTaskId(esClient, currentWriteIndexName);
+      if (!existingTaskId) {
+        throw new ReIndexAbortedError(`The target index "${nextWriteIndexName}" already exists.`);
+      }
+
+      logger.info(
+        `Reindex operation already in progress (Task ID: ${existingTaskId}). Waiting for it to complete...`
+      );
+      await waitForReIndexTaskToComplete({ esClient, taskId: existingTaskId, logger });
+      throw new ReIndexAbortedError(
+        `Re-indexing was aborted because another re-index operation was in progress`
+      );
+    }
+  }
+
+  return { currentWriteIndexName, nextWriteIndexName };
+}
+
 function removeIndexWriteBlock({
   esClient,
   index,
@@ -152,6 +180,34 @@ function removeIndexWriteBlock({
   return esClient.asInternalUser.indices.putSettings({
     index,
     body: { 'index.blocks.write': false },
+  });
+}
+
+async function getOngoingReindexTaskId(
+  esClient: { asInternalUser: ElasticsearchClient },
+  indexName: string
+) {
+  return pRetry(
+    async () => {
+      const response = await esClient.asInternalUser.tasks.list({
+        detailed: true,
+        actions: ['indices:data/write/reindex'],
+      });
+
+      for (const node of Object.values(response.nodes ?? {})) {
+        for (const [taskId, task] of Object.entries(node.tasks)) {
+          if (task.description?.includes(indexName)) {
+            return taskId;
+          }
+        }
+      }
+
+      throw new Error('Re-index task not found. Maybe it is not running.');
+    },
+    { retries: 5, minTimeout: 500, factor: 1 }
+  ).catch(() => {
+    // if task id was not found after 5 retries, then return undefined
+    return undefined;
   });
 }
 
@@ -217,10 +273,17 @@ async function waitForReIndexTaskToComplete({
       });
 
       if (!taskResponse.completed) {
-        logger.debug('Waiting for re-indexing task to complete...');
-        throw new Error('Waiting for re-indexing task to complete...');
+        logger.debug(`Waiting for re-indexing task "${taskId}" to complete...`);
+        throw new Error(`Waiting for re-indexing task "${taskId}" to complete...`);
       }
     },
     { forever: true, maxTimeout: 10000 }
   );
+}
+
+class ReIndexAbortedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ReIndexAbortedError';
+  }
 }
