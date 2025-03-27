@@ -12,6 +12,7 @@ export function MachineLearningNavigationProviderObservability({
   getPageObject,
 }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
 
   async function navigateToArea(id: string, expectedTestSubject: string) {
