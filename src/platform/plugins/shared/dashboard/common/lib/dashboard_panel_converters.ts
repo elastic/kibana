@@ -75,7 +75,7 @@ export const generateNewPanelIds = (panels: DashboardPanelMap, references?: Refe
     newPanelsMap[newId] = {
       ...panel,
       gridData: { ...panel.gridData, i: newId },
-      explicitInput: { ...panel.explicitInput, id: newId },
+      explicitInput: panel.explicitInput,
     };
     newReferences.push(
       ...prefixReferencesFromPanel(newId, getReferencesForPanelId(oldId, references ?? []))
