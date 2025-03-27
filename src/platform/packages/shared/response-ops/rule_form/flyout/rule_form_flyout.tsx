@@ -52,7 +52,6 @@ const RuleFormFlyoutRenderer = <MetaData extends RuleTypeMetaData>(
       aria-labelledby="flyoutTitle"
       size={620}
       minWidth={500}
-      className="ruleFormFlyout__container"
       hideCloseButton={hideCloseButton}
     >
       <Suspense

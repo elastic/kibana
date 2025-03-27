@@ -53,7 +53,7 @@ export const RuleActionsConnectorsModal = () => {
       <EuiModalHeader>
         <EuiModalHeaderTitle size="s">{ACTION_TYPE_MODAL_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
-      <EuiModalBody className="actionConnectorModal__container" css={inLineContainerCss}>
+      <EuiModalBody css={inLineContainerCss}>
         <RuleActionsConnectorsBody
           responsiveOverflow={responsiveOverflow}
           onSelectConnector={onClose}

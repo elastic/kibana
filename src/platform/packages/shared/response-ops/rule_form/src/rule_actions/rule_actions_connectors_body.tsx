@@ -76,7 +76,7 @@ export const RuleActionsConnectorsBody = ({
       display: none;
     }
 
-    @media (max-width: 767px) and (min-width: 575px) {
+    @container (max-width: 767px) and (min-width: 575px) {
       .hideForContainer--s {
         display: none;
       }
@@ -85,7 +85,7 @@ export const RuleActionsConnectorsBody = ({
         display: initial !important;
       }
     }
-    @media (max-width: 574px) {
+    @container (max-width: 574px) {
       .hideForContainer--xs {
         display: none;
       }

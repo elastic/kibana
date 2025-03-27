@@ -76,7 +76,7 @@ export const RuleDefinition = () => {
   const dispatch = useRuleFormDispatch();
 
   const ruleDefinitionContainerCss = css`
-    @media (max-width: 767px) {
+    @container (max-width: 767px) {
       .euiDescribedFormGroup {
         flex-direction: column;
       }

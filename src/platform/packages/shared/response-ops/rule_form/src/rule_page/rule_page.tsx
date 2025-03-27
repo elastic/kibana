@@ -92,7 +92,6 @@ export const RulePage = (props: RulePageProps) => {
         css={inLineContainerCss}
         onClick={onInteraction}
         onKeyDown={onInteraction}
-        className="ruleForm__container"
         data-test-subj="ruleForm"
       >
         <EuiPageTemplate.Header>
