@@ -416,6 +416,17 @@ describe('dimension editor', () => {
         ...rtlRender,
         selectCollapseBy,
         setMaxCols,
+        rerender: (newOverrides = {}) => {
+          rtlRender.rerender(
+            <DimensionEditor
+              {...props}
+              state={{ ...fullState, breakdownByAccessor: accessor }}
+              accessor={accessor}
+              setState={mockSetState}
+              {...newOverrides}
+            />
+          );
+        },
       };
     }
 
@@ -433,6 +444,18 @@ describe('dimension editor', () => {
       await selectCollapseBy(newCollapseFn);
 
       expect(mockSetState).toHaveBeenCalledWith({ ...fullState, collapseFn: newCollapseFn });
+    });
+
+    it('should not display the collapse function if the primary metric is not numeric', async () => {
+      const { rerender } = renderBreakdownEditor({ datasource: getNonNumericDatasource() });
+
+      expect(screen.getByLabelText(/layout columns/i)).toBeInTheDocument();
+      expect(screen.queryByLabelText(/collapse by/i)).not.toBeInTheDocument();
+
+      // now rerender with a numeric metric
+      rerender({ datasource: props.datasource });
+      expect(screen.getByLabelText(/layout columns/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/collapse by/i)).toBeInTheDocument();
     });
 
     it('sets max columns', async () => {
