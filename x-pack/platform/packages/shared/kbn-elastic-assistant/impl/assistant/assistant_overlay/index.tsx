@@ -14,10 +14,7 @@ import { css } from '@emotion/react';
 import { createGlobalStyle } from 'styled-components';
 import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
 import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
-import {
-  useAssistantLastConversation,
-  useAssistantSpaceId,
-} from '../use_space_aware_context';
+import { useAssistantLastConversation, useAssistantSpaceId } from '../use_space_aware_context';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -38,8 +35,7 @@ export const AssistantOverlay = React.memo(() => {
   // Why is this named Title and not Id?
   const [conversationTitle, setConversationTitle] = useState<string | undefined>(undefined);
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
-  const { assistantTelemetry, setShowAssistantOverlay,  } =
-    useAssistantContext();
+  const { assistantTelemetry, setShowAssistantOverlay } = useAssistantContext();
   const { getLastConversationId } = useAssistantLastConversation({ spaceId });
 
   const [chatHistoryVisible, setChatHistoryVisible] = useState(false);

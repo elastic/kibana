@@ -67,7 +67,9 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
     assistantAvailability: { isAssistantEnabled },
     baseConversations,
   } = useAssistantContext();
-  const { setLastConversationId, getLastConversationId } = useAssistantLastConversation({ spaceId });
+  const { setLastConversationId, getLastConversationId } = useAssistantLastConversation({
+    spaceId,
+  });
   const {
     allSystemPrompts,
     conversations,
