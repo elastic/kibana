@@ -270,7 +270,7 @@ async function waitForReIndexTaskToComplete({
       const taskResponse = await esClient.asInternalUser.tasks.get({
         task_id: taskId,
         wait_for_completion: false,
-      }); 
+      });
 
       if (!taskResponse.completed) {
         logger.debug(`Waiting for re-indexing task "${taskId}" to complete...`);
