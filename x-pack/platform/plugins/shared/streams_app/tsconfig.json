@@ -27,7 +27,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/code-editor",
     "@kbn/ui-theme",
-    "@kbn/calculate-auto",
     "@kbn/charts-plugin",
     "@kbn/discover-plugin",
     "@kbn/kibana-react-plugin",
