@@ -13,7 +13,7 @@
 /** provides context (from the app) to the assistant, and injects Kibana services, like `http` */
 export { AssistantProvider, useAssistantContext } from './impl/assistant_context';
 
-// Step 2: Add the `AssistantOverlay` component to your app. This component displays the assistant
+// Step 2.1: Add the `AssistantOverlay` component to your app. This component displays the assistant
 // overlay in a modal, bound to a shortcut key:
 
 /** modal overlay for Elastic Assistant conversations */
@@ -24,6 +24,15 @@ export { AssistantOverlay } from './impl/assistant/assistant_overlay';
 
 /** this component renders the Assistant without the modal overlay to, for example, render it in a Timeline tab */
 export { Assistant } from './impl/assistant';
+
+// Step 2.2: Provide spaceId to `AssistantSpaceIdProvider`
+// The spaceId here will be used to fetch the assistant data from localstorage.
+// So make sure not to provide null, undefined, or any fallback spaceId.
+// Only render the `AssistantSpaceIdProvider` component when the spaceId is available.
+export {
+  AssistantSpaceIdProvider,
+  useAssistantLastConversation,
+} from './impl/assistant/use_space_aware_context';
 
 // Step 3: Wherever you want to bring context into the assistant, use the any combination of the following
 // components and hooks:

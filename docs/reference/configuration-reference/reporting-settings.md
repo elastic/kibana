@@ -2,12 +2,16 @@
 navigation_title: "Reporting settings"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/reporting-settings-kb.html
+applies_to:
+  deployment:
+    ess: all
+    self: all
 ---
 
 # Reporting settings in {{kib}} [reporting-settings-kb]
 
 
-You can configure `xpack.reporting` settings in your `kibana.yml` to:
+You can configure `xpack.reporting` settings to:
 
 * [Enable or disable the {{report-features}}](#general-reporting-settings)
 * [Configure an encryption key to protect sensitive authentication data](#encryption-keys)
@@ -16,6 +20,9 @@ You can configure `xpack.reporting` settings in your `kibana.yml` to:
 * [Control how screenshots are captured for PNG/PDF reports](#reporting-capture-settings)
 * [Control the limits and capabilities of CSV reports](#reporting-csv-settings)
 
+:::{note}
+If a setting is applicable to {{ecloud}} Hosted environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
+:::
 
 ## Enable reporting [general-reporting-settings]
 
@@ -224,6 +231,9 @@ Reporting parameters can be adjusted to overcome some of these limiting scenario
 
 ::::
 
+`xpack.reporting.csv.maxConcurrentShardRequests` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+:   Sets the maximum number of concurrent shard requests that each sub-search request executes per node during Kibana CSV export. Defaults to `5`. This setting is available in 8.12.0 and later versions in {{ecloud}}.
+% TBD: Is this setting applicable only to Elastic Cloud?
 
 $$$xpack-reporting-csv$$$ `xpack.reporting.csv.maxSizeBytes` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   The maximum [byte size](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#byte-units) of a CSV file before being truncated. This setting exists to prevent large exports from causing performance and storage issues. Can be specified as a number of bytes. Defaults to `250mb`.

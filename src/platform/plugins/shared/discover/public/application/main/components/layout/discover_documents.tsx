@@ -80,14 +80,6 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 
-const containerStyles = css`
-  position: relative;
-`;
-
-const progressStyle = css`
-  z-index: 2;
-`;
-
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
 // export needs for testing
@@ -399,7 +391,8 @@ function DiscoverDocumentsComponent({
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
-      <div className="dscDocuments__loading">
+      // class is used in tests
+      <div className="dscDocuments__loading" css={dscDocumentsLoadingCss}>
         <EuiText size="xs" color="subdued">
           <EuiLoadingSpinner />
           <EuiSpacer size="s" />
@@ -410,6 +403,7 @@ function DiscoverDocumentsComponent({
   }
 
   return (
+    // class is used in tests
     <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel" css={containerStyles}>
       <EuiScreenReaderOnly>
         <h2 id="documentsAriaLabel">
@@ -484,3 +478,21 @@ function DiscoverDocumentsComponent({
 }
 
 export const DiscoverDocuments = memo(DiscoverDocumentsComponent);
+
+const containerStyles = css`
+  position: relative;
+  min-height: 0;
+`;
+
+const progressStyle = css`
+  z-index: 2;
+`;
+
+const dscDocumentsLoadingCss = css`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  width: 100%;
+`;
