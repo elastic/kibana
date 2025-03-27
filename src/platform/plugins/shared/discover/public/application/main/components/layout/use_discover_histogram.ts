@@ -57,9 +57,10 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
   useCurrentDataView,
+  useCurrentTabAction,
+  useCurrentTabSelector,
   useInternalStateDispatch,
 } from '../../state_management/redux';
-import { useCurrentTabAction, useCurrentTabSelector } from '../../state_management/redux/hooks';
 
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];

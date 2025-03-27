@@ -39,15 +39,16 @@ export const setTabs: InternalStateThunkActionCreator<
   };
 
 export interface UpdateTabsParams {
+  currentTabId: string;
   updateState: TabbedContentState;
   stopSyncing?: () => void;
 }
 
 export const updateTabs: InternalStateThunkActionCreator<[UpdateTabsParams], Promise<void>> =
-  ({ updateState: { items, selectedItem }, stopSyncing }) =>
+  ({ currentTabId, updateState: { items, selectedItem }, stopSyncing }) =>
   async (dispatch, getState, { urlStateStorage }) => {
     const currentState = getState();
-    const currentTab = selectTab(currentState);
+    const currentTab = selectTab(currentState, currentTabId);
     let updatedTabs = items.map<TabState>((item) => {
       const existingTab = currentState.tabs.byId[item.id];
       return existingTab ? { ...existingTab, ...item } : { ...defaultTabState, ...item };
@@ -77,10 +78,5 @@ export const updateTabs: InternalStateThunkActionCreator<[UpdateTabsParams], Pro
       }
     }
 
-    dispatch(
-      setTabs({
-        allTabs: updatedTabs,
-        selectedTabId: selectedItem?.id ?? currentTab.id,
-      })
-    );
+    dispatch(setTabs({ allTabs: updatedTabs }));
   };

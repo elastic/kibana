@@ -13,20 +13,26 @@ import { pick } from 'lodash';
 import type { DiscoverSessionViewRef } from '../session_view';
 import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
 import {
+  CurrentTabProvider,
   createTabItem,
   internalStateActions,
   selectAllTabs,
-  selectTab,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
-export const TabsView = ({ sessionViewProps }: { sessionViewProps: DiscoverSessionViewProps }) => {
+export const TabsView = ({
+  initialTabId,
+  sessionViewProps,
+}: {
+  initialTabId: string;
+  sessionViewProps: DiscoverSessionViewProps;
+}) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
-  const currentTab = useInternalStateSelector(selectTab);
   const allTabs = useInternalStateSelector(selectAllTabs);
+  const [currentTabId, setCurrentTabId] = useState(initialTabId);
   const [initialItems] = useState<TabItem[]>(() => allTabs.map((tab) => pick(tab, 'id', 'label')));
   const sessionViewRef = useRef<DiscoverSessionViewRef>(null);
 
@@ -34,21 +40,25 @@ export const TabsView = ({ sessionViewProps }: { sessionViewProps: DiscoverSessi
     <UnifiedTabs
       services={services}
       initialItems={initialItems}
-      onChanged={(updateState) =>
-        dispatch(
+      onChanged={async (updateState) => {
+        await dispatch(
           internalStateActions.updateTabs({
+            currentTabId,
             updateState,
             stopSyncing: sessionViewRef.current?.stopSyncing,
           })
-        )
-      }
+        );
+        setCurrentTabId(updateState.selectedItem?.id ?? currentTabId);
+      }}
       createItem={() => createTabItem(allTabs)}
       getPreviewData={() => ({
         query: { language: 'kuery', query: 'sample query' },
         status: TabStatus.SUCCESS,
       })}
       renderContent={() => (
-        <DiscoverSessionView key={currentTab.id} ref={sessionViewRef} {...sessionViewProps} />
+        <CurrentTabProvider currentTabId={currentTabId}>
+          <DiscoverSessionView key={currentTabId} ref={sessionViewRef} {...sessionViewProps} />
+        </CurrentTabProvider>
       )}
     />
   );

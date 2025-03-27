@@ -20,6 +20,7 @@ import {
   createInternalStateStore,
   createRuntimeStateManager,
   internalStateActions,
+  CurrentTabProvider,
 } from './state_management/redux';
 import type { RootProfileState } from '../../context_awareness';
 import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awareness';
@@ -138,9 +139,11 @@ export const DiscoverMainRoute = ({
     <InternalStateProvider store={internalState}>
       <rootProfileState.AppWrapper>
         {TABS_ENABLED ? (
-          <TabsView sessionViewProps={sessionViewProps} />
+          <TabsView initialTabId={initialTabId} sessionViewProps={sessionViewProps} />
         ) : (
-          <DiscoverSessionView {...sessionViewProps} />
+          <CurrentTabProvider currentTabId={initialTabId}>
+            <DiscoverSessionView {...sessionViewProps} />
+          </CurrentTabProvider>
         )}
       </rootProfileState.AppWrapper>
     </InternalStateProvider>

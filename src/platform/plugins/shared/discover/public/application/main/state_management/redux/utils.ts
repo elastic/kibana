@@ -10,7 +10,38 @@
 import { v4 as uuid } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { TabItem } from '@kbn/unified-tabs';
-import type { TabState } from './types';
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import type { DiscoverInternalState, TabState } from './types';
+import type {
+  InternalStateDispatch,
+  InternalStateThunkDependencies,
+  TabActionPayload,
+} from './internal_state';
+
+// For some reason if this is not explicitly typed, TypeScript fails with the following error:
+// TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
+type CreateInternalStateAsyncThunk = ReturnType<
+  typeof createAsyncThunk.withTypes<{
+    state: DiscoverInternalState;
+    dispatch: InternalStateDispatch;
+    extra: InternalStateThunkDependencies;
+  }>
+>;
+
+export const createInternalStateAsyncThunk: CreateInternalStateAsyncThunk =
+  createAsyncThunk.withTypes();
+
+type WithoutTabId<TPayload extends TabActionPayload> = Omit<TPayload, 'tabId'>;
+type VoidIfEmpty<T> = keyof T extends never ? void : T;
+
+export const createTabActionInjector =
+  (tabId: string) =>
+  <TPayload extends TabActionPayload, TReturn>(actionCreator: (params: TPayload) => TReturn) =>
+  (payload: VoidIfEmpty<WithoutTabId<TPayload>>) => {
+    return actionCreator({ ...(payload ?? {}), tabId } as TPayload);
+  };
+
+export type TabActionInjector = ReturnType<typeof createTabActionInjector>;
 
 const DEFAULT_TAB_LABEL = i18n.translate('discover.defaultTabLabel', {
   defaultMessage: 'Untitled session',

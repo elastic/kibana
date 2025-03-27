@@ -11,8 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
-import { useCurrentTabContext, useInternalStateSelector } from './hooks';
-import type { DiscoverInternalState } from './types';
+import { useCurrentTabContext } from './hooks';
 
 interface DiscoverRuntimeState {
   adHocDataViews: DataView[];

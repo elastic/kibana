@@ -19,12 +19,12 @@ import React, { type PropsWithChildren, useMemo, createContext } from 'react';
 import { useAdHocDataViews } from './runtime_state';
 import type { DiscoverInternalState, TabState } from './types';
 import {
-  createTabInjector,
   type TabActionPayload,
   type InternalStateDispatch,
   type InternalStateStore,
 } from './internal_state';
 import { selectTab } from './selectors';
+import { type TabActionInjector, createTabActionInjector } from './utils';
 
 const internalStateContext = createContext<ReactReduxContextValue>(
   // Recommended approach for versions of Redux prior to v9:
@@ -49,7 +49,7 @@ export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalStat
 
 interface CurrentTabContextValue {
   currentTabId: string;
-  injectCurrentTab: ReturnType<typeof createTabInjector>;
+  injectCurrentTab: TabActionInjector;
 }
 
 const currentTabContext = createContext<CurrentTabContextValue | undefined>(undefined);
@@ -59,7 +59,7 @@ export const CurrentTabProvider = ({
   children,
 }: PropsWithChildren<{ currentTabId: string }>) => {
   const contextValue = useMemo<CurrentTabContextValue>(
-    () => ({ currentTabId, injectCurrentTab: createTabInjector(currentTabId) }),
+    () => ({ currentTabId, injectCurrentTab: createTabActionInjector(currentTabId) }),
     [currentTabId]
   );
 

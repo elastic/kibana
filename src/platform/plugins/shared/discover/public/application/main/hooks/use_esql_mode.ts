@@ -17,8 +17,11 @@ import { useSavedSearchInitial } from '../state_management/discover_state_provid
 import type { DiscoverStateContainer } from '../state_management/discover_state';
 import { getValidViewMode } from '../utils/get_valid_view_mode';
 import { FetchStatus } from '../../types';
-import { internalStateActions, useInternalStateDispatch } from '../state_management/redux';
-import { useCurrentTabAction } from '../state_management/redux/hooks';
+import {
+  internalStateActions,
+  useCurrentTabAction,
+  useInternalStateDispatch,
+} from '../state_management/redux';
 
 const MAX_NUM_OF_COLUMNS = 50;
 

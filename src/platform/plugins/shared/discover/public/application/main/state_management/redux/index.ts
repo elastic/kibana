@@ -47,6 +47,9 @@ export {
   InternalStateProvider,
   useInternalStateDispatch,
   useInternalStateSelector,
+  CurrentTabProvider,
+  useCurrentTabSelector,
+  useCurrentTabAction,
   useDataViewsForPicker,
 } from './hooks';
 
@@ -63,4 +66,4 @@ export {
   useAdHocDataViews,
 } from './runtime_state';
 
-export { createTabItem } from './utils';
+export { type TabActionInjector, createTabActionInjector, createTabItem } from './utils';

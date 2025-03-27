@@ -15,7 +15,6 @@ import {
   createSlice,
   type ThunkAction,
   type ThunkDispatch,
-  createAsyncThunk,
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
@@ -223,26 +222,3 @@ type InternalStateThunkAction<TReturn = void> = ThunkAction<
 export type InternalStateThunkActionCreator<TArgs extends unknown[] = [], TReturn = void> = (
   ...args: TArgs
 ) => InternalStateThunkAction<TReturn>;
-
-// For some reason if this is not explicitly typed, TypeScript fails with the following error:
-// TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.
-type CreateInternalStateAsyncThunk = ReturnType<
-  typeof createAsyncThunk.withTypes<{
-    state: DiscoverInternalState;
-    dispatch: InternalStateDispatch;
-    extra: InternalStateThunkDependencies;
-  }>
->;
-
-export const createInternalStateAsyncThunk: CreateInternalStateAsyncThunk =
-  createAsyncThunk.withTypes();
-
-type WithoutTabId<T> = Omit<T, 'tabId'>;
-type VoidIfEmpty<T> = keyof T extends never ? void : T;
-
-export const createTabInjector =
-  (tabId: string) =>
-  <TPayload extends TabActionPayload, TReturn>(actionCreator: (params: TPayload) => TReturn) =>
-  (payload: VoidIfEmpty<WithoutTabId<TPayload>>) => {
-    return actionCreator({ ...(payload ?? {}), tabId } as TPayload);
-  };
