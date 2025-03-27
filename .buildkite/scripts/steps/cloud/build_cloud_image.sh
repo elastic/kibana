@@ -27,6 +27,7 @@ node scripts/build \
   --docker-tag-qualifier="$GIT_COMMIT" \
   --docker-push \
   --skip-docker-ubi \
+  --skip-docker-ubuntu \
   --skip-docker-cloud-fips \
   --skip-docker-fips \
   --skip-docker-wolfi \
