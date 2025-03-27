@@ -19,7 +19,6 @@ import { FiltersGlobal } from '../common/components/filters_global';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { useOnExpandableFlyoutClose } from '../flyout/shared/hooks/use_on_expandable_flyout_close';
 
-
 // This exists only for the type signature cast
 const CloudPostureSpyRoute = ({ pageName, ...rest }: { pageName?: CloudSecurityPosturePageId }) => (
   <SpyRoute pageName={pageName as SecurityPageName | undefined} {...rest} />

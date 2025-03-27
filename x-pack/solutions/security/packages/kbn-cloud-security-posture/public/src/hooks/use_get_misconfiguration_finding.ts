@@ -6,7 +6,11 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
-import { CDR_3RD_PARTY_RETENTION_POLICY, CDR_MISCONFIGURATIONS_INDEX_PATTERN, CspFinding } from '@kbn/cloud-security-posture-common';
+import {
+  CDR_3RD_PARTY_RETENTION_POLICY,
+  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+  CspFinding,
+} from '@kbn/cloud-security-posture-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { showErrorToast } from '../..';
@@ -18,46 +22,46 @@ import type {
 } from '../types';
 
 const MISCONFIGURATIONS_SOURCE_FIELDS = [
-    'result.*',
-    'rule.*',
-    'resource.*',
-    '@timestamp',
-    'observer',
-    'data_stream.*',
-  ];
+  'result.*',
+  'rule.*',
+  'resource.*',
+  '@timestamp',
+  'observer',
+  'data_stream.*',
+];
 
 export const buildGetMisconfigurationsFindingsQuery = (
-    { query, sort }: UseCspOptions,
-    isPreview = false
-  ) => {
-    return {
-      index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
-      size: 1,
-      ignore_unavailable: true,
-      query: buildGetMisconfigurationsFindingsQueryWithFilters(query),
-      _source: MISCONFIGURATIONS_SOURCE_FIELDS,
-    };
+  { query, sort }: UseCspOptions,
+  isPreview = false
+) => {
+  return {
+    index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
+    size: 1,
+    ignore_unavailable: true,
+    query: buildGetMisconfigurationsFindingsQueryWithFilters(query),
+    _source: MISCONFIGURATIONS_SOURCE_FIELDS,
   };
-  
-  const buildGetMisconfigurationsFindingsQueryWithFilters = (query: UseCspOptions['query']) => {
-    return {
-      ...query,
-      bool: {
-        ...query?.bool,
-        filter: [
-          ...(query?.bool?.filter ?? []),
-          {
-            range: {
-              '@timestamp': {
-                gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
-                lte: 'now',
-              },
+};
+
+const buildGetMisconfigurationsFindingsQueryWithFilters = (query: UseCspOptions['query']) => {
+  return {
+    ...query,
+    bool: {
+      ...query?.bool,
+      filter: [
+        ...(query?.bool?.filter ?? []),
+        {
+          range: {
+            '@timestamp': {
+              gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+              lte: 'now',
             },
           },
-        ],
-      },
-    };
+        },
+      ],
+    },
   };
+};
 
 export enum MISCONFIGURATION {
   RESULT_EVALUATION = 'result.evaluation',

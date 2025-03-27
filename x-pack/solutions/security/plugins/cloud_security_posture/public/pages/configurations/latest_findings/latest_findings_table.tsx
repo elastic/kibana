@@ -54,7 +54,7 @@ const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.E
   const finding = row.raw._source;
   if (!finding || !isCspFinding(finding)) return <></>;
   uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, OPEN_FINDINGS_FLYOUT);
-  return <></>
+  return <></>;
 };
 
 const title = i18n.translate('xpack.csp.findings.latestFindings.tableRowTypeLabel', {
