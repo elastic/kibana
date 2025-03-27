@@ -22,7 +22,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe('when calling the title_conversation function', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/215952
+  // Failing: See https://github.com/elastic/kibana/issues/215952
+  describe.skip('when calling the title_conversation function', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['failsOnMKI']);
     let llmProxy: LlmProxy;
