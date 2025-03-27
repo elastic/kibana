@@ -137,7 +137,7 @@ const mockRequest = {
   events: {
     aborted$: NEVER,
   },
-  query: {}
+  query: {},
 };
 
 const mockResponse = {

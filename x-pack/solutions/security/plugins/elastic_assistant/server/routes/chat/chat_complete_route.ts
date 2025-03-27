@@ -61,7 +61,7 @@ export const chatCompleteRoute = (
         validate: {
           request: {
             body: buildRouteValidationWithZod(ChatCompleteProps),
-            query: buildRouteValidationWithZod(ChatCompleteRequestQuery)
+            query: buildRouteValidationWithZod(ChatCompleteRequestQuery),
           },
         },
       },
