@@ -681,6 +681,7 @@ describe('validation logic', () => {
         'Unknown column [keywords]',
       ]);
       testErrorsAndWarnings('from a_index | rename s* as strings', [
+        'Using wildcards (*) in RENAME is not allowed [s*]',
         'Unknown column [s*]',
         'Unknown column [strings]',
       ]);
@@ -710,7 +711,7 @@ describe('validation logic', () => {
       // Do not try to validate the dissect pattern string
       testErrorsAndWarnings('from a_index | dissect textField "%{firstWord}"', []);
       testErrorsAndWarnings('from a_index | dissect doubleField "%{firstWord}"', [
-        'DISSECT only supports keyword, text types values, found [doubleField] of type [double]',
+        'DISSECT only supports values of type [keyword, text]. Found [doubleField] of type [double]',
       ]);
       testErrorsAndWarnings('from a_index | dissect textField "%{firstWord}" option ', [
         "SyntaxError: mismatched input '<EOF>' expecting '='",
@@ -760,7 +761,7 @@ describe('validation logic', () => {
       // Do not try to validate the grok pattern string
       testErrorsAndWarnings('from a_index | grok textField "%{firstWord}"', []);
       testErrorsAndWarnings('from a_index | grok doubleField "%{firstWord}"', [
-        'GROK only supports keyword, text types values, found [doubleField] of type [double]',
+        'GROK only supports values of type [keyword, text]. Found [doubleField] of type [double]',
       ]);
       testErrorsAndWarnings('from a_index | grok textField "%{firstWord}" | keep firstWord', []);
       // testErrorsAndWarnings('from a_index | grok s* "%{a}"', [
@@ -796,6 +797,13 @@ describe('validation logic', () => {
                 ]
           );
         }
+      }
+
+      for (const type of ['date', 'dateNanos']) {
+        testErrorsAndWarnings(
+          `from a_index | where ${type}Field > ?_tstart AND ${type}Field < ?_tend`,
+          []
+        );
       }
 
       for (const nesting of NESTED_DEPTHS) {
