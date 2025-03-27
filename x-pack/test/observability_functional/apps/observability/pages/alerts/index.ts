@@ -54,6 +54,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('Renders the table', async () => {
+        throw new Error('i need to be paused');
+
         await observability.alerts.common.getTableOrFail();
       });
 
