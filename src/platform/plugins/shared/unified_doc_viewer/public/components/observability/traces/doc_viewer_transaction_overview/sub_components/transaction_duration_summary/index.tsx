@@ -18,12 +18,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Duration } from '../../../components/duration';
+import { useRootTransactionContext } from '../../hooks/use_root_transaction';
 
 export interface TransactionDurationSummaryProps {
   duration: number;
 }
 
 export function TransactionDurationSummary({ duration }: TransactionDurationSummaryProps) {
+  const { transaction, loading } = useRootTransactionContext();
+
   return (
     <>
       <EuiTitle size="s">
@@ -68,7 +71,11 @@ export function TransactionDurationSummary({ duration }: TransactionDurationSumm
 
           <EuiFlexItem grow={2}>
             <EuiText size="xs">
-              <Duration duration={duration} />
+              <Duration
+                duration={duration}
+                showParentDuration={true} // REMOVE THIS AND USE THE PARENT OBJECT AS CHECK?
+                parent={{ type: 'trace', duration: transaction?.duration, loading }}
+              />
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
