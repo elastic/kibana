@@ -135,7 +135,7 @@ For more information, refer to https://github.com/elastic/kibana/issues/209996[#
 
 *Impact* +
 
-The validation error prevents Kibana from completing the bootstrap process, which may affect Kibana availability. Additionally, it blocks users from saving views in the Infrastructure Inventory pag
+Clusters with saved objects of the type inventory-view may fail to upgrade to 8.17.3 leading to downtime until the failed upgrade is rolled back.
 ====
 
 [float]
