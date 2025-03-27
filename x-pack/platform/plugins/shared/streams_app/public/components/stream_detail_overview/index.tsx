@@ -151,7 +151,7 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
       });
     },
 
-    [definition, dataViews, streamsRepositoryClient, start, end]
+    [definition, streamsRepositoryClient, start, end]
   );
 
   const [selectedTab, setSelectedTab] = React.useState<string | undefined>(undefined);
