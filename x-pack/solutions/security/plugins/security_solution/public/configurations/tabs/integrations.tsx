@@ -7,5 +7,5 @@
 import * as React from 'react';
 
 export const Integrations = () => {
-  return <h1>Integrations</h1>;
+  return <h1>{'Integrations'}</h1>;
 };

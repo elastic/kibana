@@ -7,5 +7,5 @@
 import * as React from 'react';
 
 export const KnowledgeSources = () => {
-  return <h1>Knowledge Sources</h1>;
+  return <h1>{'Knowledge Sources'}</h1>;
 };
