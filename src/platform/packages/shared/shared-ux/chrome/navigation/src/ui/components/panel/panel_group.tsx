@@ -83,18 +83,21 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
     }
   }
 
-  const renderChildren = useCallback(() => {
-    if (!filteredChildren) return null;
+  const renderChildren = useCallback(
+    ({ parentIsAccordion } = { parentIsAccordion: false }) => {
+      if (!filteredChildren) return null;
 
-    return filteredChildren.map((item, i) => {
-      const isItem = item.renderAs === 'item' || !item.children;
-      return isItem ? (
-        <PanelNavItem key={item.id} item={item} />
-      ) : (
-        <PanelGroup navNode={item} key={item.id} />
-      );
-    });
-  }, [filteredChildren]);
+      return filteredChildren.map((item, i) => {
+        const isItem = item.renderAs === 'item' || !item.children;
+        return isItem ? (
+          <PanelNavItem key={item.id} item={item} parentIsAccordion={parentIsAccordion} />
+        ) : (
+          <PanelGroup navNode={item} key={item.id} />
+        );
+      });
+    },
+    [filteredChildren]
+  );
 
   if (!filteredChildren?.length || !someChildIsVisible(filteredChildren)) {
     return null;
@@ -116,7 +119,7 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
         >
           <>
             {!firstChildIsGroup && <EuiSpacer size="s" />}
-            {renderChildren()}
+            {renderChildren({ parentIsAccordion: true })}
           </>
         </EuiAccordion>
         {appendHorizontalRule && <EuiHorizontalRule margin="xs" />}

@@ -11,9 +11,6 @@ export default function aiAssistantApiIntegrationTests({
   loadTestFile,
 }: DeploymentAgnosticFtrProviderContext) {
   describe('observability AI Assistant', function () {
-    loadTestFile(require.resolve('./chat/chat.spec.ts'));
-    loadTestFile(require.resolve('./complete/complete.spec.ts'));
-
     // Functions
     loadTestFile(require.resolve('./complete/functions/alerts.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/context.spec.ts'));
@@ -24,13 +21,8 @@ export default function aiAssistantApiIntegrationTests({
     loadTestFile(require.resolve('./complete/functions/recall.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/retrieve_elastic_doc.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/summarize.spec.ts'));
-
-    // Index assets
-    loadTestFile(require.resolve('./index_assets/index_assets.spec.ts'));
-
-    loadTestFile(require.resolve('./connectors/connectors.spec.ts'));
-    loadTestFile(require.resolve('./conversations/conversations.spec.ts'));
-
+    loadTestFile(require.resolve('./complete/functions/title_conversation.spec.ts'));
+    
     // knowledge base
     loadTestFile(
       require.resolve('./knowledge_base/knowledge_base_add_semantic_text_field_migration.spec.ts')
@@ -45,6 +37,14 @@ export default function aiAssistantApiIntegrationTests({
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_status.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_user_instructions.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base.spec.ts'));
+
+    // Misc.
+    loadTestFile(require.resolve('./chat/chat.spec.ts'));
+    loadTestFile(require.resolve('./complete/complete.spec.ts'));
+    loadTestFile(require.resolve('./index_assets/index_assets.spec.ts'));
+    loadTestFile(require.resolve('./connectors/connectors.spec.ts'));
+    loadTestFile(require.resolve('./conversations/conversations.spec.ts'));    
+
 
     // public endpoints
     loadTestFile(require.resolve('./public_complete/public_complete.spec.ts'));
