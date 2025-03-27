@@ -193,6 +193,10 @@ export class TLSRuleExecutor {
       monitorIds: enabledMonitorQueryIds,
     });
 
+    this.debug(
+      `Found ${certs.length} certificates: ` + certs.map((cert) => cert.sha256).join(', ')
+    );
+
     const latestPings = await this.getLatestPingsForMonitors(certs);
 
     const foundCerts = total > 0;
