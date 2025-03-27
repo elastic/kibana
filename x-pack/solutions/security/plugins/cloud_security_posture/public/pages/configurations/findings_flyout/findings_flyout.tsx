@@ -44,7 +44,10 @@ import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_
 import { truthy } from '@kbn/cloud-security-posture/src/utils/helpers';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CspClientPluginStartDeps, FindingMisconfigurationFlyoutProps } from '@kbn/cloud-security-posture';
+import type {
+  CspClientPluginStartDeps,
+  FindingMisconfigurationFlyoutProps,
+} from '@kbn/cloud-security-posture';
 import { useGetMisconfigurationFindings } from '@kbn/cloud-security-posture/src/hooks/use_get_misconfiguration_finding';
 import { createDetectionRuleFromBenchmarkRule } from '@kbn/cloud-security-posture/src/utils/create_detection_rule_from_benchmark';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
@@ -164,12 +167,9 @@ export const RuleNameLink = ({
 const getFlyoutDescriptionList = (finding: CspFinding): EuiDescriptionListProps['listItems'] =>
   [
     finding.resource?.id && {
-      title: i18n.translate(
-        'xpack.csp.findings.findingsFlyout.flyoutDescriptionList.resourceId',
-        {
-          defaultMessage: 'Resource ID',
-        }
-      ),
+      title: i18n.translate('xpack.csp.findings.findingsFlyout.flyoutDescriptionList.resourceId', {
+        defaultMessage: 'Resource ID',
+      }),
       description: finding.resource.id,
     },
     finding.resource?.name && {
