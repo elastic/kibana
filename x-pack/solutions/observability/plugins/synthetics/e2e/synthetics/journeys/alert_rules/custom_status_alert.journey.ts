@@ -19,11 +19,11 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
   let configId: string;
 
   before(async () => {
-    await services.cleaUp();
+    await services.cleanUp();
   });
 
   after(async () => {
-    await services.cleaUp();
+    await services.cleanUp();
   });
 
   step('Go to monitors page', async () => {
