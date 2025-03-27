@@ -316,9 +316,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     );
 
   router.versioned
+    // @ts-ignore TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
     .get({
       path: EPM_API_ROUTES.INFO_PATTERN,
-      // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(fleetAuthz, getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN))
           .granted,
@@ -715,9 +715,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
   // Update transforms with es-secondary-authorization headers,
   // append authorized_by to transform's _meta, and start transforms
   router.versioned
+    // @ts-ignore TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
     .post({
       path: EPM_API_ROUTES.REAUTHORIZE_TRANSFORMS,
-      // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
       fleetAuthz: {
         ...INSTALL_PACKAGES_AUTHZ,
         packagePrivileges: {
