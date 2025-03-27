@@ -978,70 +978,71 @@ export function XYChart({
               />
             )}
 
-          {dataLayers.length && (
-            <DataLayers
-              titles={titles}
-              layers={dataLayers}
-              endValue={endValue}
-              timeZone={timeZone}
-              syncColors={syncColors}
-              valueLabels={valueLabels}
-              fillOpacity={args.fillOpacity}
-              minBarHeight={args.minBarHeight}
-              formatFactory={formatFactory}
-              paletteService={paletteService}
-              fittingFunction={fittingFunction}
-              emphasizeFitting={emphasizeFitting}
-              yAxesConfiguration={yAxesConfiguration}
-              xAxisConfiguration={
-                xAxisConfig ? axesConfiguration[axesConfiguration.length - 1] : undefined
-              }
-              shouldShowValueLabels={shouldShowValueLabels}
-              formattedDatatables={formattedDatatables}
-              chartHasMoreThanOneBarSeries={chartHasMoreThanOneBarSeries}
-              defaultXScaleType={defaultXScaleType}
-              fieldFormats={fieldFormats}
-              uiState={uiState}
-              singleTable={singleTable}
-              isDarkMode={darkMode}
-            />
-          )}
-          {referenceLineLayers.length ? (
-            <ReferenceLines
-              layers={referenceLineLayers}
-              xAxisFormatter={xAxisFormatter}
-              axesConfiguration={axesConfiguration}
-              isHorizontal={shouldRotate}
-              paddingMap={linesPaddings}
-              titles={titles}
-              yAxesMap={yAxesMap}
-              formatters={referenceLinesFormatters}
-            />
-          ) : null}
-          {(rangeAnnotations.length || lineAnnotations.length) && isTimeViz ? (
-            <Annotations
-              rangeAnnotations={rangeAnnotations}
-              groupedLineAnnotations={groupedLineAnnotations}
-              timeFormat={timeFormat}
-              isHorizontal={shouldRotate}
-              paddingMap={linesPaddings}
-              isBarChart={filteredBarLayers.length > 0}
-              minInterval={minInterval}
-              simpleView={shouldHideDetails}
-              outsideDimension={
-                rangeAnnotations.length && shouldHideDetails
-                  ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
-                  : shouldUseNewTimeAxis
-                  ? Number(MULTILAYER_TIME_AXIS_STYLE.tickLine?.padding ?? 0) +
-                    chartBaseTheme.axes.tickLabel.fontSize
-                  : Math.max(chartBaseTheme.axes.tickLine.size, OUTSIDE_RECT_ANNOTATION_WIDTH)
-              }
-            />
-          ) : null}
-        </Chart>
-      </LegendColorPickerWrapperContext.Provider>
-    </div>
-  </>);
+            {dataLayers.length && (
+              <DataLayers
+                titles={titles}
+                layers={dataLayers}
+                endValue={endValue}
+                timeZone={timeZone}
+                syncColors={syncColors}
+                valueLabels={valueLabels}
+                fillOpacity={args.fillOpacity}
+                minBarHeight={args.minBarHeight}
+                formatFactory={formatFactory}
+                paletteService={paletteService}
+                fittingFunction={fittingFunction}
+                emphasizeFitting={emphasizeFitting}
+                yAxesConfiguration={yAxesConfiguration}
+                xAxisConfiguration={
+                  xAxisConfig ? axesConfiguration[axesConfiguration.length - 1] : undefined
+                }
+                shouldShowValueLabels={shouldShowValueLabels}
+                formattedDatatables={formattedDatatables}
+                chartHasMoreThanOneBarSeries={chartHasMoreThanOneBarSeries}
+                defaultXScaleType={defaultXScaleType}
+                fieldFormats={fieldFormats}
+                uiState={uiState}
+                singleTable={singleTable}
+                isDarkMode={darkMode}
+              />
+            )}
+            {referenceLineLayers.length ? (
+              <ReferenceLines
+                layers={referenceLineLayers}
+                xAxisFormatter={xAxisFormatter}
+                axesConfiguration={axesConfiguration}
+                isHorizontal={shouldRotate}
+                paddingMap={linesPaddings}
+                titles={titles}
+                yAxesMap={yAxesMap}
+                formatters={referenceLinesFormatters}
+              />
+            ) : null}
+            {(rangeAnnotations.length || lineAnnotations.length) && isTimeViz ? (
+              <Annotations
+                rangeAnnotations={rangeAnnotations}
+                groupedLineAnnotations={groupedLineAnnotations}
+                timeFormat={timeFormat}
+                isHorizontal={shouldRotate}
+                paddingMap={linesPaddings}
+                isBarChart={filteredBarLayers.length > 0}
+                minInterval={minInterval}
+                simpleView={shouldHideDetails}
+                outsideDimension={
+                  rangeAnnotations.length && shouldHideDetails
+                    ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
+                    : shouldUseNewTimeAxis
+                    ? Number(MULTILAYER_TIME_AXIS_STYLE.tickLine?.padding ?? 0) +
+                      chartBaseTheme.axes.tickLabel.fontSize
+                    : Math.max(chartBaseTheme.axes.tickLine.size, OUTSIDE_RECT_ANNOTATION_WIDTH)
+                }
+              />
+            ) : null}
+          </Chart>
+        </LegendColorPickerWrapperContext.Provider>
+      </div>
+    </>
+  );
 }
 
 const defaultLegendTitle = i18n.translate('expressionXY.xyChart.legendTitle', {
