@@ -15,14 +15,8 @@ import type {
   QueryDslQueryContainer,
   Duration,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { AuthenticatedUser, IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
-import type {
-  IndexNameProvider,
-  InternalUpdateRuleMigrationData,
-  SiemRuleMigrationsClientDependencies,
-  StoredRuleMigration,
-} from '../types';
+import type { InternalUpdateRuleMigrationData, StoredRuleMigration } from '../types';
 import {
   SiemMigrationStatus,
   RuleTranslationResult,
@@ -58,16 +52,6 @@ const BULK_MAX_SIZE = 500 as const;
 const DEFAULT_SEARCH_BATCH_SIZE = 500 as const;
 
 export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient {
-  constructor(
-    protected getIndexName: IndexNameProvider,
-    protected currentUser: AuthenticatedUser,
-    protected esScopedClient: IScopedClusterClient,
-    protected logger: Logger,
-    protected dependencies: SiemRuleMigrationsClientDependencies
-  ) {
-    super(getIndexName, currentUser, esScopedClient, logger, dependencies);
-  }
-
   /** Indexes an array of rule migrations to be processed */
   async create(ruleMigrations: CreateRuleMigrationInput[]): Promise<void> {
     const index = await this.getIndexName();
@@ -75,7 +59,6 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
 
     let ruleMigrationsSlice: CreateRuleMigrationInput[];
     const createdAt = new Date().toISOString();
-
     while ((ruleMigrationsSlice = ruleMigrations.splice(0, BULK_MAX_SIZE)).length) {
       await this.esClient
         .bulk({
@@ -146,7 +129,6 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
         this.logger.error(`Error searching rule migrations: ${error.message}`);
         throw error;
       });
-
     return {
       total: this.getTotalHits(result),
       data: this.processResponseHits(result),

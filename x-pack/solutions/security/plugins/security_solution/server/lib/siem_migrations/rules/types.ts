@@ -37,11 +37,10 @@ export interface CreateMigrationMetadataInput {
   migrationId: string;
 }
 
-export interface MigrationMetadataResponse {
+export type MigrationMetadata = WithCommonAttrs<{
   migration_id: string;
-}
+}>;
 
-export type MigrationMetadata = WithCommonAttrs<MigrationMetadataResponse>;
 export type StoredMigrationMetadata = Stored<MigrationMetadata>;
 
 export type StoredRuleMigration = Stored<RuleMigration>;
