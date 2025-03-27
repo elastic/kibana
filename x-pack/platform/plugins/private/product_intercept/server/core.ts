@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import crypto from 'crypto';
 import {
   RequestHandlerContext,
   type CoreSetup,
@@ -122,7 +123,11 @@ export class ProductInterceptTriggerCore {
           });
         }
 
-        const responseETag = `W/"${String(resolvedTriggerInfo.triggerIntervalInMs)}"`; // weak etag
+        // use the trigger interval as the etag
+        const responseETag = crypto
+          .createHash('sha256')
+          .update(Buffer.from(String(resolvedTriggerInfo.triggerIntervalInMs)))
+          .digest('hex');
 
         if (request.headers['if-none-match'] === responseETag) {
           return response.notModified({});
@@ -131,9 +136,8 @@ export class ProductInterceptTriggerCore {
         return response.ok({
           headers: {
             etag: responseETag,
-            // age: String(responseExpirationValueInMs),
-            'cache-control': 'private',
-            // 'cache-control': `private, max-age=${configuredIntervalInMs}, immutable`,
+            // cache the response for the duration of the trigger interval
+            'cache-control': `max-age=${resolvedTriggerInfo.triggerIntervalInMs}, must-revalidate`,
           },
           body: resolvedTriggerInfo,
         });
@@ -149,7 +153,7 @@ export class ProductInterceptTriggerCore {
       this.isCloudDeployment &&
       semverLt(existingTriggerDef.installedOn, this.kibanaVersion!)
     ) {
-      // This will contain logic for cloud environments that get it's version bumped
+      // caters to requirement to prompt users for feedback on upgrading within cloud environments
     }
 
     if (
