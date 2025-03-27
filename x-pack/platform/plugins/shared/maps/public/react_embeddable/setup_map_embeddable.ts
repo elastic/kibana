@@ -10,14 +10,14 @@ import { i18n } from '@kbn/i18n';
 import { MapAttributes } from '../../common/content_management';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 import { untilPluginStartServicesReady } from '../kibana_services';
-import { loadEmsClient } from '../util';
+import { getEmsTmsServices } from '../util';
 
 export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
   embeddableSetup.registerReactEmbeddableFactory(MAP_SAVED_OBJECT_TYPE, async () => {
-    const [{ mapEmbeddableFactory }] = await Promise.all([
-      import('./embeddable_module'),
-      loadEmsClient(),
+    const [, , { mapEmbeddableFactory }] = await Promise.all([
+      getEmsTmsServices(),
       untilPluginStartServicesReady(),
+      import('./embeddable_module'),
     ]);
 
     return mapEmbeddableFactory;

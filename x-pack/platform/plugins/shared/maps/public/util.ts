@@ -14,12 +14,6 @@ export function getKibanaTileMap(): unknown {
   return mapsEms.config.tilemap ? mapsEms.config.tilemap : {};
 }
 
-export async function loadEmsClient(): Promise<void> {
-  if (getEMSSettings().isEMSEnabled()) {
-    await getEMSClient();
-  }
-}
-
 export async function getEmsFileLayers(): Promise<FileLayer[]> {
   if (!getEMSSettings().isEMSEnabled()) {
     return [];
