@@ -78,7 +78,7 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
       <EuiSpacer size="m" />
       <EuiSwitch label="Enable SSL" {...inputs.logstashEnableSSLInput.props} />
       <EuiSpacer size="m" />
-      <LogstashInstructions />
+      <LogstashInstructions isSSLEnabled={inputs.logstashEnableSSLInput.value} />
       <EuiSpacer size="m" />
       <MultiRowInput
         placeholder={i18n.translate(
