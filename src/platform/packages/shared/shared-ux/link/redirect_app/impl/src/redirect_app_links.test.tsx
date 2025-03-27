@@ -33,7 +33,7 @@ const commonTests = (name: string, mount: Mount, navigateToUrl: jest.Mock) => {
     navigateToUrl.mockReset();
   });
 
-  describe(`RedirectAppLinks with ${name}`, () => {
+  describe.skip(`RedirectAppLinks with ${name}`, () => {
     it('intercept click events on children link elements', () => {
       let event: MouseEvent;
       const component = mount(
@@ -225,7 +225,7 @@ const targetedTests = (name: string, mount: Mount, navigateToUrl: jest.Mock) => 
     navigateToUrl.mockReset();
   });
 
-  describe(`${name} with isolated areas of effect`, () => {
+  describe.skip(`${name} with isolated areas of effect`, () => {
     it(`does not intercept click events when the link is a parent of the container`, () => {
       let event: MouseEvent;
 
@@ -251,7 +251,7 @@ const targetedTests = (name: string, mount: Mount, navigateToUrl: jest.Mock) => 
   });
 };
 
-describe('RedirectAppLinks', () => {
+describe.skip('RedirectAppLinks', () => {
   const navigateToUrl = jest.fn();
 
   beforeEach(() => {

@@ -6232,6 +6232,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/global-redirect-app-links@link:src/platform/packages/private/kbn-global-redirect-app-links":
+  version "0.0.0"
+  uid ""
+
 "@kbn/global-search-bar-plugin@link:x-pack/platform/plugins/private/global_search_bar":
   version "0.0.0"
   uid ""
