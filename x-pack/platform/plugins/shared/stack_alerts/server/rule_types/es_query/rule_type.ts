@@ -218,6 +218,7 @@ export function getRuleType(
     },
     category: DEFAULT_APP_CATEGORIES.management.id,
     producer: STACK_ALERTS_FEATURE_ID,
+    solution: 'stack',
     doesSetRecoveryContext: true,
     alerts: STACK_ALERTS_AAD_CONFIG,
   };

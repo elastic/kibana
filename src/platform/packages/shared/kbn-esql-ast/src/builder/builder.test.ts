@@ -308,6 +308,20 @@ describe('param', () => {
     expect(text).toBe('?');
     expect(node).toMatchObject({
       type: 'literal',
+      paramKind: '?',
+      literalType: 'param',
+      paramType: 'unnamed',
+    });
+  });
+
+  test('unnamed (double)', () => {
+    const node = Builder.param.build('??');
+    const text = BasicPrettyPrinter.expression(node);
+
+    expect(text).toBe('??');
+    expect(node).toMatchObject({
+      type: 'literal',
+      paramKind: '??',
       literalType: 'param',
       paramType: 'unnamed',
     });
@@ -320,6 +334,21 @@ describe('param', () => {
     expect(text).toBe('?the_name');
     expect(node).toMatchObject({
       type: 'literal',
+      paramKind: '?',
+      literalType: 'param',
+      paramType: 'named',
+      value: 'the_name',
+    });
+  });
+
+  test('named (double)', () => {
+    const node = Builder.param.build('??the_name');
+    const text = BasicPrettyPrinter.expression(node);
+
+    expect(text).toBe('??the_name');
+    expect(node).toMatchObject({
+      type: 'literal',
+      paramKind: '??',
       literalType: 'param',
       paramType: 'named',
       value: 'the_name',
@@ -333,6 +362,21 @@ describe('param', () => {
     expect(text).toBe('?123');
     expect(node).toMatchObject({
       type: 'literal',
+      paramKind: '?',
+      literalType: 'param',
+      paramType: 'positional',
+      value: 123,
+    });
+  });
+
+  test('positional (double)', () => {
+    const node = Builder.param.build('??123');
+    const text = BasicPrettyPrinter.expression(node);
+
+    expect(text).toBe('??123');
+    expect(node).toMatchObject({
+      type: 'literal',
+      paramKind: '??',
       literalType: 'param',
       paramType: 'positional',
       value: 123,
@@ -371,5 +415,69 @@ describe('order', () => {
     const text = BasicPrettyPrinter.expression(node);
 
     expect(text).toBe('a.b.c ASC NULLS FIRST');
+  });
+});
+
+describe('map', () => {
+  test('can construct an empty map', () => {
+    const node1 = Builder.expression.map();
+    const node2 = Builder.expression.map({});
+    const node3 = Builder.expression.map({
+      entries: [],
+    });
+
+    expect(node1).toMatchObject({
+      type: 'map',
+      entries: [],
+    });
+    expect(node2).toMatchObject({
+      type: 'map',
+      entries: [],
+    });
+    expect(node3).toMatchObject({
+      type: 'map',
+      entries: [],
+    });
+  });
+
+  test('can construct a map with two keys', () => {
+    const node = Builder.expression.map({
+      entries: [
+        Builder.expression.entry('foo', Builder.expression.literal.integer(1)),
+        Builder.expression.entry('bar', Builder.expression.literal.integer(2)),
+      ],
+    });
+
+    expect(node).toMatchObject({
+      type: 'map',
+      entries: [
+        {
+          type: 'map-entry',
+          key: {
+            type: 'literal',
+            literalType: 'keyword',
+            valueUnquoted: 'foo',
+          },
+          value: {
+            type: 'literal',
+            literalType: 'integer',
+            value: 1,
+          },
+        },
+        {
+          type: 'map-entry',
+          key: {
+            type: 'literal',
+            literalType: 'keyword',
+            valueUnquoted: 'bar',
+          },
+          value: {
+            type: 'literal',
+            literalType: 'integer',
+            value: 2,
+          },
+        },
+      ],
+    });
   });
 });

@@ -19,7 +19,7 @@ import type { BuildReasonMessage } from '../utils/reason_formatters';
 
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
-): SecurityAlertType<EqlRuleParams, {}, {}, 'default'> => {
+): SecurityAlertType<EqlRuleParams, {}> => {
   const { experimentalFeatures, licensing, scheduleNotificationResponseActionsService } =
     createOptions;
   return {
@@ -60,6 +60,7 @@ export const createEqlAlertType = (
     isExportable: false,
     category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
+    solution: 'security',
     async executor(execOptions) {
       const { sharedParams, services, state } = execOptions;
 

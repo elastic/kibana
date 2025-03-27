@@ -9,5 +9,9 @@
 
 import { getInputStory, getStory } from './common';
 
-export default getStory('Image Input', 'An input with an image value.');
+const Story = getStory('Image Input', 'An input with an image value.');
 export const ImageInput = getInputStory('image' as const);
+
+export default {
+  ...Story,
+};

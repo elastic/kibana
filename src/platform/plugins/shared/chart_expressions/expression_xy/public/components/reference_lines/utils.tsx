@@ -115,12 +115,10 @@ export const getLineAnnotationProps = (
         hasReducedPadding={isTextOnlyMarker}
       />
     ),
-    markerBody: (
-      <MarkerBody
-        label={config.textVisibility && !isTextOnlyMarker ? label : undefined}
-        isHorizontal={isMarkerLabelHorizontal}
-      />
-    ),
+    markerBody:
+      config.textVisibility && !isTextOnlyMarker && label ? (
+        <MarkerBody label={label} isHorizontal={isMarkerLabelHorizontal} />
+      ) : undefined,
     // rotate the position if required
     markerPosition,
   };

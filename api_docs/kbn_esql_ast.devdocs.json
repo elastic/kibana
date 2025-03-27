@@ -1244,7 +1244,9 @@
                 "section": "def-common.ESQLParamLiteral",
                 "text": "ESQLParamLiteral"
               },
-              "<string>[]"
+              "<string, ",
+              "ESQLParamKinds",
+              ">[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/walker/walker.ts",
             "deprecated": false,
@@ -2110,7 +2112,9 @@
                 "section": "def-common.ESQLParamLiteral",
                 "text": "ESQLParamLiteral"
               },
-              "<string> | ",
+              "<string, ",
+              "ESQLParamKinds",
+              "> | ",
               "ESQLIdentifier",
               " | ",
               {
@@ -2134,6 +2138,10 @@
               "ESQLOrderExpression",
               " | ",
               "ESQLUnknownItem",
+              " | ",
+              "ESQLMap",
+              " | ",
+              "ESQLMapEntry",
               " | ",
               {
                 "pluginId": "@kbn/esql-ast",
@@ -2225,7 +2233,9 @@
                     "section": "def-common.ESQLParamLiteral",
                     "text": "ESQLParamLiteral"
                   },
-                  "<string> | ",
+                  "<string, ",
+                  "ESQLParamKinds",
+                  "> | ",
                   "ESQLIdentifier",
                   " | ",
                   {
@@ -2249,6 +2259,10 @@
                   "ESQLOrderExpression",
                   " | ",
                   "ESQLUnknownItem",
+                  " | ",
+                  "ESQLMap",
+                  " | ",
+                  "ESQLMapEntry",
                   " | ",
                   {
                     "pluginId": "@kbn/esql-ast",
@@ -3441,7 +3455,9 @@
             "section": "def-common.ESQLParamLiteral",
             "text": "ESQLParamLiteral"
           },
-          "<string>"
+          "<string, ",
+          "ESQLParamKinds",
+          ">"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/ast/helpers.ts",
         "deprecated": false,
@@ -4164,36 +4180,6 @@
             "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ESQLAstMetricsCommand.aggregates",
-            "type": "Array",
-            "tags": [],
-            "label": "aggregates",
-            "description": [],
-            "signature": [
-              "ESQLAstField",
-              "[] | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ESQLAstMetricsCommand.grouping",
-            "type": "Array",
-            "tags": [],
-            "label": "grouping",
-            "description": [],
-            "signature": [
-              "ESQLAstField",
-              "[] | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4595,6 +4581,8 @@
               "\nA node representing the function or operator being called."
             ],
             "signature": [
+              "ESQLIdentifier",
+              " | ",
               {
                 "pluginId": "@kbn/esql-ast",
                 "scope": "common",
@@ -4602,9 +4590,9 @@
                 "section": "def-common.ESQLParamLiteral",
                 "text": "ESQLParamLiteral"
               },
-              "<string> | ",
-              "ESQLIdentifier",
-              " | undefined"
+              "<string, ",
+              "ESQLParamKinds",
+              "> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
             "deprecated": false,
@@ -4755,7 +4743,7 @@
             "section": "def-common.ESQLParamLiteral",
             "text": "ESQLParamLiteral"
           },
-          "<ParamType> extends ",
+          "<ParamType, ParamKind> extends ",
           "ESQLAstBaseItem",
           "<string>"
         ],
@@ -4786,6 +4774,20 @@
             "description": [],
             "signature": [
               "\"param\""
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLParamLiteral.paramKind",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "paramKind",
+            "description": [],
+            "signature": [
+              "ParamKind"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
             "deprecated": false,
@@ -6233,7 +6235,9 @@
             "section": "def-common.ESQLParamLiteral",
             "text": "ESQLParamLiteral"
           },
-          "<string> | ",
+          "<string, ",
+          "ESQLParamKinds",
+          "> | ",
           "ESQLIdentifier",
           " | ",
           {
@@ -6257,6 +6261,10 @@
           "ESQLOrderExpression",
           " | ",
           "ESQLUnknownItem",
+          " | ",
+          "ESQLMap",
+          " | ",
+          "ESQLMapEntry",
           " | ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -6304,7 +6312,9 @@
             "section": "def-common.ESQLParamLiteral",
             "text": "ESQLParamLiteral"
           },
-          "<string>"
+          "<string, ",
+          "ESQLParamKinds",
+          ">"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
         "deprecated": false,
@@ -6393,7 +6403,11 @@
           "> | ",
           "ESQLOrderExpression",
           " | ",
-          "ESQLUnknownItem"
+          "ESQLUnknownItem",
+          " | ",
+          "ESQLMap",
+          " | ",
+          "ESQLMapEntry"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
         "deprecated": false,
@@ -6689,7 +6703,9 @@
                 "section": "def-common.ESQLParamLiteral",
                 "text": "ESQLParamLiteral"
               },
-              "<string>) => string"
+              "<string, ",
+              "ESQLParamKinds",
+              ">) => string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
             "deprecated": false,
@@ -6710,7 +6726,9 @@
                     "section": "def-common.ESQLParamLiteral",
                     "text": "ESQLParamLiteral"
                   },
-                  "<string>"
+                  "<string, ",
+                  "ESQLParamKinds",
+                  ">"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
                 "deprecated": false,

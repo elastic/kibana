@@ -59,7 +59,7 @@ import {
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import { DashboardStart, DashboardSetup } from '@kbn/dashboard-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { SLOPublicStart } from '@kbn/slo-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -88,7 +88,6 @@ export interface ClientPluginsSetup {
   embeddable: EmbeddableSetup;
   serverless?: ServerlessPluginSetup;
   uiActions: UiActionsSetup;
-  dashboard: DashboardSetup;
 }
 
 export interface ClientPluginsStart {
