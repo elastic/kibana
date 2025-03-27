@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { IToasts } from '@kbn/core/public';
 import { RulesSettingsFlapping, RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
-import { RulesSettingsModal, RulesSettingsModalProps } from './rules_settings_modal';
+import { RulesSettingsFlyout, RulesSettingsFlyoutProps } from './rules_settings_modal';
 import { useKibana } from '../../../common/lib/kibana';
 import { fetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings';
 import { updateFlappingSettings } from '../../lib/rule_api/update_flapping_settings';
@@ -80,19 +80,19 @@ const mockQueryDelaySetting: RulesSettingsQueryDelay = {
   updatedAt: new Date().toISOString(),
 };
 
-const modalProps: RulesSettingsModalProps = {
+const modalProps: RulesSettingsFlyoutProps = {
   isVisible: true,
   setUpdatingRulesSettings: jest.fn(),
   onClose: jest.fn(),
   onSave: jest.fn(),
 };
 
-const RulesSettingsModalWithProviders: React.FunctionComponent<RulesSettingsModalProps> = (
+const RulesSettingsModalWithProviders: React.FunctionComponent<RulesSettingsFlyoutProps> = (
   props
 ) => (
   <IntlProvider locale="en">
     <QueryClientProvider client={queryClient}>
-      <RulesSettingsModal {...props} />
+      <RulesSettingsFlyout {...props} />
     </QueryClientProvider>
   </IntlProvider>
 );

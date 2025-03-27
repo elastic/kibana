@@ -18,13 +18,15 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiHorizontalRule,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeaderTitle,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiTitle,
   EuiSpacer,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { useFetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings';
 import { useKibana } from '../../../common/lib/kibana';
@@ -81,14 +83,14 @@ const useResettableState: <T>(
   return [value, hasChanged, updateValue, reset];
 };
 
-export interface RulesSettingsModalProps {
+export interface RulesSettingsFlyoutProps {
   isVisible: boolean;
   setUpdatingRulesSettings?: (isUpdating: boolean) => void;
   onClose: () => void;
   onSave?: () => void;
 }
 
-export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
+export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
   const { isVisible, onClose, setUpdatingRulesSettings, onSave } = props;
 
   const {
@@ -252,16 +254,18 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   };
 
   return (
-    <EuiModal data-test-subj="rulesSettingsModal" onClose={onCloseModal} maxWidth={880}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle component="h3">
-          <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.modal.title"
-            defaultMessage="Rule settings"
-          />
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody>
+    <EuiFlyout data-test-subj="rulesSettingsModal" onClose={onCloseModal} maxWidth={880}>
+      <EuiFlyoutHeader>
+        <EuiTitle>
+          <h3>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.rulesSettings.modal.title"
+              defaultMessage="Rule settings"
+            />
+          </h3>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
         <EuiCallOut
           size="s"
           title={i18n.translate('xpack.triggersActionsUI.rulesSettings.modal.calloutMessage', {
@@ -272,26 +276,32 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
         {maybeRenderForm()}
         <EuiSpacer />
         <EuiHorizontalRule margin="none" />
-      </EuiModalBody>
-      <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="rulesSettingsModalCancelButton" onClick={onCloseModal}>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.modal.cancelButton"
-            defaultMessage="Cancel"
-          />
-        </EuiButtonEmpty>
-        <EuiButton
-          fill
-          data-test-subj="rulesSettingsModalSaveButton"
-          onClick={handleSave}
-          disabled={!canWriteFlappingSettings && !canWriteQueryDelaySettings}
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.modal.saveButton"
-            defaultMessage="Save"
-          />
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty data-test-subj="rulesSettingsModalCancelButton" onClick={onCloseModal}>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.rulesSettings.modal.cancelButton"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              data-test-subj="rulesSettingsModalSaveButton"
+              onClick={handleSave}
+              disabled={!canWriteFlappingSettings && !canWriteQueryDelaySettings}
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.rulesSettings.modal.saveButton"
+                defaultMessage="Save"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
   );
 });
