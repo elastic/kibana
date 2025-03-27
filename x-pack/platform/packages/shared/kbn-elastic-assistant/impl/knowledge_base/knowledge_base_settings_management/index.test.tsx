@@ -27,6 +27,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKnowledgeBaseIndices } from '../../assistant/api/knowledge_base/use_knowledge_base_indices';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory, History } from 'history';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
@@ -39,6 +40,7 @@ const mockContext = {
     isAssistantEnabled: true,
     hasManageGlobalKnowledgeBase: true,
   },
+  userProfileService: userProfileServiceMock.createStart(),
 };
 jest.mock('../../assistant_context');
 jest.mock('../../assistant/api/knowledge_base/entries/use_create_knowledge_base_entry');
@@ -85,6 +87,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
       createdBy: 'u_user_id_1',
       updatedAt: '2024-10-23T17:33:15.933Z',
       updatedBy: 'u_user_id_1',
+      global: false,
       users: [{ name: 'Test User 1' }],
       name: 'Test Entry 1',
       namespace: 'default',
@@ -99,6 +102,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
       createdBy: 'u_user_id_2',
       updatedAt: '2024-10-25T09:55:56.596Z',
       updatedBy: 'u_user_id_2',
+      global: true,
       users: [],
       name: 'Test Entry 2',
       namespace: 'default',
@@ -114,6 +118,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
       createdBy: 'u_user_id_1',
       updatedAt: '2024-10-25T09:55:56.596Z',
       updatedBy: 'u_user_id_1',
+      global: false,
       users: [{ name: 'Test User 1' }],
       name: 'Test Entry 3',
       namespace: 'default',
@@ -129,6 +134,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
       createdBy: 'u_user_id_3',
       updatedAt: '2024-10-23T17:33:15.933Z',
       updatedBy: 'u_user_id_3',
+      global: true,
       users: [],
       name: 'Test Entry 4',
       namespace: 'default',
@@ -153,8 +159,6 @@ describe('KnowledgeBaseSettingsManagement', () => {
       data: {
         elser_exists: true,
         security_labs_exists: true,
-        index_exists: true,
-        pipeline_exists: true,
       },
       isFetched: true,
     });
@@ -198,8 +202,6 @@ describe('KnowledgeBaseSettingsManagement', () => {
       data: {
         elser_exists: false,
         security_labs_exists: false,
-        index_exists: false,
-        pipeline_exists: false,
       },
       isFetched: true,
     });
@@ -232,6 +234,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
             createdBy: 'u_user_id_1',
             updatedAt: '2024-10-23T17:33:15.933Z',
             updatedBy: 'u_user_id_1',
+            global: false,
             users: [{ name: 'Test User 1' }],
             name: 'A',
             namespace: 'default',
@@ -246,6 +249,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
             createdBy: 'u_user_id_2',
             updatedAt: '2024-10-25T09:55:56.596Z',
             updatedBy: 'u_user_id_2',
+            global: true,
             users: [],
             name: 'b',
             namespace: 'default',
@@ -261,6 +265,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
             createdBy: 'u_user_id_2',
             updatedAt: '2024-10-25T09:55:56.596Z',
             updatedBy: 'u_user_id_2',
+            global: true,
             users: [],
             name: 'B',
             namespace: 'default',
@@ -276,6 +281,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
             createdBy: 'u_user_id_1',
             updatedAt: '2024-10-25T09:55:56.596Z',
             updatedBy: 'u_user_id_1',
+            global: false,
             users: [{ name: 'Test User 1' }],
             name: 'a',
             namespace: 'default',
@@ -450,9 +456,11 @@ describe('KnowledgeBaseSettingsManagement', () => {
     });
 
     const updatedName = 'New Entry Name';
-    await waitFor(() => {
+
+    await waitFor(async () => {
       const nameInput = screen.getByTestId('entryNameInput');
-      fireEvent.change(nameInput, { target: { value: updatedName } });
+      await userEvent.clear(nameInput);
+      await userEvent.type(nameInput, updatedName);
     });
 
     await waitFor(() => {
@@ -545,7 +553,11 @@ describe('KnowledgeBaseSettingsManagement', () => {
       expect(mockCreateEntry).toHaveBeenCalledTimes(1);
     });
     expect(mockUpdateEntry).toHaveBeenCalledTimes(0);
-    expect(mockCreateEntry).toHaveBeenCalledWith({ ...mockData[3], users: undefined });
+    expect(mockCreateEntry).toHaveBeenCalledWith({
+      ...mockData[3],
+      global: false,
+      users: undefined,
+    });
   });
 
   it('does not show duplicate entry modal on new document entry creation', async () => {

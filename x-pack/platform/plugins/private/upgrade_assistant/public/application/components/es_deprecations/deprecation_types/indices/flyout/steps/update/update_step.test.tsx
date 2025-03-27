@@ -15,8 +15,10 @@ describe('UpdateIndexFlyoutStep', () => {
   const meta: ReindexState['meta'] = {
     indexName: 'some_index',
     aliases: [],
+    isInDataStream: false,
     isFrozen: false,
     isReadonly: false,
+    isClosedIndex: false,
     reindexName: 'some_index-reindexed-for-9',
   };
 

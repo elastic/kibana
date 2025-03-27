@@ -23,7 +23,7 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import type { DocLinks } from '@kbn/doc-links';
 import {
   dataTableActions,
@@ -302,22 +302,13 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     [isLoadingIndexPattern, areDetectionPageFiltersLoading]
   );
 
-  const AlertPageFilters = useMemo(
-    () => (
-      <DetectionEngineFilters
-        filters={topLevelFilters}
-        onFiltersChange={onFilterControlsChange}
-        query={query}
-        timeRange={{
-          from,
-          to,
-          mode: 'absolute',
-        }}
-        onInit={setDetectionPageFilterHandler}
-        indexPattern={indexPattern}
-      />
-    ),
-    [from, indexPattern, onFilterControlsChange, query, to, topLevelFilters]
+  const pageFiltersTimerange = useMemo<TimeRange>(
+    () => ({
+      from,
+      to,
+      mode: 'absolute',
+    }),
+    [from, to]
   );
 
   const renderAlertTable = useCallback(
@@ -412,7 +403,14 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
               </HeaderPage>
               <EuiHorizontalRule margin="none" />
               <EuiSpacer size="l" />
-              {AlertPageFilters}
+              <DetectionEngineFilters
+                filters={topLevelFilters}
+                onFiltersChange={onFilterControlsChange}
+                query={query}
+                timeRange={pageFiltersTimerange}
+                onInit={setDetectionPageFilterHandler}
+                indexPattern={indexPattern}
+              />
               <EuiSpacer size="l" />
               <ChartPanels
                 addFilter={addFilter}

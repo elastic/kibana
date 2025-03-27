@@ -27,9 +27,18 @@ export type CreateTimelinesRequestBody = z.infer<typeof CreateTimelinesRequestBo
 export const CreateTimelinesRequestBody = z.object({
   timeline: SavedTimeline,
   status: TimelineStatus.nullable().optional(),
-  timelineId: z.string().nullable().optional(),
+  /**
+   * A unique identifier for the Timeline template.
+   */
   templateTimelineId: z.string().nullable().optional(),
+  /**
+   * Timeline template version number.
+   */
   templateTimelineVersion: z.number().nullable().optional(),
+  /**
+   * A unique identifier for the Timeline.
+   */
+  timelineId: z.string().nullable().optional(),
   timelineType: TimelineType.nullable().optional(),
   version: z.string().nullable().optional(),
 });

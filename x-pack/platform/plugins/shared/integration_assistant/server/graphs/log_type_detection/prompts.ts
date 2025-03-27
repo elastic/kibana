@@ -27,11 +27,18 @@ Follow these steps to do this:
   * 'leef': If the log samples have Log Event Extended Format (LEEF) then classify it as "name: leef".
   * 'fix': If the log samples have Financial Information eXchange (FIX) then classify it as "name: fix".
   * 'unsupported': If you cannot put the format into any of the above categories then classify it with "name: unsupported".
-2. Header: for structured and unstructured format:
+2. You can look at the example_logs in the context to understand different log formats.
+3. Header: for structured and unstructured format:
   - if the samples have any or all of priority, timestamp, loglevel, hostname, ipAddress, messageId in the beginning information then set "header: true".
   - if the samples have a syslog header then set "header: true"
   - else set "header: false". If you are unable to determine the syslog header presence then set "header: false".
-3. Note that a comma-separated list should be classified as 'csv' if its rows only contain values separated by commas. But if it looks like a list of comma separated key-values pairs like 'key1=value1, key2=value2' it should be classified as 'structured'.
+4. Note that a comma-separated list should be classified as 'csv' if its rows only contain values separated by commas. But if it looks like a list of comma separated key-values pairs like 'key1=value1, key2=value2' it should be classified as 'structured'.
+
+<example_logs>
+\`\`\`json
+{example_logs}
+\`\`\`
+</example_logs>
 
 You ALWAYS follow these guidelines when writing your response:
 <guidelines>

@@ -9,17 +9,13 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { useGetCaseUsers } from './use_get_case_users';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
+import { TestProviders } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 describe('useGetCaseUsers', () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -27,7 +23,7 @@ describe('useGetCaseUsers', () => {
     const spy = jest.spyOn(api, 'getCaseUsers');
 
     renderHook(() => useGetCaseUsers('case-1'), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() =>
@@ -39,13 +35,12 @@ describe('useGetCaseUsers', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
-    const spy = jest.spyOn(api, 'getCaseUsers').mockRejectedValue(new Error("C'est la vie"));
+    jest.spyOn(api, 'getCaseUsers').mockRejectedValue(new Error("C'est la vie"));
     renderHook(() => useGetCaseUsers('case-1'), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => {
-      expect(spy).toHaveBeenCalledWith({ caseId: 'case-1', signal: expect.any(AbortSignal) });
       expect(addError).toHaveBeenCalled();
     });
   });

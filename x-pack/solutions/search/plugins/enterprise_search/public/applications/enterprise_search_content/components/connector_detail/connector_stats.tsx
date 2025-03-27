@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useMemo } from 'react';
 
 import { useValues } from 'kea';
 
@@ -93,7 +93,12 @@ const configureLabel = i18n.translate(
 
 export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, indexData }) => {
   const { connectorTypes } = useValues(KibanaLogic);
-  const connectorDefinition = connectorTypes.find((c) => c.serviceType === connector.service_type);
+  const CUSTOM_CONNECTOR = useMemo(
+    () => connectorTypes.filter(({ serviceType }) => serviceType === ''),
+    [connectorTypes]
+  );
+  const connectorDefinition =
+    connectorTypes.find((c) => c.serviceType === connector.service_type) || CUSTOM_CONNECTOR[0];
   return (
     <EuiFlexGrid columns={3} direction="row">
       <EuiFlexItem>

@@ -87,6 +87,9 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
             maxTokens: 4096,
             signal: abortSignal,
             streaming: false,
+            telemetryMetadata: {
+              pluginId: 'automatic_import',
+            },
           });
 
           const parameters = {

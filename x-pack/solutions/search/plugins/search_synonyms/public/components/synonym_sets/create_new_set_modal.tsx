@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCheckbox,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
@@ -18,6 +19,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,12 +33,20 @@ interface CreateSynonymsSetModalProps {
 export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'createSynonymsSetModalTitle' });
   const formId = useGeneratedHtmlId({ prefix: 'createSynonymsSetModalForm' });
+  const overwriteId = useGeneratedHtmlId({ prefix: 'createSynonymsSetModalOverwrite' });
 
   const [name, setName] = useState('');
   const [rawName, setRawName] = useState('');
-  const { mutate: createSynonymsSet } = usePutSynonymsSet(() => {
-    onClose();
-  });
+  const [conflictError, setConflictError] = useState(false);
+  const [forceWrite, setForceWrite] = useState(false);
+  const { mutate: createSynonymsSet } = usePutSynonymsSet(
+    () => {
+      onClose();
+    },
+    () => {
+      setConflictError(true);
+    }
+  );
   return (
     <EuiModal onClose={onClose}>
       <EuiModalHeader>
@@ -54,17 +64,27 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
           component="form"
           onSubmit={(e) => {
             e.preventDefault();
-            createSynonymsSet({ synonymsSetId: name });
+            createSynonymsSet({ synonymsSetId: name, forceWrite });
           }}
         >
           <EuiFormRow
+            fullWidth
             label={i18n.translate('xpack.searchSynonyms.createSynonymsSetModal.nameLabel', {
               defaultMessage: 'Name',
             })}
             helpText={
-              !!rawName
+              !!rawName && !conflictError
                 ? i18n.translate('xpack.searchSynonyms.createSynonymsSetModal.nameHelpText', {
                     defaultMessage: 'Your synonyms set will be named: {name}',
+                    values: { name },
+                  })
+                : undefined
+            }
+            isInvalid={conflictError}
+            error={
+              conflictError
+                ? i18n.translate('xpack.searchSynonyms.createSynonymsSetModal.nameErrorText', {
+                    defaultMessage: 'A synonym set with id {name} already exists.',
                     values: { name },
                   })
                 : undefined
@@ -76,9 +96,27 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
               onChange={(e) => {
                 setRawName(e.target.value);
                 setName(formatSynonymsSetName(e.target.value));
+                setConflictError(false);
+                setForceWrite(false);
               }}
             />
           </EuiFormRow>
+          {conflictError && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiFormRow fullWidth>
+                <EuiCheckbox
+                  id={overwriteId}
+                  data-test-subj="searchSynonymsCreateSynonymsSetModalForceWrite"
+                  label={i18n.translate('xpack.searchSynonyms.createSynonymsSetModal.forceWrite', {
+                    defaultMessage: 'Overwrite the existing synonym set.',
+                  })}
+                  checked={forceWrite}
+                  onChange={() => setForceWrite(!forceWrite)}
+                />
+              </EuiFormRow>
+            </>
+          )}
         </EuiForm>
       </EuiModalBody>
 
@@ -96,10 +134,8 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
           data-test-subj="searchSynonymsCreateSynonymsSetModalCreateButton"
           form={formId}
           fill
-          disabled={!name}
-          onClick={() => {
-            createSynonymsSet({ synonymsSetId: name });
-          }}
+          disabled={!name || (conflictError && !forceWrite)}
+          type="submit"
         >
           <FormattedMessage
             id="xpack.searchSynonyms.createSynonymsSetModal.createButton"

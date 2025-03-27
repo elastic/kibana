@@ -78,7 +78,11 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
     }: {
       drilldownName: string;
       destinationURLTemplate: string;
-      trigger: 'VALUE_CLICK_TRIGGER' | 'SELECT_RANGE_TRIGGER' | 'IMAGE_CLICK_TRIGGER';
+      trigger:
+        | 'VALUE_CLICK_TRIGGER'
+        | 'SELECT_RANGE_TRIGGER'
+        | 'IMAGE_CLICK_TRIGGER'
+        | 'CONTEXT_MENU_TRIGGER';
     }) {
       await this.fillInDrilldownName(drilldownName);
       await this.selectTriggerIfNeeded(trigger);
@@ -94,7 +98,11 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
     }
 
     async selectTriggerIfNeeded(
-      trigger: 'VALUE_CLICK_TRIGGER' | 'SELECT_RANGE_TRIGGER' | 'IMAGE_CLICK_TRIGGER'
+      trigger:
+        | 'VALUE_CLICK_TRIGGER'
+        | 'SELECT_RANGE_TRIGGER'
+        | 'IMAGE_CLICK_TRIGGER'
+        | 'CONTEXT_MENU_TRIGGER'
     ) {
       if (await testSubjects.exists(`triggerPicker`)) {
         const container = await testSubjects.find(`triggerPicker-${trigger}`);

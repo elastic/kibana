@@ -51,8 +51,9 @@ const savedObject = {
     typeMeta: '{}',
     type: '',
     runtimeFieldMap:
-      '{"aRuntimeField": { "type": "keyword", "script": {"source": "emit(\'hello\')"}}}',
-    fieldAttrs: '{"aRuntimeField": { "count": 5, "customLabel": "A Runtime Field"}}',
+      '{"aRuntimeField": { "type": "keyword", "script": {"source": "emit(\'hello\')"}}, "wrongCountType": { "type": "keyword", "script": {"source": "emit(\'test\')"}}}',
+    fieldAttrs:
+      '{"aRuntimeField": { "count": 5, "customLabel": "A Runtime Field" }, "wrongCountType": { "count": "50" }}',
   },
   type: 'index-pattern',
   references: [],
@@ -680,6 +681,23 @@ describe('IndexPatterns', () => {
     // https://github.com/elastic/kibana/issues/134873: must keep an empty object and not delete it
     expect(attrs).toHaveProperty('fieldFormatMap');
     expect(attrs.fieldFormatMap).toMatchInlineSnapshot(`"{}"`);
+  });
+
+  test('gets the correct field attrs', async () => {
+    const id = 'id';
+    setDocsourcePayload(id, savedObject);
+    const dataView = await indexPatterns.get(id);
+    expect(dataView.getFieldByName('aRuntimeField')).toEqual(
+      expect.objectContaining({
+        count: 5,
+        customLabel: 'A Runtime Field',
+      })
+    );
+    expect(dataView.getFieldByName('wrongCountType')).toEqual(
+      expect.objectContaining({
+        count: 50,
+      })
+    );
   });
 
   describe('defaultDataViewExists', () => {

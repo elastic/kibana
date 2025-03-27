@@ -37,7 +37,7 @@ export const ReadonlyWarningCallout: React.FunctionComponent<{}> = () => {
       title={
         <FormattedMessage
           id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.readonly.calloutTitle"
-          defaultMessage="Marking this data read only could affect some of the existing setups"
+          defaultMessage="Marking this data read-only could affect some of the existing setups"
         />
       }
       color="warning"

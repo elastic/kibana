@@ -126,8 +126,6 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
     switch (flyoutStep) {
       case 'details':
         return correctiveAction?.type === 'unfreeze' ? (
-          // we will show specific unfreeze details/flow for:
-          // A) 7.x indices that are frozen AND read-only (should be an edge case)
           <UnfreezeDetailsFlyoutStep
             closeFlyout={closeFlyout}
             startReindex={() => {
@@ -141,11 +139,6 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
             reindexState={reindexState}
           />
         ) : (
-          // we will show specific reindex details/flow for:
-          // B) 7.x indices that are frozen AND NOT read-only (should be the most common scenario)
-          // C) 7.x indices that are not frozen
-          //    C.1) if they are read-only => this will be a WARNING deprecation
-          //    C.2) if they are NOT read-only => this will be a CRITICAL deprecation
           <ReindexDetailsFlyoutStep
             closeFlyout={closeFlyout}
             startReindex={() => {

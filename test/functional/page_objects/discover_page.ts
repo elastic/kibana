@@ -766,7 +766,7 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
-  public async addRuntimeField(name: string, script: string, type?: string) {
+  public async addRuntimeField(name: string, script: string, type?: string, popularity?: number) {
     await this.dataViews.clickAddFieldFromSearchBar();
     await this.fieldEditor.setName(name);
     if (type) {
@@ -774,6 +774,9 @@ export class DiscoverPageObject extends FtrService {
     }
     await this.fieldEditor.enableValue();
     await this.fieldEditor.typeScript(script);
+    if (popularity) {
+      await this.fieldEditor.setPopularity(popularity);
+    }
     await this.fieldEditor.save();
     await this.header.waitUntilLoadingHasFinished();
   }
@@ -813,7 +816,7 @@ export class DiscoverPageObject extends FtrService {
    * */
   public async dragFieldWithKeyboardToTable(fieldName: string) {
     const field = await this.find.byCssSelector(
-      `[data-test-subj="dscFieldListPanelField-${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
+      `[data-attr-field="${fieldName}"] [data-test-subj="domDragDrop-keyboardHandler"]`
     );
     await field.focus();
     await this.retry.try(async () => {

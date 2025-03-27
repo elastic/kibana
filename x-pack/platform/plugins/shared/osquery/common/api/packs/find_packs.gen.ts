@@ -16,17 +16,8 @@
 
 import { z } from '@kbn/zod';
 
-import {
-  PageOrUndefined,
-  PageSizeOrUndefined,
-  SortOrUndefined,
-  SortOrderOrUndefined,
-} from '../model/schema/common_attributes.gen';
+export type FindPacksResponse = z.infer<typeof FindPacksResponse>;
+export const FindPacksResponse = z.object({});
 
-export type FindPacksRequestQuery = z.infer<typeof FindPacksRequestQuery>;
-export const FindPacksRequestQuery = z.object({
-  page: PageOrUndefined.optional(),
-  pageSize: PageSizeOrUndefined.optional(),
-  sort: SortOrUndefined.optional(),
-  sortOrder: SortOrderOrUndefined.optional(),
-});
+export type FindPackResponse = z.infer<typeof FindPackResponse>;
+export const FindPackResponse = z.object({});

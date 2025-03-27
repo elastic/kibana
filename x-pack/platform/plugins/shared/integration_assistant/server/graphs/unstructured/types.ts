@@ -25,7 +25,7 @@ export interface HandleUnstructuredNodeParams extends UnstructuredNodeParams {
 }
 
 export interface GrokResult {
-  grok_patterns: string[];
+  grok_pattern: string;
   message: string;
 }
 

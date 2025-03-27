@@ -134,7 +134,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   logger: Logger;
   getServerBasePath: () => string;
   getSpaceId: () => string;
-  getCurrentUser: () => AuthenticatedUser | null;
+  getCurrentUser: () => Promise<AuthenticatedUser | null>;
   getAIAssistantConversationsDataClient: (
     params?: GetAIAssistantConversationsDataClientParams
   ) => Promise<AIAssistantConversationsDataClient | null>;

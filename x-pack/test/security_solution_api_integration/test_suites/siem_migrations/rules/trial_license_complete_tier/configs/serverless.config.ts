@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { PRECONFIGURED_BEDROCK_ACTION } from '../../../../../config/shared';
 import { createTestConfig } from '../../../../../config/serverless/config.base';
 
 export default createTestConfig({
@@ -15,6 +16,7 @@ export default createTestConfig({
       { product_line: 'endpoint', product_tier: 'complete' },
       { product_line: 'cloud', product_tier: 'complete' },
     ])}`,
+    `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_BEDROCK_ACTION)}`,
   ],
   testFiles: [require.resolve('..')],
   junit: {

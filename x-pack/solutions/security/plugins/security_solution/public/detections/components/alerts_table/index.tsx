@@ -282,6 +282,25 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     };
   }, [isEventRenderedView]);
 
+  /**
+   * if records are too less, we don't want table to be of fixed height.
+   * it should shrink to the content height.
+   * Height setting enables/disables virtualization depending on fixed/undefined height values respectively.
+   * */
+  const alertTableHeight = useMemo(
+    () =>
+      isEventRenderedView
+        ? `${DEFAULT_DATA_GRID_HEIGHT}px`
+        : /*
+         * We keep fixed height in Event rendered because of the row height issue
+         * as mentioned here
+         */
+        count > 20
+        ? `${DEFAULT_DATA_GRID_HEIGHT}px`
+        : undefined,
+    [count, isEventRenderedView]
+  );
+
   const alertStateProps: AlertsTableStateProps = useMemo(
     () => ({
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
@@ -301,10 +320,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       onLoaded: onLoad,
       runtimeMappings: sourcererDataView?.runtimeFieldMap as RunTimeMappings,
       toolbarVisibility,
-      // if records are too less, we don't want table to be of fixed height.
-      // it should shrink to the content height.
-      // Height setting enables/disables virtualization depending on fixed/undefined height values respectively.
-      height: count >= 20 ? `${DEFAULT_DATA_GRID_HEIGHT}px` : undefined,
+      height: alertTableHeight,
       initialPageSize: 50,
     }),
     [
@@ -321,7 +337,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       onLoad,
       sourcererDataView?.runtimeFieldMap,
       toolbarVisibility,
-      count,
+      alertTableHeight,
     ]
   );
 

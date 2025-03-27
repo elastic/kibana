@@ -46,6 +46,10 @@ export type LogViewTypestate =
       context: LogViewContextWithReference;
     }
   | {
+      value: 'initializingFromUrl';
+      context: LogViewContextWithReference;
+    }
+  | {
       value: 'resolving';
       context: LogViewContextWithReference & LogViewContextWithLogView;
     }

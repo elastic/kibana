@@ -68,10 +68,10 @@ describe('ConnectorCard ', () => {
       />
     );
 
-    const getByText = createQueryWithMarkup(screen.getByText);
+    const getByTextWithMarkup = createQueryWithMarkup(screen.getByText);
 
     for (const item of listItems) {
-      expect(getByText(`${item.title}: ${item.description}`)).toBeInTheDocument();
+      expect(getByTextWithMarkup(`${item.title}: ${item.description}`)).toBeInTheDocument();
     }
   });
 

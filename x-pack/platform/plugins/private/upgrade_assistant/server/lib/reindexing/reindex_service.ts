@@ -116,9 +116,11 @@ export interface ReindexService {
    * Obtain metadata about the index, including aliases and settings
    * @param indexName
    */
-  getIndexInfo(
-    indexName: string
-  ): Promise<{ aliases: Record<string, IndicesAlias>; settings?: IndicesIndexSettings }>;
+  getIndexInfo(indexName: string): Promise<{
+    aliases: Record<string, IndicesAlias>;
+    settings?: IndicesIndexSettings;
+    isInDataStream: boolean;
+  }>;
 }
 
 export const reindexServiceFactory = (
@@ -356,7 +358,8 @@ export const reindexServiceFactory = (
 
     const aliases = response[indexName]?.aliases ?? {};
     const settings = response[indexName]?.settings?.index ?? {};
-    return { aliases, settings };
+    const isInDataStream = Boolean(response[indexName]?.data_stream);
+    return { aliases, settings, isInDataStream };
   };
 
   const isIndexHidden = async (indexName: string) => {

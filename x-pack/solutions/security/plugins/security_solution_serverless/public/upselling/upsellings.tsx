@@ -33,6 +33,8 @@ import {
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
   OsqueryResponseActionsUpsellingSectionLazy,
+  SiemMigrationsStartUpsellSectionLazy,
+  SiemMigrationsTranslatedRulesUpsellPageLazy,
   ThreatIntelligencePaywallLazy,
 } from './lazy_upselling';
 import * as i18n from './translations';
@@ -84,6 +86,11 @@ export const upsellingPages: UpsellingPages = [
     pageName: SecurityPageName.attackDiscovery,
     pli: ProductFeatureKey.attackDiscovery,
     component: () => <AttackDiscoveryUpsellingPageLazy />,
+  },
+  {
+    pageName: SecurityPageName.siemMigrationsRules,
+    pli: ProductFeatureKey.siemMigrations,
+    component: () => <SiemMigrationsTranslatedRulesUpsellPageLazy />,
   },
 ];
 
@@ -147,6 +154,11 @@ export const upsellingSections: UpsellingSections = [
     component: () => (
       <IntegrationsAssistantLazy requiredPLI={ProductFeatureKey.integrationAssistant} />
     ),
+  },
+  {
+    id: 'siem_migrations_start',
+    pli: ProductFeatureKey.siemMigrations,
+    component: SiemMigrationsStartUpsellSectionLazy,
   },
 ];
 

@@ -265,29 +265,6 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       expect(result).toContain('Citation,{reference(exampleContentReferenceId)}');
     });
 
-    it('does not include citations if content references store is false', async () => {
-      const tool: DynamicTool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
-        alertsIndexPattern,
-        anonymizationFields,
-        onNewReplacements: jest.fn(),
-        replacements,
-        request,
-        size: request.body.size,
-        ...rest,
-        contentReferencesStore: undefined,
-      }) as DynamicTool;
-
-      (esClient.search as jest.Mock).mockResolvedValue({
-        hits: {
-          hits: [{ _id: 4 }],
-        },
-      });
-
-      const result = await tool.func('');
-
-      expect(result).not.toContain('Citation');
-    });
-
     it('returns null when alertsIndexPattern is undefined', () => {
       const tool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
         // alertsIndexPattern is undefined

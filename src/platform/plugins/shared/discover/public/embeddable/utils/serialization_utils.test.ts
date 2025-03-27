@@ -121,6 +121,7 @@ describe('Serialization utils', () => {
         savedSearch,
         serializeTitles: jest.fn(),
         serializeTimeRange: jest.fn(),
+        serializeDynamicActions: jest.fn(),
       });
 
       expect(serializedState).toEqual({
@@ -156,6 +157,7 @@ describe('Serialization utils', () => {
           savedSearch,
           serializeTitles: jest.fn(),
           serializeTimeRange: jest.fn(),
+          serializeDynamicActions: jest.fn(),
           savedObjectId: 'test-id',
         });
 
@@ -176,6 +178,7 @@ describe('Serialization utils', () => {
           savedSearch: { ...savedSearch, sampleSize: 500, sort: [['order_date', 'asc']] },
           serializeTitles: jest.fn(),
           serializeTimeRange: jest.fn(),
+          serializeDynamicActions: jest.fn(),
           savedObjectId: 'test-id',
         });
 

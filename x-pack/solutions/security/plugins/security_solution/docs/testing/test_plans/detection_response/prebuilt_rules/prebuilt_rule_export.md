@@ -2,6 +2,9 @@
 
 **Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
+> [!TIP]
+> If you're new to prebuilt rules, get started [here](./prebuilt_rules.md) and check an overview of the features of prebuilt rules in [this section](./prebuilt_rules_common_info.md#features).
+
 ## Summary <!-- omit from toc -->
 
 This is a test plan for the workflows of:
@@ -25,10 +28,11 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
-  - [User stories](#user-stories)
   - [Terminology](#terminology)
+- [Requirements](#requirements)
   - [Assumptions](#assumptions)
-  - [Non-functional requirements](#non-functional-requirements)
+  - [Technical requirements](#technical-requirements)
+  - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
   - [Core Functionality](#core-functionality)
     - [Scenario: Exporting prebuilt rule individually from rule details page](#scenario-exporting-prebuilt-rule-individually-from-rule-details-page)
@@ -52,9 +56,31 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Support exporting prebuilt rules from the Rule Details page](https://github.com/elastic/kibana/issues/180176)
 - [Tests for prebuilt rule import/export workflow](https://github.com/elastic/kibana/issues/202079)
 
-### User stories
+### Terminology
 
-**Prebuilt rule export workflow:**
+- [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
+
+## Requirements
+
+### Assumptions
+
+Assumptions about test environments and scenarios outlined in this test plan.
+
+- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
+
+### Technical requirements
+
+Non-functional requirements for the functionality outlined in this test plan.
+
+- [Common technical requirements](./prebuilt_rules_common_info.md#common-technical-requirements).
+
+### Product requirements
+
+Functional requirements for the functionality outlined in this test plan.
+
+- [Common product requirements](./prebuilt_rules_common_info.md#common-product-requirements).
+
+User stories:
 
 - User can export a single prebuilt rule from the Rule Details page.
 - User can export multiple prebuilt rules one-by-one from the Rule Management page.
@@ -62,18 +88,6 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - User can export prebuilt non-customized rules.
 - User can export prebuilt customized rules.
 - User can export any combination of prebuilt non-customized, prebuilt customized, and custom rules.
-
-### Terminology
-
-- [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
-
-### Assumptions
-
-- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
-
-### Non-functional requirements
-
-- [Common non-functional requirements](./prebuilt_rules_common_info.md#common-non-functional-requirements).
 
 ## Scenarios
 

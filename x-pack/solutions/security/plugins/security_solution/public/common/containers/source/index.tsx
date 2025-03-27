@@ -22,10 +22,11 @@ import type { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../../../../common/endpoin
 export type { BrowserFields };
 
 export function getAllBrowserFields(browserFields: BrowserFields): Array<Partial<FieldSpec>> {
-  const result: Array<Partial<FieldSpec>> = [];
+  let result: Array<Partial<FieldSpec>> = [];
   for (const namespace of Object.values(browserFields)) {
     if (namespace.fields) {
-      result.push(...Object.values(namespace.fields));
+      const namespaceFields = Object.values(namespace.fields);
+      result = result.concat(namespaceFields);
     }
   }
   return result;
@@ -36,9 +37,11 @@ export function getAllBrowserFields(browserFields: BrowserFields): Array<Partial
  * @param browserFields
  * @returns
  */
-export const getAllFieldsByName = (
-  browserFields: BrowserFields
-): { [fieldName: string]: Partial<FieldSpec> } => keyBy('name', getAllBrowserFields(browserFields));
+export const getAllFieldsByName = memoizeOne(
+  (browserFields: BrowserFields): { [fieldName: string]: Partial<FieldSpec> } =>
+    keyBy('name', getAllBrowserFields(browserFields)),
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
+);
 
 export const getIndexFields = memoizeOne(
   (title: string, fields: IIndexPatternFieldList): DataViewBase =>

@@ -207,6 +207,7 @@ enabled:
   - x-pack/test/functional_execution_context/config.ts
   - x-pack/test/functional_with_es_ssl/apps/cases/group1/config.ts
   - x-pack/test/functional_with_es_ssl/apps/cases/group2/config.ts
+  - x-pack/test/functional_with_es_ssl/apps/cases/basic/config.ts
   - x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/config.ts
   - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/config.ts
   - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/shared/config.ts

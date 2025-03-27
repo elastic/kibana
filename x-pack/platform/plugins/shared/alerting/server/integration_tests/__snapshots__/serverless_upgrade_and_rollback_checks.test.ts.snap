@@ -1561,6 +1561,7 @@ Object {
     "anomalyDetectorTypes": Object {
       "flags": Object {
         "default": [Function],
+        "description": "The types of anomalies that are detected. For example, detect abnormal latency, throughput, or failed transaction rates.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1628,6 +1629,7 @@ Object {
     },
     "anomalySeverityType": Object {
       "flags": Object {
+        "description": "The severity of anomalies that result in an alert: critical, major, minor, or warning.",
         "error": [Function],
       },
       "matches": Array [
@@ -1684,6 +1686,7 @@ Object {
     },
     "environment": Object {
       "flags": Object {
+        "description": "The environment from APM.",
         "error": [Function],
       },
       "rules": Array [
@@ -1699,6 +1702,7 @@ Object {
     "serviceName": Object {
       "flags": Object {
         "default": [Function],
+        "description": "The service name from APM.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1720,6 +1724,7 @@ Object {
     "transactionType": Object {
       "flags": Object {
         "default": [Function],
+        "description": "The transaction type from APM.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1740,12 +1745,14 @@ Object {
     },
     "windowSize": Object {
       "flags": Object {
+        "description": "The size of the time window (in \`windowUnit\` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.",
         "error": [Function],
       },
       "type": "number",
     },
     "windowUnit": Object {
       "flags": Object {
+        "description": "The type of units for the time window: minutes, hours, or days.",
         "error": [Function],
       },
       "rules": Array [
@@ -1775,6 +1782,7 @@ Object {
   "keys": Object {
     "environment": Object {
       "flags": Object {
+        "description": "Filter the errors coming from your application to apply the rule to a specific environment.",
         "error": [Function],
       },
       "rules": Array [
@@ -1790,6 +1798,7 @@ Object {
     "errorGroupingKey": Object {
       "flags": Object {
         "default": [Function],
+        "description": "Filter the errors coming from your application to apply the rule to a specific error grouping key, which is a hash of the stack trace and other properties.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1817,6 +1826,7 @@ Object {
       "items": Array [
         Object {
           "flags": Object {
+            "description": "Perform a composite aggregation against the selected fields. When any of these groups match the selected rule conditions, an alert is triggered per group.",
             "error": [Function],
             "presence": "optional",
           },
@@ -1951,6 +1961,7 @@ Object {
     "serviceName": Object {
       "flags": Object {
         "default": [Function],
+        "description": "Filter the errors coming from your application to apply the rule to a specific service.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1971,6 +1982,7 @@ Object {
     },
     "threshold": Object {
       "flags": Object {
+        "description": "The number of errors, which is the threshold for alerts.",
         "error": [Function],
       },
       "type": "number",
@@ -1978,6 +1990,7 @@ Object {
     "useKqlFilter": Object {
       "flags": Object {
         "default": [Function],
+        "description": "A filter in Kibana Query Language (KQL) that limits the scope of the rule.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1990,12 +2003,14 @@ Object {
     },
     "windowSize": Object {
       "flags": Object {
+        "description": "The time frame in which the errors must occur (in \`windowUnit\` units). Generally it should be a value higher than the rule check interval to avoid gaps in detection.",
         "error": [Function],
       },
       "type": "number",
     },
     "windowUnit": Object {
       "flags": Object {
+        "description": "The type of units for the time window: minutes, hours, or days.",
         "error": [Function],
       },
       "rules": Array [
@@ -2025,6 +2040,7 @@ Object {
   "keys": Object {
     "aggregationType": Object {
       "flags": Object {
+        "description": "The type of aggregation to perform.",
         "error": [Function],
       },
       "matches": Array [
@@ -2069,6 +2085,7 @@ Object {
     },
     "environment": Object {
       "flags": Object {
+        "description": "Filter the rule to apply to a specific environment.",
         "error": [Function],
       },
       "rules": Array [
@@ -2090,6 +2107,7 @@ Object {
       "items": Array [
         Object {
           "flags": Object {
+            "description": "Perform a composite aggregation against the selected fields. When any of these groups match the selected rule conditions, an alert is triggered per group.",
             "error": [Function],
             "presence": "optional",
           },
@@ -2224,6 +2242,7 @@ Object {
     "serviceName": Object {
       "flags": Object {
         "default": [Function],
+        "description": "Filter the rule to apply to a specific service.",
         "error": [Function],
         "presence": "optional",
       },
@@ -2244,6 +2263,7 @@ Object {
     },
     "threshold": Object {
       "flags": Object {
+        "description": "The latency threshold value.",
         "error": [Function],
       },
       "type": "number",
@@ -2251,6 +2271,7 @@ Object {
     "transactionName": Object {
       "flags": Object {
         "default": [Function],
+        "description": "Filter the rule to apply to a specific transaction name.",
         "error": [Function],
         "presence": "optional",
       },
@@ -2272,6 +2293,7 @@ Object {
     "transactionType": Object {
       "flags": Object {
         "default": [Function],
+        "description": "Filter the rule to apply to a specific transaction type.",
         "error": [Function],
         "presence": "optional",
       },
@@ -2293,6 +2315,7 @@ Object {
     "useKqlFilter": Object {
       "flags": Object {
         "default": [Function],
+        "description": "A Kibana Query Language (KQL) expression thats limits the scope of alerts.",
         "error": [Function],
         "presence": "optional",
       },
@@ -2305,12 +2328,14 @@ Object {
     },
     "windowSize": Object {
       "flags": Object {
+        "description": "The size of the time window (in \`windowUnit\` units), which determines how far back to search for documents. Generally it should be a value higher than the rule check interval to avoid gaps in detection.",
         "error": [Function],
       },
       "type": "number",
     },
     "windowUnit": Object {
       "flags": Object {
+        "description": "The type of units for the time window. For example: minutes, hours, or days.",
         "error": [Function],
       },
       "rules": Array [

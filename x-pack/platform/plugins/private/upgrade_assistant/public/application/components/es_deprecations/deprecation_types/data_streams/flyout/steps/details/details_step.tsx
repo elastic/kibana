@@ -25,12 +25,12 @@ import {
   DataStreamMetadata,
   DataStreamMigrationStatus,
   DataStreamResolutionType,
+  DataStreamsAction,
 } from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
 import type { MigrationState } from '../../../use_migration_state';
 import { useAppContext } from '../../../../../../../app_context';
 import { DurationClarificationCallOut } from './warnings_callout';
-import { getPrimaryButtonLabel } from '../../messages';
 
 /**
  * Displays a flyout that shows the current reindexing status for a given index.
@@ -39,10 +39,18 @@ import { getPrimaryButtonLabel } from '../../messages';
 export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
   closeFlyout: () => void;
   migrationState: MigrationState;
+  correctiveAction: DataStreamsAction;
   initAction: (resolutionType: DataStreamResolutionType) => void;
   lastIndexCreationDateFormatted: string;
   meta: DataStreamMetadata;
-}> = ({ closeFlyout, migrationState, initAction, lastIndexCreationDateFormatted, meta }) => {
+}> = ({
+  closeFlyout,
+  migrationState,
+  initAction,
+  lastIndexCreationDateFormatted,
+  correctiveAction,
+  meta,
+}) => {
   const {
     services: {
       api,
@@ -56,6 +64,9 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
   const isCompleted = status === DataStreamMigrationStatus.completed;
   const hasFetchFailed = status === DataStreamMigrationStatus.fetchFailed;
   const hasMigrationFailed = status === DataStreamMigrationStatus.failed;
+
+  const readOnlyExcluded = correctiveAction.metadata.excludedActions?.includes('readOnly');
+  const reindexExcluded = correctiveAction.metadata.excludedActions?.includes('reindex');
 
   const { data: nodes } = api.useLoadNodeDiskSpace();
 
@@ -172,29 +183,34 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
             />
           </p>
           <ul>
-            <FormattedMessage
-              id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.readOnlyText"
-              tagName="li"
-              defaultMessage="If you do not need to update historical data, mark as read-only. You can reindex post-upgrade if updates are needed."
-            />
-            <li>
-              <FormattedMessage
-                id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.reindexOptionListTitle"
-                defaultMessage="Reindex"
-              />
-              <ul>
+            {!readOnlyExcluded && (
+              <li>
                 <FormattedMessage
-                  tagName="li"
-                  id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.reindexOption.rolledOverIndex"
-                  defaultMessage="The current write index will be rolled over and reindexed."
+                  id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.readOnlyText"
+                  defaultMessage="If you do not need to update historical data, mark as read-only. You can reindex post-upgrade if updates are needed."
                 />
+              </li>
+            )}
+            {!reindexExcluded && (
+              <li>
                 <FormattedMessage
-                  tagName="li"
-                  id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.reindexOption.additionalIndices"
-                  defaultMessage="Additional backing indices will be reindexed and remain editable."
+                  id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.reindexOptionListTitle"
+                  defaultMessage="Reindex"
                 />
-              </ul>
-            </li>
+                <ul>
+                  <FormattedMessage
+                    tagName="li"
+                    id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.reindexOption.rolledOverIndex"
+                    defaultMessage="The current write index will be rolled over and reindexed."
+                  />
+                  <FormattedMessage
+                    tagName="li"
+                    id="xpack.upgradeAssistant.dataStream.migration.flyout.detailsStep.reindexOption.additionalIndices"
+                    defaultMessage="Additional backing indices will be reindexed and remain editable."
+                  />
+                </ul>
+              </li>
+            )}
           </ul>
           <p>
             <FormattedMessage
@@ -231,34 +247,45 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
-              {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
+              {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && !reindexExcluded && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    color={status === DataStreamMigrationStatus.cancelled ? 'warning' : 'accent'}
+                    color={
+                      status === DataStreamMigrationStatus.cancelled
+                        ? 'warning'
+                        : readOnlyExcluded
+                        ? 'primary'
+                        : 'accent'
+                    }
                     iconType={status === DataStreamMigrationStatus.cancelled ? 'play' : undefined}
                     onClick={() => initAction('reindex')}
                     isLoading={loading}
-                    disabled={loading || !hasRequiredPrivileges}
+                    disabled={loading || !hasRequiredPrivileges || reindexExcluded}
                     data-test-subj="startDataStreamReindexingButton"
                   >
-                    {getPrimaryButtonLabel(status)}
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.dataStream.migration.flyout.reindexButton.initReindexButtonLabel"
+                      defaultMessage="Reindex"
+                    />
                   </EuiButton>
                 </EuiFlexItem>
               )}
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  color={'primary'}
-                  onClick={() => initAction('readonly')}
-                  disabled={!hasRequiredPrivileges}
-                  data-test-subj="startDataStreamReadonlyButton"
-                >
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.markReadOnlyButtonLabel"
-                    defaultMessage="Mark all read only"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
+              {!readOnlyExcluded && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    color={'primary'}
+                    onClick={() => initAction('readonly')}
+                    disabled={!hasRequiredPrivileges || readOnlyExcluded}
+                    data-test-subj="startDataStreamReadonlyButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.initMarkReadOnlyButtonLabel"
+                      defaultMessage="Mark read-only"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

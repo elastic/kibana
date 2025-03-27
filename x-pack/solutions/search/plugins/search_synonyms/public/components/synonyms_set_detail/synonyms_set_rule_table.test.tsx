@@ -9,6 +9,7 @@ import React from 'react';
 
 import { render, screen } from '@testing-library/react';
 import { SynonymsSetRuleTable } from './synonyms_set_rule_table';
+import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('../../hooks/use_fetch_synonyms_set', () => ({
   useFetchSynonymsSet: () => ({
@@ -64,7 +65,11 @@ jest.mock('../../hooks/use_put_synonyms_rule', () => ({
 
 describe('SynonymSetDetail table', () => {
   it('should render the list with synonym rules', () => {
-    render(<SynonymsSetRuleTable synonymsSetId="synonymSetId" />);
+    render(
+      <I18nProvider>
+        <SynonymsSetRuleTable synonymsSetId="synonymSetId" />
+      </I18nProvider>
+    );
     const synonymSetTable = screen.getByTestId('synonyms-set-table');
     expect(synonymSetTable).toBeInTheDocument();
 

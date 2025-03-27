@@ -59,6 +59,10 @@ const EntityStoreDashboardPanelsComponent = () => {
     );
   }
 
+  const atLeastOneRiskEngineInstalled =
+    riskEngineStatus.data?.risk_engine_status !== RiskEngineStatusEnum.NOT_INSTALLED ||
+    riskEngineStatus.data?.legacy_risk_engine_status !== RiskEngineStatusEnum.NOT_INSTALLED;
+
   return (
     <EuiFlexGroup direction="column" data-test-subj="entityStorePanelsGroup">
       {storeStatusQuery.status === 'error' ? (
@@ -72,7 +76,7 @@ const EntityStoreDashboardPanelsComponent = () => {
         />
       )}
 
-      {riskEngineStatus.data?.risk_engine_status !== RiskEngineStatusEnum.NOT_INSTALLED && (
+      {atLeastOneRiskEngineInstalled && (
         <>
           {entityTypes.map((entityType) => (
             <EuiFlexItem key={entityType}>

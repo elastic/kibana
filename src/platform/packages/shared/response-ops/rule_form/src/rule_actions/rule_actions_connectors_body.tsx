@@ -126,13 +126,18 @@ export const RuleActionsConnectorsBody = ({
   const availableConnectors = useMemo(() => {
     return connectors.filter(({ actionTypeId }) => {
       const actionType = connectorTypes.find(({ id }) => id === actionTypeId);
+
+      if (!actionTypeRegistry.has(actionTypeId)) {
+        return false;
+      }
+
       const actionTypeModel = actionTypeRegistry.get(actionTypeId);
 
       if (!actionType) {
         return false;
       }
 
-      if (!actionTypeModel.actionParamsFields) {
+      if (!actionTypeModel?.actionParamsFields) {
         return false;
       }
 

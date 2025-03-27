@@ -5,7 +5,7 @@
 Helpers defined in this package:
 
 - Can be used in other packages and plugins to make it easier to define schemas with Zod, such as API schemas.
-- Are already used in `packages/kbn-openapi-generator`.
+- Are already used in `src/platform/packages/shared/kbn-openapi-generator`.
 - Are already used in `x-pack/solutions/security/plugins/security_solution`.
 
 When you add some helper code to this package, please make sure that:

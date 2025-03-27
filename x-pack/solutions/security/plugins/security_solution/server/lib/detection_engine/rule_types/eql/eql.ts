@@ -55,6 +55,7 @@ import type { RulePreviewLoggedRequest } from '../../../../../common/api/detecti
 import { logEqlRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
 import { alertSuppressionTypeGuard } from '../utils/get_is_alert_suppression_active';
+import { checkErrorDetails } from '../utils/check_error_details';
 
 interface EqlExecutorParams {
   inputIndex: string[];
@@ -244,12 +245,7 @@ export const eqlExecutor = async ({
       });
       return { result, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
     } catch (error) {
-      if (
-        typeof error.message === 'string' &&
-        (error.message as string).includes('verification_exception')
-      ) {
-        // We report errors that are more related to user configuration of rules rather than system outages as "user errors"
-        // so SLO dashboards can show less noise around system outages
+      if (checkErrorDetails(error).isUserError) {
         result.userError = true;
       }
       result.errors.push(error.message);

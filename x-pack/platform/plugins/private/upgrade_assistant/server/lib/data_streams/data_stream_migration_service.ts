@@ -65,9 +65,12 @@ interface DataStreamMigrationService {
 
   /**
    * Marks the given indices as read-only.
+   * First it will roll over the write index if it exists in the deprecated indices.
+   * Then it will unfreeze the indices and set them to read-only.
+   * @param dataStreamName
    * @param indices
    */
-  readonlyIndices: (indices: string[]) => Promise<void>;
+  readonlyIndices: (dataStreamName: string, indices: string[]) => Promise<void>;
 }
 
 export interface DataStreamMigrationServiceFactoryParams {
@@ -182,24 +185,58 @@ export const dataStreamMigrationServiceFactory = ({
           );
         }
 
+        // Propagate errors from the reindex task even if reindexing is not yet complete.
+        if (taskResponse.errors.length) {
+          // Include the entire task result in the error message. This should be guaranteed
+          // to be JSON-serializable since it just came back from Elasticsearch.
+          throw error.reindexTaskFailed(
+            `Reindexing failed with ${taskResponse.errors.length} errors:\n${JSON.stringify(
+              taskResponse,
+              null,
+              2
+            )}`
+          );
+        }
+
         if (taskResponse.complete) {
-          // Check that no failures occurred
-          if (taskResponse.errors.length) {
-            // Include the entire task result in the error message. This should be guaranteed
-            // to be JSON-serializable since it just came back from Elasticsearch.
-            throw error.reindexTaskFailed(
-              `Reindexing failed with ${taskResponse.errors.length} errors:\n${JSON.stringify(
-                taskResponse,
-                null,
-                2
-              )}`
+          /**
+           * If the task is complete, check if there are any remaining indices that require upgrade
+           * If that is the case, we need to update the status to not started
+           * This way the user can trigger a new migration.
+           * Note: This is the best place to do this call because we it'll only be called
+           * 1 timeonce the task is complete.
+           * Cases we reach this code execution:
+           *     1. Task is complete and the user has the UA open. It'll disappear once the user refreshes.
+           *     2. Task is complete but we have remaining indices that require upgrade.
+           */
+
+          const { data_streams: dataStreamsDeprecations } = await esClient.migration.deprecations({
+            filter_path: `data_streams`,
+          });
+
+          const deprecationsDetails = dataStreamsDeprecations[dataStreamName];
+          if (deprecationsDetails && deprecationsDetails.length) {
+            const deprecationDetails = deprecationsDetails.find(
+              (deprecation) => deprecation._meta!.reindex_required
             );
+            if (deprecationDetails) {
+              const stillNeedsUpgrade =
+                deprecationDetails._meta!.reindex_required === true &&
+                deprecationDetails._meta!.indices_requiring_upgrade_count > 0;
+              if (stillNeedsUpgrade) {
+                return {
+                  status: DataStreamMigrationStatus.notStarted,
+                };
+              }
+            }
           }
 
+          // Find the first deprecation that has reindex_required set to true
           // Update the status
           return {
             taskPercComplete: 1,
             status: DataStreamMigrationStatus.completed,
+            resolutionType: 'reindex',
             progressDetails: {
               startTimeMs: taskResponse.start_time_millis,
               successCount: taskResponse.successes,
@@ -215,6 +252,7 @@ export const dataStreamMigrationServiceFactory = ({
           return {
             status: DataStreamMigrationStatus.inProgress,
             taskPercComplete: perc,
+            resolutionType: 'reindex',
             progressDetails: {
               startTimeMs: taskResponse.start_time_millis,
               successCount: taskResponse.successes,
@@ -238,6 +276,7 @@ export const dataStreamMigrationServiceFactory = ({
 
         return {
           status: DataStreamMigrationStatus.failed,
+          resolutionType: 'reindex',
           errorMessage: err.toString(),
         };
       }
@@ -254,6 +293,7 @@ export const dataStreamMigrationServiceFactory = ({
 
       return {
         status: DataStreamMigrationStatus.cancelled,
+        resolutionType: 'reindex',
       };
     },
     async getDataStreamMetadata(dataStreamName: string): Promise<DataStreamMetadata | null> {
@@ -298,9 +338,9 @@ export const dataStreamMigrationServiceFactory = ({
             throw error.cannotGrabMetadata(`Index ${index} does not exist in this cluster.`);
           }
 
-          indicesRequiringUpgradeDocsSize += (indexStats[1] as any).total.store
+          indicesRequiringUpgradeDocsSize += (indexStats[1] as any).primaries.store
             .total_data_set_size_in_bytes;
-          indicesRequiringUpgradeDocsCount += (indexStats[1] as any).total.docs.count;
+          indicesRequiringUpgradeDocsCount += (indexStats[1] as any).primaries.docs.count;
 
           const body = await esClient.indices.getSettings({
             index,
@@ -333,7 +373,30 @@ export const dataStreamMigrationServiceFactory = ({
       }
     },
 
-    async readonlyIndices(indices: string[]) {
+    async readonlyIndices(dataStreamName: string, indices: string[]) {
+      try {
+        const { data_streams: dataStreamsDetails } = await esClient.indices.getDataStream({
+          name: dataStreamName,
+        });
+        // Since we are not using a pattern it should only return one item
+        const dataStreamBackIndices = dataStreamsDetails[0].indices;
+
+        // The last item in this array contains information about the stream’s current write index.
+        const writeIndex = dataStreamBackIndices[dataStreamBackIndices.length - 1].index_name;
+        const hasWriteIndex = indices.some((index) => index === writeIndex);
+
+        if (hasWriteIndex) {
+          const rollOverResponse = await esClient.indices.rollover({
+            alias: dataStreamName,
+          });
+          if (!rollOverResponse.acknowledged) {
+            throw error.readonlyTaskFailed(`Could not rollover data stream ${dataStreamName}.`);
+          }
+        }
+      } catch (err) {
+        throw error.readonlyTaskFailed(`Could not migrate data stream ${dataStreamName}.`);
+      }
+
       for (const index of indices) {
         try {
           const unfreeze = await esClient.indices.unfreeze({ index });

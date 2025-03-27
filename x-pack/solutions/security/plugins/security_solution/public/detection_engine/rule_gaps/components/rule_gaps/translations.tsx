@@ -131,3 +131,9 @@ export const GAP_FILL_DISABLED_MESSAGE = i18n.translate(
     defaultMessage: 'Rule should be enabled to fill gaps',
   }
 );
+
+export const GAPS_TABLE_TOTAL_GAPS_LABEL = (totalItems: number, maxItems: number) =>
+  i18n.translate('xpack.securitySolution.gapsTable.totalGapsLabel', {
+    values: { totalItems, maxItems },
+    defaultMessage: `More than {totalItems} gaps match filters provided. Showing first {maxItems}. Constrain filters further to view additional gaps.`,
+  });

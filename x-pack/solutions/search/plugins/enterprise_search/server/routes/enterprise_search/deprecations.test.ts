@@ -15,8 +15,6 @@ import { mockDependencies, MockRouter } from '../../__mocks__';
 import { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { deleteConnectorById, putUpdateNative } from '@kbn/search-connectors';
 
-import indexDeprecatorFxns = require('../../deprecations/pre_eight_index_deprecator');
-
 import { registerDeprecationRoutes } from './deprecations';
 
 describe('deprecation routes', () => {
@@ -178,51 +176,6 @@ describe('deprecation routes', () => {
       expect(updateNativeMock).toHaveBeenCalledWith(mockClient, 'foo', false);
       expect(updateNativeMock).toHaveBeenCalledWith(mockClient, 'bar', false);
       expect(updateNativeMock).toHaveBeenCalledWith(mockClient, 'baz', false);
-    });
-  });
-
-  describe('POST /internal/enterprise_search/deprecations/set_enterprise_search_indices_read_only', () => {
-    const mockClient = {};
-    let mockRouter: MockRouter;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      const context = {
-        core: Promise.resolve({ elasticsearch: { client: { asCurrentUser: mockClient } } }),
-      } as jest.Mocked<RequestHandlerContext>;
-      mockRouter = new MockRouter({
-        context,
-        method: 'post',
-        path: '/internal/enterprise_search/deprecations/set_enterprise_search_indices_read_only',
-      });
-
-      registerDeprecationRoutes({
-        ...mockDependencies,
-        router: mockRouter.router,
-      });
-    });
-
-    it('sets read-only and 200s correctly in happy path', async () => {
-      const setIndicesReadOnlyMock = jest.spyOn(
-        indexDeprecatorFxns,
-        'setPreEightEnterpriseSearchIndicesReadOnly'
-      );
-
-      const request = {
-        body: { deprecationDetails: { domainId: 'enterpriseSearch' } },
-      };
-      mockRouter.shouldValidate(request);
-
-      setIndicesReadOnlyMock.mockResolvedValue('');
-
-      await mockRouter.callRoute(request);
-      expect(setIndicesReadOnlyMock).toHaveBeenCalledTimes(1);
-      expect(mockRouter.response.ok).toHaveBeenCalledTimes(1);
-    });
-
-    it('fails validation without deprecation context', () => {
-      const request = { body: {} };
-      mockRouter.shouldThrow(request);
     });
   });
 });

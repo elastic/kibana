@@ -61,7 +61,7 @@ When the number of results returned by your search query (displayed at the top o
 
 On the last page of the table, a message indicates that you've reached the end of the loaded search results. From that message, you can choose to load more results to continue exploring. 
 
-image:images/discover-limit-sample-size.png[Limit sample size in Discover]
+image:images/discover-limit-sample-size.png[Limit sample size in Discover, width="40%"]
 
 
 [float]

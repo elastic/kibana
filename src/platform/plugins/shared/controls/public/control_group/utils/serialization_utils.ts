@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 
 import { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { ControlGroupRuntimeState, ControlGroupSerializedState } from '../../../common';
@@ -17,7 +17,9 @@ export const deserializeControlGroup = (
   state: SerializedPanelState<ControlGroupSerializedState>
 ): ControlGroupRuntimeState => {
   const { controls } = state.rawState;
-  const controlsMap = Object.fromEntries(controls.map(({ id, ...rest }) => [id, rest]));
+
+  // we must cloneDeep `rest` because otherwise controlConfig gets copied by reference and not by value
+  const controlsMap = Object.fromEntries(controls.map(({ id, ...rest }) => [id, cloneDeep(rest)]));
 
   /** Inject data view references into each individual control */
   const references = state.references ?? [];
@@ -25,7 +27,7 @@ export const deserializeControlGroup = (
     const referenceName = reference.name;
     const { controlId } = parseReferenceName(referenceName);
     if (controlsMap[controlId]) {
-      controlsMap[controlId].dataViewId = reference.id;
+      controlsMap[controlId].controlConfig.dataViewId = reference.id;
     }
   });
 
@@ -35,7 +37,10 @@ export const deserializeControlGroup = (
     const currentControlExplicitInput = controlsMap[controlId].controlConfig;
     return {
       ...prev,
-      [controlId]: { ...omit(currentControl, 'controlConfig'), ...currentControlExplicitInput },
+      [controlId]: {
+        ...omit(currentControl, 'controlConfig'),
+        ...currentControlExplicitInput,
+      },
     };
   }, {});
 

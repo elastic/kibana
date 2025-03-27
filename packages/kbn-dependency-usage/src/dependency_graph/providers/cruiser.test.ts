@@ -114,11 +114,11 @@ describe('identifyDependencyUsage', () => {
     const [, configWithDepth1] = (cruise as jest.Mock).mock.calls[1];
 
     expect(configWithDepth2.collapse).toMatchInlineSnapshot(
-      `"^(x-pack/plugins|x-pack/packages|src/plugins|packages|src|x-pack/test|x-pack/test_serverless)/([^/]+)/([^/]+)"`
+      `"^(x-pack/solutions/observability/plugins|x-pack/solutions/observability/packages|x-pack/solutions/security/plugins|x-pack/solutions/security/packages|x-pack/solutions/search/plugins|x-pack/solutions/search/packages|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|x-pack/test|x-pack/test_serverless|test)/([^/]+)/([^/]+)"`
     );
 
     expect(configWithDepth1.collapse).toMatchInlineSnapshot(
-      `"^(x-pack/plugins|x-pack/packages|src/plugins|packages|src|x-pack/test|x-pack/test_serverless)/([^/]+)|^node_modules/(@[^/]+/[^/]+|[^/]+)"`
+      `"^(x-pack/solutions/observability/plugins|x-pack/solutions/observability/packages|x-pack/solutions/security/plugins|x-pack/solutions/security/packages|x-pack/solutions/search/plugins|x-pack/solutions/search/packages|x-pack/platform/plugins|x-pack/platform/packages|x-pack/packages|src/platform/plugins|src/platform/packages|src/core/packages|packages|src|x-pack/test|x-pack/test_serverless|test)/([^/]+)|^node_modules/(@[^/]+/[^/]+|[^/]+)"`
     );
   });
 
