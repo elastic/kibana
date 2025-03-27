@@ -350,7 +350,7 @@ function ManagedOTLPEndpointInstructions({
       <EuiMarkdownFormat>
         {i18n.translate('xpack.apm.onboarding.otel.configureAgent.textPre', {
           defaultMessage:
-            'The managed OTLP endpoint provides native support for OTLP data and handles logs, metrics and traces consistently. It preserves OpenTelemetry semantic conventions and resource attributes, offering a native experience aligned with OpenTelemetry standards. This endpoint also automatically manages scalability and resiliency for your data ingestion. Note that the managed OTLP endpoint is currently in **Tech Preview.**',
+            'The Managed OTLP Endpoint provides native support for handling of log, metric, and trace data from OpenTelemetry sources. It preserves OpenTelemetry semantic conventions and resource attributes, offering a native experience aligned with OpenTelemetry standards. Managed OTLP endpoint is currently in **Technical Preview.** Specify the following OpenTelemetry settings as part of the startup of your application.',
         })}
       </EuiMarkdownFormat>
       <EuiSpacer />
