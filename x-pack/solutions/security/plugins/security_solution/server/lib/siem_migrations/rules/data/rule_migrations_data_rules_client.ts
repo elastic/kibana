@@ -27,6 +27,7 @@ import {
   SiemMigrationStatus,
   RuleTranslationResult,
 } from '../../../../../common/siem_migrations/constants';
+import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   type RuleMigrationTaskStats,
   type RuleMigrationTranslationStats,

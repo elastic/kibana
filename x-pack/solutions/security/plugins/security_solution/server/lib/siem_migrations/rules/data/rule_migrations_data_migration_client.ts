@@ -5,20 +5,11 @@
  * 2.0.
  */
 
+import type { CreateMigrationMetadataInput, StoredMigrationMetadata } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 
-interface MigrationInput {
-  migrationId: string;
-  type: 'rules' | 'dashboards';
-  vendor?: 'splunk';
-}
-
-interface MigrationOutput {
-  migration_id: string;
-}
-
 export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseClient {
-  async create({ migrationId, type, vendor = 'splunk' }: MigrationInput): Promise<void> {
+  async create({ migrationId }: CreateMigrationMetadataInput): Promise<void> {
     const index = await this.getIndexName();
     const profileUid = await this.getProfileUid();
 
@@ -41,8 +32,6 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
           { create: { _index: index } },
           {
             migration_id: migrationId,
-            type,
-            vendor,
             created_by: profileUid,
             created_at: createdAt,
             updated_at: createdAt,
@@ -56,18 +45,18 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
       });
   }
 
-  async get({ migrationId }: { migrationId: string }): Promise<MigrationOutput> {
+  async get({ migrationId }: { migrationId: string }): Promise<StoredMigrationMetadata> {
     this.logger.debug(`Getting migration ${migrationId}.`);
     const index = await this.getIndexName();
-    const query = {
+    const queryByMigrationId = {
       term: {
         migration_id: migrationId,
       },
     };
     const response = await this.esClient
-      .search<MigrationOutput>({
+      .search<StoredMigrationMetadata>({
         index,
-        query,
+        query: queryByMigrationId,
         size: 1,
       })
       .catch((error) => {

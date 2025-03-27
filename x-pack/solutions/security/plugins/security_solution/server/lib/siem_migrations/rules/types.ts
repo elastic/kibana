@@ -13,6 +13,7 @@ import type { PackageService } from '@kbn/fleet-plugin/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import type { IndexAdapter, IndexPatternAdapter } from '@kbn/index-adapter';
 import type {
+  RuleMigration,
   RuleMigrationTranslationResult,
   UpdateRuleMigrationData,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
@@ -20,6 +21,28 @@ import { type RuleMigrationResource } from '../../../../common/siem_migrations/m
 import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_client';
 
 export type Stored<T extends object> = T & { id: string };
+
+export type WithCommonAttrs<T extends object> = T & {
+  /** The moment the migration was created */
+  created_at: string;
+  /** The profile id of the user who created the migration */
+  created_by: string;
+  /** The moment the migration was last updated */
+  updated_at: string;
+  /** The profile id of the user who last updated the migration */
+  updated_by: string;
+};
+
+export interface CreateMigrationMetadataInput {
+  migrationId: string;
+}
+
+export interface MigrationMetadataResponse {
+  migration_id: string;
+}
+
+export type MigrationMetadata = WithCommonAttrs<MigrationMetadataResponse>;
+export type StoredMigrationMetadata = Stored<MigrationMetadata>;
 
 export type StoredRuleMigration = Stored<RuleMigration>;
 export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;

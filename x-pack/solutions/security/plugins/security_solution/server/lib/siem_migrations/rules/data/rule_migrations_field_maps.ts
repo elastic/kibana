@@ -76,7 +76,4 @@ export const prebuiltRulesFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigrationPre
 
 export const migrationsFieldMaps = {
   migration_id: { type: 'keyword', required: true },
-  // rule or dashboard
-  type: { type: 'keyword', required: true },
-  vendor: { type: 'keyword', required: true },
 };

@@ -20,7 +20,6 @@ import type { CreateRuleMigrationInput } from '../data/rule_migrations_data_rule
 import { SiemMigrationAuditLogger } from './util/audit';
 import { authz } from './util/authz';
 import { withLicense } from './util/with_license';
-import { DuplicateMigrationIdError } from '../../common/errors';
 
 export const registerSiemRuleMigrationsCreateRoute = (
   router: SecuritySolutionPluginRouter,
@@ -57,21 +56,9 @@ export const registerSiemRuleMigrationsCreateRoute = (
 
             await siemMigrationAuditLogger.logCreateMigration({ migrationId });
 
-            try {
-              await ruleMigrationsClient.data.migrations.create({
-                migrationId,
-                type: 'rules',
-                vendor: originalRules[0].vendor,
-              });
-            } catch (error) {
-              if (error instanceof DuplicateMigrationIdError) {
-                logger.debug(
-                  `Migration with id ${migrationId} already exists. Updating it with more rules.`
-                );
-              } else {
-                throw error;
-              }
-            }
+            await ruleMigrationsClient.data.migrations.create({
+              migrationId,
+            });
 
             const ruleMigrations = originalRules.map<CreateRuleMigrationInput>((originalRule) => ({
               migration_id: migrationId,
