@@ -129,7 +129,6 @@ export function InterceptDisplayManager({ ackIntercept, intercept$ }: InterceptD
       <EuiSplitPanel.Outer
         grow
         role="dialog"
-        data-test-subj={`interceptStep-${currentInterceptStep.id}`}
         css={css`
           position: fixed;
           inline-size: 360px;
@@ -142,11 +141,13 @@ export function InterceptDisplayManager({ ackIntercept, intercept$ }: InterceptD
               ${euiTheme.animation.resistance};
           }
         `}
+        data-test-subj={`intercept-${currentIntercept.id}`}
       >
         <EuiSplitPanel.Inner
           css={css`
             min-height: 112px;
           `}
+          data-test-subj={`interceptStep-${currentInterceptStep.id}`}
         >
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
