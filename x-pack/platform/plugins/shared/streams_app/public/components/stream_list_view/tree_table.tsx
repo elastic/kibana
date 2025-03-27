@@ -150,8 +150,8 @@ export function asTrees(streams: ListStreamDetail[]) {
         type: isUnwiredStreamDefinition(streamDetail.stream)
           ? 'classic'
           : isRootStreamDefinition(streamDetail.stream)
-            ? 'root'
-            : 'wired',
+          ? 'root'
+          : 'wired',
       };
       currentTree.push(newNode);
     }
