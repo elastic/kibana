@@ -66,7 +66,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   isLinkEnabled,
   isPreviewMode,
 }: RiskSummaryProps<T>) => {
-  const { telemetry, spaces } = useKibana().services;
+  const { telemetry } = useKibana().services;
   const { data } = riskScoreData;
   const riskData = data && data.length > 0 ? data[0] : undefined;
   const entityData = getEntityData<T>(entityType, riskData);
