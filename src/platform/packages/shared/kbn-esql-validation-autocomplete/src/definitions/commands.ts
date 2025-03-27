@@ -599,9 +599,9 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     ),
     declaration: `CHANGE_POINT <value> ON <field_name> AS <type>, <pvalue>`,
     examples: [
-      '… | change_point value',
-      '… | change_point value on timestamp',
-      '… | change_point value on timestamp as type, pvalue',
+      '… | CHANGE_POINT value',
+      '… | CHANGE_POINT value ON timestamp',
+      '… | CHANGE_POINT value ON timestamp AS type, pvalue',
     ],
     validate: (command: ESQLCommand, references) => {
       const messages: ESQLMessage[] = [];

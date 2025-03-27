@@ -94,7 +94,10 @@ export async function suggest({
 
   switch (pos) {
     case Position.VALUE:
-      const numericFields = await getColumnsByType(ESQL_NUMBER_TYPES, [], { advanceCursor: true });
+      const numericFields = await getColumnsByType(ESQL_NUMBER_TYPES, [], {
+        advanceCursor: true,
+        openSuggestions: true,
+      });
       const lastWord = findFinalWord(innerText);
       if (lastWord !== '') {
         numericFields.forEach((fieldSuggestion) => {
@@ -109,7 +112,10 @@ export async function suggest({
       return [onSuggestion, asSuggestion, pipeCompleteItem];
     }
     case Position.ON_COLUMN: {
-      const onFields = await getColumnsByType('any', [], { advanceCursor: true });
+      const onFields = await getColumnsByType('any', [], {
+        advanceCursor: true,
+        openSuggestions: true,
+      });
       return onFields;
     }
     case Position.AFTER_ON_CLAUSE:
@@ -118,7 +124,7 @@ export async function suggest({
       // add comma and space
       const suggestions: SuggestionRawDefinition[] = buildVariablesDefinitions([
         'changePointType',
-      ]).map((v) => ({ ...v, text: v.text + ', ' }));
+      ]).map((v) => ({ ...v, text: v.text + ', ', command: TRIGGER_SUGGESTION_COMMAND }));
       return suggestions;
     }
     case Position.AS_P_VALUE_COLUMN: {
