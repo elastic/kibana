@@ -935,6 +935,9 @@ x-pack/platform/plugins/shared/streams_app @elastic/streams-program-team
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/timelines @elastic/security-threat-hunting-investigations
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
+x-pack/solutions/chat/packages/wc-genai-utils @elastic/search-kibana
+x-pack/solutions/chat/packages/wc-index-schema-builder @elastic/search-kibana
+x-pack/solutions/chat/packages/wc-integration-utils @elastic/search-kibana
 x-pack/solutions/chat/packages/wci-browser @elastic/search-kibana
 x-pack/solutions/chat/packages/wci-common @elastic/search-kibana
 x-pack/solutions/chat/packages/wci-server @elastic/search-kibana
