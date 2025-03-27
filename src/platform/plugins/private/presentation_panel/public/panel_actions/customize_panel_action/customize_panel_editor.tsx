@@ -99,7 +99,8 @@ export const CustomizePanelEditor = ({
   const dateFormat = useMemo(() => core.uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT), []);
 
   const save = () => {
-    if (panelTitle !== api.title$?.value) api.setTitle?.(panelTitle);
+    if (panelTitle !== api.title$?.value && panelTitle !== api.defaultTitle$?.value)
+      api.setTitle?.(panelTitle);
     if (hideTitle !== api.hideTitle$?.value) api.setHideTitle?.(hideTitle);
     if (panelDescription !== api.description$?.value) api.setDescription?.(panelDescription);
 
