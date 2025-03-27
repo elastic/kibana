@@ -29,7 +29,10 @@ const Fallback = ({ displayStyle }: FallbackProps) => {
   );
 };
 
-const LazySearchBar = React.lazy(() => import('./search_bar'));
+const LazySearchBar = React.lazy(async () => {
+  const { SearchBar } = await import('../ui_module');
+  return { default: SearchBar };
+});
 const WrappedSearchBar = <QT extends AggregateQuery | Query = Query>(
   props: Omit<SearchBarProps<QT>, 'intl' | 'kibana'>
 ) => {

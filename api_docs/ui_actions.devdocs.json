@@ -307,14 +307,6 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "unifiedSearch",
-                "path": "src/platform/plugins/shared/unified_search/public/plugin.ts"
-              },
-              {
-                "plugin": "unifiedSearch",
-                "path": "src/platform/plugins/shared/unified_search/public/plugin.ts"
-              },
-              {
                 "plugin": "uiActionsEnhanced",
                 "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts"
               },
