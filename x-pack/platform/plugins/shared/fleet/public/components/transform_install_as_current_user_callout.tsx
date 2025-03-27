@@ -33,7 +33,7 @@ export const TransformInstallWithCurrentUserPermissionCallout: React.FunctionCom
   return (
     <EuiCallOut color="primary" iconType="iInCircle">
       <FormattedMessage
-        id="xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout"
+        id="xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout.text"
         defaultMessage="This package has {count, plural, one {one} other {#}} {docsLink} which will be created and started with the same roles as the user installing the package."
         values={{ count, docsLink: (
           <EuiLink
@@ -42,7 +42,7 @@ export const TransformInstallWithCurrentUserPermissionCallout: React.FunctionCom
             external 
           >
             <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCalloutLinkText"
+              id="xpack.fleet.createPackagePolicy.transformInstallWithCurrentUserPermissionCallout.docsLink"
               defaultMessage="{count, plural, one {transform asset} other {transform assets}}"
               values={{ count }}
               />
