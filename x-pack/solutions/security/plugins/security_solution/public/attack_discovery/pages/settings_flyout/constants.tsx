@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-import type { Filter, Query } from '@kbn/es-query';
-
-export interface AlertsSelectionSettings {
-  end: string;
-  filters: Filter[];
-  query: Query;
-  size: number;
-  start: string;
-}
+export const MIN_FLYOUT_WIDTH = 448; // px
