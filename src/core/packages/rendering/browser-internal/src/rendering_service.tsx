@@ -21,6 +21,7 @@ import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-rendering-browser';
 import { GlobalAppStyle } from '@kbn/core-application-common';
+import { GlobalRedirectAppLink } from '@kbn/global-redirect-app-links';
 import { AppWrapper } from './app_containers';
 
 interface StartServices {
@@ -62,7 +63,7 @@ export class RenderingService {
 
     ReactDOM.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
-        <>
+        <GlobalRedirectAppLink navigateToUrl={application.navigateToUrl}>
           {/* Global Styles that apply across the entire app */}
           <GlobalAppStyle />
 
@@ -80,7 +81,7 @@ export class RenderingService {
             {/* The actual plugin/app */}
             {appComponent}
           </AppWrapper>
-        </>
+        </GlobalRedirectAppLink>
       </KibanaRootContextProvider>,
       targetDomElement
     );
