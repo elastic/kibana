@@ -27,7 +27,6 @@ import { CloudSecurityDataTable } from '../../../components/cloud_security_data_
 import { getDefaultQuery, defaultColumns } from './constants';
 import { useLatestFindingsTable } from './use_latest_findings_table';
 import { TimestampTableCell } from '../../../components/timestamp_table_cell';
-import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 import { findingsTableFieldLabels } from './findings_table_field_labels';
 
 interface LatestFindingsTableProps {

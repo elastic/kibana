@@ -80,25 +80,25 @@ const createGetMisconfigurationFindingsQuery = (resourceId?: string, ruleId?: st
 const tabs = [
   {
     id: 'overview',
-    title: i18n.translate('xpack.securitySolution.findings.findingsFlyout.overviewTabTitle', {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTabTitle', {
       defaultMessage: 'Overview',
     }),
   },
   {
     id: 'rule',
-    title: i18n.translate('xpack.securitySolution.findings.findingsFlyout.ruleTabTitle', {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTabTitle', {
       defaultMessage: 'Rule',
     }),
   },
   {
     id: 'table',
-    title: i18n.translate('xpack.securitySolution.findings.findingsFlyout.tableTabTitle', {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.tableTabTitle', {
       defaultMessage: 'Table',
     }),
   },
   {
     id: 'json',
-    title: i18n.translate('xpack.securitySolution.findings.findingsFlyout.jsonTabTitle', {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.jsonTabTitle', {
       defaultMessage: 'JSON',
     }),
   },
@@ -150,7 +150,7 @@ export const RuleNameLink = ({
     <EuiToolTip
       position="top"
       content={i18n.translate(
-        'xpack.securitySolution.findings.findingsFlyout.ruleNameTabField.ruleNameTooltip',
+        'xpack.csp.findings.findingsFlyout.ruleNameTabField.ruleNameTooltip',
         { defaultMessage: 'Manage Rule' }
       )}
     >
@@ -165,7 +165,7 @@ const getFlyoutDescriptionList = (finding: CspFinding): EuiDescriptionListProps[
   [
     finding.resource?.id && {
       title: i18n.translate(
-        'xpack.securitySolution.findings.findingsFlyout.flyoutDescriptionList.resourceId',
+        'xpack.csp.findings.findingsFlyout.flyoutDescriptionList.resourceId',
         {
           defaultMessage: 'Resource ID',
         }
@@ -174,7 +174,7 @@ const getFlyoutDescriptionList = (finding: CspFinding): EuiDescriptionListProps[
     },
     finding.resource?.name && {
       title: i18n.translate(
-        'xpack.securitySolution.findings.findingsFlyout.flyoutDescriptionList.resourceName',
+        'xpack.csp.findings.findingsFlyout.flyoutDescriptionList.resourceName',
         { defaultMessage: 'Resource Name' }
       ),
       description: finding.resource.name,
@@ -232,7 +232,7 @@ export const MissingFieldsCallout = ({
       title={
         <span style={{ color: euiTheme.colors.text }}>
           <FormattedMessage
-            id="xpack.securitySolution.findings.findingsFlyout.calloutTitle"
+            id="xpack.csp.findings.findingsFlyout.calloutTitle"
             defaultMessage="Some fields not provided by {vendor}"
             values={{
               vendor: vendor || 'the vendor',
@@ -334,4 +334,5 @@ export const FindingsRuleFlyout = ({ ruleId, resourceId }: FindingMisconfigurati
   );
 };
 
+// eslint-disable-next-line import/no-default-export
 export default FindingsRuleFlyout;
