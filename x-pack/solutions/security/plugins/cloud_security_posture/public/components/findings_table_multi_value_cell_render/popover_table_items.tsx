@@ -6,9 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPopover, EuiBadgeGroup, EuiBadge } from '@elastic/eui';
+import { EuiPopover, EuiBadgeGroup, EuiBadge, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { getShowMoreAriaLabel } from '../../pages/vulnerabilities/translations';
 
 interface PopoverItemsProps<T> {
@@ -23,7 +22,7 @@ const PopoverTableItemsComponent = <T extends unknown>({
   field,
 }: PopoverItemsProps<T>) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
+  const { euiTheme } = useEuiTheme();
   const onButtonClick = () => {
     setIsPopoverOpen(!isPopoverOpen);
   };
@@ -36,30 +35,29 @@ const PopoverTableItemsComponent = <T extends unknown>({
     <EuiPopover
       button={
         <EuiBadge
+          color="hollow"
           onClick={onButtonClick}
           onClickAriaLabel={getShowMoreAriaLabel(field, items.length - 1)}
         >
-          +
-          <FormattedMessage
-            id="xpack.csp.findings.moreWithCount"
-            defaultMessage="{count} more"
-            values={{ count: items.length - 1 }}
-          />
+          + {items.length - 1}
         </EuiBadge>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="s"
+      repositionOnScroll
     >
       <EuiBadgeGroup
         gutterSize="s"
         css={css`
-          max-height: 130px;
-          max-width: 540px;
+          max-height: 230px;
           overflow-y: auto;
+          max-width: min-content;
+          width: min-content;
+          padding-right: ${euiTheme.size.s};
         `}
       >
-        {items.slice(1).map((item, index) => renderItem(item, index, field))}
+        {items.map((item, index) => renderItem(item, index, field))}
       </EuiBadgeGroup>
     </EuiPopover>
   );
