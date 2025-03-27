@@ -385,28 +385,13 @@ export function initializePanelsManager(
       } => {
         const references: Reference[] = [];
 
-        const getApiMissingFallback = (id: string): SerializedPanelState<object> => {
-          // If the Dashboard has been saved with this panel before, we should be able to grab it from the current value of panels$
-          if (Object.keys(panels$.value[id].explicitInput ?? {}).length > 0) {
-            return {
-              rawState: panels$.value[id].explicitInput,
-              references: getReferencesForPanelId(id),
-            };
-          } else {
-            // otherwise, this panel may be new, and therefore will have its unsaved changes backed up in the dashboard backup service
-            return (
-              getDashboardBackupService().getSerializedPanelBackup(id, dashboardId) ?? {
-                rawState: {},
-              }
-            );
-          }
-        };
-
         const panels = Object.keys(panels$.value).reduce((acc, id) => {
           const childApi = children$.value[id];
           const serializeResult = apiHasSerializableState(childApi)
             ? childApi.serializeState()
-            : getApiMissingFallback(id);
+            : getDashboardBackupService().getSerializedPanelBackup(id, dashboardId) ?? {
+                rawState: {},
+              };
           acc[id] = { ...panels$.value[id], explicitInput: { ...serializeResult.rawState, id } };
 
           references.push(...prefixReferencesFromPanel(id, serializeResult.references ?? []));

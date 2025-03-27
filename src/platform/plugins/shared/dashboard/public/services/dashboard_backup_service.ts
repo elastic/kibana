@@ -111,6 +111,15 @@ class DashboardBackupService implements DashboardBackupServiceType {
           [this.activeSpaceId]: panelsStorage,
         });
       }
+
+      const serializedBackups =
+        this.sessionStorage.get(DASHBOARD_SERIALIZED_PANEL_BACKUP_KEY)?.[this.activeSpaceId] ?? {};
+      if (serializedBackups[id]) {
+        delete serializedBackups[id];
+        this.sessionStorage.set(DASHBOARD_SERIALIZED_PANEL_BACKUP_KEY, {
+          [this.activeSpaceId]: serializedBackups,
+        });
+      }
     } catch (e) {
       coreServices.notifications.toasts.addDanger({
         title: i18n.translate('dashboard.panelStorageError.clearError', {
