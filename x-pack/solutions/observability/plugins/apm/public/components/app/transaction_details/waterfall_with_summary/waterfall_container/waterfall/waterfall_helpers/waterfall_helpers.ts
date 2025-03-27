@@ -6,18 +6,18 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import type { Dictionary } from 'lodash';
-import { first, flatten, groupBy, isEmpty, keyBy, sortBy, uniq } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { Dictionary } from 'lodash';
+import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
 import { isOpenTelemetryAgentName } from '../../../../../../../../common/agent_name';
 import type { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
-import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
-import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import type {
   WaterfallError,
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../../../../../../common/waterfall/typings';
+import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
 
 type TraceAPIResponse = APIReturnType<'GET /internal/apm/traces/{traceId}'>;
 
