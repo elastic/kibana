@@ -27,7 +27,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
-import type { AlertsHealth, RuleTypeSolution } from '@kbn/alerting-types';
+import type { AlertsHealth } from '@kbn/alerting-types';
 import type { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import type { AlertingServerSetup, AlertingServerStart } from './plugin';
 import type { RulesClient } from './rules_client';
@@ -55,6 +55,7 @@ import type { PublicAlertFactory } from './alert/create_alert_factory';
 import type { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import type { PublicAlertsClient } from './alerts_client/types';
 import type { GetTimeRangeResult } from './lib/get_time_range';
+import type { AlertDeletionClient } from './alert_deletion';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -62,6 +63,7 @@ export type { RuleTypeParams };
  * @public
  */
 export interface AlertingApiRequestHandlerContext {
+  getAlertDeletionClient: () => AlertDeletionClient;
   getRulesClient: () => Promise<RulesClient>;
   getRulesSettingsClient: (withoutAuth?: boolean) => RulesSettingsClient;
   getMaintenanceWindowClient: () => MaintenanceWindowClient;
@@ -264,6 +266,8 @@ export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
    */
   formatAlert?: FormatAlert<AlertData>;
 }
+
+export type RuleTypeSolution = 'observability' | 'security' | 'stack';
 
 export interface RuleType<
   Params extends RuleTypeParams = never,

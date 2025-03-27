@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-import { FixturePlugin } from './plugin';
-
-export const plugin = async (initContext: PluginInitializerContext) =>
-  new FixturePlugin(initContext);
+export { AlertDeletionClient } from './alert_deletion_client';

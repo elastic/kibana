@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type {
+import {
   Plugin,
   CoreSetup,
   CoreStart,
@@ -14,20 +14,20 @@ import type {
   ElasticsearchClient,
 } from '@kbn/core/server';
 import { firstValueFrom, Subject } from 'rxjs';
-import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
-import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
-import type {
+import { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
+import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
+import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server/plugin';
-import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
-import type { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
-import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
+import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
+import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
@@ -89,6 +89,9 @@ const testAlertingFeatures = testRuleTypes.map((ruleTypeId) => ({
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   private readonly logger: Logger;
 
+  alertingStart$ = new Subject<AlertingServerStart>();
+  alertingStart = firstValueFrom(this.alertingStart$);
+
   taskManagerStart$ = new Subject<TaskManagerStartContract>();
   taskManagerStart = firstValueFrom(this.taskManagerStart$);
 
@@ -146,13 +149,16 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     const eventLogger = eventLog.getLogger({
       event: { provider: 'alerting' },
     });
-    defineRoutes(core, this.taskManagerStart, this.notificationsStart, {
+    defineRoutes(core, this.taskManagerStart, this.notificationsStart, this.alertingStart, {
       logger: this.logger,
       eventLogger,
     });
   }
 
-  public start(core: CoreStart, { taskManager, notifications }: FixtureStartDeps) {
+  public start(core: CoreStart, { alerting, taskManager, notifications }: FixtureStartDeps) {
+    this.alertingStart$.next(alerting);
+    this.alertingStart$.complete();
+
     this.taskManagerStart$.next(taskManager);
     this.taskManagerStart$.complete();
 
