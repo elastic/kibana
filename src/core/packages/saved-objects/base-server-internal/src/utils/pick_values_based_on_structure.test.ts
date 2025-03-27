@@ -6,9 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import deepMerge from 'deepmerge';
 import { fc } from '@fast-check/jest';
 import { pickValuesBasedOnStructure, getFlattenedKeys } from './pick_values_based_on_structure';
+import { isPlainObject } from 'lodash';
 
 describe('getFlattenedKeys', () => {
   test('empty object', () => {
@@ -56,12 +57,28 @@ describe('pickValuesBasedOnStructure', () => {
 
     expect(pickValuesBasedOnStructure(a, b)).toEqual({ v1: 'b', v2: [{ c: 2, d: 2 }] });
   });
-  test('picks a subset of values from target', () => {
+
+  test('special case: empty arrays and objects', () => {
+    const a = { v1: 'a', v2: [], v3: {} };
+    const b = {
+      v1: 'b',
+      v2: [{ c: 2, d: 2 }, { e: 4 }],
+      v3: { a: 1 },
+      another: 'value',
+      anArray: [1, 2, 3],
+    };
+
+    expect(pickValuesBasedOnStructure(a, b)).toEqual({ v1: 'b', v2: [], v3: {} });
+  });
+
+  test('can extract structure map when present in target', () => {
     /**
      * The `keys` `Arbitrary` represents words with possible numbers like `loremv123`
-     * that might be used in saved objects as key names.
+     * that might be used in saved objects as property names.
+     *
+     * We genereate 10 of them to promote key collisions. Something like: ['loremV123', 'ipsum.doleres'...]
      */
-    const keys = fc
+    const arbKeys = fc
       .array(
         fc.tuple(
           fc.lorem({ mode: 'words', maxCount: 1 }),
@@ -83,16 +100,16 @@ describe('pickValuesBasedOnStructure', () => {
         return fc.constantFrom(ks);
       });
 
-    const arbObjectA = keys.chain((ks) =>
-      fc.object({ key: fc.constantFrom(...ks), depthSize: 6, maxKeys: 100 })
-    );
-    const arbObjectB = keys.chain((ks) =>
-      fc.object({ key: fc.constantFrom(...ks), depthSize: 6, maxKeys: 100 })
+    const arbObjects = arbKeys.chain((ks) =>
+      fc.tuple(
+        fc.object({ key: fc.constantFrom(...ks), depthSize: 6, maxKeys: 100 }),
+        fc.object({ key: fc.constantFrom(...ks), depthSize: 6, maxKeys: 100 })
+      )
     );
 
     fc.assert(
-      fc.property(arbObjectA, arbObjectB, (objA, objB) => {
-        const target = Object.assign({}, objB, objA) as object;
+      fc.property(arbObjects, ([objA, objB]) => {
+        const target = deepMerge(objB, objA, { arrayMerge }) as object;
         const result = pickValuesBasedOnStructure(objA, target);
         expect(result).toEqual(objA);
       }),
@@ -100,3 +117,18 @@ describe('pickValuesBasedOnStructure', () => {
     );
   });
 });
+
+const arrayMerge = (targetArray: unknown[], sourceArray: unknown[]) => {
+  const dest = targetArray.slice();
+  sourceArray.forEach((srcItem, idx) => {
+    if (
+      (Array.isArray(dest[idx]) && Array.isArray(srcItem)) ||
+      (isPlainObject(dest[idx]) && isPlainObject(srcItem))
+    ) {
+      dest[idx] = deepMerge(dest[idx] as object, srcItem as object, { arrayMerge });
+    } else {
+      dest[idx] = srcItem;
+    }
+  });
+  return dest;
+};

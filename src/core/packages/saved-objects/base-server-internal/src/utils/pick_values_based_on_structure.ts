@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pick } from 'lodash';
-
 import { isPlainObject, get } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 
 export function getFlattenedKeys(obj: object): string[] {
   const result: string[] = [];
@@ -55,11 +54,22 @@ export function getFlattenedKeys(obj: object): string[] {
  * // => { a: 2, b: [{ a: 2 }, { a: 3 }] }
  * ```
  *
- * @note This is intended to specifically be used in the application forward
+ * @note This is intended to specifically be used in the application of forward
  *       compatibility schemas when loading a saved object from the database,
  *       downgrading it and keeping only the known, validated subset of values.
  */
 export function pickValuesBasedOnStructure(structuralSource: object, target: object): object {
-  const keys = getFlattenedKeys(structuralSource);
-  return pick(target, keys);
+  const paths = getFlattenedKeys(structuralSource);
+  const result: object = {};
+  for (const path of paths) {
+    const value = get(target, path);
+    if (Array.isArray(value)) {
+      set(result, path, []);
+    } else if (isPlainObject(value)) {
+      set(result, path, {});
+    } else {
+      set(result, path, value);
+    }
+  }
+  return result;
 }
