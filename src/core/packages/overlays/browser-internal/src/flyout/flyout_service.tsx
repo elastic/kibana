@@ -10,7 +10,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { css } from '@emotion/react';
-import { EuiFlyout, EuiFlyoutResizable } from '@elastic/eui';
+import { WorkspaceFlyout, WorkspaceFlyoutResizable } from '@kbn/core-workspace-components';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
@@ -115,18 +115,18 @@ export class FlyoutService {
 
         const getWrapper = (children: JSX.Element) => {
           return isResizable ? (
-            <EuiFlyoutResizable
+            <WorkspaceFlyoutResizable
               {...restOptions}
               onClose={onCloseFlyout}
               ref={React.createRef()}
               maxWidth={Number(options?.maxWidth)}
             >
               {children}
-            </EuiFlyoutResizable>
+            </WorkspaceFlyoutResizable>
           ) : (
-            <EuiFlyout {...restOptions} onClose={onCloseFlyout}>
+            <WorkspaceFlyout {...restOptions} onClose={onCloseFlyout}>
               {children}
-            </EuiFlyout>
+            </WorkspaceFlyout>
           );
         };
 

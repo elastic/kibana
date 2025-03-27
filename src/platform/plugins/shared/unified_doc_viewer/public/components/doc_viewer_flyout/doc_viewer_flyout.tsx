@@ -28,6 +28,7 @@ import {
   useIsWithinMinBreakpoint,
   EuiFlyoutProps,
 } from '@elastic/eui';
+import { WorkspaceFlyoutResizable } from '@kbn/core-workspace-components';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
@@ -241,7 +242,7 @@ export function UnifiedDocViewerFlyout({
 
   return (
     <EuiPortal>
-      <EuiFlyoutResizable
+      <WorkspaceFlyoutResizable
         className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
         onClose={onClose}
         type={flyoutType ?? 'push'}
@@ -314,7 +315,7 @@ export function UnifiedDocViewerFlyout({
             })}
           </EuiButtonEmpty>
         </EuiFlyoutFooter>
-      </EuiFlyoutResizable>
+      </WorkspaceFlyoutResizable>
     </EuiPortal>
   );
 }
