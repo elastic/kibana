@@ -367,7 +367,7 @@ export function initializePanelsManager(
           {
             id: uuidv4(),
             order: oldSections.length + 1,
-            title: i18n.translate('examples.gridExample.defaultSectionTitle', {
+            title: i18n.translate('dashboard.defaultSectionTitle', {
               defaultMessage: 'New collapsible section',
             }),
             collapsed: false,
