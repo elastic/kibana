@@ -11,15 +11,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
 import { paths } from '../../../../common/locators/paths';
+import { useUrlSearchState } from '../../../pages/slo_management/components/hooks/use_url_search_state';
 
 export function SloOutdatedCallout() {
+  const { onStateChange } = useUrlSearchState();
+
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
 
   const handleClick = () => {
-    navigateToUrl(basePath.prepend(paths.slosOutdatedDefinitions));
+    onStateChange({ includeOutdatedOnly: true });
+    navigateToUrl(basePath.prepend(paths.slosManagement));
   };
 
   const { isLoading, data } = useFetchSloDefinitions({ includeOutdatedOnly: true });
