@@ -21,12 +21,10 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 
 export const TabsView = ({ sessionViewProps }: { sessionViewProps: DiscoverSessionViewProps }) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
-  const query = useAppStateSelector((state) => state.query);
   const currentTab = useInternalStateSelector(selectCurrentTab);
   const allTabs = useInternalStateSelector(selectAllTabs);
   const [initialItems] = useState<TabItem[]>(() => allTabs.map((tab) => pick(tab, 'id', 'label')));
@@ -45,7 +43,10 @@ export const TabsView = ({ sessionViewProps }: { sessionViewProps: DiscoverSessi
         )
       }
       createItem={() => createTabItem(allTabs)}
-      getPreviewData={() => ({ query: query!, status: TabStatus.SUCCESS })}
+      getPreviewData={() => ({
+        query: { language: 'kuery', query: 'sample query' },
+        status: TabStatus.SUCCESS,
+      })}
       renderContent={() => (
         <DiscoverSessionView key={currentTab.id} ref={sessionViewRef} {...sessionViewProps} />
       )}
