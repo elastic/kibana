@@ -8,7 +8,7 @@
 import React, { useRef } from 'react';
 import d3, { ZoomEvent } from 'd3';
 import { css } from '@emotion/react';
-import { type UseEuiTheme, euiTextTruncate, useEuiTheme, transparentize } from '@elastic/eui';
+import { type UseEuiTheme, euiTextTruncate, useEuiTheme } from '@elastic/eui';
 import { Workspace, WorkspaceNode, TermIntersect, ControlType, WorkspaceEdge } from '../../types';
 import { makeNodeId } from '../../services/persistence';
 import { getIconOffset, IconRenderer } from '../icon_renderer';
