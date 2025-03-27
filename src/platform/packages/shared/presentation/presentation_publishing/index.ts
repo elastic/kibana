@@ -16,7 +16,7 @@ export {
   type ComparatorDefinition,
   type ComparatorFunction,
   type StateComparators,
-} from './comparators';
+} from './state_manager';
 export {
   apiCanAccessViewMode,
   getInheritedViewMode,
@@ -147,6 +147,7 @@ export {
 export {
   initializeTitleManager,
   stateHasTitles,
+  defaultTitlesState,
   type TitlesApi,
   type SerializedTitles,
 } from './interfaces/titles/title_manager';

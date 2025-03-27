@@ -9,69 +9,93 @@
 
 import { EuiMarkdownEditor, EuiMarkdownFormat, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { apiHasLastSavedChildState } from '@kbn/presentation-containers';
 import {
+  SerializedPanelState,
+  StateComparators,
+  defaultTitlesState,
   initializeTitleManager,
   useInheritedViewMode,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
+import { areComparatorsEqual } from '@kbn/presentation-publishing/state_manager/state_comparators';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, combineLatestWith, map, of } from 'rxjs';
 import { EUI_MARKDOWN_ID } from './constants';
-import {
-  MarkdownEditorApi,
-  MarkdownEditorRuntimeState,
-  MarkdownEditorSerializedState,
-} from './types';
+import { MarkdownEditorApi, MarkdownEditorSerializedState } from './types';
 
-export const markdownEmbeddableFactory: ReactEmbeddableFactory<
+// SERIALIZED STATE ONLY TODO remove this after state manager is created.
+type WithAllKeys<T extends object> = { [Key in keyof Required<T>]: T[Key] };
+
+const defaultMarkdownState: WithAllKeys<MarkdownEditorSerializedState> = {
+  content: '',
+  ...defaultTitlesState,
+};
+
+export const markdownEmbeddableFactory: EmbeddableFactory<
   MarkdownEditorSerializedState,
-  MarkdownEditorRuntimeState,
   MarkdownEditorApi
 > = {
   type: EUI_MARKDOWN_ID,
-  deserializeState: (state) => state.rawState,
-  /**
-   * The buildEmbeddable function is async so you can async import the component or load a saved
-   * object here. The loading will be handed gracefully by the Presentation Container.
-   */
-  buildEmbeddable: async (state, buildApi) => {
-    /**
-     * initialize state (source of truth)
-     */
-    const titleManager = initializeTitleManager(state);
-    const content$ = new BehaviorSubject(state.content);
+  buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    const initialMarkdownState: MarkdownEditorSerializedState = {
+      ...defaultMarkdownState,
+      ...(initialState?.rawState ?? {}),
+    };
 
-    /**
-     * Register the API for this embeddable. This API will be published into the imperative handle
-     * of the React component. Methods on this API will be exposed to siblings, to registered actions
-     * and to the parent api.
-     */
-    const api = buildApi(
-      {
-        ...titleManager.api,
-        serializeState: () => {
-          return {
-            rawState: {
-              ...titleManager.serialize(),
-              content: content$.getValue(),
-            },
-          };
-        },
+    // A messy initial version of the state manager
+    const titleManager = initializeTitleManager(initialMarkdownState);
+    const content$ = new BehaviorSubject(initialMarkdownState.content);
+
+    const allComparators: StateComparators<MarkdownEditorSerializedState> = {
+      content: 'referenceEquality',
+      ...titleManager.comparators,
+    };
+
+    const serializeState = (): SerializedPanelState<MarkdownEditorSerializedState> => ({
+      rawState: {
+        ...titleManager.serialize(),
+        content: content$.getValue(),
       },
+    });
 
-      /**
-       * Provide state comparators. Each comparator is 3 element tuple:
-       * 1) current value (publishing subject)
-       * 2) setter, allowing parent to reset value
-       * 3) optional comparator which provides logic to diff lasted stored value and current value
-       */
-      {
-        content: [content$, (value) => content$.next(value)],
-        ...titleManager.comparators,
-      }
-    );
+    // A messy initial version of the serialized state unsaved changes logic
+    const latestSerialziedState$ = combineLatest([
+      content$,
+      titleManager.api.title$,
+      titleManager.api.description$,
+      titleManager.api.hideTitle$,
+    ]).pipe(map(() => serializeState()));
+    const hasUnsavedChanges$ = apiHasLastSavedChildState<MarkdownEditorSerializedState>(parentApi)
+      ? parentApi.lastSavedStateForChild$(uuid).pipe(
+          combineLatestWith(latestSerialziedState$),
+          map(([lastSaved, latest]) =>
+            areComparatorsEqual(allComparators, lastSaved?.rawState, latest.rawState)
+          )
+        )
+      : of(false);
+
+    // a messy initial version of the 'reset' 'logic.
+    const resetUnsavedChanges = () => {
+      if (!apiHasLastSavedChildState<MarkdownEditorSerializedState>(parentApi)) return;
+      const lastSavedState = parentApi.getLastSavedStateForChild(uuid);
+      if (!lastSavedState) return;
+      content$.next(lastSavedState.rawState.content);
+
+      // SERIALIZED STATE ONLY TODO give the titleManager its own reset function...
+      titleManager.api.setTitle(lastSavedState.rawState.title);
+      titleManager.api.setDescription(lastSavedState.rawState.description);
+      titleManager.api.setHideTitle(lastSavedState.rawState.hidePanelTitles);
+    };
+
+    const api = finalizeApi({
+      ...titleManager.api,
+      hasUnsavedChanges$,
+      resetUnsavedChanges,
+      serializeState,
+    });
 
     return {
       api,

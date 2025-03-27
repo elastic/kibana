@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { StateComparators } from '../../comparators';
+import { StateComparators } from '../../state_manager';
 import { PublishesWritableDescription } from './publishes_description';
 import { PublishesWritableTitle } from './publishes_title';
 
@@ -17,6 +17,14 @@ export interface SerializedTitles {
   description?: string;
   hidePanelTitles?: boolean;
 }
+// SERIALIZED STATE ONLY TODO remove this after state manager is created.
+type WithAllKeys<T extends object> = { [Key in keyof Required<T>]: T[Key] };
+
+export const defaultTitlesState: WithAllKeys<SerializedTitles> = {
+  title: undefined,
+  description: undefined,
+  hidePanelTitles: false,
+};
 
 export const stateHasTitles = (state: unknown): state is SerializedTitles => {
   return (
@@ -35,9 +43,11 @@ export const initializeTitleManager = (
   comparators: StateComparators<SerializedTitles>;
   serialize: () => SerializedTitles;
 } => {
-  const title$ = new BehaviorSubject<string | undefined>(rawState.title);
-  const description$ = new BehaviorSubject<string | undefined>(rawState.description);
-  const hideTitle$ = new BehaviorSubject<boolean | undefined>(rawState.hidePanelTitles);
+  const initialState = { ...defaultTitlesState, ...rawState };
+
+  const title$ = new BehaviorSubject<string | undefined>(initialState.title);
+  const description$ = new BehaviorSubject<string | undefined>(initialState.description);
+  const hideTitle$ = new BehaviorSubject<boolean | undefined>(initialState.hidePanelTitles);
 
   const setTitle = (value: string | undefined) => {
     if (value !== title$.value) title$.next(value);
@@ -53,15 +63,15 @@ export const initializeTitleManager = (
     api: {
       title$,
       hideTitle$,
+      description$,
       setTitle,
       setHideTitle,
-      description$,
       setDescription,
     },
     comparators: {
-      title: [title$, setTitle],
-      description: [description$, setDescription],
-      hidePanelTitles: [hideTitle$, setHideTitle, (a, b) => Boolean(a) === Boolean(b)],
+      title: 'referenceEquality',
+      description: 'referenceEquality',
+      hidePanelTitles: 'referenceEquality',
     } as StateComparators<SerializedTitles>,
     serialize: () => ({
       title: title$.value,

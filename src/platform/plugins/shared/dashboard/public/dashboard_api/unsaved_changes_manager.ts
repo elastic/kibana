@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
-import { childrenUnsavedChanges$, initializeUnsavedChanges } from '@kbn/presentation-containers';
+import type { Reference } from '@kbn/content-management-utils';
+import { ControlGroupApi, ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
+import { HasLastSavedChildState, childrenUnsavedChanges$ } from '@kbn/presentation-containers';
 import {
   PublishesSavedObjectId,
   PublishingSubject,
   StateComparators,
 } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
-import { BehaviorSubject, Subject, combineLatest, debounceTime, skipWhile, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, of } from 'rxjs';
 import {
   PANELS_CONTROL_GROUP_KEY,
   getDashboardBackupService,
@@ -36,8 +37,10 @@ export function initializeUnsavedChangesManager({
   viewModeManager,
   unifiedSearchManager,
   referencesComparator,
+  getPanelReferences,
 }: {
   creationOptions?: DashboardCreationOptions;
+  getPanelReferences: (id: string) => Reference[];
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
   lastSavedState: DashboardState;
   panelsManager: ReturnType<typeof initializePanelsManager>;
@@ -46,34 +49,24 @@ export function initializeUnsavedChangesManager({
   viewModeManager: ReturnType<typeof initializeViewModeManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
   referencesComparator: StateComparators<Pick<DashboardState, 'references'>>;
-}) {
+}): {
+  api: {
+    hasUnsavedChanges$: PublishingSubject<boolean>;
+    asyncResetToLastSavedState: () => Promise<void>;
+  } & HasLastSavedChildState;
+  cleanup: () => void;
+  internalApi: {
+    getLastSavedState: () => DashboardState;
+    onSave: (savedState: DashboardState) => void;
+  };
+} {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
-  const saveNotification$ = new Subject<void>();
-
-  const dashboardUnsavedChanges = initializeUnsavedChanges<
-    Omit<DashboardState, 'controlGroupInput' | 'controlGroupState' | 'timeslice' | 'tags'>
-  >(
-    lastSavedState,
-    { saveNotification$ },
-    {
-      ...panelsManager.comparators,
-      ...settingsManager.comparators,
-      ...viewModeManager.comparators,
-      ...unifiedSearchManager.comparators,
-      ...referencesComparator,
-    }
-  );
 
   const unsavedChangesSubscription = combineLatest([
-    dashboardUnsavedChanges.api.unsavedChanges$,
+    of({} as Partial<DashboardState>), // SERIALIZED STATE ONLY TODO reinstate Dashboard diff checking of its own state - maybe with the new State Manager object
     childrenUnsavedChanges$(panelsManager.api.children$),
-    controlGroupApi$.pipe(
-      skipWhile((controlGroupApi) => !controlGroupApi),
-      switchMap((controlGroupApi) => {
-        return controlGroupApi!.unsavedChanges$;
-      })
-    ),
+    of(undefined as Partial<ControlGroupRuntimeState> | undefined), // SERIALIZED STATE ONLY TODO reinstate Dashboard diff checking of Controls state - maybe with the new State Manager object
   ])
     .pipe(debounceTime(0))
     .subscribe(([dashboardChanges, unsavedPanelState, controlGroupChanges]) => {
@@ -111,6 +104,14 @@ export function initializeUnsavedChangesManager({
       }
     });
 
+  const getLastSavedStateForChild = (panelId: string) => {
+    const lastSavedDashboardState = lastSavedState$.value;
+    return {
+      rawState: lastSavedDashboardState.panels[panelId].explicitInput,
+      references: getPanelReferences(panelId),
+    };
+  };
+
   return {
     api: {
       asyncResetToLastSavedState: async () => {
@@ -120,17 +121,17 @@ export function initializeUnsavedChangesManager({
         await controlGroupApi$.value?.asyncResetUnsavedChanges();
       },
       hasUnsavedChanges$,
-      saveNotification$,
+      lastSavedStateForChild$: (panelId: string) =>
+        lastSavedState$.pipe(map(() => getLastSavedStateForChild(panelId))),
+      getLastSavedStateForChild,
     },
     cleanup: () => {
-      dashboardUnsavedChanges.cleanup();
       unsavedChangesSubscription.unsubscribe();
     },
     internalApi: {
       getLastSavedState: () => lastSavedState$.value,
       onSave: (savedState: DashboardState) => {
         lastSavedState$.next(savedState);
-        saveNotification$.next();
       },
     },
   };

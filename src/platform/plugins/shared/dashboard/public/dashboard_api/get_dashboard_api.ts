@@ -118,6 +118,7 @@ export function getDashboardApi({
     viewModeManager,
     unifiedSearchManager,
     referencesComparator,
+    getPanelReferences,
   });
   function getState() {
     const { panels, references: panelReferences } = panelsManager.internalApi.getState();

@@ -76,7 +76,7 @@ export const EmbeddableRenderer = <
           ) => {
             if (onAnyStateChange) {
               /**
-               * TODO - canvas will be broken until we find a different way of handling this. Since we're decoupling the state management
+               * SERIALIZED STATE ONLY TODO  - canvas will be broken until we find a different way of handling this. Since we're decoupling the state management
                * from the embeddable this could be difficult. Ideally onAnyStateChange could be an observable on the API instead of a callback
                * and we could populate it from the state manager implementaiton.
                */
