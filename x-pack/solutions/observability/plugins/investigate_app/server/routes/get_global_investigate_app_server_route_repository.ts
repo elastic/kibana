@@ -55,6 +55,12 @@ const createInvestigationRoute = createInvestigateAppServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'AUDIT',
+    },
+  },
   params: createInvestigationParamsSchema,
   handler: async ({ params, context, request, logger }) => {
     const user = (await context.core).coreStart.security.authc.getCurrentUser(request);
@@ -73,6 +79,12 @@ const findInvestigationsRoute = createInvestigateAppServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'AUDIT',
+    },
+  },
   params: findInvestigationsParamsSchema,
   handler: async (params) => {
     const soClient = (await params.context.core).savedObjects.client;
@@ -87,6 +99,12 @@ const getInvestigationRoute = createInvestigateAppServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'AUDIT',
+    },
+  },
   params: getInvestigationParamsSchema,
   handler: async ({ params, context, logger }) => {
     const soClient = (await context.core).savedObjects.client;
@@ -100,6 +118,12 @@ const updateInvestigationRoute = createInvestigateAppServerRoute({
   endpoint: 'PUT /api/observability/investigations/{investigationId} 2023-10-31',
   options: {
     tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'AUDIT',
+    },
   },
   params: updateInvestigationParamsSchema,
   handler: async ({ params, context, request, logger }) => {
@@ -122,6 +146,12 @@ const deleteInvestigationRoute = createInvestigateAppServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'AUDIT',
+    },
+  },
   params: deleteInvestigationParamsSchema,
   handler: async ({ params, context, logger }) => {
     const soClient = (await context.core).savedObjects.client;
@@ -135,6 +165,12 @@ const createInvestigationNoteRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations/{investigationId}/notes 2023-10-31',
   options: {
     tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'AUDIT',
+    },
   },
   params: createInvestigationNoteParamsSchema,
   handler: async ({ params, context, request, logger }) => {
@@ -157,6 +193,12 @@ const getAllInvestigationTagsRoute = createInvestigateAppServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'AUDIT',
+    },
+  },
   params: getAllInvestigationTagsParamsSchema,
   handler: async ({ params, context, request, logger }) => {
     const soClient = (await context.core).savedObjects.client;
@@ -170,6 +212,12 @@ const getAllInvestigationStatsRoute = createInvestigateAppServerRoute({
   endpoint: 'GET /api/observability/investigations/_stats 2023-10-31',
   options: {
     tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'AUDIT',
+    },
   },
   params: getAllInvestigationStatsParamsSchema,
   handler: async ({ params, context, request, logger }) => {
@@ -185,6 +233,12 @@ const getInvestigationNotesRoute = createInvestigateAppServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'AUDIT',
+    },
+  },
   params: getInvestigationNotesParamsSchema,
   handler: async ({ params, context, request, logger }) => {
     const soClient = (await context.core).savedObjects.client;
@@ -198,6 +252,12 @@ const updateInvestigationNoteRoute = createInvestigateAppServerRoute({
   endpoint: 'PUT /api/observability/investigations/{investigationId}/notes/{noteId} 2023-10-31',
   options: {
     tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'AUDIT',
+    },
   },
   params: updateInvestigationNoteParamsSchema,
   handler: async ({ params, context, request, logger }) => {
@@ -225,6 +285,12 @@ const deleteInvestigationNoteRoute = createInvestigateAppServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'AUDIT',
+    },
+  },
   params: deleteInvestigationNoteParamsSchema,
   handler: async ({ params, context, request, logger }) => {
     const user = (await context.core).coreStart.security.authc.getCurrentUser(request);
@@ -245,6 +311,12 @@ const createInvestigationItemRoute = createInvestigateAppServerRoute({
   endpoint: 'POST /api/observability/investigations/{investigationId}/items 2023-10-31',
   options: {
     tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'AUDIT',
+    },
   },
   params: createInvestigationItemParamsSchema,
   handler: async ({ params, context, request, logger }) => {
@@ -267,6 +339,12 @@ const getInvestigationItemsRoute = createInvestigateAppServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'AUDIT',
+    },
+  },
   params: getInvestigationItemsParamsSchema,
   handler: async ({ params, context, request, logger }) => {
     const soClient = (await context.core).savedObjects.client;
@@ -280,6 +358,12 @@ const updateInvestigationItemRoute = createInvestigateAppServerRoute({
   endpoint: 'PUT /api/observability/investigations/{investigationId}/items/{itemId} 2023-10-31',
   options: {
     tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'AUDIT',
+    },
   },
   params: updateInvestigationItemParamsSchema,
   handler: async ({ params, context, request, logger }) => {
@@ -307,6 +391,12 @@ const deleteInvestigationItemRoute = createInvestigateAppServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'AUDIT',
+    },
+  },
   params: deleteInvestigationItemParamsSchema,
   handler: async ({ params, context, request, logger }) => {
     const user = (await context.core).coreStart.security.authc.getCurrentUser(request);
@@ -327,6 +417,12 @@ const getEventsRoute = createInvestigateAppServerRoute({
   endpoint: 'GET /api/observability/events 2023-10-31',
   options: {
     tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'AUDIT',
+    },
   },
   params: getEventsParamsSchema,
   handler: async ({ params, context, request, plugins }) => {
@@ -358,6 +454,12 @@ const getEntitiesRoute = createInvestigateAppServerRoute({
   endpoint: 'GET /api/observability/investigation/entities 2023-10-31',
   options: {
     tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'AUDIT',
+    },
   },
   params: getEntitiesParamsSchema,
   handler: async ({ params, context, request }): Promise<GetEntitiesResponse> => {
