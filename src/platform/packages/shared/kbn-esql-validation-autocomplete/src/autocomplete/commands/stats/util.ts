@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLCommand } from '@kbn/esql-ast';
+import { ESQLCommand, isFunctionExpression } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
 import {
   findPreviousWord,
@@ -38,7 +38,8 @@ export type CaretPosition =
   | 'expression_complete'
   | 'grouping_expression_without_assignment'
   | 'grouping_expression_after_assignment'
-  | 'grouping_expression_complete';
+  | 'grouping_expression_complete'
+  | 'after_where';
 
 export const getPosition = (innerText: string, command: ESQLCommand): CaretPosition => {
   const lastCommandArg = command.args[command.args.length - 1];
@@ -61,6 +62,10 @@ export const getPosition = (innerText: string, command: ESQLCommand): CaretPosit
     }
   }
 
+  if (isFunctionExpression(lastCommandArg) && lastCommandArg.name === 'where') {
+    return 'after_where';
+  }
+
   if (isAssignment(lastCommandArg) && !isAssignmentComplete(lastCommandArg)) {
     return 'expression_after_assignment';
   }
@@ -80,6 +85,15 @@ export const byCompleteItem: SuggestionRawDefinition = {
   text: 'BY ',
   kind: 'Reference',
   detail: 'By',
+  sortText: '1',
+  command: TRIGGER_SUGGESTION_COMMAND,
+};
+
+export const whereCompleteItem: SuggestionRawDefinition = {
+  label: 'WHERE',
+  text: 'WHERE ',
+  kind: 'Reference',
+  detail: 'Where',
   sortText: '1',
   command: TRIGGER_SUGGESTION_COMMAND,
 };

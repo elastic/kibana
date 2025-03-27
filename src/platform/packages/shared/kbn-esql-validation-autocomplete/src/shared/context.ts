@@ -81,7 +81,11 @@ function findCommandSubType<T extends ESQLCommandMode | ESQLCommandOption>(
   }
 }
 
-export function isMarkerNode(node: ESQLSingleAstItem | undefined): boolean {
+export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
+  if (Array.isArray(node)) {
+    return false;
+  }
+
   return Boolean(
     node &&
       (isColumnItem(node) || isIdentifier(node) || isSourceItem(node)) &&
@@ -179,7 +183,7 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
       // command ... "<here>"
       return { type: 'value' as const, command, node, option, containingFunction };
     }
-    if (node.type === 'function') {
+    if (node.type === 'function' && node.name !== 'where') {
       if (['in', 'not_in'].includes(node.name) && Array.isArray(node.args[1])) {
         // command ... a in ( <here> )
         return { type: 'list' as const, command, node, option, containingFunction };
