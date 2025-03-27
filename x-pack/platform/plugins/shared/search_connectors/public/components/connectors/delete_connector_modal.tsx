@@ -37,10 +37,10 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
   const [connectorUiOptions, setConnectorUiOptions] = useLocalStorage<
     Record<string, { deploymentMethod: 'docker' | 'source' | null }>
   >('search:connector-ui-options', {});
-  const { closeDeleteModal, deleteConnector, deleteIndex } = useActions(ConnectorsLogic);
   const {
     services: { http },
   } = useKibana();
+  const { closeDeleteModal, deleteConnector, deleteIndex } = useActions(ConnectorsLogic({ http }));
 
   const {
     deleteModalConnectorId: connectorId,
@@ -48,7 +48,7 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
     deleteModalIndexName,
     isDeleteLoading,
     isDeleteModalVisible,
-  } = useValues(ConnectorsLogic);
+  } = useValues(ConnectorsLogic({ http }));
 
   const connectorName = (isCrawler ? deleteModalIndexName : deleteModalConnectorName) || '';
 

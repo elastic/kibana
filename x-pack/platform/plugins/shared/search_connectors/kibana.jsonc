@@ -29,7 +29,6 @@
     "optionalPlugins": [
       "cloud",
       "indexManagement",
-      "searchIndices"
     ]
   }
 }

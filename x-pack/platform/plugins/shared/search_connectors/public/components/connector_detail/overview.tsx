@@ -71,53 +71,6 @@ export const ConnectorDetailOverview: React.FC = () => {
       {connector?.is_native && (
         <>
           {isModalVisible && <ConvertConnectorModal />}
-          <EuiCallOut
-            iconType="warning"
-            color="warning"
-            title={i18n.translate(
-              'xpack.searchConnectorscontent.connectors.overview.nativeCloudCallout.title',
-              {
-                defaultMessage: 'Elastic managed connectors are no longer supported',
-              }
-            )}
-          >
-            <EuiSpacer size="s" />
-            <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.searchConnectors.content.connectors.overview.nativeCloudCallout.content"
-                  defaultMessage="Elastic managed connectors are no longer supported. Convert it to a {link} to continue using it."
-                  values={{
-                    link: (
-                      <EuiLink
-                        data-test-subj="entSearchContent-connectorDetailOverview-nativeCloudCallout-connectorClientLink"
-                        data-telemetry-id="entSearchContent-connectorDetailOverview-nativeCloudCallout-connectorClientLink"
-                        href={docLinks.buildConnector}
-                        target="_blank"
-                      >
-                        {i18n.translate(
-                          'xpack.searchConnectorscontent.connectors.overview.nativeCloudCallout.connectorClient',
-                          { defaultMessage: 'self-managed connector' }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiButton
-              data-test-subj="entSearchContent-connectorDetailOverview-nativeCloudCallout-convertToSelfManagedClientButton"
-              color="warning"
-              fill
-              onClick={() => showModal()}
-            >
-              {i18n.translate(
-                'xpack.searchConnectorscontent.indices.connectors.overview.convertConnector.buttonLabel',
-                { defaultMessage: 'Convert connector' }
-              )}
-            </EuiButton>
-          </EuiCallOut>
           <EuiSpacer />
         </>
       )}

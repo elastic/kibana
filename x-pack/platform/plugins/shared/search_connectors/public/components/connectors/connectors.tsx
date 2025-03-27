@@ -60,19 +60,23 @@ export interface ConnectorsProps {
   isCrawlerSelfManaged?: boolean;
 }
 export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged }) => {
-  const { fetchConnectors, onPaginate, setIsFirstRequest, openDeleteModal } =
-    useActions(ConnectorsLogic);
-  const { data, isLoading, searchParams, isEmpty, connectors } = useValues(ConnectorsLogic);
-  const [searchQuery, setSearchValue] = useState('');
-  const [showDefaultSettingsFlyout, setShowDefaultSettingsFlyout] = useState<boolean>(false);
-  const {
-    services: { chrome, appParams },
-  } = useKibanaContextForPlugin();
-  useBreadcrumbs(!isCrawler ? connectorsBreadcrumbs : crawlersBreadcrumbs, appParams, chrome);
-
   const {
     services: { application, http },
   } = useKibana();
+
+  const {
+    services: { chrome, appParams },
+  } = useKibanaContextForPlugin();
+  const { fetchConnectors, onPaginate, setIsFirstRequest, openDeleteModal } = useActions(
+    ConnectorsLogic({ http })
+  );
+  const { data, isLoading, searchParams, isEmpty, connectors } = useValues(
+    ConnectorsLogic({ http })
+  );
+  const [searchQuery, setSearchValue] = useState('');
+  const [showDefaultSettingsFlyout, setShowDefaultSettingsFlyout] = useState<boolean>(false);
+
+  useBreadcrumbs(!isCrawler ? connectorsBreadcrumbs : crawlersBreadcrumbs, appParams, chrome);
 
   useEffect(() => {
     setIsFirstRequest();

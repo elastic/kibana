@@ -12,7 +12,7 @@ import { useActions, useValues } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EuiTabProps } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate, EuiTabProps } from '@elastic/eui';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../routes';
 import { ConnectorScheduling } from '../search_index/connector/connector_scheduling';
 import { ConnectorSyncRules } from '../search_index/connector/sync_rules/connector_rules';
@@ -45,7 +45,9 @@ export const ConnectorDetail: React.FC = () => {
   const {
     services: { application, http },
   } = useKibana();
-  const { hasFilteringFeature, index, connector } = useValues(ConnectorViewLogic({ http }));
+  const { hasFilteringFeature, index, connector, isLoading } = useValues(
+    ConnectorViewLogic({ http })
+  );
   const { fetchConnectorApiReset, startConnectorPoll, stopConnectorPoll } = useActions(
     ConnectorViewLogic({ http })
   );
@@ -61,7 +63,7 @@ export const ConnectorDetail: React.FC = () => {
   }>();
 
   const {
-    plugins: { guidedOnboarding, share },
+    plugins: { guidedOnboarding },
   } = useAppContext();
 
   useEffect(() => {
@@ -262,10 +264,38 @@ export const ConnectorDetail: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const selectedTab = useMemo(() => tabs.find((tab) => tab.id === tabId), [tabId]);
 
+  if (!connector || connector?.deleted) {
+    return (
+      <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchEditConnectorsPage">
+        <EuiPageTemplate.EmptyPrompt
+          title={
+            <h1>
+              {i18n.translate('xpack.serverlessSearch.connectors.notFound', {
+                defaultMessage: 'Could not find connector {connectorId}',
+                values: { connectorId },
+              })}
+            </h1>
+          }
+          actions={
+            <EuiButton
+              data-test-subj="serverlessSearchEditConnectorGoBackButton"
+              color="primary"
+              fill
+              onClick={() => application?.navigateToUrl(`./`)}
+            >
+              {i18n.translate('xpack.serverlessSearch.connectors.goBack', {
+                defaultMessage: 'Go back',
+              })}
+            </EuiButton>
+          }
+        />
+      </EuiPageTemplate>
+    );
+  }
+
   return (
     <SearchConnectorsPageTemplateWrapper
-      // pageChrome={[...connectorsBreadcrumbs, connector?.name ?? '...']}
-      // isLoading={isLoading}
+      isLoading={isLoading}
       pageHeader={{
         description: connector ? <ConnectorDescription connector={connector} /> : '...',
         pageTitle: connector ? <ConnectorName connector={connector} /> : '...',

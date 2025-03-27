@@ -72,7 +72,7 @@ export const StartStep: React.FC<StartStepProps> = ({
     isGenerateLoading,
     isCreateLoading,
     isFormDirty,
-  } = useValues(NewConnectorLogic);
+  } = useValues(NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl }));
   const { setRawName, createConnector, generateConnectorName, setFormDirty } = useActions(
     NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
   );

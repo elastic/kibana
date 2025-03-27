@@ -19,7 +19,8 @@ import { toAlphanumeric } from '@kbn/search-connectors/utils/to_alphanumeric';
 export const generateApiKey = async (
   client: IScopedClusterClient,
   indexName: string,
-  isNative: boolean
+  isNative: boolean,
+  isAgentlessEnabled: boolean
 ) => {
   const aclIndexName = `${CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX}${indexName}`;
 
@@ -44,18 +45,19 @@ export const generateApiKey = async (
   });
   const connector = connectorResult.hits.hits[0];
   if (connector) {
-    const apiKeyFields = isNative
-      ? {
-          api_key_id: apiKeyResult.id,
-          api_key_secret_id: await storeConnectorSecret(
-            client,
-            apiKeyResult.encoded,
-            connector._source?.api_key_secret_id || null
-          ),
-        }
-      : {
-          api_key_id: apiKeyResult.id,
-        };
+    const apiKeyFields =
+      isNative && !isAgentlessEnabled
+        ? {
+            api_key_id: apiKeyResult.id,
+            api_key_secret_id: await storeConnectorSecret(
+              client,
+              apiKeyResult.encoded,
+              connector._source?.api_key_secret_id || null
+            ),
+          }
+        : {
+            api_key_id: apiKeyResult.id,
+          };
 
     if (connector._source?.api_key_id) {
       await client.asCurrentUser.security.invalidateApiKey({ ids: [connector._source.api_key_id] });

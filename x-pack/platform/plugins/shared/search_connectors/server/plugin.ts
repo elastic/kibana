@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import type {
+  PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  LoggerFactory,
+} from '@kbn/core/server';
 import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
 import { getConnectorTypes } from '../common/lib/connector_types';
 import type {
@@ -30,9 +36,11 @@ export class SearchConnectorsPlugin
     >
 {
   private connectors: ConnectorServerSideDefinition[];
+  private readonly logger: LoggerFactory;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.connectors = [];
+    this.logger = initializerContext.logger;
   }
 
   public setup(
@@ -62,11 +70,16 @@ export class SearchConnectorsPlugin
       /**
        * Register routes
        */
-      registerConnectorRoutes({ ...plugins, router });
+      registerConnectorRoutes({
+        ...plugins,
+        router,
+        getStartServices: coreSetup.getStartServices,
+        log: this.logger.get(),
+      });
     }
-    registerStatsRoutes({ ...plugins, router });
-    registerMappingRoute({ ...plugins, router });
-    registerSearchRoute({ ...plugins, router });
+    registerStatsRoutes({ ...plugins, router, log: this.logger.get() });
+    registerMappingRoute({ ...plugins, router, log: this.logger.get() });
+    registerSearchRoute({ ...plugins, router, log: this.logger.get() });
     return {
       getConnectorTypes: () => this.connectors,
     };

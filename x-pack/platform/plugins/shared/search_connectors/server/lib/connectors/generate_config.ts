@@ -18,7 +18,11 @@ import { indexOrAliasExists } from '../indices/exists_index';
 import { generateApiKey } from '../indices/generate_api_key';
 import { generatedIndexName } from '../indices/generate_index_name';
 
-export const generateConfig = async (client: IScopedClusterClient, connector: Connector) => {
+export const generateConfig = async (
+  client: IScopedClusterClient,
+  connector: Connector,
+  isAgentlessEnabled: boolean
+) => {
   let associatedIndex: string;
 
   if (connector.index_name) {
@@ -43,7 +47,12 @@ export const generateConfig = async (client: IScopedClusterClient, connector: Co
   });
 
   await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
-  const apiKeyResponse = await generateApiKey(client, associatedIndex, connector.is_native);
+  const apiKeyResponse = await generateApiKey(
+    client,
+    associatedIndex,
+    connector.is_native,
+    isAgentlessEnabled
+  );
 
   return {
     apiKeyResponse,

@@ -88,7 +88,12 @@ export interface ConnectorsValues {
   status: typeof FetchConnectorsApiLogic.values.status;
 }
 
+export interface ConnectorsProps {
+  http?: HttpSetup;
+}
+
 export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsActions>>({
+  key: (props) => props.http,
   actions: {
     closeDeleteModal: true,
     fetchConnectors: ({ fetchCrawlersOnly, from, size, searchQuery, http }) => ({
@@ -127,23 +132,24 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
       FetchConnectorsApiLogic,
       ['data', 'status'],
     ],
+    keys: [FetchConnectorsApiLogic, 'http'],
   },
-  listeners: ({ actions, values }) => ({
+  listeners: ({ actions, values, props }) => ({
     deleteSuccess: () => {
       actions.closeDeleteModal();
-      actions.makeRequest({ ...values.searchParams });
+      actions.makeRequest({ ...values.searchParams, http: props.http });
     },
     deleteIndexSuccess: () => {
       actions.closeDeleteModal();
-      actions.makeRequest({ ...values.searchParams });
+      actions.makeRequest({ ...values.searchParams, http: props.http });
     },
     fetchConnectors: async (input, breakpoint) => {
       await breakpoint(150);
-      actions.makeRequest({ ...input });
+      actions.makeRequest({ ...input, http: props.http });
     },
   }),
   path: ['search_connectors', 'content', 'connectors_logic'],
-  reducers: () => ({
+  reducers: ({ props }) => ({
     deleteModalConnectorId: [
       '',
       {
@@ -197,6 +203,7 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
         fetchConnectors: (state, payload) => ({
           ...state,
           ...payload,
+          http: props.http,
         }),
         onPaginate: (state, { newPageIndex }) => ({
           ...state,

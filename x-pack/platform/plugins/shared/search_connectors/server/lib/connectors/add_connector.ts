@@ -16,13 +16,15 @@ import {
   NATIVE_CONNECTOR_DEFINITIONS,
 } from '@kbn/search-connectors';
 
-import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
+import {
+  DEFAULT_PIPELINE_VALUES,
+  ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
+} from '../../../common/constants';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { createIndex } from '../indices/create_index';
 import { generateApiKey } from '../indices/generate_api_key';
-import { getDefaultPipeline } from '../pipelines/get_default_pipeline';
 
 export const addConnector = async (
   client: IScopedClusterClient,
@@ -33,7 +35,8 @@ export const addConnector = async (
     language: string | null;
     name: string | null;
     serviceType?: string | null;
-  }
+  },
+  isAgentlessEnabled: boolean
 ): Promise<Connector> => {
   const index = input.indexName;
   if (index) {
@@ -82,7 +85,7 @@ export const addConnector = async (
     ...input,
     name: input.name || '',
     ...nativeFields,
-    pipeline: await getDefaultPipeline(client),
+    pipeline: DEFAULT_PIPELINE_VALUES,
   });
 
   // Only create API key for native connectors and if index name was provided
@@ -91,7 +94,7 @@ export const addConnector = async (
     input.isNative &&
     input.serviceType !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
   ) {
-    await generateApiKey(client, index, true);
+    await generateApiKey(client, index, true, isAgentlessEnabled);
   }
 
   return connector;

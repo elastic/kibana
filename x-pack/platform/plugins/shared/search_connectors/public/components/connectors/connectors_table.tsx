@@ -195,16 +195,22 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
               // crawler always has an index this is to satisfy TS
               if (connector.index_name) {
                 application?.navigateToUrl(
-                  generateEncodedPath(SEARCH_INDEX_PATH, {
-                    indexName: connector.index_name,
-                  })
+                  generateEncodedPath(
+                    `/app/management/data/search_connectors${SEARCH_INDEX_PATH}`,
+                    {
+                      indexName: connector.index_name,
+                    }
+                  )
                 );
               }
             } else {
               application?.navigateToUrl(
-                generateEncodedPath(CONNECTOR_DETAIL_PATH, {
-                  connectorId: connector.id,
-                })
+                generateEncodedPath(
+                  `/app/management/data/search_connectors${CONNECTOR_DETAIL_PATH}`,
+                  {
+                    connectorId: connector.id,
+                  }
+                )
               );
             }
           },

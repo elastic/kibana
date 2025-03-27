@@ -83,15 +83,21 @@ export function registerConnectorRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
+      const [_core, start] = await getStartServices();
+      const isAgentlessEnabled = start.fleet?.agentless?.enabled === true;
       try {
-        const body = await addConnector(client, {
-          deleteExistingConnector: request.body.delete_existing_connector,
-          indexName: request.body.index_name ?? null,
-          isNative: request.body.is_native,
-          language: request.body.language,
-          name: request.body.name ?? null,
-          serviceType: request.body.service_type,
-        });
+        const body = await addConnector(
+          client,
+          {
+            deleteExistingConnector: request.body.delete_existing_connector,
+            indexName: request.body.index_name ?? null,
+            isNative: request.body.is_native,
+            language: request.body.language,
+            name: request.body.name ?? null,
+            serviceType: request.body.service_type,
+          },
+          isAgentlessEnabled
+        );
         return response.ok({ body });
       } catch (error) {
         if (
@@ -101,7 +107,7 @@ export function registerConnectorRoutes({
           return createError({
             errorCode: (error as Error).message as ErrorCode,
             message: i18n.translate(
-              'xpack.searchConnectorsserver.routes.addConnector.connectorExistsError',
+              'xpack.searchConnectors.routes.addConnector.connectorExistsError',
               {
                 defaultMessage: 'Connector or index already exists',
               }
@@ -150,7 +156,7 @@ export function registerConnectorRoutes({
           return createError({
             errorCode: ErrorCode.STATUS_TRANSITION_ERROR,
             message: i18n.translate(
-              'xpack.searchConnectorsserver.routes.connectors.statusTransitionError',
+              'xpack.searchConnectors.routes.connectors.statusTransitionError',
               {
                 defaultMessage:
                   'Connector sync job cannot be cancelled. Connector is already cancelled or not in a cancelable state.',
@@ -266,7 +272,7 @@ export function registerConnectorRoutes({
           return createError({
             errorCode: ErrorCode.ACCESS_CONTROL_DISABLED,
             message: i18n.translate(
-              'xpack.searchConnectorsserver.connectors.accessControlSync.accessControlDisabledError',
+              'xpack.searchConnectors.connectors.accessControlSync.accessControlDisabledError',
               {
                 defaultMessage:
                   'Access control sync cannot be created. You must first enable Document Level Security.',
@@ -550,7 +556,8 @@ export function registerConnectorRoutes({
           client.asCurrentUser,
           undefined,
           fetchCrawlersOnly,
-          searchQuery
+          searchQuery,
+          false
         );
 
         connectorResultSlice = connectorResult.slice(from, from + size);
@@ -574,7 +581,7 @@ export function registerConnectorRoutes({
           return createError({
             errorCode: ErrorCode.EXPENSIVE_QUERY_NOT_ALLOWED_ERROR,
             message: i18n.translate(
-              'xpack.searchConnectorsserver.routes.connectors.expensive_query_not_allowed_error',
+              'xpack.searchConnectors.routes.connectors.expensive_query_not_allowed_error',
               {
                 defaultMessage:
                   'Expensive search queries not allowed. "search.allow_expensive_queries" is set to false ',
@@ -640,6 +647,9 @@ export function registerConnectorRoutes({
       const { connectorId } = request.params;
       const { shouldDeleteIndex } = request.query;
 
+      const [_core, start] = await getStartServices();
+      const isAgentlessEnabled = start.fleet?.agentless?.enabled === true;
+
       let connectorResponse;
       try {
         const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
@@ -662,7 +672,7 @@ export function registerConnectorRoutes({
         if (apiKeyId) {
           await client.asCurrentUser.security.invalidateApiKey({ ids: [apiKeyId] });
         }
-        if (secretId) {
+        if (!isAgentlessEnabled && secretId) {
           await deleteConnectorSecret(client.asCurrentUser, secretId);
         }
       } catch (error) {
@@ -670,7 +680,7 @@ export function registerConnectorRoutes({
           return createError({
             errorCode: ErrorCode.RESOURCE_NOT_FOUND,
             message: i18n.translate(
-              'xpack.searchConnectorsserver.routes.connectors.resource_not_found_error',
+              'xpack.searchConnectors.routes.connectors.resource_not_found_error',
               {
                 defaultMessage: 'Connector with id {connectorId} is not found.',
                 values: { connectorId },
@@ -728,9 +738,11 @@ export function registerConnectorRoutes({
 
       const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
       if (connector?.is_native) {
+        const [_core, start] = await getStartServices();
+        const isAgentlessEnabled = start.fleet?.agentless?.enabled === true;
         // generateApiKey will search for the connector doc based on index_name, so we need to refresh the index before that.
         await client.asCurrentUser.indices.refresh({ index: CONNECTORS_INDEX });
-        await generateApiKey(client, indexName, true);
+        await generateApiKey(client, indexName, true, isAgentlessEnabled);
       }
 
       return response.ok();
@@ -797,7 +809,7 @@ export function registerConnectorRoutes({
           return createError({
             errorCode: ErrorCode.RESOURCE_NOT_FOUND,
             message: i18n.translate(
-              'xpack.searchConnectorsserver.routes.connectors.resource_not_found_error',
+              'xpack.searchConnectors.routes.connectors.resource_not_found_error',
               {
                 defaultMessage: 'Connector with id {connectorId} is not found.',
                 values: { connectorId },
@@ -808,7 +820,9 @@ export function registerConnectorRoutes({
           });
         }
 
-        const configResponse = await generateConfig(client, connector);
+        const [_core, start] = await getStartServices();
+        const isAgentlessEnabled = start.fleet?.agentless?.enabled === true;
+        const configResponse = await generateConfig(client, connector, isAgentlessEnabled);
         associatedIndex = configResponse.associatedIndex;
         apiKeyResponse = configResponse.apiKeyResponse;
       } catch (error) {
@@ -816,7 +830,7 @@ export function registerConnectorRoutes({
           createError({
             errorCode: ErrorCode.GENERATE_INDEX_NAME_ERROR,
             message: i18n.translate(
-              'xpack.searchConnectorsserver.routes.connectors.generateConfiguration.indexAlreadyExistsError',
+              'xpack.searchConnectors.routes.connectors.generateConfiguration.indexAlreadyExistsError',
               {
                 defaultMessage: 'Cannot find a unique index name to generate configuration',
               }
@@ -868,7 +882,7 @@ export function registerConnectorRoutes({
           return createError({
             errorCode: ErrorCode.GENERATE_INDEX_NAME_ERROR,
             message: i18n.translate(
-              'xpack.searchConnectorsserver.routes.connectors.generateConfiguration.indexAlreadyExistsError',
+              'xpack.searchConnectors.routes.connectors.generateConfiguration.indexAlreadyExistsError',
               {
                 defaultMessage: 'Cannot find a unique connector name',
               }
@@ -903,7 +917,7 @@ export function registerConnectorRoutes({
           return createError({
             errorCode: ErrorCode.RESOURCE_NOT_FOUND,
             message: i18n.translate(
-              'xpack.searchConnectorsserver.routes.connectors.resource_not_found_error',
+              'xpack.searchConnectors.routes.connectors.resource_not_found_error',
               {
                 defaultMessage: 'Connector with id {connectorId} is not found.',
                 values: { connectorId },
@@ -918,7 +932,7 @@ export function registerConnectorRoutes({
           return createError({
             errorCode: ErrorCode.CONNECTOR_UNSUPPORTED_OPERATION,
             message: i18n.translate(
-              'xpack.searchConnectorsserver.routes.connectors.generateConfiguration.indexAlreadyExistsError',
+              'xpack.searchConnectors.routes.connectors.generateConfiguration.indexAlreadyExistsError',
               {
                 defaultMessage:
                   'Failed to fetch agentless deployment details: This action is only supported for Elastic-managed connectors.',
@@ -973,12 +987,9 @@ export function registerConnectorRoutes({
       } catch (error) {
         return createError({
           errorCode: ErrorCode.CONNECTOR_UNSUPPORTED_OPERATION,
-          message: i18n.translate(
-            'xpack.searchConnectorsserver.routes.connectors.agentlessPolicyError',
-            {
-              defaultMessage: 'Failed to fetch agentless deployment details',
-            }
-          ),
+          message: i18n.translate('xpack.searchConnectors.routes.connectors.agentlessPolicyError', {
+            defaultMessage: 'Failed to fetch agentless deployment details',
+          }),
           response,
           statusCode: 500,
         });
