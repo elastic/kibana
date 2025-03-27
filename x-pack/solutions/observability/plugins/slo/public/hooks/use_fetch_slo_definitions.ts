@@ -21,7 +21,7 @@ export interface UseFetchSloDefinitionsResponse {
 interface SLODefinitionParams {
   name?: string;
   includeOutdatedOnly?: boolean;
-  tags: string[];
+  tags?: string[];
   page?: number;
   perPage?: number;
 }
