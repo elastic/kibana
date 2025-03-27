@@ -504,6 +504,8 @@ export function LayerPanel(props: LayerPanelProps) {
                 <EuiFormRow
                   css={css`
                     padding: ${euiTheme.size.base};
+                    background-color: ${euiTheme.colors.lightestShade};
+
                     &:last-child {
                       border-radius: 0 0 ${euiTheme.border.radius.medium}
                         ${euiTheme.border.radius.medium};

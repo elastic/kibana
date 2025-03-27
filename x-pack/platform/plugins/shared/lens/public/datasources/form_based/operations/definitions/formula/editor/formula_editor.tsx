@@ -975,7 +975,6 @@ const sharedEditorStyles = {
         z-index: ${euiTheme.levels.toast} + 1;
       }
       .lnsFormula__editorContent {
-        background-color: ${euiTheme.colors.lightestShade};
         min-height: 0;
         position: relative;
       }
@@ -995,6 +994,7 @@ const sharedEditorStyles = {
     padding: ${euiTheme.size.s};
     // make sure docs are rendered in front of monaco
     z-index: 1;
+    background-color: ${euiTheme.colors.lightestShade};
     border-bottom-right-radius: ${euiTheme.border.radius.medium};
     border-bottom-left-radius: ${euiTheme.border.radius.medium};
   `,
