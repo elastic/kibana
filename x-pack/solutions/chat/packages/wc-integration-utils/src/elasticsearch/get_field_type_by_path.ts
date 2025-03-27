@@ -14,6 +14,9 @@ interface MappingProperties {
   };
 }
 
+/**
+ * Resolves the type of a given field from its path in the provided mappings.
+ */
 export const getFieldTypeByPath = ({
   fieldPath,
   mappings,
@@ -31,13 +34,13 @@ export const getFieldTypeByPath = ({
       if (properties[path]?.type) {
         return properties[path]?.type!;
       } else {
-        throw Error(`Path ${fieldPath} not found in mappings`);
+        throw Error(`Field '${fieldPath}' not found in mappings`);
       }
     } else {
       if (properties[path]?.properties) {
         properties = properties[path]!.properties!;
       } else {
-        throw Error(`Path ${fieldPath} not found in mappings`);
+        throw Error(`Field '${fieldPath}' not found in mappings`);
       }
     }
   }

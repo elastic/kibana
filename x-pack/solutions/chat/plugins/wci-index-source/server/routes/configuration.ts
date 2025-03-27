@@ -36,8 +36,6 @@ export const registerConfigurationRoutes = ({ router, core, logger }: RouteDepen
         const connectors = await getConnectorList({ actions, request });
         const connector = getDefaultConnector({ connectors });
 
-        console.log('using connector', connector);
-
         const chatModel = await inference.getChatModel({
           request,
           connectorId: connector.connectorId,

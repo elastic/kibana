@@ -15,8 +15,7 @@ export const hitToContent = ({
   hit: SearchHit;
   fields: string[];
 }): Record<string, unknown> => {
-  let content: Record<string, unknown> = {};
-  // TODO
+  const content: Record<string, unknown> = {};
 
   fields.forEach((field) => {
     if (hit.highlight?.[field]) {

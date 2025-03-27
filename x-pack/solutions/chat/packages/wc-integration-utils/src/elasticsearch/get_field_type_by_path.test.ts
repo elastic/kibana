@@ -45,4 +45,18 @@ describe('getFieldTypeByPath', () => {
 
     expect(type).toEqual('keyword');
   });
+
+  it('throw an error for fields not present in the mappings', () => {
+    const mappings: MappingTypeMapping = {
+      properties: {
+        content: {
+          type: 'text',
+        },
+      },
+    };
+
+    expect(() =>
+      getFieldTypeByPath({ fieldPath: 'missing', mappings })
+    ).toThrowErrorMatchingInlineSnapshot(`"Field 'missing' not found in mappings"`);
+  });
 });

@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 
 export interface SearchFilter {
   field: string;
-  type: string;
+  type: 'keyword' | 'date' | 'boolean';
   description: string;
   values?: string[];
 }
