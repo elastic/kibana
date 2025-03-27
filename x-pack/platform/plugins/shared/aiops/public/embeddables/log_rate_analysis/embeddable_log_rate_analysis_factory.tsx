@@ -9,10 +9,8 @@ import {
   EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
   LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME,
 } from '@kbn/aiops-log-rate-analysis/constants';
-import type { Reference } from '@kbn/content-management-utils';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -37,6 +35,7 @@ import type {
   LogRateAnalysisEmbeddableRuntimeState,
   LogRateAnalysisEmbeddableState,
 } from './types';
+import { getDataviewReferences } from '../get_dataview_references';
 
 export type EmbeddableLogRateAnalysisType = typeof EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE;
 
@@ -120,15 +119,6 @@ export const getLogRateAnalysisEmbeddableFactory = (
           dataViews$,
           serializeState: () => {
             const dataViewId = logRateAnalysisControlsApi.dataViewId.getValue();
-            const references: Reference[] = dataViewId
-              ? [
-                  {
-                    type: DATA_VIEW_SAVED_OBJECT_TYPE,
-                    name: LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME,
-                    id: dataViewId,
-                  },
-                ]
-              : [];
             return {
               rawState: {
                 timeRange: undefined,
@@ -136,7 +126,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
                 ...timeRangeManager.serialize(),
                 ...serializeLogRateAnalysisChartState(),
               },
-              references,
+              references: getDataviewReferences(dataViewId, LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME),
             };
           },
         },
