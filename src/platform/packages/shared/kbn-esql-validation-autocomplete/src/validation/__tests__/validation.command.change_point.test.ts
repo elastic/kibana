@@ -56,7 +56,7 @@ describe('validation', () => {
           );
 
           await expectErrors('FROM index | CHANGE_POINT longField', [
-            `Default @timestamp column is missing`,
+            `[CHANGE_POINT] Default @timestamp column is missing`,
           ]);
         });
 
