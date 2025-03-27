@@ -38,6 +38,7 @@
     "@kbn/actions-plugin",
     "@kbn/wci-browser",
     "@kbn/features-plugin",
+    "@kbn/wc-genai-utils",
   ],
   "exclude": [
     "target/**/*",
