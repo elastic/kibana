@@ -11,12 +11,10 @@ import { render, screen } from '@testing-library/react';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { PieVisualizationState } from '../../../common/types';
 import { DimensionEditor, DimensionEditorProps } from './dimension_editor';
-import { getKbnPalettes } from '@kbn/palettes';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 
 const darkMode = false;
 const paletteServiceMock = chartPluginMock.createPaletteRegistry();
-const palettes = getKbnPalettes({ name: 'borealis', darkMode });
 
 describe('DimensionEditor', () => {
   let defaultState: PieVisualizationState;
@@ -64,7 +62,6 @@ describe('DimensionEditor', () => {
       addLayer: jest.fn(),
       removeLayer: jest.fn(),
       panelRef: { current: null },
-      palettes,
       isDarkMode: darkMode,
       paletteService: paletteServiceMock,
     };
