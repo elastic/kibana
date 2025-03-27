@@ -68,7 +68,7 @@ import { RulesListColumns, useRulesListColumnSelector } from './rules_list_colum
 
 interface RuleTypeState {
   isLoading: boolean;
-  initialLoad: boolean;
+  isInitialLoad: boolean;
   data: RuleTypeIndex;
 }
 
@@ -990,7 +990,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
             pageIndex: page.index,
             pageSize: page.size,
             /* Don't display rule count until we have the rule types initialized */
-            totalItemCount: ruleTypesState.initialLoad ? 0 : rulesState.totalItemCount,
+            totalItemCount: ruleTypesState.isInitialLoad ? 0 : rulesState.totalItemCount,
           }}
           onChange={({
             page: changedPage,

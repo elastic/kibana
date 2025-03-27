@@ -37,7 +37,7 @@ import {
   getCreateRuleRoute,
   getEditRuleRoute,
 } from '@kbn/rule-data-utils';
-import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
+import { MaintenanceWindowCallout, useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import {
   Rule,
   RuleTableItem,
@@ -83,7 +83,6 @@ import { runRule } from '../../../lib/run_rule';
 
 import { useLoadActionTypesQuery } from '../../../hooks/use_load_action_types_query';
 import { useLoadRuleAggregationsQuery } from '../../../hooks/use_load_rule_aggregations_query';
-import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 import { useLoadRulesQuery } from '../../../hooks/use_load_rules_query';
 import { useLoadConfigQuery } from '../../../hooks/use_load_config_query';
 import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
@@ -230,7 +229,11 @@ export const RulesList = ({
     authorizedToReadAnyRules,
     authorizedToCreateAnyRules,
     isSuccess: isLoadRuleTypesSuccess,
-  } = useLoadRuleTypesQuery({ filteredRuleTypes });
+  } = useGetRuleTypesPermissions({
+    http,
+    toasts,
+    filteredRuleTypes,
+  });
   // Fetch action types
   const { actionTypes } = useLoadActionTypesQuery();
 
@@ -291,7 +294,7 @@ export const RulesList = ({
     isLoadingRuleTypes: ruleTypesState.isLoading,
     isLoadingRules: rulesState.isLoading,
     hasData,
-    isInitialLoadingRuleTypes: ruleTypesState.initialLoad,
+    isInitialLoadingRuleTypes: ruleTypesState.isInitialLoad,
     isInitialLoadingRules: rulesState.initialLoad,
   });
 
@@ -332,7 +335,7 @@ export const RulesList = ({
   ]);
 
   const tableItems = useMemo(() => {
-    if (ruleTypesState.initialLoad) {
+    if (ruleTypesState.isInitialLoad) {
       return [];
     }
     return convertRulesToTableItems({
