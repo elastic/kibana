@@ -407,7 +407,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
             ) : (
               <EuiFlexGroup
                 css={css({
-                  flexDirection: 'column',
+                  ...(addDataFeatures.length > 1 && manageDataFeatures.length > 1
+                    ? { flexDirection: 'column' }
+                    : {}),
                 })}
               >
                 <EuiFlexItem>
