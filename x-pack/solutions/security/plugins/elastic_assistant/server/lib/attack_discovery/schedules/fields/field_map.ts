@@ -56,7 +56,7 @@ export const attackDiscoveryAlertFieldMap: FieldMap = {
   [ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT]: {
     type: 'integer',
     array: false,
-    required: false,
+    required: true,
   },
   [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: {
     type: 'keyword',
@@ -71,7 +71,7 @@ export const attackDiscoveryAlertFieldMap: FieldMap = {
   [ALERT_ATTACK_DISCOVERY_API_CONFIG_ACTION_TYPE_ID]: {
     type: 'keyword',
     array: false,
-    required: false,
+    required: true,
   },
   [ALERT_ATTACK_DISCOVERY_API_CONFIG_CONNECTOR_ID]: {
     type: 'keyword',
