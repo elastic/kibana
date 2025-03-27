@@ -52,6 +52,7 @@ export const SeveritySelector: React.FC<Props> = ({
       valueOfSelected={selectedSeverity}
       onChange={onSeverityChange}
       data-test-subj="case-severity-selection"
+      aria-label="Severity"
     />
   );
 };
