@@ -59,7 +59,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       it('re-indexes KB if it has existing entries', async () => {
         await setupKnowledgeBase(getService);
         await addKbEntry();
-        setupKnowledgeBase(getService, { deployModel: false });
+        const setupPromise = setupKnowledgeBase(getService, { deployModel: false });
 
         // index block should be added
         await retry.try(async () => {
@@ -75,6 +75,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         const writeIndex = await getConcreteWriteIndexFromAlias(es);
         expect(writeIndex).to.be(`${resourceNames.writeIndexAlias.kb}-000002`);
+        await setupPromise;
       });
 
       it('does not re-index if KB is empty', async () => {
