@@ -114,14 +114,13 @@ function StaleAlert({
               {i18n.translate(
                 'xpack.observability.alertDetails.alertStaleCallout.markAsUntrackedButton',
                 {
-                  defaultMessage: 'Mark as untracked',
+                  defaultMessage: 'Untrack',
                 }
               )}
             </EuiButton>
             <EuiButton
               data-test-subj="o11yAlertDetailsAlertStaleCalloutEditRule"
               color="warning"
-              fill
               iconType="pencil"
               onClick={handleEditRuleDetails}
             >
