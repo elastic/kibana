@@ -24,6 +24,46 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-public.CardIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "CardIcon",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "UsePackageIconType",
+          " & Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/public/components/package_icon.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CardIcon.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "UsePackageIconType",
+              " & Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/public/components/package_icon.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-public.CustomAssetsAccordion",
         "type": "Function",
         "tags": [],
@@ -415,6 +455,47 @@
             ]
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.useLink",
+        "type": "Function",
+        "tags": [],
+        "label": "useLink",
+        "description": [],
+        "signature": [
+          "() => { getPath: (page: ",
+          "StaticPage",
+          " | ",
+          "DynamicPage",
+          ", values?: ",
+          {
+            "pluginId": "fleet",
+            "scope": "public",
+            "docId": "kibFleetPluginApi",
+            "section": "def-public.DynamicPagePathValues",
+            "text": "DynamicPagePathValues"
+          },
+          ") => string; getAbsolutePath: (path: string) => string; getAssetsPath: (path: string) => string; getHref: (page: ",
+          "StaticPage",
+          " | ",
+          "DynamicPage",
+          ", values?: ",
+          {
+            "pluginId": "fleet",
+            "scope": "public",
+            "docId": "kibFleetPluginApi",
+            "section": "def-public.DynamicPagePathValues",
+            "text": "DynamicPagePathValues"
+          },
+          " | undefined) => string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/public/hooks/use_link.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -6237,7 +6318,13 @@
             "text": "FleetUnauthorizedError"
           },
           " extends ",
-          "FleetError",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.FleetError",
+            "text": "FleetError"
+          },
           "<unknown>"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/server/errors/index.ts",
@@ -20376,7 +20463,93 @@
     }
   },
   "common": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FleetError",
+        "type": "Class",
+        "tags": [],
+        "label": "FleetError",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.FleetError",
+            "text": "FleetError"
+          },
+          "<TMeta> extends Error"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetError.attributes",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "{ type: \"verification_failed\"; } | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.FleetError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.FleetError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/common/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.FleetError.Unnamed.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "meta",
+                "description": [],
+                "signature": [
+                  "TMeta | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/common/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
       {
         "parentPluginId": "fleet",

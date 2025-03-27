@@ -141,11 +141,11 @@ export function Detail() {
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
-  /** Users from Security Solution onboarding page will have onboardingLink and onboardingAppId in the query params
-   ** to redirect back to the onboarding page after adding an integration
+  /** Users from Security and Observability Solution onboarding pages will have returnAppId and returnPath
+   ** in the query params to redirect back to the onboarding page after adding an integration
    */
-  const onboardingLink = useMemo(() => queryParams.get('onboardingLink'), [queryParams]);
-  const onboardingAppId = useMemo(() => queryParams.get('onboardingAppId'), [queryParams]);
+  const returnAppId = useMemo(() => queryParams.get('returnAppId'), [queryParams]);
+  const returnPath = useMemo(() => queryParams.get('returnPath'), [queryParams]);
 
   const authz = useAuthz();
   const canAddAgent = authz.fleet.addAgents;
@@ -318,12 +318,12 @@ export function Detail() {
 
   const fromIntegrations = getFromIntegrations();
 
-  const href =
+  const fromIntegrationsPath =
     fromIntegrations === 'updates_available'
-      ? getHref('integrations_installed_updates_available')
+      ? getPath('integrations_installed_updates_available')
       : fromIntegrations === 'installed'
-      ? getHref('integrations_installed')
-      : getHref('integrations_all');
+      ? getPath('integrations_installed')
+      : getPath('integrations_all');
 
   const numOfDeferredInstallations = useMemo(
     () => getDeferredInstallationsCnt(packageInfo),
@@ -336,7 +336,7 @@ export function Detail() {
         <EuiFlexItem>
           {/* Allows button to break out of full width */}
           <div>
-            <BackLink queryParams={queryParams} href={href} />
+            <BackLink queryParams={queryParams} integrationsPath={fromIntegrationsPath} />
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -393,7 +393,7 @@ export function Detail() {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [integrationInfo, isLoading, packageInfo, href, queryParams]
+    [integrationInfo, isLoading, packageInfo, fromIntegrationsPath, queryParams]
   );
 
   const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
@@ -418,20 +418,20 @@ export function Detail() {
         isAgentlessIntegration: isAgentlessIntegration(packageInfo || undefined),
       });
 
-      /** Users from Security Solution onboarding page will have onboardingLink and onboardingAppId in the query params
-       ** to redirect back to the onboarding page after adding an integration
+      /** Users from Security and Observability Solution onboarding pages will have returnAppId and returnPath
+       ** in the query params to redirect back to the onboarding page after adding an integration
        */
       const navigateOptions: InstallPkgRouteOptions =
-        onboardingAppId && onboardingLink
+        returnAppId && returnPath
           ? [
               defaultNavigateOptions[0],
               {
                 ...defaultNavigateOptions[1],
                 state: {
                   ...(defaultNavigateOptions[1]?.state ?? {}),
-                  onCancelNavigateTo: [onboardingAppId, { path: onboardingLink }],
-                  onCancelUrl: onboardingLink,
-                  onSaveNavigateTo: [onboardingAppId, { path: onboardingLink }],
+                  onCancelNavigateTo: [returnAppId, { path: returnPath }],
+                  onCancelUrl: services.application.getUrlForApp(returnAppId, { path: returnPath }),
+                  onSaveNavigateTo: [returnAppId, { path: returnPath }],
                 },
               },
             ]
@@ -448,8 +448,8 @@ export function Detail() {
       isCloud,
       isFirstTimeAgentUser,
       isGuidedOnboardingActive,
-      onboardingAppId,
-      onboardingLink,
+      returnAppId,
+      returnPath,
       packageInfo,
       pathname,
       pkgkey,
