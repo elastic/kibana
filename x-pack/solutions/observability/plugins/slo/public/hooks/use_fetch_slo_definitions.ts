@@ -35,7 +35,7 @@ export function useFetchSloDefinitions({
 }: SLODefinitionParams): UseFetchSloDefinitionsResponse {
   const { sloClient } = usePluginContext();
   const search = name.endsWith('*') ? name : `${name}*`;
-  const validTags = tags.filter((tag) => !!tag);
+  const validTags = tags.filter((tag) => !!tag).join();
 
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({
     queryKey: sloKeys.definitions({ search, page, perPage, includeOutdatedOnly, validTags }),

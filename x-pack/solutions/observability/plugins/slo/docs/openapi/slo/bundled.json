@@ -725,9 +725,9 @@
           {
             "name": "tags",
             "in": "query",
-            "description": "Specify which SLO tags to query by",
+            "description": "Specify which SLO tags to query by (comma-separated values)",
             "schema": {
-              "type": "array"
+              "type": "string"
             },
             "example": true
           },
