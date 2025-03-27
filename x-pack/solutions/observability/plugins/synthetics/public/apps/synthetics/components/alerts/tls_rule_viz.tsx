@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { inspectTLSRuleAction } from '../../state/alert_rules';
 import { TLSRuleParamsProps } from './tls_rule_ui';
 import { RuleViz } from './rule_viz';
 
 export const TLSRuleViz = ({ ruleParams }: { ruleParams: TLSRuleParamsProps['ruleParams'] }) => {
-  return <RuleViz dispatchedAction={inspectTLSRuleAction.get(ruleParams)} />;
+  const dispatchedAction = useMemo(() => inspectTLSRuleAction.get(ruleParams), [ruleParams]);
+  return <RuleViz dispatchedAction={dispatchedAction} />;
 };

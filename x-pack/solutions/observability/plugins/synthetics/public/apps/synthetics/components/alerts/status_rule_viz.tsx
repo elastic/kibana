@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { inspectStatusRuleAction } from '../../state/alert_rules';
 import { StatusRuleParamsProps } from './status_rule_ui';
 import { RuleViz } from './rule_viz';
@@ -15,5 +15,6 @@ export const StatusRuleViz = ({
 }: {
   ruleParams: StatusRuleParamsProps['ruleParams'];
 }) => {
-  return <RuleViz dispatchedAction={inspectStatusRuleAction.get(ruleParams)} />;
+  const dispatchedAction = useMemo(() => inspectStatusRuleAction.get(ruleParams), [ruleParams]);
+  return <RuleViz dispatchedAction={dispatchedAction} />;
 };
