@@ -92,13 +92,12 @@ export async function getTraceSampleIds({
       (response) => response.aggregations?.connections.buckets.map((p) => p.sample) ?? []
     );
     // make sure at least one trace per composite/connection bucket is queried
-    const traceIdsWithPriority =
-      samples.flatMap((sample) =>
-        sample.trace_ids.buckets.map((sampleDocBucket, index) => ({
-          traceId: sampleDocBucket.key as string,
-          priority: index,
-        }))
-      ) || [];
+    const traceIdsWithPriority = samples.flatMap((sample) =>
+      sample.trace_ids.buckets.map((sampleDocBucket, index) => ({
+        traceId: sampleDocBucket.key as string,
+        priority: index,
+      }))
+    );
 
     const traceIds = take(
       uniq(sortBy(traceIdsWithPriority, 'priority').map(({ traceId }) => traceId)),

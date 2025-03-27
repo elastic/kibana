@@ -396,7 +396,7 @@ async function fetchTransactionsFromExitSpans({
   const optionalFields = asMutableArray([SERVICE_ENVIRONMENT] as const);
   const requiredFields = asMutableArray([SERVICE_NAME, AGENT_NAME, PARENT_ID] as const);
 
-  const servicesResponse = await apmEventClient.search('get_transactions_for_exit_spans', {
+  const servicesResponse = await apmEventClient.search('get_transactions_from_exit_spans', {
     apm: {
       events: [ProcessorEvent.transaction],
     },
