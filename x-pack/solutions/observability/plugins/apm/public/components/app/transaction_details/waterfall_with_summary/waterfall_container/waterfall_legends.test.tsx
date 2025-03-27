@@ -13,13 +13,6 @@ import {
 } from './waterfall/waterfall_helpers/waterfall_helpers';
 import { EuiThemeProvider } from '@elastic/eui';
 
-// jest.mock('@elastic/eui', () => ({
-//   ...jest.requireActual('@elastic/eui'),
-//   useEuiTheme: jest.fn().mockReturnValue({
-//     euiTheme: { colors: { vis: { euiColorVis1: 'red' } } },
-//   }),
-// }));
-
 const createLegend = (overrides: Partial<IWaterfallLegend>): IWaterfallLegend => ({
   type: WaterfallLegendType.ServiceName,
   value: 'default-service',
