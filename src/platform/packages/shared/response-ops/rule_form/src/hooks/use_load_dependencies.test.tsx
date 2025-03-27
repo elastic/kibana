@@ -29,8 +29,8 @@ jest.mock('../common/hooks/use_resolve_rule', () => ({
   useResolveRule: jest.fn(),
 }));
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_load_rule_types_query', () => ({
-  useLoadRuleTypesQuery: jest.fn(),
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => ({
+  useGetRuleTypesPermissions: jest.fn(),
 }));
 
 jest.mock('../common/hooks/use_load_connectors', () => ({
@@ -59,8 +59,8 @@ const { useLoadConnectorTypes } = jest.requireMock('../common/hooks/use_load_con
 const { useLoadRuleTypeAadTemplateField } = jest.requireMock(
   '../common/hooks/use_load_rule_type_aad_template_fields'
 );
-const { useLoadRuleTypesQuery } = jest.requireMock(
-  '@kbn/alerts-ui-shared/src/common/hooks/use_load_rule_types_query'
+const { useGetRuleTypesPermissions } = jest.requireMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
 );
 const { useFetchFlappingSettings } = jest.requireMock(
   '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings'
@@ -158,7 +158,7 @@ const ruleTypeIndex = new Map();
 
 ruleTypeIndex.set('.index-threshold', indexThresholdRuleType);
 
-useLoadRuleTypesQuery.mockReturnValue({
+useGetRuleTypesPermissions.mockReturnValue({
   ruleTypesState: {
     isLoading: false,
     isInitialLoading: false,
@@ -278,7 +278,7 @@ describe('useLoadDependencies', () => {
     });
   });
 
-  test('should call useLoadRuleTypesQuery with fitlered rule types', async () => {
+  test('should call useGetRuleTypesPermissions with filtered rule types', async () => {
     const { result } = renderHook(
       () => {
         return useLoadDependencies({
@@ -302,7 +302,7 @@ describe('useLoadDependencies', () => {
       return expect(result.current.isInitialLoading).toEqual(false);
     });
 
-    expect(useLoadRuleTypesQuery).toBeCalledWith({
+    expect(useGetRuleTypesPermissions).toBeCalledWith({
       http: httpMock,
       toasts: toastsMock,
       filteredRuleTypes: ['test-rule-type'],
