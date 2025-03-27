@@ -60,9 +60,8 @@ function StaleAlert({
 
       // The heuristics to show the stale alert callout are:
       // 1. The alert has been active for more than 5 days
-      // 2. The alert has no cases associated with it
-      // 3. The rule is snoozed with no notifications
-      if (diffInDays >= 5 && numOfCases === 0 && (rule?.isSnoozedUntil || rule?.muteAll)) {
+
+      if (diffInDays >= 5) {
         trackEvent({
           app: 'alerts',
           metricType: METRIC_TYPE.LOADED,
@@ -71,30 +70,24 @@ function StaleAlert({
         return {
           isStale: true,
           days: diffInDays,
+          cases: numOfCases,
         };
       }
     } else {
       return {
         isStale: false,
         days: 0,
+        cases: 0,
       };
     }
-  }, [
-    alert.fields,
-    alert.start,
-    alertStatus,
-    rule?.isSnoozedUntil,
-    rule?.muteAll,
-    rule?.ruleTypeId,
-    trackEvent,
-  ]);
+  }, [alert.fields, alert.start, alertStatus, rule?.ruleTypeId, trackEvent]);
 
   return (
     <>
       {isAlertStale?.isStale && (
         <EuiCallOut
           title={i18n.translate('xpack.observability.alertDetails.staleAlertCallout.title', {
-            defaultMessage: 'Stale alert',
+            defaultMessage: 'This alert may be stale!',
           })}
           color="warning"
           iconType="warning"
@@ -102,8 +95,12 @@ function StaleAlert({
           <p>
             {i18n.translate('xpack.observability.alertDetails.staleAlertCallout.message', {
               defaultMessage:
-                'This alert has been active for {numOfDays} days, remains unassigned to any cases, and its rule is snoozed with no notifications.',
-              values: { numOfDays: isAlertStale?.days },
+                'This alert has been active for {numOfDays} days, and is assigned to {numOfCases} {cases}.',
+              values: {
+                numOfDays: isAlertStale?.days,
+                numOfCases: isAlertStale?.cases,
+                cases: isAlertStale?.cases > 1 ? 'cases' : 'case',
+              },
             })}
           </p>
           <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
