@@ -122,7 +122,7 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
       return (
         <CellTooltip
           value={
-            <EuiLink data-test-subj="o11yColumnsButton" href={ruleLink}>
+            <EuiLink data-test-subj="o11yCellRenderersLink" href={ruleLink}>
               {value}
             </EuiLink>
           }
