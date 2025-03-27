@@ -13,7 +13,7 @@ import Fs from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 const localBundles = Path.resolve(__dirname, './target_workers');
-const bazelBundles = Path.resolve(
+const builtBundles = Path.resolve(
   REPO_ROOT,
   'target',
   'build',
@@ -21,4 +21,4 @@ const bazelBundles = Path.resolve(
 );
 
 // extracted const vars
-export const bundleDir = Fs.existsSync(localBundles) ? localBundles : bazelBundles;
+export const bundleDir = Fs.existsSync(localBundles) ? localBundles : builtBundles;
