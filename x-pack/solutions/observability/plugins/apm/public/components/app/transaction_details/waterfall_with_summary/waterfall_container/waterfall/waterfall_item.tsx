@@ -242,7 +242,6 @@ export function WaterfallItem({
 
   const width = (item.duration / totalDuration) * widthFactor * 100;
   const left = (((item.offset + item.skew) / totalDuration) * widthFactor - widthFactor + 1) * 100;
-  console.log('### caue left:', item.id, left);
 
   const isCompositeSpan = item.docType === 'span' && item.doc.span.composite;
 
