@@ -71,14 +71,14 @@ async function getTransactionData({
   );
 }
 
-export interface TransactionWithOnlyName {
+export interface Transaction {
   name: string;
   duration: number;
 }
 
 const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) => {
   const { data, core } = getUnifiedDocViewerServices();
-  const [transaction, setTransaction] = useState<TransactionWithOnlyName | null>(null);
+  const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
