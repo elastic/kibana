@@ -55,11 +55,7 @@ import {
   conversationContainsAnonymizedValues,
   conversationContainsContentReferences,
 } from './conversations/utils';
-import {
-  LastConversation,
-  useAssistantLastConversation,
-  useAssistantSpaceId,
-} from './use_space_aware_context';
+import { useAssistantLastConversation, useAssistantSpaceId } from './use_space_aware_context';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
@@ -137,7 +133,9 @@ const AssistantComponent: React.FC<Props> = ({
   });
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
   const spaceId = useAssistantSpaceId();
-  const { setLastConversationId, getLastConversationId } = useAssistantLastConversation({ spaceId });
+  const { setLastConversationId, getLastConversationId } = useAssistantLastConversation({
+    spaceId,
+  });
   const lastConversationIdFromLocalStorage = useMemo(
     () => getLastConversationId(),
     [getLastConversationId]
@@ -158,7 +156,6 @@ const AssistantComponent: React.FC<Props> = ({
     defaultConnector,
     refetchCurrentUserConversations,
     conversationId: lastConversationIdFromLocalStorage,
-    setLastConversationId,
     mayUpdateConversations:
       isFetchedConnectors &&
       isFetchedCurrentUserConversations &&

@@ -130,7 +130,7 @@ describe('Assistant', () => {
     } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
     jest
       .mocked(useLocalStorage)
-      .mockReturnValue([mockData.welcome_id, persistToLocalStorage] as unknown as ReturnType<
+      .mockReturnValue([mockData.welcome_id.id, persistToLocalStorage] as unknown as ReturnType<
         typeof useLocalStorage
       >);
     jest

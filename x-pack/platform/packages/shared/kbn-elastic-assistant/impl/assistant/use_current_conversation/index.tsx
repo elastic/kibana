@@ -17,7 +17,6 @@ import { getDefaultNewSystemPrompt, getDefaultSystemPrompt } from '../use_conver
 import { useConversation } from '../use_conversation';
 import { sleep } from '../helpers';
 import { Conversation, WELCOME_CONVERSATION_TITLE } from '../../..';
-import type { LastConversation } from '../use_space_aware_context';
 
 export interface Props {
   allSystemPrompts: PromptResponse[];
@@ -28,7 +27,6 @@ export interface Props {
   refetchCurrentUserConversations: () => Promise<
     QueryObserverResult<Record<string, Conversation>, unknown>
   >;
-  setLastConversationId: (lastConversatioId?: string) => void;
 }
 
 interface UseCurrentConversation {
@@ -59,7 +57,6 @@ export const useCurrentConversation = ({
   defaultConnector,
   mayUpdateConversations,
   refetchCurrentUserConversations,
-  setLastConversationId,
 }: Props): UseCurrentConversation => {
   const {
     createConversation,
@@ -121,7 +118,7 @@ export const useCurrentConversation = ({
       cTitle,
       isStreamRefetch = false,
       silent,
-    }: { cId?: string; cTitle?: string; isStreamRefetch?: boolean; silent?: boolean; } = {}) => {
+    }: { cId?: string; cTitle?: string; isStreamRefetch?: boolean; silent?: boolean } = {}) => {
       if (cId === '' || (cTitle && !conversations[cTitle])) {
         return;
       }
@@ -189,17 +186,11 @@ export const useCurrentConversation = ({
           allConversations.data[cTitle]
         );
         setCurrentConversationId(updatedConvo.id);
-        setLastConversationId(updatedConvo.id);
       } else if (allConversations?.data?.[cId]) {
         setCurrentConversationId(cId);
-        setLastConversationId(cId);
       }
     },
-    [
-      initializeDefaultConversationWithConnector,
-      refetchCurrentUserConversations,
-      setCurrentConversationId,
-    ]
+    [initializeDefaultConversationWithConnector, refetchCurrentUserConversations]
   );
 
   // update currentConversation when conversations or currentConversationId update
