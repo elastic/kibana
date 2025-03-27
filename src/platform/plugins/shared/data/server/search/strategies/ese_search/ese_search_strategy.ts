@@ -26,7 +26,7 @@ import {
 import { toAsyncKibanaSearchResponse, toAsyncKibanaSearchStatusResponse } from './response_utils';
 import { SearchUsage, searchUsageObserver } from '../../collectors/search';
 import { getDefaultSearchParams, getShardTimeout } from '../es_search';
-import { getTotalLoaded, shimHitsTotal } from '../../../../common/search/strategies/es_search';
+import { getTotalLoaded } from '../../../../common/search/strategies/es_search';
 import { SearchConfigSchema } from '../../../config';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 
@@ -181,7 +181,7 @@ export const enhancedEsSearchStrategyProvider = (
 
       const response = esResponse.body;
       return {
-        rawResponse: shimHitsTotal(response, options),
+        rawResponse: response,
         ...(esResponse.meta?.request?.params
           ? { requestParams: sanitizeRequestParams(esResponse.meta?.request?.params) }
           : {}),

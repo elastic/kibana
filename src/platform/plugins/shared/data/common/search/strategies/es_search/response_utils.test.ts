@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getTotalLoaded, shimHitsTotal } from './response_utils';
+import { getTotalLoaded, getHitsTotal } from './response_utils';
 import type { estypes } from '@elastic/elasticsearch';
 
 describe('response utils', () => {
@@ -29,77 +29,25 @@ describe('response utils', () => {
     });
   });
 
-  describe('shimHitsTotal', () => {
-    test('returns the total if it is already numeric', () => {
-      const result = shimHitsTotal({
-        hits: {
-          total: 5,
-        },
-      } as any);
-      expect(result).toEqual({
-        hits: {
-          total: 5,
-        },
+  describe('getHitsTotal', () => {
+    describe('when hits.total is number', () => {
+      it('should return it', () => {
+        const hits = { total: 5 } as estypes.SearchHitsMetadata;
+        expect(getHitsTotal(hits.total)).toBe(5);
       });
     });
 
-    test('returns the total if it is inside `value`', () => {
-      const result = shimHitsTotal({
-        hits: {
-          total: {
-            value: 5,
-          },
-        },
-      } as any);
-      expect(result).toEqual({
-        hits: {
-          total: 5,
-        },
+    describe('when hits.total is object', () => {
+      it('should return hits.total.value', () => {
+        const hits = { total: { value: 10 } } as estypes.SearchHitsMetadata;
+        expect(getHitsTotal(hits.total)).toBe(10);
       });
     });
 
-    test('returns other properties from the response', () => {
-      const result = shimHitsTotal({
-        _shards: {},
-        hits: {
-          hits: [],
-          total: {
-            value: 5,
-          },
-        },
-      } as any);
-      expect(result).toEqual({
-        _shards: {},
-        hits: {
-          hits: [],
-          total: 5,
-        },
-      });
-    });
-
-    test('returns the response as-is if `legacyHitsTotal` is `false`', () => {
-      const result = shimHitsTotal(
-        {
-          _shards: {},
-          hits: {
-            hits: [],
-            total: {
-              value: 5,
-              relation: 'eq',
-            },
-          },
-        } as any,
-        { legacyHitsTotal: false }
-      );
-      expect(result).toEqual({
-        _shards: {},
-        hits: {
-          hits: [],
-          total: {
-            value: 5,
-            relation: 'eq',
-          },
-        },
+    describe('when hits.total is 0', () => {
+      it('should return it', () => {
+        const hits = { total: 0 } as estypes.SearchHitsMetadata;
+        expect(getHitsTotal(hits.total)).toBe(0);
       });
     });
   });

@@ -23,7 +23,7 @@ import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import type { IAggType } from './agg_type';
 import type { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
-import { AggTypesDependencies, GetConfigFn, getUserTimeZone } from '../..';
+import { AggTypesDependencies, GetConfigFn, getHitsTotal, getUserTimeZone } from '../..';
 import { getTime, calculateBounds } from '../..';
 import type { IBucketAggConfig } from './buckets';
 import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
@@ -475,7 +475,7 @@ export class AggConfigs {
     const transformedRawResponse = cloneDeep(response.rawResponse);
     if (!transformedRawResponse.aggregations) {
       transformedRawResponse.aggregations = {
-        doc_count: response.rawResponse.hits?.total as estypes.AggregationsAggregate,
+        doc_count: getHitsTotal(response.rawResponse.hits?.total) as estypes.AggregationsAggregate,
       };
     }
     const aggCursor = this.isSamplingEnabled()

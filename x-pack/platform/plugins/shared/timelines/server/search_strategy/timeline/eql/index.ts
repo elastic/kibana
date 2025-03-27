@@ -6,7 +6,7 @@
  */
 
 import { map, mergeMap } from 'rxjs';
-import { ISearchStrategy, PluginStart, shimHitsTotal } from '@kbn/data-plugin/server';
+import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { EqlSearchStrategyResponse, EQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { TimelineEqlRequestOptions } from '../../../../common/api/search_strategy';
 import { EqlSearchResponse } from '../../../../common/search_strategy';
@@ -28,7 +28,7 @@ export const timelineEqlSearchStrategyProvider = (
           return {
             ...response,
             ...{
-              rawResponse: shimHitsTotal(response.rawResponse),
+              rawResponse: response.rawResponse,
             },
           };
         }),

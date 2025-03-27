@@ -8,7 +8,7 @@
 import { useQuery } from '@tanstack/react-query';
 import moment from 'moment-timezone';
 import { lastValueFrom } from 'rxjs';
-import { SortDirection } from '@kbn/data-plugin/common';
+import { getHitsTotal, SortDirection } from '@kbn/data-plugin/common';
 import { useKibana } from '../common/lib/kibana';
 import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 
@@ -93,7 +93,7 @@ export const usePackQueryLastResults = ({
           '@timestamp': lastResultsResponse.rawResponse?.hits?.hits[0]?.fields?.['@timestamp'],
           // @ts-expect-error update types
           uniqueAgentsCount: aggsResponse?.rawResponse.aggregations?.unique_agents?.value,
-          docCount: aggsResponse?.rawResponse?.hits?.total,
+          docCount: getHitsTotal(aggsResponse?.rawResponse?.hits?.total),
         };
       }
 
