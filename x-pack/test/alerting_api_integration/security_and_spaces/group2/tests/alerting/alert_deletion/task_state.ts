@@ -7,19 +7,19 @@
 
 import expect from '@kbn/expect';
 import { get } from 'lodash';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { ALERT_START } from '@kbn/rule-data-utils';
 import moment from 'moment';
-import { Space } from '../../../../../common/types';
+import type { Space } from '../../../../../common/types';
 import { Space1, Superuser } from '../../../../scenarios';
+import type { TaskManagerDoc } from '../../../../../common/lib';
 import {
   getUrlPrefix,
   getEventLog,
   ObjectRemover,
   getTestRuleData,
-  TaskManagerDoc,
 } from '../../../../../common/lib';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertDeletionTaskStateTests({ getService }: FtrProviderContext) {

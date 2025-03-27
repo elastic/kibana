@@ -49,11 +49,9 @@ export type RulesSettingsAlertDeletion = RulesSettingsAlertDeletionProperties &
 export interface RulesSettingsProperties {
   flapping?: RulesSettingsFlappingProperties;
   queryDelay?: RulesSettingsQueryDelayProperties;
-  alertDeletion?: RulesSettingsAlertDeletionProperties;
 }
 
 export interface RulesSettings {
   flapping?: RulesSettingsFlapping;
   queryDelay?: RulesSettingsQueryDelay;
-  alertDeletion?: RulesSettingsAlertDeletion;
 }
