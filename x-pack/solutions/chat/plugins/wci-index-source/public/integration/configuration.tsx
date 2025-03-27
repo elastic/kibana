@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useFieldArray, Controller } from 'react-hook-form';
 import {
   EuiTextArea,
@@ -20,13 +20,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCallOut,
+  EuiButtonEmpty,
 } from '@elastic/eui';
+import type { IndexSourceDefinition } from '@kbn/wci-common';
 import { IntegrationConfigurationFormProps } from '@kbn/wci-browser';
+import type { WCIIndexSourceFilterField, WCIIndexSourceContextField } from '../../common/types';
+import { useGenerateSchema } from '../hooks/use_generate_schema';
 
 export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationFormProps> = ({
   form,
 }) => {
-  const { control } = form;
+  const { control, setValue } = form;
   const filterFieldsArray = useFieldArray({
     control,
     name: 'configuration.fields.filterFields',
@@ -45,6 +49,61 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
     { value: 'boolean', text: 'Boolean' },
   ];
 
+  const { generateSchema } = useGenerateSchema();
+
+  const onSchemaGenerated = useCallback(
+    (definition: IndexSourceDefinition) => {
+      setValue('configuration.description', definition.description);
+      setValue(
+        'configuration.fields.filterFields',
+        definition.filterFields.map<WCIIndexSourceFilterField>((field) => {
+          return {
+            field: field.field,
+            type: field.type,
+            description: field.description,
+            getValues: field.asEnum,
+          };
+        })
+      );
+
+      const queryClauses = definition.queryFields.map((field) => {
+        if (field.type === 'semantic_text') {
+          return {
+            semantic: {
+              field: field.field,
+              query: '{query}',
+            },
+          };
+        } else {
+          return {
+            match: {
+              [field.field]: '{query}',
+            },
+          };
+        }
+      });
+      const queryTemplate = {
+        bool: {
+          should: queryClauses,
+        },
+      };
+
+      setValue('configuration.queryTemplate', JSON.stringify(queryTemplate, undefined, 2));
+
+      setValue(
+        'configuration.fields.contextFields',
+        definition.contentFields.map<WCIIndexSourceContextField>((field) => {
+          return {
+            field: field.field,
+            description: '',
+            type: field.type === 'semantic_text' ? 'semantic' : undefined,
+          };
+        })
+      );
+    },
+    [setValue]
+  );
+
   return (
     <>
       <EuiDescribedFormGroup
@@ -61,6 +120,17 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
                 data-test-subj="workchatAppIntegrationEditViewIndex"
                 placeholder="Enter index name"
                 {...field}
+                append={
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType="gear"
+                    onClick={() => {
+                      generateSchema({ indexName: field.value }, { onSuccess: onSchemaGenerated });
+                    }}
+                  >
+                    Generate configuration
+                  </EuiButtonEmpty>
+                }
               />
             )}
           />
@@ -213,18 +283,6 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
                       name={`configuration.fields.contextFields.${index}.field`}
                       control={control}
                       render={({ field }) => <EuiFieldText placeholder="Field name" {...field} />}
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-
-                <EuiFlexItem>
-                  <EuiFormRow label="Description">
-                    <Controller
-                      name={`configuration.fields.contextFields.${index}.description`}
-                      control={control}
-                      render={({ field }) => (
-                        <EuiFieldText placeholder="Field description" {...field} />
-                      )}
                     />
                   </EuiFormRow>
                 </EuiFlexItem>

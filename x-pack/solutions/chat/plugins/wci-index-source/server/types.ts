@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkChatAppPluginSetup } from '@kbn/workchat-app/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WCIIndexSourcePluginSetup {}
@@ -16,5 +18,7 @@ export interface WCIIndexSourcePluginSetupDependencies {
   workchatApp: WorkChatAppPluginSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WCIIndexSourcePluginStartDependencies {}
+export interface WCIIndexSourcePluginStartDependencies {
+  inference: InferenceServerStart;
+  actions: ActionsPluginStart;
+}

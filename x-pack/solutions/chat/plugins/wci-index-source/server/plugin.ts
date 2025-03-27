@@ -18,6 +18,7 @@ import type {
   WCIIndexSourcePluginSetupDependencies,
   WCIIndexSourcePluginStartDependencies,
 } from './types';
+import { registerRoutes } from './routes';
 import { getIndexSourceIntegrationDefinition } from './integration';
 
 export class WCIIndexSourcePlugin
@@ -36,9 +37,16 @@ export class WCIIndexSourcePlugin
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<WCIIndexSourcePluginStartDependencies>,
     { workchatApp }: WCIIndexSourcePluginSetupDependencies
   ): WCIIndexSourcePluginSetup {
+    const router = core.http.createRouter();
+    registerRoutes({
+      core,
+      logger: this.logger,
+      router,
+    });
+
     workchatApp.integrations.register(
       getIndexSourceIntegrationDefinition({
         core,
