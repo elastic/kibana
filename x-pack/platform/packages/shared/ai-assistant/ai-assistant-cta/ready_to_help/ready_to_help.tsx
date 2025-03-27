@@ -6,14 +6,15 @@
  */
 
 import React from 'react';
-import { AssistantCallToAction } from '../call_to_action';
+import { AssistantCallToAction, type AssistantCallToActionProps } from '../call_to_action';
 
 import { translations } from './ready_to_help.translations';
 
 /**
  * Props for the `ReadyToHelp`.
  */
-export interface ReadyToHelpProps {
+export interface ReadyToHelpProps
+  extends Pick<AssistantCallToActionProps, 'data-test-subj' | 'centered'> {
   /** The type of serverless project or project focus for the deployment. */
   type?: 'stack' | 'security' | 'oblt' | 'search';
 }
@@ -22,7 +23,7 @@ export interface ReadyToHelpProps {
  * A pure component that renders a call to action that indicates the AI Assistant is configured
  * and ready to be used.
  */
-export const ReadyToHelp = ({ type = 'stack' }: ReadyToHelpProps) => {
+export const ReadyToHelp = ({ type = 'stack', ...props }: ReadyToHelpProps) => {
   const { title } = translations;
 
   let description = translations.description;
@@ -39,5 +40,5 @@ export const ReadyToHelp = ({ type = 'stack' }: ReadyToHelpProps) => {
       break;
   }
 
-  return <AssistantCallToAction {...{ title, description }} />;
+  return <AssistantCallToAction {...{ title, description, ...props }} />;
 };
