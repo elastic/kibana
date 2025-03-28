@@ -8,7 +8,7 @@
  */
 
 import { getDataViewAppState } from './get_switch_data_view_app_state';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 const emptyDefaultColumns: string[] = [];
 

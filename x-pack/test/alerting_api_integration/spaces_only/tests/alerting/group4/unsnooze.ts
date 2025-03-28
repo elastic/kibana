@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces } from '../../../scenarios';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   AlertUtils,
   checkAAD,
@@ -21,6 +21,7 @@ import {
 export default function createSnoozeRuleTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const NOW = new Date().toISOString();
 
   describe('unsnooze', function () {
     this.tags('skipFIPS');
@@ -60,7 +61,29 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
-      const response = await alertUtils.getUnsnoozeRequest(createdAlert.id);
+      const { body: snoozeSchedule } = await supertest
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}/snooze_schedule`
+        )
+        .set('kbn-xsrf', 'foo')
+        .set('content-type', 'application/json')
+        .send({
+          schedule: {
+            custom: {
+              duration: '240h',
+              start: NOW,
+              recurring: {
+                occurrences: 1,
+              },
+            },
+          },
+        })
+        .expect(200);
+
+      const response = await alertUtils.getUnsnoozeRequest(
+        createdAlert.id,
+        snoozeSchedule.schedule.id
+      );
 
       expect(response.statusCode).to.eql(204);
       expect(response.body).to.eql('');
@@ -77,6 +100,66 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         spaceId: Spaces.space1.id,
         type: RULE_SAVED_OBJECT_TYPE,
         id: createdAlert.id,
+      });
+    });
+
+    describe('validation', function () {
+      this.tags('skipFIPS');
+      it('should return 400 for when rule has no snooze schedule', async () => {
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+              actions: [],
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        const response = await alertUtils.getUnsnoozeRequest(createdAlert.id, 'random_id');
+
+        expect(response.statusCode).to.eql(400);
+        expect(response.body.message).to.eql('Rule has no snooze schedules.');
+      });
+
+      it('should return 404 for when invalid snooze schedule id', async () => {
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+              actions: [],
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        await supertest
+          .post(
+            `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}/snooze_schedule`
+          )
+          .set('kbn-xsrf', 'foo')
+          .set('content-type', 'application/json')
+          .send({
+            schedule: {
+              custom: {
+                duration: '240h',
+                start: NOW,
+                recurring: {
+                  occurrences: 1,
+                },
+              },
+            },
+          })
+          .expect(200);
+
+        const response = await alertUtils.getUnsnoozeRequest(createdAlert.id, 'random_id');
+
+        expect(response.statusCode).to.eql(404);
+        expect(response.body.message).to.eql('Rule has no snooze schedule with id random_id.');
       });
     });
   });

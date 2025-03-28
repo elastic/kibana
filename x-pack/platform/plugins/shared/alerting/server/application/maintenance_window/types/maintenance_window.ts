@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { maintenanceWindowStatus } from '../constants';
-import { maintenanceWindowSchema } from '../schemas';
+import type { TypeOf } from '@kbn/config-schema';
+import type { maintenanceWindowStatus } from '../constants';
+import type { maintenanceWindowSchema } from '../schemas';
 
 export type MaintenanceWindow = TypeOf<typeof maintenanceWindowSchema>;
 export type MaintenanceWindowStatus =

@@ -135,6 +135,62 @@ Change the settings for the Options list and Range slider controls.
 . On the *Edit control* flyout, change the options, then click *Save and close*.
 
 [float]
+[[esql-controls]]
+==== Add controls from your {esql} visualization's query
+
+preview:[]
+
+You can bind controls to your ES|QL visualizations in dashboards. When creating an {esql} visualization, the autocomplete suggestions prompt control insertion for field values, field names, function configuration, and function names (function names are currently available for Elastic Cloud Serverless only). This enables controls that only apply to a specific panel, and exposes visualization configuration such as date histogram interval controls to dashboard users.
+
+NOTE: Currently, only **Options lists** with static values are supported for {esql}-based controls.
+
+. While editing your {esql} visualization's query, the autocomplete menu suggests adding a control +
++
+image::images/esql-visualization-control-suggestion.png[ESQL query prompting to add a control]
+
+. A menu opens to let you configure the control. This is where you can specify:
+
+** The name of the control. That is the name that will appear in your {esql} query, prefixed with a `?` symbol.
+** Values available to select for users with this control. You can add multiple values from suggested fields, or type in custom values.
+** The label of the control. This is the label displayed for users viewing the dashboard for that control.
+** The width of the control. +
++
+image::images/esql-visualization-control-settings.png[ESQL control settings, width="50%"]
+
+
+**Examples**
+
+* Integrate filtering into your ES|QL experience
+
+[source,esql]
+-------------------
+| WHERE field == ?value
+-------------------
+
+* Fields in controls for dynamic group by
+
+[source,esql]
+-------------------
+| STATS count=COUNT(*) BY ?field
+-------------------
+
+* Variable time ranges? Bind function configuration settings to a control
+
+[source,esql]
+-------------------
+| BUCKET(@timestamp, ?interval),
+-------------------
+
+* Make the function itself dynamic (Currently available for Elastic Cloud Serverless only)
+
+[source,esql]
+-------------------
+| STATS metric = ?function
+-------------------
+
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte42dfaa404bfc2d6/67d2e31e2e4dc59da190d78f/dashboard-esql-controls.gif[Editing ES|QL controls from a dashboard]
+
+[float]
 [[remove-controls]]
 ==== Remove controls
 

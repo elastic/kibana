@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
-import { GeoContainmentAlertParams } from './types';
+import type { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import type { GeoContainmentAlertParams } from './types';
 
 export const validateExpression = (alertParams: GeoContainmentAlertParams): ValidationResult => {
   const { index, geoField, entity, dateField, boundaryType, boundaryIndexTitle, boundaryGeoField } =

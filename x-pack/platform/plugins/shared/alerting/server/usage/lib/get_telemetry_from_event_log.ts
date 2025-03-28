@@ -14,8 +14,8 @@ import type {
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
   AggregationsBuckets,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+} from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   NUM_ALERTING_RULE_TYPES,
   NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES,
@@ -570,8 +570,8 @@ export function parseExecutionCountAggregationResults(results: {
 
 function getProviderAndActionFilterForTimeRange(
   action: string,
-  provider: string = 'alerting',
-  range: string = '1d'
+  provider = 'alerting',
+  range = '1d'
 ) {
   return {
     bool: {

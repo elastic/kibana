@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { ILicenseState } from '../../lib';
-import { ActionsRequestHandlerContext } from '../../types';
+import type { IRouter } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { ILicenseState } from '../../lib';
+import type { ActionsRequestHandlerContext } from '../../types';
 import { createActionRoute } from './create';
 import { deleteActionRoute } from './delete';
 import { getAllActionRoute } from './get_all';

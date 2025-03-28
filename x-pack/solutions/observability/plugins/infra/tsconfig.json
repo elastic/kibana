@@ -123,7 +123,8 @@
     "@kbn/observability-utils-common",
     "@kbn/response-ops-rule-form",
     "@kbn/traced-es-client",
-    "@kbn/fields-metadata-plugin"
+    "@kbn/fields-metadata-plugin",
+    "@kbn/deeplinks-analytics"
   ],
   "exclude": ["target/**/*"]
 }

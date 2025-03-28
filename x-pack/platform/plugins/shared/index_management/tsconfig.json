@@ -57,6 +57,7 @@
     "@kbn/core-application-browser",
     "@kbn/delete-managed-asset-callout",
     "@kbn/inference-endpoint-ui-common",
+    "@kbn/shared-ux-link-redirect-app",
   ],
   "exclude": ["target/**/*"]
 }

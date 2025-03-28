@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { DocLinksServiceSetup } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 import type { AlertingRouter } from '../../types';
-import { ILicenseState } from '../../lib/license_state';
+import type { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
@@ -48,9 +48,10 @@ export const listAlertTypesRoute = (
       trackLegacyRouteUsage('listAlertTypes', usageCounter);
       const alertingContext = await context.alerting;
       const rulesClient = await alertingContext.getRulesClient();
+      const ruleTypes = await rulesClient.listRuleTypes();
 
       return res.ok({
-        body: Array.from(await rulesClient.listRuleTypes()),
+        body: ruleTypes?.map(({ solution, ...ruleType }) => ruleType) ?? [],
       });
     })
   );

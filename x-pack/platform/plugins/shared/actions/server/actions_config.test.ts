@@ -6,7 +6,8 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { ActionsConfig, DEFAULT_USAGE_API_URL } from './config';
+import type { ActionsConfig } from './config';
+import { DEFAULT_USAGE_API_URL } from './config';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
@@ -18,7 +19,7 @@ import {
   EnabledActionTypes,
 } from './actions_config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import moment from 'moment';

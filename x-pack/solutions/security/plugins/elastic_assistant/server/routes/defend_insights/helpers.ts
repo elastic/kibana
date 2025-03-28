@@ -162,6 +162,9 @@ export function getAssistantToolParams({
     temperature: 0, // zero temperature because we want structured JSON output
     timeout: connectorTimeout,
     traceOptions,
+    telemetryMetadata: {
+      pluginId: 'security_defend_insights',
+    },
   });
 
   return {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 import { Frequency } from '@kbn/rrule';
 import { getInitialByWeekday } from './get_initial_by_weekday';
 

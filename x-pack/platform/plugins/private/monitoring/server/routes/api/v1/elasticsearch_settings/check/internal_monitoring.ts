@@ -83,6 +83,12 @@ export function internalMonitoringCheckRoute(server: MonitoringCore, npRoute: Ro
       validate: {
         body: validateBody,
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES cluster client',
+        },
+      },
       options: {
         access: 'internal',
       },

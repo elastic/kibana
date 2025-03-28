@@ -9,12 +9,14 @@ import React from 'react';
 import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
 import { DASHBOARDS_CARD_TITLE } from './translations';
-import { getCardIcon } from '../common/card_icon';
+import dashboardsIcon from './images/dashboards_icon.png';
+import dashboardsDarkIcon from './images/dashboards_icon_dark.png';
 
 export const dashboardsCardConfig: OnboardingCardConfig = {
   id: OnboardingCardId.dashboards,
   title: DASHBOARDS_CARD_TITLE,
-  icon: () => getCardIcon(OnboardingCardId.dashboards),
+  icon: dashboardsIcon,
+  iconDark: dashboardsDarkIcon,
   Component: React.lazy(
     () =>
       import(

@@ -31,6 +31,7 @@ import { getReindexButtonLabel } from './messages';
 import type { UpdateIndexState } from '../../../use_update_index';
 import { FetchFailedCallOut } from '../fetch_failed_callout';
 import { ReindexingFailedCallOut } from '../reindexing_failed_callout';
+import { IndexClosedParagraph } from '../index_closed_paragraph';
 
 /**
  * Displays a flyout that shows the details / corrective action for a "reindex" deprecation for a given index.
@@ -51,7 +52,7 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
 
   const { loadingState, status: reindexStatus, hasRequiredPrivileges, meta } = reindexState;
   const { status: updateIndexStatus } = updateIndexState;
-  const { indexName } = meta;
+  const { indexName, isInDataStream, isClosedIndex } = meta;
   const loading = loadingState === LoadingState.Loading;
   const isCompleted = reindexStatus === ReindexStatus.completed || updateIndexStatus === 'complete';
   const hasFetchFailed = reindexStatus === ReindexStatus.fetchFailed;
@@ -151,33 +152,44 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
                   </EuiText>
                 ),
               },
+              /* We cannot reindex backing indices in the same way as regular indices (that would break the related data_stream) */
+              ...(!isInDataStream
+                ? [
+                    {
+                      title: i18n.translate(
+                        'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.option2.title',
+                        {
+                          defaultMessage: 'Option 2: Reindex data',
+                        }
+                      ),
+                      description: (
+                        <EuiText size="m">
+                          <FormattedMessage
+                            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.option2.description"
+                            defaultMessage="Alternatively, you can reindex the data into a new, compatible index. All existing documents will be copied over to a new index, and the old index will be removed. Depending on the size of the index and the available resources, the reindexing operation can take some time. Your data will be in read-only mode until the reindexing has completed."
+                          />
+                          {isClosedIndex && (
+                            <Fragment>
+                              <EuiSpacer size="xs" />
+                              <IndexClosedParagraph />
+                            </Fragment>
+                          )}
+                        </EuiText>
+                      ),
+                    },
+                  ]
+                : []),
               {
                 title: i18n.translate(
-                  'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.option2.title',
+                  'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.alternativeOption.title',
                   {
-                    defaultMessage: 'Option 2: Reindex data',
+                    defaultMessage: 'Alternative: Delete the index',
                   }
                 ),
                 description: (
                   <EuiText size="m">
                     <FormattedMessage
-                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.option2.description"
-                      defaultMessage="Alternatively, you can reindex the data into a new, compatible index. All existing documents will be copied over to a new index, and the old index will be removed. Depending on the size of the index and the available resources, the reindexing operation can take some time. Your data will be in read-only mode until the reindexing has completed."
-                    />
-                  </EuiText>
-                ),
-              },
-              {
-                title: i18n.translate(
-                  'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.option3.title',
-                  {
-                    defaultMessage: 'Option 3: Delete index',
-                  }
-                ),
-                description: (
-                  <EuiText size="m">
-                    <FormattedMessage
-                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.option3.description"
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.alternativeOption.description"
                       defaultMessage="If you no longer need it, you can also delete the index from {indexManagementLinkHtml}."
                       values={{
                         indexManagementLinkHtml: (
@@ -214,7 +226,8 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
-              {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
+              {/* We cannot reindex backing indices in the same way as regular indices (that would break the related data_stream) */}
+              {!isInDataStream && !hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     color={reindexStatus === ReindexStatus.cancelled ? 'warning' : 'primary'}
@@ -234,12 +247,11 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
                     fill
                     onClick={unfreeze}
                     disabled={loading}
-                    data-test-subj="startIndexReadonlyButton"
+                    data-test-subj="startUnfreezeButton"
                   >
                     <FormattedMessage
                       id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreezeIndexButton"
                       defaultMessage="Unfreeze"
-                      data-test-subj="startIndexReadonlyButton"
                     />
                   </EuiButton>
                 </EuiFlexItem>

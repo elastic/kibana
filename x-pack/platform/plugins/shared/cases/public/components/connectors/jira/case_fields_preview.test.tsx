@@ -11,8 +11,8 @@ import { screen } from '@testing-library/react';
 import { connector } from '../mock';
 import { useGetIssueTypes } from './use_get_issue_types';
 import FieldsPreview from './case_fields_preview';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+
+import { renderWithTestingProviders } from '../../../common/mock';
 import { createQueryWithMarkup } from '../../../common/test_utils';
 
 jest.mock('./use_get_issue_types');
@@ -43,21 +43,18 @@ describe('Jira Fields: Preview', () => {
     parent: 'Parent Task',
   };
 
-  let appMockRenderer: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRenderer = createAppMockRenderer();
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     jest.clearAllMocks();
   });
 
   it('renders all fields correctly', () => {
-    appMockRenderer.render(<FieldsPreview connector={connector} fields={fields} />);
+    renderWithTestingProviders(<FieldsPreview connector={connector} fields={fields} />);
 
-    const getByText = createQueryWithMarkup(screen.getByText);
+    const getByTextWithMarkup = createQueryWithMarkup(screen.getByText);
 
-    expect(getByText('Issue type: Task')).toBeInTheDocument();
-    expect(getByText('Parent issue: Parent Task')).toBeInTheDocument();
-    expect(getByText('Priority: High')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Issue type: Task')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Parent issue: Parent Task')).toBeInTheDocument();
+    expect(getByTextWithMarkup('Priority: High')).toBeInTheDocument();
   });
 });

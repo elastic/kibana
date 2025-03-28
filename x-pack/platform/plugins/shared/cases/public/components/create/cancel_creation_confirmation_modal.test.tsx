@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import userEvent from '@testing-library/user-event';
 import React from 'react';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
+
+import { renderWithTestingProviders } from '../../common/mock';
 import { CancelCreationConfirmationModal } from './cancel_creation_confirmation_modal';
 
 describe('CancelCreationConfirmationModal', () => {
-  let appMock: AppMockRenderer;
   const props = {
     title: 'My title',
     confirmButtonText: 'My confirm button text',
@@ -22,33 +22,32 @@ describe('CancelCreationConfirmationModal', () => {
   };
 
   beforeEach(() => {
-    appMock = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('renders correctly', async () => {
-    const result = appMock.render(<CancelCreationConfirmationModal {...props} />);
+    renderWithTestingProviders(<CancelCreationConfirmationModal {...props} />);
 
-    expect(result.getByTestId('cancel-creation-confirmation-modal')).toBeInTheDocument();
-    expect(result.getByText(props.title)).toBeInTheDocument();
-    expect(result.getByText(props.confirmButtonText)).toBeInTheDocument();
-    expect(result.getByText(props.cancelButtonText)).toBeInTheDocument();
+    expect(screen.getByTestId('cancel-creation-confirmation-modal')).toBeInTheDocument();
+    expect(screen.getByText(props.title)).toBeInTheDocument();
+    expect(screen.getByText(props.confirmButtonText)).toBeInTheDocument();
+    expect(screen.getByText(props.cancelButtonText)).toBeInTheDocument();
   });
 
   it('calls onConfirm', async () => {
-    const result = appMock.render(<CancelCreationConfirmationModal {...props} />);
+    renderWithTestingProviders(<CancelCreationConfirmationModal {...props} />);
 
-    expect(result.getByText(props.confirmButtonText)).toBeInTheDocument();
-    await userEvent.click(result.getByText(props.confirmButtonText));
+    expect(screen.getByText(props.confirmButtonText)).toBeInTheDocument();
+    await userEvent.click(screen.getByText(props.confirmButtonText));
 
     expect(props.onConfirm).toHaveBeenCalled();
   });
 
   it('calls onCancel', async () => {
-    const result = appMock.render(<CancelCreationConfirmationModal {...props} />);
+    renderWithTestingProviders(<CancelCreationConfirmationModal {...props} />);
 
-    expect(result.getByText(props.cancelButtonText)).toBeInTheDocument();
-    await userEvent.click(result.getByText(props.cancelButtonText));
+    expect(screen.getByText(props.cancelButtonText)).toBeInTheDocument();
+    await userEvent.click(screen.getByText(props.cancelButtonText));
 
     expect(props.onCancel).toHaveBeenCalled();
   });

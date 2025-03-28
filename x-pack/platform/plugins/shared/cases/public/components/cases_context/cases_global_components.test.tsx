@@ -8,8 +8,8 @@
 import React from 'react';
 import { getAllCasesSelectorModalNoProviderLazy } from '../../client/ui/get_all_cases_selector_modal';
 import { getCreateCaseFlyoutLazyNoProvider } from '../../client/ui/get_create_case_flyout';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
+import { renderWithTestingProviders } from '../../common/mock';
 import { getInitialCasesContextState } from './state/cases_context_reducer';
 import { CasesGlobalComponents } from './cases_global_components';
 
@@ -21,10 +21,7 @@ const getAllCasesSelectorModalNoProviderLazyMock =
   getAllCasesSelectorModalNoProviderLazy as jest.Mock;
 
 describe('Cases context UI', () => {
-  let appMock: AppMockRenderer;
-
   beforeEach(() => {
-    appMock = createAppMockRenderer();
     getCreateCaseFlyoutLazyNoProviderMock.mockClear();
   });
 
@@ -39,7 +36,7 @@ describe('Cases context UI', () => {
           },
         },
       };
-      appMock.render(<CasesGlobalComponents state={state} />);
+      renderWithTestingProviders(<CasesGlobalComponents state={state} />);
       expect(getCreateCaseFlyoutLazyNoProviderMock).toHaveBeenCalledWith({ attachments: [] });
     });
 
@@ -50,7 +47,7 @@ describe('Cases context UI', () => {
           isFlyoutOpen: false,
         },
       };
-      appMock.render(<CasesGlobalComponents state={state} />);
+      renderWithTestingProviders(<CasesGlobalComponents state={state} />);
       expect(getCreateCaseFlyoutLazyNoProviderMock).not.toHaveBeenCalled();
     });
   });
@@ -68,7 +65,7 @@ describe('Cases context UI', () => {
           },
         },
       };
-      appMock.render(<CasesGlobalComponents state={state} />);
+      renderWithTestingProviders(<CasesGlobalComponents state={state} />);
       expect(getAllCasesSelectorModalNoProviderLazyMock).toHaveBeenCalledWith({
         attachments: [],
         onRowClick,
@@ -82,7 +79,7 @@ describe('Cases context UI', () => {
           isModalOpen: false,
         },
       };
-      appMock.render(<CasesGlobalComponents state={state} />);
+      renderWithTestingProviders(<CasesGlobalComponents state={state} />);
       expect(getAllCasesSelectorModalNoProviderLazyMock).toHaveBeenCalled();
     });
   });

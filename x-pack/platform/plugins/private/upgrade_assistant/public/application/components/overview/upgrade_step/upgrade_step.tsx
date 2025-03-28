@@ -15,10 +15,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiLink,
-  EuiCode,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { useAppContext } from '../../../app_context';
@@ -47,13 +44,6 @@ const i18nTexts = {
   upgradeGuideLink: i18n.translate('xpack.upgradeAssistant.overview.upgradeGuideLink', {
     defaultMessage: 'View upgrade guide',
   }),
-
-  securitySolnLogsDBCalloutTitle: i18n.translate(
-    'xpack.upgradeAssistant.overview.securitySolutionLogsDBCalloutTitle',
-    {
-      defaultMessage: 'Action needed: review new default setting - logsdb index mode',
-    }
-  ),
 };
 
 const UpgradeStep = () => {
@@ -152,37 +142,6 @@ const UpgradeStep = () => {
             : i18nTexts.upgradeStepDescription}
         </p>
       </EuiText>
-
-      <EuiSpacer size="m" />
-
-      <EuiCallOut title={i18nTexts.securitySolnLogsDBCalloutTitle}>
-        <FormattedMessage
-          id="xpack.upgradeAssistant.overview.securitySolutionLogsDBCalloutBody"
-          defaultMessage="Logsdb is a new index mode ({logsDataStreamDocs}) that is applied to {logsPattern} data streams by default in Elasticsearch 9.0. Logsdb index mode results in significant storage savings (up to 70%) however adds up to 25% CPU overhead during data ingestion. In 9.0, logsdb will be applied to newly ingested logs data. If your cluster's hot tier CPU utilization is high (more than Y% on average), it is recommended that you disable this default behavior prior to upgrading to avoid maxing out your hot tier CPU and the downstream issues it may cause. To disable, {indexModeWithSecuritySoln}. This setting can be changed after upgrade if desired."
-          values={{
-            logsPattern: <EuiCode>logs-*-*</EuiCode>,
-            logsDataStreamDocs: (
-              <EuiLink target="_blank" href={docLinks.links.upgradeAssistant.logsDatastream}>
-                {i18n.translate(
-                  'xpack.upgradeAssistant.overview.securitySolutionLogsDBCalloutBody.logsDataStreamLink',
-                  { defaultMessage: 'learn more' }
-                )}
-              </EuiLink>
-            ),
-            indexModeWithSecuritySoln: (
-              <EuiLink
-                target="_blank"
-                href={docLinks.links.upgradeAssistant.usingLogsDbIndexModeWithESSecurity}
-              >
-                {i18n.translate(
-                  'xpack.upgradeAssistant.overview.securitySolutionLogsDBCalloutBody.indexModeWithSecuritySolnLink',
-                  { defaultMessage: 'follow these steps' }
-                )}
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiCallOut>
 
       <EuiSpacer size="m" />
 

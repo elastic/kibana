@@ -11,7 +11,7 @@ import { licenseStateMock } from '../../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { verifyApiAccess, ActionTypeDisabledError, asHttpRequestExecutionSource } from '../../lib';
 import { actionsClientMock } from '../../actions_client/actions_client.mock';
-import { ActionTypeExecutorResult } from '../../types';
+import type { ActionTypeExecutorResult } from '../../types';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 

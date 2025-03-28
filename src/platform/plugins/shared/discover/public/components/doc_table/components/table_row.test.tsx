@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
-import { TableRow, TableRowProps } from './table_row';
+import type { TableRowProps } from './table_row';
+import { TableRow } from './table_row';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

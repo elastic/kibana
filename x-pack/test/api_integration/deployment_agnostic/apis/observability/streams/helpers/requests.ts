@@ -14,11 +14,11 @@ import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import { StreamsSupertestRepositoryClient } from './repository_client';
 
 export async function enableStreams(client: StreamsSupertestRepositoryClient) {
-  await client.fetch('POST /api/streams/_enable').expect(200);
+  await client.fetch('POST /api/streams/_enable 2023-10-31').expect(200);
 }
 
 export async function disableStreams(client: StreamsSupertestRepositoryClient) {
-  await client.fetch('POST /api/streams/_disable').expect(200);
+  await client.fetch('POST /api/streams/_disable 2023-10-31').expect(200);
 }
 
 export async function indexDocument(esClient: Client, index: string, document: JsonObject) {
@@ -51,11 +51,11 @@ export async function forkStream(
   root: string,
   body: ClientRequestParamsOf<
     StreamsRouteRepository,
-    'POST /api/streams/{name}/_fork'
+    'POST /api/streams/{name}/_fork 2023-10-31'
   >['params']['body']
 ) {
   return client
-    .fetch(`POST /api/streams/{name}/_fork`, {
+    .fetch(`POST /api/streams/{name}/_fork 2023-10-31`, {
       params: {
         path: {
           name: root,
@@ -74,7 +74,7 @@ export async function putStream(
   expectStatusCode: number = 200
 ) {
   return await apiClient
-    .fetch('PUT /api/streams/{name}', {
+    .fetch('PUT /api/streams/{name} 2023-10-31', {
       params: {
         path: {
           name,
@@ -92,7 +92,7 @@ export async function getStream(
   expectStatusCode: number = 200
 ) {
   return await apiClient
-    .fetch('GET /api/streams/{name}', {
+    .fetch('GET /api/streams/{name} 2023-10-31', {
       params: {
         path: {
           name,
@@ -109,7 +109,7 @@ export async function getIlmStats(
   expectStatusCode: number = 200
 ) {
   return await apiClient
-    .fetch('GET /api/streams/{name}/lifecycle/_stats', {
+    .fetch('GET /internal/streams/{name}/lifecycle/_stats', {
       params: {
         path: {
           name,

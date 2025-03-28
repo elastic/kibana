@@ -7,7 +7,8 @@
 
 import sinon from 'sinon';
 import { ActionExecutor } from './action_executor';
-import { ConcreteTaskInstance, TaskErrorSource, TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { TaskErrorSource, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerFactory } from './task_runner_factory';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';

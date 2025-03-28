@@ -184,6 +184,7 @@ export function thresholdRuleType(
     },
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: observabilityFeatureId,
+    solution: 'observability' as const,
     alerts: MetricsRulesTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),

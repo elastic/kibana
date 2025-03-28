@@ -6,7 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { StartRenderServices } from '../../../types';
 import { EntityType } from '../../../../common/search_strategy';
 import * as utils from '../../../../common/utils/risk_score_modules';
@@ -29,7 +29,7 @@ import {
 } from '../../deprecated_risk_engine/api/translations';
 
 interface InstallRiskScoreModule {
-  dashboard?: DashboardStart;
+  share?: SharePluginStart;
   http: HttpSetup;
   refetch?: inputsModel.Refetch;
   renderDashboardLink?: (message: string, dashboardUrl: string) => React.ReactNode;
@@ -46,7 +46,7 @@ interface InstallRiskScoreModule {
 type UpgradeRiskScoreModule = InstallRiskScoreModule;
 
 const installHostRiskScoreModule = async ({
-  dashboard,
+  share,
   http,
   refetch,
   renderDashboardLink,
@@ -66,7 +66,7 @@ const installHostRiskScoreModule = async ({
   // Install dashboards and relevant saved objects
   await bulkCreatePrebuiltSavedObjects({
     http,
-    dashboard,
+    share,
     renderDashboardLink,
     renderDocLink,
     ...timerange,
@@ -82,7 +82,7 @@ const installHostRiskScoreModule = async ({
 };
 
 const installUserRiskScoreModule = async ({
-  dashboard,
+  share,
   http,
   refetch,
   renderDashboardLink,
@@ -102,7 +102,7 @@ const installUserRiskScoreModule = async ({
 
   // Install dashboards and relevant saved objects
   await bulkCreatePrebuiltSavedObjects({
-    dashboard,
+    share,
     http,
     options: {
       templateName: `${EntityType.user}RiskScoreDashboards`,
@@ -247,7 +247,7 @@ export const uninstallRiskScoreModule = async ({
 };
 
 export const upgradeHostRiskScoreModule = async ({
-  dashboard,
+  share,
   http,
   refetch,
   renderDashboardLink,
@@ -264,7 +264,7 @@ export const upgradeHostRiskScoreModule = async ({
     startServices,
   });
   await installRiskScoreModule({
-    dashboard,
+    share,
     http,
     refetch,
     renderDashboardLink,
@@ -277,7 +277,7 @@ export const upgradeHostRiskScoreModule = async ({
 };
 
 export const upgradeUserRiskScoreModule = async ({
-  dashboard,
+  share,
   http,
   refetch,
   renderDashboardLink,
@@ -294,7 +294,7 @@ export const upgradeUserRiskScoreModule = async ({
     startServices,
   });
   await installRiskScoreModule({
-    dashboard,
+    share,
     http,
     refetch,
     renderDashboardLink,

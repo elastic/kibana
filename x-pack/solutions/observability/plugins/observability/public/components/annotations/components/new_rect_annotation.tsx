@@ -12,7 +12,7 @@ import moment from 'moment';
 import { useFormContext } from 'react-hook-form';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { AnnotationTooltip } from './annotation_tooltip';
-import { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
+import type { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
 
 export function NewRectAnnotation({
   slo,

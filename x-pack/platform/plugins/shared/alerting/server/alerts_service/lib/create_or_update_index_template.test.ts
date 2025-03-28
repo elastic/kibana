@@ -8,13 +8,13 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { getIndexTemplate, createOrUpdateIndexTemplate } from './create_or_update_index_template';
 import { createDataStreamAdapterMock } from './data_stream_adapter.mock';
-import { DataStreamAdapter } from './data_stream_adapter';
+import type { DataStreamAdapter } from './data_stream_adapter';
 
 const randomDelayMultiplier = 0.01;
 const logger = loggingSystemMock.createLogger();
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-const IndexTemplate = (namespace: string = 'default', useDataStream: boolean = false) => ({
+const IndexTemplate = (namespace = 'default', useDataStream = false) => ({
   name: `.alerts-test.alerts-${namespace}-index-template`,
   body: {
     _meta: {

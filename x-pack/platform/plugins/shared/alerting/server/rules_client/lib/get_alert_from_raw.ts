@@ -6,8 +6,8 @@
  */
 
 import { omit, isEmpty } from 'lodash';
-import { Logger, SavedObjectReference } from '@kbn/core/server';
-import {
+import type { Logger, SavedObjectReference } from '@kbn/core/server';
+import type {
   Rule,
   PartialRule,
   RawRule,
@@ -22,7 +22,7 @@ import {
   convertMonitoringFromRawAndVerify,
   getRuleSnoozeEndTime,
 } from '../../lib';
-import { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { getActiveScheduledSnoozes } from '../../lib/is_rule_snoozed';
 import { injectReferencesIntoParams } from '../common';
 import {

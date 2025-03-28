@@ -102,7 +102,7 @@ export const useIngestionRate = ({
         })),
       };
     },
-    [data.search, definition, timeRange, stats]
+    [data.search, definition, timeRange, stats, core.uiSettings]
   );
 
   return {
@@ -211,7 +211,7 @@ export const useIngestionRatePerTier = ({
       }
 
       const ilmExplain = await streamsRepositoryClient.fetch(
-        'GET /api/streams/{name}/lifecycle/_explain',
+        'GET /internal/streams/{name}/lifecycle/_explain',
         {
           params: { path: { name: definition.stream.name } },
           signal,
@@ -250,7 +250,7 @@ export const useIngestionRatePerTier = ({
 
       return { start, end, interval, buckets };
     },
-    [data.search, streamsRepositoryClient, definition, timeRange, stats]
+    [data.search, streamsRepositoryClient, definition, timeRange, stats, core.uiSettings, ilmPhases]
   );
 
   return {

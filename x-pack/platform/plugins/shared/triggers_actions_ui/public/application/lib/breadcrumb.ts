@@ -16,7 +16,7 @@ import {
 
 export const getAlertingSectionBreadcrumb = (
   type: string,
-  returnHref: boolean = false
+  returnHref = false
 ): { text: string; href?: string } => {
   // Home and sections
   switch (type) {

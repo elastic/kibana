@@ -90,6 +90,9 @@ export function registerAnalyzeLogsRoutes(
             maxTokens: 4096,
             signal: abortSignal,
             streaming: false,
+            telemetryMetadata: {
+              pluginId: 'automatic_import',
+            },
           });
           const options = {
             callbacks: [

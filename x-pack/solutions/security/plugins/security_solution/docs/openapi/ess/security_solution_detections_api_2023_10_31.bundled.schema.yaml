@@ -355,11 +355,67 @@ paths:
   /api/detection_engine/rules/_bulk_create:
     post:
       deprecated: true
-      description: Create new detection rules in bulk.
+      description: >
+        Create new detection rules in bulk.
+
+        > warn
+
+        > This API is deprecated and will be removed in Kibana v9.0.
+
+
+        > warn
+
+        > When used with [API
+        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
+        authentication, the user's key gets assigned to the affected rules. If
+        the user's key gets deleted or the user becomes inactive, the rules will
+        stop running.
+
+
+        > If the API key that is used for authorization has different privileges
+        than the key that created or most recently updated the rule, the rule
+        behavior might change.
       operationId: BulkCreateRules
       requestBody:
         content:
           application/json:
+            examples:
+              example1:
+                value:
+                  - description: Process started by MS Office program - possible payload
+                    enabled: false
+                    filters:
+                      - query:
+                          match:
+                            event.action:
+                              query: 'Process Create (rule: ProcessCreate)'
+                              type: phrase
+                    from: now-6m
+                    interval: 5m
+                    language: kuery
+                    name: MS Office child process
+                    query: >-
+                      process.parent.name:EXCEL.EXE or
+                      process.parent.name:MSPUB.EXE or
+                      process.parent.name:OUTLOOK.EXE or
+                      process.parent.name:POWERPNT.EXE or
+                      process.parent.name:VISIO.EXE or
+                      process.parent.name:WINWORD.EXE
+                    risk_score: 50
+                    rule_id: process_started_by_ms_office_program_possible_payload
+                    severity: low
+                    tags:
+                      - child process
+                      - ms office
+                    type: query
+                  - description: Query with a rule_id for referencing an external id
+                    from: now-6m
+                    name: Second bulk rule
+                    query: 'user.name: root or user.name: admin'
+                    risk_score: 2
+                    rule_id: query-rule-id-2
+                    severity: low
+                    type: query
             schema:
               items:
                 $ref: '#/components/schemas/RuleCreateProps'
@@ -380,11 +436,19 @@ paths:
   /api/detection_engine/rules/_bulk_delete:
     delete:
       deprecated: true
-      description: Delete detection rules in bulk.
+      description: |
+        Delete detection rules in bulk.
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
       operationId: BulkDeleteRules
       requestBody:
         content:
           application/json:
+            examples:
+              example1:
+                value:
+                  - rule_id: process_started_by_ms_office_program_possible_payload
+                  - id: 51658332-a15e-4c9e-912a-67214e2e2359
             schema:
               items:
                 type: object
@@ -431,11 +495,19 @@ paths:
         - Bulk API
     post:
       deprecated: true
-      description: Deletes multiple rules.
+      description: |
+        Delete detection rules in bulk.
+        > warn
+        > This API is deprecated and will be removed in Kibana v9.0.
       operationId: BulkDeleteRulesPost
       requestBody:
         content:
           application/json:
+            examples:
+              example1:
+                value:
+                  - rule_id: process_started_by_ms_office_program_possible_payload
+                  - id: 51658332-a15e-4c9e-912a-67214e2e2359
             schema:
               items:
                 type: object
@@ -483,13 +555,47 @@ paths:
   /api/detection_engine/rules/_bulk_update:
     patch:
       deprecated: true
-      description: >-
+      description: >
         Update specific fields of existing detection rules using the `rule_id`
         or `id` field.
+
+        > warn
+
+        > This API is deprecated and will be removed in Kibana v9.0.
+
+
+        > warn
+
+        > When used with [API
+        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
+        authentication, the user's key gets assigned to the affected rules. If
+        the user's key gets deleted or the user becomes inactive, the rules will
+        stop running.
+
+
+        > If the API key that is used for authorization has different privileges
+        than the key that created or most recently updated the rule, the rule
+        behavior might change.
       operationId: BulkPatchRules
       requestBody:
         content:
           application/json:
+            examples:
+              example1:
+                value:
+                  - rule_id: process_started_by_ms_office_program_possible_payload
+                    threat:
+                      - framework: MITRE ATT&CK
+                        id: TA0001
+                        name: Initial Access
+                        reference: 'https://attack.mitre.org/tactics/TA0001'
+                        tactic: null
+                        technique:
+                          - id: T1193
+                            name: Spearphishing Attachment
+                            reference: 'https://attack.mitre.org/techniques/T1193'
+                  - id: 56b22b65-173e-4a5b-b27a-82599cb1433e
+                    name: New name
             schema:
               items:
                 $ref: '#/components/schemas/RulePatchProps'
@@ -513,20 +619,69 @@ paths:
         Update multiple detection rules using the `rule_id` or `id` field. The
         original rules are replaced, and all unspecified fields are deleted.
 
-        > info
+        > warn
 
-        > You cannot modify the `id` or `rule_id` values.
+        > This API is deprecated and will be removed in Kibana v9.0.
+
+
+        > warn
+
+        > When used with [API
+        key](https://www.elastic.co/guide/en/kibana/current/api-keys.html)
+        authentication, the user's key gets assigned to the affected rules. If
+        the user's key gets deleted or the user becomes inactive, the rules will
+        stop running.
+
+
+        > If the API key that is used for authorization has different privileges
+        than the key that created or most recently updated the rule, the rule
+        behavior might change.
       operationId: BulkUpdateRules
       requestBody:
         content:
           application/json:
+            examples:
+              example1:
+                value:
+                  - description: >-
+                      Detects when a previously suspended user's account is
+                      renewed in Google Workspace. An adversary may renew a
+                      suspended user account to maintain access to the Google
+                      Workspace organization with a valid account.
+                    id: 7d2f5ed8-6c05-44ab-81ce-9160ae147057
+                    name: Updated Google Workspace Suspended User Account Renewed
+                    risk_score: 21
+                    severity: low
+                    tags:
+                      - new_tag
+                    type: query
+                  - description: >-
+                      Identifies the creation of an Amazon Redshift cluster.
+                      Unexpected creation of this cluster by a
+                      non-administrative user may indicate a permission or role
+                      issue with current users. If unexpected, the resource may
+                      not properly be configured and could introduce security
+                      vulnerabilities.
+                    id: 43b2dc3b-4f21-4a10-95e2-0dbc19e6e974
+                    name: Updated AWS Redshift Cluster Creation
+                    risk_score: 21
+                    severity: low
+                    tags:
+                      - new_tag
+                    type: query
             schema:
               items:
                 $ref: '#/components/schemas/RuleUpdateProps'
               type: array
-        description: >-
+        description: >
           A JSON array where each element includes the `id` or `rule_id` field
-          of the rule you want to update and the fields you want to modify.
+          of the rule you want to update and the fields you want to be specified
+          in this rule.
+
+          > info
+
+          > All unspecified fields are deleted. You cannot modify the `id` or
+          `rule_id` values.
         required: true
       responses:
         '200':

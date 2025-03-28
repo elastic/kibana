@@ -6,6 +6,7 @@
  */
 
 import {
+  DateProcessorConfig,
   DissectProcessorConfig,
   FieldDefinitionType,
   GrokProcessorConfig,
@@ -22,19 +23,16 @@ export type ProcessorDefinitionWithUIAttributes = WithUIAttributes<ProcessorDefi
 
 export interface DetectedField {
   name: string;
-  type?: FieldDefinitionType;
+  type?: FieldDefinitionType | 'system';
 }
 
-interface BaseFormState {
-  detected_fields?: DetectedField[];
-}
+export type GrokFormState = Omit<GrokProcessorConfig, 'patterns'> & {
+  type: 'grok';
+  patterns: Array<{ value: string }>;
+};
 
-export type GrokFormState = BaseFormState &
-  Omit<GrokProcessorConfig, 'patterns'> & {
-    type: 'grok';
-    patterns: Array<{ value: string }>;
-  };
+export type DissectFormState = DissectProcessorConfig & { type: 'dissect' };
 
-export type DissectFormState = BaseFormState & DissectProcessorConfig & { type: 'dissect' };
+export type DateFormState = DateProcessorConfig & { type: 'date' };
 
-export type ProcessorFormState = GrokFormState | DissectFormState;
+export type ProcessorFormState = GrokFormState | DissectFormState | DateFormState;
