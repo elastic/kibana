@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiLoadingLogo } from '@elastic/eui';
@@ -28,7 +28,7 @@ const PageTitle = i18n.translate('xpack.searchIndices.startPage.docTitle', {
 
 export const ElasticsearchStartPage = () => {
   const { console: consolePlugin, history, searchNavigation } = useKibana().services;
-  const [indexName, setIndexName] = useState<string>(generateRandomIndexName());
+  const indexName = useMemo(() => generateRandomIndexName(), []);
   const { data: userPrivileges } = useUserPrivilegesQuery(indexName);
   const {
     data: indicesData,
