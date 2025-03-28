@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SyncStatus } from '../../../common/types';
 
 const RemoteSyncedIntegrationsBaseSchema = schema.object({
   id: schema.maybe(schema.string()),
@@ -14,7 +15,11 @@ const RemoteSyncedIntegrationsBaseSchema = schema.object({
 });
 
 export const RemoteSyncedIntegrationsStatusSchema = RemoteSyncedIntegrationsBaseSchema.extends({
-  sync_status: schema.boolean(),
+  sync_status: schema.oneOf([
+    schema.literal(SyncStatus.COMPLETED),
+    schema.literal(SyncStatus.SYNCHRONIZING),
+    schema.literal(SyncStatus.FAILED),
+  ]),
   error: schema.maybe(schema.string()),
   updated_at: schema.maybe(schema.string()),
 });

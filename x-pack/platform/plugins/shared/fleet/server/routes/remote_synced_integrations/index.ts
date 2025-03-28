@@ -11,7 +11,6 @@ import { API_VERSIONS } from '../../../common/constants';
 import { REMOTE_SYNCED_INTEGRATIONS_API_ROUTES } from '../../../common/constants';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { genericErrorResponse } from '../schema/errors';
-import { GetRemoteSyncedIntegrationsStatusRequestSchema } from '../../types';
 import { GetRemoteSyncedIntegrationsStatusResponseSchema } from '../../types/models/synced_integrations';
 
 import { getRemoteSyncedIntegrationsStatusHandler } from './handler';
@@ -19,16 +18,12 @@ import { getRemoteSyncedIntegrationsStatusHandler } from './handler';
 export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
-      path: REMOTE_SYNCED_INTEGRATIONS_API_ROUTES.INFO_PATTERN,
+      path: REMOTE_SYNCED_INTEGRATIONS_API_ROUTES.STATUS_PATTERN,
       security: {
         authz: {
           requiredPrivileges: [
-            {
-              anyRequired: [
-                FLEET_API_PRIVILEGES.SETTINGS.READ,
-                FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
-              ],
-            },
+            FLEET_API_PRIVILEGES.SETTINGS.READ,
+            FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
           ],
         },
       },
@@ -41,7 +36,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       {
         version: API_VERSIONS.public.v1,
         validate: {
-          request: GetRemoteSyncedIntegrationsStatusRequestSchema,
+          request: {},
           response: {
             200: {
               body: () => GetRemoteSyncedIntegrationsStatusResponseSchema,

@@ -209,7 +209,7 @@ export const DOWNLOAD_SOURCE_API_ROUTES = {
 };
 
 export const REMOTE_SYNCED_INTEGRATIONS_API_ROUTES = {
-  INFO_PATTERN: `${API_ROOT}/remote_synced_integrations/{outputId}/status`,
+  STATUS_PATTERN: `${API_ROOT}/remote_synced_integrations/status`,
 };
 
 export const CREATE_STANDALONE_AGENT_API_KEY_ROUTE = `${INTERNAL_ROOT}/create_standalone_agent_api_key`;

@@ -24,10 +24,11 @@ import { FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX } from '../../services/setup
 
 import type { Installation } from '../../types';
 
-import type { RemoteSyncedIntegrationsStatus, GetRemoteSyncedIntegrationsStatusResponse } from '../../../common/types';
+import type { RemoteSyncedIntegrationsStatus, GetRemoteSyncedIntegrationsStatusResponse, SyncStatus } from '../../../common/types';
 
 import type { SyncIntegrationsData } from './model';
 import { installCustomAsset } from './custom_assets';
+import { CcrFollowInfoFollowerIndex } from '@elastic/elasticsearch/lib/api/types';
 
 const MAX_RETRY_ATTEMPTS = 5;
 const RETRY_BACKOFF_MINUTES = [5, 10, 20, 40, 60];
@@ -45,7 +46,7 @@ const getFollowerIndex = async (
 
   const indexNames = Object.keys(indices);
 
-  if (indexNames?.length > 1) {
+  if (indexNames.length > 1) {
     throw new Error(
       `Not supported to sync multiple indices with prefix ${FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX}`
     );
@@ -207,43 +208,42 @@ export const syncIntegrationsOnRemote = async (
 
 export const getFollowerIndexInfo = async (
   esClient: ElasticsearchClient,
-  index: string,
   logger: Logger
-) => {
-  if (!index) {
-    throw new IndexNotFoundError(`Follower index ${index} not found`);
-  }
+): Promise<{info?: CcrFollowInfoFollowerIndex, error?: string}> => {
   try {
+    const index = await getFollowerIndex(esClient, new AbortController());
+    if (!index) {
+      return {error: `Follower index not found`};
+    }
     const res = await esClient.ccr.followInfo({
       index,
     });
     if (!res?.follower_indices || res.follower_indices.length === 0)
-      throw new IndexNotFoundError(`Follower index ${index} not available`);
+      return {error: `Follower index ${index} not available`};
 
     if (res.follower_indices[0]?.status === 'paused') {
-      throw new IndexNotFoundError(`Follower index ${index} paused`); // error code ?
+      return {error: `Follower index ${index} paused`};
     }
-    return res.follower_indices[0];
+    return {info: res.follower_indices[0]};
   } catch (err) {
     if (err?.body?.error?.type === 'index_not_found_exception')
-      throw new IndexNotFoundError(`Index ${index} not found`);
+      throw new IndexNotFoundError(`Index not found`);
 
     logger.error('error', err.message);
     throw err;
   }
 };
 
-export const compareSyncedIntegrations = async (
+export const fetchAndCompareSyncedIntegrations = async (
   esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract,
   index: string,
   logger: Logger
 ) => {
   try {
-
+    // find integrations on ccr index
     const searchRes = await esClient.search<SyncIntegrationsData>({
       index,
-      size: 50, // ?
       sort: [
         {
           'integrations.updated_at': {
@@ -259,8 +259,11 @@ export const compareSyncedIntegrations = async (
       }
     }
     const ccrIntegrations = searchRes.hits.hits[0]?._source?.integrations;
+
+    // find integrations installed on remote
     const installedIntegrations = await getPackageSavedObjects(savedObjectsClient);
-    if (!installedIntegrations) {
+
+    if (!installedIntegrations && ccrIntegrations.length > 0) {
       return {
         items: [],
         error: `No integrations installed on remote`
@@ -283,27 +286,27 @@ export const compareSyncedIntegrations = async (
         if (!localIntegrationSO) {
           return {
             ...ccrIntegration,
-            sync_status: false,
+            sync_status: 'failed' as SyncStatus.FAILED,
             error: `Installation not found`,
           };
         }
         if (ccrIntegration.package_version !== localIntegrationSO?.attributes.version) {
           return {
             ...ccrIntegration,
-            sync_status: false,
+            sync_status: 'failed' as SyncStatus.FAILED,
             error: `Installed version: ${localIntegrationSO?.attributes.version}`,
           };
         }
         if (localIntegrationSO?.attributes.install_status !== 'installed') {
           return {
             ...ccrIntegration,
-            sync_status: false,
+            sync_status: 'failed' as SyncStatus.FAILED,
             error: `Installation status: ${localIntegrationSO?.attributes.install_status}`,
           };
         }
         return {
           ...ccrIntegration,
-          sync_status: true,
+          sync_status: 'completed' as SyncStatus.COMPLETED,
           updated_at: localIntegrationSO?.updated_at,
         };
       }
@@ -318,7 +321,6 @@ export const compareSyncedIntegrations = async (
 export const getRemoteSyncedIntegrationsStatus = async (
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  outputId: string
 ): Promise<GetRemoteSyncedIntegrationsStatusResponse> => {
   const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
   const logger = appContextService.getLogger();
@@ -326,14 +328,13 @@ export const getRemoteSyncedIntegrationsStatus = async (
   if (!enableSyncIntegrationsOnRemote) {
     return { items: [] };
   }
-  const index = `${FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX}`.replace('*', outputId);
-  try {
-    const info = await getFollowerIndexInfo(esClient, index, logger);
 
-    if (info?.status !== 'active') {
-      return { items: [] };
+  try {
+    const followerIndexRes = await getFollowerIndexInfo(esClient, logger);
+    if (followerIndexRes?.error || !followerIndexRes?.info) {
+      return { error: followerIndexRes?.error, items: [] };
     }
-    const res = await compareSyncedIntegrations(esClient, soClient, index, logger);
+    const res = await fetchAndCompareSyncedIntegrations(esClient, soClient, followerIndexRes.info.follower_index, logger);
     return res;
   } catch (err) {
     throw err;
