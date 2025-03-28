@@ -10,18 +10,18 @@ import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect } from 'react';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
-import { useKibana } from '../../hooks/use_kibana';
-import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
+import { useLicense } from '../../hooks/use_license';
+import { useKibana } from '../../hooks/use_kibana';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SloManagementContent } from './components/slo_management_content';
 import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
 
 export function SloManagementPage() {
   const {
-    application: { navigateToUrl },
     http: { basePath },
     serverless,
+    application: { navigateToUrl },
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const { data: permissions } = usePermissions();
