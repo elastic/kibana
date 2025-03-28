@@ -147,7 +147,7 @@ describe('Color mapping - color generation', () => {
         assignments: [
           {
             color: { type: 'colorCode', colorCode: 'red' },
-            rules: [{ type: 'raw', value: ['configuredAssignment'] }],
+            rules: [{ type: 'raw', value: 'configuredAssignment' }],
             touched: false,
           },
         ],
@@ -177,7 +177,7 @@ describe('Color mapping - color generation', () => {
           },
           {
             color: { type: 'colorCode', colorCode: 'blue' },
-            rules: [{ type: 'raw', value: ['blueCat'] }],
+            rules: [{ type: 'raw', value: 'blueCat' }],
             touched: false,
           },
           {

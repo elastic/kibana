@@ -34,7 +34,7 @@ export function convertToRawColorMappings(
   };
 }
 
-export function convertColorMappingAssignment(
+function convertColorMappingAssignment(
   oldAssignment: DeprecatedColorMappingConfig['assignments'][number],
   column?: Partial<GenericIndexPatternColumn> | null
 ): ColorMapping.Assignment {
@@ -47,7 +47,7 @@ export function convertColorMappingAssignment(
 
 const NO_VALUE = Symbol('no-value');
 
-export function convertColorMappingRule(
+function convertColorMappingRule(
   rule: DeprecatedColorMappingConfig['assignments'][number]['rule'],
   column?: Partial<GenericIndexPatternColumn> | null
 ): ColorMapping.ColorRule[] {
@@ -99,7 +99,7 @@ const getParentFormatId = (column: Partial<GenericIndexPatternColumn>) =>
  *
  * Note: we use the `NO_VALUE` symbol to avoid collisions with falsy raw values
  */
-export function convertToRawValue(
+function convertToRawValue(
   value: string | string[],
   column?: Partial<GenericIndexPatternColumn> | null
 ): SerializedValue | symbol {
