@@ -842,6 +842,8 @@
       "@kbn/entityManager-app-plugin/*": ["x-pack/solutions/observability/plugins/entity_manager_app/*"],
       "@kbn/entityManager-plugin": ["x-pack/platform/plugins/shared/entity_manager"],
       "@kbn/entityManager-plugin/*": ["x-pack/platform/plugins/shared/entity_manager/*"],
+      "@kbn/enzyme-migrate": ["src/platform/packages/private/kbn-enzyme-migrate"],
+      "@kbn/enzyme-migrate/*": ["src/platform/packages/private/kbn-enzyme-migrate/*"],
       "@kbn/error-boundary-example-plugin": ["examples/error_boundary"],
       "@kbn/error-boundary-example-plugin/*": ["examples/error_boundary/*"],
       "@kbn/es": ["src/platform/packages/shared/kbn-es"],

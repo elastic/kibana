@@ -5362,6 +5362,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/enzyme-migrate@link:src/platform/packages/private/kbn-enzyme-migrate":
+  version "0.0.0"
+  uid ""
+
 "@kbn/error-boundary-example-plugin@link:examples/error_boundary":
   version "0.0.0"
   uid ""
