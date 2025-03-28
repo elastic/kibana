@@ -44,6 +44,7 @@ import {
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
+import { initializeSectionsManager } from './sections_manager';
 
 export function getDashboardApi({
   creationOptions,
@@ -84,11 +85,12 @@ export function getDashboardApi({
     references: [references$, (nextRefs) => references$.next(nextRefs)],
   };
 
+  const sectionsManager = initializeSectionsManager(initialState.sections);
   const panelsManager = initializePanelsManager(
     incomingEmbeddable,
     initialState.panels,
     initialPanelsRuntimeState ?? {},
-    initialState.sections,
+    sectionsManager,
     trackPanel,
     getPanelReferences,
     pushPanelReferences,
@@ -115,6 +117,7 @@ export function getDashboardApi({
       ...DEFAULT_DASHBOARD_STATE,
     },
     panelsManager,
+    sectionsManager,
     savedObjectId$,
     settingsManager,
     viewModeManager,
@@ -157,6 +160,7 @@ export function getDashboardApi({
     ...dataLoadingManager.api,
     ...dataViewsManager.api,
     ...panelsManager.api,
+    ...sectionsManager.api,
     ...settingsManager.api,
     ...trackPanel,
     ...unifiedSearchManager.api,
@@ -248,6 +252,7 @@ export function getDashboardApi({
     },
     internalApi: {
       ...panelsManager.internalApi,
+      ...sectionsManager.internalApi,
       ...unifiedSearchManager.internalApi,
       getSerializedStateForControlGroup: () => {
         return {

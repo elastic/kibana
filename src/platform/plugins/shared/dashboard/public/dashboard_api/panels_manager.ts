@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fastIsEqual from 'fast-deep-equal';
 import { filter, map, max } from 'lodash';
 import { BehaviorSubject, merge } from 'rxjs';
-import { v4 as uuidv4, v4 } from 'uuid';
+import { v4 } from 'uuid';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { Reference } from '@kbn/content-management-utils';
@@ -33,7 +32,6 @@ import { asyncForEach } from '@kbn/std';
 
 import { DashboardPanelMap, DashboardPanelState, prefixReferencesFromPanel } from '../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/content_management';
-import { DashboardSectionMap } from '../../common/dashboard_container/types';
 import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboard_actions_strings';
 import { getPanelAddedSuccessString } from '../dashboard_app/_dashboard_app_strings';
 import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_placement_registry';
@@ -46,12 +44,13 @@ import { arePanelLayoutsEqual } from './are_panel_layouts_equal';
 import type { initializeTrackPanel } from './track_panel';
 import { DashboardState, UnsavedPanelState } from './types';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
+import { initializeSectionsManager } from './sections_manager';
 
 export function initializePanelsManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
   initialPanels: DashboardPanelMap,
   initialPanelsRuntimeState: UnsavedPanelState,
-  initialSections: DashboardSectionMap | undefined,
+  sectionsManager: ReturnType<typeof initializeSectionsManager>,
   trackPanel: ReturnType<typeof initializeTrackPanel>,
   getReferencesForPanelId: (id: string) => Reference[],
   pushReferences: (references: Reference[]) => void,
@@ -65,11 +64,6 @@ export function initializePanelsManager(
     if (panels !== panels$.value) panels$.next(panels);
   }
   let restoredRuntimeState: UnsavedPanelState = initialPanelsRuntimeState;
-
-  const sections$ = new BehaviorSubject<DashboardSectionMap | undefined>(initialSections);
-  function setSections(sections?: DashboardSectionMap) {
-    if (!fastIsEqual(sections ?? [], sections$.value ?? [])) sections$.next(sections);
-  }
 
   function setRuntimeStateForChild(childId: string, state: object) {
     restoredRuntimeState[childId] = state;
@@ -139,7 +133,8 @@ export function initializePanelsManager(
 
     // if the panel is in a collapsed section and has never been built, then childApi will be undefined
     const sectionId = panels$.value[id].gridData.sectionId;
-    const section = sections$.value?.filter((current) => current.id === sectionId) ?? [];
+    const section =
+      sectionsManager.api.sections$.value?.filter((current) => current.id === sectionId) ?? [];
     if (section.length > 0 && section[0].collapsed) {
       return undefined;
     }
@@ -363,41 +358,11 @@ export function initializePanelsManager(
       setPanels,
       setRuntimeStateForChild,
 
-      sections$,
-      addNewSection: () => {
-        const oldSections = sections$.getValue() ?? [];
-        setSections([
-          ...oldSections,
-          {
-            id: uuidv4(),
-            order: oldSections.length + 1,
-            title: i18n.translate('dashboard.defaultSectionTitle', {
-              defaultMessage: 'New collapsible section',
-            }),
-            collapsed: false,
-          },
-        ]);
-
-        // // scroll to bottom after row is added
-        // layoutUpdated$.pipe(skip(1), take(1)).subscribe(() => {
-        //   window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        // });
-        trackPanel.setScrollToPanelId(newId);
-      },
-      setSections,
-
       untilEmbeddableLoaded,
     },
     comparators: {
       panels: [panels$, setPanels, arePanelLayoutsEqual],
-      sections: [
-        sections$,
-        setSections,
-        (a, b) => {
-          return fastIsEqual(a ?? [], b ?? []);
-        },
-      ],
-    } as StateComparators<Pick<DashboardState, 'panels' | 'sections'>>,
+    } as StateComparators<Pick<DashboardState, 'panels'>>,
     internalApi: {
       registerChildApi: (api: DefaultEmbeddableApi) => {
         children$.next({
@@ -408,7 +373,6 @@ export function initializePanelsManager(
       reset: (lastSavedState: DashboardState) => {
         restoredRuntimeState = {};
         setPanels(lastSavedState.panels);
-        setSections(lastSavedState.sections);
 
         let resetChangedPanelCount = false;
         const currentChildren = children$.value;
@@ -457,7 +421,7 @@ export function initializePanelsManager(
           return acc;
         }, {} as DashboardPanelMap);
 
-        return { panels, sections: sections$.getValue(), references };
+        return { panels, sections: sectionsManager.api.sections$.getValue(), references };
       },
     },
   };

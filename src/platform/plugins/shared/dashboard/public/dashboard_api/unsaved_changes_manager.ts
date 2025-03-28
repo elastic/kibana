@@ -27,12 +27,14 @@ import { initializeSettingsManager } from './settings_manager';
 import { DashboardCreationOptions, DashboardState } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeViewModeManager } from './view_mode_manager';
+import { initializeSectionsManager } from './sections_manager';
 
 export function initializeUnsavedChangesManager({
   creationOptions,
   controlGroupApi$,
   lastSavedState,
   panelsManager,
+  sectionsManager,
   savedObjectId$,
   settingsManager,
   viewModeManager,
@@ -43,6 +45,7 @@ export function initializeUnsavedChangesManager({
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
   lastSavedState: DashboardState;
   panelsManager: ReturnType<typeof initializePanelsManager>;
+  sectionsManager: ReturnType<typeof initializeSectionsManager>;
   savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   viewModeManager: ReturnType<typeof initializeViewModeManager>;
@@ -60,6 +63,7 @@ export function initializeUnsavedChangesManager({
     { saveNotification$ },
     {
       ...panelsManager.comparators,
+      ...sectionsManager.comparators,
       ...settingsManager.comparators,
       ...viewModeManager.comparators,
       ...unifiedSearchManager.comparators,
@@ -133,9 +137,11 @@ export function initializeUnsavedChangesManager({
   return {
     api: {
       asyncResetToLastSavedState: async () => {
-        panelsManager.internalApi.reset(lastSavedState$.value);
-        settingsManager.internalApi.reset(lastSavedState$.value);
-        unifiedSearchManager.internalApi.reset(lastSavedState$.value);
+        const resetToState = lastSavedState$.value;
+        sectionsManager.internalApi.reset(resetToState);
+        panelsManager.internalApi.reset(resetToState);
+        settingsManager.internalApi.reset(resetToState);
+        unifiedSearchManager.internalApi.reset(resetToState);
         await controlGroupApi$.value?.asyncResetUnsavedChanges();
       },
       hasUnsavedChanges$,

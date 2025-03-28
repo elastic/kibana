@@ -53,8 +53,11 @@ export function placeClonePanel({
   }
   const beside = panelToPlaceBeside.gridData;
   const otherPanelGridData: GridData[] = [];
-  forOwn(currentPanels, (panel: DashboardPanelState, key: string | undefined) => {
-    otherPanelGridData.push(panel.gridData);
+  forOwn(currentPanels, (panel: DashboardPanelState) => {
+    if (panel.gridData.sectionId === sectionId) {
+      // only check against panels that are in the same section as the cloned panel
+      otherPanelGridData.push(panel.gridData);
+    }
   });
 
   const possiblePlacementDirections: IplacementDirection[] = [
