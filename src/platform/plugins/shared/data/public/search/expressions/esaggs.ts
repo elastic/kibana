@@ -37,13 +37,28 @@ export function getFunctionDefinition({
 }) {
   return (): EsaggsExpressionFunctionDefinition => ({
     ...getEsaggsMeta(),
+    sideEffects: (
+      args,
+      { inspectorAdapters, abortSignal, getSearchSessionId, getExecutionContext, getSearchContext }
+    ) => {
+      const requests = inspectorAdapters.requests?.getRequestEntries();
+      return () => {
+        if (!requests || requests.length === 0) {
+          return;
+        }
+        const requestsMap = new Map(requests.map(([request]) => [request.id, request]));
+        const responsesMap = new WeakMap(requests);
+        inspectorAdapters.requests?.loadFromEntries(requestsMap, responsesMap);
+      };
+    },
     fn(
       input,
       args,
       { inspectorAdapters, abortSignal, getSearchSessionId, getExecutionContext, getSearchContext }
     ) {
       return defer(async () => {
-        const { aggs, indexPatterns, searchSource, getNow } = await getStartDependencies();
+        const [{ aggs, indexPatterns, searchSource, getNow }, { handleEsaggsRequest }] =
+          await Promise.all([getStartDependencies(), import('../../../common/search/expressions')]);
 
         const indexPattern = await indexPatterns.create(args.index.value, true);
         const aggConfigs = aggs.createAggConfigs(
@@ -56,8 +71,6 @@ export function getFunctionDefinition({
             samplerSeed: args.samplerSeed,
           }
         );
-
-        const { handleEsaggsRequest } = await import('../../../common/search/expressions');
 
         return { aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest };
       }).pipe(

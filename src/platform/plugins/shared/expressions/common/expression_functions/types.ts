@@ -99,6 +99,8 @@ export interface ExpressionFunctionDefinition<
    */
   fn(input: Input, args: Arguments, context: Context): Output;
 
+  sideEffects?: (args: Arguments, context: Context) => () => void;
+
   /**
    * @deprecated Use `inputTypes` instead.
    */

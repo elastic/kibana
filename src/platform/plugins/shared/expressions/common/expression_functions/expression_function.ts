@@ -53,6 +53,8 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     handlers: object
   ) => ExpressionValue;
 
+  sideEffects?: (params: Record<string, unknown>, handlers: object) => () => void;
+
   /**
    * A short help text.
    */
@@ -107,6 +109,7 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
       migrations,
       namespace,
       allowCache,
+      sideEffects,
     } = functionDefinition;
 
     this.name = name;
@@ -114,6 +117,7 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     this.type = type;
     this.aliases = aliases || [];
     this.fn = fn as ExpressionFunction['fn'];
+    this.sideEffects = sideEffects as ExpressionFunction['sideEffects'];
     this.help = help || '';
     this.inputTypes = inputTypes || context?.types;
     this.allowCache = !!allowCache;
