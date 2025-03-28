@@ -1689,6 +1689,36 @@ describe('secrets', () => {
 
         expect(result.secretsToDelete).toEqual([{ id: 'token' }]);
       });
+
+      it('should delete secret if it is omitted in update', async () => {
+        const result = await extractAndUpdateOutputSecrets({
+          oldOutput: {
+            id: 'logstash-id',
+            name: 'logstash',
+            is_default: false,
+            is_default_monitoring: false,
+            type: 'logstash',
+            secrets: {
+              ssl: {
+                key: {
+                  id: 'ssl-key-token',
+                },
+              },
+            },
+          },
+          outputUpdate: {
+            name: 'logstash-id',
+            type: 'logstash',
+            is_default: false,
+            is_default_monitoring: false,
+            secrets: {},
+            proxy_id: null,
+          },
+          esClient: esClientMock,
+        });
+
+        expect(result.secretsToDelete).toEqual([{ id: 'ssl-key-token' }]);
+      });
     });
     describe('deleteOutputSecrets', () => {
       it('should delete existing secrets', async () => {
