@@ -98,7 +98,6 @@ export const useGridLayoutPanelEvents = ({
     (e: UserInteractionEvent) => {
       if (!isLayoutInteractive(gridLayoutStateManager)) return;
       if (isMouseEvent(e)) {
-        e.stopPropagation();
         startMouseInteraction({
           e,
           onStart,

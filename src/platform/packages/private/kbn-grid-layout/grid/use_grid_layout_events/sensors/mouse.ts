@@ -41,6 +41,7 @@ export const startMouseInteraction = ({
   onEnd: () => void;
 }) => {
   if (e.button !== MOUSE_BUTTON_LEFT) return;
+  e.stopPropagation();
   startAutoScroll();
 
   const handleMouseMove = (ev: UserMouseEvent) => {
