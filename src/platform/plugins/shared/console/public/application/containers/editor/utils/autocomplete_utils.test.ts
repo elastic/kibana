@@ -13,7 +13,6 @@
 import { monaco } from '@kbn/monaco';
 
 const mockPopulateContext = jest.fn();
-const getConditionalTemplate = jest.fn();
 
 jest.mock('../../../../lib/autocomplete/engine', () => {
   return {
@@ -220,12 +219,12 @@ describe('autocomplete_utils', () => {
   });
 
   describe('getInsertText', () => {
-    const mockContext = { addTemplate: false, endpoint: 'test/_search' } as AutoCompleteContext;
+    const mockContext = { addTemplate: false } as AutoCompleteContext;
 
     it('returns empty string if name is undefined', () => {
       expect(
         getInsertText(
-          { name: undefined, insertValue: '', template: null, value: '' } as ResultTerm,
+          { name: undefined } as ResultTerm,
           '',
           mockContext
         )
@@ -253,7 +252,6 @@ describe('autocomplete_utils', () => {
     });
 
     it('appends template when available and context.addTemplate is true', () => {
-      // getConditionalTemplate.mockReturnValue({ value: '{ "key": "val" }' });
       expect(
         getInsertText({ name: 'query', template: {} } as ResultTerm, '{\n' + '    ', {
           ...mockContext,
@@ -265,7 +263,7 @@ describe('autocomplete_utils', () => {
     it('inserts template when provided directly and context.addTemplate is true', () => {
       expect(
         getInsertText(
-          { name: 'terms', template: { field: '' }, value: '' },
+          { name: 'terms', template: { field: '' } },
           '{\n' + '    "aggs": {\n' + '      "NAME": {\n' + '        "',
           { ...mockContext, addTemplate: true }
         )
@@ -275,7 +273,7 @@ describe('autocomplete_utils', () => {
     it('inserts only field name when template is provided and context.addTemplate is false', () => {
       expect(
         getInsertText(
-          { name: 'terms', template: { field: '' }, value: '' },
+          { name: 'terms', template: { field: '' } },
           '{\n' + '    "aggs": {\n' + '      "NAME": {\n' + '        "',
           mockContext
         )
@@ -285,7 +283,7 @@ describe('autocomplete_utils', () => {
     it('inserts template inline', () => {
       expect(
         getInsertText(
-          { name: 'term', template: { FIELD: { value: 'VALUE' } }, value: '' },
+          { name: 'term', template: { FIELD: { value: 'VALUE' } } },
           '{"query": {te',
           { ...mockContext, addTemplate: true }
         )
@@ -295,14 +293,14 @@ describe('autocomplete_utils', () => {
     it('adds cursor placeholder inside empty objects and arrays', () => {
       expect(
         getInsertText(
-          { name: 'field', insertValue: '', template: null, value: '{' } as ResultTerm,
+          { name: 'field', value: '{' } as ResultTerm,
           '',
           mockContext
         )
       ).toBe('"field": {$0}');
       expect(
         getInsertText(
-          { name: 'field', insertValue: '', template: null, value: '[' } as ResultTerm,
+          { name: 'field', value: '[' } as ResultTerm,
           '',
           mockContext
         )
