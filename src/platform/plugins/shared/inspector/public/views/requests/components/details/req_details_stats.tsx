@@ -30,7 +30,7 @@ interface RequestDetailsStatRow extends RequestStatistic {
 const StatRow = ({ stat }: { stat: RequestDetailsStatRow }) => {
   const { euiTheme } = useEuiTheme();
   return (
-    <EuiTableRow key={stat.id}>
+    <EuiTableRow>
       <EuiTableRowCell>
         {stat.label}
 
@@ -72,7 +72,7 @@ export class RequestDetailsStats extends Component<DetailViewProps> {
     return (
       <EuiTable responsiveBreakpoint={false}>
         <EuiTableBody>
-          {sortedStats.map((stat: RequestDetailsStatRow) => [<StatRow stat={stat} />])}
+          {sortedStats.map((stat) => <StatRow stat={stat} key={stat.id}/>)}
         </EuiTableBody>
       </EuiTable>
     );
