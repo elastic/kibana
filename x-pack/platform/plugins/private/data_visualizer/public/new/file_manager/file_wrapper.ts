@@ -74,7 +74,6 @@ export class FileWrapper {
   private pipeline$ = new BehaviorSubject<IngestPipeline | undefined>(undefined);
   public readonly pipelineObvs$ = this.pipeline$.asObservable(); // rename!!!!
   private pipelineJsonValid$ = new BehaviorSubject<boolean>(true);
-  // public readonly pipelineJsonValid = this.pipelineJsonValid$.asObservable();
 
   public readonly fileStatus$ = this.analyzedFile$.asObservable();
   private fileSizeChecker: FileSizeChecker;
@@ -92,6 +91,8 @@ export class FileWrapper {
 
   public destroy() {
     this.analyzedFile$.complete();
+    this.pipeline$.complete();
+    this.pipelineJsonValid$.complete();
   }
 
   public async analyzeFile(overrides: InputOverrides = {}) {
@@ -148,9 +149,6 @@ export class FileWrapper {
         overrides as Record<string, string>
       );
 
-      // const overrideDefaults = this.analyzedFile$.getValue().serverSettings;
-      // const formattedOverrides = createUrlOverrides(overrides, overrideDefaults);
-      // const resp = await this.fileUpload.analyzeFile(fileContents, formattedOverrides);
       const serverSettings = processResults(resp);
 
       return {

@@ -109,7 +109,6 @@ export class FileUploadManager {
     valid: false,
     count: 0,
   });
-  // private pipelines: Array<IngestPipeline | undefined> = [];
   private inferenceId: string | null = null;
   private importer: IImporter | null = null;
   private timeFieldName: string | undefined | null = null;
@@ -184,13 +183,10 @@ export class FileUploadManager {
         let mappingsOk = mappingClashes.length === 0;
         if (existingIndexChecks !== undefined) {
           mappingsOk = mappingsOk && existingIndexChecks.mappingClashes.length === 0;
-          // mappingsOk = mappingsOk && existingIndexChecks.unmappedFields.length < 5;
-          // mappingsOk = mappingsOk && existingIndexChecks.newFieldsPerFile.length < 5;
         }
 
         if (mappingsOk && formatsOk) {
           this.updateMappings(mergedMappings);
-          // this.pipelines = this.getPipelines();
           this.addSemanticTextField();
         }
 
@@ -210,6 +206,11 @@ export class FileUploadManager {
 
   destroy() {
     this.files$.complete();
+    this.analysisValid$.complete();
+    this.settings$.complete();
+    this.mappings$.complete();
+    this.existingIndexMappings$.complete();
+    this.uploadStatus$.complete();
     this.mappingsCheckSubscription.unsubscribe();
   }
   private setStatus(status: Partial<UploadStatus>) {
@@ -331,7 +332,6 @@ export class FileUploadManager {
     return (pipeline: string) => {
       const files = this.getFiles();
       files[index].updatePipeline(pipeline);
-      // this.files$.next(files); // is this needed?? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     };
   }
 
@@ -340,16 +340,11 @@ export class FileUploadManager {
     files.forEach((file, i) => {
       file.setPipeline(pipelines[i]);
     });
-    // this.files$.next(files);
   }
 
   public getMappings() {
     return this.mappings$.getValue().json;
   }
-
-  // public getMappings$() {
-  //   return this.mappings$.asObservable();
-  // }
 
   public updateMappings(mappings: MappingTypeMapping | string) {
     this.updateSettingsOrMappings('mappings', mappings);
@@ -358,10 +353,6 @@ export class FileUploadManager {
   public getSettings() {
     return this.settings$.getValue();
   }
-
-  // public getSettings$() {
-  //   return this.settings$.asObservable();
-  // }
 
   public updateSettings(settings: IndicesIndexSettings | string) {
     this.updateSettingsOrMappings('settings', settings);

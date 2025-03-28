@@ -44,7 +44,7 @@ export const IngestPipeline: FC<Props> = ({
     [localPipeline]
   );
   // add a warning that editing the pipeline when there are more than one file will update the mappings !!!!!!!
-  // or somehow stop pipeline editing from triggering observerable FileAnalysis
+  // or somehow stop pipeline editing from triggering observable FileAnalysis
   return (
     <IngestPipelineEditor
       initialized={readonly}
