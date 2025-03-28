@@ -8,7 +8,7 @@
  */
 
 import fastIsEqual from 'fast-deep-equal';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { i18n } from '@kbn/i18n';
@@ -18,7 +18,7 @@ import { DashboardSectionMap } from '../../common/dashboard_container/types';
 import { DashboardState } from './types';
 
 export function initializeSectionsManager(initialSections: DashboardSectionMap | undefined) {
-  const scrollToSection$ = new BehaviorSubject<string | undefined>(undefined);
+  const scrollToBottom$ = new Subject<void>();
   const sections$ = new BehaviorSubject<DashboardSectionMap | undefined>(initialSections);
   function setSections(sections?: DashboardSectionMap) {
     if (!fastIsEqual(sections ?? [], sections$.value ?? [])) sections$.next(sections);
@@ -29,11 +29,10 @@ export function initializeSectionsManager(initialSections: DashboardSectionMap |
       sections$,
       addNewSection: () => {
         const oldSections = sections$.getValue() ?? [];
-        const newId = uuidv4();
         setSections([
           ...oldSections,
           {
-            id: newId,
+            id: uuidv4(),
             order: oldSections.length + 1,
             title: i18n.translate('dashboard.defaultSectionTitle', {
               defaultMessage: 'New collapsible section',
@@ -43,10 +42,10 @@ export function initializeSectionsManager(initialSections: DashboardSectionMap |
         ]);
 
         // scroll to bottom after row is added
-        scrollToSection$.next(newId);
+        scrollToBottom$.next();
       },
       setSections,
-      scrollToSection$,
+      scrollToBottom$,
     },
     comparators: {
       sections: [

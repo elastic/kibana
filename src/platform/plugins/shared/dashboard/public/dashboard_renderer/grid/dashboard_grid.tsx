@@ -165,7 +165,6 @@ export const DashboardGrid = ({
     // memoizing this component reduces the number of times it gets re-rendered to a minimum
     return (
       <GridLayout
-        layoutRef={layoutRef}
         css={layoutStyles}
         layout={currentLayout}
         gridSettings={{
@@ -192,17 +191,17 @@ export const DashboardGrid = ({
 
   useEffect(() => {
     const scrollToBottomOnResize = new ResizeObserver(() => {
-      setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 1);
+      setTimeout(dashboardApi.scrollToBottom, 1);
       scrollToBottomOnResize.disconnect();
     });
 
-    const scrollToSectionSubscription = dashboardApi.scrollToSection$.subscribe((sectionId) => {
-      if (!layoutRef.current || !sectionId) return;
+    const scrollToBottomSubscription = dashboardApi.scrollToBottom$.subscribe(() => {
+      if (!layoutRef.current) return;
       scrollToBottomOnResize.observe(layoutRef.current);
     });
     return () => {
       scrollToBottomOnResize.disconnect();
-      scrollToSectionSubscription.unsubscribe();
+      scrollToBottomSubscription.unsubscribe();
     };
   }, [dashboardApi]);
 
@@ -230,7 +229,7 @@ export const DashboardGrid = ({
   }, [useMargins, viewMode, expandedPanelId, euiTheme.levels.toast]);
 
   return (
-    <div className={dashboardClasses} css={dashboardStyles}>
+    <div ref={layoutRef} className={dashboardClasses} css={dashboardStyles}>
       {memoizedgridLayout}
     </div>
   );
