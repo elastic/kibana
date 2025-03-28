@@ -925,7 +925,7 @@ export async function suggestForExpression({
  * Example:
  * "is null" -> /^i(?:s(?:\s+(?:n(?:u(?:l(?:l)?)?)?)?)?)?$/i
  */
-function buildPartialMatcher(str: string) {
+export function buildPartialMatcher(str: string) {
   // Split the string into characters
   const chars = str.split('');
 
