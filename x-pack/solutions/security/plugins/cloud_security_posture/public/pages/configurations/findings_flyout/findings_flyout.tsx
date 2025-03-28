@@ -263,12 +263,7 @@ export const FindingsRuleFlyout = ({ ruleId, resourceId }: FindingMisconfigurati
 
   return (
     <>
-      <EuiFlexGroup
-        grow={1}
-        gutterSize={'none'}
-        direction={'column'}
-        data-test-subj={FINDINGS_FLYOUT}
-      >
+      <EuiFlexGroup gutterSize={'none'} direction={'column'} data-test-subj={FINDINGS_FLYOUT}>
         <EuiFlyoutHeader>
           <EuiPanel hasShadow={false}>
             <EuiSpacer />

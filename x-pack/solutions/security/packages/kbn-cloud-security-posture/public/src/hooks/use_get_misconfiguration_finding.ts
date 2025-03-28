@@ -9,7 +9,6 @@ import { lastValueFrom } from 'rxjs';
 import {
   CDR_3RD_PARTY_RETENTION_POLICY,
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
-  CspFinding,
 } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -62,18 +61,6 @@ const buildGetMisconfigurationsFindingsQueryWithFilters = (query: UseCspOptions[
     },
   };
 };
-
-export enum MISCONFIGURATION {
-  RESULT_EVALUATION = 'result.evaluation',
-  RULE_NAME = 'rule.name',
-}
-export interface MisconfigurationFindingTableDetailsFields {
-  [MISCONFIGURATION.RESULT_EVALUATION]: string;
-  [MISCONFIGURATION.RULE_NAME]: string;
-}
-
-export type MisconfigurationFindingDetailFields = Pick<CspFinding, 'rule' | 'resource'> &
-  MisconfigurationFindingTableDetailsFields;
 
 export const useGetMisconfigurationFindings = (options: UseCspOptions) => {
   const {
