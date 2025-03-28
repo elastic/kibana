@@ -74,7 +74,7 @@ export function useInstalledIntegrations(
             ),
           },
         })),
-    [data, upgradingIntegrations]
+    [data, upgradingIntegrations, uninstallingIntegrations]
   );
 
   const localSearch = useLocalSearch(internalInstalledPackages, isInitialLoading);

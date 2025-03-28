@@ -99,8 +99,8 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
               ? res.error?.message
               : res.results
               ? res.results
-                  .filter((res) => res.error)
-                  .map((res) => `${res.name}: ${res.error?.message}`)
+                  .filter((result) => result.error)
+                  .map((result) => `${result.name}: ${result.error?.message}`)
                   .join('\n')
               : 'Unexpected error';
             const error = new Error(errorMessage);
@@ -217,7 +217,7 @@ export function useBulkActions() {
         });
       }
     },
-    [toasts]
+    [toasts, setPollingBulkActions]
   );
 
   const actions = useMemo(
