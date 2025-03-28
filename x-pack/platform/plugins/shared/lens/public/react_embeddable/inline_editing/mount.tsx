@@ -68,7 +68,7 @@ const inlineFlyoutStyles = ({ euiTheme }: UseEuiTheme) => `
   clip-path: polygon(-100% 0, 100% 0, 100% 100%, -100% 100%);
   max-inline-size: 640px;
   min-inline-size: 256px;
-  background:${euiTheme.colors.backgroundBaseSubdued};
+  background:${euiTheme.colors.lightestShade};
   @include euiBreakpoint('xs', 's', 'm') {
     clip-path: none;
   }
