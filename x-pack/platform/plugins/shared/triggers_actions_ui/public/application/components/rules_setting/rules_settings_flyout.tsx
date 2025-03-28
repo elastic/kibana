@@ -27,13 +27,9 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiDescribedFormGroup,
-  EuiText,
-  EuiForm,
 } from '@elastic/eui';
 import { useFetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings';
 import { css } from '@emotion/react';
-import { HorizontalAlignment } from '@elastic/charts';
 import { useKibana } from '../../../common/lib/kibana';
 import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
 import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
@@ -261,7 +257,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
   return (
     <EuiFlyout
       type="push"
-      data-test-subj="rulesSettingsModal"
+      data-test-subj="rulesSettingsFlyout"
       onClose={onCloseFlyout}
       maxWidth={384}
     >
@@ -292,7 +288,10 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="rulesSettingsModalCancelButton" onClick={onCloseFlyout}>
+            <EuiButtonEmpty
+              data-test-subj="rulesSettingsFlyoutCancelButton"
+              onClick={onCloseFlyout}
+            >
               <FormattedMessage
                 id="xpack.triggersActionsUI.rulesSettings.flyout.cancelButton"
                 defaultMessage="Cancel"
@@ -302,7 +301,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              data-test-subj="rulesSettingsModalSaveButton"
+              data-test-subj="rulesSettingsFlyoutSaveButton"
               onClick={handleSave}
               disabled={!canWriteFlappingSettings && !canWriteQueryDelaySettings}
             >

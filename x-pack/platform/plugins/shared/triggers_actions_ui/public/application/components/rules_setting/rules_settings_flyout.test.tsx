@@ -87,7 +87,7 @@ const modalProps: RulesSettingsFlyoutProps = {
   onSave: jest.fn(),
 };
 
-const RulesSettingsModalWithProviders: React.FunctionComponent<RulesSettingsFlyoutProps> = (
+const rulesSettingsFlyoutWithProviders: React.FunctionComponent<RulesSettingsFlyoutProps> = (
   props
 ) => (
   <IntlProvider locale="en">
@@ -160,7 +160,7 @@ describe('rules_settings_modal', () => {
   });
 
   test('renders flapping settings correctly', async () => {
-    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
     expect(fetchFlappingSettingsMock).toHaveBeenCalledTimes(1);
     await waitForModalLoad();
     expect(
@@ -169,12 +169,14 @@ describe('rules_settings_modal', () => {
     expect(result.getByTestId('lookBackWindowRangeInput').getAttribute('value')).toBe('10');
     expect(result.getByTestId('statusChangeThresholdRangeInput').getAttribute('value')).toBe('10');
 
-    expect(result.getByTestId('rulesSettingsModalCancelButton')).toBeInTheDocument();
-    expect(result.getByTestId('rulesSettingsModalSaveButton').getAttribute('disabled')).toBeFalsy();
+    expect(result.getByTestId('rulesSettingsFlyoutCancelButton')).toBeInTheDocument();
+    expect(
+      result.getByTestId('rulesSettingsFlyoutSaveButton').getAttribute('disabled')
+    ).toBeFalsy();
   });
 
   test('can save flapping settings', async () => {
-    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
     await waitForModalLoad();
 
     const lookBackWindowInput = result.getByTestId('lookBackWindowRangeInput');
@@ -187,7 +189,7 @@ describe('rules_settings_modal', () => {
     expect(statusChangeThresholdInput.getAttribute('value')).toBe('5');
 
     // Try saving
-    await userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
+    await userEvent.click(result.getByTestId('rulesSettingsFlyoutSaveButton'));
 
     await waitFor(() => {
       expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
@@ -208,7 +210,7 @@ describe('rules_settings_modal', () => {
   });
 
   test('reset flapping settings to initial state on cancel without triggering another server reload', async () => {
-    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
     expect(fetchFlappingSettingsMock).toHaveBeenCalledTimes(1);
     expect(getQueryDelaySettingsMock).toHaveBeenCalledTimes(1);
     await waitForModalLoad();
@@ -223,7 +225,7 @@ describe('rules_settings_modal', () => {
     expect(statusChangeThresholdInput.getAttribute('value')).toBe('3');
 
     // Try cancelling
-    await userEvent.click(result.getByTestId('rulesSettingsModalCancelButton'));
+    await userEvent.click(result.getByTestId('rulesSettingsFlyoutCancelButton'));
 
     expect(modalProps.onClose).toHaveBeenCalledTimes(1);
     expect(updateFlappingSettingsMock).not.toHaveBeenCalled();
@@ -238,7 +240,7 @@ describe('rules_settings_modal', () => {
   });
 
   test('should prevent statusChangeThreshold from being greater than lookBackWindow', async () => {
-    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
     await waitForModalLoad();
 
     const lookBackWindowInput = result.getByTestId('lookBackWindowRangeInput');
@@ -261,7 +263,7 @@ describe('rules_settings_modal', () => {
   test('handles errors when saving settings', async () => {
     updateFlappingSettingsMock.mockRejectedValue('failed!');
 
-    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
     await waitForModalLoad();
 
     const lookBackWindowInput = result.getByTestId('lookBackWindowRangeInput');
@@ -274,7 +276,7 @@ describe('rules_settings_modal', () => {
     expect(statusChangeThresholdInput.getAttribute('value')).toBe('5');
 
     // Try saving
-    await userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
+    await userEvent.click(result.getByTestId('rulesSettingsFlyoutSaveButton'));
     await waitFor(() => {
       expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
     });
@@ -285,7 +287,7 @@ describe('rules_settings_modal', () => {
   });
 
   test('displays flapping detection off prompt when flapping is disabled', async () => {
-    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
     await waitForModalLoad();
 
     expect(result.queryByTestId('rulesSettingsFlappingOffPrompt')).toBe(null);
@@ -308,13 +310,13 @@ describe('rules_settings_modal', () => {
         readFlappingSettingsUI: true,
       },
     };
-    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
     await waitForModalLoad({ queryDelaySection: false });
 
     expect(result.getByTestId('rulesSettingsFlappingEnableSwitch')).toBeDisabled();
     expect(result.getByTestId('lookBackWindowRangeInput')).toBeDisabled();
     expect(result.getByTestId('statusChangeThresholdRangeInput')).toBeDisabled();
-    expect(result.getByTestId('rulesSettingsModalSaveButton')).toBeDisabled();
+    expect(result.getByTestId('rulesSettingsFlyoutSaveButton')).toBeDisabled();
   });
 
   test('form elements are not visible when provided with insufficient read permissions', async () => {
@@ -334,7 +336,7 @@ describe('rules_settings_modal', () => {
     };
     await waitForModalLoad({ flappingSection: false, queryDelaySection: false });
 
-    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
     await waitFor(() => {
       expect(result.queryByTestId('centerJustifiedSpinner')).toBe(null);
     });
@@ -343,17 +345,19 @@ describe('rules_settings_modal', () => {
   });
 
   test('renders query delay settings correctly', async () => {
-    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
     expect(getQueryDelaySettingsMock).toHaveBeenCalledTimes(1);
     await waitForModalLoad();
     expect(result.getByTestId('queryDelayRangeInput').getAttribute('value')).toBe('10');
 
-    expect(result.getByTestId('rulesSettingsModalCancelButton')).toBeInTheDocument();
-    expect(result.getByTestId('rulesSettingsModalSaveButton').getAttribute('disabled')).toBeFalsy();
+    expect(result.getByTestId('rulesSettingsFlyoutCancelButton')).toBeInTheDocument();
+    expect(
+      result.getByTestId('rulesSettingsFlyoutSaveButton').getAttribute('disabled')
+    ).toBeFalsy();
   });
 
   test('can save query delay settings', async () => {
-    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
     await waitForModalLoad();
 
     const queryDelayRangeInput = result.getByTestId('queryDelayRangeInput');
@@ -361,7 +365,7 @@ describe('rules_settings_modal', () => {
     expect(queryDelayRangeInput.getAttribute('value')).toBe('20');
 
     // Try saving
-    await userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
+    await userEvent.click(result.getByTestId('rulesSettingsFlyoutSaveButton'));
 
     await waitFor(() => {
       expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
@@ -382,7 +386,7 @@ describe('rules_settings_modal', () => {
   test('handles errors when saving query delay settings', async () => {
     updateQueryDelaySettingsMock.mockRejectedValue('failed!');
 
-    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
     await waitForModalLoad();
 
     const queryDelayRangeInput = result.getByTestId('queryDelayRangeInput');
@@ -390,7 +394,7 @@ describe('rules_settings_modal', () => {
     expect(queryDelayRangeInput.getAttribute('value')).toBe('20');
 
     // Try saving
-    await userEvent.click(result.getByTestId('rulesSettingsModalSaveButton'));
+    await userEvent.click(result.getByTestId('rulesSettingsFlyoutSaveButton'));
     await waitFor(() => {
       expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
     });
@@ -415,11 +419,11 @@ describe('rules_settings_modal', () => {
         readQueryDelaySettingsUI: true,
       },
     };
-    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
     await waitForModalLoad({ flappingSection: false });
 
     expect(result.getByTestId('queryDelayRangeInput')).toBeDisabled();
-    expect(result.getByTestId('rulesSettingsModalSaveButton')).toBeDisabled();
+    expect(result.getByTestId('rulesSettingsFlyoutSaveButton')).toBeDisabled();
   });
 
   test('query delay form elements are not visible when provided with insufficient read permissions', async () => {
@@ -438,7 +442,7 @@ describe('rules_settings_modal', () => {
       },
     };
 
-    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
     await waitForModalLoad({ flappingSection: false, queryDelaySection: false });
 
     expect(result.queryByTestId('rulesSettingsQueryDelaySection')).toBe(null);
@@ -446,7 +450,7 @@ describe('rules_settings_modal', () => {
 
   test('hides query delay settings when not serverless', async () => {
     useKibanaMock().services.isServerless = false;
-    const result = render(<RulesSettingsModalWithProviders {...modalProps} />);
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
     await waitForModalLoad({ queryDelaySection: false });
     expect(result.queryByTestId('rulesSettingsQueryDelaySection')).not.toBeInTheDocument();
   });
