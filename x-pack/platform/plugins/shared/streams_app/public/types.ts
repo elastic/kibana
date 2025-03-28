@@ -55,7 +55,7 @@ export interface StreamsAppStartDependencies {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  discover?: DiscoverStart;
+  discover: DiscoverStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   share: SharePublicStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
