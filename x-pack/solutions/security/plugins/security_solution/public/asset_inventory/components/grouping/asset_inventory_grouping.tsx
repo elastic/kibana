@@ -29,7 +29,7 @@ interface AssetInventoryGroupingProps<T> {
  * This component is used to render the loading state of the AssetInventoryGrouping component
  * It's used to avoid the flickering of the table when the data is loading
  */
-export const AssetInventoryGroupingLoading = <T,>({
+export const GroupWrapperLoading = <T,>({
   grouping,
   pageSize,
 }: Pick<AssetInventoryGroupingProps<T>, 'grouping' | 'pageSize'>) => {
@@ -54,7 +54,7 @@ export const AssetInventoryGroupingLoading = <T,>({
   );
 };
 
-export const AssetInventoryGrouping = <T,>({
+export const GroupWrapper = <T,>({
   data,
   renderChildComponent,
   grouping,
@@ -68,7 +68,7 @@ export const AssetInventoryGrouping = <T,>({
   groupSelectorComponent,
 }: AssetInventoryGroupingProps<T>) => {
   if (!data || isFetching) {
-    return <AssetInventoryGroupingLoading grouping={grouping} pageSize={pageSize} />;
+    return <GroupWrapperLoading grouping={grouping} pageSize={pageSize} />;
   }
 
   return (

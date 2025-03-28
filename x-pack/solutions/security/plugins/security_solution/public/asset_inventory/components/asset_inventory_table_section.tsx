@@ -8,28 +8,61 @@ import React, { useState, useEffect } from 'react';
 import type { Filter } from '@kbn/es-query';
 import type { AssetInventoryURLStateResult } from '../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
 import { DEFAULT_TABLE_SECTION_HEIGHT } from '../constants';
-import { AssetInventoryGrouping } from './grouping/asset_inventory_grouping';
+import { GroupWrapper } from './grouping/asset_inventory_grouping';
 import { useAssetInventoryGrouping } from './grouping/use_asset_inventory_grouping';
 import { AssetInventoryDataTable } from './asset_inventory_data_table';
 
-interface TopLevelGroupProps {
+export interface AssetInventoryTableSectionProps {
   state: AssetInventoryURLStateResult;
-  renderChildComponent: (groupFilters: Filter[]) => JSX.Element;
+}
+
+/**
+ * Recursive component hierarchy
+ *
+ * AssetInventoryTableSection (renders either/or one of the children)
+ * |-- AssetInventoryDataTable (no grouping)
+ * |-- GroupWithURLPagination (grouping level = 0, renders both children)
+ *     |-- GroupWrapper
+ *     |-- GroupContent
+ *         |-- GroupWithLocalPagination (grouping level = 1, renders both children)
+ *             |-- GroupWrapper
+ *             |-- GroupContent (renders)
+ *                 |-- DataTableWithLocalPagination
+ *                     |-- AssetInventoryDataTable (grouping level = 2)
+ */
+export const AssetInventoryTableSection = ({ state }: AssetInventoryTableSectionProps) => {
+  const { grouping } = useAssetInventoryGrouping({ state });
+  const selectedGroup = grouping.selectedGroups[0];
+
+  if (selectedGroup === 'none') {
+    return (
+      <AssetInventoryDataTable state={state} groupSelectorComponent={grouping.groupSelector} />
+    );
+  }
+
+  return (
+    <GroupWithURLPagination
+      state={state}
+      selectedGroup={selectedGroup}
+      selectedGroupOptions={grouping.selectedGroups}
+      groupSelectorComponent={grouping.groupSelector}
+    />
+  );
+};
+
+interface GroupWithURLPaginationProps {
+  state: AssetInventoryURLStateResult;
   selectedGroup: string;
+  selectedGroupOptions: string[];
   groupSelectorComponent?: JSX.Element;
 }
 
-interface SubGroupProps extends TopLevelGroupProps {
-  groupingLevel: number;
-  parentGroupFilters?: string;
-}
-
-const TopLevelGroup = ({
+const GroupWithURLPagination = ({
   state,
-  renderChildComponent,
   selectedGroup,
+  selectedGroupOptions,
   groupSelectorComponent,
-}: TopLevelGroupProps) => {
+}: GroupWithURLPaginationProps) => {
   const { groupData, grouping, isFetching } = useAssetInventoryGrouping({
     state,
     selectedGroup,
@@ -46,10 +79,18 @@ const TopLevelGroup = ({
   }, [selectedGroup]);
 
   return (
-    <AssetInventoryGrouping
+    <GroupWrapper
       data={groupData}
       grouping={grouping}
-      renderChildComponent={renderChildComponent}
+      renderChildComponent={(childFilters) => (
+        <GroupContent
+          currentGroupFilters={childFilters}
+          state={state}
+          groupingLevel={1}
+          selectedGroupOptions={selectedGroupOptions}
+          groupSelectorComponent={groupSelectorComponent}
+        />
+      )}
       activePageIndex={state.pageIndex}
       pageSize={state.pageSize}
       onChangeGroupsPage={state.onChangePage}
@@ -62,21 +103,67 @@ const TopLevelGroup = ({
   );
 };
 
-const SubGroup = ({
+interface GroupContentProps {
+  currentGroupFilters: Filter[];
+  state: AssetInventoryURLStateResult;
+  groupingLevel: number;
+  selectedGroupOptions: string[];
+  parentGroupFilters?: string;
+  groupSelectorComponent?: JSX.Element;
+}
+
+const GroupContent = ({
+  currentGroupFilters,
   state,
-  renderChildComponent,
+  groupingLevel,
+  selectedGroupOptions,
+  parentGroupFilters,
+  groupSelectorComponent,
+}: GroupContentProps) => {
+  if (groupingLevel < selectedGroupOptions.length) {
+    const nextGroupingLevel = groupingLevel + 1;
+    return (
+      <GroupWithLocalPagination
+        state={state}
+        groupingLevel={nextGroupingLevel}
+        selectedGroup={selectedGroupOptions[groupingLevel]}
+        selectedGroupOptions={selectedGroupOptions}
+        parentGroupFilters={JSON.stringify([
+          ...currentGroupFilters,
+          ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : []),
+        ])}
+        groupSelectorComponent={groupSelectorComponent}
+      />
+    );
+  }
+
+  return (
+    <DataTableWithLocalPagination
+      state={state}
+      currentGroupFilters={currentGroupFilters}
+      parentGroupFilters={parentGroupFilters}
+    />
+  );
+};
+
+interface GroupWithLocalPaginationProps extends GroupWithURLPaginationProps {
+  groupingLevel: number;
+  parentGroupFilters?: string;
+}
+
+const GroupWithLocalPagination = ({
+  state,
   groupingLevel,
   parentGroupFilters,
   selectedGroup,
+  selectedGroupOptions,
   groupSelectorComponent,
-}: SubGroupProps) => {
+}: GroupWithLocalPaginationProps) => {
   const [subgroupPageIndex, setSubgroupPageIndex] = useState(0);
   const [subgroupPageSize, setSubgroupPageSize] = useState(10);
 
-  const subgroupState = { ...state, pageIndex: subgroupPageIndex, pageSize: subgroupPageSize };
-
   const { groupData, grouping, isFetching } = useAssetInventoryGrouping({
-    state: subgroupState,
+    state: { ...state, pageIndex: subgroupPageIndex, pageSize: subgroupPageSize },
     selectedGroup,
     groupFilters: parentGroupFilters ? JSON.parse(parentGroupFilters) : [],
   });
@@ -90,10 +177,18 @@ const SubGroup = ({
   }, [selectedGroup]);
 
   return (
-    <AssetInventoryGrouping
+    <GroupWrapper
       data={groupData}
       grouping={grouping}
-      renderChildComponent={renderChildComponent}
+      renderChildComponent={(childFilters) => (
+        <GroupContent
+          currentGroupFilters={childFilters}
+          state={state}
+          groupingLevel={groupingLevel}
+          selectedGroupOptions={selectedGroupOptions}
+          groupSelectorComponent={groupSelectorComponent}
+        />
+      )}
       activePageIndex={subgroupPageIndex}
       pageSize={subgroupPageSize}
       onChangeGroupsPage={setSubgroupPageIndex}
@@ -117,19 +212,8 @@ const DataTableWithLocalPagination = ({
   currentGroupFilters,
   parentGroupFilters,
 }: DataTableWithLocalPagination) => {
-  // Reusable parts
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
-
-  /**
-   * This is used to reset the active page index when the selected group changes
-   * It is needed because the grouping number of pages can change according to the selected group
-   */
-  useEffect(() => {
-    setTablePageIndex(0);
-  }, [tablePageSize]);
-
-  // End of Reusable parts
 
   const combinedFilters = [
     ...currentGroupFilters,
@@ -154,97 +238,4 @@ const DataTableWithLocalPagination = ({
   };
 
   return <AssetInventoryDataTable state={newState} height={DEFAULT_TABLE_SECTION_HEIGHT} />;
-};
-
-const renderChildComponent = ({
-  state,
-  level,
-  currentSelectedGroup,
-  selectedGroupOptions,
-  parentGroupFilters,
-  groupSelectorComponent,
-}: {
-  state: AssetInventoryURLStateResult;
-  level: number;
-  currentSelectedGroup: string;
-  selectedGroupOptions: string[];
-  parentGroupFilters?: string;
-  groupSelectorComponent?: JSX.Element;
-}) => {
-  let getChildComponent: (groupFilters: Filter[]) => JSX.Element;
-
-  if (currentSelectedGroup === 'none') {
-    return (
-      <AssetInventoryDataTable state={state} groupSelectorComponent={groupSelectorComponent} />
-    );
-  }
-
-  if (level < selectedGroupOptions.length - 1 && !selectedGroupOptions.includes('none')) {
-    getChildComponent = (currentGroupFilters: Filter[]) => {
-      const nextGroupingLevel = level + 1;
-      return renderChildComponent({
-        state,
-        level: nextGroupingLevel,
-        currentSelectedGroup: selectedGroupOptions[nextGroupingLevel],
-        selectedGroupOptions,
-        parentGroupFilters: JSON.stringify([
-          ...currentGroupFilters,
-          ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : []),
-        ]),
-        groupSelectorComponent,
-      });
-    };
-  } else {
-    getChildComponent = (currentGroupFilters: Filter[]) => {
-      return (
-        <DataTableWithLocalPagination
-          state={state}
-          currentGroupFilters={currentGroupFilters}
-          parentGroupFilters={parentGroupFilters}
-        />
-      );
-    };
-  }
-
-  if (level === 0) {
-    return (
-      <TopLevelGroup
-        state={state}
-        renderChildComponent={getChildComponent}
-        selectedGroup={selectedGroupOptions[level]}
-        groupSelectorComponent={groupSelectorComponent}
-      />
-    );
-  }
-
-  return (
-    <SubGroup
-      state={state}
-      renderChildComponent={getChildComponent}
-      selectedGroup={selectedGroupOptions[level]}
-      groupingLevel={level}
-      parentGroupFilters={parentGroupFilters}
-      groupSelectorComponent={groupSelectorComponent}
-    />
-  );
-};
-
-export interface AssetInventoryTableSectionProps {
-  state: AssetInventoryURLStateResult;
-}
-
-export const AssetInventoryTableSection = ({ state }: AssetInventoryTableSectionProps) => {
-  const { grouping } = useAssetInventoryGrouping({ state });
-
-  return (
-    <div>
-      {renderChildComponent({
-        state,
-        level: 0,
-        currentSelectedGroup: grouping.selectedGroups[0],
-        selectedGroupOptions: grouping.selectedGroups,
-        groupSelectorComponent: grouping.groupSelector,
-      })}
-    </div>
-  );
 };
