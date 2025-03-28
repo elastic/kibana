@@ -617,7 +617,7 @@ describe('dashboard', () => {
               "searchSourceJSON": "{\\"query\\":{\\"language\\":\\"kuery\\",\\"query\\":\\"\\"},\\"filter\\":[{\\"query\\":{\\"match_phrase\\":{\\"machine.os.keyword\\":\\"osx\\"}},\\"$state\\":{\\"store\\":\\"appState\\"},\\"meta\\":{\\"type\\":\\"phrase\\",\\"key\\":\\"machine.os.keyword\\",\\"params\\":{\\"query\\":\\"osx\\"},\\"disabled\\":false,\\"negate\\":false,\\"alias\\":null,\\"indexRefName\\":\\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\\"}}]}",
             },
             "optionsJSON": "{\\"hidePanelTitles\\":false,\\"useMargins\\":true,\\"syncColors\\":true,\\"syncCursor\\":true,\\"syncTooltips\\":true}",
-            "panelsJSON": "[{\\"version\\":\\"7.9.3\\",\\"type\\":\\"visualization\\",\\"panelRefName\\":\\"panel_82fa0882-9f9e-476a-bbb9-03555e5ced91\\",\\"embeddableConfig\\":{\\"enhancements\\":{\\"dynamicActions\\":{\\"events\\":[]}}},\\"panelIndex\\":\\"82fa0882-9f9e-476a-bbb9-03555e5ced91\\",\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"82fa0882-9f9e-476a-bbb9-03555e5ced91\\"}}]",
+            "panelsJSON": "[{\\"gridData\\":{\\"x\\":0,\\"y\\":0,\\"w\\":24,\\"h\\":15,\\"i\\":\\"82fa0882-9f9e-476a-bbb9-03555e5ced91\\"},\\"embeddableConfig\\":{\\"enhancements\\":{\\"dynamicActions\\":{\\"events\\":[]}}},\\"panelIndex\\":\\"82fa0882-9f9e-476a-bbb9-03555e5ced91\\",\\"panelRefName\\":\\"panel_82fa0882-9f9e-476a-bbb9-03555e5ced91\\",\\"type\\":\\"visualization\\",\\"version\\":\\"7.9.3\\"}]",
             "timeRestore": false,
             "title": "Dashboard A",
             "version": 1,
