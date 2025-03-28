@@ -6,7 +6,7 @@
  */
 
 import type { EuiDataGridColumn } from '@elastic/eui';
-import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_CASE_IDS, ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 
 export const RELATED_ALERT_REASON = 'relatedAlertReason';
@@ -41,13 +41,20 @@ export const getRelatedColumns = (): EuiDataGridColumn[] => {
         defaultMessage: 'Relation',
       }),
       id: RELATION_COL,
+      initialWidth: 350,
+    },
+    {
+      id: ALERT_CASE_IDS,
+      displayAsText: i18n.translate('xpack.observability.alertsTGrid.caseIdsColumnDescription', {
+        defaultMessage: 'Related cases',
+      }),
     },
     {
       displayAsText: i18n.translate('xpack.observability.alertsTGrid.actionsColumnDescription', {
         defaultMessage: 'Actions',
       }),
       id: RELATED_ACTIONS_COL,
-      initialWidth: 150,
+      initialWidth: 120,
     },
   ];
 };

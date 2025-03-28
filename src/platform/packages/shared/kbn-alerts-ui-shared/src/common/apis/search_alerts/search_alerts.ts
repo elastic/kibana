@@ -68,6 +68,10 @@ export interface SearchAlertsParams {
    * The page size to fetch
    */
   pageSize: number;
+  /**
+   * The minimum score to apply to the query
+   */
+  minScore?: number;
 }
 
 export interface SearchAlertsResult {
@@ -92,6 +96,7 @@ export const searchAlerts = ({
   runtimeMappings,
   pageIndex,
   pageSize,
+  minScore,
 }: SearchAlertsParams): Promise<SearchAlertsResult> =>
   lastValueFrom(
     data.search
@@ -104,6 +109,7 @@ export const searchAlerts = ({
           pagination: { pageIndex, pageSize },
           sort,
           runtimeMappings,
+          minScore,
         },
         {
           strategy: 'privateRuleRegistryAlertsSearchStrategy',

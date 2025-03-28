@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/types';
@@ -56,26 +55,12 @@ export function RelatedAlertsTable({ alertData }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiSpacer size="s" />
-      <EuiCallOut
-        size="s"
-        title={i18n.translate(
-          'xpack.observability.relatedAlertsView.euiCallOut.relatedAlertsHeuristicsLabel',
-          { defaultMessage: 'Related alerts heuristics' }
-        )}
-        iconType="search"
-      >
-        <p>
-          {i18n.translate('xpack.observability.relatedAlertsView.p.weAreFetchingAlertsLabel', {
-            defaultMessage:
-              "We are fetching relevant alerts to the current alert based on some heuristics. Soon you'll be able to tweaks the weights applied to these heuristics",
-          })}
-        </p>
-      </EuiCallOut>
       <AlertsTable<ObservabilityAlertsTableContext>
         id={RELATED_ALERTS_TABLE_ID}
         query={esQuery}
         columns={columns}
         ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+        minScore={1.5}
         initialSort={initialSort}
         casesConfiguration={caseConfiguration}
         additionalContext={{
@@ -97,6 +82,7 @@ export function RelatedAlertsTable({ alertData }: Props) {
         rowHeightsOptions={{
           defaultHeight: 'auto',
         }}
+        height="600px"
       />
     </EuiFlexGroup>
   );

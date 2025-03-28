@@ -372,6 +372,7 @@ export interface PublicAlertsDataGridProps
     | 'columns'
   > {
   ruleTypeIds: string[];
+  minScore?: number;
   consumers?: string[];
   /**
    * If true, shows a button in the table toolbar to inspect the search alerts request

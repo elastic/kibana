@@ -24,6 +24,7 @@ export type RuleRegistrySearchRequest = IEsSearchRequest & {
   sort?: SortCombinations[];
   pagination?: RuleRegistrySearchRequestPagination;
   runtimeMappings?: MappingRuntimeFields;
+  minScore?: number;
 };
 
 export interface RuleRegistrySearchRequestPagination {

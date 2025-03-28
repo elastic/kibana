@@ -22,6 +22,7 @@ import {
   ALERT_START,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_UUID,
+  ALERT_CASE_IDS,
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
@@ -139,6 +140,9 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
     },
     [RELATED_ACTIONS_COL]: (val) => {
       return <AlertActions {...props} />;
+    },
+    [ALERT_CASE_IDS]: (value) => {
+      return <>{value}</>;
     },
   };
 

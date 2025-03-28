@@ -176,7 +176,7 @@ export function useBuildRelatedAlertsQuery({ alert }: Props): QueryDslQueryConta
                 weight: 5,
               },
             ],
-            boost_mode: 'multiply',
+            boost_mode: 'sum',
           },
         },
       ],

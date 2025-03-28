@@ -43,7 +43,6 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
   ...rest
 }) => {
   const services = useKibana().services;
-
   const {
     http: {
       basePath: { prepend },
