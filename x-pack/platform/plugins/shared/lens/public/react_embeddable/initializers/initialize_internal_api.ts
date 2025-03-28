@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, skip } from 'rxjs';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -29,11 +29,17 @@ export function initializeInternalApi(
 ): LensInternalApi {
   const [hasRenderCompleted$] = buildObservableVariable<boolean>(false);
   const [expressionParams$] = buildObservableVariable<ExpressionWrapperProps | null>(null);
+  expressionParams$.pipe(skip(1)).subscribe((value) => {
+    console.log('expressionParams$ emit', value);
+  })
   const expressionAbortController$ = new BehaviorSubject<AbortController | undefined>(undefined);
   if (apiHasAbortController(parentApi)) {
     expressionAbortController$.next(parentApi.abortController);
   }
   const [renderCount$] = buildObservableVariable<number>(0);
+  renderCount$.pipe(skip(1)).subscribe((value) => {
+    console.log('renderCount$ emit', value);
+  })
 
   const attributes$ = new BehaviorSubject<LensRuntimeState['attributes']>(
     initialState.attributes || createEmptyLensState().attributes
@@ -47,6 +53,9 @@ export function initializeInternalApi(
   // In both cases a blocking error can happen, but for Lens validation errors we want to have full control over the UI
   // while for runtime errors the error will bubble up to the embeddable presentation layer
   const validationMessages$ = new BehaviorSubject<UserMessage[]>([]);
+  validationMessages$.pipe(skip(1)).subscribe((value) => {
+    console.log('validationMessages$ emit', value);
+  })
   // This other set of messages is for non-blocking messages that can be displayed in the UI
   const messages$ = new BehaviorSubject<UserMessage[]>([]);
 

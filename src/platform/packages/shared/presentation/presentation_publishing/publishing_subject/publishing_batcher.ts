@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { combineLatest, debounceTime, skip } from 'rxjs';
+import { combineLatest, debounceTime, skip, tap } from 'rxjs';
 import { AnyPublishingSubject, PublishingSubject, UnwrapPublishingSubjectTuple } from './types';
 
 const hasSubjectsArrayChanged = (
@@ -117,18 +117,27 @@ export const useBatchedPublishingSubjects = <
   const [latestPublishedValues, setLatestPublishedValues] = useState<
     UnwrapPublishingSubjectTuple<SubjectsType>
   >(() => unwrapPublishingSubjectArray(subjects));
+  //console.log('latestPublishedValues', latestPublishedValues);
 
   /**
    * Subscribe to all subjects and update the latest values when any of them change.
    */
   useEffect(() => {
+    console.log('set up publishing subjects combineLatest');
     const subscription = combineLatest(subjects)
       .pipe(
+        tap((values) => {
+          console.log('tap latestPublishedValues: ', latestPublishedValues);
+        }),
         // When a new observer subscribes to a BehaviorSubject, it immediately receives the current value. Skip this emit.
         skip(1),
+        tap((values) => {
+          console.log('tap (after skip) latestPublishedValues: ', latestPublishedValues);
+        }),
         debounceTime(0)
       )
       .subscribe((values) => {
+        console.log('next latestPublishedValues: ', latestPublishedValues);
         setLatestPublishedValues(values as UnwrapPublishingSubjectTuple<SubjectsType>);
       });
     return () => subscription.unsubscribe();

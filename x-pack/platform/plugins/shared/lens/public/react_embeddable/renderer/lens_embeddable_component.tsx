@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
 import { ExpressionWrapper } from '../expression_wrapper';
 import { LensInternalApi, LensApi } from '../types';
@@ -23,6 +23,13 @@ export function LensEmbeddableComponent({
   api: LensApi;
   onUnmount: () => void;
 }) {
+
+  /*const expressionParams = useStateFromPublishingSubject(internalApi.expressionParams$);
+  const renderCount = useStateFromPublishingSubject(internalApi.renderCount$);
+  const blockingErrors = useStateFromPublishingSubject(internalApi.validationMessages$);
+  const hasRendered = useStateFromPublishingSubject(api.rendered$);
+  const viewMode = useStateFromPublishingSubject(api.viewMode$);*/
+
   const [
     // Pick up updated params from the observable
     expressionParams,
@@ -40,8 +47,8 @@ export function LensEmbeddableComponent({
     api.rendered$,
     // listen to view change mode but do not use its actual value
     // just call the Lens API to know whether it's in edit mode
-    api.viewMode$
   );
+  console.log('render LensEmbeddableComponent');
   const canEdit = Boolean(api.isEditingEnabled?.() && getViewMode(api) === 'edit');
 
   const [warningOrErrors, infoMessages] = useMessages(internalApi);

@@ -15,7 +15,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { noop } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, skip } from 'rxjs';
 import type { IntegrationCallbacks, LensInternalApi, LensRuntimeState } from '../types';
 import { buildObservableVariable } from '../helper';
 import { SharingSavedObjectProps } from '../../types';
@@ -56,6 +56,9 @@ export function initializeStateManagement(
   const [dataViews$] = buildObservableVariable<DataView[] | undefined>(internalApi.dataViews$);
   const [dataLoading$] = buildObservableVariable<boolean | undefined>(internalApi.dataLoading$);
   const [rendered$] = buildObservableVariable<boolean>(internalApi.hasRenderCompleted$);
+  rendered$.pipe(skip(1)).subscribe((value) => {
+    console.log('rendered$ emit', value);
+  })
   const [abortController$, abortControllerComparator] = buildObservableVariable<
     AbortController | undefined
   >(internalApi.expressionAbortController$);
