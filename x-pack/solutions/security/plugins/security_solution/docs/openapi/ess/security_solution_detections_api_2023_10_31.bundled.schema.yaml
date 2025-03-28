@@ -5512,7 +5512,6 @@ components:
         dynamic or technical fields like enabled or execution_summary will not
         cause revision increments.
       minimum: 0
-      readOnly: true
       type: integer
     RuleSignatureId:
       description: Could be any string, not necessarily a UUID
@@ -5563,7 +5562,6 @@ components:
         > It is not incremented on each update. Compare this to the `revision`
         field.
       minimum: 1
-      readOnly: true
       type: integer
     SavedObjectResolveAliasPurpose:
       enum:

@@ -24,7 +24,6 @@ components:
     RuleVersion:
       type: integer
       minimum: 1
-      readOnly: true
       description: |
         The rule's version number.
 
@@ -36,7 +35,6 @@ components:
     RuleRevision:
       type: integer
       minimum: 0
-      readOnly: true
       description: |
         The rule's revision number.
 
