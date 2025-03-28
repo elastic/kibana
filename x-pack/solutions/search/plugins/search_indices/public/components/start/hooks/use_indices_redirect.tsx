@@ -25,11 +25,11 @@ export const useIndicesRedirect = (
   const usageTracker = useUsageTracker();
 
   return useEffect(() => {
-    if (!userPrivileges) {
+    if (hasDoneRedirect) {
       return;
     }
 
-    if (hasDoneRedirect) {
+    if (!userPrivileges) {
       return;
     }
 
