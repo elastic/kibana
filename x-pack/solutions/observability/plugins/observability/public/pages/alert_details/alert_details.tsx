@@ -54,7 +54,7 @@ import { AlertOverview } from '../../components/alert_overview/alert_overview';
 import { CustomThresholdRule } from '../../components/custom_threshold/components/types';
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 import { AlertHistoryChart } from './components/alert_history';
-import StaleAlert from './components/state_alert';
+import StaleAlert from './components/stale_alert';
 
 interface AlertDetailsPathParams {
   alertId: string;
