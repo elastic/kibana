@@ -12,9 +12,12 @@ const RIGHT = 'right';
 
 spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity '] }, () => {
   spaceTest.beforeEach(async ({ browserAuth, apiServices }) => {
-    await apiServices.detectionRule.deleteAll();
     await apiServices.detectionRule.createCustomQueryRule(CUSTOM_QUERY_RULE);
     await browserAuth.loginAsPlatformEngineer();
+  });
+
+  spaceTest.afterEach(async ({ apiServices }) => {
+    await apiServices.detectionRule.deleteAll();
   });
 
   spaceTest('should test flyout url sync', async ({ pageObjects }) => {
