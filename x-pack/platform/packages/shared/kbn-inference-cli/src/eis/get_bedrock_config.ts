@@ -31,6 +31,8 @@ class VaultAccessError extends AggregateError {
   }
 }
 
+class InvalidCredentialsError extends Error {}
+
 async function getBedrockCreditsFromVault() {
   await execa.command(`which vault`).catch((error) => {
     throw new VaultUnavailableError(error);
@@ -43,9 +45,15 @@ async function getBedrockCreditsFromVault() {
   });
 
   const secretPath = process.env.VAULT_SECRET_PATH || 'secret/eis/bedrock';
+  const vaultAddress = process.env.VAULT_ADDR || 'https://secrets.elastic.co:8200';
 
   const output = await execa
-    .command(`vault kv get -format json ${secretPath}`)
+    .command(`vault kv get -format json ${secretPath}`, {
+      // extends env
+      env: {
+        VAULT_ADDR: vaultAddress,
+      },
+    })
     .then((value) => {
       return (JSON.parse(value.stdout) as { data: { data: Record<string, string> } }).data.data;
     })
@@ -104,8 +112,16 @@ export async function getBedrockConfig({ log }: { log: ToolingLog }): Promise<Aw
 
   log.debug(`No bedrock credentials found in env, checking Vault`);
 
-  return {
+  const credentials = {
     ...defaults,
     ...(await getBedrockCreditsFromVault()),
   };
+
+  const missing = Object.keys(pickBy(credentials, (value) => !value));
+
+  if (missing.includes('accessKeyId') || missing.includes('secretAccessKey')) {
+    throw new InvalidCredentialsError(`Missing credentials ${missing.join(', ')}`);
+  }
+
+  return credentials;
 }
