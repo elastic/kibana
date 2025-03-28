@@ -543,6 +543,7 @@ export class ChromeService {
       recentlyAccessed,
       http: { basePath: http.basePath, getLoadingCount$: http.getLoadingCount$ },
       customBranding: { customBranding$ },
+      banner$: headerBanner$.asObservable(),
     });
 
     return {
