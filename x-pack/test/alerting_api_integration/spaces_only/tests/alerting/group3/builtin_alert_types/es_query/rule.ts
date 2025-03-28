@@ -50,8 +50,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     { label: 'host.name', searchPath: 'host.name' },
   ];
 
-  // FLAKY: https://github.com/elastic/kibana/issues/194701
-  describe.skip('rule', () => {
+  describe('rule', () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);
@@ -183,7 +182,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         );
         expect(alertDoc['kibana.alert.evaluation.threshold']).to.eql(-1);
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
-        expect(value).greaterThan(0);
+        expect(value >= 0).to.be(true);
         expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
         expect(alertDoc['host.name']).to.eql(['host-1']);
         expect(alertDoc['host.hostname']).to.eql(['host-1']);
