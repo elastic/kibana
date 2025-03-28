@@ -42,7 +42,9 @@ export const DEFAULT_TABLE_SECTION_HEIGHT = 512; // px
 export const ASSET_FIELDS = {
   ASSET_CRITICALITY: 'asset.criticality',
   ENTITY_TYPE: 'entity.category',
-  CLOUD_ACCOUNT: 'cloud.account.id',
+  CLOUD_ACCOUNT_ID: 'cloud.account.id',
+  CLOUD_ACCOUNT_NAME: 'cloud.account.name',
+  CLOUD_PROVIDER: 'cloud.provider',
   SOURCE: 'entity.type',
 } as const;
 
@@ -50,6 +52,6 @@ export const ASSET_GROUPING_OPTIONS = {
   NONE: 'none',
   ASSET_CRITICALITY: ASSET_FIELDS.ASSET_CRITICALITY,
   ENTITY_TYPE: ASSET_FIELDS.ENTITY_TYPE,
-  CLOUD_ACCOUNT: ASSET_FIELDS.CLOUD_ACCOUNT,
+  CLOUD_ACCOUNT: ASSET_FIELDS.CLOUD_ACCOUNT_ID,
   SOURCE: ASSET_FIELDS.SOURCE,
 };

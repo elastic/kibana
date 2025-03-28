@@ -23,6 +23,7 @@ import type {
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
+import { CISBenchmarkIcon } from '@kbn/cloud-security-posture';
 import { ASSET_GROUPING_OPTIONS, TEST_SUBJ_GROUPING_COUNTER } from '../../../constants';
 import { firstNonNullValue } from './first_non_null_value';
 import { NullGroup } from './null_group';
@@ -39,6 +40,8 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
   if (isLoading) {
     return <LoadingGroup />;
   }
+
+  const cloudProvider = firstNonNullValue(bucket.cloudProvider?.buckets?.[0]?.key);
 
   const renderNullGroup = (title: string) => (
     <NullGroup title={title} field={selectedGroup} unit={NULL_GROUPING_UNIT} />
@@ -116,15 +119,18 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
         renderNullGroup(NULL_GROUPING_MESSAGES.CLOUD_ACCOUNT)
       ) : (
         <EuiFlexGroup alignItems="center" gutterSize="m">
+          {cloudProvider && (
+            <EuiFlexItem grow={0}>
+              <CISBenchmarkIcon
+                type={`cis_${cloudProvider}`}
+                name={firstNonNullValue(bucket.accountName?.buckets?.[0]?.key)}
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <EuiText size="s">{getGroupPanelTitle('cloudAccount')}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="xs" color="subdued">
-                  {bucket.cloudAccount?.buckets?.[0]?.key}
-                </EuiText>
+                <EuiText size="s">{getGroupPanelTitle('accountName')}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

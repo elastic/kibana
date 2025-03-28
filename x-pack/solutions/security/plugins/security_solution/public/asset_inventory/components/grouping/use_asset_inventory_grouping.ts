@@ -97,7 +97,12 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
     case ASSET_GROUPING_OPTIONS.ENTITY_TYPE:
       return [...aggMetrics, getTermAggregation('entityType', ASSET_FIELDS.ENTITY_TYPE)];
     case ASSET_GROUPING_OPTIONS.CLOUD_ACCOUNT:
-      return [...aggMetrics, getTermAggregation('cloudAccount', ASSET_FIELDS.CLOUD_ACCOUNT)];
+      return [
+        ...aggMetrics,
+        getTermAggregation('accountId', ASSET_FIELDS.CLOUD_ACCOUNT_ID),
+        getTermAggregation('accountName', ASSET_FIELDS.CLOUD_ACCOUNT_NAME),
+        getTermAggregation('cloudProvider', ASSET_FIELDS.CLOUD_PROVIDER),
+      ];
     case ASSET_GROUPING_OPTIONS.SOURCE:
       return [...aggMetrics, getTermAggregation('source', ASSET_FIELDS.SOURCE)];
   }

@@ -32,7 +32,13 @@ export interface AssetsGroupingAggregation {
   entityType?: {
     buckets?: GenericBuckets[];
   };
-  cloudAccount?: {
+  accountId?: {
+    buckets?: GenericBuckets[];
+  };
+  accountName?: {
+    buckets?: GenericBuckets[];
+  };
+  cloudProvider?: {
     buckets?: GenericBuckets[];
   };
   source?: {
