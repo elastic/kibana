@@ -544,7 +544,13 @@
             "text": "ESQLCommandMode"
           },
           " | ",
-          "ESQLInlineCast",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLInlineCast",
+            "text": "ESQLInlineCast"
+          },
           "<",
           {
             "pluginId": "@kbn/esql-ast",
@@ -694,7 +700,13 @@
             "text": "ESQLCommandMode"
           },
           " | ",
-          "ESQLInlineCast",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLInlineCast",
+            "text": "ESQLInlineCast"
+          },
           "<",
           {
             "pluginId": "@kbn/esql-ast",
@@ -2686,7 +2698,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"unsupported\" | \"null\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"time_literal\" | \"time_duration\" | \"date_period\""
+              "\"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"unsupported\" | \"null\" | \"cartesian_point\" | \"cartesian_shape\" | \"date_period\" | \"time_duration\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"function_named_parameters\" | \"time_literal\""
             ],
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
@@ -2806,27 +2818,14 @@
           },
           {
             "parentPluginId": "@kbn/esql-validation-autocomplete",
-            "id": "def-common.FunctionDefinition.supportedCommands",
+            "id": "def-common.FunctionDefinition.locationsAvailable",
             "type": "Array",
             "tags": [],
-            "label": "supportedCommands",
+            "label": "locationsAvailable",
             "description": [],
             "signature": [
-              "string[]"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-validation-autocomplete",
-            "id": "def-common.FunctionDefinition.supportedOptions",
-            "type": "Array",
-            "tags": [],
-            "label": "supportedOptions",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
+              "Location",
+              "[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
