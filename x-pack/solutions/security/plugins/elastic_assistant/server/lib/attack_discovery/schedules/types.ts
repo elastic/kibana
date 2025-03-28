@@ -7,6 +7,7 @@
 
 import { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { RuleExecutorOptions, RuleType, RuleTypeState } from '@kbn/alerting-plugin/server';
+import { AttackDiscoveryScheduleParams } from '@kbn/elastic-assistant-common';
 import {
   ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT,
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
@@ -58,7 +59,7 @@ export type AttackDiscoveryAlert = DefaultAlert & {
 };
 
 export type AttackDiscoveryExecutorOptions = RuleExecutorOptions<
-  {},
+  AttackDiscoveryScheduleParams,
   RuleTypeState,
   {},
   {},
@@ -67,7 +68,7 @@ export type AttackDiscoveryExecutorOptions = RuleExecutorOptions<
 >;
 
 export type AttackDiscoveryScheduleType = RuleType<
-  {},
+  AttackDiscoveryScheduleParams,
   never,
   RuleTypeState,
   {},

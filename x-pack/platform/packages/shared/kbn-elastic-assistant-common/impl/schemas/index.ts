@@ -26,6 +26,9 @@ export * from './attack_discovery/common_attributes.gen';
 export * from './attack_discovery/get_attack_discovery_route.gen';
 export * from './attack_discovery/post_attack_discovery_route.gen';
 export * from './attack_discovery/cancel_attack_discovery_route.gen';
+export * from './attack_discovery/crud_attack_discovery_schedules_route.gen';
+export * from './attack_discovery/find_attack_discovery_schedules_route.gen';
+export * from './attack_discovery/schedules.gen';
 
 // Defend insight Schemas
 export * from './defend_insights';

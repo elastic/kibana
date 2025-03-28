@@ -10,8 +10,9 @@ import { AttackDiscoveryAlert } from './types';
 import { attackDiscoveryAlertFieldMap } from './fields';
 
 export const ATTACK_DISCOVERY_ALERTS_AAD_CONFIG: IRuleTypeAlerts<AttackDiscoveryAlert> = {
-  context: 'security.attack.discovery',
+  context: 'security.attackdiscovery',
   mappings: { fieldMap: attackDiscoveryAlertFieldMap },
   isSpaceAware: true,
   shouldWrite: true,
+  useEcs: true,
 };

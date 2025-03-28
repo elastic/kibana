@@ -26,6 +26,7 @@ import { PLUGIN_ID } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
 import { CallbackIds, appContextService } from './services/app_context';
 import { createGetElserId, removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
+import { getAttackDiscoveryScheduleType } from './lib/attack_discovery/schedules/register_schedule/definition';
 
 export class ElasticAssistantPlugin
   implements
@@ -88,6 +89,13 @@ export class ElasticAssistantPlugin
     this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
 
     registerRoutes(router, this.logger, this.getElserId);
+
+    // Register Attack Discovery Schedule type
+    plugins.alerting.registerType(
+      getAttackDiscoveryScheduleType({
+        logger: this.logger,
+      })
+    );
 
     return {
       actions: plugins.actions,
