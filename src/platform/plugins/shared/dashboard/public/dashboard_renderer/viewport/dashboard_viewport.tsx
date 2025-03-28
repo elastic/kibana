@@ -135,19 +135,19 @@ export const DashboardViewport = ({
           <ExitFullScreenButton onExit={onExit} toggleChrome={!dashboardApi.isEmbeddedExternally} />
         </EuiPortal>
       )}
-      {panelCount === 0 && (sections ?? []).length === 0 ? (
-        <DashboardEmptyScreen />
-      ) : (
-        <div
-          className={classes}
-          data-shared-items-container
-          data-title={dashboardTitle}
-          data-description={description}
-          data-shared-items-count={panelCount}
-        >
+      <div
+        className={classes}
+        data-shared-items-container
+        data-title={dashboardTitle}
+        data-description={description}
+        data-shared-items-count={panelCount}
+      >
+        {panelCount === 0 && (sections ?? []).length === 0 ? (
+          <DashboardEmptyScreen />
+        ) : (
           <DashboardGrid dashboardContainerRef={dashboardContainerRef} />
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
