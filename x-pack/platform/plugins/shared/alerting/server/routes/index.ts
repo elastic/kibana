@@ -31,7 +31,8 @@ import { getRuleExecutionKPIRoute } from './get_rule_execution_kpi';
 import { getRuleStateRoute } from './get_rule_state';
 import { healthRoute } from './framework/apis/health';
 import { resolveRuleRoute } from './rule/apis/resolve';
-import { ruleTypesRoute } from './rule/apis/list_types/rule_types';
+import { getRuleTypesRoute } from './rule/apis/list_types/external/get_rule_types_route';
+import { getRuleTypesInternalRoute } from './rule/apis/list_types/internal/get_rule_types_internal_route';
 import { muteAllRuleRoute } from './rule/apis/mute_all/mute_all_rule';
 import { muteAlertRoute } from './rule/apis/mute_alert/mute_alert';
 import { unmuteAllRuleRoute } from './rule/apis/unmute_all';
@@ -78,6 +79,7 @@ import { findGapsRoute } from './gaps/apis/find/find_gaps_route';
 import { fillGapByIdRoute } from './gaps/apis/fill/fill_gap_by_id_route';
 import { getRuleIdsWithGapsRoute } from './gaps/apis/get_rule_ids_with_gaps/get_rule_ids_with_gaps_route';
 import { getGapsSummaryByRuleIdsRoute } from './gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route';
+
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
   licenseState: ILicenseState;
@@ -118,7 +120,8 @@ export function defineRoutes(opts: RouteOptions) {
   getRuleExecutionLogRoute(router, licenseState);
   getRuleExecutionKPIRoute(router, licenseState);
   getRuleStateRoute(router, licenseState);
-  ruleTypesRoute(router, licenseState);
+  getRuleTypesRoute(router, licenseState);
+  getRuleTypesInternalRoute(router, licenseState);
   muteAllRuleRoute(router, licenseState, usageCounter);
   unmuteAllRuleRoute(router, licenseState);
   updateRuleApiKeyRoute(router, licenseState);
