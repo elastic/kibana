@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { chunk, flatten, pick } from 'lodash';
 import { Subject } from 'rxjs';
 import agent from 'elastic-apm-node';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { either, isErr, mapErr } from './lib/result_type';
 import {
   ErroredTask,
@@ -23,23 +23,23 @@ import {
   OkResultOf,
   RanTask,
 } from './task_events';
-import { Middleware } from './lib/middleware';
+import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
-import {
+import type {
   ConcreteTaskInstance,
   EphemeralTask,
   IntervalSchedule,
   TaskInstanceWithDeprecatedFields,
   TaskInstanceWithId,
-  TaskStatus,
 } from './task';
-import { TaskStore } from './task_store';
+import { TaskStatus } from './task';
+import type { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { TaskLifecycleEvent } from './polling_lifecycle';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTaskRejectedDueToCapacityError } from './task_running';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
-import { ErrorOutput } from './lib/bulk_operation_buffer';
+import type { ErrorOutput } from './lib/bulk_operation_buffer';
 
 const VERSION_CONFLICT_STATUS = 409;
 const BULK_ACTION_SIZE = 100;
