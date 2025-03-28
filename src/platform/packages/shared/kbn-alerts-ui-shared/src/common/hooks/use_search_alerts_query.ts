@@ -43,6 +43,7 @@ export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryPa
     runtimeMappings,
     pageIndex = 0,
     pageSize = DEFAULT_ALERTS_PAGE_SIZE,
+    aggs = {},
   } = params;
   return useQuery({
     queryKey: queryKeyPrefix.concat(JSON.stringify(params)),
@@ -58,6 +59,7 @@ export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryPa
         runtimeMappings,
         pageIndex,
         pageSize,
+        aggs,
       }),
     refetchOnWindowFocus: false,
     context: AlertsQueryContext,
