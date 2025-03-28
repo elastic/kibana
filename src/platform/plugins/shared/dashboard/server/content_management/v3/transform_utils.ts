@@ -16,6 +16,7 @@ import type {
   DashboardItem,
   ItemAttrsToSavedObjectParams,
   ItemAttrsToSavedObjectReturn,
+  ItemAttrsToSavedObjectWithTagsParams,
   PartialDashboardItem,
   SavedObjectToItemReturn,
 } from './types';
@@ -123,9 +124,8 @@ export const getResultV3ToV2 = (result: DashboardGetOut): DashboardCrudTypesV2['
   };
 };
 
-export const itemAttrsToSavedObject = async ({
+export const itemAttrsToSavedObject = ({
   attributes,
-  replaceTagReferencesByName,
   incomingReferences = [],
 }: ItemAttrsToSavedObjectParams): ItemAttrsToSavedObjectReturn => {
   try {
@@ -145,16 +145,27 @@ export const itemAttrsToSavedObject = async ({
         kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),
       }),
     };
-
-    // Tags can be specified as an attribute or in the incomingReferences.
-    const soReferences =
-      replaceTagReferencesByName && tags && tags.length
-        ? await replaceTagReferencesByName(incomingReferences, tags)
-        : incomingReferences;
-    return { attributes: soAttributes, references: soReferences, error: null };
+    return { attributes: soAttributes, references: incomingReferences, error: null };
   } catch (e) {
     return { attributes: null, references: null, error: e };
   }
+};
+
+export const itemAttrsToSavedObjectWithTags = async ({
+  attributes,
+  replaceTagReferencesByName,
+  incomingReferences = [],
+}: ItemAttrsToSavedObjectWithTagsParams): Promise<ItemAttrsToSavedObjectReturn> => {
+  const { tags, ...restAttributes } = attributes;
+  // Tags can be specified as an attribute or in the incomingReferences.
+  const soReferences =
+    replaceTagReferencesByName && tags && tags.length
+      ? await replaceTagReferencesByName({ references: incomingReferences, newTagNames: tags })
+      : incomingReferences;
+  return itemAttrsToSavedObject({
+    attributes: restAttributes,
+    incomingReferences: soReferences,
+  });
 };
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {

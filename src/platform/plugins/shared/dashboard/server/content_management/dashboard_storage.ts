@@ -20,7 +20,7 @@ import type { ITagsClient, Tag } from '@kbn/saved-objects-tagging-oss-plugin/com
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
 import { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
-import { itemAttrsToSavedObject, savedObjectToItem } from './latest';
+import { itemAttrsToSavedObjectWithTags, savedObjectToItem } from './latest';
 import type {
   DashboardAttributes,
   DashboardItem,
@@ -31,6 +31,7 @@ import type {
   DashboardUpdateOptions,
   DashboardUpdateOut,
   DashboardSearchOptions,
+  ReplaceTagReferencesByNameParams,
 } from './latest';
 
 const getRandomColor = (): string => {
@@ -258,9 +259,9 @@ export class DashboardStorage {
       attributes: soAttributes,
       references: soReferences,
       error: attributesError,
-    } = await itemAttrsToSavedObject({
+    } = await itemAttrsToSavedObjectWithTags({
       attributes: dataToLatest,
-      replaceTagReferencesByName: (references: SavedObjectReference[], newTagNames: string[]) =>
+      replaceTagReferencesByName: ({ references, newTagNames }: ReplaceTagReferencesByNameParams) =>
         this.replaceTagReferencesByName(references, newTagNames, allTags, tagsClient),
       incomingReferences: options.references,
     });
@@ -340,9 +341,9 @@ export class DashboardStorage {
       attributes: soAttributes,
       references: soReferences,
       error: attributesError,
-    } = await itemAttrsToSavedObject({
+    } = await itemAttrsToSavedObjectWithTags({
       attributes: dataToLatest,
-      replaceTagReferencesByName: (references: SavedObjectReference[], newTagNames: string[]) =>
+      replaceTagReferencesByName: ({ references, newTagNames }: ReplaceTagReferencesByNameParams) =>
         this.replaceTagReferencesByName(references, newTagNames, allTags, tagsClient),
       incomingReferences: options.references,
     });
