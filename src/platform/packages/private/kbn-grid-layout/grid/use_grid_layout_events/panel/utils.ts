@@ -4,8 +4,10 @@
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
  * Public License v 1"; you may not use this file except in compliance with, at
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * License v3.0 only", or the "Server Side Public License, v 1". 
  */
+
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { GridLayoutStateManager, PanelInteractionEvent } from '../../types';
 import type { UserInteractionEvent, PointerPosition } from '../types';
 import { KeyboardCode, type UserKeyboardEvent } from '../sensors/keyboard/types';
@@ -66,7 +68,7 @@ export function getSensorOffsets(
   };
 }
 
-const KEYBOARD_DRAG_BOTTOM_LIMIT = 8;
+const KEYBOARD_DRAG_BOTTOM_LIMIT = parseInt(euiThemeVars.euiSizeS);
 
 export const getNextKeyboardPositionForPanel = (
   ev: UserKeyboardEvent,
