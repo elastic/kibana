@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsAppPageHeader } from '../streams_app_page_header';
 import { StreamsAppPageHeaderTitle } from '../streams_app_page_header/streams_app_page_header_title';
 import { StreamsAppPageBody } from '../streams_app_page_body';
-import { StreamsList } from '../streams_list';
+import { StreamsTreeTable } from './tree_table';
+import { StreamsEmptyPrompt } from './empty_prompt';
 
 export function StreamListView() {
   const {
@@ -23,13 +25,12 @@ export function StreamListView() {
     },
   } = useKibana();
 
-  const [query, setQuery] = useState('');
-
   const streamsListFetch = useStreamsAppFetch(
-    ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', {
+    async ({ signal }) => {
+      const { streams } = await streamsRepositoryClient.fetch('GET /internal/streams', {
         signal,
       });
+      return streams;
     },
     [streamsRepositoryClient]
   );
@@ -49,22 +50,11 @@ export function StreamListView() {
         />
       </EuiFlexItem>
       <StreamsAppPageBody background>
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem grow={false}>
-            <EuiSearchBar
-              query={query}
-              box={{
-                incremental: true,
-              }}
-              onChange={(nextQuery) => {
-                setQuery(nextQuery.queryText);
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow>
-            <StreamsList streams={streamsListFetch.value?.streams} query={query} showControls />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {!streamsListFetch.loading && !streamsListFetch.value?.length ? (
+          <StreamsEmptyPrompt />
+        ) : (
+          <StreamsTreeTable loading={streamsListFetch.loading} streams={streamsListFetch.value} />
+        )}
       </StreamsAppPageBody>
     </EuiFlexGroup>
   );
