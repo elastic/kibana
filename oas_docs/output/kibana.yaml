@@ -8172,16 +8172,19 @@ paths:
                               type: object
                               properties:
                                 collapsed:
+                                  description: The collapsed state of the section.
                                   type: boolean
                                 id:
+                                  description: The unique ID of the section.
                                   type: string
                                 order:
+                                  description: The order that sections should be rendered in. These values should be unique, and the order `0` is reserved for the main dashhboard content.
                                   minimum: 1
                                   type: number
                                 title:
+                                  description: The title of the section.
                                   type: string
                               required:
-                                - id
                                 - order
                                 - title
                                 - collapsed
@@ -8660,16 +8663,19 @@ paths:
                         type: object
                         properties:
                           collapsed:
+                            description: The collapsed state of the section.
                             type: boolean
                           id:
+                            description: The unique ID of the section.
                             type: string
                           order:
+                            description: The order that sections should be rendered in. These values should be unique, and the order `0` is reserved for the main dashhboard content.
                             minimum: 1
                             type: number
                           title:
+                            description: The title of the section.
                             type: string
                         required:
-                          - id
                           - order
                           - title
                           - collapsed
@@ -9071,16 +9077,19 @@ paths:
                               type: object
                               properties:
                                 collapsed:
+                                  description: The collapsed state of the section.
                                   type: boolean
                                 id:
+                                  description: The unique ID of the section.
                                   type: string
                                 order:
+                                  description: The order that sections should be rendered in. These values should be unique, and the order `0` is reserved for the main dashhboard content.
                                   minimum: 1
                                   type: number
                                 title:
+                                  description: The title of the section.
                                   type: string
                               required:
-                                - id
                                 - order
                                 - title
                                 - collapsed
@@ -9539,16 +9548,19 @@ paths:
                         type: object
                         properties:
                           collapsed:
+                            description: The collapsed state of the section.
                             type: boolean
                           id:
+                            description: The unique ID of the section.
                             type: string
                           order:
+                            description: The order that sections should be rendered in. These values should be unique, and the order `0` is reserved for the main dashhboard content.
                             minimum: 1
                             type: number
                           title:
+                            description: The title of the section.
                             type: string
                         required:
-                          - id
                           - order
                           - title
                           - collapsed
@@ -9946,16 +9958,19 @@ paths:
                               type: object
                               properties:
                                 collapsed:
+                                  description: The collapsed state of the section.
                                   type: boolean
                                 id:
+                                  description: The unique ID of the section.
                                   type: string
                                 order:
+                                  description: The order that sections should be rendered in. These values should be unique, and the order `0` is reserved for the main dashhboard content.
                                   minimum: 1
                                   type: number
                                 title:
+                                  description: The title of the section.
                                   type: string
                               required:
-                                - id
                                 - order
                                 - title
                                 - collapsed
