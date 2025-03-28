@@ -10887,8 +10887,7 @@
               "\nDefines the security requirements for a route, including authorization and authentication."
             ],
             "signature": [
-              "RouteSecurity",
-              " | undefined"
+              "RouteSecurity"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
             "deprecated": false,
@@ -10960,10 +10959,6 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/http/server-internal/src/http_server.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/metrics/server-internal/src/routes/elu_history.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -16104,9 +16099,9 @@
               "RouteConfigOptions",
               "<",
               "RouteMethod",
-              ">, \"tags\" | \"timeout\" | \"body\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\" | \"availability\"> | undefined; security?: ",
+              ">, \"tags\" | \"timeout\" | \"body\" | \"authRequired\" | \"xsrfRequired\" | \"excludeFromOAS\" | \"excludeFromRateLimiter\" | \"httpResource\" | \"availability\"> | undefined; security: ",
               "RouteSecurity",
-              " | undefined; description?: string | undefined; summary?: string | undefined; access: ",
+              "; description?: string | undefined; summary?: string | undefined; access: ",
               "RouteAccess",
               "; discontinued?: string | undefined; enableQueryVersion?: boolean | undefined; }"
             ],
