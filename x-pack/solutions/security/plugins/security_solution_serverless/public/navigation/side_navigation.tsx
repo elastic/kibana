@@ -8,11 +8,15 @@
 import React from 'react';
 import * as Rx from 'rxjs';
 
-import { ExternalPageName, NavigationProvider } from '@kbn/security-solution-navigation';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { LinkButton } from '@kbn/security-solution-navigation/links';
+import {
+  ExternalPageName,
+  NavigationProvider,
+  SecurityPageName,
+} from '@kbn/security-solution-navigation';
+import { LinkButton, securityLink } from '@kbn/security-solution-navigation/links';
 import { type Services } from '../common/services';
 
 const SOLUTION_NAME = i18n.translate(
@@ -45,37 +49,37 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
               },
               {
                 id: 'dashboards',
-                link: 'securitySolutionUI:dashboards',
+                link: securityLink(SecurityPageName.dashboards),
                 renderAs: 'item',
                 children: [
                   {
                     id: 'overview',
-                    link: 'securitySolutionUI:overview',
+                    link: securityLink(SecurityPageName.overview),
                     sideNavStatus: 'hidden',
                   },
                   {
                     id: 'detection_response',
-                    link: 'securitySolutionUI:detection_response',
+                    link: securityLink(SecurityPageName.detectionAndResponse),
                     sideNavStatus: 'hidden',
                   },
                   {
                     id: 'cloud_security_posture-dashboard',
-                    link: 'securitySolutionUI:cloud_security_posture-dashboard',
+                    link: securityLink(SecurityPageName.cloudSecurityPostureDashboard),
                     sideNavStatus: 'hidden',
                   },
                   {
                     id: 'cloud_security_posture-vulnerability_dashboard',
-                    link: 'securitySolutionUI:cloud_security_posture-vulnerability_dashboard',
+                    link: securityLink(SecurityPageName.cloudSecurityPostureVulnerabilityDashboard),
                     sideNavStatus: 'hidden',
                   },
                   {
                     id: 'entity_analytics',
-                    link: 'securitySolutionUI:entity_analytics',
+                    link: securityLink(SecurityPageName.entityAnalytics),
                     sideNavStatus: 'hidden',
                   },
                   {
                     id: 'data_quality',
-                    link: 'securitySolutionUI:data_quality',
+                    link: securityLink(SecurityPageName.dataQuality),
                     sideNavStatus: 'hidden',
                   },
                 ],
@@ -87,7 +91,7 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
             children: [
               {
                 id: 'rules-landing',
-                link: 'securitySolutionUI:rules-landing',
+                link: securityLink(SecurityPageName.rulesLanding),
                 title: i18n.translate('xpack.securitySolutionServerless.navLinks.rules', {
                   defaultMessage: 'Rules',
                 }),
@@ -102,30 +106,30 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                     children: [
                       {
                         id: 'rules',
-                        link: 'securitySolutionUI:rules',
+                        link: securityLink(SecurityPageName.rules),
                         renderAs: 'item',
                         children: [
                           {
                             id: 'rules-add',
-                            link: 'securitySolutionUI:rules-add',
+                            link: securityLink(SecurityPageName.rulesAdd),
                           },
                           {
                             id: 'rules-create',
-                            link: 'securitySolutionUI:rules-create',
+                            link: securityLink(SecurityPageName.rulesCreate),
                           },
                         ],
                       },
                       {
                         id: 'cloud_security_posture-benchmarks',
-                        link: 'securitySolutionUI:cloud_security_posture-benchmarks',
+                        link: securityLink(SecurityPageName.cloudSecurityPostureBenchmarks),
                       },
                       {
                         id: 'exceptions',
-                        link: 'securitySolutionUI:exceptions',
+                        link: securityLink(SecurityPageName.exceptions),
                       },
                       {
                         id: 'siem_migrations-rules',
-                        link: 'securitySolutionUI:siem_migrations-rules',
+                        link: securityLink(SecurityPageName.siemMigrationsRules),
                         title: i18n.translate(
                           'xpack.securitySolutionServerless.navLinks.rules.management.siemRuleMigrations',
                           { defaultMessage: 'SIEM rule migrations' }
@@ -143,7 +147,7 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                     children: [
                       {
                         id: 'coverage-overview',
-                        link: 'securitySolutionUI:coverage-overview',
+                        link: securityLink(SecurityPageName.coverageOverview),
                       },
                     ],
                   },
@@ -152,28 +156,28 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
               },
               {
                 id: 'alerts',
-                link: 'securitySolutionUI:alerts',
+                link: securityLink(SecurityPageName.alerts),
               },
               {
                 id: 'attack_discovery',
-                link: 'securitySolutionUI:attack_discovery',
+                link: securityLink(SecurityPageName.attackDiscovery),
               },
               {
                 id: 'cloud_security_posture-findings',
-                link: 'securitySolutionUI:cloud_security_posture-findings',
+                link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
               },
               {
                 id: 'cases',
-                link: 'securitySolutionUI:cases',
+                link: securityLink(SecurityPageName.case),
                 children: [
                   {
                     id: 'cases_create',
-                    link: 'securitySolutionUI:cases_create',
+                    link: securityLink(SecurityPageName.caseCreate),
                     sideNavStatus: 'hidden',
                   },
                   {
                     id: 'cases_configure',
-                    link: 'securitySolutionUI:cases_configure',
+                    link: securityLink(SecurityPageName.caseConfigure),
                     sideNavStatus: 'hidden',
                   },
                 ],
@@ -186,26 +190,26 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
             children: [
               {
                 id: 'investigations',
-                link: 'securitySolutionUI:investigations',
+                link: securityLink(SecurityPageName.investigations),
                 title: i18n.translate('xpack.securitySolutionServerless.navLinks.investigations', {
                   defaultMessage: 'Investigations',
                 }),
                 children: [
                   {
                     id: 'timelines',
-                    link: 'securitySolutionUI:timelines',
+                    link: securityLink(SecurityPageName.timelines),
                     renderAs: 'item',
                     children: [
                       {
                         id: 'timelines-templates',
-                        link: 'securitySolutionUI:timelines-templates',
+                        link: securityLink(SecurityPageName.timelinesTemplates),
                         sideNavStatus: 'hidden',
                       },
                     ],
                   },
                   {
                     id: 'notes',
-                    link: 'securitySolutionUI:notes',
+                    link: securityLink(SecurityPageName.notes),
                     renderAs: 'item',
                   },
                   {
@@ -218,117 +222,117 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
               },
               {
                 id: 'threat_intelligence',
-                link: 'securitySolutionUI:threat_intelligence',
+                link: securityLink(SecurityPageName.threatIntelligence),
               },
               {
                 id: 'explore',
-                link: 'securitySolutionUI:explore',
+                link: securityLink(SecurityPageName.exploreLanding),
                 title: i18n.translate('xpack.securitySolutionServerless.navLinks.explore', {
                   defaultMessage: 'Explore',
                 }),
                 children: [
                   {
                     id: 'hosts',
-                    link: 'securitySolutionUI:hosts',
+                    link: securityLink(SecurityPageName.hosts),
                     renderAs: 'item',
                     children: [
                       {
                         id: 'hosts-all',
-                        link: 'securitySolutionUI:hosts-all',
+                        link: securityLink(SecurityPageName.hostsAll),
                         breadcrumbStatus: 'hidden',
                       },
                       {
                         id: 'hosts-uncommon_processes',
-                        link: 'securitySolutionUI:hosts-uncommon_processes',
+                        link: securityLink(SecurityPageName.hostsUncommonProcesses),
                         breadcrumbStatus: 'hidden',
                       },
                       {
                         id: 'hosts-anomalies',
-                        link: 'securitySolutionUI:hosts-anomalies',
+                        link: securityLink(SecurityPageName.hostsAnomalies),
                         breadcrumbStatus: 'hidden',
                       },
                       {
                         id: 'hosts-events',
-                        link: 'securitySolutionUI:hosts-events',
+                        link: securityLink(SecurityPageName.hostsEvents),
                         breadcrumbStatus: 'hidden',
                       },
                       {
                         id: 'hosts-risk',
-                        link: 'securitySolutionUI:hosts-risk',
+                        link: securityLink(SecurityPageName.hostsRisk),
                         breadcrumbStatus: 'hidden',
                       },
                       {
                         id: 'hosts-sessions',
-                        link: 'securitySolutionUI:hosts-sessions',
+                        link: securityLink(SecurityPageName.hostsSessions),
                         breadcrumbStatus: 'hidden',
                       },
                     ],
                   },
                   {
                     id: 'network',
-                    link: 'securitySolutionUI:network',
+                    link: securityLink(SecurityPageName.network),
                     renderAs: 'item',
                     children: [
                       {
                         id: 'network-flows',
-                        link: 'securitySolutionUI:network-flows',
+                        link: securityLink(SecurityPageName.networkFlows),
                         breadcrumbStatus: 'hidden',
                       },
                       {
                         id: 'network-dns',
-                        link: 'securitySolutionUI:network-dns',
+                        link: securityLink(SecurityPageName.networkDns),
                         breadcrumbStatus: 'hidden',
                       },
                       {
                         id: 'network-http',
-                        link: 'securitySolutionUI:network-http',
+                        link: securityLink(SecurityPageName.networkHttp),
                         breadcrumbStatus: 'hidden',
                       },
                       {
                         id: 'network-tls',
-                        link: 'securitySolutionUI:network-tls',
+                        link: securityLink(SecurityPageName.networkTls),
                         breadcrumbStatus: 'hidden',
                       },
                       {
                         id: 'network-anomalies',
-                        link: 'securitySolutionUI:network-anomalies',
+                        link: securityLink(SecurityPageName.networkAnomalies),
                         breadcrumbStatus: 'hidden',
                       },
                       {
                         id: 'network-events',
-                        link: 'securitySolutionUI:network-events',
+                        link: securityLink(SecurityPageName.networkEvents),
                         breadcrumbStatus: 'hidden',
                       },
                     ],
                   },
                   {
                     id: 'users',
-                    link: 'securitySolutionUI:users',
+                    link: securityLink(SecurityPageName.users),
                     renderAs: 'item',
                     children: [
                       {
                         id: 'users-all',
-                        link: 'securitySolutionUI:users-all',
+                        link: securityLink(SecurityPageName.usersAll),
                         breadcrumbStatus: 'hidden',
                       },
                       {
                         id: 'users-authentications',
-                        link: 'securitySolutionUI:users-authentications',
+                        link: securityLink(SecurityPageName.usersAuthentications),
                         breadcrumbStatus: 'hidden',
                       },
                       {
                         id: 'users-anomalies',
-                        link: 'securitySolutionUI:users-anomalies',
+                        link: securityLink(SecurityPageName.usersAnomalies),
                         breadcrumbStatus: 'hidden',
                       },
                       {
                         id: 'users-risk',
-                        link: 'securitySolutionUI:users-risk',
+                        link: securityLink(SecurityPageName.usersRisk),
                         breadcrumbStatus: 'hidden',
                       },
                       {
                         id: 'users-events',
-                        link: 'securitySolutionUI:users-events',
+                        link: securityLink(SecurityPageName.usersEvents),
                         breadcrumbStatus: 'hidden',
                       },
                     ],
@@ -343,7 +347,7 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
             children: [
               {
                 id: 'assets',
-                link: 'securitySolutionUI:assets',
+                link: securityLink(SecurityPageName.assets),
                 title: i18n.translate('xpack.securitySolutionServerless.navLinks.assets', {
                   defaultMessage: 'Assets',
                 }),
@@ -388,7 +392,7 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                   },
                   {
                     id: 'endpoints',
-                    link: 'securitySolutionUI:endpoints',
+                    link: securityLink(SecurityPageName.endpoints),
                     title: i18n.translate(
                       'xpack.securitySolutionServerless.navLinks.assets.endpoints',
                       { defaultMessage: 'Endpoints' }
@@ -396,32 +400,32 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                     children: [
                       {
                         id: 'endpoints',
-                        link: 'securitySolutionUI:endpoints',
+                        link: securityLink(SecurityPageName.endpoints),
                         breadcrumbStatus: 'hidden',
                       },
                       {
                         id: 'policy',
-                        link: 'securitySolutionUI:policy',
+                        link: securityLink(SecurityPageName.policies),
                       },
                       {
                         id: 'trusted_apps',
-                        link: 'securitySolutionUI:trusted_apps',
+                        link: securityLink(SecurityPageName.trustedApps),
                       },
                       {
                         id: 'event_filters',
-                        link: 'securitySolutionUI:event_filters',
+                        link: securityLink(SecurityPageName.eventFilters),
                       },
                       {
                         id: 'host_isolation_exceptions',
-                        link: 'securitySolutionUI:host_isolation_exceptions',
+                        link: securityLink(SecurityPageName.hostIsolationExceptions),
                       },
                       {
                         id: 'blocklist',
-                        link: 'securitySolutionUI:blocklist',
+                        link: securityLink(SecurityPageName.blocklist),
                       },
                       {
                         id: 'response_actions_history',
-                        link: 'securitySolutionUI:response_actions_history',
+                        link: securityLink(SecurityPageName.responseActionsHistory),
                       },
                     ],
                   },
@@ -475,7 +479,7 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
             children: [
               {
                 id: 'machine_learning-landing',
-                link: 'securitySolutionUI:machine_learning-landing',
+                link: securityLink(SecurityPageName.mlLanding),
                 title: i18n.translate('xpack.securitySolutionServerless.navLinks.ml', {
                   defaultMessage: 'Machine learning',
                 }),
@@ -697,7 +701,7 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
             children: [
               {
                 id: 'entity_analytics-management',
-                link: 'securitySolutionUI:entity_analytics-management',
+                link: securityLink(SecurityPageName.entityAnalyticsManagement),
                 title: i18n.translate('xpack.securitySolutionServerless.navLinks.entityRiskScore', {
                   defaultMessage: 'Entity Risk Score',
                 }),
@@ -705,7 +709,7 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
               },
               {
                 id: 'entity_analytics-entity_store_management',
-                link: 'securitySolutionUI:entity_analytics-entity_store_management',
+                link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
                 title: i18n.translate('xpack.securitySolutionServerless.navLinks.entityStore', {
                   defaultMessage: 'Entity Store',
                 }),
@@ -720,7 +724,7 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
     footer: [
       {
         type: 'navItem',
-        link: 'securitySolutionUI:get_started',
+        link: securityLink(SecurityPageName.landing),
         icon: 'launch',
       },
       {
@@ -831,11 +835,11 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                     breadcrumbStatus: 'hidden',
                   },
                   {
-                    link: 'securitySolutionUI:entity_analytics-management',
+                    link: securityLink(SecurityPageName.entityAnalyticsManagement),
                     breadcrumbStatus: 'hidden',
                   },
                   {
-                    link: 'securitySolutionUI:entity_analytics-entity_store_management',
+                    link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
                     breadcrumbStatus: 'hidden',
                   },
                 ],

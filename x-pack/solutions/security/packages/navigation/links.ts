@@ -12,5 +12,6 @@ export {
   LinkButton,
   LinkAnchor,
   isSecurityId,
+  securityLink,
 } from './src/links';
 export type { GetLinkUrl, GetLinkProps, LinkProps } from './src/links';
