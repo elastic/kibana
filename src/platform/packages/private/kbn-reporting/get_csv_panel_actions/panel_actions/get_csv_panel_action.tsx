@@ -37,13 +37,15 @@ import {
   PublishesTitle,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CSV_REPORTING_ACTION, JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import { CSV_REPORTING_ACTION } from '@kbn/reporting-export-types-csv-common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ClientConfigType } from '@kbn/reporting-public/types';
 import { checkLicense } from '@kbn/reporting-public/license_check';
 import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
+import { getSearchCsvJobParams } from '@kbn/reporting-common/get_search_csv_job_params';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getI18nStrings } from './strings';
 
 export interface PanelActionDependencies {
@@ -127,7 +129,12 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
   public async getSharingData(savedSearch: SavedSearch) {
     const [{ uiSettings }, { data }] = await firstValueFrom(this.startServices$);
     const { getSharingData } = await loadSharingDataHelpers();
-    return await getSharingData(savedSearch.searchSource, savedSearch, { uiSettings, data });
+    return await getSharingData(
+      savedSearch.searchSource,
+      savedSearch,
+      { uiSettings, data },
+      isOfAggregateQueryType(savedSearch.searchSource.getField('query'))
+    );
   }
 
   public isCompatible = async (context: EmbeddableApiContext) => {
@@ -153,15 +160,14 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
   private executeGenerate = async (params: ExecutionParams) => {
     const [startServices] = await firstValueFrom(this.startServices$);
     const { searchSource, columns, title } = params;
-    const csvJobParams = this.apiClient.getDecoratedJobParams<JobAppParamsCSV>({
-      searchSource,
-      columns,
+    const { reportType, decoratedJobParams } = getSearchCsvJobParams({
+      apiClient: this.apiClient,
+      searchModeParams: { isEsqlMode: false, searchSource, columns },
       title,
-      objectType: 'search',
     });
 
     await this.apiClient
-      .createReportingJob('csv_searchsource', csvJobParams)
+      .createReportingJob(reportType, decoratedJobParams)
       .then((job) => {
         if (job) {
           this.notifications.toasts.addSuccess({
