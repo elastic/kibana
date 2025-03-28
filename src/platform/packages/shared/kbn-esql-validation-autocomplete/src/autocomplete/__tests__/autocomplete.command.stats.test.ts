@@ -237,15 +237,27 @@ describe('autocomplete.suggest', () => {
           ]);
         });
 
-        // it('suggests after operator', async () => {
-        //   await suggest('FROM a | STATS MIN(b) WHERE keywordField != /');
-        // });
+        it('suggests after operator', async () => {
+          await assertSuggestions('FROM a | STATS MIN(b) WHERE keywordField != /', [
+            ...getFieldNamesByType(['boolean', 'text', 'keyword']),
+            ...getFunctionSignaturesByReturnType(
+              Location.STATS_WHERE,
+              ['boolean', 'text', 'keyword'],
+              { scalar: true }
+            ),
+          ]);
+        });
 
-        it('suggests pipe after boolean expression', async () => {
+        it('suggests pipe after complete boolean expression', async () => {
           const suggestions = await suggest(
             'FROM a | STATS MIN(b) WHERE keywordField != keywordField /'
           );
           expect(suggestions.map(({ text }) => text)).toContain('| ');
+        });
+
+        it('does NOT suggest pipe after complete non-boolean expression', async () => {
+          const suggestions = await suggest('FROM a | STATS MIN(b) WHERE doubleField + 1 /');
+          expect(suggestions.map(({ text }) => text)).not.toContain('| ');
         });
       });
     });
@@ -294,16 +306,19 @@ describe('autocomplete.suggest', () => {
       });
 
       test('on space before expression right hand side operand', async () => {
-        await assertSuggestions('from a | stats avg(b) by integerField % /', [
-          ...getFieldNamesByType('integer'),
-          ...getFieldNamesByType('double'),
-          ...getFieldNamesByType('long'),
-          ...getFunctionSignaturesByReturnType(Location.EVAL, ['integer', 'double', 'long'], {
-            scalar: true,
-          }),
-          // categorize is not compatible here
-          ...allGroupingFunctions.filter((f) => !f.text.includes('CATEGORIZE')),
-        ]);
+        /**
+         * @todo re-enable when expression autocomplete is officially supported for STATS ... BY
+         */
+        // await assertSuggestions('from a | stats avg(b) by integerField % /', [
+        //   ...getFieldNamesByType('integer'),
+        //   ...getFieldNamesByType('double'),
+        //   ...getFieldNamesByType('long'),
+        //   ...getFunctionSignaturesByReturnType(Location.EVAL, ['integer', 'double', 'long'], {
+        //     scalar: true,
+        //   }),
+        //   // categorize is not compatible here
+        //   ...allGroupingFunctions.filter((f) => !f.text.includes('CATEGORIZE')),
+        // ]);
         await assertSuggestions('from a | stats avg(b) by var0 = /', [
           getDateHistogramCompletionItem(),
           ...getFieldNamesByType('any').map((field) => `${field} `),
