@@ -8,7 +8,6 @@
  */
 
 export { Workspace, type WorkspaceProps } from './workspace';
-
 export {
   type WorkspaceToolProps,
   type WorkspaceToolbarButtonProps,
@@ -16,3 +15,10 @@ export {
   type WorkspaceToolbarButtonComponentProps,
   WorkspaceToolbarButtonComponent,
 } from './toolbar';
+
+export {
+  type WorkspaceFlyoutResizableProps,
+  WorkspaceFlyoutResizable,
+  type WorkspaceFlyoutProps,
+  WorkspaceFlyout,
+} from './flyouts/flyouts';

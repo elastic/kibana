@@ -3,7 +3,11 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
   "kbn_references": [
     "@kbn/kibana-react-plugin",
     "@kbn/monaco",
@@ -43,7 +47,10 @@
     "@kbn/data-view-utils",
     "@kbn/apm-ui-shared",
     "@kbn/react-hooks",
-    "@kbn/embeddable-plugin"
+    "@kbn/embeddable-plugin",
+    "@kbn/core-workspace-components"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
