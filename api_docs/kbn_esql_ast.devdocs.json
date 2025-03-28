@@ -2125,7 +2125,13 @@
                 "text": "ESQLCommandMode"
               },
               " | ",
-              "ESQLInlineCast",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLInlineCast",
+                "text": "ESQLInlineCast"
+              },
               "<",
               {
                 "pluginId": "@kbn/esql-ast",
@@ -2246,7 +2252,13 @@
                     "text": "ESQLCommandMode"
                   },
                   " | ",
-                  "ESQLInlineCast",
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ESQLInlineCast",
+                    "text": "ESQLInlineCast"
+                  },
                   "<",
                   {
                     "pluginId": "@kbn/esql-ast",
@@ -2423,7 +2435,13 @@
             "description": [],
             "signature": [
               "(node: ",
-              "ESQLInlineCast",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLInlineCast",
+                "text": "ESQLInlineCast"
+              },
               "<",
               {
                 "pluginId": "@kbn/esql-ast",
@@ -2446,7 +2464,13 @@
                 "label": "node",
                 "description": [],
                 "signature": [
-                  "ESQLInlineCast",
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ESQLInlineCast",
+                    "text": "ESQLInlineCast"
+                  },
                   "<",
                   {
                     "pluginId": "@kbn/esql-ast",
@@ -4624,6 +4648,74 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ESQLInlineCast",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLInlineCast",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLInlineCast",
+            "text": "ESQLInlineCast"
+          },
+          "<ValueType> extends ",
+          "ESQLAstBaseItem",
+          "<string>"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLInlineCast.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"inlineCast\""
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLInlineCast.value",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "ValueType"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLInlineCast.castType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "castType",
+            "description": [],
+            "signature": [
+              "\"string\" | \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"bool\" | \"datetime\" | \"int\" | \"cartesian_point\" | \"cartesian_shape\" | \"date_period\" | \"time_duration\""
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.ESQLLocation",
         "type": "Interface",
         "tags": [],
@@ -5649,7 +5741,13 @@
             "description": [],
             "signature": [
               "((node: ",
-              "ESQLInlineCast",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLInlineCast",
+                "text": "ESQLInlineCast"
+              },
               "<",
               {
                 "pluginId": "@kbn/esql-ast",
@@ -5672,7 +5770,13 @@
                 "label": "node",
                 "description": [],
                 "signature": [
-                  "ESQLInlineCast",
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ESQLInlineCast",
+                    "text": "ESQLInlineCast"
+                  },
                   "<",
                   {
                     "pluginId": "@kbn/esql-ast",
@@ -6248,7 +6352,13 @@
             "text": "ESQLCommandMode"
           },
           " | ",
-          "ESQLInlineCast",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLInlineCast",
+            "text": "ESQLInlineCast"
+          },
           "<",
           {
             "pluginId": "@kbn/esql-ast",
@@ -6391,7 +6501,13 @@
             "text": "ESQLCommandMode"
           },
           " | ",
-          "ESQLInlineCast",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLInlineCast",
+            "text": "ESQLInlineCast"
+          },
           "<",
           {
             "pluginId": "@kbn/esql-ast",
