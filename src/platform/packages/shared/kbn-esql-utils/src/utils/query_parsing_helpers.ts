@@ -13,6 +13,7 @@ import type {
   ESQLFunction,
   ESQLColumn,
   ESQLSingleAstItem,
+  ESQLInlineCast,
   ESQLCommandOption,
 } from '@kbn/esql-ast';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
@@ -100,12 +101,27 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   }
   const lowLevelFunction = allFunctionsWithNamedParams[allFunctionsWithNamedParams.length - 1];
 
-  const column = lowLevelFunction.args.find((arg) => {
-    const argument = arg as ESQLSingleAstItem;
-    return argument.type === 'column';
-  }) as ESQLColumn;
+  let columnName: string | undefined;
 
-  return column?.name;
+  lowLevelFunction.args.some((arg) => {
+    const argument = arg as ESQLSingleAstItem | ESQLInlineCast<ESQLSingleAstItem>;
+    if (argument.type === 'column') {
+      columnName = argument.name;
+      return true;
+    }
+
+    if (
+      argument.type === 'inlineCast' &&
+      (argument as ESQLInlineCast<ESQLSingleAstItem>).value.type === 'column'
+    ) {
+      columnName = (argument as ESQLInlineCast<ESQLSingleAstItem>).value.name;
+      return true;
+    }
+
+    return false;
+  });
+
+  return columnName;
 };
 
 export const isQueryWrappedByPipes = (query: string): boolean => {

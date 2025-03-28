@@ -184,6 +184,14 @@ describe('esql query helpers', () => {
         )
       ).toBe('event.timefield');
     });
+
+    it('should return the time field if the column is casted', () => {
+      expect(
+        getTimeFieldFromESQLQuery(
+          'from a | WHERE date_nanos::date >= ?_tstart AND date_nanos::date <= ?_tend'
+        )
+      ).toBe('date_nanos');
+    });
   });
 
   describe('prettifyQuery', function () {
