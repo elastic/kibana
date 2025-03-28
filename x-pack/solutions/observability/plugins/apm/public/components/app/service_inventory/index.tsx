@@ -8,7 +8,7 @@
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ApmDocumentType } from '../../../../common/document_type';
 import type { ServiceListItem } from '../../../../common/service_inventory';
@@ -115,10 +115,8 @@ function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
 
 function useServicesDetailedStatisticsFetcher({
   mainStatisticsFetch,
-  renderedItems,
 }: {
   mainStatisticsFetch: ReturnType<typeof useServicesMainStatisticsFetcher>;
-  renderedItems: ServiceListItem[];
 }) {
   const {
     query: { rangeFrom, rangeTo, environment, kuery, offset, comparisonEnabled },
@@ -138,7 +136,7 @@ function useServicesDetailedStatisticsFetcher({
 
   const comparisonFetch = useProgressiveFetcher(
     (callApmApi) => {
-      const serviceNames = renderedItems.map(({ serviceName }) => serviceName);
+      const serviceNames = mainStatisticsData.items.map(({ serviceName }) => serviceName);
 
       if (
         start &&
@@ -170,7 +168,7 @@ function useServicesDetailedStatisticsFetcher({
     // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mainStatisticsData.requestId, renderedItems, offset, comparisonEnabled],
+    [mainStatisticsData.requestId, mainStatisticsData.items, offset, comparisonEnabled],
     { preservePreviousData: false }
   );
 
@@ -180,7 +178,6 @@ function useServicesDetailedStatisticsFetcher({
 export function ServiceInventory() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useStateDebounced('');
   const { onPageReady } = usePerformanceContext();
-  const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
   const mainStatisticsFetch = useServicesMainStatisticsFetcher(debouncedSearchQuery);
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
   const {
@@ -205,7 +202,6 @@ export function ServiceInventory() {
 
   const { comparisonFetch } = useServicesDetailedStatisticsFetcher({
     mainStatisticsFetch,
-    renderedItems,
   });
 
   const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
@@ -318,7 +314,6 @@ export function ServiceInventory() {
             serviceOverflowCount={serviceOverflowCount}
             onChangeSearchQuery={setDebouncedSearchQuery}
             maxCountExceeded={mainStatisticsData?.maxCountExceeded ?? false}
-            onChangeRenderedItems={setRenderedItems}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

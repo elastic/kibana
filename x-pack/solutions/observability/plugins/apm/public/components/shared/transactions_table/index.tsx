@@ -9,8 +9,7 @@ import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { compact } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { ApmDocumentType } from '../../../../common/document_type';
 import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
@@ -91,12 +90,10 @@ export function TransactionsTable({
   const shouldShowSparkPlots = showSparkPlots ?? !isLarge;
   const { transactionType, serviceName } = useApmServiceContext();
   const [searchQuery, setSearchQueryDebounced] = useStateDebounced('');
-  const [renderedItems, setRenderedItems] = useState<ApiResponse['transactionGroups']>([]);
 
   const { mainStatistics, mainStatisticsStatus, detailedStatistics, detailedStatisticsStatus } =
     useTableData({
       comparisonEnabled,
-      currentPageItems: renderedItems,
       end,
       environment,
       kuery,
@@ -252,7 +249,6 @@ export function TransactionsTable({
             isLoading={mainStatisticsStatus === FETCH_STATUS.LOADING}
             tableSearchBar={tableSearchBar}
             showPerPageOptions={showPerPageOptions}
-            onChangeRenderedItems={setRenderedItems}
             saveTableOptionsToUrl={saveTableOptionsToUrl}
           />
         </OverviewTableContainer>
@@ -263,7 +259,6 @@ export function TransactionsTable({
 
 function useTableData({
   comparisonEnabled,
-  currentPageItems,
   end,
   environment,
   kuery,
@@ -275,7 +270,6 @@ function useTableData({
   transactionType,
 }: {
   comparisonEnabled: boolean | undefined;
-  currentPageItems: ApiResponse['transactionGroups'];
   end: string;
   environment: string;
   kuery: string;
@@ -341,7 +335,12 @@ function useTableData({
 
   const { data: detailedStatistics, status: detailedStatisticsStatus } = useFetcher(
     (callApmApi) => {
-      const transactionNames = compact(currentPageItems.map(({ name }) => name));
+      const transactionNames = mainStatistics.transactionGroups.reduce((acc, { name }) => {
+        if (name) {
+          acc.push(name);
+        }
+        return acc;
+      }, [] as string[]);
       if (
         start &&
         end &&
@@ -377,7 +376,7 @@ function useTableData({
     // only fetches detailed statistics when `currentPageItems` is updated.
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mainStatistics.requestId, currentPageItems, offset, comparisonEnabled],
+    [mainStatistics.requestId, mainStatistics.transactionGroups, offset, comparisonEnabled],
     { preservePreviousData: false }
   );
 

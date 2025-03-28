@@ -295,7 +295,7 @@ interface Props {
   serviceOverflowCount: number;
   maxCountExceeded: boolean;
   onChangeSearchQuery: (searchQuery: string) => void;
-  onChangeRenderedItems: (renderedItems: ServiceListItem[]) => void;
+  onChangeRenderedItems?: (renderedItems: ServiceListItem[]) => void;
 }
 export function ApmServicesTable({
   status,

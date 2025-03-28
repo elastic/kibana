@@ -34,10 +34,8 @@ const INITIAL_STATE_DETAILED_STATISTICS: DetailedStatistics = {
 };
 
 export function useErrorGroupListData({
-  renderedItems,
   sorting,
 }: {
-  renderedItems: ErrorGroupItem[];
   sorting: TableOptions<ErrorGroupItem>['sort'];
 }) {
   const { serviceName } = useApmServiceContext();
@@ -85,7 +83,7 @@ export function useErrorGroupListData({
     status: detailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
-      if (mainStatistics.requestId && renderedItems.length && start && end) {
+      if (mainStatistics.requestId && mainStatistics.errorGroups.length && start && end) {
         return callApmApi(
           'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
           {
@@ -100,7 +98,9 @@ export function useErrorGroupListData({
                 offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
               },
               body: {
-                groupIds: JSON.stringify(renderedItems.map(({ groupId }) => groupId).sort()),
+                groupIds: JSON.stringify(
+                  mainStatistics.errorGroups.map(({ groupId }) => groupId).sort()
+                ),
               },
             },
           }
@@ -109,7 +109,7 @@ export function useErrorGroupListData({
     },
     // only fetches agg results when main statistics are ready
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mainStatistics.requestId, renderedItems, comparisonEnabled, offset],
+    [mainStatistics.requestId, mainStatistics.errorGroups, comparisonEnabled, offset],
     { preservePreviousData: false }
   );
 
