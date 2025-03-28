@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewLazy } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 
 export type HostMetricTypes = 'cpu' | 'memory' | 'network' | 'disk' | 'log' | 'kpi';
@@ -16,7 +16,7 @@ export type ContainerMetricTypes = KubernetesContainerMetrics | DockerContainerM
 export interface MetricsChartsFields {
   assetId: string;
   dateRange: TimeRange;
-  dataView?: DataView;
+  dataView?: DataView | DataViewLazy;
   overview?: boolean;
   onShowAll?: (metric: string) => void;
 }

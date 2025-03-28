@@ -32,7 +32,7 @@ const useDataViews = () => {
     }),
   });
 
-  const { value: logsDataView, loading: logsDataViewLoading } = useAsync(
+  const { value: logsDataViewLazy, loading: logsDataViewLoading } = useAsync(
     () => getLogsDataView(logViewReference),
     [logViewReference, getLogsDataView]
   );
@@ -40,7 +40,7 @@ const useDataViews = () => {
   return {
     metrics: { dataView: metricsView?.dataViewReference, loading: metricsDataViewLoading },
     logs: {
-      dataView: logsDataView,
+      dataViewLazy: logsDataViewLazy,
       reference: logViewReference,
       loading: logsReferenceLoading || logsDataViewLoading,
     },

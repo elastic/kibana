@@ -57,7 +57,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
         .join(' AND ')
     : '';
 
-  const { derivedDataView } = useLogView({
+  const { derivedDataViewLazy } = useLogView({
     initialLogViewReference: rule.params.logView,
     logViews: logsShared.logViews.client,
   });
@@ -102,7 +102,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
             </EuiFlexItem>
             <EuiFlexItem grow={5}>
               <EuiSpacer size="s" />
-              {derivedDataView && (
+              {derivedDataViewLazy && (
                 <LogThresholdRatioChart
                   filter={filter}
                   numeratorKql={numeratorKql}
@@ -111,8 +111,8 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
                   timeRange={timeRange}
                   alertRange={{ from: alert.start, to: alertEnd }}
                   index={{
-                    pattern: derivedDataView.getIndexPattern(),
-                    timestampField: derivedDataView.timeFieldName || '@timestamp',
+                    pattern: derivedDataViewLazy.getIndexPattern(),
+                    timestampField: derivedDataViewLazy.timeFieldName || '@timestamp',
                   }}
                   height={150}
                   interval={interval}
@@ -168,7 +168,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
               />
             </EuiFlexItem>
             <EuiFlexItem grow={5}>
-              {derivedDataView && (
+              {derivedDataViewLazy && (
                 <LogThresholdCountChart
                   filter={filter}
                   kql={kql}
@@ -176,8 +176,8 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
                   timeRange={timeRange}
                   alertRange={{ from: alert.start, to: alertEnd }}
                   index={{
-                    pattern: derivedDataView.getIndexPattern(),
-                    timestampField: derivedDataView.timeFieldName || '@timestamp',
+                    pattern: derivedDataViewLazy.getIndexPattern(),
+                    timestampField: derivedDataViewLazy.timeFieldName || '@timestamp',
                   }}
                   height={150}
                   interval={interval}

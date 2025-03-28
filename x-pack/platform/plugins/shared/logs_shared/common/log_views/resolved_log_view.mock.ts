@@ -6,7 +6,7 @@
  */
 
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
+import { createStubDataViewLazy } from '@kbn/data-views-plugin/common/stubs';
 import { defaultLogViewsStaticConfig } from './defaults';
 import { ResolvedLogView, resolveLogView } from './resolved_log_view';
 import { LogViewAttributes } from './types';
@@ -42,7 +42,7 @@ export const createResolvedLogViewMock = (
       messageColumn: { id: 'MESSAGE_COLUMN_ID' },
     },
   ],
-  dataViewReference: createStubDataView({
+  dataViewReference: createStubDataViewLazy({
     spec: {
       id: 'log-view-data-view-mock',
       title: 'log-indices-*',
@@ -56,10 +56,10 @@ export const createResolvedLogViewMockFromAttributes = (logViewAttributes: LogVi
     'log-view-id',
     logViewAttributes,
     {
-      get: async () => createStubDataView({ spec: {} }),
+      get: async () => createStubDataViewLazy({ spec: {} }),
       getFieldsForWildcard: async () => [],
       create: async (spec: DataViewSpec) =>
-        createStubDataView({
+        createStubDataViewLazy({
           spec,
         }),
     } as unknown as DataViewsContract,

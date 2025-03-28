@@ -36,7 +36,7 @@ export const HostMetrics = () => {
         <HostCharts
           key={metric}
           assetId={asset.id}
-          dataView={metric === 'log' ? logs.dataView : metrics.dataView}
+          dataView={metric === 'log' ? logs.dataViewLazy : metrics.dataView}
           dateRange={state.dateRange}
           metric={metric}
         />

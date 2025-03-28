@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewLazy } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
@@ -19,27 +19,28 @@ import { useLogsCharts } from '../../hooks/use_log_charts';
 import { Kpi } from '../../components/kpis/kpi';
 
 interface Props {
-  dataView?: DataView;
+  dataViewLazy?: DataViewLazy;
   assetId: string;
   assetType: InventoryItemType;
   dateRange: TimeRange;
 }
 
-export const LogsContent = ({ assetId, assetType, dataView, dateRange }: Props) => {
+export const LogsContent = ({ assetId, assetType, dataViewLazy, dateRange }: Props) => {
   const { reloadRequestTime } = useReloadRequestTimeContext();
 
   const filters = useMemo(() => {
+    // TODO: converting dataViewLazy to dataView
     return [
       buildCombinedAssetFilter({
         field: findInventoryFields(assetType).id,
         values: [assetId],
-        dataView,
+        dataViewLazy,
       }),
     ];
-  }, [dataView, assetId, assetType]);
+  }, [dataViewLazy, assetId, assetType]);
 
   const { charts } = useLogsCharts({
-    dataViewId: dataView?.id,
+    dataViewId: dataViewLazy?.id,
   });
 
   return (

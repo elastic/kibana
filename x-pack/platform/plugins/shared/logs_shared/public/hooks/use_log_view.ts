@@ -195,7 +195,7 @@ export const useLogView = ({
     logView,
     resolvedLogView,
     logViewStatus,
-    derivedDataView: resolvedLogView?.dataViewReference,
+    derivedDataViewLazy: resolvedLogView?.dataViewReference,
     isInlineLogView,
     isPersistedLogView,
 
