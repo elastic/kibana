@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data_views';
-export * from './initialize_session';
-export * from './tabs';
+import type { DiscoverInternalState } from './types';
+
+export const selectAllTabs = (state: DiscoverInternalState) =>
+  state.tabs.allIds.map((id) => state.tabs.byId[id]);
+
+export const selectCurrentTab = (state: DiscoverInternalState) =>
+  state.tabs.byId[state.tabs.currentId];
