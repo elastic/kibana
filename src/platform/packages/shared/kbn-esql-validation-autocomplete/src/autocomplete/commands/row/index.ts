@@ -8,7 +8,7 @@
  */
 
 import { isRestartingExpression } from '../../../shared/helpers';
-import { CommandSuggestParams } from '../../../definitions/types';
+import { CommandSuggestParams, Location } from '../../../definitions/types';
 
 import type { SuggestionRawDefinition } from '../../types';
 import {
@@ -25,7 +25,7 @@ export async function suggest({
 }: CommandSuggestParams<'row'>): Promise<SuggestionRawDefinition[]> {
   // ROW var0 = /
   if (/=\s*$/.test(innerText)) {
-    return getFunctionSuggestions({ command: 'row' });
+    return getFunctionSuggestions({ location: Location.ROW });
   }
 
   // ROW var0 = 23 /
@@ -40,6 +40,6 @@ export async function suggest({
   // ROW foo = "bar", /
   return [
     getNewVariableSuggestion(getSuggestedVariableName()),
-    ...getFunctionSuggestions({ command: 'row' }),
+    ...getFunctionSuggestions({ location: Location.ROW }),
   ];
 }
