@@ -42,7 +42,7 @@ async function validateInstalledPackages(
   );
   if (nonInstalledPackages.length) {
     throw new FleetError(
-      `Cannot ${operation} non installed packages: ${nonInstalledPackages.join(', ')}`
+      `Cannot ${operation} non-installed packages: ${nonInstalledPackages.join(', ')}`
     );
   }
 }
