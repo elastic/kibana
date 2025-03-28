@@ -48,6 +48,14 @@ function createErrorPauseHandler() {
   return async (err, test, callback) => {
     // Check if pauseOnError is enabled globally or for this specific test
     if (testConfig.pauseOnError) {
+      const originalTimeout = test.timeout();
+      // Set minimum pause timeout to 10 minutes (600000 ms)
+      const minPauseTimeout = 600000;
+      // Extend timeout if it's less than 10 minutes
+      if (originalTimeout < minPauseTimeout) {
+        test.timeout(minPauseTimeout);
+      }
+
       // Create a more informative pause message
       const pauseMessage = chalk.bold.yellow(`
         !!!!! ${chalk.red('TEST PAUSED ON ERROR')} !!!!!
@@ -67,7 +75,14 @@ function createErrorPauseHandler() {
         const pauseTimeout = setTimeout(() => {
           console.error('Pause timeout exceeded. Resuming test execution.');
           resolve();
-        }, 600000);
+          // Restore the original timeout
+          test.timeout(originalTimeout);
+          // Clear the timeout to prevent memory leaks
+          clearTimeout(pauseTimeout);
+
+          // call the callback to continue the test run
+          callback();
+        }, minPauseTimeout);
 
         // Set up a way to manually interrupt
         const interruptHandler = () => {
