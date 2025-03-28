@@ -171,10 +171,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
 
   if (options.createDockerCloudFIPS) {
     // control w/ --docker-images and --skip-docker-cloud-fips
-    if (options.downloadCloudDependencies) {
-      // control w/ --skip-cloud-dependencies-download
-      await run(Tasks.DownloadCloudDependencies);
-    }
+    // v9.0 does not have a Cloud FIPS release, this is a NOOP
     await run(Tasks.CreateDockerCloudFIPS);
   }
 
