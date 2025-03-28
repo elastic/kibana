@@ -81,16 +81,7 @@ export function createMergedMappings(
     return { mergedMappings: mappings[0] as MappingTypeMapping, mappingClashes: [] };
   }
 
-  const fieldsPerFile = mappings.map((m) => {
-    if (m.properties === undefined) {
-      return [];
-    }
-    return Object.entries(m.properties)
-      .map(([key, value]) => {
-        return { name: key, value };
-      })
-      .sort((a, b) => a.name.localeCompare(b.name));
-  });
+  const fieldsPerFile = mappings.map((m) => getFieldsFromMappings(m as MappingTypeMapping));
 
   const mappingClashes: MappingClash[] = [];
 
@@ -115,7 +106,7 @@ export function createMergedMappings(
               existingType: existingField.type,
               clashingType: {
                 fileName: files[i].getFileName(),
-                newType: field.value.type,
+                newType: field.value.type as string,
                 fileIndex: i,
               },
             });
@@ -124,7 +115,7 @@ export function createMergedMappings(
       }
     });
     return acc;
-  }, new Map<string, any>());
+  }, new Map<string, any>()); // remove any !!!!!!!!!!!!!!!!!!!!
 
   const mergedMappings = {
     properties: Object.fromEntries(mergedMappingsMap),
@@ -169,7 +160,7 @@ export function createMergedMappings(
                 existingType,
                 clashingType: {
                   fileName: files[i].getFileName(),
-                  newType: field.value.type,
+                  newType: field.value.type as string,
                   fileIndex: i,
                 },
               });
@@ -350,4 +341,15 @@ export function getFormatClashes(files: FileWrapper[]): FileClash[] {
       clashType,
     };
   });
+}
+
+export function getFieldsFromMappings(mappings: MappingTypeMapping) {
+  if (mappings.properties === undefined) {
+    return [];
+  }
+  return Object.entries(mappings.properties)
+    .map(([key, value]) => {
+      return { name: key, value };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
 }

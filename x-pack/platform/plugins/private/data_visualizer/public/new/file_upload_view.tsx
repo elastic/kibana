@@ -50,14 +50,12 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose, reset })
     canImport,
     mappings,
     settings,
+    pipelines,
     importResults,
     dataViewName,
     setDataViewName,
     dataViewNameError,
   } = useFileUpload(fileUploadManager);
-
-  // eslint-disable-next-line no-console
-  console.log('filesStatus', filesStatus);
 
   const showImportControls =
     uploadStatus.overallImportStatus === STATUS.NOT_STARTED &&
@@ -97,6 +95,7 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose, reset })
               <FileStatus
                 uploadStatus={uploadStatus}
                 fileStatus={status}
+                pipeline={pipelines[i]!}
                 key={i}
                 deleteFile={() => deleteFile(i)}
                 index={i}
@@ -124,11 +123,15 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose, reset })
               mappings={mappings.json}
               setMappings={(m) => fileUploadManager.updateMappings(m)}
               settings={settings.json}
+              pipelines={pipelines}
+              setPipelines={(p) => fileUploadManager.updatePipelines(p)}
               setSettings={(s) => fileUploadManager.updateSettings(s)}
               indexName={indexName}
               dataViewName={dataViewName}
               setDataViewName={setDataViewName}
               dataViewNameError={dataViewNameError}
+              results={2}
+              filesStatus={filesStatus}
             />
 
             <EuiSpacer />

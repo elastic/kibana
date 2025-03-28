@@ -20,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { IngestPipeline as IngestPipelineType } from '@kbn/file-upload-plugin/common';
 import type { InputOverrides } from '@kbn/file-upload-plugin/common';
 import type { FileAnalysis } from '../file_manager/file_wrapper';
 import { STATUS, type UploadStatus } from '../file_manager/file_manager';
@@ -48,6 +49,7 @@ enum TAB {
 interface Props {
   uploadStatus: UploadStatus;
   fileStatus: FileAnalysis;
+  pipeline: IngestPipelineType;
   deleteFile: () => void;
   index: number;
   setPipeline?: (pipeline: string) => void;
@@ -62,6 +64,7 @@ export const FileStatus: FC<Props> = ({
   lite,
   uploadStatus,
   fileStatus,
+  pipeline,
   deleteFile,
   index,
   showFileContentPreview,
@@ -250,7 +253,7 @@ export const FileStatus: FC<Props> = ({
 
                   {selectedTab === TAB.PIPELINE ? (
                     <IngestPipeline
-                      fileStatus={fileStatus}
+                      pipeline={pipeline}
                       showTitle={false}
                       setPipeline={setPipeline}
                     />

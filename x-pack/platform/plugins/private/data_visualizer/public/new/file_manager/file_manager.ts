@@ -53,6 +53,7 @@ export interface Config<T> {
   json: T;
   string: string;
   valid: boolean;
+  count: number;
 }
 
 export const emptyConfig = {
@@ -87,6 +88,12 @@ export class FileUploadManager {
       files.length > 0 ? combineLatest(files.map((file) => file.fileStatus$)) : of([])
     )
   );
+  public readonly filePipelines$: Observable<Array<IngestPipeline | undefined>> = // should this be undefined? !!!!!
+    this.files$.pipe(
+      switchMap((files) =>
+        files.length > 0 ? combineLatest(files.map((file) => file.pipelineObvs$)) : of([])
+      )
+    );
   private readonly existingIndexMappings$ = new BehaviorSubject<MappingTypeMapping | null>(null);
 
   private mappingsCheckSubscription: Subscription;
@@ -94,13 +101,15 @@ export class FileUploadManager {
     json: {},
     string: '',
     valid: false,
+    count: 0,
   });
   public readonly mappings$ = new BehaviorSubject<Config<MappingTypeMapping | null>>({
     json: null,
     string: '',
     valid: false,
+    count: 0,
   });
-  private pipelines: Array<IngestPipeline | undefined> = [];
+  // private pipelines: Array<IngestPipeline | undefined> = [];
   private inferenceId: string | null = null;
   private importer: IImporter | null = null;
   private timeFieldName: string | undefined | null = null;
@@ -181,7 +190,7 @@ export class FileUploadManager {
 
         if (mappingsOk && formatsOk) {
           this.updateMappings(mergedMappings);
-          this.pipelines = this.getPipelines();
+          // this.pipelines = this.getPipelines();
           this.addSemanticTextField();
         }
 
@@ -193,7 +202,7 @@ export class FileUploadManager {
               ? getMappingClashInfo(mappingClashes, existingIndexChecks, statuses)
               : [],
           analysisStatus: mappingsOk && formatsOk ? STATUS.COMPLETED : STATUS.FAILED,
-          pipelinesJsonValid: statuses.every((status) => status.pipelineJsonValid),
+          pipelinesJsonValid: this.allPipelinesValid(),
         });
       }
     });
@@ -313,12 +322,25 @@ export class FileUploadManager {
     return files.map((file) => file.getPipeline());
   }
 
+  private allPipelinesValid() {
+    const files = this.getFiles();
+    return files.every((file) => file.isPipelineValid());
+  }
+
   public updatePipeline(index: number) {
     return (pipeline: string) => {
       const files = this.getFiles();
       files[index].updatePipeline(pipeline);
-      this.files$.next(files); // is this needed?? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      // this.files$.next(files); // is this needed?? !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     };
+  }
+
+  public updatePipelines(pipelines: IngestPipeline[]) {
+    const files = this.getFiles();
+    files.forEach((file, i) => {
+      file.setPipeline(pipelines[i]);
+    });
+    // this.files$.next(files);
   }
 
   public getMappings() {
@@ -370,6 +392,7 @@ export class FileUploadManager {
           json,
           string: incomingConfigString,
           valid: true,
+          count: currentConfig.count + 1,
         });
       } catch (e) {
         this.setStatus({
@@ -382,6 +405,7 @@ export class FileUploadManager {
         json: config,
         string: '',
         valid: true,
+        count: currentConfig.count + 1,
       });
     }
   }
@@ -395,8 +419,9 @@ export class FileUploadManager {
     dataViewName?: string | null
   ): Promise<FileUploadResults | null> {
     const mappings = this.getMappings();
+    const pipelines = this.getPipelines();
 
-    if (mappings === null || this.pipelines === null || this.commonFileFormat === null) {
+    if (mappings === null || pipelines === null || this.commonFileFormat === null) {
       this.setStatus({
         overallImportStatus: STATUS.FAILED,
       });
@@ -425,7 +450,7 @@ export class FileUploadManager {
       });
     }
 
-    const createPipelines = this.pipelines.length > 0;
+    const createPipelines = pipelines.length > 0;
 
     this.setStatus({
       indexCreated: STATUS.STARTED,
@@ -441,7 +466,7 @@ export class FileUploadManager {
         indexName,
         this.getSettings().json,
         mappings,
-        this.pipelines,
+        pipelines,
         this.isExistingIndexUpload()
       );
       this.timeFieldName = this.importer.getTimeField();
@@ -620,11 +645,12 @@ export class FileUploadManager {
 
   private addSemanticTextField() {
     const mappings = this.getMappings();
+    const pipelines = this.getPipelines();
     if (
       this.isTikaFormat() &&
       this.autoAddSemanticTextField &&
       this.autoAddInferenceEndpointName !== null &&
-      this.pipelines !== null &&
+      pipelines !== null &&
       mappings !== null
     ) {
       mappings.properties!.content = {
@@ -632,7 +658,7 @@ export class FileUploadManager {
         inference_id: this.autoAddInferenceEndpointName,
       };
 
-      this.pipelines.forEach((pipeline) => {
+      pipelines.forEach((pipeline) => {
         if (pipeline === undefined) {
           return;
         }

@@ -47,8 +47,6 @@ export type FileAnalysis = AnalysisResults & {
   importProgress: number;
   docCount: number;
   supportedFormat: boolean;
-  pipeline: IngestPipeline | undefined; // should it be null? !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  pipelineJsonValid: boolean;
 };
 
 export class FileWrapper {
@@ -71,9 +69,12 @@ export class FileWrapper {
     importProgress: 0,
     docCount: 0,
     supportedFormat: true,
-    pipeline: undefined,
-    pipelineJsonValid: true,
   });
+
+  private pipeline$ = new BehaviorSubject<IngestPipeline | undefined>(undefined);
+  public readonly pipelineObvs$ = this.pipeline$.asObservable(); // rename!!!!
+  private pipelineJsonValid$ = new BehaviorSubject<boolean>(true);
+  // public readonly pipelineJsonValid = this.pipelineJsonValid$.asObservable();
 
   public readonly fileStatus$ = this.analyzedFile$.asObservable();
   private fileSizeChecker: FileSizeChecker;
@@ -117,8 +118,8 @@ export class FileWrapper {
         fileContents: parsedFileContents,
         data,
         supportedFormat,
-        pipeline: analysisResults.results?.ingest_pipeline,
       });
+      this.setPipeline(analysisResults.results?.ingest_pipeline);
     });
   }
 
@@ -191,10 +192,16 @@ export class FileWrapper {
     return this.analyzedFile$.getValue().results?.mappings;
   }
   public getPipeline(): IngestPipeline | undefined {
-    return this.analyzedFile$.getValue().pipeline;
+    return this.pipeline$.getValue();
   }
-  public setPipeline(pipeline: IngestPipeline) {
-    this.setStatus({ pipeline });
+  public isPipelineValid() {
+    return this.pipelineJsonValid$.getValue();
+  }
+  public setPipeline(pipeline: IngestPipeline | undefined) {
+    this.pipeline$.next(pipeline);
+  }
+  public setPipelineValid(valid: boolean) {
+    this.pipelineJsonValid$.next(valid);
   }
   public updatePipeline(pipeline: IngestPipeline | string) {
     if (typeof pipeline === 'string') {
@@ -204,27 +211,19 @@ export class FileWrapper {
         const currentPipelineString = JSON.stringify(currentPipeline);
         const incomingPipelineString = JSON.stringify(json);
 
-        this.setStatus({
-          pipelineJsonValid: true,
-        });
+        this.setPipelineValid(true);
 
         if (currentPipelineString === incomingPipelineString) {
           return;
         }
 
-        this.setStatus({
-          pipeline: json,
-        });
+        this.setPipeline(json);
       } catch (e) {
-        this.setStatus({
-          pipelineJsonValid: false,
-        });
+        this.setPipelineValid(false);
         return;
       }
     } else {
-      this.setStatus({
-        pipeline,
-      });
+      this.setPipeline(pipeline);
     }
   }
   public getFormat() {

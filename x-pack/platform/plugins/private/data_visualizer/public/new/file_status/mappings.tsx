@@ -30,7 +30,11 @@ export const Mappings: FC<Props> = ({ mappings, setMappings, showTitle, readonly
   useDebounce(
     () => {
       if (setMappings) {
-        setMappings(localMappings);
+        const mOriginal = JSON.stringify(mappings);
+        const mLocal = JSON.stringify(JSON.parse(localMappings));
+        if (mOriginal !== mLocal) {
+          setMappings(localMappings);
+        }
       }
     },
     500,

@@ -127,6 +127,8 @@ export function useFileUpload(
     fileUploadManager.settings$.getValue()
   );
 
+  const pipelines = useObservable(fileUploadManager.filePipelines$, []);
+
   return {
     indexName,
     setIndexName,
@@ -142,6 +144,7 @@ export function useFileUpload(
     canImport,
     mappings,
     settings,
+    pipelines,
     importResults,
     dataViewName,
     setDataViewName,
