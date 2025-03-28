@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
@@ -57,6 +58,13 @@ export const getMetricVisRenderer = (
     displayName: 'metric visualization',
     reuseDomNode: true,
     render: async (domNode, { visData, visConfig, overrides }, handlers) => {
+      const performanceId = uuidv4();
+      const performanceName = (name: string) => `Lens:${EXPRESSION_METRIC_NAME}:${name}`;
+      const performanceMark = (name: string) =>
+        performance.mark(performanceName(name), { detail: { id: performanceId } });
+
+      performanceMark('preFlight');
+
       const { core, plugins } = deps.getStartDeps();
 
       handlers.onDestroy(() => {
@@ -71,6 +79,8 @@ export const getMetricVisRenderer = (
           )
         : false;
       const renderComplete = () => {
+        performanceMark('renderComplete');
+
         const executionContext = handlers.getExecutionContext();
         const containerType = extractContainerType(executionContext);
         const visualizationType = extractVisualizationType(executionContext);
@@ -85,6 +95,9 @@ export const getMetricVisRenderer = (
       };
 
       const { MetricVis } = await import('../components/metric_vis');
+
+      performanceMark('renderStart');
+
       render(
         <KibanaRenderContextProvider {...core}>
           <div
