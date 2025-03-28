@@ -20,6 +20,7 @@ export * from './global_parameters.journey';
 export * from './detail_flyout';
 export * from './alert_rules/default_status_alert.journey';
 export * from './alert_rules/custom_status_alert.journey';
+export * from './alert_rules/custom_tls_alert.journey';
 export * from './test_now_mode.journey';
 export * from './monitor_details_page/monitor_summary.journey';
 export * from './test_run_details.journey';
