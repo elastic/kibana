@@ -277,6 +277,7 @@ export function withCapacityEstimate(
       };
     } catch (e) {
       // Return monitoredStats with out capacity estimation
+      logger.debug(e.message);
     }
   }
   return monitoredStats;
