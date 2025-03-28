@@ -22,6 +22,7 @@
     "@kbn/core-i18n-browser",
     "@kbn/test-jest-helpers",
     "@kbn/core-user-profile-browser",
+    "@kbn/core-user-profile-common",
   ],
   "exclude": [
     "target/**/*",
