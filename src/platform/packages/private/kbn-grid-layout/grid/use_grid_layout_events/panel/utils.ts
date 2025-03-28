@@ -80,8 +80,7 @@ export const getNextKeyboardPositionForPanel = (
     },
   } = gridLayoutStateManager;
 
-  const { type, currentPosition } = interactionEvent || {};
-  const panelPosition = currentPosition;
+  const { type, currentPosition: panelPosition } = interactionEvent || {};
 
   if (!panelPosition) return handlePosition;
 
