@@ -8123,7 +8123,7 @@
     "@launchdarkly/js-sdk-common" "2.13.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@^9.7.5":
+"@launchdarkly/node-server-sdk@^9.7.6":
   version "9.7.6"
   resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.7.6.tgz#1860e71535b51da0f30e169389822e9506cfed9c"
   integrity sha512-Sg71ks8EHykh6xHUgrCIOn8dXeY5dCa0UA+oQ6ttqxauz2Wvx9XJ1XlZowWOmUkdWrewri9ywrvLzaW2X0F5nQ==
@@ -8132,10 +8132,10 @@
     https-proxy-agent "^5.0.1"
     launchdarkly-eventsource "2.0.3"
 
-"@launchdarkly/openfeature-node-server@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/openfeature-node-server/-/openfeature-node-server-1.0.0.tgz#09abebb56608e729049c3ebbd2373ce0ea25121d"
-  integrity sha512-4O4bQSqM+9BUZo8L+rQkxUdrv3sqC8vGcC0U0yBvELXmd9Q8jJZkY+7+idcx/zJsInYwnfmS0TUA4YeOyQw89A==
+"@launchdarkly/openfeature-node-server@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/openfeature-node-server/-/openfeature-node-server-1.1.0.tgz#b2ae7a667f84bc4714c9657cd62f029c7af72f6e"
+  integrity sha512-x3uxYfF+NBbIZz0w8K4GIYquMiC5YaH8JwnrfYPrjO/gKHRnBlYdrAQFL+N8m4K7jf8U66Je1JRkGTVk+/2n+g==
 
 "@leichtgewicht/ip-codec@^2.0.1":
   version "2.0.4"
