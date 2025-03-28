@@ -18,7 +18,6 @@ import { useIlmPhasesColorAndDescription } from './use_ilm_phases_color_and_desc
 const TIMESTAMP_FIELD = '@timestamp';
 const RANDOM_SAMPLER_PROBABILITY = 0.1;
 
-
 // some units are not supported for the fixed_interval of the date histogram
 // this function uses the calculateAutoTimeExpression function to determine
 // if the interval should be a calendar_interval or a fixed_interval
@@ -73,7 +72,6 @@ export const useIngestionRate = ({
       }
       const { interval, intervalType } = intervalData;
       
-
       const {
         rawResponse: { aggregations },
       } = await lastValueFrom(
@@ -100,6 +98,7 @@ export const useIngestionRate = ({
                   sampler: {
                     random_sampler: {
                       probability: RANDOM_SAMPLER_PROBABILITY,
+                      seed: 42,
                     },
                     aggs: {
                       docs_count: {
@@ -107,6 +106,8 @@ export const useIngestionRate = ({
                           field: TIMESTAMP_FIELD,
                           [intervalType]: interval,
                           min_doc_count: 0,
+                          extended_bounds: { min: start, max: end
+                          }
                         },
                       },
                     },
@@ -210,6 +211,7 @@ export const useIngestionRatePerTier = ({
                   sampler: {
                     random_sampler: {
                       probability: RANDOM_SAMPLER_PROBABILITY,
+                      seed: 42,
                     },
                     aggs: {
                       docs_count: {
@@ -217,6 +219,8 @@ export const useIngestionRatePerTier = ({
                           field: TIMESTAMP_FIELD,
                           [intervalType]: interval,
                           min_doc_count: 0,
+                          extended_bounds: { min: start, max: end
+                          }
                         },
                         aggs: {
                           indices: {
