@@ -86,7 +86,7 @@ export const RulesSettingsFlappingFormLeft = memo((props: RulesSettingsFlappingF
 
   return (
     <EuiFlexItem>
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size="s">
             <p>{flappingDescription}</p>
@@ -164,7 +164,7 @@ export const RulesSettingsFlappingSection = memo((props: RulesSettingsFlappingSe
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
         <RulesSettingsFlappingFormLeft
           isSwitchDisabled={!canWrite}
           settings={settings}

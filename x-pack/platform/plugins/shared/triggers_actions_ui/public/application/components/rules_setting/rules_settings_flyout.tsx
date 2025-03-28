@@ -255,12 +255,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
   };
 
   return (
-    <EuiFlyout
-      type="push"
-      data-test-subj="rulesSettingsFlyout"
-      onClose={onCloseFlyout}
-      maxWidth={384}
-    >
+    <EuiFlyout type="push" data-test-subj="rulesSettingsFlyout" onClose={onCloseFlyout} size="s">
       <EuiFlyoutHeader>
         <EuiTitle>
           <h3>
