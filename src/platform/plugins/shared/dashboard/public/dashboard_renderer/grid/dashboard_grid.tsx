@@ -10,7 +10,7 @@
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import { omit } from 'lodash';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { useEuiTheme } from '@elastic/eui';
@@ -35,6 +35,7 @@ export const DashboardGrid = ({
 }) => {
   const dashboardApi = useDashboardApi();
   const layoutStyles = useLayoutStyles();
+  const layoutRef = useRef<HTMLDivElement | null>(null);
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
   const { euiTheme } = useEuiTheme();
   const firstRowId = useRef(uuidv4());
@@ -164,6 +165,7 @@ export const DashboardGrid = ({
     // memoizing this component reduces the number of times it gets re-rendered to a minimum
     return (
       <GridLayout
+        layoutRef={layoutRef}
         css={layoutStyles}
         layout={currentLayout}
         gridSettings={{
@@ -187,6 +189,21 @@ export const DashboardGrid = ({
     expandedPanelId,
     viewMode,
   ]);
+
+  useEffect(() => {
+    const observer = new ResizeObserver((test) => {
+      setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 1);
+      observer.disconnect();
+    });
+
+    dashboardApi.scrollToSection$.subscribe((sectionId) => {
+      if (!layoutRef.current || !sectionId) return;
+      observer.observe(layoutRef.current);
+    });
+    return () => {
+      observer.disconnect();
+    };
+  }, [dashboardApi]);
 
   const { dashboardClasses, dashboardStyles } = useMemo(() => {
     return {

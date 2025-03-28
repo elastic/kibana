@@ -24,15 +24,6 @@ export function initializeSectionsManager(initialSections: DashboardSectionMap |
     if (!fastIsEqual(sections ?? [], sections$.value ?? [])) sections$.next(sections);
   }
 
-  const tryToScrollToSection = (id: string) => {
-    const element = document.getElementById(`kbnGridRowHeader-${id}`);
-    if (!element) {
-      window.requestAnimationFrame(() => setTimeout(() => tryToScrollToSection(id), 1));
-    } else {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   return {
     api: {
       sections$,
@@ -52,7 +43,7 @@ export function initializeSectionsManager(initialSections: DashboardSectionMap |
         ]);
 
         // scroll to bottom after row is added
-        tryToScrollToSection(newId);
+        scrollToSection$.next(newId);
       },
       setSections,
       scrollToSection$,

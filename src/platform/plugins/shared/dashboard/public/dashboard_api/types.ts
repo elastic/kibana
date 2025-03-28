@@ -223,6 +223,7 @@ export type DashboardApi = CanExpandPanels &
     runQuickSave: () => Promise<void>;
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;
+    scrollToSection$: PublishingSubject<string | undefined>;
     scrollToTop: () => void;
     setFilters: (filters?: Filter[] | undefined) => void;
     setFullScreenMode: (fullScreenMode: boolean) => void;

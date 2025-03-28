@@ -24,6 +24,7 @@ import { isLayoutEqual } from './utils/equality_checks';
 import { getRowKeysInOrder, resolveGridRow } from './utils/resolve_grid_row';
 
 export type GridLayoutProps = {
+  layoutRef?: React.MutableRefObject<HTMLDivElement | null>;
   layout: GridLayoutData;
   gridSettings: GridSettings;
   onLayoutChange: (newLayout: GridLayoutData) => void;
@@ -33,6 +34,7 @@ export type GridLayoutProps = {
 } & UseCustomDragHandle;
 
 export const GridLayout = ({
+  layoutRef: ref,
   layout,
   gridSettings,
   renderPanelContents,
@@ -153,6 +155,7 @@ export const GridLayout = ({
       <GridHeightSmoother>
         <div
           ref={(divElement) => {
+            if (ref) ref.current = divElement;
             layoutRef.current = divElement;
             setDimensionsRef(divElement);
           }}
