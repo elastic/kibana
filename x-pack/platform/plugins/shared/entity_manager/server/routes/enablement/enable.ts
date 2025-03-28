@@ -117,7 +117,7 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
         }
       }
 
-      const apiKey = await generateEntityDiscoveryAPIKey(server, request, logger);
+      const apiKey = await generateEntityDiscoveryAPIKey(server, request);
       if (apiKey === undefined) {
         return response.customError({
           statusCode: 500,

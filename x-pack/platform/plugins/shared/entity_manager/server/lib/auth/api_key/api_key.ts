@@ -7,7 +7,6 @@
 
 import { KibanaRequest } from '@kbn/core-http-server';
 import { getFakeKibanaRequest } from '@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request';
-import { Logger } from '@kbn/core/server';
 import { EntityManagerServerSetup } from '../../../types';
 import { canManageEntityDefinition, entityDefinitionRuntimePrivileges } from '../privileges';
 import { BUILT_IN_ALLOWED_INDICES } from '../../entities/built_in/constants';
@@ -52,10 +51,9 @@ export const checkIfEntityDiscoveryAPIKeyIsValid = async (
 
 export const generateEntityDiscoveryAPIKey = async (
   server: EntityManagerServerSetup,
-  req: KibanaRequest,
-  logger: Logger
+  req: KibanaRequest
 ): Promise<EntityDiscoveryAPIKey | undefined> => {
-  logger.info('Generating Entity Discovery API key');
+  server.logger.info('Generating Entity Discovery API key');
 
   const apiKey = await server.security.authc.apiKeys.grantAsInternalUser(req, {
     name: 'Entity discovery API key',
