@@ -191,17 +191,18 @@ export const DashboardGrid = ({
   ]);
 
   useEffect(() => {
-    const observer = new ResizeObserver((test) => {
+    const scrollToBottomOnResize = new ResizeObserver(() => {
       setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 1);
-      observer.disconnect();
+      scrollToBottomOnResize.disconnect();
     });
 
-    dashboardApi.scrollToSection$.subscribe((sectionId) => {
+    const scrollToSectionSubscription = dashboardApi.scrollToSection$.subscribe((sectionId) => {
       if (!layoutRef.current || !sectionId) return;
-      observer.observe(layoutRef.current);
+      scrollToBottomOnResize.observe(layoutRef.current);
     });
     return () => {
-      observer.disconnect();
+      scrollToBottomOnResize.disconnect();
+      scrollToSectionSubscription.unsubscribe();
     };
   }, [dashboardApi]);
 
