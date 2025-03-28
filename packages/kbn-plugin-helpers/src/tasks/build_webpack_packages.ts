@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import path from 'path';
-import execa from 'execa';
+import execa, { StdioOption } from 'execa';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { TaskContext } from '../task_context';
@@ -16,25 +15,13 @@ import { TaskContext } from '../task_context';
 export async function buildWebpackPackages({ log, quiet, dist }: TaskContext) {
   log.info('building required artifacts for the optimizer');
 
-  const packagesToBuild = [
-    'src/platform/packages/private/kbn-ui-shared-deps-npm',
-    'src/platform/packages/private/kbn-ui-shared-deps-src',
-    'src/platform/packages/shared/kbn-monaco',
-  ];
+  const stdio: StdioOption[] = quiet
+    ? ['ignore', 'pipe', 'pipe']
+    : ['inherit', 'inherit', 'inherit'];
 
-  async function buildPackage(packageName: string) {
-    const stdioOptions: Array<'ignore' | 'pipe' | 'inherit'> = quiet
-      ? ['ignore', 'pipe', 'pipe']
-      : ['inherit', 'inherit', 'inherit'];
+  const args = ['kbn', 'build-shared'];
+  if (quiet) args.push('--quiet');
+  if (dist) args.push('--dist');
 
-    await execa('yarn', ['build', '--quiet', ...(dist ? ['--dist'] : [])], {
-      cwd: path.resolve(REPO_ROOT, packageName),
-      stdio: stdioOptions,
-    });
-  }
-
-  for (const pkg of packagesToBuild) {
-    await buildPackage(pkg);
-  }
-  log.success('required artifacts were created');
+  await execa('yarn', args, { cwd: REPO_ROOT, stdio });
 }

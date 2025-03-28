@@ -9,7 +9,6 @@
 
 import { run } from '../../lib/spawn.mjs';
 import External from '../../lib/external_packages.js';
-import { buildPackage } from '../../lib/webpack.mjs';
 
 import {
   areNodeModulesPresent,
@@ -94,14 +93,7 @@ export const command = {
     }
 
     await time('pre-build webpack bundles for packages', async () => {
-      const packageNames = [
-        'src/platform/packages/private/kbn-ui-shared-deps-npm',
-        'src/platform/packages/private/kbn-ui-shared-deps-src',
-        'src/platform/packages/shared/kbn-monaco',
-      ];
-      for (const pkg of packageNames) {
-        await buildPackage(pkg, { quiet });
-      }
+      await run('yarn', ['kbn', 'build-shared']);
       log.success('build required webpack bundles for packages');
     });
 

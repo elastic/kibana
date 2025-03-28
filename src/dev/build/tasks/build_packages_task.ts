@@ -12,16 +12,13 @@ import * as Fsp from 'fs/promises';
 
 import * as Peggy from '@kbn/peggy';
 import { asyncForEach } from '@kbn/std';
-import { withFastAsyncTransform, TransformConfig } from '@kbn/babel-transform';
+import { TransformConfig, withFastAsyncTransform } from '@kbn/babel-transform';
 import { makeMatcher } from '@kbn/picomatcher';
 import { PackageFileMap } from '@kbn/repo-file-maps';
 import { getRepoFiles } from '@kbn/get-repo-files';
-
-import { ToolingLog } from '@kbn/tooling-log';
-import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import execa from 'execa';
-import { Task, scanCopy, write, deleteAll } from '../lib';
+import execa, { StdioOption } from 'execa';
+import { deleteAll, scanCopy, Task, write } from '../lib';
 import type { Record } from '../lib/fs_records';
 import { fleetBuildTasks } from './fleet';
 
@@ -109,7 +106,7 @@ export const BuildPackages: Task = {
     const pkgFileMap = new PackageFileMap(packages, await getRepoFiles());
 
     log.info(`Building webpack artifacts which are necessary for the build`);
-    await buildWebpackBundles(log, {
+    await buildWebpackBundles({
       quiet: false,
       dist: true,
     });
@@ -310,31 +307,11 @@ export const BuildPackages: Task = {
   },
 };
 
-export async function buildWebpackBundles(
-  log: ToolingLog,
-  { quiet, dist }: { quiet: boolean; dist: boolean }
-) {
-  async function buildPackage(packagePath: string) {
-    const stdioOptions: Array<'ignore' | 'pipe' | 'inherit'> = quiet
-      ? ['ignore', 'pipe', 'pipe']
-      : ['inherit', 'inherit', 'inherit'];
+export async function buildWebpackBundles({ quiet, dist }: { quiet: boolean; dist: boolean }) {
+  const options = [quiet ? ['--quiet'] : [], dist ? ['--dist'] : []].flat();
+  const stdio: StdioOption[] = quiet
+    ? ['ignore', 'pipe', 'pipe']
+    : ['inherit', 'inherit', 'inherit'];
 
-    await execa('yarn', ['build', ...(dist ? ['--dist'] : [])], {
-      cwd: path.resolve(REPO_ROOT, packagePath),
-      env: {
-        ...process.env,
-      },
-      stdio: stdioOptions,
-    });
-  }
-
-  const packageNames = [
-    'src/platform/packages/private/kbn-ui-shared-deps-npm',
-    'src/platform/packages/private/kbn-ui-shared-deps-src',
-    'src/platform/packages/shared/kbn-monaco',
-  ];
-  for (const packagePath of packageNames) {
-    log.info(`building ${packagePath}`);
-    await buildPackage(packagePath);
-  }
+  await execa('yarn', ['kbn', 'build-shared', ...options], { cwd: REPO_ROOT, stdio });
 }
