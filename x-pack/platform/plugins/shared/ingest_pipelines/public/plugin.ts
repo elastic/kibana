@@ -7,12 +7,33 @@
 
 import { i18n } from '@kbn/i18n';
 import { Subscription } from 'rxjs';
-import type { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type {
+  CoreStart,
+  CoreSetup,
+  Plugin,
+  PluginInitializerContext,
+  ScopedHistory,
+} from '@kbn/core/public';
 
+import React from 'react';
 import { PLUGIN_ID } from '../common/constants';
-import { uiMetricService, apiService } from './application/services';
-import type { SetupDependencies, StartDependencies, ILicense, Config } from './types';
+import {
+  uiMetricService,
+  apiService,
+  documentationService,
+  breadcrumbService,
+  fileReaderService,
+} from './application/services';
+import type {
+  SetupDependencies,
+  StartDependencies,
+  ILicense,
+  Config,
+  IngestPipelinesPluginStart,
+  IngestPipelineFlyoutProps,
+} from './types';
 import { IngestPipelinesLocatorDefinition } from './locator';
+import { IngestPipelineFlyout } from './application/sections/pipelines_list/ingest_pipeline_flyout_embeddable';
 
 export class IngestPipelinesPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
@@ -73,10 +94,51 @@ export class IngestPipelinesPlugin
     );
   }
 
-  public start(core: CoreStart, { licensing }: StartDependencies) {
-    this.licensingSubscription = licensing?.license$.subscribe((license) => {
+  public start(core: CoreStart, startDependencies: StartDependencies): IngestPipelinesPluginStart {
+    this.licensingSubscription = startDependencies.licensing?.license$.subscribe((license) => {
       this.license = license;
     });
+
+    return {
+      getIngestPipelineFlyoutComponent: (deps: { history: ScopedHistory<unknown> }) => {
+        const { docLinks, application, executionContext, overlays, notifications } = core;
+
+        documentationService.setup(docLinks);
+        // disable breadcrumb service for the flyout
+        breadcrumbService.setup(() => {});
+
+        const services = {
+          breadcrumbs: breadcrumbService,
+          metric: uiMetricService,
+          documentation: documentationService,
+          api: apiService,
+          fileReader: fileReaderService,
+          notifications,
+          history: deps.history,
+          uiSettings: core.uiSettings,
+          settings: core.settings,
+          share: startDependencies.share,
+          fileUpload: startDependencies.fileUpload,
+          application,
+          executionContext,
+          license: this.license,
+          consolePlugin: startDependencies.console,
+          overlays,
+          http: core.http,
+          config: {
+            enableManageProcessors: this.config.enableManageProcessors !== false,
+          },
+        };
+
+        return (props: IngestPipelineFlyoutProps) => {
+          return React.createElement(IngestPipelineFlyout, {
+            services,
+            coreServices: core,
+            ...props,
+          });
+        };
+      },
+    };
   }
 
   public stop() {

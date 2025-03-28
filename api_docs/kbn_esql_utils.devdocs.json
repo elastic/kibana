@@ -1533,7 +1533,9 @@
         "label": "getValuesFromQueryField",
         "description": [],
         "signature": [
-          "(queryString: string) => string | undefined"
+          "(queryString: string, cursorPosition?: ",
+          "Position",
+          " | undefined) => string | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
         "deprecated": false,
@@ -1553,6 +1555,22 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getValuesFromQueryField.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "cursorPosition",
+            "description": [],
+            "signature": [
+              "Position",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],

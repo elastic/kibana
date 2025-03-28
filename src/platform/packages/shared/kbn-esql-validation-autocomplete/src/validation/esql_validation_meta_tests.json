@@ -2643,6 +2643,7 @@
     {
       "query": "from a_index | rename s* as strings",
       "error": [
+        "Using wildcards (*) in RENAME is not allowed [s*]",
         "Unknown column [s*]",
         "Unknown column [strings]"
       ],
@@ -2704,14 +2705,15 @@
     {
       "query": "from a_index | dissect doubleField \"%{firstWord}\"",
       "error": [
-        "DISSECT only supports keyword, text types values, found [doubleField] of type [double]"
+        "DISSECT only supports values of type [keyword, text]. Found [doubleField] of type [double]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | dissect textField \"%{firstWord}\" option ",
       "error": [
-        "SyntaxError: mismatched input '<EOF>' expecting '='"
+        "SyntaxError: mismatched input '<EOF>' expecting '='",
+        "Expected [APPEND_SEPARATOR] in [DISSECT] but found [option]"
       ],
       "warning": []
     },
@@ -2719,14 +2721,14 @@
       "query": "from a_index | dissect textField \"%{firstWord}\" option = ",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, '['}",
-        "Invalid option for DISSECT: [option]"
+        "Expected [APPEND_SEPARATOR] in [DISSECT] but found [option]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | dissect textField \"%{firstWord}\" option = 1",
       "error": [
-        "Invalid option for DISSECT: [option]"
+        "Expected [APPEND_SEPARATOR] in [DISSECT] but found [option]"
       ],
       "warning": []
     },
@@ -2738,14 +2740,14 @@
     {
       "query": "from a_index | dissect textField \"%{firstWord}\" ignore_missing = true",
       "error": [
-        "Invalid option for DISSECT: [ignore_missing]"
+        "Expected [APPEND_SEPARATOR] in [DISSECT] but found [ignore_missing]"
       ],
       "warning": []
     },
     {
       "query": "from a_index | dissect textField \"%{firstWord}\" append_separator = true",
       "error": [
-        "Invalid value for DISSECT append_separator: expected a string, but was [true]"
+        "Invalid value for DISSECT APPEND_SEPARATOR: expected a string, but was [true]"
       ],
       "warning": []
     },
@@ -2797,7 +2799,7 @@
     {
       "query": "from a_index | grok doubleField \"%{firstWord}\"",
       "error": [
-        "GROK only supports keyword, text types values, found [doubleField] of type [double]"
+        "GROK only supports values of type [keyword, text]. Found [doubleField] of type [double]"
       ],
       "warning": []
     },
@@ -3212,6 +3214,16 @@
     },
     {
       "query": "from a_index | where ipField != ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateField > ?_tstart AND dateField < ?_tend",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where dateNanosField > ?_tstart AND dateNanosField < ?_tend",
       "error": [],
       "warning": []
     },
@@ -9294,7 +9306,7 @@
     {
       "query": "from a_index | enrich _:policy",
       "error": [
-        "Unrecognized value [_] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]"
+        "Unrecognized value [_] for ENRICH, mode needs to be one of [_any, _coordinator, _remote]"
       ],
       "warning": []
     },
@@ -9324,7 +9336,7 @@
     {
       "query": "from a_index | enrich any:policy",
       "error": [
-        "Unrecognized value [any] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]"
+        "Unrecognized value [any] for ENRICH, mode needs to be one of [_any, _coordinator, _remote]"
       ],
       "warning": []
     },
@@ -9451,7 +9463,7 @@
     {
       "query": "from a_index | enrich _unknown:policy",
       "error": [
-        "Unrecognized value [_unknown] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]"
+        "Unrecognized value [_unknown] for ENRICH, mode needs to be one of [_any, _coordinator, _remote]"
       ],
       "warning": []
     },
