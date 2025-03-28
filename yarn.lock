@@ -11786,10 +11786,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-is@~18.2.0":
-  version "18.2.4"
-  resolved "https://registry.yarnpkg.com/@types/react-is/-/react-is-18.2.4.tgz#95a92829de452662348ce08349ca65623c50daf7"
-  integrity sha512-wBc7HgmbCcrvw0fZjxbgz/xrrlZKzEqmABBMeSvpTvdm25u6KI6xdIi9pRE2G0C1Lw5ETFdcn4UbYZ4/rpqUYw==
+"@types/react-is@~19.0.0":
+  version "19.0.0"
+  resolved "https://registry.yarnpkg.com/@types/react-is/-/react-is-19.0.0.tgz#eccf45556cf1858e9116eed1f9e7b51496501a7a"
+  integrity sha512-71dSZeeJ0t3aoPyY9x6i+JNSvg5m9EF2i2OlSZI5QoJuI8Ocgor610i+4A10TQmURR+0vLwcVCEYFpXdzM1Biw==
   dependencies:
     "@types/react" "*"
 
@@ -26401,10 +26401,10 @@ react-is@^17.0.0, react-is@^17.0.1, react-is@^17.0.2:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.2.tgz#e691d4a8e9c789365655539ab372762b0efb54f0"
   integrity sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==
 
-react-is@~18.2.0:
-  version "18.2.0"
-  resolved "https://registry.npmjs.org/react-is/-/react-is-18.2.0.tgz"
-  integrity sha512-xWGDIW6x921xtzPkhiULtthJHoJvBbF3q26fzloPCK0hsvxtPVelvftw3zjbHWSkR2km9Z+4uxbDDK/6Zw9B8w==
+react-is@~19.1.0:
+  version "19.1.0"
+  resolved "https://registry.yarnpkg.com/react-is/-/react-is-19.1.0.tgz#805bce321546b7e14c084989c77022351bbdd11b"
+  integrity sha512-Oe56aUPnkHyyDxxkvqtd7KkdQP5uIUfHxd5XTb3wE9d/kRnZLmKbDB0GWk919tdQ+mxxPtG6EAs6RMT6i1qtHg==
 
 react-lifecycles-compat@^3.0.4:
   version "3.0.4"
