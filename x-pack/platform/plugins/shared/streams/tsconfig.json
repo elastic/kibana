@@ -43,6 +43,7 @@
     "@kbn/utils",
     "@kbn/core-saved-objects-server-internal",
     "@kbn/core-analytics-server",
-    "@kbn/es-types"
+    "@kbn/es-types",
+    "@kbn/zod-helpers"
   ]
 }
