@@ -24,12 +24,6 @@ export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
   options: {
     tags: [],
   },
-  security: {
-    authz: {
-      enabled: false,
-      reason: 'AUDIT',
-    },
-  },
   params: z.object({
     body: z.object({
       investigationId: z.string(),
