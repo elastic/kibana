@@ -24,7 +24,7 @@ import { monaco as monacoEditor } from '@kbn/monaco';
 
 import { Controller, useController, useFormContext } from 'react-hook-form';
 import { ChatForm, ChatFormFields } from '../../types';
-import { FullHeight, QueryViewTitlePanel } from './styles';
+import { FullHeight, QueryViewTitlePanel, PanelFillContainer } from './styles';
 import { formatElasticsearchQueryString } from '../../utils/user_query';
 
 export const ElasticsearchQueryViewer = ({
@@ -151,7 +151,7 @@ export const ElasticsearchQueryViewer = ({
           ))}
         </EuiSplitPanel.Inner>
       ) : null}
-      <EuiSplitPanel.Inner paddingSize="none">
+      <EuiSplitPanel.Inner paddingSize="none" css={PanelFillContainer}>
         <Controller
           control={control}
           name={ChatFormFields.userElasticsearchQuery}

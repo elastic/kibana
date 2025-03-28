@@ -7,7 +7,6 @@
 
 import React, { useEffect } from 'react';
 import { useController } from 'react-hook-form';
-import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,7 +23,12 @@ import { ElasticsearchQueryOutput } from './query_output';
 import { QuerySidePanel } from './query_side_panel';
 import { useElasticsearchQuery } from '../../hooks/use_elasticsearch_query';
 import { ChatForm, ChatFormFields, PlaygroundPageMode } from '../../types';
-import { FullHeight, QueryViewContainer, QueryViewSidebarContainer } from './styles';
+import {
+  FullHeight,
+  QueryViewContainer,
+  QueryViewSidebarContainer,
+  PanelFillContainer,
+} from './styles';
 import { disableExecuteQuery } from '../../utils/user_query';
 
 export const SearchQueryMode = ({ pageMode }: { pageMode: PlaygroundPageMode }) => {
@@ -62,14 +66,7 @@ export const SearchQueryMode = ({ pageMode }: { pageMode: PlaygroundPageMode }) 
     >
       <EuiFlexGroup>
         <EuiFlexItem grow={6} css={QueryViewContainer(euiTheme)}>
-          <EuiPanel
-            paddingSize="none"
-            hasShadow={false}
-            css={css({
-              // This is needed to maintain the resizable container height when rendering output editor with larger content
-              height: '95%',
-            })}
-          >
+          <EuiPanel paddingSize="none" hasShadow={false} css={PanelFillContainer}>
             <EuiResizableContainer direction="vertical" css={FullHeight}>
               {(EuiResizablePanel, EuiResizableButton) => (
                 <>
