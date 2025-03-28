@@ -15,9 +15,9 @@ import {
   mockAnonymizedEventsReplacements,
 } from '../../mock/mock_anonymized_events';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
-import { getDefaultRefinePrompt } from '../refine/helpers/get_default_refine_prompt';
 import { getAnonymizedEventsFromState } from './helpers/get_anonymized_events_from_state';
 import { getGenerateNode } from '.';
+import { DEFEND_INSIGHTS } from '../../../../../prompt/prompts';
 
 const insightTimestamp = new Date().toISOString();
 
@@ -43,7 +43,7 @@ const mockLogger = {
 let mockLlm: ActionsClientLlm;
 
 const initialGraphState: GraphState = {
-  prompt: 'test prompt',
+  prompt: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.DEFAULT,
   anonymizedEvents: [...mockAnonymizedEvents],
   combinedGenerations: '',
   combinedRefinements: '',
@@ -56,9 +56,21 @@ const initialGraphState: GraphState = {
   maxHallucinationFailures: 5,
   maxRepeatedGenerations: 3,
   refinements: [],
-  refinePrompt: getDefaultRefinePrompt(),
+  refinePrompt: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.REFINE,
   replacements: mockAnonymizedEventsReplacements,
   unrefinedResults: null,
+  continuePrompt: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.CONTINUE,
+};
+
+const prompts = {
+  default: '',
+  refine: '',
+  continue: '',
+  group: '',
+  events: '',
+  eventsId: '',
+  eventsEndpointId: '',
+  eventsValue: '',
 };
 
 describe('getGenerateNode', () => {
@@ -82,19 +94,24 @@ describe('getGenerateNode', () => {
       insightType: 'incompatible_antivirus',
       llm: mockLlm,
       logger: mockLogger,
+      prompts,
     });
 
     expect(typeof generateNode).toBe('function');
   });
 
   it('invokes the chain with the expected events from state and formatting instructions', async () => {
-    const mockInvoke = getChainWithFormatInstructions('incompatible_antivirus', mockLlm).chain
-      .invoke as jest.Mock;
+    const mockInvoke = getChainWithFormatInstructions({
+      insightType: 'incompatible_antivirus',
+      llm: mockLlm,
+      prompts,
+    }).chain.invoke as jest.Mock;
 
     const generateNode = getGenerateNode({
       insightType: 'incompatible_antivirus',
       llm: mockLlm,
       logger: mockLogger,
+      prompts,
     });
 
     await generateNode(initialGraphState);
@@ -117,8 +134,11 @@ ${getAnonymizedEventsFromState(initialGraphState).join('\n\n')}
       'You asked for some JSON, here it is:\n```json\n{"key": "value"}\n```\nI hope that works for you.';
 
     const mockLlmWithResponse = new FakeLLM({ response }) as unknown as ActionsClientLlm;
-    const mockInvoke = getChainWithFormatInstructions('incompatible_antivirus', mockLlmWithResponse)
-      .chain.invoke as jest.Mock;
+    const mockInvoke = getChainWithFormatInstructions({
+      insightType: 'incompatible_antivirus',
+      llm: mockLlmWithResponse,
+      prompts,
+    }).chain.invoke as jest.Mock;
 
     mockInvoke.mockResolvedValue(response);
 
@@ -126,6 +146,7 @@ ${getAnonymizedEventsFromState(initialGraphState).join('\n\n')}
       insightType: 'incompatible_antivirus',
       llm: mockLlmWithResponse,
       logger: mockLogger,
+      prompts,
     });
 
     const state = await generateNode(initialGraphState);
@@ -148,10 +169,11 @@ ${getAnonymizedEventsFromState(initialGraphState).join('\n\n')}
     const mockLlmWithHallucination = new FakeLLM({
       response: hallucinatedResponse,
     }) as unknown as ActionsClientLlm;
-    const mockInvoke = getChainWithFormatInstructions(
-      'incompatible_antivirus',
-      mockLlmWithHallucination
-    ).chain.invoke as jest.Mock;
+    const mockInvoke = getChainWithFormatInstructions({
+      insightType: 'incompatible_antivirus',
+      llm: mockLlmWithHallucination,
+      prompts,
+    }).chain.invoke as jest.Mock;
 
     mockInvoke.mockResolvedValue(hallucinatedResponse);
 
@@ -159,6 +181,7 @@ ${getAnonymizedEventsFromState(initialGraphState).join('\n\n')}
       insightType: 'incompatible_antivirus',
       llm: mockLlmWithHallucination,
       logger: mockLogger,
+      prompts,
     });
 
     const withPreviousGenerations = {
@@ -185,10 +208,11 @@ ${getAnonymizedEventsFromState(initialGraphState).join('\n\n')}
     const mockLlmWithRepeatedGenerations = new FakeLLM({
       response: repeatedResponse,
     }) as unknown as ActionsClientLlm;
-    const mockInvoke = getChainWithFormatInstructions(
-      'incompatible_antivirus',
-      mockLlmWithRepeatedGenerations
-    ).chain.invoke as jest.Mock;
+    const mockInvoke = getChainWithFormatInstructions({
+      insightType: 'incompatible_antivirus',
+      llm: mockLlmWithRepeatedGenerations,
+      prompts,
+    }).chain.invoke as jest.Mock;
 
     mockInvoke.mockResolvedValue(repeatedResponse);
 
@@ -196,6 +220,7 @@ ${getAnonymizedEventsFromState(initialGraphState).join('\n\n')}
       insightType: 'incompatible_antivirus',
       llm: mockLlmWithRepeatedGenerations,
       logger: mockLogger,
+      prompts,
     });
 
     const withPreviousGenerations = {
@@ -221,8 +246,11 @@ ${getAnonymizedEventsFromState(initialGraphState).join('\n\n')}
     const mockLlmWithResponse = new FakeLLM({
       response,
     }) as unknown as ActionsClientLlm;
-    const mockInvoke = getChainWithFormatInstructions('incompatible_antivirus', mockLlmWithResponse)
-      .chain.invoke as jest.Mock;
+    const mockInvoke = getChainWithFormatInstructions({
+      insightType: 'incompatible_antivirus',
+      llm: mockLlmWithResponse,
+      prompts,
+    }).chain.invoke as jest.Mock;
 
     mockInvoke.mockResolvedValue(response);
 
@@ -230,6 +258,7 @@ ${getAnonymizedEventsFromState(initialGraphState).join('\n\n')}
       insightType: 'incompatible_antivirus',
       llm: mockLlmWithResponse,
       logger: mockLogger,
+      prompts,
     });
 
     const withPreviousGenerations = {
@@ -267,8 +296,11 @@ ${getAnonymizedEventsFromState(initialGraphState).join('\n\n')}
     const mockLlmWithResponse = new FakeLLM({
       response: rawInsights,
     }) as unknown as ActionsClientLlm;
-    const mockInvoke = getChainWithFormatInstructions('incompatible_antivirus', mockLlmWithResponse)
-      .chain.invoke as jest.Mock;
+    const mockInvoke = getChainWithFormatInstructions({
+      insightType: 'incompatible_antivirus',
+      llm: mockLlmWithResponse,
+      prompts,
+    }).chain.invoke as jest.Mock;
 
     mockInvoke.mockResolvedValue(rawInsights);
 
@@ -276,6 +308,7 @@ ${getAnonymizedEventsFromState(initialGraphState).join('\n\n')}
       insightType: 'incompatible_antivirus',
       llm: mockLlmWithResponse,
       logger: mockLogger,
+      prompts,
     });
 
     const withPreviousGenerations = {
@@ -321,8 +354,11 @@ ${getAnonymizedEventsFromState(initialGraphState).join('\n\n')}
     const mockLlmWithResponse = new FakeLLM({
       response: rawInsights,
     }) as unknown as ActionsClientLlm;
-    const mockInvoke = getChainWithFormatInstructions('incompatible_antivirus', mockLlmWithResponse)
-      .chain.invoke as jest.Mock;
+    const mockInvoke = getChainWithFormatInstructions({
+      insightType: 'incompatible_antivirus',
+      llm: mockLlmWithResponse,
+      prompts,
+    }).chain.invoke as jest.Mock;
 
     mockInvoke.mockResolvedValue(rawInsights);
 
@@ -330,6 +366,7 @@ ${getAnonymizedEventsFromState(initialGraphState).join('\n\n')}
       insightType: 'incompatible_antivirus',
       llm: mockLlmWithResponse,
       logger: mockLogger,
+      prompts,
     });
 
     const withPreviousGenerations = {

@@ -59,6 +59,10 @@ import {
   InlineCastContext,
   IndexPatternContext,
   InlinestatsCommandContext,
+  MatchExpressionContext,
+  MatchBooleanExpressionContext,
+  MapExpressionContext,
+  EntryExpressionContext,
 } from '../antlr/esql_parser';
 import {
   createSource,
@@ -83,6 +87,7 @@ import {
   createFunctionCall,
   createParam,
   createLiteralString,
+  createBinaryExpression,
 } from './factories';
 
 import {
@@ -94,11 +99,21 @@ import {
   ESQLAstField,
   ESQLInlineCast,
   ESQLOrderExpression,
+  ESQLBinaryExpression,
+  InlineCastingType,
+  ESQLMap,
+  ESQLMapEntry,
+  ESQLStringLiteral,
+  ESQLAstExpression,
 } from '../types';
 import { firstItem, lastItem } from '../visitor/utils';
+import { Builder } from '../builder';
+import { getPosition } from './helpers';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
-  const fromContexts = ctx.getTypedRuleContexts(IndexPatternContext);
+  const fromContexts = ctx
+    .indexPatternAndMetadataFields()
+    .getTypedRuleContexts(IndexPatternContext);
   return fromContexts.map((sourceCtx) => createSource(sourceCtx));
 }
 
@@ -303,8 +318,7 @@ function visitOperatorExpression(
       fn.args.push(arg);
     }
     return fn;
-  }
-  if (ctx instanceof ArithmeticBinaryContext) {
+  } else if (ctx instanceof ArithmeticBinaryContext) {
     const fn = createFunction(getMathOperation(ctx), ctx, undefined, 'binary-expression');
     const args = [visitOperatorExpression(ctx._left), visitOperatorExpression(ctx._right)];
     for (const arg of args) {
@@ -316,8 +330,7 @@ function visitOperatorExpression(
     const argsLocationExtends = computeLocationExtends(fn);
     fn.location = argsLocationExtends;
     return fn;
-  }
-  if (ctx instanceof OperatorExpressionDefaultContext) {
+  } else if (ctx instanceof OperatorExpressionDefaultContext) {
     return visitPrimaryExpression(ctx.primaryExpression());
   }
 }
@@ -417,14 +430,11 @@ export function visitRenameClauses(clausesCtx: RenameClauseContext[]): ESQLAstIt
 export function visitPrimaryExpression(ctx: PrimaryExpressionContext): ESQLAstItem | ESQLAstItem[] {
   if (ctx instanceof ConstantDefaultContext) {
     return getConstant(ctx.constant());
-  }
-  if (ctx instanceof DereferenceContext) {
+  } else if (ctx instanceof DereferenceContext) {
     return createColumn(ctx.qualifiedName());
-  }
-  if (ctx instanceof ParenthesizedExpressionContext) {
+  } else if (ctx instanceof ParenthesizedExpressionContext) {
     return collectBooleanExpression(ctx.booleanExpression());
-  }
-  if (ctx instanceof FunctionContext) {
+  } else if (ctx instanceof FunctionContext) {
     const functionExpressionCtx = ctx.functionExpression();
     const fn = createFunctionCall(ctx);
     const asteriskArg = functionExpressionCtx.ASTERISK()
@@ -437,16 +447,57 @@ export function visitPrimaryExpression(ctx: PrimaryExpressionContext): ESQLAstIt
       .booleanExpression_list()
       .flatMap(collectBooleanExpression)
       .filter(nonNullable);
+
     if (functionArgs.length) {
       fn.args.push(...functionArgs);
     }
+
+    const mapExpressionCtx = functionExpressionCtx.mapExpression();
+
+    if (mapExpressionCtx) {
+      const trailingMap = visitMapExpression(mapExpressionCtx);
+
+      fn.args.push(trailingMap);
+    }
+
     return fn;
-  }
-  if (ctx instanceof InlineCastContext) {
+  } else if (ctx instanceof InlineCastContext) {
     return collectInlineCast(ctx);
   }
   return createUnknownItem(ctx);
 }
+
+export const visitMapExpression = (ctx: MapExpressionContext): ESQLMap => {
+  const map = Builder.expression.map(
+    {},
+    {
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: Boolean(ctx.exception),
+    }
+  );
+  const entryCtxs = ctx.entryExpression_list();
+
+  for (const entryCtx of entryCtxs) {
+    const entry = visitMapEntryExpression(entryCtx);
+
+    map.entries.push(entry);
+  }
+
+  return map;
+};
+
+export const visitMapEntryExpression = (ctx: EntryExpressionContext): ESQLMapEntry => {
+  const keyCtx = ctx._key;
+  const valueCtx = ctx._value;
+  const key = createLiteralString(keyCtx) as ESQLStringLiteral;
+  const value = getConstant(valueCtx) as ESQLAstExpression;
+  const entry = Builder.expression.entry(key, value, {
+    location: getPosition(ctx.start, ctx.stop),
+    incomplete: Boolean(ctx.exception),
+  });
+
+  return entry;
+};
 
 function collectInlineCast(ctx: InlineCastContext): ESQLInlineCast {
   const primaryExpression = visitPrimaryExpression(ctx.primaryExpression());
@@ -512,9 +563,15 @@ function collectDefaultExpression(ctx: BooleanExpressionContext) {
 
 export function collectBooleanExpression(ctx: BooleanExpressionContext | undefined): ESQLAstItem[] {
   const ast: ESQLAstItem[] = [];
+
   if (!ctx) {
     return ast;
   }
+
+  if (ctx instanceof MatchExpressionContext) {
+    return [visitMatchExpression(ctx)];
+  }
+
   return ast
     .concat(
       collectLogicalExpression(ctx),
@@ -524,6 +581,41 @@ export function collectBooleanExpression(ctx: BooleanExpressionContext | undefin
     )
     .flat();
 }
+
+type ESQLAstMatchBooleanExpression = ESQLColumn | ESQLBinaryExpression | ESQLInlineCast;
+
+const visitMatchExpression = (ctx: MatchExpressionContext): ESQLAstMatchBooleanExpression => {
+  return visitMatchBooleanExpression(ctx.matchBooleanExpression());
+};
+
+const visitMatchBooleanExpression = (
+  ctx: MatchBooleanExpressionContext
+): ESQLAstMatchBooleanExpression => {
+  let expression: ESQLAstMatchBooleanExpression = createColumn(ctx.qualifiedName());
+  const dataTypeCtx = ctx.dataType();
+  const constantCtx = ctx.constant();
+
+  if (dataTypeCtx) {
+    expression = Builder.expression.inlineCast(
+      {
+        castType: dataTypeCtx.getText().toLowerCase() as InlineCastingType,
+        value: expression,
+      },
+      {
+        location: getPosition(ctx.start, dataTypeCtx.stop),
+        incomplete: Boolean(ctx.exception),
+      }
+    );
+  }
+
+  if (constantCtx) {
+    const constantExpression = getConstant(constantCtx);
+
+    expression = createBinaryExpression(':', ctx, [expression, constantExpression]);
+  }
+
+  return expression;
+};
 
 export function visitField(ctx: FieldContext) {
   if (ctx.qualifiedName() && ctx.ASSIGN()) {

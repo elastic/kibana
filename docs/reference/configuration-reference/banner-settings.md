@@ -2,6 +2,9 @@
 navigation_title: "Banners settings"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/banners-settings-kb.html
+applies_to:
+  deployment:
+    self: all
 ---
 
 # Banner settings in {{kib}} [banners-settings-kb]
@@ -25,6 +28,9 @@ Banners are a [subscription feature](https://www.elastic.co/subscriptions).
 
 `xpack.banners.textColor`
 :   The color for the banner text. Defaults to `#8A6A0A`.
+
+`xpack.banners.linkColor`
+:   The color for the banner link text. Defaults to `#0B64DD`.
 
 `xpack.banners.backgroundColor`
 :   The color of the banner background. Defaults to `#FFF9E8`.

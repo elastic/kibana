@@ -6,13 +6,12 @@
  */
 
 import React, { useCallback } from 'react';
-import { css } from '@emotion/react';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { useWatch } from 'react-hook-form';
 import { PLUGIN_ID } from '../../common';
 import { QueryMode } from './query_mode/query_mode';
+import { SearchQueryMode } from './query_mode/search_query_mode';
 import { ChatSetupPage } from './setup_page/chat_setup_page';
 import { Header } from './header';
 import { useLoadConnectors } from '../hooks/use_load_connectors';
@@ -30,13 +29,6 @@ import {
   SEARCH_PLAYGROUND_CHAT_PATH,
   SEARCH_PLAYGROUND_SEARCH_PATH,
 } from '../routes';
-
-const SectionStyle = css`
-  display: flex;
-  flex-grow: 1;
-  position: absolute;
-  inset: 0;
-`;
 
 export interface AppProps {
   showDocs?: boolean;
@@ -67,16 +59,6 @@ export const App: React.FC<AppProps> = ({ showDocs = false }) => {
     hasConnectors: Boolean(connectors?.length),
   });
 
-  const restrictedWidth =
-    pageMode === PlaygroundPageMode.search && viewMode === PlaygroundViewMode.preview;
-  const paddingSize =
-    pageMode === PlaygroundPageMode.search && viewMode === PlaygroundViewMode.preview
-      ? 'xl'
-      : 'none';
-  const useSectionStyling = !(
-    pageMode === PlaygroundPageMode.search && viewMode === PlaygroundViewMode.preview
-  );
-
   return (
     <>
       <Header
@@ -85,39 +67,27 @@ export const App: React.FC<AppProps> = ({ showDocs = false }) => {
         isActionsDisabled={showSetupPage}
         onSelectPageModeChange={handlePageModeChange}
       />
-      <KibanaPageTemplate.Section
-        alignment="top"
-        restrictWidth={restrictedWidth}
-        grow
-        css={{
-          position: 'relative',
-        }}
-        contentProps={{ css: useSectionStyling ? SectionStyle : undefined }}
-        paddingSize={paddingSize}
-        className="eui-fullHeight"
-      >
-        <Routes>
-          {showSetupPage ? (
-            <>
-              <Route path={SEARCH_PLAYGROUND_CHAT_PATH} component={ChatSetupPage} />
-              {isSearchModeEnabled && (
-                <Route path={SEARCH_PLAYGROUND_SEARCH_PATH} component={SearchPlaygroundSetupPage} />
-              )}
-            </>
-          ) : (
-            <>
-              <Route exact path={SEARCH_PLAYGROUND_CHAT_PATH} component={Chat} />
-              <Route exact path={PLAYGROUND_CHAT_QUERY_PATH} component={QueryMode} />
-              {isSearchModeEnabled && (
-                <>
-                  <Route exact path={SEARCH_PLAYGROUND_SEARCH_PATH} component={SearchMode} />
-                  <Route exact path={PLAYGROUND_SEARCH_QUERY_PATH} component={QueryMode} />
-                </>
-              )}
-            </>
-          )}
-        </Routes>
-      </KibanaPageTemplate.Section>
+      <Routes>
+        {showSetupPage ? (
+          <>
+            <Route path={SEARCH_PLAYGROUND_CHAT_PATH} component={ChatSetupPage} />
+            {isSearchModeEnabled && (
+              <Route path={SEARCH_PLAYGROUND_SEARCH_PATH} component={SearchPlaygroundSetupPage} />
+            )}
+          </>
+        ) : (
+          <>
+            <Route exact path={SEARCH_PLAYGROUND_CHAT_PATH} component={Chat} />
+            <Route exact path={PLAYGROUND_CHAT_QUERY_PATH} component={QueryMode} />
+            {isSearchModeEnabled && (
+              <>
+                <Route exact path={SEARCH_PLAYGROUND_SEARCH_PATH} component={SearchMode} />
+                <Route exact path={PLAYGROUND_SEARCH_QUERY_PATH} component={SearchQueryMode} />
+              </>
+            )}
+          </>
+        )}
+      </Routes>
     </>
   );
 };

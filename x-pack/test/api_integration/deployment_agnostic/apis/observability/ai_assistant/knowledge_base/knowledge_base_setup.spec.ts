@@ -13,7 +13,7 @@ import {
   TINY_ELSER,
   deleteInferenceEndpoint,
   setupKnowledgeBase,
-} from './helpers';
+} from '../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const ml = getService('ml');
