@@ -545,6 +545,7 @@ export function ChatBody({
                   }
                   onStopGenerating={stop}
                   onActionClick={handleActionClick}
+                  isArchived={isArchived}
                 />
               )}
             </EuiPanel>

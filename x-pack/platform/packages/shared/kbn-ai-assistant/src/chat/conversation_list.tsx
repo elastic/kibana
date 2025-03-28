@@ -200,18 +200,12 @@ export function ConversationList({
 
   const toggleConversationsSection = (isOpen: boolean) => {
     setIsConversationsOpen(isOpen);
-
-    if (archivedConversations?.length) {
-      setIsArchivedOpen(!isOpen);
-    }
+    setIsArchivedOpen(!isOpen);
   };
 
   const toggleArchivedSection = (isOpen: boolean) => {
     setIsArchivedOpen(isOpen);
-
-    if (activeConversations?.length) {
-      setIsConversationsOpen(!isOpen);
-    }
+    setIsConversationsOpen(!isOpen);
   };
 
   useEffect(() => {
@@ -223,6 +217,9 @@ export function ConversationList({
       setIsArchivedOpen(false);
     }
   }, [selectedConversation]);
+
+  console.log("isConversationsOpen", isConversationsOpen);
+  console.log("isArchivedOpen", isArchivedOpen);
 
   const loader = (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
@@ -297,7 +294,6 @@ export function ConversationList({
                       iconSize="m"
                       onToggle={(isOpen) => toggleConversationsSection(isOpen)}
                       forceState={isConversationsOpen ? 'open' : 'closed'}
-                      isDisabled={!activeConversations.length}
                     >
                       <div className={scrollSectionClass(scrollBarStyles)}>
                         {isLoading ? loader : null}
@@ -320,7 +316,6 @@ export function ConversationList({
                       onToggle={(isOpen) => toggleArchivedSection(isOpen)}
                       forceState={isArchivedOpen ? 'open' : 'closed'}
                       borders="horizontal"
-                      isDisabled={!archivedConversations.length}
                     >
                       <div className={scrollSectionClass(scrollBarStyles)}>
                         {isLoading ? loader : null}
