@@ -11,6 +11,7 @@ import { range } from 'lodash';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { DETECTION_ENGINE_RULES_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
+import { RuleAction } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   getImportExceptionsListItemSchemaMock,
   getImportExceptionsListSchemaMock,
@@ -30,122 +31,90 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
 import { createConnector } from '../../../utils/connectors';
 
-const getImportRuleBuffer = (connectorId: string) => {
-  const rule1 = {
-    id: '53aad690-544e-11ec-a349-11361cc441c4',
-    updated_at: '2021-12-03T15:33:13.271Z',
-    updated_by: 'elastic',
-    created_at: '2021-12-03T15:33:13.271Z',
-    created_by: 'elastic',
-    name: '7.16 test with action',
-    tags: [],
-    interval: '5m',
-    enabled: true,
-    description: 'test',
-    risk_score: 21,
-    severity: 'low',
-    license: '',
-    output_index: '',
-    meta: { from: '1m', kibana_siem_app_url: 'http://0.0.0.0:5601/s/7/app/security' },
-    author: [],
-    false_positives: [],
-    from: 'now-360s',
-    rule_id: 'aa525d7c-8948-439f-b32d-27e00c750246',
-    max_signals: 100,
-    risk_score_mapping: [],
-    severity_mapping: [],
-    threat: [],
-    to: 'now',
-    references: [],
-    version: 1,
-    exceptions_list: [],
-    immutable: false,
-    type: 'query',
-    language: 'kuery',
-    index: [
-      'apm-*-transaction*',
-      'traces-apm*',
-      'auditbeat-*',
-      'endgame-*',
-      'filebeat-*',
-      'logs-*',
-      'packetbeat-*',
-      'winlogbeat-*',
-    ],
-    query: '*:*',
-    filters: [],
-    throttle: '1h',
-    actions: [
-      {
-        group: 'default',
-        id: connectorId,
-        params: {
-          message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
-        },
-        action_type_id: '.slack',
+const getBaseRuleWithActions = (
+  actions: RuleAction[] = [
+    {
+      group: 'default',
+      id: 'default-id',
+      params: {
+        message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
       },
-    ],
-  };
+      action_type_id: '.slack',
+    },
+  ]
+) => ({
+  id: '53aad690-544e-11ec-a349-11361cc441c4',
+  updated_at: '2021-12-03T15:33:13.271Z',
+  updated_by: 'elastic',
+  created_at: '2021-12-03T15:33:13.271Z',
+  created_by: 'elastic',
+  name: '7.16 test with action',
+  tags: [],
+  interval: '5m',
+  enabled: true,
+  description: 'test',
+  risk_score: 21,
+  severity: 'low',
+  license: '',
+  output_index: '',
+  meta: { from: '1m', kibana_siem_app_url: 'http://0.0.0.0:5601/s/7/app/security' },
+  author: [],
+  false_positives: [],
+  from: 'now-360s',
+  rule_id: 'aa525d7c-8948-439f-b32d-27e00c750246',
+  max_signals: 100,
+  risk_score_mapping: [],
+  severity_mapping: [],
+  threat: [],
+  to: 'now',
+  references: [],
+  version: 1,
+  exceptions_list: [],
+  immutable: false,
+  type: 'query',
+  language: 'kuery',
+  index: [
+    'apm-*-transaction*',
+    'traces-apm*',
+    'auditbeat-*',
+    'endgame-*',
+    'filebeat-*',
+    'logs-*',
+    'packetbeat-*',
+    'winlogbeat-*',
+  ],
+  query: '*:*',
+  filters: [],
+  throttle: '1h',
+  actions,
+});
+
+const getImportRuleBuffer = (connectorId: string) => {
+  const rule1 = getBaseRuleWithActions([
+    {
+      group: 'default',
+      id: connectorId,
+      params: {
+        message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+      },
+      action_type_id: '.slack',
+    },
+  ]);
   const ndjson = combineToNdJson(rule1);
 
   return Buffer.from(ndjson);
 };
 const getImportRuleWithConnectorsBuffer = (connectorId: string) => {
-  const rule1 = {
-    id: '53aad690-544e-11ec-a349-11361cc441c4',
-    updated_at: '2021-12-03T15:33:13.271Z',
-    updated_by: 'elastic',
-    created_at: '2021-12-03T15:33:13.271Z',
-    created_by: 'elastic',
-    name: '7.16 test with action',
-    tags: [],
-    interval: '5m',
-    enabled: true,
-    description: 'test',
-    risk_score: 21,
-    severity: 'low',
-    license: '',
-    output_index: '',
-    meta: { from: '1m', kibana_siem_app_url: 'http://0.0.0.0:5601/s/7/app/security' },
-    author: [],
-    false_positives: [],
-    from: 'now-360s',
-    rule_id: 'aa525d7c-8948-439f-b32d-27e00c750246',
-    max_signals: 100,
-    risk_score_mapping: [],
-    severity_mapping: [],
-    threat: [],
-    to: 'now',
-    references: [],
-    version: 1,
-    exceptions_list: [],
-    immutable: false,
-    type: 'query',
-    language: 'kuery',
-    index: [
-      'apm-*-transaction*',
-      'traces-apm*',
-      'auditbeat-*',
-      'endgame-*',
-      'filebeat-*',
-      'logs-*',
-      'packetbeat-*',
-      'winlogbeat-*',
-    ],
-    query: '*:*',
-    filters: [],
-    throttle: '1h',
-    actions: [
-      {
-        group: 'default',
-        id: connectorId,
-        params: {
-          message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
-        },
-        action_type_id: '.slack',
+  const rule1 = getBaseRuleWithActions([
+    {
+      group: 'default',
+      id: connectorId,
+      params: {
+        message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
       },
-    ],
-  };
+      action_type_id: '.slack',
+    },
+  ]);
   const connector = {
     id: connectorId,
     type: 'action',
@@ -651,26 +620,16 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [
             {
               rule_id: 'rule-1',
-              id: '123',
               error: {
                 status_code: 404,
-                message: '1 connector is missing. Connector id missing is: 123',
+                message: 'Rule actions reference the following missing action IDs: 123',
               },
             },
           ],
-          action_connectors_success: false,
+          action_connectors_success: true,
           action_connectors_success_count: 0,
           action_connectors_warnings: [],
-          action_connectors_errors: [
-            {
-              rule_id: 'rule-1',
-              id: '123',
-              error: {
-                status_code: 404,
-                message: '1 connector is missing. Connector id missing is: 123',
-              },
-            },
-          ],
+          action_connectors_errors: [],
         });
       });
 
@@ -848,7 +807,7 @@ export default ({ getService }: FtrProviderContext): void => {
             actions: [
               {
                 group: 'default',
-                id: 'cabc78e0-9031-11ed-b076-53cc4d57aayo',
+                id: '51b17790-544e-11ec-a349-11361cc441c4',
                 action_type_id: '.webhook',
                 params: {},
               },
@@ -866,7 +825,7 @@ export default ({ getService }: FtrProviderContext): void => {
             ],
           }),
           {
-            id: 'cabc78e0-9031-11ed-b076-53cc4d57aayo',
+            id: '51b17790-544e-11ec-a349-11361cc441c4',
             type: 'action',
             updated_at: '2023-01-25T14:35:52.852Z',
             created_at: '2023-01-25T14:35:52.852Z',
@@ -893,34 +852,71 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body).toMatchObject({
           success: false,
-          success_count: 0,
+          success_count: 1,
           rules_count: 2,
           errors: [
             {
               rule_id: 'rule-2',
-              id: 'cabc78e0-9031-11ed-b076-53cc4d57aa22',
               error: {
                 status_code: 404,
                 message:
-                  '1 connector is missing. Connector id missing is: cabc78e0-9031-11ed-b076-53cc4d57aa22',
+                  'Rule actions reference the following missing action IDs: cabc78e0-9031-11ed-b076-53cc4d57aa22',
               },
             },
           ],
-          action_connectors_success: false,
-          action_connectors_success_count: 0,
-          action_connectors_errors: [
-            {
-              error: {
-                status_code: 404,
-                message:
-                  '1 connector is missing. Connector id missing is: cabc78e0-9031-11ed-b076-53cc4d57aa22',
-              },
-              rule_id: 'rule-2',
-              id: 'cabc78e0-9031-11ed-b076-53cc4d57aa22',
-            },
-          ],
+          action_connectors_success: true,
+          action_connectors_success_count: 1,
+          action_connectors_errors: [],
           action_connectors_warnings: [],
         });
+      });
+
+      it('should import rules and update references correctly after overwriting an existing connector', async () => {
+        // Import this archive to create the space '4567-space' referenced below
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/import_rule_connector'
+        );
+        const defaultSpaceConnectorId = '8fbf6d10-a21a-11ed-84a4-a33e4c2558c9';
+
+        const spaceId = '4567-space';
+        const buffer = getImportRuleWithConnectorsBuffer(defaultSpaceConnectorId);
+
+        await supertest
+          .post(`${DETECTION_ENGINE_RULES_IMPORT_URL}`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .attach('file', buffer, 'rules.ndjson')
+          .expect(200);
+
+        await supertest
+          .post(`/s/${spaceId}${DETECTION_ENGINE_RULES_IMPORT_URL}`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .attach('file', buffer, 'rules.ndjson')
+          .expect(200);
+
+        const { body: overwriteResponseBody } = await supertest
+          .post(
+            `/s/${spaceId}${DETECTION_ENGINE_RULES_IMPORT_URL}?overwrite=true&overwrite_action_connectors=true`
+          )
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .attach('file', buffer, 'rules.ndjson')
+          .expect(200);
+
+        expect(overwriteResponseBody).toMatchObject({
+          success: true,
+          success_count: 1,
+          rules_count: 1,
+          errors: [],
+          action_connectors_success: true,
+          action_connectors_success_count: 1,
+          action_connectors_warnings: [],
+          action_connectors_errors: [],
+        });
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/import_rule_connector'
+        );
       });
 
       describe('@skipInServerless migrate pre-8.0 action connector ids', () => {
@@ -1025,7 +1021,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 expect.objectContaining({
                   error: {
                     status_code: 404,
-                    message: `1 connector is missing. Connector id missing is: ${space714ActionConnectorId}`,
+                    message: `Rule actions reference the following missing action IDs: ${space714ActionConnectorId}`,
                   },
                 }),
               ],
@@ -1052,7 +1048,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 expect.objectContaining({
                   error: {
                     status_code: 404,
-                    message: `1 connector is missing. Connector id missing is: ${space714ActionConnectorId}`,
+                    message: `Rule actions reference the following missing action IDs: ${space714ActionConnectorId}`,
                   },
                 }),
               ],
@@ -1136,7 +1132,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 expect.objectContaining({
                   error: {
                     status_code: 404,
-                    message: `1 connector is missing. Connector id missing is: ${defaultSpaceActionConnectorId}`,
+                    message: `Rule actions reference the following missing action IDs: ${defaultSpaceActionConnectorId}`,
                   },
                 }),
               ],

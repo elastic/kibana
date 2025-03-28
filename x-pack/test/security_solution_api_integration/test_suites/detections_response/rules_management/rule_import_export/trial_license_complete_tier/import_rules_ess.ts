@@ -158,10 +158,10 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               error: {
                 message:
-                  'You may not have actions privileges required to import rules with actions: Unable to bulk_create action',
-                status_code: 403,
+                  'Rule actions reference the following missing action IDs: cabc78e0-9031-11ed-b076-53cc4d57aaf1',
+                status_code: 404,
               },
-              rule_id: '(unknown id)',
+              rule_id: 'rule-with-actions',
             },
           ],
           success: false,
@@ -234,7 +234,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   'You may not have actions privileges required to import rules with actions: Unauthorized to get actions',
                 status_code: 403,
               },
-              rule_id: '(unknown id)',
+              rule_id: 'rule-with-actions',
             },
           ],
           rules_count: 1,

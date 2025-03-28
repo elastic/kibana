@@ -46,6 +46,13 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   describe('@ess import_export_rules_flow', () => {
+    /*beforeAll(async () => {
+      await createUserAndRole(getService, ROLES.soc_manager);
+    });
+
+    afterAll(async () => {
+      await deleteUserAndRole(getService, ROLES.soc_manager);
+    });*/
     beforeEach(async () => {
       await createAlertsIndex(supertest, log);
       await createUserAndRole(getService, ROLES.soc_manager);

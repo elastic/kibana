@@ -26,6 +26,7 @@ import {
 } from '../../../../routes/utils';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
+import { checkRuleActions } from '../../../logic/import/action_connectors/check_rule_actions';
 import { createRuleSourceImporter } from '../../../logic/import/rule_source_importer';
 import { importRules } from '../../../logic/import/import_rules';
 
@@ -126,32 +127,24 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           const [duplicateIdErrors, parsedObjectsWithoutDuplicateErrors] =
             getTupleDuplicateErrorsAndUniqueRules(rules, request.query.overwrite);
 
-          const migratedParsedObjectsWithoutDuplicateErrors = await migrateLegacyActionsIds(
-            parsedObjectsWithoutDuplicateErrors,
-            actionSOClient,
-            actionsClient
-          );
-
           // import actions-connectors
           const {
             successCount: actionConnectorSuccessCount,
             success: actionConnectorSuccess,
             warnings: actionConnectorWarnings,
             errors: actionConnectorErrors,
-            rulesWithMigratedActions,
           } = await importRuleActionConnectors({
             actionConnectors,
             actionsClient,
             actionsImporter,
-            rules: migratedParsedObjectsWithoutDuplicateErrors,
             overwrite: request.query.overwrite_action_connectors,
           });
 
-          // rulesWithMigratedActions: Is returned only in case connectors were exported from different namespace and the
-          // original rules actions' ids were replaced with new destinationIds
-          const parsedRuleStream = actionConnectorErrors.length
-            ? []
-            : rulesWithMigratedActions || migratedParsedObjectsWithoutDuplicateErrors;
+          const rulesAndErrors = await migrateLegacyActionsIds(
+            parsedObjectsWithoutDuplicateErrors,
+            actionSOClient,
+            actionsClient
+          );
 
           const ruleSourceImporter = createRuleSourceImporter({
             config,
@@ -160,8 +153,17 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             prebuiltRuleObjectsClient: createPrebuiltRuleObjectsClient(rulesClient),
           });
 
-          const [parsedRules, parsedRuleErrors] = partition(isRuleToImport, parsedRuleStream);
-          const ruleChunks = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
+          const [parsedRules, parsedRuleErrors] = partition(isRuleToImport, rulesAndErrors);
+
+          // After importing the actions and migrating action IDs on rules to import,
+          // validate that all actions referenced by rules exist
+          // Filter out rules that reference non-existent actions
+          const { validatedActionRules, missingActionErrors } = await checkRuleActions({
+            actionsClient,
+            rules: parsedRules,
+          });
+
+          const ruleChunks = chunk(CHUNK_PARSED_OBJECT_SIZE, validatedActionRules);
 
           const importRuleResponse = await importRules({
             ruleChunks,
@@ -180,9 +182,9 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           const importErrors = importRuleResponse.filter(isBulkError);
           const errors = [
             ...parseErrors,
-            ...actionConnectorErrors,
             ...duplicateIdErrors,
             ...importErrors,
+            ...missingActionErrors,
           ];
 
           const successes = importRuleResponse.filter((resp) => {
