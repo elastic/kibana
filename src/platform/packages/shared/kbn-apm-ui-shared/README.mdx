@@ -1,17 +1,19 @@
 # @kbn/apm-ui-shared
 
+## Components
 
-TODO ADD PROPER COMPONENT INFO (?)
+| Name     | Description                                                                                                                                                 |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Duration | Displays the duration with automatic unit formatting and the option to show the percentage of the duration relative to a parent (trace or transaction). |
 
----
-id: AlertsUIShared/Components/AlertLifecycleStatusBadge
-slug: /kbn-apm-ui-shared/src/alert_lifecycle_status_badge/index.tsx
-title: Alert Lifecycle Status
-description: A component to show the status of an alert
-tags: ['kbn-apm-ui-shared', 'component']
-date: 2023-02-07
----
+## Utils
 
-## Description
+### Formatters
 
-A component to show the status of an alert
+| Name               | Description                                                                                                                     |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| asDuration         | Format duration value to the best unit for display.                                                                             |
+| asDecimal          | Format a number to a decimal with a fixed number of decimal places.                                                             |
+| asInteger          | Format a number to an integer.                                                                                                  |
+| asDecimalOrInteger | Format a number to a decimal with a fixed number of decimal places if it has a decimal part, otherwise format it to an integer. |
+| asPercent          | Format a number to a percentage with a fixed number of decimal places.                                                          |
