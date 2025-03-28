@@ -19,18 +19,12 @@ export class PainlessLab {
   }
 
   async goto() {
-    return this.page.gotoApp('dev_tools', { hash: 'painless_lab' });
+    this.page.gotoApp('dev_tools', { hash: 'painless_lab' });
   }
 
   async waitForRenderComplete() {
     // wait for page to be rendered
-    return await this.page.testSubj
-      .locator('painless_lab')
-      .waitFor({ timeout: DEFAULT_LOADING_TIMEOUT });
-  }
-
-  async outputValue() {
-    return this.outputValueElement;
+    await this.page.testSubj.locator('painless_lab').waitFor({ timeout: DEFAULT_LOADING_TIMEOUT });
   }
 
   async setCodeEditorValue(value: string, nthIndex?: number) {

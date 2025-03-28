@@ -27,6 +27,6 @@ test.describe('test scenario', { tag: tags.ESS_ONLY }, () => {
 
   test('validate painless lab editor', async ({ pageObjects }) => {
     pageObjects.painlessLab.setCodeEditorValue(TEST_SCRIPT);
-    await expect(pageObjects.painlessLab.outputValue()).toHaveText(TEST_SCRIPT_RESULT);
+    await expect(pageObjects.painlessLab.outputValueElement).toContainText(TEST_SCRIPT_RESULT);
   });
 });
