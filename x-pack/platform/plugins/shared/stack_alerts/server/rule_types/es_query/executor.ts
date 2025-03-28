@@ -54,7 +54,6 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     throw new AlertsClientError();
   }
   const currentTimestamp = new Date().toISOString();
-  const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
   const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
   const alertLimit = alertsClient.getAlertLimitValue();
   const compareFn = ComparatorFns.get(params.thresholdComparator);
@@ -95,7 +94,6 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         alertLimit,
         params: params as OnlyEsqlQueryRuleParams,
         spacePrefix,
-        publicBaseUrl,
         services: {
           share,
           scopedClusterClient,
@@ -110,9 +108,9 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         alertLimit,
         params: params as OnlyEsQueryRuleParams,
         timestamp: latestTimestamp,
-        publicBaseUrl,
         spacePrefix,
         services: {
+          share,
           scopedClusterClient,
           logger,
           ruleResultService,
