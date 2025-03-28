@@ -86,7 +86,7 @@ describe('pickValuesBasedOnStructure', () => {
           fc.option(fc.constant('.'))
         ),
         {
-          minLength: 10,
+          minLength: 1,
           maxLength: 10,
         }
       )
