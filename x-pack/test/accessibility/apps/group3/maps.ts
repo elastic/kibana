@@ -57,11 +57,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('map inspect view chooser ', async function () {
-      await testSubjects.click('inspectorViewChooser');
-      await a11y.testAppSnapshot();
-    });
-
     it('map inspector panel - view requests', async function () {
       await inspector.openInspectorRequestsView();
       await a11y.testAppSnapshot();

@@ -10,13 +10,7 @@
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiContextMenuItem, EuiTabs, EuiTab, EuiToolTip } from '@elastic/eui';
 import { InspectorViewDescription } from '../types';
 
 interface Props {
@@ -69,57 +63,44 @@ export class InspectorViewChooser extends Component<Props, State> {
     );
   };
 
-  renderViewButton() {
-    return (
-      <EuiButtonEmpty
-        size="s"
-        iconType="arrowDown"
-        iconSide="right"
-        onClick={this.toggleSelector}
-        data-test-subj="inspectorViewChooser"
-      >
-        <FormattedMessage
-          id="inspector.view"
-          defaultMessage="View: {viewName}"
-          values={{ viewName: this.props.selectedView.title }}
-        />
-      </EuiButtonEmpty>
-    );
-  }
-
   renderSingleView() {
     return (
-      <EuiToolTip position="bottom" content={this.props.selectedView.help}>
-        <FormattedMessage
-          id="inspector.view"
-          defaultMessage="View: {viewName}"
-          values={{ viewName: this.props.selectedView.title }}
-        />
-      </EuiToolTip>
+      <EuiTabs size="s">
+        <EuiToolTip position="bottom" content={this.props.selectedView.help}>
+          <EuiTab
+            isSelected={true}
+            data-test-subj={`inspectorViewChooser${this.props.selectedView.title}`}
+          >
+            <FormattedMessage
+              id="inspector.view"
+              defaultMessage="{viewName}"
+              values={{ viewName: this.props.selectedView.title }}
+            />
+          </EuiTab>
+        </EuiToolTip>
+      </EuiTabs>
     );
   }
 
   render() {
-    const { views } = this.props;
-
+    const { views, selectedView } = this.props;
     if (views.length < 2) {
       return this.renderSingleView();
     }
-
-    const triggerButton = this.renderViewButton();
-
     return (
-      <EuiPopover
-        id="inspectorViewChooser"
-        button={triggerButton}
-        isOpen={this.state.isSelectorOpen}
-        closePopover={this.closeSelector}
-        panelPaddingSize="none"
-        anchorPosition="downRight"
-        repositionOnScroll
-      >
-        <EuiContextMenuPanel items={views.map(this.renderView)} />
-      </EuiPopover>
+      <EuiTabs size="s" data-test-subj="inspectorViewChooser">
+        {views.map((view, index) => (
+          <EuiToolTip key={index} content={view.help} position="bottom">
+            <EuiTab
+              onClick={() => this.props.onViewSelected(view)}
+              isSelected={selectedView === view}
+              data-test-subj={`inspectorViewChooser${view.title}`}
+            >
+              {view.title}
+            </EuiTab>
+          </EuiToolTip>
+        ))}
+      </EuiTabs>
     );
   }
 }

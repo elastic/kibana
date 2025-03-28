@@ -187,18 +187,13 @@ export class InspectorService extends FtrService {
    * Opens inspector viewId for example 'Requests
    * @param viewId
    */
-
   public async openInspectorView(viewId: string): Promise<void> {
     this.log.debug(`Open Inspector view ${viewId}`);
     const dtsViewId = 'inspectorViewChooser' + viewId;
     await this.retry.try(async () => {
-      await this.testSubjects.click('inspectorViewChooser');
-      // check whether popover menu opens, if not, fail and retry opening
-      await this.testSubjects.existOrFail(dtsViewId, { timeout: 2000 });
       await this.testSubjects.click(dtsViewId);
-      const selection = await this.testSubjects.getVisibleText('inspectorViewChooser');
-      this.log.debug(`inspector view selection = ${selection}`);
-      expect(selection.includes(viewId)).to.be(true);
+      const isSelected = await this.testSubjects.getAttribute(dtsViewId, 'aria-selected');
+      expect(isSelected).to.be('true');
     });
   }
 
@@ -206,7 +201,6 @@ export class InspectorService extends FtrService {
    * Opens inspector requests view
    */
   public async openInspectorRequestsView(): Promise<void> {
-    if (!(await this.testSubjects.exists('inspectorViewChooser'))) return;
     await this.openInspectorView('Requests');
   }
 

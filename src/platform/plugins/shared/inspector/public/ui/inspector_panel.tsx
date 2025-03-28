@@ -134,15 +134,15 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
                 <h1>{title}</h1>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <InspectorViewChooser
-                views={views}
-                onViewSelected={this.onViewSelected}
-                selectedView={selectedView}
-              />
-            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
+        <div className="insInspectorViewChooserContainer">
+          <InspectorViewChooser
+            views={views}
+            onViewSelected={this.onViewSelected}
+            selectedView={selectedView}
+          />
+        </div>
         <EuiFlyoutBody className="insInspectorPanel__flyoutBody">
           {this.renderSelectedPanel()}
         </EuiFlyoutBody>
