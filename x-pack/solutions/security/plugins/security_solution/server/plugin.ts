@@ -133,6 +133,10 @@ import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrati
 import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
+import {
+  ENTITY_ANALYTICS_ESQL_SEARCH_STRATEGY,
+  entityAnalyticsEsqlSearchStrategyProvider,
+} from './search_strategy/entity_analytics_esql';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -515,6 +519,16 @@ export class Plugin implements ISecuritySolutionPlugin {
         plugins.data.search.registerSearchStrategy(
           ENDPOINT_SEARCH_STRATEGY,
           endpointSearchStrategy
+        );
+
+        const entityAnalyticsEsqlSearchStrategy = entityAnalyticsEsqlSearchStrategyProvider(
+          depsStart.data,
+          this.endpointContext
+        );
+
+        plugins.data.search.registerSearchStrategy(
+          ENTITY_ANALYTICS_ESQL_SEARCH_STRATEGY,
+          entityAnalyticsEsqlSearchStrategy
         );
 
         /**

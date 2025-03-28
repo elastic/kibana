@@ -12,6 +12,7 @@ const layerId = uuidv4();
 export const columnTimestampId = uuidv4();
 export const columnResultId = uuidv4();
 export const dataViewId = uuidv4();
+export const columnUserId = uuidv4();
 
 export const getLensAttributes: GetLensAttributes = ({ esql, extraOptions = {} }) => {
   return {
@@ -53,6 +54,7 @@ export const getLensAttributes: GetLensAttributes = ({ esql, extraOptions = {} }
             seriesType: 'bar_stacked',
             xAccessor: columnTimestampId,
             accessors: [columnResultId],
+            splitAccessor: columnUserId,
             layerType: 'data',
             colorMapping: {
               assignments: [],
@@ -102,6 +104,14 @@ export const getLensAttributes: GetLensAttributes = ({ esql, extraOptions = {} }
                     type: 'number',
                   },
                   inMetricDimension: true,
+                },
+                {
+                  columnId: columnUserId,
+                  fieldName: 'user.name',
+                  meta: {
+                    type: 'string',
+                    esType: 'keyword',
+                  },
                 },
               ],
               timeField: '@timestamp',

@@ -5,8 +5,11 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import { useQuery } from '@tanstack/react-query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { getESQLResults } from '@kbn/esql-utils';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
@@ -17,8 +20,9 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { VisualizationEmbeddable } from '../../common/components/visualization_actions/visualization_embeddable';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { getLensAttributes } from './get_lens_attributes';
+import { useKibana } from '../../common/lib/kibana';
 
-const ESQL = `FROM commands-privtest
+const SUDO_COUNT_ESQL_STACKED = `FROM commands-privtest
 | RENAME @timestamp AS event_timestamp
 | LOOKUP JOIN privileged-users ON user.name
 | WHERE MATCH(message, \"sudo su\") 
@@ -26,13 +30,65 @@ const ESQL = `FROM commands-privtest
 | EVAL is_privileged = COALESCE(labels.is_privileged, false)
 | EVAL privileged_status = CASE(is_privileged, \"privileged\", \"not_privileged\")
 | EVAL timestamp=DATE_TRUNC(30 second, @timestamp)
-| stats results = count(*) by timestamp`;
+| stats results = COUNT(*) by timestamp, user.name`;
+
+const PRIVILEGED_USER_LIST_ESQL = `FROM commands-privtest
+| RENAME @timestamp AS event_timestamp
+| LOOKUP JOIN privileged-users ON user.name
+| RENAME event_timestamp AS @timestamp
+| EVAL is_privileged = COALESCE(labels.is_privileged, false)
+| WHERE is_privileged == true
+| STATS
+    name = MAX(user.name),
+    @timestamp = MAX(@timestamp)
+    BY user.name
+| KEEP @timestamp, user.name`;
+
+// using helpers
+const fetchESQLSimple = async (data: DataPublicPluginStart, signal?: AbortSignal) => {
+  return getESQLResults({
+    esqlQuery: PRIVILEGED_USER_LIST_ESQL,
+    search: data.search.search,
+    signal,
+  });
+};
+
+// I copied this function from the ESQL helper
+function toRecords(response) {
+  if (!response) return [];
+  const { columns, values } = response;
+  return values.map((row) => {
+    const doc = {};
+    row.forEach((cell, index) => {
+      const { name } = columns[index];
+      // @ts-expect-error
+      doc[name] = cell;
+    });
+    return doc;
+  });
+}
 
 const PrivilegedUserMonitoringComponent = () => {
   const { loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
   const { to, from } = useGlobalTime();
   const timerange = useMemo(() => ({ from, to }), [from, to]);
+  const { data } = useKibana().services;
 
+  const {
+    isInitialLoading,
+    isLoading,
+    isError,
+    isRefetching,
+    data: result,
+  } = useQuery({
+    queryKey: [timerange],
+    queryFn: async ({ signal }) => {
+      return fetchESQLSimple(data, signal);
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  const values = toRecords(result?.response);
   return (
     <>
       <FiltersGlobal>
@@ -45,17 +101,49 @@ const PrivilegedUserMonitoringComponent = () => {
         {isSourcererLoading ? (
           <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
         ) : (
-          <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
-            <VisualizationEmbeddable
-              applyGlobalQueriesAndFilters={true}
-              esql={ESQL}
-              data-test-subj="embeddable-matrix-histogram"
-              getLensAttributes={getLensAttributes}
-              height={155}
-              id={'my-id'}
-              timerange={timerange}
-            />
-          </EuiFlexGroup>
+          <>
+            <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
+              <VisualizationEmbeddable
+                applyGlobalQueriesAndFilters={true}
+                esql={SUDO_COUNT_ESQL_STACKED}
+                data-test-subj="embeddable-matrix-histogram"
+                getLensAttributes={getLensAttributes}
+                height={155}
+                id={'my-id'}
+                timerange={timerange}
+              />
+            </EuiFlexGroup>
+
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem>
+                {isLoading ? (
+                  <EuiLoadingSpinner size="m" />
+                ) : isError ? (
+                  <div>{'Error loading data'}</div>
+                ) : (
+                  <EuiBasicTable
+                    loading={isInitialLoading || isRefetching}
+                    items={values || []}
+                    columns={[
+                      {
+                        field: 'user.name',
+                        name: 'Username',
+                      },
+                      {
+                        field: '@timestamp',
+                        name: 'Timestamp',
+                        dataType: 'date',
+
+                        render: (timestamp) => {
+                          return new Date(timestamp).toLocaleString();
+                        },
+                      },
+                    ]}
+                  />
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
         )}
       </SecuritySolutionPageWrapper>
 
@@ -65,11 +153,3 @@ const PrivilegedUserMonitoringComponent = () => {
 };
 
 export const PrivilegedUserMonitoringPage = React.memo(PrivilegedUserMonitoringComponent);
-
-// [x] New page
-// [x] ESQL JOIN based lens visualisation
-// [x] Stack by visualization with lens
-// [ ] ESQL JOIN based search strategy backed visualisation
-//    [ ] implemented using search strategies
-//  [x] Searchbar with KQL query (it would be good to look in kibana how other people build ESQL commands. e.g lens must do it because they add limits to queries for you, hopefully there is a nice library)
-//  [ ] inspect button
