@@ -18,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const security = getService('security');
+  const toasts = getService('toasts');
 
   describe('console app', function describeIndexTests() {
     before(async () => {
@@ -80,13 +81,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.clearEditorText();
       await PageObjects.console.enterText('OPTIONS /');
       await PageObjects.console.clickPlay();
-      await retry.try(async () => {
-        const actualResponse = await PageObjects.console.getOutputText();
-        log.debug(actualResponse);
-        expect(actualResponse).to.contain(expectedResponseContains);
-
-        expect(await PageObjects.console.hasSuccessBadge()).to.be(false);
-      });
+      const resultToast = await toasts.getElementByIndex(1);
+      const toastText = await resultToast.getVisibleText();
+      expect(toastText).to.be(
+        'The selected request contains an error. Please resolve it and try again.'
+      );
     });
 
     describe('tabs navigation', () => {

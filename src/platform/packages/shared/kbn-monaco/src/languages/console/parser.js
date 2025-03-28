@@ -58,7 +58,7 @@ export const createParser = () => {
       ch = text.charAt(newAt);
       updateRequestEnd();
       addRequestEnd();
-      at += 1;
+      at = newAt + 1;
     },
     next = function (c) {
       if (c && c !== ch) {
