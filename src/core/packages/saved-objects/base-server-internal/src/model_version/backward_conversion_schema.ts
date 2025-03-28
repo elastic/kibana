@@ -34,6 +34,7 @@ export const convertModelVersionBackwardConversionSchema = (
       //
       // If we reversed this, validation conversion would be returned in the
       // converted attrs, for example: { duration: '1m' } => { duration: moment.Duration }
+      // which this "conversion" wants to avoid.
       const convertedAttrs = pickValuesBasedOnStructure(validatedAttrs, originalAttrs);
       return {
         ...doc,
