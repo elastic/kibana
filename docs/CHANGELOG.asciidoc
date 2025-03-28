@@ -135,7 +135,7 @@ For more information, refer to https://github.com/elastic/kibana/issues/209996[#
 
 *Impact* +
 
-Clusters with saved objects of the type inventory-view may fail to upgrade to 8.17.3 leading to downtime until the failed upgrade is rolled back.
+Clusters with saved objects of the type inventory-view may fail to upgrade to 8.17.3, resulting in downtime until the failed upgrade is rolled back.
 ====
 
 [float]
