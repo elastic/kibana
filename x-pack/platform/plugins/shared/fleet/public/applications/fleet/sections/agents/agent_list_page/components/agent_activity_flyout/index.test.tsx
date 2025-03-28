@@ -52,6 +52,7 @@ describe('AgentActivityFlyout', () => {
         refreshAgentActivity={refreshAgentActivity}
         setSearch={mockSetSearch}
         setSelectedStatus={mockSetSelectedStatus}
+        openManageAutoUpgradeModal={jest.fn()}
       />
     </IntlProvider>
   );
@@ -574,6 +575,42 @@ describe('AgentActivityFlyout', () => {
         .querySelector('[data-test-subj="statusDescription"]')!
         .textContent?.replace(/\s/g, '')
     ).toContain('Policy1 changed to revision 2 at Sep 15, 2022 10:00 AM.'.replace(/\s/g, ''));
+  });
+
+  it('should render agent activity for an automatic upgrade', () => {
+    const mockActionStatuses = [
+      {
+        actionId: 'action8',
+        nbAgentsActionCreated: 3,
+        nbAgentsAck: 0,
+        type: 'UPGRADE',
+        nbAgentsActioned: 3,
+        is_automatic: true,
+        status: 'IN_PROGRESS',
+        expiration: '2099-09-16T10:00:00.000Z',
+        policyId: 'policy1',
+        revision: 2,
+        creationTime: '2022-09-15T10:00:00.000Z',
+        nbAgentsFailed: 0,
+        completionTime: '2022-09-15T11:00:00.000Z',
+        version: '8.17.3',
+      },
+    ];
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: false,
+    });
+    const result = render(component());
+
+    expect(
+      result.container.querySelector('[data-test-subj="inProgressTitle"]')!.textContent
+    ).toContain('Upgrading 1 agent to version 8.17.3');
+    expect(
+      result.container
+        .querySelector('[data-test-subj="manageAutoUpgradesButton"]')!
+        .textContent?.replace(/\s/g, '')
+    ).toContain('Manage auto-upgrade agents');
   });
 
   it('should keep flyout state on new data', () => {

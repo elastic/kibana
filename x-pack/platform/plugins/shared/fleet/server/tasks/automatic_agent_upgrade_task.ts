@@ -61,6 +61,11 @@ interface AutomaticAgentUpgradeTaskSetupContract {
 interface AutomaticAgentUpgradeTaskStartContract {
   taskManager: TaskManagerStartContract;
 }
+interface VersionAndCounts {
+  version: string;
+  count: number;
+  targetPercentage: number;
+}
 
 export class AutomaticAgentUpgradeTask {
   private logger: Logger;
@@ -220,6 +225,33 @@ export class AutomaticAgentUpgradeTask {
       );
       return;
     }
+    // before processing everything, we need to get the counts for each version so we know if we should round some up or down to make sure we arent overshooting the number of agents.
+    let versionAndCounts: VersionAndCounts[] = [];
+
+    for (const requiredVersion of agentPolicy.required_versions ?? []) {
+      let numberOfAgentsForUpgrade = Math.round(
+        (totalActiveAgents * requiredVersion.percentage) / 100
+      );
+
+      // Subtract total number of agents already or on or updating to target version.
+      const updatingToKuery = `(upgrade_details.target_version:${requiredVersion.version} AND NOT upgrade_details.state:UPG_FAILED)`;
+      const totalOnOrUpdatingToTargetVersionAgents = await this.getAgentCount(
+        esClient,
+        soClient,
+        `((policy_id:${agentPolicy.id} AND agent.version:${
+          requiredVersion.version
+        }) OR ${updatingToKuery}) AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`
+      );
+
+      numberOfAgentsForUpgrade -= totalOnOrUpdatingToTargetVersionAgents;
+      versionAndCounts.push({
+        version: requiredVersion.version,
+        count: numberOfAgentsForUpgrade,
+        targetPercentage: requiredVersion.percentage,
+      });
+    }
+    // then we need to adjust based on the total to make sure we arent over or undershooting the number of agents
+    versionAndCounts = await this.adjustAgentCounts(versionAndCounts, totalActiveAgents);
 
     for (const requiredVersion of agentPolicy.required_versions ?? []) {
       await this.processRequiredVersion(
@@ -227,9 +259,57 @@ export class AutomaticAgentUpgradeTask {
         soClient,
         agentPolicy,
         requiredVersion,
-        totalActiveAgents
+        versionAndCounts
       );
     }
+  }
+
+  public async adjustAgentCounts(
+    versionAndCounts: Array<{
+      version: string;
+      count: number;
+      targetPercentage: number;
+    }>,
+    totalActiveAgents: number
+  ) {
+    const totalActualPercentage =
+      (versionAndCounts.reduce((acc, item) => acc + item.count, 0) / totalActiveAgents) * 100;
+    const totalNeededPercentage = versionAndCounts.reduce(
+      (acc, item) => acc + item.targetPercentage,
+      0
+    );
+
+    // now we have the total percentage after we add everything up, vs the total target percentage we have. Get the difference, then multiply that by the total active agents to get the delta we need to add or remove from the total count.
+    const totalDeltaPercentage = totalActualPercentage - totalNeededPercentage;
+
+    // if we are over, we need to remove some from the count, and if we are under, we need to add some to the count. If we're spot on, all good
+    if (totalDeltaPercentage !== 0) {
+      // get the actual count of agents we are off by using the percentage * the total active agents
+      let deltaCount = Math.round((totalDeltaPercentage / 100) * totalActiveAgents);
+
+      // now we need to add or remove from the versionAndCounts array
+      let index = 0;
+      // so long as we have more to add or remove, do so
+      while (deltaCount !== 0 && index < versionAndCounts.length) {
+        const item = versionAndCounts[index];
+        if (deltaCount > 0) {
+          // still have too many, removing one
+
+          item.count -= 1;
+          deltaCount -= 1;
+        } else if (deltaCount < 0) {
+          // still have too few, adding one
+
+          if (item.count > 0) {
+            item.count += 1;
+            deltaCount += 1;
+          }
+        }
+        index++;
+      }
+    }
+
+    return versionAndCounts;
   }
 
   private async getAgentCount(
@@ -250,28 +330,29 @@ export class AutomaticAgentUpgradeTask {
     soClient: SavedObjectsClientContract,
     agentPolicy: AgentPolicy,
     requiredVersion: AgentTargetVersion,
-    totalActiveAgents: number
+    versionAndCounts: Array<{ version: string; count: number }>
   ) {
     this.logger.debug(
       `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: checking candidate agents for upgrade (target version: ${requiredVersion.version}, percentage: ${requiredVersion.percentage})`
     );
 
-    // Calculate how many agents should meet the version requirement.
-    let numberOfAgentsForUpgrade = Math.round(
-      (totalActiveAgents * requiredVersion.percentage) / 100
-    );
+    // // Calculate how many agents should meet the version requirement.
+    // let numberOfAgentsForUpgrade = Math.round(
+    //   (totalActiveAgents * requiredVersion.percentage) / 100
+    // );
 
-    // Subtract total number of agents already or on or updating to target version.
-    const updatingToKuery = `(upgrade_details.target_version:${requiredVersion.version} AND NOT upgrade_details.state:UPG_FAILED)`;
-    const totalOnOrUpdatingToTargetVersionAgents = await this.getAgentCount(
-      esClient,
-      soClient,
-      `((policy_id:${agentPolicy.id} AND agent.version:${
-        requiredVersion.version
-      }) OR ${updatingToKuery}) AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`
-    );
+    // // Subtract total number of agents already or on or updating to target version.
+    // const updatingToKuery = `(upgrade_details.target_version:${requiredVersion.version} AND NOT upgrade_details.state:UPG_FAILED)`;
+    // const totalOnOrUpdatingToTargetVersionAgents = await this.getAgentCount(
+    //   esClient,
+    //   soClient,
+    //   `((policy_id:${agentPolicy.id} AND agent.version:${
+    //     requiredVersion.version
+    //   }) OR ${updatingToKuery}) AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`
+    // );
 
-    numberOfAgentsForUpgrade -= totalOnOrUpdatingToTargetVersionAgents;
+    let numberOfAgentsForUpgrade =
+      versionAndCounts.find((item) => item.version === requiredVersion.version)?.count ?? 0;
     // Return if target is already met.
     if (numberOfAgentsForUpgrade <= 0) {
       this.logger.info(

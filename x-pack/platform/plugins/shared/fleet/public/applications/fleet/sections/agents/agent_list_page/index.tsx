@@ -32,6 +32,7 @@ import {
 import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
 
 import { AgentRequestDiagnosticsModal } from '../components/agent_request_diagnostics_modal';
+import { ManageAutoUpgradeAgentsModal } from '../components/manage_auto_upgrade_agents_modal';
 
 import type { SelectionMode } from './components/types';
 
@@ -45,8 +46,6 @@ import {
 } from './components';
 import { AgentActivityFlyout } from './components/agent_activity_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
-
-import { ManageAutoUpgradeAgentsModal } from '../components/manage_auto_upgrade_agents_modal';
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { cloud } = useStartServices();

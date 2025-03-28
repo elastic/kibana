@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import styled from '@emotion/styled';
 
 import type { ActionStatus } from '../../../../../types';
 import { useStartServices } from '../../../../../hooks';
@@ -27,6 +28,15 @@ import { useStartServices } from '../../../../../hooks';
 import { formattedTime, inProgressDescription, inProgressTitle } from './helpers';
 
 import { ViewAgentsButton } from './view_agents_button';
+
+const Divider = styled.div`
+  width: 0;
+  height: 50%;
+  border-left: ${(props) => props.theme.euiTheme.border.thin};
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+`;
 
 export const UpgradeInProgressActivityItem: React.FunctionComponent<{
   action: ActionStatus;
@@ -113,20 +123,30 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
               <EuiFlexItem grow={false}>
                 <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <Divider />
+              </EuiFlexItem>
               {isAutomaticUpgrade && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    onClick={() => onClickManageAutoUpgradeAgents(action)}
-                    size="m"
-                    flush="left"
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.agentActivityFlyout.manageAutoUpgradeAgents"
-                      defaultMessage="Manage auto-upgrade agents"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
+                <>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      data-test-subj="agentActivityFlyout.manageAutoUpgradesButton"
+                      onClick={() => onClickManageAutoUpgradeAgents(action)}
+                      size="m"
+                      flush="left"
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.agentActivityFlyout.manageAutoUpgradeAgents"
+                        defaultMessage="Manage auto-upgrade agents"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <Divider />
+                  </EuiFlexItem>
+                </>
               )}
+
               <EuiFlexItem>
                 <EuiButtonEmpty>
                   <FormattedMessage
