@@ -13,6 +13,7 @@
       "streams",
       "data",
       "dataViews",
+      "discoverShared",
       "unifiedSearch",
       "share",
       "savedObjectsTagging",
@@ -20,6 +21,8 @@
       "fieldsMetadata",
       "datasetQuality",
       "licensing",
+      "indexManagement",
+      "ingestPipelines",
     ],
     "requiredBundles": [
       "kibanaReact"

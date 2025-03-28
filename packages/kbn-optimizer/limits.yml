@@ -5,6 +5,7 @@ pageLoadAssetSize:
   aiops: 32733
   alerting: 106936
   apm: 64385
+  apmSourcesAccess: 16765
   automaticImport: 25433
   banners: 17946
   canvas: 29355
@@ -34,10 +35,11 @@ pageLoadAssetSize:
   dataViews: 65000
   dataVisualizer: 30000
   devTools: 38637
-  discover: 99999
+  discover: 25000
   discoverEnhanced: 42730
   discoverShared: 17111
   embeddable: 24000
+  embeddableAlertsTable: 19615
   embeddableEnhanced: 22107
   enterpriseSearch: 66810
   entityManager: 17175
@@ -83,7 +85,7 @@ pageLoadAssetSize:
   infra: 184320
   ingestPipelines: 58003
   inputControlVis: 172675
-  inspector: 148711
+  inspector: 17600
   interactiveSetup: 80000
   inventory: 27430
   investigate: 17970
@@ -120,7 +122,7 @@ pageLoadAssetSize:
   osquery: 107090
   painlessLab: 179748
   presentationPanel: 11550
-  presentationUtil: 33905
+  presentationUtil: 9000
   productDocBase: 22500
   profiling: 36694
   remoteClusters: 51327
@@ -144,12 +146,14 @@ pageLoadAssetSize:
   searchNotebooks: 18942
   searchPlayground: 19325
   searchprofiler: 67080
+  searchQueryRules: 19708
   searchSynonyms: 20262
   security: 81771
   securitySolution: 98429
   securitySolutionEss: 31781
   securitySolutionServerless: 62488
   serverless: 16573
+  serverlessChat: 22715
   serverlessObservability: 68747
   serverlessSearch: 72995
   sessionView: 77750
@@ -173,7 +177,7 @@ pageLoadAssetSize:
   uiActionsEnhanced: 38494
   unifiedDocViewer: 25099
   unifiedHistogram: 19928
-  unifiedSearch: 71059
+  unifiedSearch: 23000
   upgradeAssistant: 81241
   uptime: 60000
   urlDrilldown: 30063

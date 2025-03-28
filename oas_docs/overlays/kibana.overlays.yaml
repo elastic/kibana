@@ -47,6 +47,12 @@ actions:
         description: Alerting documentation
         url: https://www.elastic.co/guide/en/kibana/master/alerting-getting-started.html
       x-displayName: "Alerting"
+  - target: '$.tags[?(@.name=="streams")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Streams is a new and experimental way to manage your data in Kibana (currently experimental - expect changes).
+      x-displayName: "Streams"
   - target: '$.tags[?(@.name=="cases")]'
     description: Change tag description and displayName
     update:
@@ -101,7 +107,11 @@ actions:
     update:
       x-displayName: "System"
       description: >
-        Get information about the system status, resource usage, and installed plugins.
+        Get information about the system status, resource usage, features, and installed plugins.
+  - target: '$.tags[?(@.name=="user session")]'
+    description: Change displayName
+    update:
+      x-displayName: "User session management"
 # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations

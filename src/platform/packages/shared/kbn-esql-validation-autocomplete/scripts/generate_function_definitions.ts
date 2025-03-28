@@ -18,6 +18,7 @@ import {
   FunctionReturnType,
   Signature,
   FunctionDefinitionTypes,
+  Location,
 } from '../src/definitions/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../src/shared/constants';
 const aliasTable: Record<string, string[]> = {
@@ -79,14 +80,17 @@ const bucketParameterTypes: Array<
   ['long', 'integer', 'long', 'long', 'double'],
 ];
 
-const scalarSupportedCommandsAndOptions = {
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
-};
+const defaultScalarFunctionLocations: Location[] = [
+  Location.EVAL,
+  Location.ROW,
+  Location.SORT,
+  Location.WHERE,
+  Location.STATS,
+  Location.STATS_BY,
+  Location.STATS_WHERE,
+];
 
-const aggregationSupportedCommandsAndOptions = {
-  supportedCommands: ['stats', 'inlinestats', 'metrics'],
-};
+const defaultAggFunctionLocations: Location[] = [Location.STATS];
 
 // coalesce can be removed when a test is added for version type
 // (https://github.com/elastic/elasticsearch/pull/109032#issuecomment-2150033350)
@@ -98,7 +102,7 @@ const extraFunctions: FunctionDefinition[] = [
     name: 'case',
     description:
       'Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to `true`. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches.',
-    ...scalarSupportedCommandsAndOptions,
+    locationsAvailable: defaultScalarFunctionLocations,
     signatures: [
       {
         params: [
@@ -306,26 +310,20 @@ const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
  * @returns
  */
 function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): FunctionDefinition {
-  let supportedCommandsAndOptions: Pick<
-    FunctionDefinition,
-    'supportedCommands' | 'supportedOptions'
-  > =
+  let locationsAvailable =
     ESFunctionDefinition.type === FunctionDefinitionTypes.SCALAR
-      ? scalarSupportedCommandsAndOptions
-      : aggregationSupportedCommandsAndOptions;
+      ? defaultScalarFunctionLocations
+      : defaultAggFunctionLocations;
 
   // MATCH and QSRT has limited supported for where commands only
   if (FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)) {
-    supportedCommandsAndOptions = {
-      supportedCommands: ['where'],
-      supportedOptions: [],
-    };
+    locationsAvailable = [Location.WHERE];
   }
   const ret = {
     type: ESFunctionDefinition.type,
     name: ESFunctionDefinition.name,
     operator: ESFunctionDefinition.operator,
-    ...supportedCommandsAndOptions,
+    locationsAvailable,
     description: ESFunctionDefinition.description,
     alias: aliasTable[ESFunctionDefinition.name],
     ignoreAsSuggestion: ESFunctionDefinition.snapshot_only,
@@ -690,13 +688,13 @@ const enrichGrouping = (
       ];
       return {
         ...op,
+        locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
         signatures,
-        supportedOptions: ['by'],
       };
     }
     return {
       ...op,
-      supportedOptions: ['by'],
+      locationsAvailable: [...op.locationsAvailable, Location.STATS_BY],
     };
   });
 };
@@ -721,26 +719,32 @@ const enrichOperators = (
       // Elasticsearch docs uses lhs and rhs instead of left and right that Kibana code uses
       params: s.params.map((param) => ({ ...param, name: replaceParamName(param.name) })),
     }));
-    let supportedCommands = op.supportedCommands;
-    let supportedOptions = op.supportedOptions;
+
+    let locationsAvailable = op.locationsAvailable;
+
     if (isComparisonOperator) {
-      supportedCommands = _.uniq([...op.supportedCommands, 'eval', 'where', 'row', 'sort']);
-      supportedOptions = ['by'];
+      locationsAvailable = _.uniq([
+        ...op.locationsAvailable,
+        Location.EVAL,
+        Location.WHERE,
+        Location.ROW,
+        Location.SORT,
+        Location.STATS_BY,
+      ]);
     }
     if (isMathOperator) {
-      supportedCommands = _.uniq([
-        ...op.supportedCommands,
-        'eval',
-        'where',
-        'row',
-        'stats',
-        'metrics',
-        'sort',
+      locationsAvailable = _.uniq([
+        ...op.locationsAvailable,
+        Location.EVAL,
+        Location.WHERE,
+        Location.ROW,
+        Location.STATS,
+        Location.SORT,
+        Location.STATS_BY,
       ]);
-      supportedOptions = ['by'];
     }
     if (isInOperator || isLikeOperator || isNotOperator) {
-      supportedCommands = ['eval', 'where', 'row', 'sort'];
+      locationsAvailable = [Location.EVAL, Location.WHERE, Location.SORT, Location.ROW];
     }
     if (isInOperator) {
       // Override the signatures to be array types instead of singular
@@ -766,8 +770,7 @@ const enrichOperators = (
       signatures,
       // Elasticsearch docs does not include the full supported commands for math operators
       // so we are overriding to add proper support
-      supportedCommands,
-      supportedOptions,
+      locationsAvailable,
       type: FunctionDefinitionTypes.OPERATOR,
       validate: validators[op.name],
       ...(isNotOperator ? { ignoreAsSuggestion: true } : {}),
@@ -829,6 +832,12 @@ function printGeneratedFunctionsFile(
     if (name.toLowerCase() === 'match') {
       functionName = 'match';
     }
+
+    // Map locationsAvailable to enum names
+    const locationsAvailable = functionDefinition.locationsAvailable.map(
+      (location) => `Location.${location.toUpperCase()}`
+    );
+
     return `// Do not edit this manually... generated by scripts/generate_function_definitions.ts
     const ${getDefinitionName(name)}: FunctionDefinition = {
     type: FunctionDefinitionTypes.${type.toUpperCase()},
@@ -839,8 +848,7 @@ function printGeneratedFunctionsFile(
     preview: ${functionDefinition.preview || 'false'},
     alias: ${alias ? `['${alias.join("', '")}']` : 'undefined'},
     signatures: ${JSON.stringify(signatures, null, 2)},
-    supportedCommands: ${JSON.stringify(functionDefinition.supportedCommands)},
-    supportedOptions: ${JSON.stringify(functionDefinition.supportedOptions)},
+    locationsAvailable: [${locationsAvailable.join(', ')}],
     validate: ${functionDefinition.validate || 'undefined'},
     examples: ${JSON.stringify(functionDefinition.examples || [])},${
       customParametersSnippet
@@ -870,7 +878,7 @@ function printGeneratedFunctionsFile(
  */
 
 import { i18n } from '@kbn/i18n';
-import { type FunctionDefinition, FunctionDefinitionTypes } from '../types';
+import { type FunctionDefinition, FunctionDefinitionTypes, Location } from '../types';
 ${
   functionsType === FunctionDefinitionTypes.SCALAR
     ? `import type { ESQLFunction } from '@kbn/esql-ast';
@@ -912,7 +920,12 @@ ${
 
   const ESFunctionDefinitionsDirectory = join(
     pathToElasticsearch,
-    'docs/reference/esql/functions/kibana/definition'
+    '/docs/reference/query-languages/esql/kibana/definition/functions'
+  );
+
+  const ESOperatorsDefinitionsDirectory = join(
+    pathToElasticsearch,
+    '/docs/reference/query-languages/esql/kibana/definition/operators'
   );
 
   // read all ES function definitions (the directory is full of JSON files) and create an array of definitions
@@ -920,12 +933,18 @@ ${
     JSON.parse(readFileSync(`${ESFunctionDefinitionsDirectory}/${file}`, 'utf-8'))
   );
 
+  const ESFOperatorDefinitions = readdirSync(ESOperatorsDefinitionsDirectory).map((file) =>
+    JSON.parse(readFileSync(`${ESOperatorsDefinitionsDirectory}/${file}`, 'utf-8'))
+  );
+
+  const allFunctionDefinitions = ESFunctionDefinitions.concat(ESFOperatorDefinitions);
+
   const scalarFunctionDefinitions: FunctionDefinition[] = [];
   const aggFunctionDefinitions: FunctionDefinition[] = [];
   const operatorDefinitions: FunctionDefinition[] = [];
   const groupingFunctionDefinitions: FunctionDefinition[] = [];
 
-  for (const ESDefinition of ESFunctionDefinitions) {
+  for (const ESDefinition of allFunctionDefinitions) {
     if (aliases.has(ESDefinition.name) || excludedFunctions.has(ESDefinition.name)) {
       continue;
     }

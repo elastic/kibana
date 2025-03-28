@@ -45,5 +45,6 @@
     "@kbn/sort-predicates",
     "@kbn/data-grid-in-table-search",
     "@kbn/data-view-utils",
+    "@kbn/react-hooks",
   ]
 }

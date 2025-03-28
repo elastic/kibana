@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
 
 export enum SearchType {
   esQuery = 'esQuery',

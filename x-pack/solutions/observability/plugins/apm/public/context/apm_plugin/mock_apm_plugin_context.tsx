@@ -92,7 +92,6 @@ const mockCore = merge({}, coreStart, {
 const mockConfig: ConfigSchema = {
   serviceMapEnabled: true,
   ui: {
-    serviceMapApiV2Enabled: false,
     enabled: false,
   },
   latestAgentVersionsUrl: '',

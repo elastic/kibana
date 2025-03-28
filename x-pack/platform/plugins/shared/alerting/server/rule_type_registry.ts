@@ -64,6 +64,7 @@ export interface RegistryRuleType
     | 'actionVariables'
     | 'category'
     | 'producer'
+    | 'solution'
     | 'minimumLicenseRequired'
     | 'isExportable'
     | 'ruleTaskTimeout'
@@ -393,6 +394,7 @@ export class RuleTypeRegistry {
         actionVariables: _ruleType.actionVariables,
         category: _ruleType.category,
         producer: _ruleType.producer,
+        solution: _ruleType.solution,
         minimumLicenseRequired: _ruleType.minimumLicenseRequired,
         isExportable: _ruleType.isExportable,
         ruleTaskTimeout: _ruleType.ruleTaskTimeout,

@@ -70,7 +70,7 @@ describe('ConnectorsDropdown', () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <span
-                data-test-subj="dropdown-connector-no-connector"
+                data-test-subj="dropdown-connector-no-connector-label"
               >
                 No connector selected
               </span>

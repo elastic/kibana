@@ -27,7 +27,7 @@ export const ViewCodeAction: React.FC<{ selectedPageMode: PlaygroundPageMode }> 
       <EuiButton
         iconType="editorCodeBlock"
         color="primary"
-        fill
+        fill={selectedPageMode === PlaygroundPageMode.chat}
         onClick={() => setShowFlyout(true)}
         disabled={!selectedIndices || selectedIndices?.length === 0}
         data-test-subj="viewCodeActionButton"

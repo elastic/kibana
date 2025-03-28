@@ -609,7 +609,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"unprivileged\" | \"indexed\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\" | \"waiting_for_results\""
+              "\"indexed\" | \"indexing\" | \"unprivileged\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\" | \"waiting_for_results\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/status.ts",
             "deprecated": false,
@@ -1297,7 +1297,7 @@
             "label": "package",
             "description": [],
             "signature": [
-              "{ version?: string | undefined; name?: string | undefined; fixed_version?: string | undefined; }"
+              "{ version?: string | string[] | undefined; name?: string | string[] | undefined; fixed_version?: string | string[] | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/schema/vulnerabilities/csp_vulnerability_finding.ts",
             "deprecated": false,
@@ -1364,7 +1364,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"empty\" | \"not-empty\" | \"unprivileged\""
+              "\"empty\" | \"unprivileged\" | \"not-empty\""
             ],
             "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/status.ts",
             "deprecated": false,
@@ -1465,10 +1465,13 @@
           {
             "parentPluginId": "@kbn/cloud-security-posture-common",
             "id": "def-common.Vulnerability.id",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "id",
             "description": [],
+            "signature": [
+              "string | string[]"
+            ],
             "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/schema/vulnerabilities/csp_vulnerability_finding.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1487,10 +1490,13 @@
           {
             "parentPluginId": "@kbn/cloud-security-posture-common",
             "id": "def-common.Vulnerability.reference",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "reference",
             "description": [],
+            "signature": [
+              "string | string[]"
+            ],
             "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/schema/vulnerabilities/csp_vulnerability_finding.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1928,7 +1934,7 @@
         "label": "CspStatusCode",
         "description": [],
         "signature": [
-          "\"unprivileged\" | \"indexed\" | \"indexing\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\" | \"waiting_for_results\""
+          "\"indexed\" | \"indexing\" | \"unprivileged\" | \"index-timeout\" | \"not-deployed\" | \"not-installed\" | \"waiting_for_results\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/status.ts",
         "deprecated": false,
@@ -1973,7 +1979,7 @@
         "label": "IndexStatus",
         "description": [],
         "signature": [
-          "\"empty\" | \"not-empty\" | \"unprivileged\""
+          "\"empty\" | \"unprivileged\" | \"not-empty\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-cloud-security-posture/common/types/status.ts",
         "deprecated": false,

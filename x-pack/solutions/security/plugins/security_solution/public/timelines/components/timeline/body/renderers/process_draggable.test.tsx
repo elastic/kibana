@@ -10,6 +10,7 @@ import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
 import { ProcessDraggable, ProcessDraggableWithNonExistentProcess } from './process_draggable';
+import { CellActionsWrapper } from '../../../../../common/components/drag_and_drop/cell_actions_wrapper';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 
 jest.mock('../../../../../common/lib/kibana');
@@ -22,13 +23,27 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('../../../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+  return {
+    CellActionsWrapper: jest.fn(),
+  };
+});
+
+const MockedCellActionsWrapper = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+});
+
 describe('ProcessDraggable', () => {
+  beforeEach(() => {
+    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+  });
   const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
       const wrapper = shallow(
         <ProcessDraggable
+          scopeId="some_scope"
           contextId="context-123"
           endgamePid={456}
           endgameProcessName="endgame-process-name-123"
@@ -44,6 +59,7 @@ describe('ProcessDraggable', () => {
     test('it returns null if everything is null', () => {
       const wrapper = shallow(
         <ProcessDraggable
+          scopeId="some_scope"
           contextId="context-123"
           endgamePid={null}
           endgameProcessName={null}
@@ -59,6 +75,7 @@ describe('ProcessDraggable', () => {
     test('it returns null if everything is undefined', () => {
       const wrapper = shallow(
         <ProcessDraggable
+          scopeId="some_scope"
           contextId="context-123"
           endgamePid={undefined}
           endgameProcessName={undefined}
@@ -75,6 +92,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={undefined}
             endgameProcessName={undefined}
@@ -92,6 +110,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={undefined}
             endgameProcessName={undefined}
@@ -109,6 +128,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={null}
             endgameProcessName={null}
@@ -126,6 +146,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={NaN}
             endgameProcessName={undefined}
@@ -143,6 +164,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={NaN}
             endgameProcessName={null}
@@ -160,6 +182,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={NaN}
             endgameProcessName=""
@@ -177,6 +200,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={NaN}
             endgameProcessName="[endgame-process_name]"
@@ -194,6 +218,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={456}
             endgameProcessName="[endgame-process_name]"
@@ -211,6 +236,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={456}
             endgameProcessName=""
@@ -228,6 +254,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={456}
             endgameProcessName=""
@@ -245,6 +272,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={456}
             endgameProcessName="[endgame-process_name]"
@@ -262,6 +290,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={null}
             endgameProcessName={null}
@@ -279,6 +308,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={456}
             endgameProcessName={null}
@@ -296,6 +326,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={undefined}
             endgameProcessName={undefined}
@@ -313,6 +344,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={null}
             endgameProcessName=""
@@ -330,6 +362,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={null}
             endgameProcessName="[endgame-process-name]"
@@ -347,6 +380,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={null}
             endgameProcessName="[endgame-process-name]"
@@ -364,6 +398,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={null}
             endgameProcessName="[endgame-process-name]"
@@ -381,6 +416,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={999}
             endgameProcessName={undefined}
@@ -398,6 +434,7 @@ describe('ProcessDraggable', () => {
       const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
+            scopeId="some_scope"
             contextId="context-123"
             endgamePid={999}
             endgameProcessName={undefined}
@@ -411,6 +448,30 @@ describe('ProcessDraggable', () => {
       expect(wrapper.text()).toEqual('(999)');
     });
   });
+
+  test('should passing correct scopeId to cell actions', () => {
+    mount(
+      <TestProviders>
+        <ProcessDraggable
+          scopeId="some_scope"
+          contextId="context-123"
+          endgamePid={999}
+          endgameProcessName={undefined}
+          eventId="event-123"
+          processExecutable={undefined}
+          processName={undefined}
+          processPid={undefined}
+        />
+      </TestProviders>
+    );
+
+    expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scopeId: 'some_scope',
+      }),
+      {}
+    );
+  });
 });
 
 describe('ProcessDraggableWithNonExistentProcess', () => {
@@ -420,6 +481,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
     const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
+          scopeId="some_scope"
           contextId="context-123"
           endgamePid={undefined}
           endgameProcessName={undefined}
@@ -437,6 +499,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
     const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
+          scopeId="some_scope"
           contextId="context-123"
           endgamePid={999}
           endgameProcessName={undefined}
@@ -454,6 +517,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
     const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
+          scopeId="some_scope"
           contextId="context-123"
           endgamePid={undefined}
           endgameProcessName="[endgameProcessName]"
@@ -471,6 +535,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
     const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
+          scopeId="some_scope"
           contextId="context-123"
           endgamePid={undefined}
           endgameProcessName={undefined}
@@ -488,6 +553,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
     const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
+          scopeId="some_scope"
           contextId="context-123"
           endgamePid={undefined}
           endgameProcessName={undefined}
@@ -505,6 +571,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
     const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
+          scopeId="some_scope"
           contextId="context-123"
           endgamePid={undefined}
           endgameProcessName={undefined}
@@ -522,6 +589,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
     const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
+          scopeId="some_scope"
           contextId="context-123"
           endgamePid={999}
           endgameProcessName="[endgameProcessName]"
@@ -533,5 +601,29 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('[processName](123)');
+  });
+
+  test('should passing correct scopeId to cell actions', () => {
+    mount(
+      <TestProviders>
+        <ProcessDraggableWithNonExistentProcess
+          scopeId="some_scope"
+          contextId="context-123"
+          endgamePid={999}
+          endgameProcessName="[endgameProcessName]"
+          eventId="event-123"
+          processExecutable="[processExecutable]"
+          processName="[processName]"
+          processPid={123}
+        />
+      </TestProviders>
+    );
+
+    expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scopeId: 'some_scope',
+      }),
+      {}
+    );
   });
 });

@@ -38,8 +38,6 @@ import {
   DEFAULT_ASSISTANT_NAMESPACE,
   DEFAULT_KNOWLEDGE_BASE_SETTINGS,
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
-  LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
-  LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY,
   SHOW_ANONYMIZED_VALUES_LOCAL_STORAGE_KEY,
   STREAMING_LOCAL_STORAGE_KEY,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
@@ -49,10 +47,6 @@ import { ModalSettingsTabs } from '../assistant/settings/types';
 import { AssistantNavLink } from './assistant_nav_link';
 
 export type SelectedConversation = { id: string } | { title: string };
-export interface LastConversation {
-  id: string;
-  title?: string;
-}
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -116,7 +110,6 @@ export interface UseAssistantContext {
   http: HttpSetup;
   inferenceEnabled: boolean;
   knowledgeBase: KnowledgeBaseConfig;
-  getLastConversation: (selectedConversation?: SelectedConversation) => LastConversation;
   promptContexts: Record<string, PromptContext>;
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   nameSpace: string;
@@ -128,7 +121,6 @@ export interface UseAssistantContext {
   setContentReferencesVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
-  setLastConversation: React.Dispatch<React.SetStateAction<LastConversation | undefined>>;
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<ModalSettingsTabs | null>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
@@ -185,16 +177,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     useSessionStorage<TraceOptions>(
       `${nameSpace}.${TRACE_OPTIONS_SESSION_STORAGE_KEY}`,
       defaultTraceOptions
-    );
-
-  // Legacy fallback: used only if the new storage value is not yet set
-  const [localStorageLastConversationId] = useLocalStorage<string>(
-    `${nameSpace}.${LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY}`
-  );
-
-  const [localStorageLastConversation, setLocalStorageLastConversation] =
-    useLocalStorage<LastConversation>(
-      `${nameSpace}.${LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY}`
     );
 
   /**
@@ -296,51 +278,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
    */
   const codeBlockRef = useRef(() => {});
 
-  const getLastConversation = useCallback(
-    (selectedConversation?: SelectedConversation): LastConversation => {
-      let nextConversation: LastConversation = { id: '' };
-      // Type guard to check if selectedConversation has a 'title'
-      if (selectedConversation && 'title' in selectedConversation) {
-        nextConversation = {
-          id: '',
-          title: selectedConversation.title,
-        };
-        return nextConversation;
-      }
-
-      // If selectedConversation exists and has an 'id', return it with no 'title'
-      if (selectedConversation && 'id' in selectedConversation) {
-        nextConversation = { id: selectedConversation.id };
-        return nextConversation;
-      }
-
-      // Check if localStorageLastConversation has a 'title'
-      if (localStorageLastConversation && 'title' in localStorageLastConversation) {
-        nextConversation = {
-          id: '',
-          title: localStorageLastConversation.title,
-        };
-        return nextConversation;
-      }
-
-      // If localStorageLastConversation, return it
-      if (localStorageLastConversation && 'id' in localStorageLastConversation) {
-        nextConversation = localStorageLastConversation;
-        return nextConversation;
-      }
-
-      // If localStorageLastConversationId exists, use it as 'id'
-      if (localStorageLastConversationId) {
-        nextConversation = { id: localStorageLastConversationId };
-        return nextConversation;
-      }
-
-      // Default to an empty 'id'
-      return nextConversation;
-    },
-    [localStorageLastConversation, localStorageLastConversationId]
-  );
-
   // Fetch assistant capabilities
   const { data: assistantFeatures } = useCapabilities({ http, toasts });
 
@@ -389,8 +326,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       toasts,
       traceOptions: sessionStorageTraceOptions,
       unRegisterPromptContext,
-      getLastConversation,
-      setLastConversation: setLocalStorageLastConversation,
       currentAppId,
       codeBlockRef,
       userProfileService,
@@ -430,8 +365,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       toasts,
       sessionStorageTraceOptions,
       unRegisterPromptContext,
-      getLastConversation,
-      setLocalStorageLastConversation,
       currentAppId,
       codeBlockRef,
       userProfileService,

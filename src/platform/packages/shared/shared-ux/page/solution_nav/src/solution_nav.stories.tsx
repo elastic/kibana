@@ -57,32 +57,39 @@ const items: SolutionNavProps['items'] = [
   },
 ];
 
-export const SolutionNav = (params: Params) => {
-  return (
-    <Component items={items} isOpenOnDesktop={true} {...params} onCollapse={action('onCollapse')} />
-  );
-};
+export const SolutionNav = {
+  render: (params: Params) => {
+    return (
+      <Component
+        items={items}
+        isOpenOnDesktop={true}
+        {...params}
+        onCollapse={action('onCollapse')}
+      />
+    );
+  },
 
-SolutionNav.argTypes = {
-  name: {
-    control: 'text',
-    defaultValue: 'Kibana',
+  argTypes: {
+    name: {
+      control: 'text',
+      defaultValue: 'Kibana',
+    },
+    icon: {
+      control: { type: 'radio' },
+      options: ['logoKibana', 'logoObservability', 'logoSecurity'],
+      defaultValue: 'logoKibana',
+    },
+    children: {
+      control: 'text',
+      defaultValue: '',
+    },
+    canBeCollapsed: {
+      control: 'boolean',
+      defaultValue: true,
+    },
   },
-  icon: {
-    control: { type: 'radio' },
-    options: ['logoKibana', 'logoObservability', 'logoSecurity'],
-    defaultValue: 'logoKibana',
-  },
-  children: {
-    control: 'text',
-    defaultValue: '',
-  },
-  canBeCollapsed: {
-    control: 'boolean',
-    defaultValue: true,
-  },
-};
 
-SolutionNav.parameters = {
-  layout: 'fullscreen',
+  parameters: {
+    layout: 'fullscreen',
+  },
 };
