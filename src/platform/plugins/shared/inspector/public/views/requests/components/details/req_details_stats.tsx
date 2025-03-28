@@ -72,7 +72,9 @@ export class RequestDetailsStats extends Component<DetailViewProps> {
     return (
       <EuiTable responsiveBreakpoint={false}>
         <EuiTableBody>
-          {sortedStats.map((stat) => <StatRow stat={stat} key={stat.id}/>)}
+          {sortedStats.map((stat) => (
+            <StatRow stat={stat} key={stat.id} />
+          ))}
         </EuiTableBody>
       </EuiTable>
     );
