@@ -24,7 +24,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
   describe('Observability alerts >', function () {
     this.tags('includeFirefox');
-    this.timeout(60 * 1000);
 
     const testSubjects = getService('testSubjects');
     const retry = getService('retry');
@@ -55,7 +54,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('Renders the table', async () => {
-        throw new Error('TODO: Fix this test');
         await observability.alerts.common.getTableOrFail();
       });
 
