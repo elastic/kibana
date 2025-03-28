@@ -77,10 +77,12 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 
 jest.mock('../../../common/lib/kibana');
 
-jest.mock('../../hooks/use_load_rule_types_query', () => ({
-  useLoadRuleTypesQuery: jest.fn(),
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => ({
+  useGetRuleTypesPermissions: jest.fn(),
 }));
-const { useLoadRuleTypesQuery } = jest.requireMock('../../hooks/use_load_rule_types_query');
+const { useGetRuleTypesPermissions } = jest.requireMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
+);
 
 jest.mock('@kbn/alerts-ui-shared/src/action_variables/transforms', () => {
   const original = jest.requireActual('@kbn/alerts-ui-shared/src/action_variables/transforms');
@@ -112,7 +114,13 @@ describe('action_type_form', () => {
     jest.clearAllMocks();
   });
 
-  useLoadRuleTypesQuery.mockReturnValue({ ruleTypesState: { data: mockedRuleTypeIndex } });
+  useGetRuleTypesPermissions.mockReturnValue({
+    ruleTypesState: {
+      isLoading: false,
+      isInitialLoading: false,
+      data: mockedRuleTypeIndex,
+    },
+  });
 
   const mockedActionParamsFields = React.lazy(async () => ({
     default() {

@@ -549,7 +549,7 @@ export const ruleTypesIndex = new Map([
       name: 'SLO burn rate',
       category: 'observability',
       producer: 'slo',
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [
@@ -1090,7 +1090,7 @@ export const ruleTypesIndex = new Map([
       category: 'observability',
       producer: 'infrastructure',
       fieldsForAAD: ['cloud.*', 'host.*', 'orchestrator.*', 'container.*', 'labels.*', 'tags'],
-      is_exportable: true,
+      isExportable: true,
     },
   ],
   [

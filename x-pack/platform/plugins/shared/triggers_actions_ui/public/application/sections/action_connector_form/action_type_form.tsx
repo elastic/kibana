@@ -51,6 +51,7 @@ import {
 } from '@kbn/response-ops-rule-form';
 import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
 import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import {
@@ -63,7 +64,6 @@ import {
   ActionConnectorMode,
   NotifyWhenSelectOptions,
 } from '../../../types';
-import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
@@ -195,7 +195,11 @@ export const ActionTypeForm = ({
 
   const { fields: alertFields } = useRuleTypeAlertFields(http, ruleTypeId, useAlertTemplateFields);
 
-  const { ruleTypesState } = useLoadRuleTypesQuery({ filteredRuleTypes: [] });
+  const { ruleTypesState } = useGetRuleTypesPermissions({
+    http,
+    toasts: notifications.toasts,
+    filteredRuleTypes: [],
+  });
 
   const templateFields = useMemo(
     () => (useAlertTemplateFields ? alertFields : availableActionVariables),

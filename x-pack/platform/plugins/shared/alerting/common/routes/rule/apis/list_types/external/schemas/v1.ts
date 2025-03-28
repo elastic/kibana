@@ -138,12 +138,6 @@ export const typesRulesSchema = schema.object({
       description: 'Indicates whether the rule type has custom mappings for the alert data.',
     },
   }),
-  has_fields_for_a_a_d: schema.boolean({
-    meta: {
-      description:
-        'Indicates whether the rule type has fields for alert as data for the alert data.  ',
-    },
-  }),
   id: schema.string({
     meta: {
       description: 'The unique identifier for the rule type.',
