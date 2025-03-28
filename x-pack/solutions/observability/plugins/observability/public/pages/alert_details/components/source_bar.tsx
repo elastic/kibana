@@ -35,7 +35,12 @@ export function SourceBar({ alert, sources = [] }: SourceBarProps) {
   return (
     groups &&
     groups.length > 0 && (
-      <EuiPanel data-test-subj="alert-summary-container" hasShadow={false} hasBorder={true}>
+      <EuiPanel
+        paddingSize="s"
+        data-test-subj="alert-summary-container"
+        hasShadow={false}
+        hasBorder={true}
+      >
         <EuiFlexGroup gutterSize="l" direction="row" wrap>
           <EuiTitle size="xs">
             <h5>
