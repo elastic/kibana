@@ -152,7 +152,6 @@ export class UnenrollInactiveAgentsTask {
         );
         continue;
       }
-      this.logger.debug(`[UnenrollInactiveAgentsTask] batch size "${this.unenrollBatchSize}"`);
       agentCounter += res.agents.length;
       if (agentCounter >= this.unenrollBatchSize) {
         this.endRun('Reached the maximum amount of agents to unenroll, exiting.');
