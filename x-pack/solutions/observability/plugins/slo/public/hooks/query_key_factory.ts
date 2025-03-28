@@ -56,7 +56,7 @@ export const sloKeys = {
     search: string;
     page: number;
     perPage: number;
-    version?: string;
+    includeOutdatedOnly: boolean;
     validTags: string;
   }) => [...sloKeys.allDefinitions(), params],
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,

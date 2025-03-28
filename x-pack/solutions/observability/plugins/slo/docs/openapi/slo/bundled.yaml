@@ -435,14 +435,11 @@ paths:
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
         - $ref: '#/components/parameters/space_id'
-        - name: version
+        - name: includeOutdatedOnly
           in: query
           description: Indicates if the API returns only outdated SLO or all SLO definitions
           schema:
-            type: string
-            enum:
-              - current
-              - outdated
+            type: boolean
           example: true
         - name: tags
           in: query

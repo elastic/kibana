@@ -9,7 +9,6 @@ import {
   createKbnUrlStateStorage,
   createSessionStorageStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
-import { SLODefinitionVersions } from '@kbn/slo-schema';
 import deepmerge from 'deepmerge';
 import { pick } from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -24,7 +23,7 @@ export interface SearchState {
   tags: string[];
   page: number;
   perPage: number;
-  version?: SLODefinitionVersions;
+  includeOutdatedOnly?: boolean;
 }
 
 export const DEFAULT_STATE: SearchState = {
@@ -32,6 +31,7 @@ export const DEFAULT_STATE: SearchState = {
   tags: [],
   page: 0,
   perPage: DEFAULT_SLO_PAGE_SIZE,
+  includeOutdatedOnly: false,
 };
 
 export function useUrlSearchState(): {

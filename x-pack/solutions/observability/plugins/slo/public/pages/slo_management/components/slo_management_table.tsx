@@ -40,7 +40,7 @@ import { SearchState, useUrlSearchState } from './hooks/use_url_search_state';
 
 export function SloManagementTable() {
   const { state, onStateChange } = useUrlSearchState();
-  const { search, version, page, perPage, tags } = state;
+  const { search, page, perPage, tags, includeOutdatedOnly } = state;
   const { services } = useKibana();
 
   const {
@@ -49,11 +49,11 @@ export function SloManagementTable() {
   } = services;
 
   const { isLoading, isError, data, refetch } = useFetchSloDefinitions({
-    version,
     page: page + 1,
     perPage,
     name: search,
     tags,
+    includeOutdatedOnly,
   });
 
   const { data: permissions } = usePermissions();
@@ -295,12 +295,7 @@ export function SloManagementTable() {
   return (
     <>
       <EuiPanel hasBorder={true}>
-        <SloManagementSearchBar
-          initialVersion={state.version}
-          state={state}
-          onRefresh={refetch}
-          updateFilter={updateFilter}
-        />
+        <SloManagementSearchBar state={state} onRefresh={refetch} updateFilter={updateFilter} />
         <EuiSpacer size="m" />
         <EuiBasicTable<SLODefinitionResponse>
           tableCaption={TABLE_CAPTION}
