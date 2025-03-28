@@ -137,6 +137,13 @@ export function initializePanelsManager(
       return children$.value[id] as ApiType;
     }
 
+    // if the panel is in a collapsed section and has never been built, then childApi will be undefined
+    const sectionId = panels$.value[id].gridData.sectionId;
+    const section = sections$.value?.filter((current) => current.id === sectionId) ?? [];
+    if (section.length > 0 && section[0].collapsed) {
+      return undefined;
+    }
+
     return new Promise((resolve, reject) => {
       const subscription = merge(children$, panels$).subscribe(() => {
         if (children$.value[id]) {
@@ -170,7 +177,9 @@ export function initializePanelsManager(
     const titles: string[] = [];
     await asyncForEach(Object.keys(panels$.value), async (id) => {
       const childApi = await untilEmbeddableLoaded(id);
-      const title = apiPublishesTitle(childApi) ? getTitle(childApi) : '';
+      const title = apiPublishesTitle(childApi)
+        ? getTitle(childApi)
+        : (panels$.value[id]?.explicitInput as { title?: string }).title;
       if (title) titles.push(title);
     });
     return titles;
@@ -197,12 +206,6 @@ export function initializePanelsManager(
         const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
           customPlacementSettings?.strategy ?? PanelPlacementStrategy.findTopLeftMostOpenSpace,
           {
-            // only decide positioning of new panel based on panels in **first section**
-            // currentPanels: Object.keys(panels$.value).reduce((prev, panelId) => {
-            //   const panel = panels$.value[panelId];
-            //   if (panel.gridData.sectionId === undefined) return { ...prev, [panelId]: panel };
-            //   return prev;
-            // }, {}),
             currentPanels: panels$.value,
             height: customPlacementSettings?.height ?? DEFAULT_PANEL_HEIGHT,
             width: customPlacementSettings?.width ?? DEFAULT_PANEL_WIDTH,
@@ -269,6 +272,7 @@ export function initializePanelsManager(
         const { newPanelPlacement, otherPanels } = placeClonePanel({
           width: panelToClone.gridData.w,
           height: panelToClone.gridData.h,
+          sectionId: panelToClone.gridData.sectionId,
           currentPanels: panels$.value,
           placeBesideId: idToDuplicate,
         });
@@ -378,6 +382,7 @@ export function initializePanelsManager(
         // layoutUpdated$.pipe(skip(1), take(1)).subscribe(() => {
         //   window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         // });
+        trackPanel.setScrollToPanelId(newId);
       },
       setSections,
 
