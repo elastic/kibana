@@ -9,13 +9,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach } from '../../helpers';
 
-const INFRA_ACTIVE_ALERTS_CELL_COUNT = 78;
 const TOTAL_ALERTS_CELL_COUNT = 440;
 const RECOVERED_ALERTS_CELL_COUNT = 330;
 const ACTIVE_ALERTS_CELL_COUNT = 110;
-
-const DISABLED_ALERTS_CHECKBOX = 6;
-const ENABLED_ALERTS_CHECKBOX = 4;
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -28,7 +24,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     const testSubjects = getService('testSubjects');
     const retry = getService('retry');
     const observability = getService('observability');
-    const security = getService('security');
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
