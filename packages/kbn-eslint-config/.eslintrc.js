@@ -32,6 +32,7 @@ module.exports = {
     '@kbn/eslint-plugin-css',
     'eslint-plugin-depend',
     'prettier',
+    'eslint-plugin-react-compiler',
   ],
 
   parserOptions: {
@@ -43,6 +44,7 @@ module.exports = {
   },
 
   rules: {
+    'react-compiler/react-compiler': 'error',
     // Suggests better replacements for packages: https://github.com/es-tooling/module-replacements/tree/main/docs/modules
     'depend/ban-dependencies': [
       'error',
