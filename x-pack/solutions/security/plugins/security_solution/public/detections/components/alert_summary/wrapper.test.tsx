@@ -19,6 +19,7 @@ import {
 import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 import { SEARCH_BAR_TEST_ID } from './search_bar/search_bar_section';
+import { KPIS_SECTION } from './kpis/kpis_section';
 
 jest.mock('../../../common/components/search_bar', () => ({
   // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID
@@ -92,7 +93,9 @@ describe('<Wrapper />', () => {
       services: {
         data: {
           dataViews: {
-            create: jest.fn().mockReturnValue({ id: 'id', toSpec: jest.fn() }),
+            create: jest
+              .fn()
+              .mockReturnValue({ getIndexPattern: jest.fn(), id: 'id', toSpec: jest.fn() }),
             clearInstanceCache: jest.fn(),
           },
           query: { filterManager: { getFilters: jest.fn() } },
@@ -117,6 +120,7 @@ describe('<Wrapper />', () => {
       expect(getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(SEARCH_BAR_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(KPIS_SECTION)).toBeInTheDocument();
     });
   });
 });
