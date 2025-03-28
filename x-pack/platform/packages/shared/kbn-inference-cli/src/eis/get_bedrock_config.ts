@@ -8,6 +8,7 @@
 /* eslint-disable max-classes-per-file */
 import execa from 'execa';
 import { ToolingLog } from '@kbn/tooling-log';
+import { pickBy } from 'lodash';
 
 class VaultUnavailableError extends AggregateError {
   constructor(originalError: Error) {
@@ -15,9 +16,18 @@ class VaultUnavailableError extends AggregateError {
   }
 }
 
+class VaultTimedOutError extends AggregateError {
+  constructor(originalError: Error) {
+    super(
+      [originalError],
+      `Vault timed out. Make sure you are connected to the VPN. See https://docs.elastic.dev/vault.`
+    );
+  }
+}
+
 class VaultAccessError extends AggregateError {
-  constructor(field: string, originalError: Error) {
-    super([originalError], `Could not get vault field ${field}`);
+  constructor(originalError: Error) {
+    super([originalError], `Could not read from Vault`);
   }
 }
 
@@ -26,26 +36,38 @@ async function getBedrockCreditsFromVault() {
     throw new VaultUnavailableError(error);
   });
 
-  async function readVault(field: string, path: string): Promise<string> {
-    return await execa
-      .command(`vault read -field ${field} ${path}`)
-      .then((value) => {
-        return value.stdout;
-      })
-      .catch((error) => {
-        throw new VaultAccessError(field, error);
-      });
-  }
+  await execa.command('vault status', { timeout: 2500 }).catch((error) => {
+    if (error.timedOut) {
+      throw new VaultTimedOutError(error);
+    }
+  });
 
-  const vaultPath = 'secret/ent-search-team/inference/eis-gateway/dev';
+  const secretPath = process.env.VAULT_SECRET_PATH || 'secret/eis/bedrock';
 
-  const accessKeyId = await readVault('bedrock-aws-access-key-id', vaultPath);
-  const secretAccessKey = await readVault('bedrock-aws-secret-access-key', vaultPath);
+  const output = await execa
+    .command(`vault kv get -format json ${secretPath}`)
+    .then((value) => {
+      return (JSON.parse(value.stdout) as { data: { data: Record<string, string> } }).data.data;
+    })
+    .catch((error) => {
+      throw new VaultAccessError(error);
+    });
 
-  return {
+  const accessKeyId = output.aws_bedrock_access_key_id;
+  const secretAccessKey = output.aws_bedrock_secret_access_key;
+  const apiEndpoint = output.aws_bedrock_api_endpoint;
+  const bedrockModelId = output.aws_bedrock_model_id;
+  const awsBedrockRegion = output.aws_bedrock_region;
+
+  const config = {
     accessKeyId,
     secretAccessKey,
+    apiEndpoint,
+    bedrockModelId,
+    awsBedrockRegion,
   };
+
+  return pickBy(config, (val) => !!val) as typeof config;
 }
 
 export interface AwsBedrockConfig {
@@ -56,9 +78,7 @@ export interface AwsBedrockConfig {
   secretAccessKey: string;
 }
 
-export async function getBedrockConfig({ log }: { log: ToolingLog }): Promise<AwsBedrockConfig> {
-  log.debug(`Checking for Bedrock config`);
-
+function getDefaults() {
   const accessKeyId = process.env.AWS_BEDROCK_ACCESS_KEY_ID;
   const secretAccessKey = process.env.AWS_BEDROCK_SECRET_ACCESS_KEY;
   const region = process.env.AWS_BEDROCK_REGION ?? 'us-west-2';
@@ -66,16 +86,26 @@ export async function getBedrockConfig({ log }: { log: ToolingLog }): Promise<Aw
   const apiEndpoint =
     (process.env.AWS_BEDROCK_API_ENDPOINT = `https://bedrock-runtime.${region}.amazonaws.com`);
 
-  if (accessKeyId && secretAccessKey) {
-    return { accessKeyId, secretAccessKey, region, modelId, apiEndpoint };
+  return { accessKeyId, secretAccessKey, region, modelId, apiEndpoint };
+}
+
+export async function getBedrockConfig({ log }: { log: ToolingLog }): Promise<AwsBedrockConfig> {
+  log.debug(`Checking for Bedrock config`);
+
+  const defaults = getDefaults();
+
+  if (defaults.accessKeyId && defaults.secretAccessKey) {
+    return {
+      ...defaults,
+      accessKeyId: defaults.accessKeyId,
+      secretAccessKey: defaults.secretAccessKey,
+    };
   }
 
   log.debug(`No bedrock credentials found in env, checking Vault`);
 
   return {
-    region,
-    modelId,
-    apiEndpoint,
+    ...defaults,
     ...(await getBedrockCreditsFromVault()),
   };
 }

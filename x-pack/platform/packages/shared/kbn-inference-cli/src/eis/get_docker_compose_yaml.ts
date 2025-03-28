@@ -7,13 +7,11 @@
 
 import dedent from 'dedent';
 import { EisGatewayConfig } from './get_eis_gateway_config';
-import { EisModelServerConfig } from './get_eis_model_server_config';
 
 export function getDockerComposeYaml({
   config,
 }: {
   config: {
-    eisModelServer: EisModelServerConfig;
     eisGateway: EisGatewayConfig;
     nginx: {
       file: string;
@@ -22,33 +20,11 @@ export function getDockerComposeYaml({
 }) {
   return dedent(`
     services:
-      eis-model-server:
-        image: ${config.eisModelServer.image}
-        ports:
-          - "${config.eisModelServer.port}:8000"
-        environment:
-          TELEMETRY_EXPORTER_TYPE: "none"
-          EIS_MODEL_SERVER_LOG_LEVEL: "warn"
-        healthcheck:
-          test:
-            [
-              'CMD',
-              'python',
-              '-c',
-              "import socket; s=socket.socket(); s.connect(('localhost',${config.eisModelServer.port})); s.close()",
-            ]
-          interval: 1s
-          timeout: 2s
-          retries: 10
-
       eis-gateway:
         image: ${config.eisGateway.image}
         expose:
           - "8443"
           - "8051"
-        depends_on:
-          eis-model-server:
-            condition: service_healthy
         volumes:
           - "${config.eisGateway.mount.acl}:/app/acl/acl.yaml:ro"
           - "${config.eisGateway.mount.tls.cert}:/certs/tls/tls.crt:ro"

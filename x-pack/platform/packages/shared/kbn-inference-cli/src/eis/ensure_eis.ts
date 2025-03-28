@@ -13,7 +13,6 @@ import chalk from 'chalk';
 import { assertDockerAvailable } from './assert_docker_available';
 import { getDockerComposeYaml } from './get_docker_compose_yaml';
 import { getEisGatewayConfig } from './get_eis_gateway_config';
-import { getEisModelServerConfig } from './get_eis_model_server_config';
 import { DATA_DIR, writeFile } from './file_utils';
 import { getNginxConf } from './get_nginx_conf';
 import { getBedrockConfig } from './get_bedrock_config';
@@ -40,10 +39,6 @@ export async function ensureEis({ log, signal }: { log: ToolingLog; signal: Abor
 
   await down();
 
-  const eisModelServerConfig = await getEisModelServerConfig({
-    log,
-  });
-
   const eisGatewayConfig = await getEisGatewayConfig({
     aws,
     log,
@@ -58,7 +53,6 @@ export async function ensureEis({ log, signal }: { log: ToolingLog; signal: Abor
 
   const dockerComposeYaml = getDockerComposeYaml({
     config: {
-      eisModelServer: eisModelServerConfig,
       eisGateway: eisGatewayConfig,
       nginx: {
         file: NGINX_CONF_FILE_PATH,
@@ -86,9 +80,9 @@ export async function ensureEis({ log, signal }: { log: ToolingLog; signal: Abor
 
   backOff(isGatewayReady, {
     delayFirstAttempt: true,
-    maxDelay: 2000,
+    startingDelay: 500,
     jitter: 'full',
-    numOfAttempts: 10,
+    numOfAttempts: 20,
   })
     .then(() => {
       log.write(
