@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import React from 'react';
@@ -204,6 +205,13 @@ export const getXyChartRenderer = ({
   validate: () => undefined,
   reuseDomNode: true,
   render: async (domNode: Element, config: XYChartProps, handlers) => {
+    const performanceId = uuidv4();
+    const performanceName = (name: string) => `Lens:xyVis:${name}`;
+    const performanceMark = (name: string) =>
+      performance.mark(performanceName(name), { detail: { id: performanceId } });
+
+    performanceMark('preFlight');
+
     const deps = await getStartDeps();
 
     // Lazy loaded parts
@@ -233,6 +241,8 @@ export const getXyChartRenderer = ({
     );
 
     const renderComplete = () => {
+      performanceMark('renderComplete');
+
       const executionContext = handlers.getExecutionContext();
       const containerType = extractContainerType(executionContext);
       const visualizationType = extractVisualizationType(executionContext);
@@ -260,6 +270,8 @@ export const getXyChartRenderer = ({
       width: '100%',
       height: '100%',
     });
+
+    performanceMark('renderStart');
 
     ReactDOM.render(
       <KibanaRenderContextProvider {...deps.startServices}>

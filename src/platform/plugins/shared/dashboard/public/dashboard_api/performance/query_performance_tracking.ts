@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { groupBy, round, meanBy } from 'lodash';
 import { combineLatest, map, pairwise, startWith, switchMap, skipWhile, of } from 'rxjs';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -124,6 +125,23 @@ function reportPerformanceMetrics({
   const duration =
     loadType === 'dashboardSubsequentLoad' ? timeToData : Math.max(timeToData, totalLoadTime);
 
+  const performanceMarkers = performance
+    .getEntriesByType('mark')
+    .filter((marker) => marker.name.startsWith('Lens:')) as PerformanceMark[];
+  const groupedPerformanceMarkers = groupBy(performanceMarkers, (marker) => marker.detail.id);
+  const measurements = Object.values(groupedPerformanceMarkers).map((group) => {
+    const preFlightStart = group.find((marker) => marker.name.endsWith(':preFlight'))?.startTime;
+    const renderStart = group.find((marker) => marker.name.endsWith(':renderStart'))?.startTime;
+    const renderComplete = group.find((marker) =>
+      marker.name.endsWith(':renderComplete')
+    )?.startTime;
+
+    return {
+      preFlightDuration: preFlightStart && renderStart ? renderStart - preFlightStart : 0,
+      renderDuration: renderComplete && renderStart ? renderComplete - renderStart : 0,
+    };
+  });
+
   const e = {
     eventName: DASHBOARD_LOADED_EVENT,
     duration,
@@ -133,6 +151,12 @@ function reportPerformanceMetrics({
     value2: panelCount,
     key4: 'load_type',
     value4: loadTypesMapping[loadType],
+    key7: 'mean_lens_preflight',
+    value7: round(meanBy(measurements, 'preFlightDuration'), 2),
+    key8: 'mean_lens_data_request',
+    value8: 0,
+    key9: 'mean_lens_rendering',
+    value9: round(meanBy(measurements, 'renderDuration'), 2),
   };
   reportPerformanceMetricEvent(coreServices.analytics, e);
 }
