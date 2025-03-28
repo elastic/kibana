@@ -14,7 +14,9 @@ import type { EuiThemeComputed } from '@elastic/eui';
 describe('getAlertEventRowIndicator', () => {
   it('should return the correct color and label for an event row', () => {
     const row = {
-      'event.kind': 'event',
+      flattened: {
+        'event.kind': 'event',
+      },
     } as unknown as DataTableRecord;
 
     const euiTheme = {
@@ -33,7 +35,9 @@ describe('getAlertEventRowIndicator', () => {
 
   it('should return the correct color and label for an alert row', () => {
     const row = {
-      'event.kind': 'signal',
+      flattened: {
+        'event.kind': 'signal',
+      },
     } as unknown as DataTableRecord;
 
     const euiTheme = {
