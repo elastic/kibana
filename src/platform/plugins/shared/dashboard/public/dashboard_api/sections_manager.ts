@@ -18,10 +18,20 @@ import { DashboardSectionMap } from '../../common/dashboard_container/types';
 import { DashboardState } from './types';
 
 export function initializeSectionsManager(initialSections: DashboardSectionMap | undefined) {
+  const scrollToSection$ = new BehaviorSubject<string | undefined>(undefined);
   const sections$ = new BehaviorSubject<DashboardSectionMap | undefined>(initialSections);
   function setSections(sections?: DashboardSectionMap) {
     if (!fastIsEqual(sections ?? [], sections$.value ?? [])) sections$.next(sections);
   }
+
+  const tryToScrollToSection = (id: string) => {
+    const element = document.getElementById(`kbnGridRowHeader-${id}`);
+    if (!element) {
+      window.requestAnimationFrame(() => tryToScrollToSection(id));
+    } else {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return {
     api: {
@@ -42,9 +52,10 @@ export function initializeSectionsManager(initialSections: DashboardSectionMap |
         ]);
 
         // scroll to bottom after row is added
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        tryToScrollToSection(newId);
       },
       setSections,
+      scrollToSection$,
     },
     comparators: {
       sections: [

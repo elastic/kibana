@@ -70,7 +70,7 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
       });
     },
     scrollToTop: () => {
-      window.scroll(0, 0);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     setFocusedPanelId: (id: string | undefined) => {
       if (focusedPanelId$.value !== id) focusedPanelId$.next(id);
