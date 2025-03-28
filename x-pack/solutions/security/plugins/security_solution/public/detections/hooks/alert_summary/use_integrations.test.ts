@@ -6,22 +6,22 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useSources } from './use_sources';
+import { useIntegrations } from './use_integrations';
 import { useKibana } from '../../../common/lib/kibana';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
 import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
-import { FILTER_KEY } from '../../components/alert_summary/search_bar/sources_filter_button';
+import { FILTER_KEY } from '../../components/alert_summary/search_bar/integrations_filter_button';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../detection_engine/rule_management/api/hooks/use_find_rules_query');
 
-describe('useSources', () => {
+describe('useIntegrations', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should return a checked source', () => {
+  it('should return a checked integration', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         data: {
@@ -56,14 +56,14 @@ describe('useSources', () => {
       },
     ];
 
-    const { result } = renderHook(() => useSources({ packages }));
+    const { result } = renderHook(() => useIntegrations({ packages }));
 
     expect(result.current).toEqual({
       isLoading: false,
-      sources: [
+      integrations: [
         {
           checked: 'on',
-          'data-test-subj': 'alert-summary-source-option-Splunk',
+          'data-test-subj': 'alert-summary-integration-option-Splunk',
           key: 'SplunkRuleName',
           label: 'Splunk',
         },
@@ -71,7 +71,7 @@ describe('useSources', () => {
     });
   });
 
-  it('should return an un-checked source', () => {
+  it('should return an un-checked integration', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         data: {
@@ -118,13 +118,13 @@ describe('useSources', () => {
       },
     ];
 
-    const { result } = renderHook(() => useSources({ packages }));
+    const { result } = renderHook(() => useIntegrations({ packages }));
 
     expect(result.current).toEqual({
       isLoading: false,
-      sources: [
+      integrations: [
         {
-          'data-test-subj': 'alert-summary-source-option-Splunk',
+          'data-test-subj': 'alert-summary-integration-option-Splunk',
           key: 'SplunkRuleName',
           label: 'Splunk',
         },
@@ -132,7 +132,7 @@ describe('useSources', () => {
     });
   });
 
-  it('should not return a source if no rule match', () => {
+  it('should not return a integration if no rule match', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         data: { query: { filterManager: { getFilters: jest.fn().mockReturnValue([]) } } },
@@ -153,11 +153,11 @@ describe('useSources', () => {
       },
     ];
 
-    const { result } = renderHook(() => useSources({ packages }));
+    const { result } = renderHook(() => useIntegrations({ packages }));
 
     expect(result.current).toEqual({
       isLoading: false,
-      sources: [],
+      integrations: [],
     });
   });
 
@@ -182,11 +182,11 @@ describe('useSources', () => {
       },
     ];
 
-    const { result } = renderHook(() => useSources({ packages }));
+    const { result } = renderHook(() => useIntegrations({ packages }));
 
     expect(result.current).toEqual({
       isLoading: true,
-      sources: [],
+      integrations: [],
     });
   });
 });

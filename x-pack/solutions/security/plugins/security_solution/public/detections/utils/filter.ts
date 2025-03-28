@@ -86,7 +86,7 @@ export const updateFiltersArray = (
     value as string
   );
 
-  return filter != null
+  return filter
     ? existingFilters.filter((f: Filter) => f !== filter)
     : [...existingFilters, newFilter];
 };

@@ -9,23 +9,19 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
-import {
-  SEARCH_BAR_TEST_ID,
-  SearchBarSection,
-  SOURCE_BUTTON_LOADING_TEST_ID,
-} from './search_bar_section';
+import { INTEGRATION_BUTTON_LOADING_TEST_ID, SEARCH_BAR_TEST_ID, SearchBarSection } from './search_bar_section';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
-import { SOURCE_BUTTON_TEST_ID } from './sources_filter_button';
+import { INTEGRATION_BUTTON_TEST_ID } from './integrations_filter_button';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useSources } from '../../../hooks/alert_summary/use_sources';
+import { useIntegrations } from '../../../hooks/alert_summary/use_integrations';
 
 jest.mock('../../../../common/components/search_bar', () => ({
   // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID
   SiemSearchBar: () => <div data-test-subj={'alert-summary-search-bar'} />,
 }));
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../hooks/alert_summary/use_sources');
+jest.mock('../../../hooks/alert_summary/use_integrations');
 
 const dataView: DataView = createStubDataView({ spec: {} });
 const packages: PackageListItem[] = [
@@ -40,9 +36,9 @@ const packages: PackageListItem[] = [
 
 describe('<SearchBarSection />', () => {
   it('should render all components', () => {
-    (useSources as jest.Mock).mockReturnValue({
+    (useIntegrations as jest.Mock).mockReturnValue({
       isLoading: false,
-      sources: [],
+      integrations: [],
     });
     (useKibana as jest.Mock).mockReturnValue({
       services: { data: { query: { filterManager: jest.fn() } } },
@@ -53,21 +49,21 @@ describe('<SearchBarSection />', () => {
     );
 
     expect(getByTestId(SEARCH_BAR_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(SOURCE_BUTTON_LOADING_TEST_ID)).not.toBeInTheDocument();
-    expect(getByTestId(SOURCE_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(INTEGRATION_BUTTON_LOADING_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(INTEGRATION_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render a loading skeleton for the source button while fetching rules', () => {
-    (useSources as jest.Mock).mockReturnValue({
+  it('should render a loading skeleton for the integration button while fetching rules', () => {
+    (useIntegrations as jest.Mock).mockReturnValue({
       isLoading: true,
-      sources: [],
+      integrations: [],
     });
 
     const { getByTestId, queryByTestId } = render(
       <SearchBarSection dataView={dataView} packages={packages} />
     );
 
-    expect(getByTestId(SOURCE_BUTTON_LOADING_TEST_ID)).toBeInTheDocument();
-    expect(queryByTestId(SOURCE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(INTEGRATION_BUTTON_LOADING_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(INTEGRATION_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 });

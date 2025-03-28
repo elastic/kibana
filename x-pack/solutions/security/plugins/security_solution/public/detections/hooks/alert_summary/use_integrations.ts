@@ -15,34 +15,34 @@ import { useFindRulesQuery } from '../../../detection_engine/rule_management/api
 import { filterExistsInFiltersArray } from '../../utils/filter';
 import { useKibana } from '../../../common/lib/kibana';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
-import { FILTER_KEY } from '../../components/alert_summary/search_bar/sources_filter_button';
+import { FILTER_KEY } from '../../components/alert_summary/search_bar/integrations_filter_button';
 
-export const SOURCE_OPTION_TEST_ID = 'alert-summary-source-option-';
+export const INTEGRATION_OPTION_TEST_ID = 'alert-summary-integration-option-';
 
-export interface UseSourcesParams {
+export interface UseIntegrationsParams {
   /**
    * List of installed AI for SOC integrations
    */
   packages: PackageListItem[];
 }
 
-export interface UseSourcesResult {
+export interface UseIntegrationsResult {
+  /**
+   * List of integrations ready to be consumed by the IntegrationFilterButton component
+   */
+  integrations: EuiSelectableOption[];
   /**
    * True while rules are being fetched
    */
   isLoading: boolean;
-  /**
-   * List of sources ready to be consumed by the SourceFilterButton component
-   */
-  sources: EuiSelectableOption[];
 }
 
 /**
- * Combining installed packages and rules to create an interface that the SourceFilterButton can take as input (as EuiSelectableOption).
- * If there is no match between a package and the rules, the source is not returned.
- * If a filter exists (we assume that this filter is negated) we do not mark the source as checked for the EuiFilterButton.
+ * Combining installed packages and rules to create an interface that the IntegrationFilterButton can take as input (as EuiSelectableOption).
+ * If there is no match between a package and the rules, the integration is not returned.
+ * If a filter exists (we assume that this filter is negated) we do not mark the integration as checked for the EuiFilterButton.
  */
-export const useSources = ({ packages }: UseSourcesParams): UseSourcesResult => {
+export const useIntegrations = ({ packages }: UseIntegrationsParams): UseIntegrationsResult => {
   // Fetch all rules. For the AI for SOC effort, there should only be one rule per integration (which means for now 5-6 rules total)
   const { data, isLoading } = useFindRulesQuery({});
 
@@ -55,7 +55,7 @@ export const useSources = ({ packages }: UseSourcesParams): UseSourcesResult => 
   // There can be existing rules filtered out, coming when parsing the url
   const currentFilters = filterManager.getFilters();
 
-  const sources = useMemo(() => {
+  const integrations = useMemo(() => {
     const result: EuiSelectableOption[] = [];
 
     packages.forEach((p: PackageListItem) => {
@@ -65,16 +65,16 @@ export const useSources = ({ packages }: UseSourcesParams): UseSourcesResult => 
 
       if (matchingRule) {
         // Retrieves the filter from the key/value pair
-        const currentFilterExists = filterExistsInFiltersArray(currentFilters, FILTER_KEY, p.title);
+        const currentFilter = filterExistsInFiltersArray(currentFilters, FILTER_KEY, p.title);
 
         // A EuiSelectableOption is checked only if there is no matching filter for that rule
-        const source = {
-          'data-test-subj': `${SOURCE_OPTION_TEST_ID}${p.title}`,
-          ...(!currentFilterExists && { checked: 'on' as EuiSelectableOptionCheckedType }),
+        const integration = {
+          'data-test-subj': `${INTEGRATION_OPTION_TEST_ID}${p.title}`,
+          ...(!currentFilter && { checked: 'on' as EuiSelectableOptionCheckedType }),
           key: matchingRule?.name,
           label: p.title,
         };
-        result.push(source);
+        result.push(integration);
       }
     });
 
@@ -83,9 +83,9 @@ export const useSources = ({ packages }: UseSourcesParams): UseSourcesResult => 
 
   return useMemo(
     () => ({
+      integrations,
       isLoading,
-      sources,
     }),
-    [isLoading, sources]
+    [integrations, isLoading]
   );
 };

@@ -9,15 +9,15 @@ import React from 'react';
 import { act, render } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
-  SOURCE_BUTTON_TEST_ID,
-  SourceFilterButton,
-  SOURCES_LIST_TEST_ID,
-} from './sources_filter_button';
+  INTEGRATION_BUTTON_TEST_ID,
+  IntegrationFilterButton,
+  INTEGRATIONS_LIST_TEST_ID,
+} from './integrations_filter_button';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 
 jest.mock('../../../../common/lib/kibana');
 
-const sources: EuiSelectableOption[] = [
+const integrations: EuiSelectableOption[] = [
   {
     'data-test-subj': 'first',
     checked: 'on',
@@ -31,22 +31,22 @@ const sources: EuiSelectableOption[] = [
   },
 ];
 
-describe('<SourceFilterButton />', () => {
+describe('<IntegrationFilterButton />', () => {
   it('should render the component', async () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: { data: { query: { filterManager: jest.fn() } } },
     });
 
     await act(async () => {
-      const { getByTestId } = render(<SourceFilterButton sources={sources} />);
+      const { getByTestId } = render(<IntegrationFilterButton integrations={integrations} />);
 
-      const button = getByTestId(SOURCE_BUTTON_TEST_ID);
+      const button = getByTestId(INTEGRATION_BUTTON_TEST_ID);
       expect(button).toBeInTheDocument();
       button.click();
 
       await new Promise(process.nextTick);
 
-      expect(getByTestId(SOURCES_LIST_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(INTEGRATIONS_LIST_TEST_ID)).toBeInTheDocument();
 
       expect(getByTestId('first')).toHaveTextContent('firstLabel');
       expect(getByTestId('second')).toHaveTextContent('secondLabel');
@@ -61,9 +61,9 @@ describe('<SourceFilterButton />', () => {
     });
 
     await act(async () => {
-      const { getByTestId } = render(<SourceFilterButton sources={sources} />);
+      const { getByTestId } = render(<IntegrationFilterButton integrations={integrations} />);
 
-      getByTestId(SOURCE_BUTTON_TEST_ID).click();
+      getByTestId(INTEGRATION_BUTTON_TEST_ID).click();
 
       await new Promise(process.nextTick);
 
@@ -106,9 +106,9 @@ describe('<SourceFilterButton />', () => {
     });
 
     await act(async () => {
-      const { getByTestId } = render(<SourceFilterButton sources={sources} />);
+      const { getByTestId } = render(<IntegrationFilterButton integrations={integrations} />);
 
-      getByTestId(SOURCE_BUTTON_TEST_ID).click();
+      getByTestId(INTEGRATION_BUTTON_TEST_ID).click();
 
       await new Promise(process.nextTick);
 

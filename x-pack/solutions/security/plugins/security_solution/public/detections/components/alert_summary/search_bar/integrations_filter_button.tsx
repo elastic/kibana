@@ -22,31 +22,34 @@ import { i18n } from '@kbn/i18n';
 import { updateFiltersArray } from '../../../utils/filter';
 import { useKibana } from '../../../../common/lib/kibana';
 
-export const SOURCE_BUTTON_TEST_ID = 'alert-summary-source-button';
-export const SOURCES_LIST_TEST_ID = 'alert-summary-sources-list';
+export const INTEGRATION_BUTTON_TEST_ID = 'alert-summary-integration-button';
+export const INTEGRATIONS_LIST_TEST_ID = 'alert-summary-integrations-list';
 
-const SOURCES_BUTTON = i18n.translate('xpack.securitySolution.alertSummary.sources.buttonLabel', {
-  defaultMessage: 'Sources',
-});
+const INTEGRATIONS_BUTTON = i18n.translate(
+  'xpack.securitySolution.alertSummary.integrations.buttonLabel',
+  {
+    defaultMessage: 'Integrations',
+  }
+);
 
 export const FILTER_KEY = 'kibana.alert.rule.name';
 
-export interface SourceFilterButtonProps {
+export interface IntegrationFilterButtonProps {
   /**
-   * List of sources the user can select or deselect
+   * List of integrations the user can select or deselect
    */
-  sources: EuiSelectableOption[];
+  integrations: EuiSelectableOption[];
 }
 
 /**
  * Filter button displayed next to the KQL bar at the top of the alert summary page.
- * A source is friendly UI representation of an integration. For the AI for SOC effort, each integration has one rule associated with.
- * This means that deselecting a source is equivalent to filtering out by the rule for that integration.
+ * For the AI for SOC effort, each integration has one rule associated with.
+ * This means that deselecting an integration is equivalent to filtering out by the rule for that integration.
  * The EuiFilterButton works as follow:
- * - if a source is selected, this means that no filters live in filterManager
- * - if a source is deselected, this means that we have a negated filter for that rule in filterManager
+ * - if an integration is selected, this means that no filters live in filterManager
+ * - if an integration is deselected, this means that we have a negated filter for that rule in filterManager
  */
-export const SourceFilterButton = memo(({ sources }: SourceFilterButtonProps) => {
+export const IntegrationFilterButton = memo(({ integrations }: IntegrationFilterButtonProps) => {
   const { euiTheme } = useEuiTheme();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -62,7 +65,7 @@ export const SourceFilterButton = memo(({ sources }: SourceFilterButtonProps) =>
     prefix: 'filterGroupPopover',
   });
 
-  const [items, setItems] = useState<EuiSelectableOption[]>(sources);
+  const [items, setItems] = useState<EuiSelectableOption[]>(integrations);
 
   const onChange = useCallback(
     (
@@ -93,7 +96,7 @@ export const SourceFilterButton = memo(({ sources }: SourceFilterButtonProps) =>
       css={css`
         background-color: ${euiTheme.colors.backgroundBasePrimary};
       `}
-      data-test-subj={SOURCE_BUTTON_TEST_ID}
+      data-test-subj={INTEGRATION_BUTTON_TEST_ID}
       hasActiveFilters={!!items.find((item) => item.checked === 'on')}
       iconType="arrowDown"
       isSelected={isPopoverOpen}
@@ -101,7 +104,7 @@ export const SourceFilterButton = memo(({ sources }: SourceFilterButtonProps) =>
       numFilters={items.filter((item) => item.checked !== 'off').length}
       onClick={togglePopover}
     >
-      {SOURCES_BUTTON}
+      {INTEGRATIONS_BUTTON}
     </EuiFilterButton>
   );
 
@@ -118,7 +121,7 @@ export const SourceFilterButton = memo(({ sources }: SourceFilterButtonProps) =>
           css={css`
             min-width: 200px;
           `}
-          data-test-subj={SOURCES_LIST_TEST_ID}
+          data-test-subj={INTEGRATIONS_LIST_TEST_ID}
           options={items}
           onChange={onChange}
         >
@@ -129,4 +132,4 @@ export const SourceFilterButton = memo(({ sources }: SourceFilterButtonProps) =>
   );
 });
 
-SourceFilterButton.displayName = 'SourceFilterButton';
+IntegrationFilterButton.displayName = 'IntegrationFilterButton';
