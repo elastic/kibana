@@ -19,6 +19,9 @@ const TIMESTAMP_FIELD = '@timestamp';
 const RANDOM_SAMPLER_PROBABILITY = 0.1;
 
 
+// some units are not supported for the fixed_interval of the date histogram
+// this function uses the calculateAutoTimeExpression function to determine
+// if the interval should be a calendar_interval or a fixed_interval
 const getIntervalAndType = (
   timeRange: TimeRange,
   core: { uiSettings: { get: (key: string) => any } }
@@ -30,7 +33,7 @@ const getIntervalAndType = (
   if (!start || !end || !interval) {
     return undefined;
   }
-
+  
   const calendarIntervalUnits = new Set(['w', 'M', 'q', 'y']);
 
   const intervalType = calendarIntervalUnits.has(interval.replace(/^\d+/, ''))
