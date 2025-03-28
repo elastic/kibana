@@ -222,13 +222,7 @@ describe('autocomplete_utils', () => {
     const mockContext = { addTemplate: false } as AutoCompleteContext;
 
     it('returns empty string if name is undefined', () => {
-      expect(
-        getInsertText(
-          { name: undefined } as ResultTerm,
-          '',
-          mockContext
-        )
-      ).toBe('');
+      expect(getInsertText({ name: undefined } as ResultTerm, '', mockContext)).toBe('');
     });
 
     it('handles unclosed quotes correctly', () => {
@@ -282,29 +276,20 @@ describe('autocomplete_utils', () => {
 
     it('inserts template inline', () => {
       expect(
-        getInsertText(
-          { name: 'term', template: { FIELD: { value: 'VALUE' } } },
-          '{"query": {te',
-          { ...mockContext, addTemplate: true }
-        )
+        getInsertText({ name: 'term', template: { FIELD: { value: 'VALUE' } } }, '{"query": {te', {
+          ...mockContext,
+          addTemplate: true,
+        })
       ).toBe('"term": {\n' + '  "FIELD": {\n' + '    "value": "VALUE"\n' + '  }\n' + '}');
     });
 
     it('adds cursor placeholder inside empty objects and arrays', () => {
-      expect(
-        getInsertText(
-          { name: 'field', value: '{' } as ResultTerm,
-          '',
-          mockContext
-        )
-      ).toBe('"field": {$0}');
-      expect(
-        getInsertText(
-          { name: 'field', value: '[' } as ResultTerm,
-          '',
-          mockContext
-        )
-      ).toBe('"field": [$0]');
+      expect(getInsertText({ name: 'field', value: '{' } as ResultTerm, '', mockContext)).toBe(
+        '"field": {$0}'
+      );
+      expect(getInsertText({ name: 'field', value: '[' } as ResultTerm, '', mockContext)).toBe(
+        '"field": [$0]'
+      );
     });
   });
 });
