@@ -14,7 +14,7 @@ import {
   getGroupingQuery,
   useGrouping,
 } from '@kbn/grouping';
-import { parseGroupingQuery } from '@kbn/grouping/src';
+import { type ParsedGroupingAggregation, parseGroupingQuery } from '@kbn/grouping/src';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
 import {
   GROUP_BY_CLICK,
@@ -33,11 +33,7 @@ import {
   LOCAL_STORAGE_ASSETS_GROUPING_KEY,
 } from '../../constants';
 import { groupPanelRenderer, groupStatsRenderer } from './utils/asset_inventory_group_renderer';
-import {
-  type AssetsGroupingAggregation,
-  type AssetsRootGroupingAggregation,
-  useFetchGroupedData,
-} from './use_fetch_grouped_data';
+import { type AssetsGroupingAggregation, useFetchGroupedData } from './use_fetch_grouped_data';
 import { assetsUnit, groupingTitle, assetGroupsUnit, GROUPING_LABELS } from './translations';
 
 // TODO Remove?
@@ -137,10 +133,13 @@ const getRuntimeMappingsByGroupField = (
  * Type Guard for checking if the given source is a AssetsRootGroupingAggregation
  */
 export const isAssetsRootGroupingAggregation = (
-  // TODO Replace any with correct type
-  groupData: Record<string, any> | undefined // eslint-disable-line @typescript-eslint/no-explicit-any
-): groupData is AssetsRootGroupingAggregation => {
-  return groupData?.unitsCount?.value !== undefined;
+  groupData: {} | ParsedGroupingAggregation<AssetsGroupingAggregation>
+): groupData is ParsedGroupingAggregation<AssetsGroupingAggregation> => {
+  return (
+    typeof groupData === 'object' &&
+    'unitsCount' in groupData &&
+    groupData.unitsCount?.value !== undefined
+  );
 };
 
 /**
