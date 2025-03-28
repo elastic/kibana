@@ -11,10 +11,10 @@ import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { debounce } from 'lodash';
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 
-import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { AlertFieldCategoriesMap } from '@kbn/alerting-types';
 import type { FieldBrowserProps } from '../../types';
 import { FieldBrowserModal } from '../field_browser_modal/field_browser_modal';
-import { filterBrowserFieldsByFieldName, filterSelectedBrowserFields } from '../../helpers';
+import { filterBrowserFieldsByFieldName, filterSelectedAlertFields } from '../../helpers';
 import * as i18n from '../../translations';
 import { styles } from './field_browser.styles';
 
@@ -28,7 +28,7 @@ export const INPUT_TIMEOUT = 250;
  */
 export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
   columnIds,
-  browserFields,
+  alertFields,
   onResetColumns,
   onToggleColumn,
   options,
@@ -45,7 +45,8 @@ export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
   /** debounced filterInput, the one that is applied to the filteredBrowserFields */
   const [appliedFilterInput, setAppliedFilterInput] = useState('');
   /** all fields in this collection have field names that match the filterInput */
-  const [filteredBrowserFields, setFilteredBrowserFields] = useState<BrowserFields | null>(null);
+  const [filteredBrowserFields, setFilteredBrowserFields] =
+    useState<AlertFieldCategoriesMap | null>(null);
   /** when true, show only the the selected field */
   const [filterSelectedEnabled, setFilterSelectedEnabled] = useState(false);
   /** when true, show a spinner in the input to indicate the field browser is searching for matching field names */
@@ -71,12 +72,10 @@ export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
     };
   }, [debouncedApplyFilterInput]);
 
-  const selectionFilteredBrowserFields = useMemo<BrowserFields>(
+  const selectionFilteredBrowserFields = useMemo<AlertFieldCategoriesMap>(
     () =>
-      filterSelectedEnabled
-        ? filterSelectedBrowserFields({ browserFields, columnIds })
-        : browserFields,
-    [browserFields, columnIds, filterSelectedEnabled]
+      filterSelectedEnabled ? filterSelectedAlertFields({ alertFields, columnIds }) : alertFields,
+    [alertFields, columnIds, filterSelectedEnabled]
   );
 
   useEffect(() => {
@@ -144,7 +143,7 @@ export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
         <FieldBrowserModal
           columnIds={columnIds}
           filteredBrowserFields={
-            filteredBrowserFields != null ? filteredBrowserFields : browserFields
+            filteredBrowserFields != null ? filteredBrowserFields : alertFields
           }
           filterSelectedEnabled={filterSelectedEnabled}
           isSearching={isSearching}

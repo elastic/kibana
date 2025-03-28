@@ -8,7 +8,7 @@
  */
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { AlertFieldCategoriesMap } from '@kbn/rule-registry-plugin/common';
 
 const DEFAULT_INDEX_PATTERN = [
   'apm-*-transaction*',
@@ -21,7 +21,7 @@ const DEFAULT_INDEX_PATTERN = [
   'winlogbeat-*',
 ];
 
-export const mockBrowserFields: BrowserFields = {
+export const mockBrowserFields: AlertFieldCategoriesMap = {
   agent: {
     fields: {
       'agent.ephemeral_id': {

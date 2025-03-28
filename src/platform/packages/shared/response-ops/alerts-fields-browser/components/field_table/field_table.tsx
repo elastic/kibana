@@ -15,7 +15,7 @@ import {
   useEuiTheme,
   CriteriaWithPagination,
 } from '@elastic/eui';
-import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { AlertFieldCategoriesMap } from '@kbn/rule-registry-plugin/common';
 import { getFieldColumns, getFieldItemsData } from '../field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from '../../helpers';
 import type { BrowserFieldItem, FieldBrowserProps, GetFieldTableColumns } from '../../types';
@@ -33,7 +33,7 @@ export interface FieldTableProps extends Pick<FieldBrowserProps, 'columnIds' | '
    * filtered such that the name of every field in the category includes
    * the filter input (as a substring).
    */
-  filteredBrowserFields: BrowserFields;
+  filteredBrowserFields: AlertFieldCategoriesMap;
   /** when true, show only the the selected field */
   filterSelectedEnabled: boolean;
   onFilterSelectedChange: (enabled: boolean) => void;

@@ -16,7 +16,7 @@ import { FieldBrowserComponent } from './field_browser';
 import type { FieldBrowserProps } from '../../types';
 
 const defaultProps: FieldBrowserProps = {
-  browserFields: mockBrowserFields,
+  alertFields: mockBrowserFields,
   columnIds: [],
   onToggleColumn: jest.fn(),
   onResetColumns: jest.fn(),

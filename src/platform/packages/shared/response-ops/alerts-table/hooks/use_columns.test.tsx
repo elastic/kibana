@@ -12,7 +12,7 @@ import { EuiDataGridColumn } from '@elastic/eui';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserFields } from '@kbn/alerting-types';
+import { AlertFieldCategoriesMap } from '@kbn/alerting-types';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
 import { useColumns } from './use_columns';
@@ -41,7 +41,7 @@ const wrapper: FunctionComponent<React.PropsWithChildren<{}>> = ({ children }) =
 );
 
 const mockFetchAlertsFields = jest.mocked(fetchAlertsFields);
-const browserFields: BrowserFields = {
+const browserFields: AlertFieldCategoriesMap = {
   kibana: {
     fields: {
       ['event.action']: {

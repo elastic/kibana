@@ -18,6 +18,7 @@
     "requiredPlugins": [
       "alerting",
       "data",
+      "fieldsMetadata",
       "triggersActionsUi"
     ],
     "optionalPlugins": [

@@ -6,41 +6,45 @@
  */
 
 import { FieldDescriptor } from '@kbn/data-views-plugin/server';
-import { BrowserFields, BrowserField } from '../../../common';
+import { AlertFieldCategoriesMap } from '@kbn/alerting-types';
+// @ts-expect-error TODO Missing export and type definitions
+import { EcsNested } from '@elastic/ecs/generated/ecs_nested';
+import { FieldDescriptorWithMetadata } from '../../../common/types';
 
 const getFieldCategory = (fieldCapability: FieldDescriptor) => {
   const name = fieldCapability.name.split('.');
-
   if (name.length === 1) {
     return 'base';
   }
-
   return name[0];
 };
 
-const browserFieldFactory = (
-  fieldCapability: FieldDescriptor,
-  category: string
-): Readonly<Record<string, Partial<BrowserField>>> => {
-  return {
-    [fieldCapability.name]: {
-      ...fieldCapability,
-      category,
-    },
-  };
-};
-
-export const fieldDescriptorToBrowserFieldMapper = (fields: FieldDescriptor[]): BrowserFields => {
-  return fields.reduce((browserFields: BrowserFields, field: FieldDescriptor) => {
+/**
+ * Groups the list of field specs into a map from category to field name to field spec
+ * @example
+ * ```ts
+ * {
+ *   base: {
+ *     fields: {
+ *       '@timestamp': { ... },
+ *     },
+ *   },
+ *   kibana: { ... },
+ *   ...
+ * }
+ * ```
+ */
+export const groupAlertFieldsByCategory = (
+  fields: FieldDescriptorWithMetadata[]
+): AlertFieldCategoriesMap => {
+  return fields.reduce((alertFields, field) => {
     const category = getFieldCategory(field);
-    const browserField = browserFieldFactory(field, category);
-
-    if (browserFields[category] && browserFields[category]) {
-      Object.assign(browserFields[category].fields || {}, browserField);
-    } else {
-      browserFields[category] = { fields: browserField };
+    const ecsCategoryData = EcsNested[category as keyof typeof EcsNested];
+    if (!alertFields[category]) {
+      const { fields: _, ...categoryData } = ecsCategoryData ?? {};
+      alertFields[category] = { name: category, fields: {}, ...categoryData };
     }
-
-    return browserFields;
-  }, {});
+    alertFields[category].fields[field.name] = { ...field, category };
+    return alertFields;
+  }, {} as AlertFieldCategoriesMap);
 };

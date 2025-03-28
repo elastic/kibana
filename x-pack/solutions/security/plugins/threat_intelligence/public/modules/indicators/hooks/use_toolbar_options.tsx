@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiButtonIcon, EuiDataGridColumn, EuiText } from '@elastic/eui';
-import { BrowserField } from '@kbn/rule-registry-plugin/common';
+import { AlertFieldCategory } from '@kbn/rule-registry-plugin/common';
 import { useInspector } from '../../../hooks/use_inspector';
 import { IndicatorsFieldBrowser } from '../components/table/field_browser';
 import { INSPECT_BUTTON_TEST_ID } from './test_ids';
@@ -22,7 +22,7 @@ export const useToolbarOptions = ({
   onResetColumns,
   onToggleColumn,
 }: {
-  browserFields: Readonly<Record<string, Partial<BrowserField>>>;
+  browserFields: Readonly<Record<string, Partial<AlertFieldCategory>>>;
   start: number;
   end: number;
   indicatorCount: number;

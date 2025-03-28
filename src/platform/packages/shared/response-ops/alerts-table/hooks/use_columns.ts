@@ -10,7 +10,7 @@
 import { type MutableRefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiDataGridColumn, EuiDataGridOnColumnResizeData } from '@elastic/eui';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { BrowserField, BrowserFields } from '@kbn/alerting-types';
+import type { AlertField, AlertFieldCategoriesMap } from '@kbn/alerting-types';
 import { isEmpty } from 'lodash';
 import { useFetchAlertsFieldsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
@@ -28,7 +28,7 @@ export interface UseColumnsArgs {
    * If this is provided, it will be used to populate the columns instead of fetching the fields
    * from the alerting APIs
    */
-  alertsFields?: BrowserFields;
+  alertsFields?: AlertFieldCategoriesMap;
   http: HttpStart;
 }
 
@@ -36,7 +36,7 @@ export interface UseColumnsResp {
   columns: EuiDataGridColumn[];
   visibleColumns: string[];
   isBrowserFieldDataLoading: boolean | undefined;
-  browserFields: BrowserFields;
+  browserFields: AlertFieldCategoriesMap;
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
   onChangeVisibleColumns: (columnIds: string[]) => void;
@@ -56,11 +56,9 @@ const fieldTypeToDataGridColumnTypeMapper = (fieldType: string | undefined) => {
 
 const getFieldCategoryFromColumnId = (columnId: string): string => {
   const fieldName = columnId.split('.');
-
   if (fieldName.length === 1) {
     return 'base';
   }
-
   return fieldName[0];
 };
 
@@ -71,13 +69,13 @@ const getFieldCategoryFromColumnId = (columnId: string): string => {
  */
 const euiColumnFactory = (
   columnId: string,
-  browserFields: BrowserFields,
+  alertFieldsByCategory: AlertFieldCategoriesMap,
   defaultColumns: EuiDataGridColumn[]
 ): EuiDataGridColumn => {
   const defaultColumn = getColumnByColumnId(defaultColumns, columnId);
   const column = defaultColumn ? defaultColumn : { id: columnId };
 
-  const browserFieldsProps = getBrowserFieldProps(columnId, browserFields);
+  const browserFieldsProps = getBrowserFieldProps(columnId, alertFieldsByCategory);
   return {
     ...column,
     schema: fieldTypeToDataGridColumnTypeMapper(browserFieldsProps.type),
@@ -86,26 +84,26 @@ const euiColumnFactory = (
 
 const getBrowserFieldProps = (
   columnId: string,
-  browserFields: BrowserFields
-): Partial<BrowserField> => {
-  const notFoundSpecs = { type: 'string' };
+  alertFieldsByCategory: AlertFieldCategoriesMap
+): Partial<AlertField> => {
+  const defaultFieldSpec = { type: 'string' };
 
-  if (!browserFields || Object.keys(browserFields).length === 0) {
-    return notFoundSpecs;
+  if (!alertFieldsByCategory || Object.keys(alertFieldsByCategory).length === 0) {
+    return defaultFieldSpec;
   }
 
   const category = getFieldCategoryFromColumnId(columnId);
-  if (!browserFields[category]) {
-    return notFoundSpecs;
+  if (!alertFieldsByCategory[category]) {
+    return defaultFieldSpec;
   }
 
-  const categorySpecs = browserFields[category].fields;
+  const categorySpecs = alertFieldsByCategory[category].fields;
   if (!categorySpecs) {
-    return notFoundSpecs;
+    return defaultFieldSpec;
   }
 
   const fieldSpecs = categorySpecs[columnId];
-  return fieldSpecs ? fieldSpecs : notFoundSpecs;
+  return fieldSpecs ? fieldSpecs : defaultFieldSpec;
 };
 
 const isPopulatedColumn = (column: EuiDataGridColumn) => Boolean(column.schema);
@@ -117,7 +115,7 @@ const isPopulatedColumn = (column: EuiDataGridColumn) => Boolean(column.schema);
  */
 const populateColumns = (
   columns: EuiDataGridColumn[],
-  browserFields: BrowserFields,
+  browserFields: AlertFieldCategoriesMap,
   defaultColumns: EuiDataGridColumn[]
 ): EuiDataGridColumn[] => {
   return columns.map((column: EuiDataGridColumn) => {
@@ -176,9 +174,9 @@ export const useColumns = ({
     }
   );
 
-  const selectedAlertsFields = useMemo<BrowserFields>(
-    () => alertsFields ?? fieldsQuery.data?.browserFields ?? {},
-    [alertsFields, fieldsQuery.data?.browserFields]
+  const selectedAlertsFields = useMemo<AlertFieldCategoriesMap>(
+    () => alertsFields ?? fieldsQuery.data ?? {},
+    [alertsFields, fieldsQuery.data]
   );
 
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(() => {
@@ -234,11 +232,7 @@ export const useColumns = ({
     if (fieldsQuery.data) {
       if (isEmpty(fieldsQuery.data.browserFields) || isColumnsPopulated) return;
 
-      const populatedColumns = populateColumns(
-        columns,
-        fieldsQuery.data.browserFields,
-        defaultColumns
-      );
+      const populatedColumns = populateColumns(columns, fieldsQuery.data, defaultColumns);
 
       setColumnsPopulated(true);
       setColumns(populatedColumns);

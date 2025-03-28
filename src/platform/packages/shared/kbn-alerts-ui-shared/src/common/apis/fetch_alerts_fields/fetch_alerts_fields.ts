@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
-import type { BrowserFields } from '@kbn/alerting-types';
+import type { AlertFieldCategoriesMap } from '@kbn/alerting-types';
 import type { FetchAlertsFieldsParams } from './types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../constants';
 
 export const fetchAlertsFields = ({ http, ruleTypeIds }: FetchAlertsFieldsParams) => {
-  return http.get<{ browserFields: BrowserFields; fields: FieldDescriptor[] }>(
-    `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
-    {
-      query: { ruleTypeIds },
-    }
-  );
+  return http.get<AlertFieldCategoriesMap>(`${BASE_RAC_ALERTS_API_PATH}/browser_fields`, {
+    query: { ruleTypeIds },
+  });
 };

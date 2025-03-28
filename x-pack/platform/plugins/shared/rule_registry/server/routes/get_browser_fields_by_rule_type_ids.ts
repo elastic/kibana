@@ -14,7 +14,7 @@ import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
 
-export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerContext>) => {
+export const getAlertsFieldsByRuleTypeIds = (router: IRouter<RacRequestHandlerContext>) => {
   router.get(
     {
       path: `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
@@ -60,7 +60,7 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
           });
         }
 
-        const fields = await alertsClient.getBrowserFields({
+        const fields = await alertsClient.getAlertsFieldsByCategory({
           indices: o11yIndices,
           ruleTypeIds: onlyO11yRuleTypeIds,
           metaFields: ['_id', '_index'],

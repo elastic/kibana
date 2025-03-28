@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
-import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { AlertFieldCategoriesMap } from '@kbn/rule-registry-plugin/common';
 import type { FieldBrowserProps } from '../../types';
 import { Search } from '../search';
 
@@ -49,7 +49,7 @@ export type FieldBrowserModalProps = Pick<
    * filtered such that the name of every field in the category includes
    * the filter input (as a substring).
    */
-  filteredBrowserFields: BrowserFields;
+  filteredBrowserFields: AlertFieldCategoriesMap;
   /** when true, show only the the selected field */
   filterSelectedEnabled: boolean;
   onFilterSelectedChange: (enabled: boolean) => void;
