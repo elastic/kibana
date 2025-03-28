@@ -9,7 +9,7 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { fetchRuleTypeAlertFields, getDescription } from './fetch_rule_type_alert_fields';
-import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
+import type { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
 
 const http = httpServiceMock.createStartContract();
 

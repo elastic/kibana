@@ -9,13 +9,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach } from '../../helpers';
 
-const INFRA_ACTIVE_ALERTS_CELL_COUNT = 78;
 const TOTAL_ALERTS_CELL_COUNT = 440;
 const RECOVERED_ALERTS_CELL_COUNT = 330;
 const ACTIVE_ALERTS_CELL_COUNT = 110;
-
-const DISABLED_ALERTS_CHECKBOX = 6;
-const ENABLED_ALERTS_CHECKBOX = 4;
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -28,7 +24,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     const testSubjects = getService('testSubjects');
     const retry = getService('retry');
     const observability = getService('observability');
-    const security = getService('security');
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
@@ -208,39 +203,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         });
       });
 
-      describe.skip('Cell actions', () => {
-        beforeEach(async () => {
-          await retry.try(async () => {
-            const cells = await observability.alerts.common.getTableCells();
-            const alertStatusCell = cells[2];
-            await alertStatusCell.moveMouseTo();
-            await retry.waitFor(
-              'cell actions visible',
-              async () => await observability.alerts.common.filterForValueButtonExists()
-            );
-          });
-        });
-
-        afterEach(async () => {
-          await observability.alerts.common.clearQueryBar();
-          // Reset the query bar by hiding the dropdown
-          await observability.alerts.common.submitQuery('');
-        });
-
-        it.skip('Filter for value works', async () => {
-          await (await observability.alerts.common.getFilterForValueButton()).click();
-          const queryBarValue = await (
-            await observability.alerts.common.getQueryBar()
-          ).getAttribute('value');
-          expect(queryBarValue).to.be('kibana.alert.status: "active"');
-          // Wait for request
-          await retry.try(async () => {
-            const cells = await observability.alerts.common.getTableCells();
-            expect(cells.length).to.be(INFRA_ACTIVE_ALERTS_CELL_COUNT);
-          });
-        });
-      });
-
       describe('Actions Button', () => {
         it('Opens rule details page when click on "View Rule Details"', async () => {
           const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
@@ -250,57 +212,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           expect(
             await (await find.byCssSelector('[data-test-subj="breadcrumb first"]')).getVisibleText()
           ).to.eql('Observability');
-        });
-      });
-
-      describe.skip('Bulk Actions', () => {
-        before(async () => {
-          await security.testUser.setRoles(['global_alerts_logs_all_else_read']);
-          await observability.alerts.common.submitQuery('kibana.alert.status: "active"');
-        });
-        after(async () => {
-          await observability.alerts.common.submitQuery('');
-          await security.testUser.restoreDefaults();
-        });
-
-        it('Only logs alert should be enable for bulk actions', async () => {
-          const disabledCheckBoxes =
-            await observability.alerts.common.getAllDisabledCheckBoxInTable();
-          const enabledCheckBoxes =
-            await observability.alerts.common.getAllEnabledCheckBoxInTable();
-
-          expect(disabledCheckBoxes.length).to.eql(DISABLED_ALERTS_CHECKBOX);
-          expect(enabledCheckBoxes.length).to.eql(ENABLED_ALERTS_CHECKBOX);
-        });
-
-        it('validate formatting of the bulk actions button', async () => {
-          const selectAll = await testSubjects.find('select-all-events');
-          await selectAll.click();
-          const bulkActionsButton = await testSubjects.find('selectedShowBulkActionsButton');
-          expect(await bulkActionsButton.getVisibleText()).to.be('Selected 4 alerts');
-          await selectAll.click();
-        });
-
-        it('validate functionality of the bulk actions button', async () => {
-          const selectAll = await testSubjects.find('select-all-events');
-          await selectAll.click();
-
-          const bulkActionsButton = await testSubjects.find('selectedShowBulkActionsButton');
-          await bulkActionsButton.click();
-
-          const bulkActionsAcknowledgedAlertStatusButton = await testSubjects.find(
-            'acknowledged-alert-status'
-          );
-          await bulkActionsAcknowledgedAlertStatusButton.click();
-          await observability.alerts.common.submitQuery(
-            'kibana.alert.workflow_status : "acknowledged"'
-          );
-
-          await retry.try(async () => {
-            const enabledCheckBoxes =
-              await observability.alerts.common.getAllEnabledCheckBoxInTable();
-            expect(enabledCheckBoxes.length).to.eql(1);
-          });
         });
       });
     });

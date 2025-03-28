@@ -15,14 +15,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { AssistantBeacon, AssistantBeaconProps } from '@kbn/ai-assistant-icon';
+import { AssistantBeacon, AssistantBeaconProps, useBeaconSize } from '@kbn/ai-assistant-icon';
 
 import { styles } from './call_to_action.styles';
 import { translations } from './call_to_action.translations';
 
 const Beacon = (props: Pick<AssistantBeaconProps, 'backgroundColor'>) => (
   <EuiFlexItem grow={false}>
-    <AssistantBeacon {...props} />
+    <AssistantBeacon {...props} size="xxl" />
   </EuiFlexItem>
 );
 
@@ -64,8 +64,15 @@ export interface AssistantCallToActionProps {
   title?: string;
   /** Optional description for the call to action. */
   description?: string;
+  /**
+   * True if the panel is intended to be vertically centered, false otherwise.  If true, the panel will compensate for the
+   * beacon height to ensure the title and description are centered.
+   */
+  centered?: boolean;
   /** Optional content to display beneath the description. */
   children?: ReactNode;
+  /** Optional test subject for the component. */
+  ['data-test-subj']?: string;
 }
 
 /**
@@ -78,11 +85,20 @@ export const AssistantCallToAction = ({
   description,
   color = 'plain',
   children,
+  centered = false,
+  ...props
 }: AssistantCallToActionProps) => {
+  const { rootSize } = useBeaconSize('xxl');
   const backgroundColor = color === 'plain' ? 'backgroundBasePlain' : 'backgroundBaseSubdued';
 
   return (
-    <EuiPanel css={styles.root} hasShadow={false} borderRadius="none" {...{ color }}>
+    <EuiPanel
+      css={styles.root(centered ? rootSize : 0)}
+      hasShadow={false}
+      borderRadius="none"
+      grow={false}
+      {...{ color, ...props }}
+    >
       <EuiFlexGroup direction="column" alignItems="center" gutterSize="m">
         <Beacon {...{ backgroundColor }} />
         <Title {...{ title }} />
