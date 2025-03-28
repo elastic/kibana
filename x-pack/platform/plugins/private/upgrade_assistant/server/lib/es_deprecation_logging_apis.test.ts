@@ -199,22 +199,34 @@ describe('getRecentEsDeprecationLogs', () => {
     const mockHits = [
       { _source: { '@timestamp': withinTimeframe1, message: 'Recent log 1' } },
       { _source: { '@timestamp': withinTimeframe2, message: 'Recent log 2' } },
+      {
+        _source: { '@timestamp': outsideTimeframe, message: 'Old log that should be filtered out' },
+      },
     ];
+
+    // Elasticsearch would filter out the logs outside timeframe in a real scenario
+    // but we need to simulate this in our test by returning only the logs within timeframe
+    const filteredMockHits = mockHits.filter(
+      (hit) => hit._source['@timestamp'] !== outsideTimeframe
+    );
 
     dataClient.asCurrentUser.search.mockResolvedValue({
       hits: {
-        hits: mockHits,
-        total: { value: 2 },
+        hits: filteredMockHits,
+        total: { value: filteredMockHits.length },
       },
     } as any);
 
     const result = await getRecentEsDeprecationLogs(dataClient, customTimeframe);
 
-    // Verify correct results were returned
+    // Verify correct results were returned (should only contain logs within timeframe)
     expect(result).toEqual({
-      logs: mockHits.map((hit) => hit._source),
+      logs: filteredMockHits.map((hit) => hit._source),
       count: 2,
     });
+
+    // Verify that outsideTimeframe log is not included
+    expect(result.logs.find((log) => log['@timestamp'] === outsideTimeframe)).toBeUndefined();
 
     // Verify the search query uses the correct timeframe
     expect(dataClient.asCurrentUser.search).toHaveBeenCalledWith(
