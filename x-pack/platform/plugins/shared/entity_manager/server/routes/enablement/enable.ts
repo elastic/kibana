@@ -100,7 +100,7 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
         });
       }
 
-      logger.info(`Enabling managed entity discovery (installOnly=${params.query.installOnly})`);
+      logger.debug(`Enabling managed entity discovery (installOnly=${params.query.installOnly})`);
       const soClient = core.savedObjects.getClient({
         includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
       });
@@ -117,7 +117,7 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
         }
       }
 
-      const apiKey = await generateEntityDiscoveryAPIKey(server, request);
+      const apiKey = await generateEntityDiscoveryAPIKey(server, request, logger);
       if (apiKey === undefined) {
         return response.customError({
           statusCode: 500,
@@ -142,7 +142,7 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
           )
         );
       }
-      logger.info('Managed entity discovery is enabled');
+      logger.debug('Managed entity discovery is enabled');
 
       return response.ok({ body: { success: true } });
     } catch (err) {
