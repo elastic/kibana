@@ -43,15 +43,14 @@ import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_
 import { truthy } from '@kbn/cloud-security-posture/src/utils/helpers';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
+import { CISBenchmarkIcon, type CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
+import cisLogoIcon from '@kbn/cloud-security-posture/src/assets/icons/cis_logo.svg';
 import { createDetectionRuleFromBenchmarkRule } from '@kbn/cloud-security-posture/src/utils/create_detection_rule_from_benchmark'; //
-import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
 import { TakeAction } from '../../../components/take_action';
 import { TableTab } from './table_tab';
 import { JsonTab } from './json_tab';
 import { OverviewTab } from './overview_tab';
 import { RuleTab } from './rule_tab';
-import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import { CspInlineDescriptionList } from '../../../components/csp_inline_description_list';
 
 const FINDINGS_MISCONFIGS_FLYOUT_DESCRIPTION_LIST = 'misconfigs-findings-flyout-description-list';

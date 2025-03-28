@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';
+import eksLogo from '@kbn/cloud-security-posture/src/assets/icons/cis_eks_logo.svg';
+import googleCloudLogo from '@kbn/cloud-security-posture/src/assets/icons/google_cloud_logo.svg';
 import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types_old';
 import {
   CLOUDBEAT_EKS,
@@ -19,9 +21,6 @@ import {
   CLOUDBEAT_AKS,
   CLOUDBEAT_GKE,
 } from '../../common/constants';
-
-import eksLogo from '../assets/icons/cis_eks_logo.svg';
-import googleCloudLogo from '../assets/icons/google_cloud_logo.svg';
 
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 

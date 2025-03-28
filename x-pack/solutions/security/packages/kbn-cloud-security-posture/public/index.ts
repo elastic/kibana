@@ -11,6 +11,7 @@ export type { NavFilter } from './src/utils/query_utils';
 export { showErrorToast } from './src/utils/show_error_toast';
 export { encodeQuery, decodeQuery } from './src/utils/query_utils';
 export { CspEvaluationBadge } from './src/components/csp_evaluation_badge';
+export { CISBenchmarkIcon } from './src/components/cis_benchmark_icon';
 export {
   getSeverityStatusColor,
   getCvsScoreColor,

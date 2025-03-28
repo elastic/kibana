@@ -10,6 +10,7 @@ import { generatePath, Link, type RouteComponentProps } from 'react-router-dom';
 import { EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { CISBenchmarkIcon } from '@kbn/cloud-security-posture';
 import type { PageUrlParams } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { RulesContainer } from './rules_container';
@@ -17,7 +18,6 @@ import { cloudPosturePages } from '../../common/navigation/constants';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { useSecuritySolutionContext } from '../../application/security_solution_context';
 import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
-import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
 import { getBenchmarkCisName } from '../../../common/utils/helpers';
 
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
