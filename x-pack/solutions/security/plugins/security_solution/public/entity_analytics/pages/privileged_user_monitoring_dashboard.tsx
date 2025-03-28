@@ -21,6 +21,11 @@ import { VisualizationEmbeddable } from '../../common/components/visualization_a
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { getLensAttributes } from './get_lens_attributes';
 import { useKibana } from '../../common/lib/kibana';
+import { buildESQLWithKQLQuery } from '../../common/utils/esql';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
+import { inputsSelectors } from '../../common/store';
+import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query';
+import { buildTimeRangeFilter } from '../../common/lib/kuery';
 
 const SUDO_COUNT_ESQL_STACKED = `FROM commands-privtest
 | RENAME @timestamp AS event_timestamp
@@ -44,12 +49,17 @@ const PRIVILEGED_USER_LIST_ESQL = `FROM commands-privtest
     BY user.name
 | KEEP @timestamp, user.name`;
 
-// using helpers
-const fetchESQLSimple = async (data: DataPublicPluginStart, signal?: AbortSignal) => {
+const fetchESQLSimple = async (
+  esqlQuery: string,
+  data: DataPublicPluginStart,
+  signal: AbortSignal | undefined,
+  filter: unknown
+) => {
   return getESQLResults({
-    esqlQuery: PRIVILEGED_USER_LIST_ESQL,
+    esqlQuery,
     search: data.search.search,
     signal,
+    filter,
   });
 };
 
@@ -73,6 +83,14 @@ const PrivilegedUserMonitoringComponent = () => {
   const { to, from } = useGlobalTime();
   const timerange = useMemo(() => ({ from, to }), [from, to]);
   const { data } = useKibana().services;
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
+  const { filterQuery } = useGlobalFilterQuery({ extraFilter: buildTimeRangeFilter(from, to) });
+
+  const esqlQuery = useMemo(
+    () => buildESQLWithKQLQuery(PRIVILEGED_USER_LIST_ESQL, globalQuery.query as string),
+    [globalQuery.query]
+  );
 
   const {
     isInitialLoading,
@@ -81,9 +99,9 @@ const PrivilegedUserMonitoringComponent = () => {
     isRefetching,
     data: result,
   } = useQuery({
-    queryKey: [timerange],
+    queryKey: [filterQuery, esqlQuery],
     queryFn: async ({ signal }) => {
-      return fetchESQLSimple(data, signal);
+      return fetchESQLSimple(esqlQuery, data, signal, filterQuery);
     },
     refetchOnWindowFocus: false,
   });
@@ -134,7 +152,7 @@ const PrivilegedUserMonitoringComponent = () => {
                         name: 'Timestamp',
                         dataType: 'date',
 
-                        render: (timestamp) => {
+                        render: (timestamp: string) => {
                           return new Date(timestamp).toLocaleString();
                         },
                       },
