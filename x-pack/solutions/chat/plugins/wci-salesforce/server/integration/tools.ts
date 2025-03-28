@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest, SearchResponse, SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SupportCase } from './types';
 
 interface CaseRetrievalParams {
   id?: string[];
   size?: number;
+  sortField?: string;
   ownerEmail?: string[];
   priority?: string[];
   closed?: boolean;
@@ -39,18 +40,16 @@ export async function retrieveCases(
   params: CaseRetrievalParams = {}
 ): Promise<Array<{ type: 'text'; text: string }>> {
   const size = params.size || 10;
+  const sortOrder = 'asc'
+  const sort = params.sortField ? [{ [params.sortField as string]: { order: sortOrder as SortOrder } }] : [];
 
   try {
     const query = buildQuery(params);
 
-    // Determine sorting parameters
-    const sortField = 'created_at';
-    const sortOrder = 'desc';
-
     const searchRequest: SearchRequest = {
       index: indexName,
       query,
-      sort: [{ [sortField]: { order: sortOrder } }],
+      sort,
       size,
     };
 

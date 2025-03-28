@@ -10,6 +10,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 import { retrieveCases } from './tools';
 
+
 // Define enum field structure upfront
 interface Field {
   field: string;
@@ -47,6 +48,9 @@ export async function createMcpServer({
     },
   ];
 
+  // Extract field mappings for sorting parameters
+  const sortableFields = await getSortableFields(elasticsearchClient, logger, index)
+  logger.info('Sortable Fields ' + JSON.stringify(sortableFields))
   const enumFieldValues = await getFieldValues(elasticsearchClient, logger, index, enumFields);
 
   // Extract specific values for tool parameters
@@ -74,6 +78,7 @@ export async function createMcpServer({
           'Salesforce internal IDs of the support cases (use only when specifically requested)'
         ),
       size: z.number().int().positive().default(10).describe('Maximum number of cases to return'),
+      sortField: z.string().optional().describe(`Field to sort results by. Could be any of these ${sortableFields}`),
       ownerEmail: z
         .array(z.string())
         .optional()
@@ -119,6 +124,7 @@ export async function createMcpServer({
     async ({
       id,
       size = 10,
+      sortField,
       priority,
       closed,
       caseNumber,
@@ -132,6 +138,7 @@ export async function createMcpServer({
       const caseContent = await retrieveCases(elasticsearchClient, logger, index, {
         id,
         size,
+        sortField,
         priority,
         closed,
         caseNumber,
@@ -144,8 +151,6 @@ export async function createMcpServer({
       });
 
       logger.info(`Retrieved ${caseContent.length} support cases`);
-
-      logger.info(`Retrieved ${JSON.stringify(caseContent)}`);
 
       return {
         content: caseContent,
@@ -192,4 +197,30 @@ async function getFieldValues(
   }
 
   return fieldValues;
+}
+/**
+ * Retrieves index field properties for sorting
+ */
+async function getSortableFields(
+  client: ElasticsearchClient,
+  logger: Logger,
+  indexName: string,
+): Promise<Record<string, any>> {
+  const sortableFieldTypes = ["keyword", "date", "boolean", "integer", "long", "double", "float"];
+  const sortableFields = {}
+  try {
+    const response = await client.indices.getMapping({
+      index: indexName
+    });
+
+    // determin how to create a list of {field : type} for only sortable fields
+    if (response) {
+      return response[indexName].mappings.properties as Record<string, any>
+    } else {
+      throw new Error('Could not find mappings in response');
+    }
+  } catch (error) {
+    console.error(`Error getting field mappings for index ${indexName}:`, error);
+    throw error;
+  }
 }
