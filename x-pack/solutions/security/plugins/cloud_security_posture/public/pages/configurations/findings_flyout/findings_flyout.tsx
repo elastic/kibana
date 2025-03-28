@@ -267,72 +267,72 @@ export const FindingsRuleFlyout = ({ ruleId, resourceId }: FindingMisconfigurati
 
   return (
     <>
-    <div data-test-subj={FINDINGS_FLYOUT}>
-      <EuiFlyoutHeader>
-        <EuiPanel hasShadow={false}>
-          <EuiSpacer />
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <CspEvaluationBadge type={finding?.result?.evaluation} />
-            </EuiFlexItem>
-            <EuiFlexItem grow style={{ minWidth: 0 }}>
-              <EuiTitle size="m" className="eui-textTruncate">
-                <EuiTextColor color="primary" title={finding?.rule?.name}>
-                  {finding?.rule?.name}
-                </EuiTextColor>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {finding && (
-            <div
-              css={css`
-                line-height: 20px;
-                margin-top: ${euiTheme.size.m};
-              `}
-            >
-              <CspInlineDescriptionList
-                testId={FINDINGS_MISCONFIGS_FLYOUT_DESCRIPTION_LIST}
-                listItems={getFlyoutDescriptionList(finding)}
-              />
-            </div>
-          )}
-
-          <EuiSpacer />
-          <EuiTabs>
-            {tabs.map((v) => (
-              <EuiTab
-                key={v.id}
-                isSelected={tab.id === v.id}
-                onClick={() => setTab(v)}
-                data-test-subj={`findings_flyout_tab_${v.id}`}
+      <div data-test-subj={FINDINGS_FLYOUT}>
+        <EuiFlyoutHeader>
+          <EuiPanel hasShadow={false}>
+            <EuiSpacer />
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow={false}>
+                <CspEvaluationBadge type={finding?.result?.evaluation} />
+              </EuiFlexItem>
+              <EuiFlexItem grow style={{ minWidth: 0 }}>
+                <EuiTitle size="m" className="eui-textTruncate">
+                  <EuiTextColor color="primary" title={finding?.rule?.name}>
+                    {finding?.rule?.name}
+                  </EuiTextColor>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {finding && (
+              <div
+                css={css`
+                  line-height: 20px;
+                  margin-top: ${euiTheme.size.m};
+                `}
               >
-                {v.title}
-              </EuiTab>
-            ))}
-          </EuiTabs>
-        </EuiPanel>
-      </EuiFlyoutHeader>
-      {finding && (
-        <EuiPanel hasShadow={false}>
-          <EuiFlyoutBody key={tab.id}>
-            {!isNativeCspFinding(finding) && ['overview', 'rule'].includes(tab.id) && (
-              <div style={{ marginBottom: euiTheme.size.base }}>
-                <MissingFieldsCallout finding={finding} />
+                <CspInlineDescriptionList
+                  testId={FINDINGS_MISCONFIGS_FLYOUT_DESCRIPTION_LIST}
+                  listItems={getFlyoutDescriptionList(finding)}
+                />
               </div>
             )}
-            <FindingsTab tab={tab} finding={finding} />
-          </EuiFlyoutBody>
-        </EuiPanel>
-      )}
-      <EuiFlyoutFooter>
-        <EuiPanel color="transparent">
-          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <TakeAction createRuleFn={createMisconfigurationRuleFn} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiFlyoutFooter>
+
+            <EuiSpacer />
+            <EuiTabs>
+              {tabs.map((v) => (
+                <EuiTab
+                  key={v.id}
+                  isSelected={tab.id === v.id}
+                  onClick={() => setTab(v)}
+                  data-test-subj={`findings_flyout_tab_${v.id}`}
+                >
+                  {v.title}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+          </EuiPanel>
+        </EuiFlyoutHeader>
+        {finding && (
+          <EuiPanel hasShadow={false}>
+            <EuiFlyoutBody key={tab.id}>
+              {!isNativeCspFinding(finding) && ['overview', 'rule'].includes(tab.id) && (
+                <div style={{ marginBottom: euiTheme.size.base }}>
+                  <MissingFieldsCallout finding={finding} />
+                </div>
+              )}
+              <FindingsTab tab={tab} finding={finding} />
+            </EuiFlyoutBody>
+          </EuiPanel>
+        )}
+        <EuiFlyoutFooter>
+          <EuiPanel color="transparent">
+            <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <TakeAction createRuleFn={createMisconfigurationRuleFn} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlyoutFooter>
       </div>
     </>
   );
