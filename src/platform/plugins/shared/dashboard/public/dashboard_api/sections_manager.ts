@@ -27,7 +27,7 @@ export function initializeSectionsManager(initialSections: DashboardSectionMap |
   const tryToScrollToSection = (id: string) => {
     const element = document.getElementById(`kbnGridRowHeader-${id}`);
     if (!element) {
-      window.requestAnimationFrame(() => tryToScrollToSection(id));
+      window.requestAnimationFrame(() => setTimeout(() => tryToScrollToSection(id), 1));
     } else {
       element.scrollIntoView({ behavior: 'smooth' });
     }
