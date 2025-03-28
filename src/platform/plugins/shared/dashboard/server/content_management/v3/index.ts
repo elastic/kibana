@@ -35,8 +35,4 @@ export {
   dashboardSearchResultsSchema,
   referenceSchema,
 } from './cm_services';
-export {
-  dashboardAttributesOut,
-  itemAttrsToSavedObject,
-  savedObjectToItem,
-} from './transform_utils';
+export { dashboardAttributesOut, itemToSavedObject, savedObjectToItem } from './transform_utils';

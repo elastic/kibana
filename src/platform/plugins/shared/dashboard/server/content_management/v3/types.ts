@@ -81,7 +81,7 @@ export type SavedObjectToItemReturn<T> =
       error: Error;
     };
 
-export type ItemAttrsToSavedObjectReturn =
+export type ItemToSavedObjectReturn =
   | {
       attributes: DashboardSavedObjectAttributes;
       references: SavedObjectReference[];

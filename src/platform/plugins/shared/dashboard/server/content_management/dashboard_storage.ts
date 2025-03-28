@@ -22,7 +22,7 @@ import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { getCmServicesDefinition } from './cm_services';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
-import { itemAttrsToSavedObject, savedObjectToItem } from './latest';
+import { itemToSavedObject, savedObjectToItem } from './latest';
 import type {
   DashboardAttributes,
   DashboardItem,
@@ -159,7 +159,7 @@ export class DashboardStorage {
       attributes: soAttributes,
       references: soReferences,
       error: attributesError,
-    } = itemAttrsToSavedObject(dataToLatest, this.embeddable, optionsToLatest?.references);
+    } = itemToSavedObject(dataToLatest, this.embeddable, optionsToLatest?.references);
     if (attributesError) {
       throw Boom.badRequest(`Invalid data. ${attributesError.message}`);
     }
@@ -234,7 +234,7 @@ export class DashboardStorage {
       attributes: soAttributes,
       error: attributesError,
       references: soReferences,
-    } = itemAttrsToSavedObject(dataToLatest, this.embeddable, optionsToLatest?.references);
+    } = itemToSavedObject(dataToLatest, this.embeddable, optionsToLatest?.references);
     if (attributesError) {
       throw Boom.badRequest(`Invalid data. ${attributesError.message}`);
     }

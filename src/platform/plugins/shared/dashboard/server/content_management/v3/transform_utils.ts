@@ -15,7 +15,7 @@ import type {
   DashboardAttributes,
   DashboardGetOut,
   DashboardItem,
-  ItemAttrsToSavedObjectReturn,
+  ItemToSavedObjectReturn,
   PartialDashboardItem,
   SavedObjectToItemReturn,
 } from './types';
@@ -73,12 +73,11 @@ export function dashboardAttributesOut(
 }
 
 export const getResultV3ToV2 = (
-  embeddable: EmbeddableStart,
-  references: SavedObjectReference[] = [],
-  result: DashboardGetOut
+  result: DashboardGetOut,
+  embeddable: EmbeddableStart
 ): DashboardCrudTypesV2['GetOut'] => {
   const { meta, item } = result;
-  const { attributes, ...rest } = item;
+  const { attributes, references, ...rest } = item;
   const {
     controlGroupInput,
     description,
@@ -127,11 +126,11 @@ export const getResultV3ToV2 = (
   };
 };
 
-export const itemAttrsToSavedObject = (
+export const itemToSavedObject = (
   attributes: DashboardAttributes,
   embeddable: EmbeddableStart,
   references: SavedObjectReference[] = []
-): ItemAttrsToSavedObjectReturn => {
+): ItemToSavedObjectReturn => {
   try {
     const { controlGroupInput, kibanaSavedObjectMeta, options, panels, ...rest } = attributes;
     const { panelsJSON, references: panelReferences } = transformPanelsIn(
