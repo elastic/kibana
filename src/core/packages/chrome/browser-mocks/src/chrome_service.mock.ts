@@ -91,6 +91,9 @@ const createStartContractMock = () => {
       updateSolutionNavigations: jest.fn(),
     },
     workspace: {
+      banner: {
+        getBanner$: jest.fn(),
+      },
       getStateProvider: jest.fn(),
       header: {
         getBreadcrumbs$: jest.fn(),

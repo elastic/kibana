@@ -16,6 +16,10 @@ export interface WorkspaceHeaderService {
   getBreadcrumbs$: () => Observable<EuiBreadcrumb[]>;
 }
 
+export interface WorkspaceBannerService {
+  getBanner$: () => Observable<ReactNode | undefined>;
+}
+
 export interface WorkspaceToolbarService {
   getTools$: () => Observable<Array<Readonly<WorkspaceTool>>>;
   getTool$: (toolId: string | null) => Observable<WorkspaceTool | undefined>;
@@ -27,6 +31,7 @@ export interface WorkspaceToolbarService {
 export interface WorkspaceService {
   isEnabled: () => boolean;
   header: WorkspaceHeaderService;
+  banner: WorkspaceBannerService;
   toolbar: WorkspaceToolbarService;
   getStateProvider: () => ({ children }: { children: ReactNode }) => JSX.Element;
 }
