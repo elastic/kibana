@@ -254,30 +254,30 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('parses shard failures for EQL event query', async () => {
       await esArchiver.load(packetBeatPath);
+      await setBrokenRuntimeField({ es, index: 'packetbeat-*' });
+
+      // sometimes we would hit max signals on the good shard
+      // and never search the shard with the bad runtime field
+      // by changing the logic to be "and" broken == 1
+      // we ensure that both shards are searched
+      // which I believe was the cause of the test being flakey.
       const rule: EqlRuleCreateProps = {
         ...getEqlRuleForAlertTesting(['auditbeat-*', 'packetbeat-*']),
-        query: 'any where agent.type == "packetbeat" or broken == 1',
+        query: 'any where agent.type == "packetbeat" and broken == 1',
       };
-      await setBrokenRuntimeField({ es, index: 'auditbeat-*' });
-      const createdRule = await createRule(supertest, log, rule);
-      const createdRuleId = createdRule.id;
-      await waitForRulePartialFailure({ supertest, log, id: createdRuleId });
-      const route = routeWithNamespace(DETECTION_ENGINE_RULES_URL);
-      const response = await supertest
-        .get(route)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31')
-        .query({ id: createdRule.id })
-        .expect(200);
-
-      const ruleResponse = response.body;
-      expect(
-        ruleResponse.execution_summary.last_execution.message.includes(
-          'The EQL event query was only executed on the available shards. The query failed to run successfully on the following shards:'
-        )
-      ).eql(true);
-
-      await unsetBrokenRuntimeField({ es, index: 'auditbeat-*' });
+      const { logs } = await previewRule({ supertest, rule });
+      expect_(logs).toEqual(
+        expect_.arrayContaining([
+          expect_.objectContaining({
+            warnings: expect_.arrayContaining([
+              expect_.stringContaining(
+                'The EQL event query was only executed on the available shards. The query failed to run successfully on the following shards:'
+              ),
+            ]),
+          }),
+        ])
+      );
+      await unsetBrokenRuntimeField({ es, index: 'packetbeat-*' });
       await esArchiver.unload(packetBeatPath);
     });
 
@@ -835,7 +835,7 @@ export default ({ getService }: FtrProviderContext) => {
       const expectedWarning =
         'This rule reached the maximum alert limit for the rule execution. Some alerts were not created.';
 
-      it('specifying only timestamp_field results in alert creation with an expected warning', async () => {
+      it('specifying only timestamp_field results in alert creation with an expect.expected warning', async () => {
         const rule: EqlRuleCreateProps = {
           ...getEqlRuleForAlertTesting(['auditbeat-*']),
           timestamp_field: 'event.created',
@@ -853,7 +853,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect_(previewAlerts).not.toHaveLength(0);
       });
 
-      it('specifying only timestamp_override results in alert creation with an expected warning', async () => {
+      it('specifying only timestamp_override results in alert creation with an expect.expected warning', async () => {
         const rule: EqlRuleCreateProps = {
           ...getEqlRuleForAlertTesting(['auditbeat-*']),
           timestamp_override: 'event.created',
@@ -871,7 +871,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect_(previewAlerts).not.toHaveLength(0);
       });
 
-      it('specifying both timestamp_override and timestamp_field results in alert creation with an expected warning', async () => {
+      it('specifying both timestamp_override and timestamp_field results in alert creation with an expect.expected warning', async () => {
         const rule: EqlRuleCreateProps = {
           ...getEqlRuleForAlertTesting(['auditbeat-*']),
           timestamp_field: 'event.created',
