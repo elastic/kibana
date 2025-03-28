@@ -446,7 +446,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     render(
       <KibanaRenderContextProvider {...core}>
         <div className="visChart__spinner">
-          <EuiLoadingChart mono size="l" />
+          <EuiLoadingChart size="l" />
         </div>
       </KibanaRenderContextProvider>,
       this.domNode
