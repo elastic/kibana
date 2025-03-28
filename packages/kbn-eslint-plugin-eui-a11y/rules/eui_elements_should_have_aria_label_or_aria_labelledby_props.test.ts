@@ -56,7 +56,12 @@ for (const [name, tester] of [tsTester, babelTester]) {
         valid: EUI_ELEMENTS.map((element) => ({
           filename: 'foo.tsx',
           code: `<${element[0]} aria-label="foo" />`,
-        })),
+        })).concat(
+          EUI_ELEMENTS.map((element) => ({
+            filename: 'foo.tsx',
+            code: `<EuiFormRow aria-label="foo"><${element[0]} aria-label="foo" /></EuiFormRow>`,
+          }))
+        ),
 
         invalid: EUI_ELEMENTS.map((element) => {
           return {
@@ -78,7 +83,27 @@ for (const [name, tester] of [tsTester, babelTester]) {
             }>
 import { i18n } from '@kbn/i18n';`,
           };
-        }),
+        }).concat(
+          EUI_ELEMENTS.map((element) => {
+            return {
+              filename: 'foo.tsx',
+              code: `<EuiFormRow><${element[0]}>Value Thing hello</${element[0]}></EuiFormRow>`,
+              errors: [
+                {
+                  line: 1,
+                  message: `<${element[0]}> should have a \`aria-label\` for a11y. Use the autofix suggestion or add your own.`,
+                },
+              ],
+              output: `<EuiFormRow aria-label={i18n.translate('app_not_found_in_i18nrc.valueThinghello${element[1].replaceAll(
+                ' ',
+                ''
+              )}.ariaLabel', { defaultMessage: 'Value Thing hello' })}><${
+                element[0]
+              }>Value Thing hello</${element[0]}></EuiFormRow>
+import { i18n } from '@kbn/i18n';`,
+            };
+          })
+        ),
       }
     );
   });
