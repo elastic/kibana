@@ -17,7 +17,13 @@ import {
   Wrapper,
 } from './wrapper';
 import { useKibana } from '../../../common/lib/kibana';
+import { TestProviders } from '../../../common/mock';
+import { SEARCH_BAR_TEST_ID } from './search_bar/search_bar_section';
 
+jest.mock('../../../common/components/search_bar', () => ({
+  // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID
+  SiemSearchBar: () => <div data-test-subj={'alert-summary-search-bar'} />,
+}));
 jest.mock('../../../common/lib/kibana');
 
 const packages: PackageListItem[] = [
@@ -86,9 +92,10 @@ describe('<Wrapper />', () => {
       services: {
         data: {
           dataViews: {
-            create: jest.fn().mockReturnValue({ id: 'id' }),
+            create: jest.fn().mockReturnValue({ id: 'id', toSpec: jest.fn() }),
             clearInstanceCache: jest.fn(),
           },
+          query: { filterManager: { getFilters: jest.fn() } },
         },
       },
     });
@@ -99,12 +106,17 @@ describe('<Wrapper />', () => {
     }));
 
     await act(async () => {
-      const { getByTestId } = render(<Wrapper packages={packages} />);
+      const { getByTestId } = render(
+        <TestProviders>
+          <Wrapper packages={packages} />
+        </TestProviders>
+      );
 
       await new Promise(process.nextTick);
 
       expect(getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(SEARCH_BAR_TEST_ID)).toBeInTheDocument();
     });
   });
 });
