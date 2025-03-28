@@ -135,8 +135,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
-        await unloadDashboards();
         await unlinkDashboard(SEARCH_DASHBOARD_ID);
+        await unloadDashboards();
       });
 
       it('lists the dashboard in the stream response', async () => {
@@ -177,7 +177,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('recovers on write and lists the linked dashboard ', async () => {
-          await unlinkDashboard(SEARCH_DASHBOARD_ID);
           await linkDashboard(SEARCH_DASHBOARD_ID);
 
           const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {

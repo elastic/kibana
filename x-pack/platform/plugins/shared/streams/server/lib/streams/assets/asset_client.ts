@@ -17,8 +17,8 @@ import {
   Asset,
   AssetLink,
   AssetLinkRequest,
-  AssetUnlinkRequest,
   AssetType,
+  AssetUnlinkRequest,
   AssetWithoutUuid,
   DashboardLink,
   QueryAsset,
@@ -35,6 +35,7 @@ import {
   STREAM_NAME,
 } from './fields';
 import { AssetStorageSettings } from './storage_settings';
+import { AssetNotFoundError } from '../errors/asset_not_found_error';
 
 interface TermQueryOpts {
   queryEmptyString: boolean;
@@ -230,7 +231,11 @@ export class AssetClient {
   async unlinkAsset(name: string, asset: AssetUnlinkRequest) {
     const id = getUuid(name, asset);
 
-    await this.clients.storageClient.delete({ id });
+    const { result } = await this.clients.storageClient.delete({ id });
+
+    if (result === 'not_found') {
+      throw new AssetNotFoundError(`${asset[ASSET_TYPE]} not found`);
+    }
   }
 
   async clean() {
