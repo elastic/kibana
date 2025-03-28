@@ -123,10 +123,14 @@ describe('updateIndex', () => {
         'index.force_memory_term_dictionary'
       );
       expect(JSON.stringify(putSettingsCall.settings)).toContain('index.soft_deletes.enabled');
-      
+
       // Verify settings are set to null
-      expect(JSON.stringify(putSettingsCall.settings)).toContain('index.force_memory_term_dictionary":null');
-      expect(JSON.stringify(putSettingsCall.settings)).toContain('index.soft_deletes.enabled":null');
+      expect(JSON.stringify(putSettingsCall.settings)).toContain(
+        'index.force_memory_term_dictionary":null'
+      );
+      expect(JSON.stringify(putSettingsCall.settings)).toContain(
+        'index.soft_deletes.enabled":null'
+      );
 
       // Verify logging
       expect(mockLogger.info).toHaveBeenCalledWith(
