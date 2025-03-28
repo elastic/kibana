@@ -6,13 +6,11 @@
  */
 
 import { get } from 'lodash';
-import { RunContext, TaskCost, TaskDefinition, TaskPriority } from './task';
+import type { RunContext, TaskDefinition } from './task';
+import { TaskCost, TaskPriority } from './task';
 import { mockLogger } from './test_utils';
-import {
-  sanitizeTaskDefinitions,
-  TaskDefinitionRegistry,
-  TaskTypeDictionary,
-} from './task_type_dictionary';
+import type { TaskDefinitionRegistry } from './task_type_dictionary';
+import { sanitizeTaskDefinitions, TaskTypeDictionary } from './task_type_dictionary';
 
 jest.mock('./constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['foo'],
