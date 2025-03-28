@@ -161,13 +161,14 @@ export class ProductInterceptTriggerCore {
       existingTriggerDef.triggerInterval !== this.interceptTriggerInterval
     ) {
       // provide escape hatch to update the trigger interval if needed, might prove useful on serverless environments
-      this.savedObjectsClient?.update<InterceptTriggerRecord>(
-        interceptTriggerRecordSavedObject.name,
-        this.defId,
-        {
+      this.savedObjectsClient
+        ?.update<InterceptTriggerRecord>(interceptTriggerRecordSavedObject.name, this.defId, {
           triggerInterval: this.interceptTriggerInterval!,
-        }
-      );
+        })
+        .catch((err) => {
+          // TODO: handle error properly
+          this.logger?.error(err);
+        });
     }
 
     if (!existingTriggerDef) {

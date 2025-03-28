@@ -185,6 +185,9 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
   loginAssistanceMessage=""
   notifications={
     Object {
+      "intercepts": Object {
+        "add": [MockFunction],
+      },
       "showErrorDialog": [MockFunction],
       "toasts": Object {
         "add": [MockFunction],
@@ -224,6 +227,9 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
   loginAssistanceMessage="This is an *important* message"
   notifications={
     Object {
+      "intercepts": Object {
+        "add": [MockFunction],
+      },
       "showErrorDialog": [MockFunction],
       "toasts": Object {
         "add": [MockFunction],
@@ -264,6 +270,9 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
   loginHelp="**some-help**"
   notifications={
     Object {
+      "intercepts": Object {
+        "add": [MockFunction],
+      },
       "showErrorDialog": [MockFunction],
       "toasts": Object {
         "add": [MockFunction],
@@ -342,6 +351,9 @@ exports[`LoginPage page renders as expected 1`] = `
           loginAssistanceMessage=""
           notifications={
             Object {
+              "intercepts": Object {
+                "add": [MockFunction],
+              },
               "showErrorDialog": [MockFunction],
               "toasts": Object {
                 "add": [MockFunction],
@@ -429,6 +441,9 @@ exports[`LoginPage page renders with custom branding 1`] = `
           loginAssistanceMessage=""
           notifications={
             Object {
+              "intercepts": Object {
+                "add": [MockFunction],
+              },
               "showErrorDialog": [MockFunction],
               "toasts": Object {
                 "add": [MockFunction],
