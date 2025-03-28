@@ -80,18 +80,11 @@ export class LogViewsClient implements ILogViewsClient {
     return internalLogView;
   }
 
-  public async getResolvedLogView(
-    logViewReference: LogViewReference,
-    useDataViewLazy: boolean = false
-  ): Promise<ResolvedLogView> {
+  public async getResolvedLogView(logViewReference: LogViewReference): Promise<ResolvedLogView> {
     const logView = persistedLogViewReferenceRT.is(logViewReference)
       ? await this.getLogView(logViewReference.logViewId)
       : logViewReference;
-    const resolvedLogView = await this.resolveLogView(
-      logView.id,
-      logView.attributes,
-      useDataViewLazy
-    );
+    const resolvedLogView = await this.resolveLogView(logView.id, logView.attributes);
     return resolvedLogView;
   }
 
@@ -124,16 +117,14 @@ export class LogViewsClient implements ILogViewsClient {
 
   public async resolveLogView(
     logViewId: string,
-    logViewAttributes: LogViewAttributes,
-    useDataViewLazy: boolean = false
+    logViewAttributes: LogViewAttributes
   ): Promise<ResolvedLogView> {
     return await resolveLogView(
       logViewId,
       logViewAttributes,
       await this.dataViews,
       await this.logSourcesService,
-      this.config,
-      useDataViewLazy
+      this.config
     );
   }
 

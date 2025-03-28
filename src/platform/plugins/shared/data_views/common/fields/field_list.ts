@@ -80,6 +80,7 @@ export interface IIndexPatternFieldList extends Array<DataViewField> {
 // Extending the array class and using a constructor doesn't work well
 // when calling filter and similar so wrapping in a callback.
 // To be removed in the future
+// TODO: Should it be removed?
 export const fieldList = (
   specs: FieldSpec[] = [],
   shortDotsEnable = false

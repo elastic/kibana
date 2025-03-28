@@ -186,6 +186,7 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
   } = useMemo(() => decodeOrThrow(errorsRT)(errors), [errors]);
 
   const supportedFields = useMemo(() => {
+    // TODO: use await dataViewLazy.getFields({ fieldName: ['*'] })
     if (resolvedLogView?.fields) {
       return resolvedLogView.fields.filter((field) => {
         return (field.type === 'string' || field.type === 'number') && field.searchable;

@@ -215,7 +215,7 @@ export const createLogThresholdExecutor =
 
       const { indices, timestampField, runtimeMappings } = await logsShared.logViews
         .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser, logSourcesService)
-        .getResolvedLogView(validatedParams.logView, true);
+        .getResolvedLogView(validatedParams.logView);
 
       if (!isRatioRuleParams(validatedParams)) {
         await executeAlert(

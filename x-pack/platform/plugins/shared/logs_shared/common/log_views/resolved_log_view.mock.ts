@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataViewsContract, fieldList } from '@kbn/data-views-plugin/common';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { defaultLogViewsStaticConfig } from './defaults';
 import { ResolvedLogView, resolveLogView } from './resolved_log_view';
@@ -22,7 +22,6 @@ export const createResolvedLogViewMock = (
   timestampField: 'TIMESTAMP_FIELD',
   tiebreakerField: 'TIEBREAKER_FIELD',
   messageField: ['MESSAGE_FIELD'],
-  fields: fieldList(),
   runtimeMappings: {
     runtime_field: {
       type: 'keyword',
