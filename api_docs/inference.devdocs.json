@@ -1098,7 +1098,7 @@
         "label": "ChatCompleteRequestBody",
         "description": [],
         "signature": [
-          "{ connectorId: string; stream?: boolean | undefined; system?: string | undefined; temperature?: number | undefined; modelName?: string | undefined; messages: ",
+          "{ connectorId: string; system?: string | undefined; temperature?: number | undefined; modelName?: string | undefined; messages: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1114,7 +1114,7 @@
             "section": "def-common.FunctionCallingMode",
             "text": "FunctionCallingMode"
           },
-          " | undefined; } & ",
+          " | undefined; maxRetries?: number | undefined; retryConfiguration?: { retryOn?: \"all\" | \"auto\" | undefined; } | undefined; } & ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",

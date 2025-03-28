@@ -127,30 +127,12 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/solutions\/observability\/plugins\/exploratory_view/])) ||
-      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml'));
-    }
-
-    if (
-      (await doAnyChangesMatch([
-        /^x-pack\/solutions\/observability\/plugins\/synthetics/,
-        /^x-pack\/solutions\/observability\/plugins\/exploratory_view/,
-      ])) ||
+      (await doAnyChangesMatch([/^x-pack\/solutions\/observability\/plugins/])) ||
       GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime_plugin.yml'));
-    }
-
-    if (
-      (await doAnyChangesMatch([
-        /^x-pack\/solutions\/observability\/plugins\/ux/,
-        /^x-pack\/solutions\/observability\/plugins\/exploratory_view/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
-    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
     }
 
@@ -177,6 +159,24 @@ const getPipeline = (filename: string, removeSteps = true) => {
       GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ai_infra_gen_ai.yml'));
+    }
+
+    if (
+      GITHUB_PR_LABELS.includes('ci:build-cloud-image') &&
+      !GITHUB_PR_LABELS.includes('ci:deploy-cloud') &&
+      !GITHUB_PR_LABELS.includes('ci:cloud-deploy') &&
+      !GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/build_cloud_image.yml'));
+    }
+
+    if (
+      GITHUB_PR_LABELS.includes('ci:build-cloud-fips-image') &&
+      !GITHUB_PR_LABELS.includes('ci:deploy-cloud') &&
+      !GITHUB_PR_LABELS.includes('ci:cloud-deploy') &&
+      !GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/build_cloud_fips_image.yml'));
     }
 
     if (
@@ -281,6 +281,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/ai_assistant.yml')
       );
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution/ai4dsoc.yml'));
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/automatic_import.yml')
       );
@@ -466,6 +467,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/solutions\/observability\/packages\/kbn-scout-oblt/,
         /^x-pack\/solutions\/observability\/plugins\/apm/,
         /^x-pack\/solutions\/observability\/plugins\/observability_onboarding/,
+        /^x-pack\/solutions\/security\/packages\/kbn-scout-security/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:scout-ui-tests')
     ) {

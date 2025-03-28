@@ -12,7 +12,6 @@ import { ML_SCHEDULED_MODEL_DEPLOYMENTS } from '../../../../common/types/storage
 import type { ScheduledDeployment, TrainedModelsService } from '../trained_models_service';
 import { useMlKibana } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
-import { useSavedObjectsApiService } from '../../services/ml_api_service/saved_objects';
 import { useEnabledFeatures, useMlServerInfo } from '../../contexts/ml';
 import { useCloudCheck } from '../../components/node_available_warning/hooks';
 import { getNewJobLimits } from '../../services/ml_server_info';
@@ -24,9 +23,7 @@ import { useMlTelemetryClient } from '../../contexts/ml/ml_telemetry_context';
  * for tracking active operations. The service is destroyed when no components
  * are using it and all operations are complete.
  */
-export function useInitTrainedModelsService(
-  canManageSpacesAndSavedObjects: boolean
-): TrainedModelsService {
+export function useInitTrainedModelsService(): TrainedModelsService {
   const {
     services: {
       mlServices: { trainedModelsService },
@@ -36,8 +33,6 @@ export function useInitTrainedModelsService(
   const { telemetryClient } = useMlTelemetryClient();
 
   const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
-
-  const savedObjectsApiService = useSavedObjectsApiService();
 
   const { showNodeInfo } = useEnabledFeatures();
   const { nlpSettings } = useMlServerInfo();
@@ -69,8 +64,6 @@ export function useInitTrainedModelsService(
       setScheduledDeployments,
       displayErrorToast,
       displaySuccessToast,
-      savedObjectsApiService,
-      canManageSpacesAndSavedObjects,
       telemetryService: telemetryClient,
       deploymentParamsMapper,
     });

@@ -15,7 +15,7 @@ import { Configure } from './configure';
 
 // Failing: See https://github.com/elastic/kibana/issues/176600
 // Failing: See https://github.com/elastic/kibana/issues/193918
-describe.skip('Configure ', () => {
+describe('Configure ', () => {
   const onSubmit = jest.fn();
 
   beforeEach(() => {

@@ -70,6 +70,7 @@ describe('InferenceConnector', () => {
 
       const response = await connector.performApiUnifiedCompletion({
         body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
+        telemetryMetadata: { pluginId: 'security_ai_assistant' },
       });
       expect(mockEsClient.transport.request).toBeCalledTimes(1);
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
@@ -86,7 +87,13 @@ describe('InferenceConnector', () => {
           method: 'POST',
           path: '_inference/chat_completion/test/_stream',
         },
-        { asStream: true, meta: true }
+        {
+          asStream: true,
+          meta: true,
+          headers: {
+            'X-Elastic-Product-Use-Case': 'security_ai_assistant',
+          },
+        }
       );
       expect(response.choices[0].message.content).toEqual(' you');
     });
@@ -290,7 +297,10 @@ describe('InferenceConnector', () => {
           method: 'POST',
           path: '_inference/chat_completion/test/_stream',
         },
-        { asStream: true, meta: true }
+        {
+          asStream: true,
+          meta: true,
+        }
       );
     });
 
@@ -312,7 +322,11 @@ describe('InferenceConnector', () => {
           method: 'POST',
           path: '_inference/chat_completion/test/_stream',
         },
-        { asStream: true, meta: true, signal }
+        {
+          asStream: true,
+          meta: true,
+          signal,
+        }
       );
     });
 
