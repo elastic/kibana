@@ -469,11 +469,11 @@ export class SavedMap {
     await this._syncAttributesWithStore();
 
     let mapSerializedState: MapSerializedState | undefined;
+    const { attributes, references } = extractReferences({
+      attributes: this._attributes,
+    });
     if (saveByReference) {
       try {
-        const { attributes, references } = extractReferences({
-          attributes: this._attributes,
-        });
         const savedObjectsTagging = getSavedObjectsTagging();
         const tagReferences =
           savedObjectsTagging && tags ? savedObjectsTagging.ui.updateTagsReferences([], tags) : [];
@@ -521,7 +521,7 @@ export class SavedMap {
         state: {
           embeddableId: newCopyOnSave ? undefined : this._embeddableId,
           type: MAP_SAVED_OBJECT_TYPE,
-          input: mapSerializedState,
+          serializedState: { rawState: mapSerializedState, references },
         },
         path: this._originatingPath,
       });
@@ -530,7 +530,7 @@ export class SavedMap {
       await this._getStateTransfer().navigateToWithEmbeddablePackage('dashboards', {
         state: {
           type: MAP_SAVED_OBJECT_TYPE,
-          input: mapSerializedState,
+          serializedState: { rawState: mapSerializedState, references },
         },
         path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
       });

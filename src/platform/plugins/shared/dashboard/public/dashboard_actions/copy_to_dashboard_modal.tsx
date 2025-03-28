@@ -18,8 +18,7 @@ import {
   EuiRadio,
   EuiSpacer,
 } from '@elastic/eui';
-import { EmbeddablePackageState, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
-import { apiHasSnapshottableState } from '@kbn/presentation-publishing';
+import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { omit } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -28,6 +27,7 @@ import { embeddableService } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
 import { CopyToDashboardAPI } from './copy_to_dashboard_action';
+import { DashboardApi } from '../dashboard_api/types';
 
 interface CopyToDashboardModalProps {
   api: CopyToDashboardAPI;
@@ -51,18 +51,14 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
   const dashboardId = api.parentApi.savedObjectId$.value;
 
   const onSubmit = useCallback(() => {
-    const dashboard = api.parentApi;
+    const dashboard = api.parentApi as DashboardApi;
     const panelToCopy = dashboard.getDashboardPanelFromId(api.uuid);
-    const runtimeSnapshot = apiHasSnapshottableState(api) ? api.snapshotRuntimeState() : undefined;
-
-    if (!panelToCopy && !runtimeSnapshot) {
-      throw new PanelNotFoundError();
-    }
 
     const state: EmbeddablePackageState = {
       type: panelToCopy.type,
-      input: runtimeSnapshot ?? {
-        ...omit(panelToCopy.explicitInput, 'id'),
+      serializedState: {
+        rawState: { ...omit(panelToCopy.explicitInput, 'id') },
+        references: panelToCopy.references ?? [],
       },
       size: {
         width: panelToCopy.gridData.w,
