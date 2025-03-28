@@ -178,15 +178,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           (dFields: DegradedField) => dFields.name === 'trace.id'
         )?.indexFieldWasLastPresentIn;
 
-        expect(
-          logLevelLastBackingIndex?.startsWith(`.ds-${type}-${degradedFieldDataset}-${namespace}`)
-        ).to.be(true);
-        expect(logLevelLastBackingIndex?.endsWith('-000002')).to.be(true);
+        const logLevelRegex = new RegExp(
+          `^\\.ds-${type}-${degradedFieldDataset}-${namespace}.*-000002$`
+        );
+        expect(logLevelLastBackingIndex?.match(logLevelRegex)).to.not.be(null);
 
-        expect(
-          traceIdLastBackingIndex?.startsWith(`.ds-${type}-${degradedFieldDataset}-${namespace}`)
-        ).to.be(true);
-        expect(traceIdLastBackingIndex?.endsWith('-000001')).to.be(true);
+        const traceIdRegex = new RegExp(
+          `^\\.ds-${type}-${degradedFieldDataset}-${namespace}.*-000001$`
+        );
+        expect(traceIdLastBackingIndex?.match(traceIdRegex)).to.not.be(null);
       });
     });
   });
