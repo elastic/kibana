@@ -18,6 +18,25 @@ import { useIlmPhasesColorAndDescription } from './use_ilm_phases_color_and_desc
 const TIMESTAMP_FIELD = '@timestamp';
 const RANDOM_SAMPLER_PROBABILITY = 0.1;
 
+
+const getIntervalType = (
+  timeRange: TimeRange,
+  core: { uiSettings: { get: (key: string) => any } }
+): { interval: string; intervalType: string } | undefined => {
+  const start = datemath.parse(timeRange.from);
+  const end = datemath.parse(timeRange.to);
+  const interval = getCalculateAutoTimeExpression((key) => core.uiSettings.get(key))(timeRange);
+
+  if (!start || !end || !interval) {
+    return undefined;
+  }
+
+  const calendarIntervalUnits = new Set(['1m', '1h', '1d', '1w', '1M', '1q', '1y']);
+  const intervalType = calendarIntervalUnits.has(interval) ? 'calendar_interval' : 'fixed_interval';
+
+  return { interval, intervalType };
+};
+
 export const useIngestionRate = ({
   definition,
   stats,
@@ -42,10 +61,12 @@ export const useIngestionRate = ({
 
       const start = datemath.parse(timeRange.from);
       const end = datemath.parse(timeRange.to);
-      const interval = getCalculateAutoTimeExpression((key) => core.uiSettings.get(key))(timeRange);
-      if (!start || !end || !interval) {
+      const intervalData = getIntervalType(timeRange, core);
+      if (!start || !end || !intervalData) {
         return;
       }
+      const { interval, intervalType } = intervalData;
+      
 
       const {
         rawResponse: { aggregations },
@@ -78,7 +99,8 @@ export const useIngestionRate = ({
                       docs_count: {
                         date_histogram: {
                           field: TIMESTAMP_FIELD,
-                          fixed_interval: interval,
+                          // use the var intervalType from the previous snippet
+                          [intervalType]: interval,
                           min_doc_count: 0,
                         },
                       },
@@ -143,10 +165,11 @@ export const useIngestionRatePerTier = ({
 
       const start = datemath.parse(timeRange.from);
       const end = datemath.parse(timeRange.to);
-      const interval = getCalculateAutoTimeExpression((key) => core.uiSettings.get(key))(timeRange);
-      if (!start || !end || !interval) {
+      const intervalData = getIntervalType(timeRange, core);
+      if (!start || !end || !intervalData) {
         return;
       }
+      const { interval, intervalType } = intervalData;
 
       const {
         rawResponse: { aggregations },
@@ -187,7 +210,8 @@ export const useIngestionRatePerTier = ({
                       docs_count: {
                         date_histogram: {
                           field: TIMESTAMP_FIELD,
-                          fixed_interval: interval,
+                          // use the var intervalType from the previous snippet
+                          [intervalType]: interval,
                           min_doc_count: 0,
                         },
                         aggs: {
