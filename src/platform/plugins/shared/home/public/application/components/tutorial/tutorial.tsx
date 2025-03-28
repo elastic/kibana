@@ -103,7 +103,7 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
       this.setState({ notFound: true });
     }
 
-    getServices().chrome.setBreadcrumbs([
+    const breadcrumbs = [
       {
         text: integrationsTitle,
         href: this.props.addBasePath('/app/integrations/browse'),
@@ -111,7 +111,12 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
       {
         text: tutorial ? tutorial.name : this.props.tutorialId,
       },
-    ]);
+    ];
+    getServices().chrome.setBreadcrumbs(breadcrumbs, {
+      project: {
+        value: breadcrumbs,
+      },
+    });
   }
 
   getInstructions = () => {
