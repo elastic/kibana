@@ -1,9 +1,9 @@
 # Define which plugins should be run or skipped in Scout CI pipeline
 ui_tests:
   enabled:
-    - apm
     - discover_enhanced
-    - observability_onboarding
   disabled:
     - maps
     - security_solution
+    - observability_onboarding
+    - apm
