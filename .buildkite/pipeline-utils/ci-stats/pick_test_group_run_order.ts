@@ -577,7 +577,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
               image: 'family/kibana-ubuntu-2004',
               imageProject: 'elastic-images-prod',
               provider: 'gcp',
-              machineType: 'e2-standard-8',
+              machineType: 'n2-standard-8',
               preemptible: true,
             },
             env: {
