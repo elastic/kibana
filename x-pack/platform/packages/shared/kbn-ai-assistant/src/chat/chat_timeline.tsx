@@ -126,6 +126,7 @@ export function ChatTimeline({
     currentUser,
     chatState,
     isConversationOwnedByCurrentUser,
+    isArchived,
     onActionClick,
   ]);
 
