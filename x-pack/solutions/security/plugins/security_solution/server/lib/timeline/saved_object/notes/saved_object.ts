@@ -16,7 +16,8 @@ import { identity } from 'fp-ts/lib/function';
 import type { SavedObjectsFindOptions } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getUserDisplayName } from '@kbn/user-profile-components';
-import { MAX_UNASSOCIATED_NOTES, UNAUTHENTICATED_USER } from '../../../../../common/constants';
+import * as Boom from '@hapi/boom';
+import { MAX_NOTES_PER_DOCUMENT, UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   Note,
   BareNote,
@@ -30,6 +31,7 @@ import type { FrameworkRequest } from '../../../framework';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { noteFieldsMigrator } from './field_migrator';
+import { countUnassignedNotesLinkedToDocument } from './count_unassigned_notes';
 
 export const deleteNotesByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
   const options: SavedObjectsFindOptions = {
@@ -135,7 +137,6 @@ export const createNote = async ({
 }): Promise<ResponseNote> => {
   const {
     savedObjects: { client: savedObjectsClient },
-    uiSettings: { client: uiSettingsClient },
   } = await request.context.core;
   const userInfo = request.user;
 
@@ -145,23 +146,13 @@ export const createNote = async ({
     noteFieldsMigrator.extractFieldsToReferences<BareNoteWithoutExternalRefs>({
       data: noteWithCreator,
     });
-  if (references.length === 1 && references[0].id === '') {
-    const maxUnassociatedNotes = await uiSettingsClient.get<number>(MAX_UNASSOCIATED_NOTES);
-    const notesCount = await savedObjectsClient.find<SavedObjectNoteWithoutExternalRefs>({
-      type: noteSavedObjectType,
-      hasReference: { type: timelineSavedObjectType, id: '' },
-    });
-    if (notesCount.total >= maxUnassociatedNotes) {
-      return {
-        code: 403,
-        message: `Cannot create more than ${maxUnassociatedNotes} notes without associating them to a timeline`,
-        note: {
-          ...note,
-          noteId: uuidv1(),
-          version: '',
-          timelineId: '',
-        },
-      };
+  if (references.length === 1 && references[0].id === '' && note.eventId) {
+    const notesCount = await countUnassignedNotesLinkedToDocument(savedObjectsClient, note.eventId);
+
+    if (notesCount >= MAX_NOTES_PER_DOCUMENT) {
+      throw Boom.forbidden(
+        `Cannot create more than ${MAX_NOTES_PER_DOCUMENT} notes per document without associating them to a timeline`
+      );
     }
   }
   const noteAttributes: SavedObjectNoteWithoutExternalRefs = {
