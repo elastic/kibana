@@ -44,7 +44,9 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   return (
                     pathNameSerialized.startsWith(
                       prepend('/app/elasticsearch/index_management/indices')
-                    ) || pathNameSerialized.startsWith(prepend('/app/elasticsearch/indices'))
+                    ) ||
+                    pathNameSerialized.startsWith(prepend('/app/elasticsearch/indices')) ||
+                    pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
                   );
                 },
               },
@@ -108,13 +110,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 }),
                 link: 'searchSynonyms',
               },
-              {
-                id: 'searchQueryRules',
-                title: i18n.translate('xpack.serverlessSearch.nav.relevance.searchQueryRules', {
-                  defaultMessage: 'Query Rules',
-                }),
-                link: 'searchQueryRules',
-              },
             ],
           },
           {
@@ -126,12 +121,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             children: [
               {
                 link: 'discover',
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return (
-                    pathNameSerialized.startsWith(prepend('/app/discover')) ||
-                    pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
-                  );
-                },
               },
               {
                 link: 'dashboards',
