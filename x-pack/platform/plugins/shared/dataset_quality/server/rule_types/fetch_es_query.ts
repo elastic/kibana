@@ -100,15 +100,19 @@ export async function fetchEsQuery({
 
   return (
     dataStreamBuckets.map((bucket) => {
-      const groupByFields = bucket.key.reduce(
-        (obj: Record<string, string>, bucketKey: string, bucketIndex: number) => ({
-          ...obj,
-          [groupBy[bucketIndex]]: bucketKey,
-        }),
-        {}
-      );
+      // TODO: rework this, when its not multi_terms
+      const groupByFields =
+        groupBy.length === 1
+          ? { [groupBy[0]]: [bucket.key] }
+          : bucket.key.reduce(
+              (obj: Record<string, string>, bucketKey: string, bucketIndex: number) => ({
+                ...obj,
+                [groupBy[bucketIndex]]: bucketKey,
+              }),
+              {}
+            );
 
-      const bucketKey = bucket.key;
+      const bucketKey = Array.isArray(bucket.key) ? bucket.key : [bucket.key];
 
       return {
         docCount: bucket.doc_count,

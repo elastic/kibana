@@ -34,14 +34,10 @@ export const defaultRuleParams: Partial<DatasetQualityRuleParams> = {
   type: 'degraded_docs',
 };
 
-export type DatasetQualityPrefillOptions = Partial<DatasetQualityRuleParams>;
 export type DataStreamGroupByFields = Array<DataViewFieldBase & { aggregatable: boolean }>;
 
 export const RuleForm: React.FunctionComponent<
-  RuleTypeParamsExpressionProps<
-    DatasetQualityRuleParams,
-    { adHocDataViewList: DataView[]; currentOptions?: DatasetQualityPrefillOptions }
-  >
+  RuleTypeParamsExpressionProps<DatasetQualityRuleParams, { adHocDataViewList: DataView[] }>
 > = (props) => {
   const {
     services: { dataViews, dataViewEditor },
@@ -58,13 +54,9 @@ export const RuleForm: React.FunctionComponent<
 
   const preFillProperty = useCallback(
     (property: keyof DatasetQualityRuleParams) => {
-      if (metadata && metadata.currentOptions?.[property]) {
-        setRuleParams(property, metadata.currentOptions[property]);
-      } else {
-        setRuleParams(property, defaultRuleParams[property]);
-      }
+      setRuleParams(property, defaultRuleParams[property]);
     },
-    [metadata, setRuleParams]
+    [setRuleParams]
   );
 
   const updateProperty = useCallback(

@@ -7,8 +7,10 @@
 
 import {
   EuiButton,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopover,
   EuiSkeletonTitle,
   EuiTextColor,
   EuiTitle,
@@ -16,7 +18,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { openInDiscoverText } from '../../../common/translations';
 import {
   useDatasetDetailsRedirectLinkTelemetry,
@@ -25,10 +28,18 @@ import {
   useRedirectLink,
 } from '../../hooks';
 import { IntegrationIcon } from '../common';
+import { AlertingFlyout } from '../../alerts/alerting_flyout.ts';
+import { getAlertingCapabilities } from '../../alerts/get_alerting_capabilities';
+import { useKibanaContextForPlugin } from '../../utils';
 
 export function Header() {
   const { datasetDetails, timeRange, integrationDetails, loadingState } =
     useDatasetQualityDetailsState();
+
+  const {
+    services: { application, alerting },
+  } = useKibanaContextForPlugin();
+  const { capabilities } = application;
 
   const { navigationSources } = useDatasetDetailsTelemetry();
 
@@ -44,8 +55,66 @@ export function Header() {
     sendTelemetry,
   });
 
+  const { isAlertingAvailable } = getAlertingCapabilities(alerting, capabilities);
+
+  const [showPopover, setShowPopover] = useState<boolean>(false);
+  const [ruleType, setRuleType] = useState<'datasetQuality' | null>(null);
+
   const pageTitle =
     integrationDetails?.integration?.integration?.datasets?.[datasetDetails.name] ?? title;
+
+  const createMenuItems = [
+    {
+      name: i18n.translate('xpack.ingestPipelines.list.table.createPipelineButtonLabel', {
+        defaultMessage: 'Create alert',
+      }),
+      icon: 'bell',
+      onClick: () => {
+        setShowPopover(false);
+        setRuleType('datasetQuality');
+      },
+      'data-test-subj': `createAlert`,
+    },
+    {
+      name: openInDiscoverText,
+      icon: 'discoverApp',
+      ...redirectLinkProps.linkProps,
+      'data-test-subj': `openInDiscover`,
+    },
+  ];
+  const titleActionButtons = [
+    <EuiPopover
+      key="actionsPopover"
+      isOpen={showPopover}
+      closePopover={() => setShowPopover(false)}
+      button={
+        <EuiButton
+          iconSide="right"
+          iconType="arrowDown"
+          data-test-subj="datasetQualityDetailsActionsDropdown"
+          key="actionsDropdown"
+          onClick={() => setShowPopover((prev) => !prev)}
+        >
+          {i18n.translate('xpack.ingestPipelines.list.table.createPipelineDropdownLabel', {
+            defaultMessage: 'Actions',
+          })}
+        </EuiButton>
+      }
+      panelPaddingSize="none"
+      repositionOnScroll
+    >
+      <EuiContextMenu
+        initialPanelId={0}
+        data-test-subj="autoFollowPatternActionContextMenu"
+        panels={[
+          {
+            id: 0,
+            items: createMenuItems,
+          },
+        ]}
+      />
+    </EuiPopover>,
+  ];
 
   return !loadingState.integrationDetailsLoaded ? (
     <EuiSkeletonTitle
@@ -85,16 +154,29 @@ export function Header() {
           justifyContent="flexEnd"
           alignItems="center"
         >
-          <EuiButton
-            data-test-subj="datasetQualityDetailsHeaderButton"
-            size="s"
-            {...redirectLinkProps.linkProps}
-            iconType="discoverApp"
-          >
-            {openInDiscoverText}
-          </EuiButton>
+          {isAlertingAvailable ? (
+            titleActionButtons
+          ) : (
+            <EuiButton
+              data-test-subj="datasetQualityDetailsHeaderButton"
+              size="s"
+              {...redirectLinkProps.linkProps}
+              iconType="discoverApp"
+            >
+              {openInDiscoverText}
+            </EuiButton>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
+      <AlertingFlyout
+        dataStream={rawName}
+        addFlyoutVisible={!!ruleType}
+        setAddFlyoutVisibility={(visible) => {
+          if (!visible) {
+            setRuleType(null);
+          }
+        }}
+      />
     </EuiFlexGroup>
   );
 }

@@ -5,17 +5,29 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiBetaBadge, EuiLink, EuiPageHeader, EuiCode } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiBetaBadge, EuiLink, EuiPageHeader, EuiCode, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { KNOWN_TYPES } from '../../../common/constants';
 import { datasetQualityAppTitle } from '../../../common/translations';
+import { AlertingFlyout } from '../../alerts/alerting_flyout.ts';
+import { getAlertingCapabilities } from '../../alerts/get_alerting_capabilities';
+import { useKibanaContextForPlugin } from '../../utils';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function Header() {
+  const {
+    services: { application, alerting },
+  } = useKibanaContextForPlugin();
+  const { capabilities } = application;
+
+  const [ruleType, setRuleType] = useState<'datasetQuality' | null>(null);
+
+  const { isAlertingAvailable } = getAlertingCapabilities(alerting, capabilities);
+
   return (
     <EuiPageHeader
       bottomBorder
@@ -58,6 +70,34 @@ export default function Header() {
             ),
           }}
         />
+      }
+      rightSideItems={
+        isAlertingAvailable
+          ? [
+              <>
+                <EuiButton
+                  data-test-subj="datasetQualityDetailsHeaderButton"
+                  onClick={() => {
+                    setRuleType('datasetQuality');
+                  }}
+                  iconType="bell"
+                >
+                  <FormattedMessage
+                    id="xpack.datasetQuality.header.createAlertLabel"
+                    defaultMessage="Create alert"
+                  />
+                </EuiButton>
+                <AlertingFlyout
+                  addFlyoutVisible={!!ruleType}
+                  setAddFlyoutVisibility={(visible) => {
+                    if (!visible) {
+                      setRuleType(null);
+                    }
+                  }}
+                />
+              </>,
+            ]
+          : undefined
       }
     />
   );
