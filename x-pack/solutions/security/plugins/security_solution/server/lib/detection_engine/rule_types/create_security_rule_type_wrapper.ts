@@ -107,6 +107,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     experimentalFeatures,
     alerting,
     analytics,
+    eventsTelemetry,
+    licensing,
+    scheduleNotificationResponseActionsService,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -375,7 +378,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               message: gapErrorMessage,
               metrics: {
                 executionGap: remainingGap,
-                gapRange: experimentalFeatures?.storeGapsInEventLogEnabled ? gap : undefined,
+                gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
               },
             });
           }
@@ -454,6 +457,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     spaceId,
                     ignoreFields: ignoreFieldsObject,
                     ignoreFieldsRegexes,
+                    eventsTelemetry,
+                    licensing,
+                    scheduleNotificationResponseActionsService,
                   },
                 });
 
@@ -532,7 +538,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   indexingDurations: result.bulkCreateTimes,
                   enrichmentDurations: result.enrichmentTimes,
                   executionGap: remainingGap,
-                  gapRange: experimentalFeatures?.storeGapsInEventLogEnabled ? gap : undefined,
+                  gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
                 },
                 userError: result.userError,
               });
