@@ -22,6 +22,7 @@ export type ComparatorFunction<StateType, KeyType extends keyof StateType> = (
 export type StateComparators<StateType> = {
   [KeyType in keyof Required<StateType>]:
     | 'referenceEquality'
+    | 'deepEquality'
     | ComparatorFunction<StateType, KeyType>;
 };
 

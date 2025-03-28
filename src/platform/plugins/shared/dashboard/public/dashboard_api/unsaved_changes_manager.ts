@@ -13,19 +13,20 @@ import { HasLastSavedChildState, childrenUnsavedChanges$ } from '@kbn/presentati
 import {
   PublishesSavedObjectId,
   PublishingSubject,
+  SerializedPanelState,
   StateComparators,
+  apiHasSerializableState,
 } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
 import { BehaviorSubject, combineLatest, debounceTime, map, of } from 'rxjs';
-import {
-  PANELS_CONTROL_GROUP_KEY,
-  getDashboardBackupService,
-} from '../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { initializePanelsManager } from './panels_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { DashboardCreationOptions, DashboardState } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeViewModeManager } from './view_mode_manager';
+
+const DEBOUNCE_TIME = 100;
 
 export function initializeUnsavedChangesManager({
   creationOptions,
@@ -63,12 +64,26 @@ export function initializeUnsavedChangesManager({
   const hasUnsavedChanges$ = new BehaviorSubject(false);
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
 
+  const panelsChangesSource$ = childrenUnsavedChanges$(panelsManager.api.children$).pipe(
+    map((childrenWithChanges) => {
+      const changedPanelStates: { [key: string]: SerializedPanelState<object> } = {};
+      for (const { uuid, hasUnsavedChanges } of childrenWithChanges) {
+        if (!hasUnsavedChanges) continue;
+        const childApi = panelsManager.api.children$.value[uuid];
+        if (!childApi || !apiHasSerializableState(childApi)) continue;
+        changedPanelStates[uuid] = childApi.serializeState();
+      }
+      if (Object.keys(changedPanelStates).length === 0) return undefined;
+      return changedPanelStates;
+    })
+  );
+
   const unsavedChangesSubscription = combineLatest([
     of({} as Partial<DashboardState>), // SERIALIZED STATE ONLY TODO reinstate Dashboard diff checking of its own state - maybe with the new State Manager object
-    childrenUnsavedChanges$(panelsManager.api.children$),
+    panelsChangesSource$,
     of(undefined as Partial<ControlGroupRuntimeState> | undefined), // SERIALIZED STATE ONLY TODO reinstate Dashboard diff checking of Controls state - maybe with the new State Manager object
   ])
-    .pipe(debounceTime(0))
+    .pipe(debounceTime(DEBOUNCE_TIME))
     .subscribe(([dashboardChanges, unsavedPanelState, controlGroupChanges]) => {
       /**
        * viewMode needs to be stored in session state because its used to exclude 'view' dashboards on the listing page
@@ -86,26 +101,24 @@ export function initializeUnsavedChangesManager({
 
       // backup unsaved changes if configured to do so
       if (creationOptions?.useSessionStorageIntegration) {
-        // Current behaviour expects time range not to be backed up. Revisit this?
-        const dashboardStateToBackup = omit(dashboardChanges ?? {}, [
+        const allReferences: Reference[] = [];
+        const dashboardStateToBackup: Partial<DashboardState> = omit(dashboardChanges ?? {}, [
           'timeRange',
           'refreshInterval',
         ]);
-        const reactEmbeddableChanges = unsavedPanelState ? { ...unsavedPanelState } : {};
-        if (controlGroupChanges) {
-          reactEmbeddableChanges[PANELS_CONTROL_GROUP_KEY] = controlGroupChanges;
-        }
 
-        getDashboardBackupService().setState(
-          savedObjectId$.value,
-          dashboardStateToBackup,
-          reactEmbeddableChanges
-        );
+        // SERIALIZED STATE ONLY TODO back up controls state.
+
+        // apply panels changes
+        dashboardStateToBackup.references = allReferences;
+
+        getDashboardBackupService().setState(savedObjectId$.value, dashboardChanges);
       }
     });
 
   const getLastSavedStateForChild = (panelId: string) => {
     const lastSavedDashboardState = lastSavedState$.value;
+    if (!lastSavedDashboardState.panels[panelId]) return;
     return {
       rawState: lastSavedDashboardState.panels[panelId].explicitInput,
       references: getPanelReferences(panelId),

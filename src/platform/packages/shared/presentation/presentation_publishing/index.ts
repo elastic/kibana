@@ -9,14 +9,7 @@
 
 export { isEmbeddableApiContext, type EmbeddableApiContext } from './embeddable_api_context';
 
-export {
-  getInitialValuesFromComparators,
-  getUnchangingComparator,
-  runComparators,
-  type ComparatorDefinition,
-  type ComparatorFunction,
-  type StateComparators,
-} from './state_manager';
+export { type ComparatorFunction, type StateComparators } from './state_manager';
 export {
   apiCanAccessViewMode,
   getInheritedViewMode,

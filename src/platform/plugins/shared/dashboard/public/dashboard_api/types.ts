@@ -51,7 +51,11 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 import { Observable, Subject } from 'rxjs';
 import { DashboardPanelMap, DashboardPanelState } from '../../common';
-import type { DashboardAttributes, DashboardOptions } from '../../server/content_management';
+import type {
+  DashboardAttributes,
+  DashboardOptions,
+  GridData,
+} from '../../server/content_management';
 import type { DashboardPanel } from '../../server/content_management';
 import {
   LoadDashboardReturn,
@@ -59,6 +63,18 @@ import {
 } from '../services/dashboard_content_management_service/types';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
+
+export interface DashboardLayout {
+  [uuid: string]: GridData;
+}
+
+export interface DashboardChildState {
+  [uuid: string]: SerializedPanelState<object>;
+}
+
+export interface DashboardChildren {
+  [uuid: string]: DefaultEmbeddableApi;
+}
 
 export interface DashboardCreationOptions {
   getInitialInput?: () => Partial<DashboardState>;
@@ -160,10 +176,6 @@ export type DashboardLocatorParams = Partial<
    */
   controlGroupState?: Partial<ControlGroupRuntimeState> & SerializableRecord; // used SerializableRecord here to force the GridData type to be read as serializable
 };
-
-export interface UnsavedPanelState {
-  [key: string]: object | undefined;
-}
 
 export type DashboardApi = CanExpandPanels &
   HasAppContext &

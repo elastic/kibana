@@ -70,11 +70,11 @@ export const initializeStateManager = <StateType extends object>(
   /**
    * Reinitializes the state of this state manager. All keys are required in the new state to ensure that every subject is overwritten.
    */
-  const reinitializeState = (newState: WithAllKeys<StateType>) => {
+  const reinitializeState = (newState: Partial<StateType>) => {
     for (const [key, subject] of Object.entries<SubjectOf<StateType>>(
       keyToSubjectMap as { [key: string]: SubjectOf<StateType> }
     )) {
-      subject.next(newState[key as keyof StateType]);
+      subject.next(newState[key as keyof StateType] ?? defaultState[key as keyof StateType]);
     }
   };
 

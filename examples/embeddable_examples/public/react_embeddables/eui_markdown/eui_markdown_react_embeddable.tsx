@@ -71,9 +71,9 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     const hasUnsavedChanges$ = apiHasLastSavedChildState<MarkdownEditorSerializedState>(parentApi)
       ? parentApi.lastSavedStateForChild$(uuid).pipe(
           combineLatestWith(latestSerialziedState$),
-          map(([lastSaved, latest]) =>
-            areComparatorsEqual(allComparators, lastSaved?.rawState, latest.rawState)
-          )
+          map(([lastSaved, latest]) => {
+            return !areComparatorsEqual(allComparators, lastSaved?.rawState, latest.rawState);
+          })
         )
       : of(false);
 

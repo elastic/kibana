@@ -9,15 +9,15 @@
 
 import { isEmpty, xor } from 'lodash';
 import fastIsEqual from 'fast-deep-equal';
-import { DashboardPanelMap } from '../../common';
+import { DashboardLayout } from './types';
 
 /**
  * Checks whether the panel maps have the same keys, and if they do, whether all of the other keys inside each panel
- * are equal. Skips explicit input as that needs to be handled asynchronously.
+ * are equal.
  */
 export const arePanelLayoutsEqual = (
-  originalPanels: DashboardPanelMap,
-  newPanels: DashboardPanelMap
+  originalPanels: DashboardLayout,
+  newPanels: DashboardLayout
 ) => {
   const originalEmbeddableIds = Object.keys(originalPanels);
   const newEmbeddableIds = Object.keys(newPanels);
@@ -42,16 +42,8 @@ export const arePanelLayoutsEqual = (
   };
 
   for (const embeddableId of newEmbeddableIds) {
-    const {
-      explicitInput: originalExplicitInput,
-      panelRefName: panelRefA,
-      ...commonPanelDiffOriginal
-    } = originalPanels[embeddableId];
-    const {
-      explicitInput: newExplicitInput,
-      panelRefName: panelRefB,
-      ...commonPanelDiffNew
-    } = newPanels[embeddableId];
+    const { ...commonPanelDiffOriginal } = originalPanels[embeddableId];
+    const { ...commonPanelDiffNew } = newPanels[embeddableId];
 
     if (!isEmpty(commonPanelDiff(commonPanelDiffOriginal, commonPanelDiffNew))) return false;
   }
