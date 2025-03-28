@@ -21,7 +21,7 @@ export function StreamsAppPageHeader({
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiPageHeader
         className={css`
-          padding: ${theme.size.m} ${theme.size.l};
+          padding: ${theme.size.l} ${theme.size.l} ${theme.size.m};
         `}
       >
         {title}
