@@ -218,9 +218,6 @@ export function ConversationList({
     }
   }, [selectedConversation]);
 
-  console.log('isConversationsOpen', isConversationsOpen);
-  console.log('isArchivedOpen', isArchivedOpen);
-
   const loader = (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
       <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
