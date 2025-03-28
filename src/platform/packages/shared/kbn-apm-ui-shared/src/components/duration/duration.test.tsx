@@ -8,20 +8,54 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
-import { Duration } from '.';
+import { Duration, DurationProps } from '.';
+import { render, screen } from '@testing-library/react';
 
 describe('Duration', () => {
-  let wrapper: ReactWrapper;
-  const defaultProps = {
-    duration: 100,
-  };
+  const duration = 10;
+  const parentDuration = 20;
+  const expectedDurationText = `${duration} μs`;
+  const getExpectedParentDurationText = (parentType: string) => `(50% of ${parentType})`;
+  const loadingDataTestSubj = 'DurationLoadingSpinner';
 
-  beforeEach(async () => {
-    wrapper = mount(<Duration {...defaultProps} />);
+  describe('when there is NOT parent data', () => {
+    it('should render duration with the right format', () => {
+      render(<Duration duration={duration} />);
+      expect(screen.getByText(expectedDurationText)).toBeInTheDocument();
+    });
   });
 
-  it('dumb temporary test', () => {
-    expect(true).toBeTruthy();
+  describe('when there is parent data', () => {
+    describe('and the loading is set to true', () => {
+      const parentWithLoading: DurationProps['parent'] = {
+        duration: parentDuration,
+        type: 'trace',
+        loading: true,
+      };
+
+      it('should render the duration and the loader but not the parent duration', () => {
+        render(<Duration duration={duration} parent={parentWithLoading} />);
+        expect(screen.getByText(expectedDurationText)).toBeInTheDocument();
+        expect(screen.getByTestId(loadingDataTestSubj)).toBeInTheDocument();
+      });
+    });
+
+    describe('and the loading is set to false', () => {
+      const parentWithLoading: DurationProps['parent'] = {
+        duration: parentDuration,
+        type: 'trace',
+        loading: false,
+      };
+
+      it('should render the duration and the parent duration but not the loader', () => {
+        render(<Duration duration={duration} parent={parentWithLoading} />);
+        expect(
+          screen.getByText(
+            `${expectedDurationText} ${getExpectedParentDurationText(parentWithLoading.type)}`
+          )
+        ).toBeInTheDocument();
+        expect(screen.queryByTestId(loadingDataTestSubj)).not.toBeInTheDocument();
+      });
+    });
   });
 });
