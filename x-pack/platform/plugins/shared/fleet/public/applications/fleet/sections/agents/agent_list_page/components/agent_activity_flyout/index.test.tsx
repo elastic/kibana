@@ -43,6 +43,7 @@ describe('AgentActivityFlyout', () => {
   const mockAbortUpgrade = jest.fn();
   const mockSetSearch = jest.fn();
   const mockSetSelectedStatus = jest.fn();
+  const mockOpenManageAutoUpgradeModal = jest.fn();
 
   const component = (refreshAgentActivity: boolean = false) => (
     <IntlProvider timeZone="UTC" locale="en">
@@ -52,7 +53,7 @@ describe('AgentActivityFlyout', () => {
         refreshAgentActivity={refreshAgentActivity}
         setSearch={mockSetSearch}
         setSelectedStatus={mockSetSelectedStatus}
-        openManageAutoUpgradeModal={jest.fn()}
+        openManageAutoUpgradeModal={mockOpenManageAutoUpgradeModal}
       />
     </IntlProvider>
   );

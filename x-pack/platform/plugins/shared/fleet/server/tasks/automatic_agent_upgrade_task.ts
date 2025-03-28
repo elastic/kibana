@@ -264,14 +264,7 @@ export class AutomaticAgentUpgradeTask {
     }
   }
 
-  public async adjustAgentCounts(
-    versionAndCounts: Array<{
-      version: string;
-      count: number;
-      targetPercentage: number;
-    }>,
-    totalActiveAgents: number
-  ) {
+  public async adjustAgentCounts(versionAndCounts: VersionAndCounts[], totalActiveAgents: number) {
     const totalActualPercentage =
       (versionAndCounts.reduce((acc, item) => acc + item.count, 0) / totalActiveAgents) * 100;
     const totalNeededPercentage = versionAndCounts.reduce(
@@ -330,7 +323,7 @@ export class AutomaticAgentUpgradeTask {
     soClient: SavedObjectsClientContract,
     agentPolicy: AgentPolicy,
     requiredVersion: AgentTargetVersion,
-    versionAndCounts: Array<{ version: string; count: number }>
+    versionAndCounts: VersionAndCounts[]
   ) {
     this.logger.debug(
       `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: checking candidate agents for upgrade (target version: ${requiredVersion.version}, percentage: ${requiredVersion.percentage})`

@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiText, EuiPanel, EuiIcon } from '@elastic/eui';
+import { EuiText, EuiPanel, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { ActionStatus } from '../../../../../types';
 
@@ -24,12 +24,17 @@ export const ActivitySection: React.FunctionComponent<{
   return (
     <>
       <EuiPanel color="subdued" hasBorder={true} borderRadius="none">
-        <EuiText className="eui-alignCenter">
-          {actions.some((action) => action.status === 'IN_PROGRESS') && (
-            <EuiIcon type="dot" color="success" />
-          )}
-
-          <b>{title}</b>
+        <EuiText>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            {actions.some((action) => action.status === 'IN_PROGRESS') && (
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="dot" color="success" />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <b>{title}</b>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiText>
       </EuiPanel>
       {actions.map((currentAction, index) =>

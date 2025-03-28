@@ -300,13 +300,19 @@ export const AgentUpgradeStatus: React.FC<{
       </EuiFlexGroup>
     );
   }
-  if (agent.upgrade_attempts) {
+  if (agent.upgrade_attempts && agent.upgrade_attempts.length > 1 && agent.status === 'updating') {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiIconTip
             type="warning"
-            content={`Retrying Upgrade (${agent.upgrade_attempts.length}/7 attempts)`}
+            content={
+              <FormattedMessage
+                id="xpack.fleet.agentUpgradeStatusTooltip.retryingUpgrade"
+                defaultMessage="Retrying Upgrade ({retryCount}/7 attempts)"
+                values={{ retryCount: agent.upgrade_attempts.length }}
+              />
+            }
             color="subdued"
           />
         </EuiFlexItem>
