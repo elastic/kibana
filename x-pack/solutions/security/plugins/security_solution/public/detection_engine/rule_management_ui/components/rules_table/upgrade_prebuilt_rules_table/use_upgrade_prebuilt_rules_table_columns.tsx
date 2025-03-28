@@ -26,7 +26,7 @@ import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import { IntegrationsPopover } from '../../../../../detections/components/rules/related_integrations/integrations_popover';
 import { SeverityBadge } from '../../../../../common/components/severity_badge';
 import { useUserData } from '../../../../../detections/components/user_info';
-import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../../common/translations';
 import type { Rule } from '../../../../rule_management/logic';
 import { getNormalizedSeverity } from '../helpers';
 import type { UpgradePrebuiltRulesTableActions } from './upgrade_prebuilt_rules_table_context';

@@ -2282,7 +2282,9 @@
               "DiscoverInternalState",
               ", ",
               "AnyAction",
-              ", InternalStateThunkDependencies>]>>"
+              ", ",
+              "InternalStateThunkDependencies",
+              ">]>>"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": false,
@@ -2404,17 +2406,7 @@
               "\nComplex functions to update multiple containers from UI"
             ],
             "signature": [
-              "{ fetchData: (initial?: boolean | undefined) => void; initializeAndSync: () => () => void; loadDataViewList: () => Promise<void>; loadSavedSearch: (param?: ",
-              "LoadParams",
-              " | undefined) => Promise<",
-              {
-                "pluginId": "savedSearch",
-                "scope": "public",
-                "docId": "kibSavedSearchPluginApi",
-                "section": "def-public.SavedSearch",
-                "text": "SavedSearch"
-              },
-              " | undefined>; createAndAppendAdHocDataView: (dataViewSpec: ",
+              "{ fetchData: (initial?: boolean | undefined) => void; initializeAndSync: () => () => void; createAndAppendAdHocDataView: (dataViewSpec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4796,6 +4788,23 @@
           "\"discoverApp\""
         ],
         "path": "src/platform/plugins/shared/discover/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-common.APP_STATE_URL_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "APP_STATE_URL_KEY",
+        "description": [
+          "\nThe query param key used to store the Discover app state in the URL"
+        ],
+        "signature": [
+          "\"_a\""
+        ],
+        "path": "src/platform/plugins/shared/discover/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
