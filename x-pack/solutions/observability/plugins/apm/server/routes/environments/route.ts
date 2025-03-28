@@ -55,4 +55,28 @@ const environmentsRoute = createApmServerRoute({
   },
 });
 
-export const environmentsRouteRepository = environmentsRoute;
+const unsetEnvironmentsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/environments/unset',
+  params: t.type({
+    query: rangeRt,
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (
+    resources
+  ): Promise<{
+    hasUnsetEnvironment: boolean;
+  }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { context, params, config } = resources;
+    const { start, end } = params.query;
+
+    return {
+      hasUnsetEnvironment: true,
+    };
+  },
+});
+
+export const environmentsRouteRepository = {
+  ...environmentsRoute,
+  ...unsetEnvironmentsRoute,
+};
