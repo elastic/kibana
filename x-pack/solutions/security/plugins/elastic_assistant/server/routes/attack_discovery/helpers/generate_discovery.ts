@@ -28,27 +28,27 @@ const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 secon
 const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
 
 export interface GenerateAttackDiscoveryParams {
-  attackDiscoveryId: string;
-  logger: Logger;
-  authenticatedUser: AuthenticatedUser;
   actionsClient: PublicMethodsOf<ActionsClient>;
-  esClient: ElasticsearchClient;
+  attackDiscoveryId: string;
+  authenticatedUser: AuthenticatedUser;
+  config: AttackDiscoverGenerationConfig;
   dataClient: AttackDiscoveryDataClient;
+  esClient: ElasticsearchClient;
+  logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
-  config: AttackDiscoverGenerationConfig;
 }
 
 export const generateAttackDiscovery = async ({
-  attackDiscoveryId,
-  logger,
-  authenticatedUser,
   actionsClient,
-  esClient,
+  attackDiscoveryId,
+  authenticatedUser,
+  config,
   dataClient,
+  esClient,
+  logger,
   savedObjectsClient,
   telemetry,
-  config,
 }: GenerateAttackDiscoveryParams) => {
   const startTime = moment(); // start timing the generation
 

@@ -110,15 +110,15 @@ export const postAttackDiscoveryRoute = (
 
           // Don't await the results of invoking the graph; (just the metadata will be returned from the route handler):
           generateAttackDiscovery({
-            attackDiscoveryId,
-            logger,
-            authenticatedUser,
             actionsClient,
-            esClient,
+            attackDiscoveryId,
+            authenticatedUser,
+            config: request.body,
             dataClient,
+            esClient,
+            logger,
             savedObjectsClient,
             telemetry,
-            config: request.body,
           }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
 
           return response.ok({
