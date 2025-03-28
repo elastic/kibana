@@ -19,7 +19,7 @@ const TIMESTAMP_FIELD = '@timestamp';
 const RANDOM_SAMPLER_PROBABILITY = 0.1;
 
 
-const getIntervalType = (
+const getIntervalAndType = (
   timeRange: TimeRange,
   core: { uiSettings: { get: (key: string) => any } }
 ): { interval: string; intervalType: string } | undefined => {
@@ -64,7 +64,7 @@ export const useIngestionRate = ({
 
       const start = datemath.parse(timeRange.from);
       const end = datemath.parse(timeRange.to);
-      const intervalData = getIntervalType(timeRange, core);
+      const intervalData = getIntervalAndType(timeRange, core);
       if (!start || !end || !intervalData) {
         return;
       }
@@ -168,7 +168,7 @@ export const useIngestionRatePerTier = ({
 
       const start = datemath.parse(timeRange.from);
       const end = datemath.parse(timeRange.to);
-      const intervalData = getIntervalType(timeRange, core);
+      const intervalData = getIntervalAndType(timeRange, core);
       if (!start || !end || !intervalData) {
         return;
       }
