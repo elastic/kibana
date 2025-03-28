@@ -9,7 +9,11 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
-import { INTEGRATION_BUTTON_LOADING_TEST_ID, SEARCH_BAR_TEST_ID, SearchBarSection } from './search_bar_section';
+import {
+  INTEGRATION_BUTTON_LOADING_TEST_ID,
+  SEARCH_BAR_TEST_ID,
+  SearchBarSection,
+} from './search_bar_section';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { INTEGRATION_BUTTON_TEST_ID } from './integrations_filter_button';
