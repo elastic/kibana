@@ -252,30 +252,30 @@ export const LOG_RATE_ANALYSIS_TITLE = i18n.translate(
 export const LOG_RATE_ANALYSIS_DESC = i18n.translate(
   'xpack.securitySolution.navLinks.ml.explainLogRateSpikes.desc',
   {
-    defaultMessage: 'Log Rate Analysis Page',
+    defaultMessage: 'Log Rate Analysis page',
   }
 );
 export const LOG_PATTERN_ANALYSIS_TITLE = i18n.translate(
   'xpack.securitySolution.navLinks.ml.logPatternAnalysis.title',
   {
-    defaultMessage: 'Log pattern analysis',
+    defaultMessage: 'Log Pattern Analysis',
   }
 );
 export const LOG_PATTERN_ANALYSIS_DESC = i18n.translate(
   'xpack.securitySolution.navLinks.ml.logPatternAnalysis.desc',
   {
-    defaultMessage: 'Log pattern analysis page',
+    defaultMessage: 'Log Pattern Analysis page',
   }
 );
 export const CHANGE_POINT_DETECTIONS_TITLE = i18n.translate(
   'xpack.securitySolution.navLinks.ml.changePointDetections.title',
   {
-    defaultMessage: 'Change point detection',
+    defaultMessage: 'Change Point Detection',
   }
 );
 export const CHANGE_POINT_DETECTIONS_DESC = i18n.translate(
   'xpack.securitySolution.navLinks.ml.changePointDetections.desc',
   {
-    defaultMessage: 'Change point detection page',
+    defaultMessage: 'Change Point Detection page',
   }
 );

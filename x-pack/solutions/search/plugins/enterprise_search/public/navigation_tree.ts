@@ -242,7 +242,7 @@ export const getNavigationTreeDefinition = ({
                   title: i18n.translate(
                     'xpack.enterpriseSearch.searchNav.management.trainedModels',
                     {
-                      defaultMessage: 'Trained models',
+                      defaultMessage: 'Trained Models',
                     }
                   ),
                 },
