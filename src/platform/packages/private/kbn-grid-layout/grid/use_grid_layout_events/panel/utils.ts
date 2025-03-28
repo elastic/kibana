@@ -50,7 +50,10 @@ export const getDragPreviewRect = ({
 
 // Calculates the sensor's offset relative to the active panel's edges (top, left, right, bottom).
 // This ensures the dragged or resized panel maintains its position under the cursor during the interaction.
-export function getSensorOffsets(e: UserInteractionEvent, { top, left, right, bottom }: DOMRect) {
+export function getSensorOffsets(
+  e: UserInteractionEvent,
+  { top, left, right, bottom }: { top: number; left: number; right: number; bottom: number }
+) {
   if (!isTouchEvent(e) && !isMouseEvent(e) && !isKeyboardEvent(e)) {
     throw new Error('Unsupported event type: only mouse, touch, or keyboard events are handled.');
   }
@@ -72,14 +75,13 @@ export const getNextKeyboardPositionForPanel = (
 ) => {
   const {
     interactionEvent$: { value: interactionEvent },
-    activePanel$: { value: activePanel },
     runtimeSettings$: {
       value: { columnPixelWidth, rowHeight, gutterSize, keyboardDragTopLimit },
     },
   } = gridLayoutStateManager;
 
-  const { type } = interactionEvent || {};
-  const panelPosition = activePanel?.position || interactionEvent?.panelDiv.getBoundingClientRect();
+  const { type, currentPosition } = interactionEvent || {};
+  const panelPosition = currentPosition;
 
   if (!panelPosition) return handlePosition;
 

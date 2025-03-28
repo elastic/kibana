@@ -51,16 +51,6 @@ export interface GridSettings {
  */
 export type RuntimeGridSettings = GridSettings & { columnPixelWidth: number };
 
-export interface ActivePanel {
-  id: string;
-  position: {
-    top: number;
-    left: number;
-    bottom: number;
-    right: number;
-  };
-}
-
 export interface ActiveRowEvent {
   id: string;
   sensorType: 'mouse' | 'touch' | 'keyboard';
@@ -82,7 +72,6 @@ export interface GridLayoutStateManager {
   accessMode$: BehaviorSubject<GridAccessMode>;
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
-  activePanel$: BehaviorSubject<ActivePanel | undefined>;
   activeRowEvent$: BehaviorSubject<ActiveRowEvent | undefined>;
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 
@@ -129,6 +118,12 @@ export interface PanelInteractionEvent {
     bottom: number;
   };
   sensorType: 'mouse' | 'touch' | 'keyboard';
+  currentPosition: {
+    top: number;
+    left: number;
+    bottom: number;
+    right: number;
+  };
 }
 
 /**
