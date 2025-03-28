@@ -25,7 +25,7 @@ function hardenPrototypes() {
   Object.seal(Function.prototype);
 
   // corejs currently manipulates Array.prototype, so we cannot seal it here.
-  // this is instead sealed within `src/platform/packages/shared/kbn-security-hardening/prototype.ts`
+  // this is instead sealed within `packages/kbn-security-hardening/prototype.ts`
 }
 
 module.exports = hardenPrototypes;
