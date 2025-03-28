@@ -98,9 +98,8 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector, isD
         await http.post(`/internal/serverless_search/connectors/${connector.id}/index_name`, {
           body: JSON.stringify({ index_name: indexName }),
         });
-      } catch (error) {
-        // Log the error for debugging but don't disrupt the flow
-        logger.error(`Failed to update index_name for connector ${connector.id}:`, error);
+      } catch {
+        // do nothing
       }
 
       return { serviceType: inputServiceType, name: connectorName };
