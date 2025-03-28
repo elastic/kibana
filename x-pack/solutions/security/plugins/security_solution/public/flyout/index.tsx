@@ -54,6 +54,7 @@ import {
   HostPanelKey,
   ServicePanelKey,
   UniversalEntityPanelKey,
+  MisconfigurationFindingsPanelKey,
 } from './entity_details/shared/constants';
 import type { ServicePanelExpandableFlyoutProps } from './entity_details/service_right';
 import { ServicePanel } from './entity_details/service_right';
@@ -190,7 +191,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
-    key: 'findings-misconfiguration-panel',
+    key: MisconfigurationFindingsPanelKey,
     component: (props) => (
       <FindingsMisconfigurationPanel
         {...(props as FindingsMisconfigurationPanelExpandableFlyoutProps).params}
