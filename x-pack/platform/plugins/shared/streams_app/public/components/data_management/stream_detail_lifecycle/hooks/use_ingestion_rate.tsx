@@ -32,7 +32,7 @@ const getIntervalAndType = (
   if (!start || !end || !interval) {
     return undefined;
   }
-  
+
   const calendarIntervalUnits = new Set(['w', 'M', 'q', 'y']);
 
   const intervalType = calendarIntervalUnits.has(interval.replace(/^\d+/, ''))
@@ -71,7 +71,7 @@ export const useIngestionRate = ({
         return;
       }
       const { interval, intervalType } = intervalData;
-      
+
       const {
         rawResponse: { aggregations },
       } = await lastValueFrom(
@@ -106,8 +106,7 @@ export const useIngestionRate = ({
                           field: TIMESTAMP_FIELD,
                           [intervalType]: interval,
                           min_doc_count: 0,
-                          extended_bounds: { min: start, max: end
-                          }
+                          extended_bounds: { min: start, max: end },
                         },
                       },
                     },
@@ -219,8 +218,7 @@ export const useIngestionRatePerTier = ({
                           field: TIMESTAMP_FIELD,
                           [intervalType]: interval,
                           min_doc_count: 0,
-                          extended_bounds: { min: start, max: end
-                          }
+                          extended_bounds: { min: start, max: end },
                         },
                         aggs: {
                           indices: {
