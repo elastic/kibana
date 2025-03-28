@@ -7,54 +7,21 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
-import { createConsoleInspector, withMemoizedSelectors } from '@kbn/xstate-utils';
-import { createSelector } from 'reselect';
+import { createConsoleInspector } from '@kbn/xstate-utils';
 import {
   streamEnrichmentMachine,
   createStreamEnrichmentMachineImplementations,
 } from './stream_enrichment_state_machine';
-import {
-  StreamEnrichmentContextType,
-  StreamEnrichmentInput,
-  StreamEnrichmentServiceDependencies,
-} from './types';
+import { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './types';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef } from '../processor_state_machine';
-import {
-  PreviewDocsFilterOption,
-  SimulationActorSnapshot,
-  filterSimulationDocuments,
-} from '../simulation_state_machine';
+import { PreviewDocsFilterOption, SimulationActorSnapshot } from '../simulation_state_machine';
 
 const consoleInspector = createConsoleInspector();
 
-const StreamEnrichmentContext = withMemoizedSelectors(
-  createActorContext(streamEnrichmentMachine),
-  {
-    derivedSamples: createSelector(
-      [
-        (ctx: StreamEnrichmentContextType) => {
-          return ctx.simulatorRef?.getSnapshot().context.samples;
-        },
-        (ctx: StreamEnrichmentContextType) =>
-          ctx.simulatorRef?.getSnapshot().context.previewDocsFilter,
-        (ctx: StreamEnrichmentContextType) =>
-          ctx.simulatorRef?.getSnapshot().context.simulation?.documents,
-      ],
-      (samples, previewDocsFilter, documents) => {
-        return (
-          (previewDocsFilter && documents
-            ? filterSimulationDocuments(documents, previewDocsFilter)
-            : samples) || []
-        );
-      }
-    ),
-  },
-  (context) => (context.simulatorRef ? [context.simulatorRef] : [])
-);
+const StreamEnrichmentContext = createActorContext(streamEnrichmentMachine);
 
 export const useStreamsEnrichmentSelector = StreamEnrichmentContext.useSelector;
-export const useStreamsEnrichmentMemoizedSelector = StreamEnrichmentContext.useMemoizedSelector;
 
 export type StreamEnrichmentEvents = ReturnType<typeof useStreamEnrichmentEvents>;
 
