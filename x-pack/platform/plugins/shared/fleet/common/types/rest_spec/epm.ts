@@ -176,7 +176,7 @@ export interface BulkOperationPackagesResponse {
 export interface GetOneBulkOperationPackagesResponse {
   status: string;
   error?: { message: string };
-  results?: Array<{ success?: boolean; error?: { message: string } }>;
+  results?: Array<{ name: string; success?: boolean; error?: { message: string } }>;
 }
 
 export interface BulkInstallPackagesRequest {

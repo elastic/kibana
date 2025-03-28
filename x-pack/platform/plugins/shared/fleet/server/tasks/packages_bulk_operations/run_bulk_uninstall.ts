@@ -57,7 +57,7 @@ export async function _runBulkUninstallTask({
         success: true,
       });
     } catch (error) {
-      logger.error(`Upgrade of package: ${pkg.name} failed`, { error });
+      logger.error(`Uninstalling package: ${pkg.name} failed`, { error });
       results.push({
         name: pkg.name,
         success: false,

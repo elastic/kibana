@@ -95,7 +95,17 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
             });
           } else if (res.status === 'failed') {
             // TODO update copy and view integrations https://github.com/elastic/kibana/issues/209892
-            toasts.addDanger({
+            const errorMessage = res.error?.message
+              ? res.error?.message
+              : res.results
+              ? res.results
+                  .filter((res) => res.error)
+                  .map((res) => `${res.name}: ${res.error?.message}`)
+                  .join('\n')
+              : 'Unexpected error';
+            const error = new Error(errorMessage);
+
+            toasts.addError(error, {
               title:
                 action.type === 'bulk_upgrade'
                   ? i18n.translate(

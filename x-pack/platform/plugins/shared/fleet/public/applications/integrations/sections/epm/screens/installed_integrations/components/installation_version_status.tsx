@@ -106,27 +106,17 @@ const UninstallingVersionStatus: React.FunctionComponent<{
   item: InstalledPackageUIPackageListItem;
 }> = React.memo(({ item }) => {
   return (
-    <EuiToolTip
-      content={
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size={'m'} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <FormattedMessage
-          id="xpack.fleet.epmInstalledIntegrations.uninstallingTooltip"
-          defaultMessage={'Uninstalling to {version}'}
-          values={{ version: item.version }}
+          id="xpack.fleet.epmInstalledIntegrations.uninstallingText"
+          defaultMessage="Uninstalling..."
         />
-      }
-    >
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size={'m'} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <FormattedMessage
-            id="xpack.fleet.epmInstalledIntegrations.uninstallingText"
-            defaultMessage="Uninstalling..."
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 });
 
