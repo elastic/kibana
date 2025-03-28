@@ -12,15 +12,15 @@ import {
   ALERTS_BY_HOST_PANEL,
   ALERTS_BY_HOST_PROGRESS_BAR,
   ALERTS_BY_HOST_ROW,
-  AlertsProgressBarPanel,
-} from './alerts_progress_bar_panel';
+  AlertsProgressBarByHostNamePanel,
+} from './alerts_progress_bar_by_host_name_panel';
 import { TestProviders } from '../../../../common/mock';
 import { useSummaryChartData } from '../../alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data';
 import { parsedAlerts } from '../../alerts_kpis/alerts_progress_bar_panel/mock_data';
 
 jest.mock('../../alerts_kpis/alerts_summary_charts_panel/use_summary_chart_data');
 
-describe('<AlertsProgressBarPanel />', () => {
+describe('<AlertsProgressBarByHostNamePanel />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -33,7 +33,7 @@ describe('<AlertsProgressBarPanel />', () => {
 
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <AlertsProgressBarPanel signalIndexName={''} />
+        <AlertsProgressBarByHostNamePanel signalIndexName={''} />
       </TestProviders>
     );
 
@@ -64,7 +64,7 @@ describe('<AlertsProgressBarPanel />', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <AlertsProgressBarPanel signalIndexName={''} />
+        <AlertsProgressBarByHostNamePanel signalIndexName={''} />
       </TestProviders>
     );
 
@@ -79,7 +79,7 @@ describe('<AlertsProgressBarPanel />', () => {
 
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <AlertsProgressBarPanel signalIndexName={''} />
+        <AlertsProgressBarByHostNamePanel signalIndexName={''} />
       </TestProviders>
     );
 

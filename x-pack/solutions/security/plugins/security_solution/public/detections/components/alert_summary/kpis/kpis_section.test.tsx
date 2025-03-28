@@ -8,7 +8,7 @@
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import { KPIsSection } from './kpis_section';
-import { ALERTS_BY_HOST_PANEL } from './alerts_progress_bar_panel';
+import { ALERTS_BY_HOST_PANEL } from './alerts_progress_bar_by_host_name_panel';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { TestProviders } from '../../../../common/mock';

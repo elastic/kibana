@@ -49,7 +49,7 @@ const HEIGHT = 160; // px
  * Renders a list showing the percentages of alerts grouped by host.name .
  * The component is used in the alerts page in the AI for SOC alert summary page.
  */
-export const AlertsProgressBarPanel: React.FC<ChartsPanelProps> = ({
+export const AlertsProgressBarByHostNamePanel: React.FC<ChartsPanelProps> = ({
   filters,
   query,
   signalIndexName,
@@ -128,4 +128,4 @@ export const AlertsProgressBarPanel: React.FC<ChartsPanelProps> = ({
   );
 };
 
-AlertsProgressBarPanel.displayName = 'AlertsProgressBarPanel';
+AlertsProgressBarByHostNamePanel.displayName = 'AlertsProgressBarByHostNamePanel';

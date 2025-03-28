@@ -12,7 +12,7 @@ import { inputsSelectors } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SeverityLevelPanel } from '../../alerts_kpis/severity_level_panel';
 import { AlertsByRulePanel } from '../../alerts_kpis/alerts_by_rule_panel';
-import { AlertsProgressBarPanel } from './alerts_progress_bar_panel';
+import { AlertsProgressBarByHostNamePanel } from './alerts_progress_bar_by_host_name_panel';
 
 export const KPIS_SECTION = 'alert-summary-kpis-section';
 
@@ -52,7 +52,7 @@ export const KPIsSection = memo(({ dataView }: KPIsSectionProps) => {
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <AlertsProgressBarPanel signalIndexName={signalIndexName} query={query} />
+        <AlertsProgressBarByHostNamePanel signalIndexName={signalIndexName} query={query} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
