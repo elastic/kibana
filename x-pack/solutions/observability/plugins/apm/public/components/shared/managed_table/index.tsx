@@ -45,7 +45,7 @@ export interface TableSearchBar<T> {
   fieldsToSearch: Array<keyof T>;
   maxCountExceeded: boolean;
   placeholder: string;
-  onChangeSearchQuery: (searchQuery: string) => void;
+  onChangeSearchQuery?: (searchQuery: string) => void;
   techPreview?: boolean;
 }
 
@@ -86,6 +86,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
   // onChange handlers
   onChangeRenderedItems?: (renderedItems: T[]) => void;
   onChangeSorting?: (sorting: TableOptions<T>['sort']) => void;
+  onChangeItemIndices?: (range: readonly [number, number]) => void;
 
   // sorting
   sortItems?: boolean;
@@ -115,8 +116,9 @@ function UnoptimizedManagedTable<T extends object>(props: {
     showPerPageOptions = true,
 
     // onChange handlers
-    onChangeRenderedItems = () => {},
-    onChangeSorting = () => {},
+    onChangeRenderedItems,
+    onChangeSorting,
+    onChangeItemIndices,
 
     // sorting
     sortItems = true,
@@ -197,35 +199,44 @@ function UnoptimizedManagedTable<T extends object>(props: {
         });
   }, [items, searchQuery, tableSearchBar.fieldsToSearch]);
 
+  const renderedIndices = useMemo(
+    () =>
+      [
+        tableOptions.page.index * tableOptions.page.size,
+        (tableOptions.page.index + 1) * tableOptions.page.size,
+      ] as const,
+    [tableOptions.page.index, tableOptions.page.size]
+  );
+
   const renderedItems = useMemo(() => {
     const sortedItems = sortItems
       ? sortFn(filteredItems, tableOptions.sort.field as keyof T, tableOptions.sort.direction)
       : filteredItems;
 
-    return sortedItems.slice(
-      tableOptions.page.index * tableOptions.page.size,
-      (tableOptions.page.index + 1) * tableOptions.page.size
-    );
+    return sortedItems.slice(...renderedIndices);
   }, [
     sortItems,
     sortFn,
     filteredItems,
     tableOptions.sort.field,
     tableOptions.sort.direction,
-    tableOptions.page.index,
-    tableOptions.page.size,
+    renderedIndices,
   ]);
 
   useEffect(() => {
-    onChangeRenderedItems(renderedItems);
+    onChangeRenderedItems?.(renderedItems);
   }, [onChangeRenderedItems, renderedItems]);
+
+  useEffect(() => {
+    onChangeItemIndices?.(renderedIndices);
+  }, [onChangeItemIndices, renderedIndices]);
 
   const sorting = useMemo(
     () => ({ sort: tableOptions.sort as TableOptions<T>['sort'] }),
     [tableOptions.sort]
   );
 
-  useEffect(() => onChangeSorting(sorting.sort), [onChangeSorting, sorting]);
+  useEffect(() => onChangeSorting?.(sorting.sort), [onChangeSorting, sorting]);
 
   const paginationProps = useMemo(() => {
     if (!pagination) {
@@ -256,7 +267,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
           oldSearchQuery: searchQuery,
         })
       ) {
-        tableSearchBar.onChangeSearchQuery(value);
+        tableSearchBar.onChangeSearchQuery?.(value);
       }
     },
     [searchQuery, tableSearchBar]

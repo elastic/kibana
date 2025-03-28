@@ -294,8 +294,9 @@ interface Props {
   sortFn: SortFunction<ServiceListItem>;
   serviceOverflowCount: number;
   maxCountExceeded: boolean;
-  onChangeSearchQuery: (searchQuery: string) => void;
+  onChangeSearchQuery?: (searchQuery: string) => void;
   onChangeRenderedItems?: (renderedItems: ServiceListItem[]) => void;
+  onChangeItemIndices?: (range: readonly [number, number]) => void;
 }
 export function ApmServicesTable({
   status,
@@ -313,6 +314,7 @@ export function ApmServicesTable({
   maxCountExceeded,
   onChangeSearchQuery,
   onChangeRenderedItems,
+  onChangeItemIndices,
 }: Props) {
   const breakpoints = useBreakpoints();
   const { core } = useApmPluginContext();
@@ -423,6 +425,7 @@ export function ApmServicesTable({
           initialPageSize={initialPageSize}
           sortFn={sortFn}
           onChangeRenderedItems={onChangeRenderedItems}
+          onChangeItemIndices={onChangeItemIndices}
           tableSearchBar={tableSearchBar}
         />
       </EuiFlexItem>

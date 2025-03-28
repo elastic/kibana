@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -34,8 +35,10 @@ const INITIAL_STATE_DETAILED_STATISTICS: DetailedStatistics = {
 };
 
 export function useErrorGroupListData({
+  renderedItems,
   sorting,
 }: {
+  renderedItems: readonly [number, number];
   sorting: TableOptions<ErrorGroupItem>['sort'];
 }) {
   const { serviceName } = useApmServiceContext();
@@ -78,12 +81,21 @@ export function useErrorGroupListData({
       [sorting.direction, sorting.field, start, end, serviceName, environment, kuery, searchQuery]
     );
 
+  const itemsToFetch = useMemo(
+    () =>
+      mainStatistics.errorGroups
+        .slice(...renderedItems)
+        .map(({ groupId }) => groupId)
+        .sort(),
+    [mainStatistics.errorGroups, renderedItems]
+  );
+
   const {
     data: detailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
     status: detailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
-      if (mainStatistics.requestId && mainStatistics.errorGroups.length && start && end) {
+      if (mainStatistics.requestId && itemsToFetch.length && start && end) {
         return callApmApi(
           'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
           {
@@ -98,9 +110,7 @@ export function useErrorGroupListData({
                 offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
               },
               body: {
-                groupIds: JSON.stringify(
-                  mainStatistics.errorGroups.map(({ groupId }) => groupId).sort()
-                ),
+                groupIds: JSON.stringify(itemsToFetch),
               },
             },
           }
@@ -109,7 +119,7 @@ export function useErrorGroupListData({
     },
     // only fetches agg results when main statistics are ready
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mainStatistics.requestId, mainStatistics.errorGroups, comparisonEnabled, offset],
+    [mainStatistics.requestId, itemsToFetch, comparisonEnabled, offset],
     { preservePreviousData: false }
   );
 

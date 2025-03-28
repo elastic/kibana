@@ -85,6 +85,7 @@ export function ErrorGroupList({
   const { offset, rangeFrom, rangeTo } = query;
 
   const [sorting, setSorting] = useState<TableOptions<ErrorGroupItem>['sort']>(defaultSorting);
+  const [renderedItems, setRenderedItems] = useState<readonly [number, number]>([0, 0]);
 
   const {
     setDebouncedSearchQuery,
@@ -92,7 +93,7 @@ export function ErrorGroupList({
     mainStatisticsStatus,
     detailedStatistics,
     detailedStatisticsStatus,
-  } = useErrorGroupListData({ sorting });
+  } = useErrorGroupListData({ renderedItems, sorting });
 
   const isMainStatsLoading = isPending(mainStatisticsStatus);
   const isDetailedStatsLoading = isPending(detailedStatisticsStatus);
@@ -325,6 +326,7 @@ export function ErrorGroupList({
       onChangeSorting={setSorting}
       saveTableOptionsToUrl={saveTableOptionsToUrl}
       showPerPageOptions={showPerPageOptions}
+      onChangeItemIndices={setRenderedItems}
     />
   );
 }

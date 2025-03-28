@@ -8,7 +8,7 @@
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ApmDocumentType } from '../../../../common/document_type';
 import type { ServiceListItem } from '../../../../common/service_inventory';
@@ -115,8 +115,10 @@ function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
 
 function useServicesDetailedStatisticsFetcher({
   mainStatisticsFetch,
+  renderedItems,
 }: {
   mainStatisticsFetch: ReturnType<typeof useServicesMainStatisticsFetcher>;
+  renderedItems: readonly [number, number];
 }) {
   const {
     query: { rangeFrom, rangeTo, environment, kuery, offset, comparisonEnabled },
@@ -134,14 +136,21 @@ function useServicesDetailedStatisticsFetcher({
 
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
 
+  const itemsToFetch = useMemo(
+    () =>
+      mainStatisticsData.items
+        .slice(...renderedItems)
+        .map(({ serviceName }) => serviceName)
+        .sort(),
+    [mainStatisticsData.items, renderedItems]
+  );
+
   const comparisonFetch = useProgressiveFetcher(
     (callApmApi) => {
-      const serviceNames = mainStatisticsData.items.map(({ serviceName }) => serviceName);
-
       if (
         start &&
         end &&
-        serviceNames.length > 0 &&
+        itemsToFetch.length > 0 &&
         mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
         dataSourceOptions
       ) {
@@ -159,7 +168,7 @@ function useServicesDetailedStatisticsFetcher({
             },
             body: {
               // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
-              serviceNames: JSON.stringify(serviceNames.sort()),
+              serviceNames: JSON.stringify(itemsToFetch),
             },
           },
         });
@@ -168,7 +177,7 @@ function useServicesDetailedStatisticsFetcher({
     // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mainStatisticsData.requestId, mainStatisticsData.items, offset, comparisonEnabled],
+    [mainStatisticsData.requestId, itemsToFetch, offset, comparisonEnabled],
     { preservePreviousData: false }
   );
 
@@ -179,6 +188,7 @@ export function ServiceInventory() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useStateDebounced('');
   const { onPageReady } = usePerformanceContext();
   const mainStatisticsFetch = useServicesMainStatisticsFetcher(debouncedSearchQuery);
+  const [renderedItems, setRenderedItems] = useState<readonly [number, number]>([0, 0]);
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
   const {
     query: { rangeFrom, rangeTo },
@@ -202,6 +212,7 @@ export function ServiceInventory() {
 
   const { comparisonFetch } = useServicesDetailedStatisticsFetcher({
     mainStatisticsFetch,
+    renderedItems,
   });
 
   const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
@@ -313,6 +324,7 @@ export function ServiceInventory() {
             initialPageSize={INITIAL_PAGE_SIZE}
             serviceOverflowCount={serviceOverflowCount}
             onChangeSearchQuery={setDebouncedSearchQuery}
+            onChangeItemIndices={setRenderedItems}
             maxCountExceeded={mainStatisticsData?.maxCountExceeded ?? false}
           />
         </EuiFlexItem>
