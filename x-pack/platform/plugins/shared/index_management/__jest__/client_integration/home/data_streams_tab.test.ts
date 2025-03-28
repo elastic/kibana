@@ -41,7 +41,7 @@ const urlServiceMock = {
         state: {},
       }),
       getUrl: async ({ policyName }: { policyName: string }) => `/test/${policyName}`,
-      getRedirectUrl: () => '/app/path',
+      getRedirectUrl,
       navigate: async () => {},
       useUrl: () => '',
     }),
