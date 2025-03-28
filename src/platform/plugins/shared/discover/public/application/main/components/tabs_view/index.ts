@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data_views';
-export * from './initialize_session';
-export * from './tabs';
+export { TabsView } from './tabs_view';
