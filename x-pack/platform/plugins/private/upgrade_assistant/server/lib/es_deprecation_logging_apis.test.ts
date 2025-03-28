@@ -138,9 +138,15 @@ describe('getRecentEsDeprecationLogs', () => {
 
   it('returns logs and count when index exists', async () => {
     const dataClient = elasticsearchServiceMock.createScopedClusterClient();
+
+    // Use dynamic dates relative to now
+    const now = new Date();
+    const timestamp1 = new Date(now.getTime() - 1000).toISOString(); // 1 second ago
+    const timestamp2 = new Date(now.getTime() - 2000).toISOString(); // 2 seconds ago
+
     const mockHits = [
-      { _source: { '@timestamp': '2025-03-25T12:34:56.789Z', message: 'Deprecation log 1' } },
-      { _source: { '@timestamp': '2025-03-25T12:34:57.789Z', message: 'Deprecation log 2' } },
+      { _source: { '@timestamp': timestamp1, message: 'Deprecation log 1' } },
+      { _source: { '@timestamp': timestamp2, message: 'Deprecation log 2' } },
     ];
 
     dataClient.asCurrentUser.indices.exists.mockResolvedValue(true as any);
@@ -176,16 +182,58 @@ describe('getRecentEsDeprecationLogs', () => {
     expect(result).toEqual({ logs: [], count: 0 });
   });
 
-  it('uses provided timeframe parameter', async () => {
+  it('uses provided timeframe parameter and only returns logs from the specified timeframe', async () => {
     const dataClient = elasticsearchServiceMock.createScopedClusterClient();
     dataClient.asCurrentUser.indices.exists.mockResolvedValue(true as any);
+
+    // Create a custom timeframe of 1 hour
+    const customTimeframe = 60 * 60 * 1000; // 1 hour
+
+    // Create timestamps within and outside the timeframe
+    const now = new Date();
+    const withinTimeframe1 = new Date(now.getTime() - 30 * 60 * 1000).toISOString(); // 30 mins ago
+    const withinTimeframe2 = new Date(now.getTime() - 45 * 60 * 1000).toISOString(); // 45 mins ago
+    const outsideTimeframe = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString(); // 2 hours ago
+
+    // Mock logs data with timestamps both within and outside the timeframe
+    const mockHits = [
+      { _source: { '@timestamp': withinTimeframe1, message: 'Recent log 1' } },
+      { _source: { '@timestamp': withinTimeframe2, message: 'Recent log 2' } },
+    ];
+
     dataClient.asCurrentUser.search.mockResolvedValue({
-      hits: { hits: [], total: { value: 0 } },
+      hits: {
+        hits: mockHits,
+        total: { value: 2 },
+      },
     } as any);
 
-    const customTimeframe = 60 * 60 * 1000; // 1 hour
-    await getRecentEsDeprecationLogs(dataClient, customTimeframe);
+    const result = await getRecentEsDeprecationLogs(dataClient, customTimeframe);
 
-    expect(dataClient.asCurrentUser.search).toHaveBeenCalled();
+    // Verify correct results were returned
+    expect(result).toEqual({
+      logs: mockHits.map((hit) => hit._source),
+      count: 2,
+    });
+
+    // Verify the search query uses the correct timeframe
+    expect(dataClient.asCurrentUser.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              must: expect.objectContaining({
+                range: expect.objectContaining({
+                  '@timestamp': expect.objectContaining({
+                    gte: expect.any(String),
+                    lte: expect.any(String),
+                  }),
+                }),
+              }),
+            }),
+          }),
+        }),
+      })
+    );
   });
 });
