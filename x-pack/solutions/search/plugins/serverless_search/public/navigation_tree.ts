@@ -44,9 +44,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   return (
                     pathNameSerialized.startsWith(
                       prepend('/app/elasticsearch/index_management/indices')
-                    ) ||
-                    pathNameSerialized.startsWith(prepend('/app/elasticsearch/indices')) ||
-                    pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
+                    ) || pathNameSerialized.startsWith(prepend('/app/elasticsearch/indices'))
                   );
                 },
               },
@@ -128,6 +126,12 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             children: [
               {
                 link: 'discover',
+                getIsActive: ({ pathNameSerialized, prepend }) => {
+                  return (
+                    pathNameSerialized.startsWith(prepend('/app/discover')) ||
+                    pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
+                  );
+                },
               },
               {
                 link: 'dashboards',
