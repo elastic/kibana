@@ -264,6 +264,7 @@ export const AlertDeleteModal = ({ onCloseModal, isVisible }: AlertDeleteProps) 
             type="submit"
             form={FORM_ID}
             fill
+            color="danger"
             isDisabled={!isFormValid}
             data-test-subj="alert-delete-submit"
           >
