@@ -925,7 +925,7 @@ export async function suggestForExpression({
  * Example:
  * "is null" -> /^i(?:s(?:\s+(?:n(?:u(?:l(?:l)?)?)?)?)?)?$/i
  */
-export function buildPartialMatcher(str: string) {
+function buildPartialMatcher(str: string) {
   // Split the string into characters
   const chars = str.split('');
 
@@ -951,4 +951,26 @@ export function buildPartialMatcher(str: string) {
 
   // Return the final regex pattern
   return new RegExp(pattern + '$', 'i');
+}
+
+const isNullMatcher = buildPartialMatcher('is nul');
+const isNotNullMatcher = buildPartialMatcher('is not nul');
+
+/**
+ * Encapsulates handling of the "is null" and "is not null"
+ * checks...
+ *
+ * @todo use the simpler "getExpressionType(root) !== 'unknown'"
+ * as soon as https://github.com/elastic/kibana/issues/199401 is resolved
+ */
+export function isExpressionComplete(
+  expressionType: SupportedDataType | 'unknown',
+  innerText: string
+) {
+  return (
+    expressionType !== 'unknown' &&
+    // see https://github.com/elastic/kibana/issues/199401
+    // for the reason we need this string check.
+    !(isNullMatcher.test(innerText) || isNotNullMatcher.test(innerText))
+  );
 }

@@ -729,6 +729,7 @@ const enrichOperators = (
         Location.WHERE,
         Location.ROW,
         Location.SORT,
+        Location.STATS_WHERE,
         Location.STATS_BY,
       ]);
     }
@@ -738,13 +739,20 @@ const enrichOperators = (
         Location.EVAL,
         Location.WHERE,
         Location.ROW,
-        Location.STATS,
         Location.SORT,
+        Location.STATS,
+        Location.STATS_WHERE,
         Location.STATS_BY,
       ]);
     }
     if (isInOperator || isLikeOperator || isNotOperator) {
-      locationsAvailable = [Location.EVAL, Location.WHERE, Location.SORT, Location.ROW];
+      locationsAvailable = [
+        Location.EVAL,
+        Location.WHERE,
+        Location.SORT,
+        Location.ROW,
+        Location.STATS_WHERE,
+      ];
     }
     if (isInOperator) {
       // Override the signatures to be array types instead of singular

@@ -18,7 +18,7 @@ import {
   getControlSuggestionIfSupported,
 } from '../../factories';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
-import { pushItUpInTheList, suggestForExpression } from '../../helper';
+import { isExpressionComplete, pushItUpInTheList, suggestForExpression } from '../../helper';
 import {
   byCompleteItem,
   getDateHistogramCompletionItem,
@@ -76,13 +76,23 @@ export async function suggest({
         return [];
       }
 
-      return suggestForExpression({
+      const suggestions = await suggestForExpression({
         expressionRoot,
         getExpressionType,
         getColumnsByType,
         location: Location.STATS_WHERE,
         innerText,
+        preferredExpressionType: 'boolean',
       });
+
+      // Is this a complete boolean expression?
+      // If so, we can call it done and suggest a pipe
+      const expressionType = getExpressionType(expressionRoot);
+      if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
+        suggestions.push(pipeCompleteItem);
+      }
+
+      return suggestions;
 
     case 'grouping_expression_after_assignment':
       return [

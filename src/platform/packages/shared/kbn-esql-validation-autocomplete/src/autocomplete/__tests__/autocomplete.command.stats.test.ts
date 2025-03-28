@@ -61,8 +61,6 @@ describe('autocomplete.suggest', () => {
       suggest = res.suggest;
     });
 
-    describe('STATS ...', () => {});
-
     describe('... <aggregates> ...', () => {
       test('lists possible aggregations on space after command', async () => {
         const expected = [
@@ -237,6 +235,17 @@ describe('autocomplete.suggest', () => {
             ...getFieldNamesByType('any').map((name) => `${name} `),
             ...getFunctionSignaturesByReturnType(Location.STATS_WHERE, 'any', { scalar: true }),
           ]);
+        });
+
+        // it('suggests after operator', async () => {
+        //   await suggest('FROM a | STATS MIN(b) WHERE keywordField != /');
+        // });
+
+        it('suggests pipe after boolean expression', async () => {
+          const suggestions = await suggest(
+            'FROM a | STATS MIN(b) WHERE keywordField != keywordField /'
+          );
+          expect(suggestions.map(({ text }) => text)).toContain('| ');
         });
       });
     });
