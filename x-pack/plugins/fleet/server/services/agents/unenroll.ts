@@ -10,7 +10,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import { v4 as uuidv4 } from 'uuid';
 
 import type { Agent } from '../../types';
-import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
@@ -37,6 +37,10 @@ async function unenrollAgentIsAllowed(
     throw new HostedAgentPolicyRestrictionRelatedError(
       `Cannot unenroll ${agentId} from a hosted agent policy ${agentPolicy.id}`
     );
+  }
+
+  if (agentPolicy?.supports_agentless) {
+    throw new FleetError(`Cannot unenroll agentless agent ${agentId}`);
   }
 
   return true;
