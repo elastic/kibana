@@ -449,19 +449,11 @@ export class StatusRuleExecutor {
     const data = await this.getDownChecks({});
     return {
       ...data,
-      monitors: [
-        ...this.monitors.map((monitor) => ({
-          id: monitor.id,
-          name: monitor.attributes.name,
-          type: monitor.attributes.type,
-        })),
-        // add some 1000 dummy monitors to test the pagination
-        ...new Array(1000).fill(null).map((_, index) => ({
-          id: `dummy-${index}`,
-          name: `dummy-${index}`,
-          type: 'http',
-        })),
-      ],
+      monitors: this.monitors.map((monitor) => ({
+        id: monitor.id,
+        name: monitor.attributes.name,
+        type: monitor.attributes.type,
+      })),
     };
   };
 }
