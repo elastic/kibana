@@ -309,10 +309,24 @@ export const panelSchema = schema.object({
 
 export const sectionSchema = schema.arrayOf(
   schema.object({
-    id: schema.string(),
-    order: schema.number({ min: 1 }), // order 0 is reserved for main dashboard content
-    title: schema.string(),
-    collapsed: schema.boolean(),
+    id: schema.maybe(
+      schema.string({
+        meta: { description: 'The unique ID of the section.' },
+      })
+    ),
+    order: schema.number({
+      min: 1,
+      meta: {
+        description:
+          'The order that sections should be rendered in. These values should be unique, and the order `0` is reserved for the main dashhboard content.',
+      },
+    }),
+    title: schema.string({
+      meta: { description: 'The title of the section.' },
+    }),
+    collapsed: schema.boolean({
+      meta: { description: 'The collapsed state of the section.' },
+    }),
   })
 );
 
