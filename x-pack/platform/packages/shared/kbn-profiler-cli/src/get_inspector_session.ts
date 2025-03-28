@@ -18,6 +18,8 @@ export async function getInspectorSession(): Promise<() => Promise<Profiler.Prof
   return async () => {
     const { profile } = await client.Profiler.stop();
 
+    await client.Profiler.disable();
+
     await client.close();
 
     return profile;

@@ -20,12 +20,16 @@ run(
     const pid = flags.pid
       ? Number(flags.pid)
       : await getKibanaProcessId({
-          port: Number(flags.port || 5601),
+          port: Number(flags.port || 5603),
         });
 
     process.kill(pid, 'SIGUSR1');
 
     const stop = await getInspectorSession();
+
+    addCleanupTask(() => {
+      return stop();
+    });
 
     const connections = Number(flags.c || flags.connections || 1);
     const amount = Number(flags.a || flags.amount || 1);
