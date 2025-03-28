@@ -40,16 +40,16 @@ export const DOCS_URL = 'https://ela.st/asset-inventory';
 export const DEFAULT_TABLE_SECTION_HEIGHT = 512; // px
 
 export const ASSET_FIELDS = {
-  ASSET_TYPE: 'entity.type',
-  ASSET_CATEGORY: 'entity.category',
-  RISK: 'host.risk.calculated_level',
-  CRITICALITY: 'asset.criticality',
+  ASSET_CRITICALITY: 'asset.criticality',
+  ENTITY_TYPE: 'entity.category',
+  CLOUD_ACCOUNT: 'cloud.account.id',
+  SOURCE: 'entity.type',
 } as const;
 
 export const ASSET_GROUPING_OPTIONS = {
   NONE: 'none',
-  ASSET_TYPE: ASSET_FIELDS.ASSET_TYPE,
-  ASSET_CATEGORY: ASSET_FIELDS.ASSET_CATEGORY,
-  RISK: ASSET_FIELDS.RISK,
-  CRITICALITY: ASSET_FIELDS.CRITICALITY,
+  ASSET_CRITICALITY: ASSET_FIELDS.ASSET_CRITICALITY,
+  ENTITY_TYPE: ASSET_FIELDS.ENTITY_TYPE,
+  CLOUD_ACCOUNT: ASSET_FIELDS.CLOUD_ACCOUNT,
+  SOURCE: ASSET_FIELDS.SOURCE,
 };

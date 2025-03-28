@@ -26,16 +26,16 @@ export interface AssetsGroupingAggregation {
   groupByFields?: {
     buckets?: GenericBuckets[];
   };
-  assetType?: {
+  assetCriticality?: {
     buckets?: GenericBuckets[];
   };
-  assetCategory?: {
+  entityType?: {
     buckets?: GenericBuckets[];
   };
-  risk?: {
+  cloudAccount?: {
     buckets?: GenericBuckets[];
   };
-  criticality?: {
+  source?: {
     buckets?: GenericBuckets[];
   };
 }

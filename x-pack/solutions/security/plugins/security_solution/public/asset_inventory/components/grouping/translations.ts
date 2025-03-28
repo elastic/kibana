@@ -22,25 +22,25 @@ export const assetGroupsUnit = (
   const groupCount = hasNullGroup ? totalCount - 1 : totalCount;
 
   switch (selectedGroup) {
-    case ASSET_GROUPING_OPTIONS.ASSET_TYPE:
-      return i18n.translate('xpack.securitySolution.assetInventory.groupUnit.assetType', {
+    case ASSET_GROUPING_OPTIONS.ASSET_CRITICALITY:
+      return i18n.translate('xpack.securitySolution.assetInventory.groupUnit.assetCriticality', {
         values: { groupCount },
-        defaultMessage: `{groupCount} {groupCount, plural, =1 {asset type} other {asset types}}`,
+        defaultMessage: `{groupCount} {groupCount, plural, =1 {asset criticality} other {asset criticalities}}`,
       });
-    case ASSET_GROUPING_OPTIONS.ASSET_CATEGORY:
-      return i18n.translate('xpack.securitySolution.assetInventory.groupUnit.assetCategory', {
+    case ASSET_GROUPING_OPTIONS.ENTITY_TYPE:
+      return i18n.translate('xpack.securitySolution.assetInventory.groupUnit.entityType', {
         values: { groupCount },
-        defaultMessage: `{groupCount} {groupCount, plural, =1 {asset category} other {asset categories}}`,
+        defaultMessage: `{groupCount} {groupCount, plural, =1 {entity type} other {entity types}}`,
       });
-    case ASSET_GROUPING_OPTIONS.RISK:
-      return i18n.translate('xpack.securitySolution.assetInventory.groupUnit.risk', {
+    case ASSET_GROUPING_OPTIONS.CLOUD_ACCOUNT:
+      return i18n.translate('xpack.securitySolution.assetInventory.groupUnit.cloudAccount', {
         values: { groupCount },
-        defaultMessage: `{groupCount} {groupCount, plural, =1 {risk} other {risks}}`,
+        defaultMessage: `{groupCount} {groupCount, plural, =1 {cloud account} other {cloud accounts}}`,
       });
-    case ASSET_GROUPING_OPTIONS.CRITICALITY:
-      return i18n.translate('xpack.securitySolution.assetInventory.groupUnit.criticality', {
+    case ASSET_GROUPING_OPTIONS.SOURCE:
+      return i18n.translate('xpack.securitySolution.assetInventory.groupUnit.source', {
         values: { groupCount },
-        defaultMessage: `{groupCount} {groupCount, plural, =1 {criticality} other {criticalities}}`,
+        defaultMessage: `{groupCount} {groupCount, plural, =1 {source} other {sources}}`,
       });
     default:
       return i18n.translate('xpack.securitySolution.assetInventory.groupUnit.default', {
@@ -58,44 +58,47 @@ export const NULL_GROUPING_UNIT = i18n.translate(
 );
 
 export const NULL_GROUPING_MESSAGES = {
-  ASSET_TYPE: i18n.translate(
-    'xpack.securitySolution.assetInventory.grouping.assetType.nullGroupTitle',
+  ASSET_CRITICALITY: i18n.translate(
+    'xpack.securitySolution.assetInventory.grouping.assetCriticality.nullGroupTitle',
     {
-      defaultMessage: 'No asset type',
+      defaultMessage: 'No asset criticality',
     }
   ),
-  ASSET_CATEGORY: i18n.translate(
-    'xpack.securitySolution.assetInventory.grouping.assetCategory.nullGroupTitle',
+  ENTITY_TYPE: i18n.translate(
+    'xpack.securitySolution.assetInventory.grouping.entityType.nullGroupTitle',
     {
-      defaultMessage: 'No asset category',
+      defaultMessage: 'No entity type',
     }
   ),
-  RISK: i18n.translate('xpack.securitySolution.assetInventory.grouping.risk.nullGroupTitle', {
-    defaultMessage: 'No risk',
+  CLOUD_ACCOUNT: i18n.translate(
+    'xpack.securitySolution.assetInventory.grouping.cloudAccount.nullGroupTitle',
+    {
+      defaultMessage: 'No cloud account',
+    }
+  ),
+  SOURCE: i18n.translate('xpack.securitySolution.assetInventory.grouping.source.nullGroupTitle', {
+    defaultMessage: 'No source',
   }),
-  CRITICALITY: i18n.translate(
-    'xpack.securitySolution.assetInventory.grouping.criticality.nullGroupTitle',
-    {
-      defaultMessage: 'No criticality',
-    }
-  ),
   DEFAULT: i18n.translate('xpack.securitySolution.assetInventory.grouping.default.nullGroupTitle', {
     defaultMessage: 'No grouping',
   }),
 };
 
 export const GROUPING_LABELS = {
-  ASSET_TYPE: i18n.translate('xpack.securitySolution.assetInventory.groupBy.assetType', {
-    defaultMessage: 'Asset type',
+  ASSET_CRITICALITY: i18n.translate(
+    'xpack.securitySolution.assetInventory.groupBy.assetCriticality',
+    {
+      defaultMessage: 'Asset criticality',
+    }
+  ),
+  ENTITY_TYPE: i18n.translate('xpack.securitySolution.assetInventory.groupBy.entityType', {
+    defaultMessage: 'Entity type',
   }),
-  ASSET_CATEGORY: i18n.translate('xpack.securitySolution.assetInventory.groupBy.assetCategory', {
-    defaultMessage: 'Asset category',
+  CLOUD_ACCOUNT: i18n.translate('xpack.securitySolution.assetInventory.groupBy.cloudAccount', {
+    defaultMessage: 'Cloud account',
   }),
-  RISK: i18n.translate('xpack.securitySolution.assetInventory.groupBy.risk', {
-    defaultMessage: 'Risk',
-  }),
-  CRITICALITY: i18n.translate('xpack.securitySolution.assetInventory.groupBy.criticality', {
-    defaultMessage: 'Criticality',
+  SOURCE: i18n.translate('xpack.securitySolution.assetInventory.groupBy.source', {
+    defaultMessage: 'Source',
   }),
 };
 

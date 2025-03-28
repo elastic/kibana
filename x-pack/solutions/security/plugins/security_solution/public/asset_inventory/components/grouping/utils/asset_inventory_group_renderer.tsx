@@ -63,9 +63,29 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
   };
 
   switch (selectedGroup) {
-    case ASSET_GROUPING_OPTIONS.ASSET_TYPE:
+    case ASSET_GROUPING_OPTIONS.ASSET_CRITICALITY:
       return nullGroupMessage ? (
-        renderNullGroup(NULL_GROUPING_MESSAGES.ASSET_TYPE)
+        renderNullGroup(NULL_GROUPING_MESSAGES.ASSET_CRITICALITY)
+      ) : (
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem>
+                <EuiText size="s"> {getGroupPanelTitle()}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="xs" color="subdued">
+                  {firstNonNullValue(bucket.assetCriticality?.buckets?.[0]?.key)}{' '}
+                  {firstNonNullValue(bucket.assetCriticality?.buckets?.[0]?.key)}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    case ASSET_GROUPING_OPTIONS.ENTITY_TYPE:
+      return nullGroupMessage ? (
+        renderNullGroup(NULL_GROUPING_MESSAGES.ENTITY_TYPE)
       ) : (
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
@@ -81,9 +101,9 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
                     css={css`
                       word-break: break-all;
                     `}
-                    title={bucket.assetType?.buckets?.[0]?.key as string}
+                    title={bucket.entityType?.buckets?.[0]?.key as string}
                   >
-                    {getGroupPanelTitle('assetType')}
+                    {getGroupPanelTitle('entityType')}
                   </EuiTextBlockTruncate>
                 </EuiText>
               </EuiFlexItem>
@@ -91,58 +111,38 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case ASSET_GROUPING_OPTIONS.ASSET_CATEGORY:
+    case ASSET_GROUPING_OPTIONS.CLOUD_ACCOUNT:
       return nullGroupMessage ? (
-        renderNullGroup(NULL_GROUPING_MESSAGES.ASSET_CATEGORY)
+        renderNullGroup(NULL_GROUPING_MESSAGES.CLOUD_ACCOUNT)
       ) : (
-        <EuiFlexGroup alignItems="center">
+        <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <EuiText size="s"> {getGroupPanelTitle()}</EuiText>
+                <EuiText size="s">{getGroupPanelTitle('cloudAccount')}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">
-                  {firstNonNullValue(bucket.assetCategory?.buckets?.[0]?.key)}{' '}
-                  {firstNonNullValue(bucket.assetCategory?.buckets?.[0]?.key)}
+                  {bucket.cloudAccount?.buckets?.[0]?.key}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case ASSET_GROUPING_OPTIONS.RISK:
+    case ASSET_GROUPING_OPTIONS.SOURCE:
       return nullGroupMessage ? (
-        renderNullGroup(NULL_GROUPING_MESSAGES.RISK)
+        renderNullGroup(NULL_GROUPING_MESSAGES.SOURCE)
       ) : (
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <EuiText size="s">{getGroupPanelTitle('risk')}</EuiText>
+                <EuiText size="s">{getGroupPanelTitle('source')}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">
-                  {bucket.risk?.buckets?.[0]?.key}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    case ASSET_GROUPING_OPTIONS.CRITICALITY:
-      return nullGroupMessage ? (
-        renderNullGroup(NULL_GROUPING_MESSAGES.CRITICALITY)
-      ) : (
-        <EuiFlexGroup alignItems="center" gutterSize="m">
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem>
-                <EuiText size="s">{getGroupPanelTitle('criticality')}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="xs" color="subdued">
-                  {bucket.criticality?.buckets?.[0]?.key}
+                  {bucket.source?.buckets?.[0]?.key}
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>

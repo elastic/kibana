@@ -38,27 +38,25 @@ import { assetsUnit, groupingTitle, assetGroupsUnit, GROUPING_LABELS } from './t
 
 const MAX_GROUPING_LEVELS = 3;
 
-// TODO Move to other file?
-export const defaultGroupingOptions: GroupOption[] = [
+const defaultGroupingOptions: GroupOption[] = [
   {
-    label: GROUPING_LABELS.ASSET_TYPE,
-    key: ASSET_GROUPING_OPTIONS.ASSET_TYPE,
+    label: GROUPING_LABELS.ASSET_CRITICALITY,
+    key: ASSET_GROUPING_OPTIONS.ASSET_CRITICALITY,
   },
   {
-    label: GROUPING_LABELS.ASSET_CATEGORY,
-    key: ASSET_GROUPING_OPTIONS.ASSET_CATEGORY,
+    label: GROUPING_LABELS.ENTITY_TYPE,
+    key: ASSET_GROUPING_OPTIONS.ENTITY_TYPE,
   },
   {
-    label: GROUPING_LABELS.RISK,
-    key: ASSET_GROUPING_OPTIONS.RISK,
+    label: GROUPING_LABELS.CLOUD_ACCOUNT,
+    key: ASSET_GROUPING_OPTIONS.CLOUD_ACCOUNT,
   },
   {
-    label: GROUPING_LABELS.CRITICALITY,
-    key: ASSET_GROUPING_OPTIONS.CRITICALITY,
+    label: GROUPING_LABELS.SOURCE,
+    key: ASSET_GROUPING_OPTIONS.SOURCE,
   },
 ];
 
-// TODO Move to other file?
 export const getDefaultQuery = ({
   query,
   filters,
@@ -67,7 +65,6 @@ export const getDefaultQuery = ({
 } => ({
   query,
   filters,
-  // TODO how to sort asset fields?
   sort: [[]],
 });
 
@@ -92,14 +89,17 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
   ];
 
   switch (field) {
-    case ASSET_GROUPING_OPTIONS.ASSET_TYPE:
-      return [...aggMetrics, getTermAggregation('assetType', ASSET_FIELDS.ASSET_TYPE)];
-    case ASSET_GROUPING_OPTIONS.ASSET_CATEGORY:
-      return [...aggMetrics, getTermAggregation('assetCategory', ASSET_FIELDS.ASSET_CATEGORY)];
-    case ASSET_GROUPING_OPTIONS.RISK:
-      return [...aggMetrics, getTermAggregation('risk', ASSET_FIELDS.RISK)];
-    case ASSET_GROUPING_OPTIONS.CRITICALITY:
-      return [...aggMetrics, getTermAggregation('criticality', ASSET_FIELDS.CRITICALITY)];
+    case ASSET_GROUPING_OPTIONS.ASSET_CRITICALITY:
+      return [
+        ...aggMetrics,
+        getTermAggregation('assetCriticality', ASSET_FIELDS.ASSET_CRITICALITY),
+      ];
+    case ASSET_GROUPING_OPTIONS.ENTITY_TYPE:
+      return [...aggMetrics, getTermAggregation('entityType', ASSET_FIELDS.ENTITY_TYPE)];
+    case ASSET_GROUPING_OPTIONS.CLOUD_ACCOUNT:
+      return [...aggMetrics, getTermAggregation('cloudAccount', ASSET_FIELDS.CLOUD_ACCOUNT)];
+    case ASSET_GROUPING_OPTIONS.SOURCE:
+      return [...aggMetrics, getTermAggregation('source', ASSET_FIELDS.SOURCE)];
   }
   return aggMetrics;
 };
