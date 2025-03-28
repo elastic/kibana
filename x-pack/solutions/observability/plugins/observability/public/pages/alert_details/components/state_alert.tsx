@@ -87,7 +87,7 @@ function StaleAlert({
       {isAlertStale?.isStale && (
         <EuiCallOut
           title={i18n.translate('xpack.observability.alertDetails.staleAlertCallout.title', {
-            defaultMessage: 'This alert may be stale!',
+            defaultMessage: 'This alert may be stale',
           })}
           color="warning"
           iconType="warning"
@@ -95,7 +95,7 @@ function StaleAlert({
           <p>
             {i18n.translate('xpack.observability.alertDetails.staleAlertCallout.message', {
               defaultMessage:
-                'This alert has been active for {numOfDays} days, and is assigned to {numOfCases} {cases}.',
+                'This alert has been active for {numOfDays} days and is assigned to {numOfCases} {cases}.',
               values: {
                 numOfDays: isAlertStale?.days,
                 numOfCases: isAlertStale?.cases,
