@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
-import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
 import { IngestPipelinesPluginStart } from '@kbn/ingest-pipelines-plugin/public';
@@ -19,7 +21,6 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 import { StreamsTelemetryService } from '../public/telemetry/service';
 
@@ -49,6 +50,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
         ingestPipelines: {} as unknown as IngestPipelinesPluginStart,
         discoverShared: {} as unknown as DiscoverSharedPublicStart,
         charts: {} as unknown as ChartsPluginStart,
+        discover: {} as unknown as DiscoverStart,
       },
     },
     services: {
