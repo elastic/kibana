@@ -303,7 +303,6 @@ export function ServiceInventory() {
       });
     }
   }, [mainStatisticsStatus, comparisonFetch.status, onPageReady, rangeFrom, rangeTo]);
-
   return (
     <>
       <SearchBar showTimeComparison />
