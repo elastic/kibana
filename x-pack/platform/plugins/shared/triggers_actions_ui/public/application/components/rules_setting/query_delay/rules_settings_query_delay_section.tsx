@@ -100,7 +100,7 @@ export const RulesSettingsQueryDelaySection = memo((props: RulesSettingsQueryDel
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiFlexGroup>
+      <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiText color="subdued" size="s">
             <p>{queryDelayDescription}</p>

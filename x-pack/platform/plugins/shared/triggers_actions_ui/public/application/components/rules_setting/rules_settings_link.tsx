@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RulesSettingsFlyout } from './rules_settings_modal';
+import { RulesSettingsFlyout } from './rules_settings_flyout';
 import { useKibana } from '../../../common/lib/kibana';
 
 export const RulesSettingsLink = () => {

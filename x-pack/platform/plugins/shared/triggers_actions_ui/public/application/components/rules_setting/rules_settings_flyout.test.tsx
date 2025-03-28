@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { IToasts } from '@kbn/core/public';
 import { RulesSettingsFlapping, RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
-import { RulesSettingsFlyout, RulesSettingsFlyoutProps } from './rules_settings_modal';
+import { RulesSettingsFlyout, RulesSettingsFlyoutProps } from './rules_settings_flyout';
 import { useKibana } from '../../../common/lib/kibana';
 import { fetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings';
 import { updateFlappingSettings } from '../../lib/rule_api/update_flapping_settings';

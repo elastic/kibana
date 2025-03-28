@@ -27,8 +27,13 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiDescribedFormGroup,
+  EuiText,
+  EuiForm,
 } from '@elastic/eui';
 import { useFetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings';
+import { css } from '@emotion/react';
+import { HorizontalAlignment } from '@elastic/charts';
 import { useKibana } from '../../../common/lib/kibana';
 import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
 import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
@@ -46,7 +51,7 @@ export const RulesSettingsErrorPrompt = memo(() => {
       title={
         <h4>
           <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.modal.errorPromptTitle"
+            id="xpack.triggersActionsUI.rulesSettings.flyout.errorPromptTitle"
             defaultMessage="Unable to load your rules settings"
           />
         </h4>
@@ -54,7 +59,7 @@ export const RulesSettingsErrorPrompt = memo(() => {
       body={
         <p>
           <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.modal.errorPromptBody"
+            id="xpack.triggersActionsUI.rulesSettings.flyout.errorPromptBody"
             defaultMessage="There was an error loading your rules settings. Contact your administrator for help"
           />
         </p>
@@ -144,7 +149,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
     },
   });
 
-  const onCloseModal = useCallback(() => {
+  const onCloseFlyout = useCallback(() => {
     resetFlappingSettings();
     resetQueryDelaySettings();
     onClose();
@@ -254,35 +259,42 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
   };
 
   return (
-    <EuiFlyout data-test-subj="rulesSettingsModal" onClose={onCloseModal} maxWidth={880}>
+    <EuiFlyout
+      type="push"
+      data-test-subj="rulesSettingsModal"
+      onClose={onCloseFlyout}
+      maxWidth={384}
+    >
       <EuiFlyoutHeader>
         <EuiTitle>
           <h3>
             <FormattedMessage
-              id="xpack.triggersActionsUI.rulesSettings.modal.title"
+              id="xpack.triggersActionsUI.rulesSettings.flyout.title"
               defaultMessage="Rule settings"
             />
           </h3>
         </EuiTitle>
+        <EuiSpacer size="m" />
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiCallOut
-          size="s"
-          title={i18n.translate('xpack.triggersActionsUI.rulesSettings.modal.calloutMessage', {
-            defaultMessage: 'Apply to all rules within the current space.',
-          })}
-        />
-        <EuiHorizontalRule />
-        {maybeRenderForm()}
-        <EuiSpacer />
-        <EuiHorizontalRule margin="none" />
-      </EuiFlyoutBody>
+      <EuiHorizontalRule margin="none" />
+
+      <EuiCallOut
+        size="m"
+        title={i18n.translate('xpack.triggersActionsUI.rulesSettings.flyout.calloutMessage', {
+          defaultMessage: 'Apply to all rules within the current space.',
+        })}
+        css={css`
+          position: sticky;
+        `}
+      />
+      <EuiFlyoutBody>{maybeRenderForm()}</EuiFlyoutBody>
+
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="rulesSettingsModalCancelButton" onClick={onCloseModal}>
+            <EuiButtonEmpty data-test-subj="rulesSettingsModalCancelButton" onClick={onCloseFlyout}>
               <FormattedMessage
-                id="xpack.triggersActionsUI.rulesSettings.modal.cancelButton"
+                id="xpack.triggersActionsUI.rulesSettings.flyout.cancelButton"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
@@ -295,7 +307,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
               disabled={!canWriteFlappingSettings && !canWriteQueryDelaySettings}
             >
               <FormattedMessage
-                id="xpack.triggersActionsUI.rulesSettings.modal.saveButton"
+                id="xpack.triggersActionsUI.rulesSettings.flyout.saveButton"
                 defaultMessage="Save"
               />
             </EuiButton>

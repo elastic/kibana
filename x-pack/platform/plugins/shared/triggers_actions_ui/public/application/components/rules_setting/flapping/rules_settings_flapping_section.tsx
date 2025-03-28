@@ -164,7 +164,7 @@ export const RulesSettingsFlappingSection = memo((props: RulesSettingsFlappingSe
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiFlexGroup>
+      <EuiFlexGroup direction="column">
         <RulesSettingsFlappingFormLeft
           isSwitchDisabled={!canWrite}
           settings={settings}
