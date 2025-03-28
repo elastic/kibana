@@ -199,6 +199,7 @@ export async function createRule<Params extends RuleParams = never>(
   } = await withSpan({ name: 'extractReferences', type: 'rules' }, () =>
     extractReferences(context, ruleType, allActions, validatedRuleTypeParams)
   );
+  // TODO update extractReferences
 
   const createTime = Date.now();
   const lastRunTimestamp = new Date();
@@ -209,7 +210,7 @@ export async function createRule<Params extends RuleParams = never>(
   const { systemActions, actions: actionToNotUse, ...restData } = data;
   // Convert domain rule object to ES rule attributes
   const ruleAttributes = transformRuleDomainToRuleAttributes({
-    actionsWithRefs,
+    actionsWithRefs, // TODO add dashboards with refs
     rule: {
       ...restData,
       // TODO (http-versioning) create a rule domain version of this function
