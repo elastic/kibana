@@ -22,6 +22,88 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/index-management-shared-types",
+        "id": "def-common.ComponentTemplateFlyoutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ComponentTemplateFlyoutProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.ComponentTemplateFlyoutProps.componentTemplateName",
+            "type": "string",
+            "tags": [],
+            "label": "componentTemplateName",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.ComponentTemplateFlyoutProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-management-shared-types",
+        "id": "def-common.DatastreamFlyoutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "DatastreamFlyoutProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.DatastreamFlyoutProps.datastreamName",
+            "type": "string",
+            "tags": [],
+            "label": "datastreamName",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.DatastreamFlyoutProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-management-shared-types",
         "id": "def-common.EmptyListContent",
         "type": "Interface",
         "tags": [],
@@ -1653,6 +1735,171 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.IndexManagementPluginStart.getComponentTemplateFlyoutComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getComponentTemplateFlyoutComponent",
+            "description": [],
+            "signature": [
+              "(deps: { history: ",
+              "ScopedHistory",
+              "<unknown>; }) => React.FC<",
+              {
+                "pluginId": "@kbn/index-management-shared-types",
+                "scope": "common",
+                "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+                "section": "def-common.ComponentTemplateFlyoutProps",
+                "text": "ComponentTemplateFlyoutProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-management-shared-types",
+                "id": "def-common.IndexManagementPluginStart.getComponentTemplateFlyoutComponent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/index-management-shared-types",
+                    "id": "def-common.IndexManagementPluginStart.getComponentTemplateFlyoutComponent.$1.history",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "history",
+                    "description": [],
+                    "signature": [
+                      "ScopedHistory",
+                      "<unknown>"
+                    ],
+                    "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.IndexManagementPluginStart.getIndexTemplateFlyoutComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getIndexTemplateFlyoutComponent",
+            "description": [],
+            "signature": [
+              "(deps: { history: ",
+              "ScopedHistory",
+              "<unknown>; }) => React.FC<",
+              {
+                "pluginId": "@kbn/index-management-shared-types",
+                "scope": "common",
+                "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+                "section": "def-common.IndexTemplateFlyoutProps",
+                "text": "IndexTemplateFlyoutProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-management-shared-types",
+                "id": "def-common.IndexManagementPluginStart.getIndexTemplateFlyoutComponent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/index-management-shared-types",
+                    "id": "def-common.IndexManagementPluginStart.getIndexTemplateFlyoutComponent.$1.history",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "history",
+                    "description": [],
+                    "signature": [
+                      "ScopedHistory",
+                      "<unknown>"
+                    ],
+                    "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.IndexManagementPluginStart.getDatastreamFlyoutComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getDatastreamFlyoutComponent",
+            "description": [],
+            "signature": [
+              "(deps: { history: ",
+              "ScopedHistory",
+              "<unknown>; }) => React.FC<",
+              {
+                "pluginId": "@kbn/index-management-shared-types",
+                "scope": "common",
+                "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+                "section": "def-common.DatastreamFlyoutProps",
+                "text": "DatastreamFlyoutProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-management-shared-types",
+                "id": "def-common.IndexManagementPluginStart.getDatastreamFlyoutComponent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/index-management-shared-types",
+                    "id": "def-common.IndexManagementPluginStart.getDatastreamFlyoutComponent.$1.history",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "history",
+                    "description": [],
+                    "signature": [
+                      "ScopedHistory",
+                      "<unknown>"
+                    ],
+                    "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1755,6 +2002,63 @@
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-management-shared-types",
+        "id": "def-common.IndexTemplateFlyoutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexTemplateFlyoutProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.IndexTemplateFlyoutProps.indexTemplateName",
+            "type": "string",
+            "tags": [],
+            "label": "indexTemplateName",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.IndexTemplateFlyoutProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.IndexTemplateFlyoutProps.reload",
+            "type": "Function",
+            "tags": [],
+            "label": "reload",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2281,7 +2585,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " & ({ page: \"data_streams_details\"; dataStreamName?: string | undefined; } | { page: \"index_template\"; indexTemplate: string; } | { page: \"component_template\"; componentTemplate: string; })"
+          " & ({ page: \"index_list\"; filter?: string | undefined; includeHiddenIndices?: boolean | undefined; } | { page: \"data_streams_details\"; dataStreamName?: string | undefined; } | { page: \"index_template\"; indexTemplate: string; } | { page: \"index_template_edit\"; indexTemplate: string; } | { page: \"index_template_clone\"; indexTemplate: string; } | { page: \"component_template\"; componentTemplate: string; } | { page: \"component_template_list\"; filter?: string | undefined; } | { page: \"edit_component_template\"; componentTemplate: string; } | { page: \"clone_component_template\"; componentTemplate: string; } | { page: \"create_component_template\"; componentTemplate: string; })"
         ],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
         "deprecated": false,

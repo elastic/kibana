@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
+import { SearchBarSection } from './search_bar/search_bar_section';
 
 const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.alertSummary.dataViewError', {
   defaultMessage: 'Unable to create data view',
@@ -31,7 +32,7 @@ const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
 
 export interface WrapperProps {
   /**
-   * List of installed Ai for SOC integrations
+   * List of installed AI for SOC integrations
    */
   packages: PackageListItem[];
 }
@@ -89,7 +90,9 @@ export const Wrapper = memo(({ packages }: WrapperProps) => {
               title={<h2>{DATAVIEW_ERROR}</h2>}
             />
           ) : (
-            <div data-test-subj={CONTENT_TEST_ID}>{'wrapper'}</div>
+            <div data-test-subj={CONTENT_TEST_ID}>
+              <SearchBarSection dataView={dataView} packages={packages} />
+            </div>
           )}
         </>
       }

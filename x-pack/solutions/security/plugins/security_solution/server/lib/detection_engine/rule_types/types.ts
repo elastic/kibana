@@ -225,37 +225,6 @@ export interface SignalSource {
   kibana?: SearchTypes;
 }
 
-export interface BulkItem {
-  create?: {
-    _index: string;
-    _type?: string;
-    _id: string;
-    _version: number;
-    result?: string;
-    _shards?: {
-      total: number;
-      successful: number;
-      failed: number;
-    };
-    _seq_no?: number;
-    _primary_term?: number;
-    status: number;
-    error?: {
-      type: string;
-      reason: string;
-      index_uuid?: string;
-      shard: string;
-      index: string;
-    };
-  };
-}
-
-export interface BulkResponse {
-  took: number;
-  errors: boolean;
-  items: BulkItem[];
-}
-
 export type EventHit = Exclude<TypeOfFieldMap<EcsFieldMap>, '@timestamp'> & {
   '@timestamp': string;
   [key: string]: SearchTypes;
@@ -325,8 +294,6 @@ export interface AlertAttributes<T extends RuleParams = RuleParams> {
   throttle: string;
   params: T;
 }
-
-export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;
 
 export type SignalsEnrichment = (signals: SignalSourceHit[]) => Promise<SignalSourceHit[]>;
 
