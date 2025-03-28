@@ -96,7 +96,9 @@ export const RuleForm: React.FunctionComponent<
     };
 
     initDataView();
+  }, [adHocDataViews, dataView, dataViews, ruleParams.name]);
 
+  useEffect(() => {
     if (!ruleParams.comparator) {
       preFillProperty('comparator');
     }
@@ -121,9 +123,6 @@ export const RuleForm: React.FunctionComponent<
       preFillProperty('type');
     }
   }, [
-    adHocDataViews,
-    dataView,
-    dataViews,
     preFillProperty,
     ruleParams.comparator,
     ruleParams.groupBy,
