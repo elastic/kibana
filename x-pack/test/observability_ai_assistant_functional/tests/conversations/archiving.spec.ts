@@ -62,6 +62,13 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       await createConversation(proxy);
     });
 
+    after(async () => {
+      await deleteConnectors(supertest);
+      await deleteConversations(getService);
+      await ui.auth.logout();
+      proxy.close();
+    });
+
     it('should display the context menu button', async () => {
       await testSubjects.existOrFail(ui.pages.conversations.contextMenu.button);
     });
