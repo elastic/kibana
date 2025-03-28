@@ -27360,6 +27360,14 @@
                 "properties": {
                   "force": {
                     "type": "boolean"
+                  },
+                  "space_ids": {
+                    "description": "When provided install assets in the specified spaces instead of the current space.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 1,
+                    "type": "array"
                   }
                 },
                 "type": "object"
