@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../../scenarios';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getEventLog, getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export

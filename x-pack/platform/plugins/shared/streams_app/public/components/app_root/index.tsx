@@ -19,6 +19,7 @@ import { streamsAppRouter } from '../../routes/config';
 import { StreamsAppStartDependencies } from '../../types';
 import { StreamsAppServices } from '../../services/types';
 import { HeaderMenuPortal } from '../header_menu';
+import { TimeFilterProvider } from '../../hooks/use_timefilter';
 
 export function AppRoot({
   coreStart,
@@ -47,12 +48,14 @@ export function AppRoot({
   return (
     <StreamsAppContextProvider context={context}>
       <RedirectAppLinks coreStart={coreStart}>
-        <RouterProvider history={history} router={streamsAppRouter}>
-          <BreadcrumbsContextProvider>
-            <RouteRenderer />
-          </BreadcrumbsContextProvider>
-          <StreamsAppHeaderActionMenu appMountParameters={appMountParameters} />
-        </RouterProvider>
+        <TimeFilterProvider timefilter={pluginsStart.data.query.timefilter.timefilter}>
+          <RouterProvider history={history} router={streamsAppRouter}>
+            <BreadcrumbsContextProvider>
+              <RouteRenderer />
+            </BreadcrumbsContextProvider>
+            <StreamsAppHeaderActionMenu appMountParameters={appMountParameters} />
+          </RouterProvider>
+        </TimeFilterProvider>
       </RedirectAppLinks>
     </StreamsAppContextProvider>
   );

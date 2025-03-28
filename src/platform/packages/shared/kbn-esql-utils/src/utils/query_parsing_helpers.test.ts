@@ -67,11 +67,11 @@ describe('esql query helpers', () => {
       const idxPattern14 = getIndexPatternFromESQLQuery('METRICS tsdb');
       expect(idxPattern14).toBe('tsdb');
 
-      const idxPattern15 = getIndexPatternFromESQLQuery('METRICS tsdb max(cpu) BY host');
+      const idxPattern15 = getIndexPatternFromESQLQuery('METRICS tsdb | STATS max(cpu) BY host');
       expect(idxPattern15).toBe('tsdb');
 
       const idxPattern16 = getIndexPatternFromESQLQuery(
-        'METRICS pods load=avg(cpu), writes=max(rate(indexing_requests)) BY pod | SORT pod'
+        'METRICS pods | STATS load=avg(cpu), writes=max(rate(indexing_requests)) BY pod | SORT pod'
       );
       expect(idxPattern16).toBe('pods');
 
@@ -149,7 +149,7 @@ describe('esql query helpers', () => {
     });
 
     it('should return true for metrics with aggregations', () => {
-      expect(hasTransformationalCommand('metrics a var = avg(b)')).toBeTruthy();
+      expect(hasTransformationalCommand('metrics a | stats var = avg(b)')).toBeTruthy();
     });
   });
 
@@ -182,6 +182,14 @@ describe('esql query helpers', () => {
           'from a | stats meow = avg(bytes) by bucket(event.timefield, 200, ?_tstart, ?_tend)'
         )
       ).toBe('event.timefield');
+    });
+
+    it('should return the time field if the column is casted', () => {
+      expect(
+        getTimeFieldFromESQLQuery(
+          'from a | WHERE date_nanos::date >= ?_tstart AND date_nanos::date <= ?_tend'
+        )
+      ).toBe('date_nanos');
     });
   });
 
