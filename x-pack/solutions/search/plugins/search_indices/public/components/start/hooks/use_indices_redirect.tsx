@@ -23,7 +23,6 @@ export const useIndicesRedirect = (
   const [lastStatus, setLastStatus] = useState<IndicesStatusResponse | undefined>(() => undefined);
   const [hasDoneRedirect, setHasDoneRedirect] = useState(() => false);
   const usageTracker = useUsageTracker();
-
   return useEffect(() => {
     if (hasDoneRedirect) {
       return;
