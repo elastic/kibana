@@ -74,14 +74,29 @@ export const _getMissingPrivilegesMessage = (riskEnginePrivileges: EntityAnalyti
     )
     .join('\n');
 
-  const clusterPrivilegesMessage = !clusterPrivileges.length
+  const clusterRunPrivilegesMessage = !clusterPrivileges.run.length
     ? ''
-    : i18n.translate('xpack.securitySolution.entityAnalytics.riskEngine.missingClusterPrivilege', {
-        defaultMessage: 'Missing cluster privileges: {privileges}.',
-        values: {
-          privileges: clusterPrivileges.join(', '),
-        },
-      });
+    : i18n.translate(
+        'xpack.securitySolution.entityAnalytics.riskEngine.missingClusterRunPrivilege',
+        {
+          defaultMessage: 'Missing cluster privileges to run risk score engine: {privileges}.',
+          values: {
+            privileges: clusterPrivileges.run.join(', '),
+          },
+        }
+      );
+
+  const clusterEnablePrivilegesMessage = !clusterPrivileges.enable.length
+    ? ''
+    : i18n.translate(
+        'xpack.securitySolution.entityAnalytics.riskEngine.missingClusterEnablePrivilege',
+        {
+          defaultMessage: 'Missing cluster privileges to enable risk score engine: {privileges}.',
+          values: {
+            privileges: clusterPrivileges.enable.join(', '),
+          },
+        }
+      );
 
   const unauthorizedMessage = i18n.translate(
     'xpack.securitySolution.entityAnalytics.riskEngine.unauthorized',
@@ -90,7 +105,7 @@ export const _getMissingPrivilegesMessage = (riskEnginePrivileges: EntityAnalyti
     }
   );
 
-  return `${unauthorizedMessage} ${indexPrivilegesMessage} ${clusterPrivilegesMessage}`;
+  return `${unauthorizedMessage} ${indexPrivilegesMessage} ${clusterRunPrivilegesMessage} ${clusterEnablePrivilegesMessage}`;
 };
 
 /**
