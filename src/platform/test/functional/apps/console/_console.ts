@@ -77,7 +77,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should return statusCode 400 to unsupported HTTP verbs', async () => {
-      const expectedResponseContains = '"statusCode": 400';
       await PageObjects.console.clearEditorText();
       await PageObjects.console.enterText('OPTIONS /');
       await PageObjects.console.clickPlay();
