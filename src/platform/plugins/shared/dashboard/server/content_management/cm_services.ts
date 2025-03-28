@@ -17,13 +17,13 @@ import type {
 
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { serviceDefinition as v1 } from './v1';
-import { serviceDefinition as v2 } from './v2';
+import { getServiceDefinition as v2 } from './v2';
 import { getServiceDefinition as v3 } from './v3';
 
 export const getCmServicesDefinition = (
   embeddable: EmbeddableStart
 ): { [version: Version]: ServicesDefinition } => ({
   1: v1,
-  2: v2,
+  2: v2(embeddable),
   3: v3(embeddable),
 });

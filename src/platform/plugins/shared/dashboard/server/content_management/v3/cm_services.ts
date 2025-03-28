@@ -519,7 +519,7 @@ export const getServiceDefinition = (embeddable: EmbeddableStart): ServicesDefin
       result: {
         schema: dashboardGetResultSchema,
         // TODO Ignoring references for now...
-        down: (data) => getResultV3ToV2(embeddable, [], data),
+        down: (data) => getResultV3ToV2(data, embeddable),
       },
     },
   },
