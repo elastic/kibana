@@ -41,7 +41,7 @@ export const useDashboardsFetch = (name?: string) => {
 
       return response;
     },
-    [name, streamsRepositoryClient]
+    [name, streamsRepositoryClient, telemetryClient]
   );
 
   return dashboardsFetch;

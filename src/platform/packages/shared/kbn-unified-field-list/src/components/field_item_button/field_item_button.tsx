@@ -260,3 +260,10 @@ function FieldConflictInfoIcon({
     </EuiToolTip>
   );
 }
+
+// The FieldItemButton has a generic type, which makes it a bit harder to type
+// it when imported lazily.
+// This type will be used to type cast the component when lazy loaded and helps
+// to avoid a bundle size increase. Note: the generic type is stripped with this
+// but it's a trade-off we need to keep for the moment.
+export type GenericFieldItemButtonType = typeof FieldItemButton;
