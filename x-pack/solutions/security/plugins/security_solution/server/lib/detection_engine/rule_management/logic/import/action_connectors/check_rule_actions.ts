@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { RuleToImport } from '../../../../../../../common/api/detection_engine';
-import { BulkError } from '../../../../routes/utils';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
+import type { RuleToImport } from '../../../../../../../common/api/detection_engine';
+import type { BulkError } from '../../../../routes/utils';
 import { handleActionConnectorsErrors } from './utils';
-import { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 
 const getActionsOrError = async ({
   actionsClient,
