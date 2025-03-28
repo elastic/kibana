@@ -1142,7 +1142,10 @@ class OutputService {
     const outputSO = await this.encryptedSoClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id),
-      updateData
+      updateData,
+      {
+        mergeAttributes: false,
+      }
     );
 
     if (outputSO.error) {
