@@ -27,7 +27,7 @@ import {
   scheduleBulkUpgrade,
   getBulkOperationTaskResults,
 } from '../../tasks/packages_bulk_operations';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 async function validateInstalledPackages(
   savedObjectsClient: SavedObjectsClientContract,
@@ -42,7 +42,7 @@ async function validateInstalledPackages(
   );
   if (nonInstalledPackages.length) {
     throw new FleetError(
-      `Cannot ${operation} non installed packages: ${nonInstalledPackages.join(', ')}`
+      `Cannot ${operation} non-installed packages: ${nonInstalledPackages.join(', ')}`
     );
   }
 }
