@@ -35,11 +35,24 @@ export const SearchQueryMode = ({ pageMode }: { pageMode: PlaygroundPageMode }) 
   }, [usageTracker]);
   const { executeQuery, data, error, isError, fetchStatus } = useElasticsearchQuery(pageMode);
   const {
+    field: { value: searchQuery },
+  } = useController<ChatForm, ChatFormFields.searchQuery>({
+    name: ChatFormFields.searchQuery,
+  });
+  const {
+    field: { value: question },
+  } = useController<ChatForm, ChatFormFields.question>({
+    name: ChatFormFields.question,
+  });
+  const {
     field: { value: userElasticsearchQueryValidations },
   } = useController<ChatForm, ChatFormFields.userElasticsearchQueryValidations>({
     name: ChatFormFields.userElasticsearchQueryValidations,
   });
-  const executeQueryDisabled = disableExecuteQuery(userElasticsearchQueryValidations);
+  const executeQueryDisabled = disableExecuteQuery(
+    userElasticsearchQueryValidations,
+    pageMode === PlaygroundPageMode.chat ? question : searchQuery
+  );
   const isLoading = fetchStatus !== 'idle';
 
   return (

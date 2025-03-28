@@ -44,11 +44,14 @@ export const validateUserElasticSearchQuery = (
   return { isValid: true, isUserCustomized: true };
 };
 
-export const disableExecuteQuery = (validations: UserQueryValidations | undefined): boolean => {
-  if (validations?.isUserCustomized) {
-    return validations?.isValid === false;
-  }
-  return false;
+export const disableExecuteQuery = (
+  validations: UserQueryValidations | undefined,
+  query: string
+): boolean => {
+  return (
+    query.trim().length === 0 ||
+    (validations?.isUserCustomized === true && validations?.isValid === false)
+  );
 };
 
 export const elasticsearchQueryString = (
