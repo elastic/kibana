@@ -111,7 +111,7 @@ export const generateAttackDiscovery = async ({
 
     return { anonymizedAlerts, attackDiscoveries, replacements: latestReplacements };
   } catch (err) {
-    handleGraphError({
+    await handleGraphError({
       apiConfig,
       attackDiscoveryId,
       authenticatedUser,

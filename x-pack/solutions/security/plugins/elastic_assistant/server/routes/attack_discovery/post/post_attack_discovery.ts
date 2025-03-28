@@ -119,7 +119,7 @@ export const postAttackDiscoveryRoute = (
             savedObjectsClient,
             telemetry,
             config: request.body,
-          });
+          }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
 
           return response.ok({
             body: currentAd,
