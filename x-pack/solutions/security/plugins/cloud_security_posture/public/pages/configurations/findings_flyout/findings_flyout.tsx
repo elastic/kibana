@@ -27,7 +27,6 @@ import {
   EuiCallOut,
   EuiLink,
   EuiPanel,
-  EuiLoadingLogo,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { assertNever } from '@kbn/std';
@@ -257,17 +256,19 @@ export const FindingsRuleFlyout = ({ ruleId, resourceId }: FindingMisconfigurati
   const { euiTheme } = useEuiTheme();
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
-  if (!finding)
-    return (
-      <EuiLoadingLogo logo="logoSecurity" size="xl" data-test-subj={'findingsFlyoutLoadingTest'} />
-    );
+  if (!finding) return null;
 
   const createMisconfigurationRuleFn = async (http: HttpSetup) =>
     createDetectionRuleFromBenchmarkRule(http, finding?.rule);
 
   return (
     <>
-      <div data-test-subj={FINDINGS_FLYOUT}>
+      <EuiFlexGroup
+        grow={1}
+        gutterSize={'none'}
+        direction={'column'}
+        data-test-subj={FINDINGS_FLYOUT}
+      >
         <EuiFlyoutHeader>
           <EuiPanel hasShadow={false}>
             <EuiSpacer />
@@ -333,7 +334,7 @@ export const FindingsRuleFlyout = ({ ruleId, resourceId }: FindingMisconfigurati
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlyoutFooter>
-      </div>
+      </EuiFlexGroup>
     </>
   );
 };

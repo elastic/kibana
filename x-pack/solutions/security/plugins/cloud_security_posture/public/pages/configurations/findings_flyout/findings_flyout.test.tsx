@@ -25,14 +25,6 @@ jest.mock('@kbn/cloud-security-posture/src/hooks/use_get_misconfiguration_findin
 
 describe('<FindingsFlyout/>', () => {
   describe('Overview Tab', () => {
-    it('should render loading state when finding data is not available', async () => {
-      (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({ data: undefined });
-
-      const { getByTestId } = render(<TestComponent />);
-
-      getByTestId('findingsFlyoutLoadingTest');
-    });
-
     it('should render the flyout with available data', async () => {
       (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({
         data: { result: { hits: [{ _source: mockFindingsHit }] } },
