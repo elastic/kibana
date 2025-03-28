@@ -20,15 +20,17 @@ export const RISK_ENGINE_CLEANUP_URL = `${PUBLIC_RISK_ENGINE_URL}/dangerously_de
 export const RISK_ENGINE_CONFIGURE_SO_URL =
   `${PUBLIC_RISK_ENGINE_URL}/saved_object/configure` as const;
 
-type ClusterPrivilege = 'manage_index_templates' | 'manage_transform';
+type ClusterPrivilege = 'manage_index_templates' | 'manage_transform' | 'manage_ingest_pipelines';  
 export const TO_RUN_RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
   'manage_transform',
 ] as ClusterPrivilege[];
 
 export const TO_ENABLE_RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
+ = [
   'manage_index_templates',
   'manage_transform',
-] as ClusterPrivilege[];
+  'manage_ingest_pipelines',
+] satisfies ClusterPrivilege[];
 
 export const RISK_SCORE_INDEX_PATTERN = 'risk-score.risk-score-*';
 

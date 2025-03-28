@@ -169,6 +169,7 @@ export interface DocLinks {
     readonly textEmbedding: string;
     readonly troubleshootSetup: string;
     readonly usersAccess: string;
+    readonly upgrade9x: string;
   };
   readonly heartbeat: {
     readonly base: string;
@@ -261,6 +262,7 @@ export interface DocLinks {
   readonly upgradeAssistant: {
     readonly overview: string;
     readonly batchReindex: string;
+    readonly indexBlocks: string;
     readonly remoteReindex: string;
     readonly unfreezeApi: string;
     readonly reindexWithPipeline: string;

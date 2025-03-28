@@ -243,7 +243,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           parsedContextResponseData.suggestions.forEach((suggestion: RecalledSuggestion) => {
             expect(suggestion).to.have.property('id');
             expect(suggestion).to.have.property('text');
-            expect(suggestion).to.have.property('score');
+            expect(suggestion).to.have.property('esScore');
           });
 
           const suggestionTexts = parsedContextResponseData.suggestions

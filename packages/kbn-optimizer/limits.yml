@@ -146,6 +146,7 @@ pageLoadAssetSize:
   searchNotebooks: 18942
   searchPlayground: 19325
   searchprofiler: 67080
+  searchQueryRules: 19708
   searchSynonyms: 20262
   security: 81771
   securitySolution: 98429
@@ -176,7 +177,7 @@ pageLoadAssetSize:
   uiActionsEnhanced: 38494
   unifiedDocViewer: 25099
   unifiedHistogram: 19928
-  unifiedSearch: 71059
+  unifiedSearch: 23000
   upgradeAssistant: 81241
   uptime: 60000
   urlDrilldown: 30063
