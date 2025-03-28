@@ -42,17 +42,22 @@ export const navLinksUpdater$ = new BehaviorSubject<NavigationLink[]>([]);
 export const navLinks$ = navLinksUpdater$.asObservable();
 
 let currentSubscription: Subscription;
-export const updateNavLinks = (isSolutionNavEnabled: boolean, _core: CoreStart) => {
+export const updateNavLinks = (isSolutionNavEnabled: boolean, core: CoreStart) => {
   if (currentSubscription) {
     currentSubscription.unsubscribe();
   }
   if (isSolutionNavEnabled) {
-    return;
+    // import solution nav links only when solution nav is enabled
+    lazySolutionNavLinks().then((createSolutionNavLinks$) => {
+      currentSubscription = createSolutionNavLinks$(internalNavLinks$, core).subscribe((links) => {
+        navLinksUpdater$.next(links);
+      });
+    });
+  } else {
+    currentSubscription = internalNavLinks$.subscribe((links) => {
+      navLinksUpdater$.next(links);
+    });
   }
-
-  currentSubscription = internalNavLinks$.subscribe((links) => {
-    navLinksUpdater$.next(links);
-  });
 };
 
 // includes internal security links only
@@ -68,3 +73,9 @@ export const useNavLinks = (): NavigationLink[] => {
 export const useRootNavLink = (linkId: SecurityPageName): NavigationLink | undefined => {
   return useNavLinks().find(({ id }) => id === linkId);
 };
+
+const lazySolutionNavLinks = async () =>
+  import(
+    /* webpackChunkName: "solution_nav_links" */
+    '../../app/solution_navigation/links/nav_links'
+  ).then(({ createSolutionNavLinks$ }) => createSolutionNavLinks$);
