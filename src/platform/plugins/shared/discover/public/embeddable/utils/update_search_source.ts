@@ -15,17 +15,21 @@ import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DiscoverServices } from '../../build_services';
 import { getSortForSearchSource } from '../../utils/sorting';
 
+export const getEmbeddableActiveTimeRange = (
+  timeslice: FetchContext['timeslice'],
+  timeRange: FetchContext['timeRange']
+) => {
+  return timeslice !== undefined
+    ? {
+        from: new Date(timeslice[0]).toISOString(),
+        to: new Date(timeslice[1]).toISOString(),
+        mode: 'absolute' as 'absolute',
+      }
+    : timeRange;
+};
+
 export const getTimeRangeFromFetchContext = (fetchContext: FetchContext) => {
-  const timeRange =
-    fetchContext.timeslice !== undefined
-      ? {
-          from: new Date(fetchContext.timeslice[0]).toISOString(),
-          to: new Date(fetchContext.timeslice[1]).toISOString(),
-          mode: 'absolute' as 'absolute',
-        }
-      : fetchContext.timeRange;
-  if (!timeRange) return undefined;
-  return timeRange;
+  return getEmbeddableActiveTimeRange(fetchContext.timeslice, fetchContext.timeRange);
 };
 
 const getTimeRangeFilter = (

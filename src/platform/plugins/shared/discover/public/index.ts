@@ -38,6 +38,7 @@ export {
   type SearchEmbeddableRuntimeState,
   type SearchEmbeddableApi,
   type NonPersistedDisplayOptions,
+  getDiscoverLocatorParamsForEsqlCSV,
 } from './embeddable';
 export type { DiscoverServices } from './build_services';
 
