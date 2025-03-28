@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['header', 'svlCommonPage', 'svlCommonNavigation']);
-  const retry = getService('retry');
   const allLabels = {
     viewer: [
       { label: 'Machine Learning', expected: true },
