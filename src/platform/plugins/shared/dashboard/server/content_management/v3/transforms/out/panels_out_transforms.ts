@@ -83,6 +83,7 @@ function injectPanelSavedObjectId(panel: DashboardPanel, references: SavedObject
 
   return {
     ...injectedPanel,
+    type: matchingReference.type,
     panelConfig: {
       ...panel.panelConfig,
       savedObjectId: matchingReference.id,
