@@ -19,7 +19,7 @@ export const NO_INDEX_PATTERNS: DataView[] = [];
 
 interface Props {
   maxAlerts: number;
-  setMaxAlerts: React.Dispatch<React.SetStateAction<string>>;
+  setMaxAlerts: (value: string) => void;
 }
 
 const AlertSelectionRangeComponent: React.FC<Props> = ({ maxAlerts, setMaxAlerts }) => {
