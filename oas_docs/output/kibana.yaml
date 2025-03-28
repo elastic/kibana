@@ -49112,9 +49112,12 @@ paths:
         - description: Indicates if the API returns only outdated SLO or all SLO definitions
           example: true
           in: query
-          name: includeOutdatedOnly
+          name: version
           schema:
-            type: boolean
+            enum:
+              - current
+              - outdated
+            type: string
         - description: Specify which SLO tags to query by (comma-separated list)
           in: query
           name: tags
