@@ -786,7 +786,7 @@ Packaging tests use Vagrant virtual machines as hosts and Ansible for provisioni
 # Build distributions
 node scripts/build --all-platforms --debug
 
-cd test/package
+cd src/platform/test/package
 
 # Setup virtual machine and networking
 vagrant up <hostname> --no-provision

@@ -48,55 +48,60 @@ const responseSchema = () => {
 };
 
 export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void => {
-  router.versioned.post({ path, access: 'internal' }).addVersion(
-    {
-      version: '1',
+  router.versioned
+    .post({
+      path,
+      access: 'internal',
       security: {
         authz: {
           enabled: false,
           reason: 'Authorization provided by Elasticsearch',
         },
       },
-      validate: {
-        request: {
-          body: bodySchema,
-        },
-        response: {
-          200: {
-            body: responseSchema,
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: bodySchema,
+          },
+          response: {
+            200: {
+              body: responseSchema,
+            },
           },
         },
       },
-    },
-    async (ctx, req, res) => {
-      const { client } = (await ctx.core).elasticsearch;
+      async (ctx, req, res) => {
+        const { client } = (await ctx.core).elasticsearch;
 
-      const body = {
-        script: req.body.script,
-        context: req.body.context,
-        context_setup: {
-          document: req.body.document,
-          index: req.body.index,
-        },
-      };
-
-      try {
-        // client types need to be updated to support this request format
-        // when it does, supply response types
-        const { result } = await client.asCurrentUser.scriptsPainlessExecute(body);
-
-        return res.ok({ body: { values: result } });
-      } catch (error) {
-        // Assume invalid painless script was submitted
-        // Return 200 with error object
-        const handleCustomError = () => {
-          return res.ok({
-            body: { values: [], error: error.body?.error, status: error.statusCode },
-          });
+        const body = {
+          script: req.body.script,
+          context: req.body.context,
+          context_setup: {
+            document: req.body.document,
+            index: req.body.index,
+          },
         };
 
-        return handleEsError({ error, response: res, handleCustomError });
+        try {
+          // client types need to be updated to support this request format
+          // when it does, supply response types
+          const { result } = await client.asCurrentUser.scriptsPainlessExecute(body);
+
+          return res.ok({ body: { values: result } });
+        } catch (error) {
+          // Assume invalid painless script was submitted
+          // Return 200 with error object
+          const handleCustomError = () => {
+            return res.ok({
+              body: { values: [], error: error.body?.error, status: error.statusCode },
+            });
+          };
+
+          return handleEsError({ error, response: res, handleCustomError });
+        }
       }
-    }
-  );
+    );
 };
