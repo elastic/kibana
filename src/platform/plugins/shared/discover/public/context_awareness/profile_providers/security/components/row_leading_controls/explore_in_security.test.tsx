@@ -18,10 +18,12 @@ import type { ProfileProviderServices } from '../../../profile_provider_services
 const TEST_TIMELINE_URL = 'test-timeline-url';
 
 const mockGetUrlForApp = jest.fn().mockReturnValue(TEST_TIMELINE_URL);
+const mockNavigateToUrl = jest.fn();
 
 const mockDiscoverServices = {
   application: {
     getUrlForApp: mockGetUrlForApp,
+    navigateToUrl: mockNavigateToUrl,
   },
 } as unknown as ProfileProviderServices;
 
@@ -40,19 +42,9 @@ const mockRowProps = {
   },
 } as unknown as RowControlRowProps;
 
-const mockWindowOpen = jest.fn();
-
-jest.spyOn(window, 'open').mockImplementation(mockWindowOpen);
-
-const MockControl: RowControlComponent = ({ iconType, onClick, label }) => {
-  const onButtonClick = () => {
-    onClick?.({} as RowControlRowProps);
-  };
-  return (
-    <EuiButton iconType={iconType} onClick={onButtonClick}>
-      {label}
-    </EuiButton>
-  );
+const MockControl: RowControlComponent = ({ label, ...props }) => {
+  // @ts-expect-error
+  return <EuiButton {...props}>{label}</EuiButton>;
 };
 
 describe('Explore In Security Control', () => {
@@ -68,9 +60,9 @@ describe('Explore In Security Control', () => {
       />
     );
 
-    expect(screen.getByText('Explore alert in Security')).toBeVisible();
-    fireEvent.click(screen.getByText('Explore alert in Security'));
-    expect(mockWindowOpen).toHaveBeenCalledWith('test-url', '_blank');
+    expect(screen.getByText('Explore Alert in Security')).toBeVisible();
+    fireEvent.click(screen.getByTestId('explore-in-security'));
+    expect(mockNavigateToUrl).toHaveBeenCalled();
   });
 
   test('should return the event control correctly', () => {
@@ -94,8 +86,8 @@ describe('Explore In Security Control', () => {
       />
     );
 
-    expect(screen.getByText('Explore event in Security')).toBeVisible();
-    fireEvent.click(screen.getByText('Explore event in Security'));
-    expect(mockWindowOpen).toHaveBeenCalledWith(expectedEventURL, '_blank');
+    expect(screen.getByText('Explore Event in Security')).toBeVisible();
+    screen.debug(undefined, 1000000);
+    expect(screen.getByTestId('explore-in-security')).toHaveAttribute('href', expectedEventURL);
   });
 });

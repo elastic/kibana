@@ -24,8 +24,9 @@ export interface RowControlProps {
   disabled?: boolean;
   iconType: IconType;
   label: string;
-  onClick: ((props: RowControlRowProps) => void) | undefined;
+  onClick?: (props: RowControlRowProps) => void;
   tooltipContent?: React.ReactNode;
+  href?: string;
 }
 
 export type RowControlComponent = FC<RowControlProps>;

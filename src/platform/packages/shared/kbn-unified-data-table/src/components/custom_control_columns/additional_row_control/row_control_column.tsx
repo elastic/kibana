@@ -16,6 +16,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { RowControlColumn, RowControlProps } from '@kbn/discover-utils';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import { DEFAULT_CONTROL_COLUMN_WIDTH } from '../../../constants';
 import { useControlColumn } from '../../../hooks/use_control_column';
 
@@ -35,27 +36,38 @@ export const RowControlCell = ({
         disabled,
         iconType,
         label,
-        onClick,
+        onClick: onClickProps,
         tooltipContent,
+        href: hrefProps,
         ...extraProps
       }) => {
         const classNameProp = Boolean(tooltipContent)
           ? {}
           : { className: 'unifiedDataTable__rowControl' };
 
+        const { href, onClick } = getRouterLinkProps({
+          /**
+           * if the control is disabled, we ignore the href prop and button should be disabled.
+           * Additionaly, display as a button instead of an anchor
+           */
+          href: disabled ? undefined : hrefProps,
+          onClick: (_ev: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement, MouseEvent>) => {
+            if (record && onClickProps) {
+              onClickProps?.({ record, rowIndex });
+            }
+          },
+        });
+
         const control = (
           <EuiButtonIcon
             aria-label={label}
             color={color ?? 'text'}
             data-test-subj={dataTestSubj ?? `unifiedDataTable_rowControl_${props.columnId}`}
-            disabled={disabled}
             iconSize="s"
             iconType={iconType}
-            onClick={() => {
-              if (record && onClick) {
-                onClick({ record, rowIndex });
-              }
-            }}
+            onClick={onClick}
+            /** if href prop is present, disabled prop is invalid and not expected since it is a link */
+            {...(href ? { href } : { disabled })}
             {...classNameProp}
             {...extraProps}
           />

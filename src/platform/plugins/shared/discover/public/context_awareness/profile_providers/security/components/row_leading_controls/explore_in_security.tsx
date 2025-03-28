@@ -23,7 +23,7 @@ export interface ExploreInSecurityProps {
 export function ExploreInSecurity({ Control, rowProps, services }: ExploreInSecurityProps) {
   const hit = rowProps.record;
   const {
-    application: { getUrlForApp },
+    application: { getUrlForApp, navigateToUrl },
   } = services;
 
   const timelinesURL = getUrlForApp('securitySolutionUI', {
@@ -49,16 +49,18 @@ export function ExploreInSecurity({ Control, rowProps, services }: ExploreInSecu
   const url = useMemo(() => (isAlert ? alertURL : eventURL), [isAlert, alertURL, eventURL]);
 
   const onControlClick = useCallback(() => {
-    window.open(url, '_blank');
-  }, [url]);
+    navigateToUrl(url);
+  }, [url, navigateToUrl]);
 
   const label = useMemo(() => exploreRowActionLabel(isAlert), [isAlert]);
   return (
     <Control
+      data-test-subj="explore-in-security"
       iconType="logoSecurity"
       label={label}
-      onClick={onControlClick}
       tooltipContent={label}
+      href={url}
+      onClick={onControlClick}
     />
   );
 }
