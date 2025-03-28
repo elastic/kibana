@@ -13,7 +13,16 @@ export class ElasticsearchClientXPack implements Plugin {
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
     router.get(
-      { path: '/api/elasticsearch_client_xpack/context/user', validate: false },
+      {
+        path: '/api/elasticsearch_client_xpack/context/user',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
       async (context, req, res) => {
         const coreContext = await context.core;
         const body = await coreContext.elasticsearch.client.asCurrentUser.security.getUser();
@@ -22,7 +31,16 @@ export class ElasticsearchClientXPack implements Plugin {
     );
 
     router.get(
-      { path: '/api/elasticsearch_client_xpack/contract/user', validate: false },
+      {
+        path: '/api/elasticsearch_client_xpack/contract/user',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
       async (context, req, res) => {
         const [coreStart] = await core.getStartServices();
         const body = await coreStart.elasticsearch.client
