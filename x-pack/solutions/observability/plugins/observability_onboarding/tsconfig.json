@@ -34,7 +34,6 @@
     "@kbn/deeplinks-observability",
     "@kbn/fleet-plugin",
     "@kbn/shared-ux-link-redirect-app",
-    "@kbn/home-sample-data-tab",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
     "@kbn/discover-plugin",
@@ -46,7 +45,8 @@
     "@kbn/core-plugins-server",
     "@kbn/logs-shared-plugin",
     "@kbn/tooling-log",
-    "@kbn/ebt-tools"
+    "@kbn/ebt-tools",
+    "@kbn/apm-plugin"
   ],
   "exclude": [
     "target/**/*"

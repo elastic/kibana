@@ -17,6 +17,7 @@
     ],
     "optionalPlugins": [
       "console",
+      "usageCollection",
       "searchNavigation",
     ],
     "requiredBundles": [
