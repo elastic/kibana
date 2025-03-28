@@ -603,8 +603,6 @@
     "@kbn/interactive-setup-test-endpoints-plugin": "link:src/platform/test/interactive_setup_api_integration/plugins/test_endpoints",
     "@kbn/interpreter": "link:src/platform/packages/shared/kbn-interpreter",
     "@kbn/inventory-plugin": "link:x-pack/solutions/observability/plugins/inventory",
-    "@kbn/investigate-app-plugin": "link:x-pack/solutions/observability/plugins/investigate_app",
-    "@kbn/investigate-plugin": "link:x-pack/solutions/observability/plugins/investigate",
     "@kbn/investigation-shared": "link:x-pack/solutions/observability/packages/kbn-investigation-shared",
     "@kbn/io-ts-utils": "link:src/platform/packages/shared/kbn-io-ts-utils",
     "@kbn/ipynb": "link:x-pack/solutions/search/packages/kbn-ipynb",
