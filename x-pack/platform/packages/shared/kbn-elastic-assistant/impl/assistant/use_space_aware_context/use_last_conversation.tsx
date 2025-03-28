@@ -17,7 +17,6 @@ export interface LastConversation {
   title?: string;
 }
 
-const localStorageLastConversationIdSubject$ = new BehaviorSubject<string | null>(null);
 export const useAssistantLastConversation = ({
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   spaceId,
@@ -31,25 +30,23 @@ export const useAssistantLastConversation = ({
   // Legacy fallback: used only if the new storage value is not yet set
   const [localStorageLastConversationId, setLocalStorageLastConversationId] =
     useLocalStorage<string>(`${nameSpace}.${LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY}.${spaceId}`);
+  const localStorageLastConversationIdSubject$ = useMemo(
+    () => new BehaviorSubject<string | null>(null),
+    []
+  );
 
   // Sync BehaviorSubject when localStorage changes
   useEffect(() => {
     if (localStorageLastConversationIdSubject$.getValue() !== localStorageLastConversationId) {
       localStorageLastConversationIdSubject$.next(localStorageLastConversationId || null);
     }
-  }, [localStorageLastConversationId]);
+  }, [localStorageLastConversationId, localStorageLastConversationIdSubject$]);
 
   const getLastConversationId = useCallback(
     // if a conversationId has been provided, use that
     // if not, check local storage
     // last resort, go to welcome conversation
     (conversationId?: string) => {
-      console.log(
-        'conversationId',
-        conversationId,
-        localStorageLastConversationIdSubject$.getValue()
-      );
-
       return (
         conversationId ??
         localStorageLastConversationIdSubject$.getValue() ??
