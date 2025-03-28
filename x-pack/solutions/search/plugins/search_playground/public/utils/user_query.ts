@@ -10,20 +10,23 @@ import { i18n } from '@kbn/i18n';
 import type { ChatForm, ChatFormFields, UserQueryValidations } from '../types';
 
 export const validateUserElasticSearchQuery = (
-  userQuery: string | undefined,
-  elasticsearchQuery: { retriever: any }
+  userQuery: ChatForm[ChatFormFields.userElasticsearchQuery],
+  elasticsearchQuery: ChatForm[ChatFormFields.elasticsearchQuery]
 ): UserQueryValidations => {
-  if (!userQuery) {
+  if (userQuery === null) {
     return { isValid: false, isUserCustomized: false };
   }
   let userQueryErrors: string[] | undefined;
   if (!userQuery.includes('{query}')) {
     userQueryErrors = [
       i18n.translate('xpack.searchPlayground.userQuery.errors.queryPlaceholder', {
-        defaultMessage: 'User query must contain "{query}" placeholder',
+        defaultMessage: 'User query must contain "{query}"',
         values: { query: '{query}' },
       }),
     ];
+  }
+  if (userQuery.trim().length === 0) {
+    return { isValid: false, isUserCustomized: true, userQueryErrors };
   }
   let userQueryObject: {} = {};
   try {

@@ -48,7 +48,7 @@ export const useSourceIndicesFields = () => {
   const setIndices = useCallback(
     (indices: IndexName[]) => {
       onIndicesChange(indices);
-      onUserQueryChange(undefined);
+      onUserQueryChange(null);
       usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, indices.length);
     },
     [onIndicesChange, onUserQueryChange, usageTracker]

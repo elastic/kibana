@@ -97,7 +97,7 @@ export interface ChatForm {
   [ChatFormFields.docSize]: number;
   [ChatFormFields.queryFields]: { [index: string]: string[] };
   [ChatFormFields.searchQuery]: string;
-  [ChatFormFields.userElasticsearchQuery]: string | undefined;
+  [ChatFormFields.userElasticsearchQuery]: string | null;
   [ChatFormFields.userElasticsearchQueryValidations]: UserQueryValidations | undefined;
 }
 

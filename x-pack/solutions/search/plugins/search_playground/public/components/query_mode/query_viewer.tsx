@@ -58,8 +58,8 @@ export const ElasticsearchQueryViewer = ({
     [elasticsearchQuery]
   );
   const resetElasticsearchQuery = useCallback(() => {
-    onChangeUserQuery(generatedEsQuery);
-  }, [onChangeUserQuery, generatedEsQuery]);
+    onChangeUserQuery(null);
+  }, [onChangeUserQuery]);
   const editorMounted = useCallback((editor: monacoEditor.editor.IStandaloneCodeEditor) => {
     monacoEditor.languages.json.jsonDefaults.setDiagnosticsOptions({
       validate: true,

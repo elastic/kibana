@@ -53,7 +53,7 @@ const DEFAULT_FORM_STATE: Partial<ChatForm> = {
   search_query: '',
   indices: [],
   summarization_model: undefined,
-  user_elasticsearch_query: undefined,
+  user_elasticsearch_query: null,
   user_elasticsearch_query_validations: {
     isUserCustomized: false,
     isValid: false,
@@ -155,6 +155,7 @@ describe('FormProvider', () => {
           source_fields: {},
           indices: [],
           summarization_model: undefined,
+          user_elasticsearch_query: null,
         })
       );
     });

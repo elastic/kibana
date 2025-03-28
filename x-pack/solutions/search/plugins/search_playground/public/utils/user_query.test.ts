@@ -21,8 +21,8 @@ describe('User Query utilities', () => {
         },
       },
     };
-    it('should return false if userQuery is undefined', () => {
-      expect(validateUserElasticSearchQuery(undefined, sampleGeneratedElasticsearchQuery)).toEqual({
+    it('should return false if userQuery is null', () => {
+      expect(validateUserElasticSearchQuery(null, sampleGeneratedElasticsearchQuery)).toEqual({
         isValid: false,
         isUserCustomized: false,
       });
@@ -43,6 +43,18 @@ describe('User Query utilities', () => {
       expect(validateUserElasticSearchQuery(userQuery, sampleGeneratedElasticsearchQuery)).toEqual({
         isValid: false,
         isUserCustomized: true,
+      });
+    });
+    it('should return valid false if userQuery is empty', () => {
+      expect(validateUserElasticSearchQuery('', sampleGeneratedElasticsearchQuery)).toEqual({
+        isValid: false,
+        isUserCustomized: true,
+        userQueryErrors: [expect.any(String)],
+      });
+      expect(validateUserElasticSearchQuery('   ', sampleGeneratedElasticsearchQuery)).toEqual({
+        isValid: false,
+        isUserCustomized: true,
+        userQueryErrors: [expect.any(String)],
       });
     });
     it('should return customized false if queries are equal', () => {
@@ -90,7 +102,7 @@ describe('User Query utilities', () => {
       expect(validateUserElasticSearchQuery(userQuery, sampleGeneratedElasticsearchQuery)).toEqual({
         isValid: false,
         isUserCustomized: true,
-        userQueryErrors: ['User query must contain "{query}" placeholder'],
+        userQueryErrors: ['User query must contain "{query}"'],
       });
     });
     it('should include {query} placeholder error even when query is not valid JSON', () => {
@@ -98,7 +110,7 @@ describe('User Query utilities', () => {
       expect(validateUserElasticSearchQuery(userQuery, sampleGeneratedElasticsearchQuery)).toEqual({
         isValid: false,
         isUserCustomized: true,
-        userQueryErrors: ['User query must contain "{query}" placeholder'],
+        userQueryErrors: [expect.any(String)],
       });
     });
   });

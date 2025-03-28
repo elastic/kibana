@@ -19,7 +19,6 @@ import { SearchQuery } from './search_query';
 import { QueryFieldsPanel } from './query_fields_panel';
 import { ChatPrompt } from './chat_prompt';
 import { EditContextPanel } from '../edit_context/edit_context_panel';
-import { formatElasticsearchQueryString } from '../../utils/user_query';
 
 export interface QuerySidePanelProps {
   executeQuery: () => void;
@@ -78,8 +77,8 @@ export const QuerySidePanel = ({
       queryFieldsOnChange(updatedQueryFields);
       const updatedQuery = createQuery(updatedQueryFields, sourceFields, fields);
       elasticsearchQueryChange(updatedQuery);
-      // ensure the userQuery matches the updated query.
-      userElasticsearchQueryChange(formatElasticsearchQueryString(updatedQuery));
+      // ensure the userQuery is cleared so it doesn't diverge from the generated query.
+      userElasticsearchQueryChange(null);
       usageTracker?.count(AnalyticsEvents.queryFieldsUpdated, currentIndexFields.length);
     },
     [

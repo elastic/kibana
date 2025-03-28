@@ -24,7 +24,7 @@ const DEFAULT_FORM_VALUES: PartialChatForm = {
   source_fields: {},
   indices: [],
   summarization_model: undefined,
-  [ChatFormFields.userElasticsearchQuery]: undefined,
+  [ChatFormFields.userElasticsearchQuery]: null,
   [ChatFormFields.userElasticsearchQueryValidations]: undefined,
 };
 
