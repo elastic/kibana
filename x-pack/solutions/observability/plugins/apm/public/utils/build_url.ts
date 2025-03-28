@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import url from 'url';
 import type { Transaction } from '../../typings/es_schemas/ui/transaction';
 import type { Span } from '../../typings/es_schemas/ui/span';
 import type { APMError } from '../../typings/es_schemas/ui/apm_error';
@@ -18,12 +17,16 @@ export const buildUrl = (item: Transaction | Span | APMError) => {
 
   const hasURLFromFields = urlScheme && serverAddress;
 
-  return hasURLFromFields
-    ? url.format({
-        protocol: urlScheme, // 'https',
-        hostname: serverAddress, // 'example.com',
-        ...(serverPort && { port: serverPort }), // 443,
-        pathname: urlPath ?? '', // '/some/path',
-      })
-    : undefined;
+  const urlServerPort = serverPort ? `:${serverPort}` : '';
+
+  try {
+    const url = hasURLFromFields
+      ? new URL(urlPath ?? '', `${urlScheme}://${serverAddress}${urlServerPort}`).toString()
+      : undefined;
+
+    return url;
+  } catch (e) {
+    console.error('Failed to build URL', e);
+    return undefined;
+  }
 };

@@ -12,7 +12,7 @@ describe('buildUrl', () => {
   it('should return a full URL when all fields are provided', () => {
     const item = {
       url: {
-        scheme: 'https',
+        scheme: 'ftp',
         path: '/some/path',
       },
       server: {
@@ -21,7 +21,7 @@ describe('buildUrl', () => {
       },
     };
     const result = buildUrl(item as unknown as Transaction);
-    expect(result).toBe('https://example.com:443/some/path');
+    expect(result).toBe('ftp://example.com:443/some/path');
   });
 
   it('should return a URL without a port if the port is not provided', () => {
@@ -49,7 +49,7 @@ describe('buildUrl', () => {
       },
     };
     const result = buildUrl(item as unknown as Transaction);
-    expect(result).toBe('https://example.net:8443');
+    expect(result).toBe('https://example.net:8443/');
   });
 
   it('should return undefined if the scheme is missing', () => {
@@ -78,6 +78,33 @@ describe('buildUrl', () => {
     };
     const result = buildUrl(item as unknown as Transaction);
     expect(result).toBeUndefined();
+  });
+
+  it('should return undefined and log an error if the port is invalid', () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const item = {
+      url: {
+        scheme: 'https',
+        path: '/invalid/port',
+      },
+      server: {
+        address: 'example.com',
+        port: 'invalid-port',
+      },
+    };
+
+    const result = buildUrl(item as unknown as Transaction);
+
+    expect(result).toBeUndefined();
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Failed to build URL',
+      expect.objectContaining({
+        message: 'Invalid base URL: https://example.com:invalid-port',
+      })
+    );
+
+    consoleErrorSpy.mockRestore();
   });
 
   it('should handle an empty object gracefully', () => {
