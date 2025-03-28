@@ -600,6 +600,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
     );
   // Get agent status for policy
   router.versioned
+    // @ts-ignore  https://github.com/elastic/kibana/issues/203170
     .get({
       path: AGENT_API_ROUTES.STATUS_PATTERN,
       // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170

@@ -442,8 +442,8 @@ describe('autocomplete.suggest', () => {
           });
 
           expect(suggestions).toContainEqual({
-            label: '?function',
-            text: '?function',
+            label: '??function',
+            text: '??function',
             kind: 'Constant',
             detail: 'Named parameter',
             command: undefined,
@@ -486,8 +486,8 @@ describe('autocomplete.suggest', () => {
           });
 
           expect(suggestions).toContainEqual({
-            label: '?field',
-            text: '?field',
+            label: '??field',
+            text: '??field',
             kind: 'Constant',
             detail: 'Named parameter',
             command: undefined,
