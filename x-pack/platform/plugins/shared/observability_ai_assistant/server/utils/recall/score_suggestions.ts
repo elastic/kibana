@@ -49,7 +49,7 @@ export async function scoreSuggestions({
   logger: Logger;
 }): Promise<{
   relevantDocuments: RecalledSuggestion[];
-  scores: Array<{ id: string; score: number }>;
+  llmScores: Array<{ id: string; llmScore: number }>;
 }> {
   const shortIdTable = new ShortIdTable();
 
@@ -72,7 +72,7 @@ export async function scoreSuggestions({
     Documents:
     ${JSON.stringify(
       suggestions.map((suggestion) => ({
-        ...omit(suggestion, 'score'), // Omit score to not bias the LLM
+        ...omit(suggestion, 'esScore'), // Omit ES score to not bias the LLM
         id: shortIdTable.take(suggestion.id), // Shorten id to save tokens
       })),
       null,
@@ -126,21 +126,21 @@ export async function scoreSuggestions({
     scoreFunctionRequest.message.function_call.arguments
   );
 
-  const scores = parseSuggestionScores(scoresAsString)
+  const llmScores = parseSuggestionScores(scoresAsString)
     // Restore original IDs (added fallback to id for testing purposes)
-    .map(({ id, score }) => ({ id: shortIdTable.lookup(id) || id, score }));
+    .map(({ id, llmScore }) => ({ id: shortIdTable.lookup(id) || id, llmScore }));
 
-  if (scores.length === 0) {
+  if (llmScores.length === 0) {
     // seemingly invalid or no scores, return all
-    return { relevantDocuments: suggestions, scores: [] };
+    return { relevantDocuments: suggestions, llmScores: [] };
   }
 
   const suggestionIds = suggestions.map((document) => document.id);
 
   // get top 5 documents ids with scores > 4
-  const relevantDocumentIds = scores
-    .filter(({ score }) => score > 4)
-    .sort((a, b) => b.score - a.score)
+  const relevantDocumentIds = llmScores
+    .filter(({ llmScore }) => llmScore > 4)
+    .sort((a, b) => b.llmScore - a.llmScore)
     .slice(0, 5)
     .filter(({ id }) => suggestionIds.includes(id ?? '')) // Remove hallucinated documents
     .map(({ id }) => id);
@@ -153,6 +153,6 @@ export async function scoreSuggestions({
 
   return {
     relevantDocuments,
-    scores: scores.map((score) => ({ id: score.id, score: score.score })),
+    llmScores: llmScores.map((score) => ({ id: score.id, llmScore: score.llmScore })),
   };
 }
