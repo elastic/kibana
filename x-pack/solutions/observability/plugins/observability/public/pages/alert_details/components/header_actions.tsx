@@ -26,8 +26,6 @@ import {
   ALERT_RULE_UUID,
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
-  ALERT_START,
-  ALERT_END,
 } from '@kbn/rule-data-utils';
 
 import { useKibana } from '../../../utils/kibana_react';
@@ -60,8 +58,6 @@ export function HeaderActions({
       getRuleSnoozeModal: RuleSnoozeModal,
     },
     http,
-    application: { navigateToApp },
-    investigate: investigatePlugin,
   } = services;
 
   const { rule, refetch } = useFetchRule({
@@ -118,9 +114,6 @@ export function HeaderActions({
     setIsPopoverOpen(false);
     setSnoozeModalOpen(true);
   };
-
-  const alertStart = alert?.fields[ALERT_START];
-  const alertEnd = alert?.fields[ALERT_END];
 
   return (
     <>
