@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import './copy_status_summary_indicator.scss';
-
-import { EuiBadge, EuiIconTip, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBadge, EuiIconTip, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,7 +25,8 @@ interface Props {
   onDestinationMapChange: (value?: Map<string, string>) => void;
 }
 
-const renderIcon = (props: Props) => {
+const CopyStatusIcon = (props: Props) => {
+  const { euiTheme } = useEuiTheme();
   const {
     space,
     summarizedCopyResult,
@@ -83,7 +83,11 @@ const renderIcon = (props: Props) => {
   }
 
   const missingReferences = hasMissingReferences ? (
-    <span className="spcCopyToSpace__missingReferencesIcon">
+    <span
+      css={css`
+        margin-left: ${euiTheme.size.xs};
+      `}
+    >
       <EuiIconTip
         type={'link'}
         color={'warning'}
@@ -134,11 +138,15 @@ const renderIcon = (props: Props) => {
 
 export const CopyStatusSummaryIndicator = (props: Props) => {
   const { summarizedCopyResult } = props;
-
+  const { euiTheme } = useEuiTheme();
   return (
     <Fragment>
-      {renderIcon(props)}
-      <EuiBadge className="spcCopyToSpace__summaryCountBadge">
+      <CopyStatusIcon {...props} />
+      <EuiBadge
+        css={css`
+          margin-left: ${euiTheme.size.xs};
+        `}
+      >
         {summarizedCopyResult.objects.length}
       </EuiBadge>
     </Fragment>
