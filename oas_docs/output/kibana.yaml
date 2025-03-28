@@ -62396,7 +62396,6 @@ components:
         > info
         > Not all updates to any rule fields will increment the revision. Only those fields that are considered static `rule parameters` can trigger revision increments. For example, an update to a rule's query or index fields will increment the rule's revision by `1`. However, changes to dynamic or technical fields like enabled or execution_summary will not cause revision increments.
       minimum: 0
-      readOnly: true
       type: integer
     Security_Detections_API_RuleSignatureId:
       description: Could be any string, not necessarily a UUID
@@ -62434,7 +62433,6 @@ components:
         > info
         > It is not incremented on each update. Compare this to the `revision` field.
       minimum: 1
-      readOnly: true
       type: integer
     Security_Detections_API_SavedObjectResolveAliasPurpose:
       enum:
