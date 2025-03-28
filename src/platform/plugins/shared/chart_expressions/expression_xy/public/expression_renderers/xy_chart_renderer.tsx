@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { METRIC_TYPE } from '@kbn/analytics';
+import { createPerformanceTracker, METRIC_TYPE } from '@kbn/analytics';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -205,12 +204,12 @@ export const getXyChartRenderer = ({
   validate: () => undefined,
   reuseDomNode: true,
   render: async (domNode: Element, config: XYChartProps, handlers) => {
-    const performanceId = uuidv4();
-    const performanceName = (name: string) => `Lens:xyVis:${name}`;
-    const performanceMark = (name: string) =>
-      performance.mark(performanceName(name), { detail: { id: performanceId } });
+    const performanceTracker = createPerformanceTracker({
+      type: 'Lens',
+      instance: 'xyVis',
+    });
 
-    performanceMark('preFlight');
+    performanceTracker.mark('preFlight');
 
     const deps = await getStartDeps();
 
@@ -241,7 +240,7 @@ export const getXyChartRenderer = ({
     );
 
     const renderComplete = () => {
-      performanceMark('renderComplete');
+      performanceTracker.mark('renderComplete');
 
       const executionContext = handlers.getExecutionContext();
       const containerType = extractContainerType(executionContext);
@@ -271,7 +270,7 @@ export const getXyChartRenderer = ({
       height: '100%',
     });
 
-    performanceMark('renderStart');
+    performanceTracker.mark('renderStart');
 
     ReactDOM.render(
       <KibanaRenderContextProvider {...deps.startServices}>

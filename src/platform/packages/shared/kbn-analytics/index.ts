@@ -18,3 +18,9 @@ export { Reporter } from './src/reporter';
 export { METRIC_TYPE } from './src/metrics';
 export { ReportManager } from './src/report';
 export { ApplicationUsageTracker } from './src/application_usage_tracker';
+export {
+  clearPerformanceTrackersByType,
+  createPerformanceTracker,
+  getPerformanceTrackersByType,
+  getPerformanceTrackersGroupedById,
+} from './src/performance/performance_tracker';

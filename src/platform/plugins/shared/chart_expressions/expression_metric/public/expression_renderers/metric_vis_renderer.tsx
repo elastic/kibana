@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
@@ -15,7 +14,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { css } from '@emotion/react';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { METRIC_TYPE } from '@kbn/analytics';
+import { createPerformanceTracker, METRIC_TYPE } from '@kbn/analytics';
 import type { IInterpreterRenderHandlers, Datatable } from '@kbn/expressions-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
@@ -58,12 +57,12 @@ export const getMetricVisRenderer = (
     displayName: 'metric visualization',
     reuseDomNode: true,
     render: async (domNode, { visData, visConfig, overrides }, handlers) => {
-      const performanceId = uuidv4();
-      const performanceName = (name: string) => `Lens:${EXPRESSION_METRIC_NAME}:${name}`;
-      const performanceMark = (name: string) =>
-        performance.mark(performanceName(name), { detail: { id: performanceId } });
+      const performanceTracker = createPerformanceTracker({
+        type: 'Lens',
+        instance: EXPRESSION_METRIC_NAME,
+      });
 
-      performanceMark('preFlight');
+      performanceTracker.mark('preFlight');
 
       const { core, plugins } = deps.getStartDeps();
 
@@ -79,7 +78,7 @@ export const getMetricVisRenderer = (
           )
         : false;
       const renderComplete = () => {
-        performanceMark('renderComplete');
+        performanceTracker.mark('renderComplete');
 
         const executionContext = handlers.getExecutionContext();
         const containerType = extractContainerType(executionContext);
@@ -96,7 +95,7 @@ export const getMetricVisRenderer = (
 
       const { MetricVis } = await import('../components/metric_vis');
 
-      performanceMark('renderStart');
+      performanceTracker.mark('renderStart');
 
       render(
         <KibanaRenderContextProvider {...core}>

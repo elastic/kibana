@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -16,7 +15,7 @@ import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { METRIC_TYPE } from '@kbn/analytics';
+import { createPerformanceTracker, METRIC_TYPE } from '@kbn/analytics';
 import {
   ChartSizeEvent,
   extractContainerType,
@@ -63,12 +62,12 @@ export const heatmapRenderer: (
   }),
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
-    const performanceId = uuidv4();
-    const performanceName = (name: string) => `Lens:${EXPRESSION_HEATMAP_NAME}:${name}`;
-    const performanceMark = (name: string) =>
-      performance.mark(performanceName(name), { detail: { id: performanceId } });
+    const performanceTracker = createPerformanceTracker({
+      type: 'Lens',
+      instance: EXPRESSION_HEATMAP_NAME,
+    });
 
-    performanceMark('preFlight');
+    performanceTracker.mark('preFlight');
 
     const { core, plugins } = getStartDeps();
 
@@ -86,7 +85,7 @@ export const heatmapRenderer: (
     };
 
     const renderComplete = () => {
-      performanceMark('renderComplete');
+      performanceTracker.mark('renderComplete');
 
       const executionContext = handlers.getExecutionContext();
       const containerType = extractContainerType(executionContext);
@@ -122,7 +121,7 @@ export const heatmapRenderer: (
     const { HeatmapComponent } = await import('../components/heatmap_component');
     const { isInteractive } = handlers;
 
-    performanceMark('renderStart');
+    performanceTracker.mark('renderStart');
 
     render(
       <KibanaRenderContextProvider {...core}>

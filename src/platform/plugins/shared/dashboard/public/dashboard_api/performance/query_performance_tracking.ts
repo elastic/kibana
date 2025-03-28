@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { groupBy, round, meanBy } from 'lodash';
+import { round, meanBy } from 'lodash';
 import { combineLatest, map, pairwise, startWith, switchMap, skipWhile, of } from 'rxjs';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { PublishesPhaseEvents, apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
+import { clearPerformanceTrackersByType, getPerformanceTrackersGroupedById } from '@kbn/analytics';
 
 import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_LOADED_EVENT } from '../../utils/telemetry_constants';
@@ -125,10 +126,8 @@ function reportPerformanceMetrics({
   const duration =
     loadType === 'dashboardSubsequentLoad' ? timeToData : Math.max(timeToData, totalLoadTime);
 
-  const performanceMarkers = performance
-    .getEntriesByType('mark')
-    .filter((marker) => marker.name.startsWith('Lens:')) as PerformanceMark[];
-  const groupedPerformanceMarkers = groupBy(performanceMarkers, (marker) => marker.detail.id);
+  const groupedPerformanceMarkers = getPerformanceTrackersGroupedById('Lens');
+
   const measurements = Object.values(groupedPerformanceMarkers).map((group) => {
     const preFlightStart = group.find((marker) => marker.name.endsWith(':preFlight'))?.startTime;
     const renderStart = group.find((marker) => marker.name.endsWith(':renderStart'))?.startTime;
@@ -158,5 +157,7 @@ function reportPerformanceMetrics({
     key9: 'mean_lens_rendering',
     value9: round(meanBy(measurements, 'renderDuration'), 2),
   };
+
   reportPerformanceMetricEvent(coreServices.analytics, e);
+  clearPerformanceTrackersByType('Lens');
 }
