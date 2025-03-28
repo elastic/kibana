@@ -108,5 +108,10 @@ describe('helpers', () => {
       const variable = validateVariableName('??_my_variable', '??');
       expect(variable).toBe('??my_variable');
     });
+
+    it('should not allow more than 2 questiomarks', () => {
+      const variable = validateVariableName('???my_variable', '??');
+      expect(variable).toBe('??my_variable');
+    });
   });
 });

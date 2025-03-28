@@ -111,6 +111,13 @@ export const validateVariableName = (variableName: string, prefix: '??' | '?') =
     text = `?${text}`;
   }
 
+  const match = text.match(/^(\?*)/);
+  const leadingQuestionMarksCount = match ? match[0].length : 0;
+
+  if (leadingQuestionMarksCount > 2) {
+    text = '??'.concat(text.substring(leadingQuestionMarksCount));
+  }
+
   // Remove unnecessary leading underscores
   if (text.charAt(prefix.length) === '_') {
     text = `${prefix}${text.substring(prefix.length + 1)}`;
