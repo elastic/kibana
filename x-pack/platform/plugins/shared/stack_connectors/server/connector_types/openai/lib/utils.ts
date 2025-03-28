@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AxiosResponse, ResponseType } from 'axios';
-import { IncomingMessage } from 'http';
+import type { AxiosResponse, ResponseType } from 'axios';
+import type { IncomingMessage } from 'http';
 import { OpenAiProviderType } from '../../../../common/openai/constants';
 import {
   sanitizeRequest as openAiSanitizeRequest,

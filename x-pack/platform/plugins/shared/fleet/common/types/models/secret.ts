@@ -45,3 +45,7 @@ export interface DeletedSecretReference {
   id: string;
   deleted: boolean;
 }
+
+export interface BaseSSLSecrets {
+  ssl?: { key?: SOSecret };
+}

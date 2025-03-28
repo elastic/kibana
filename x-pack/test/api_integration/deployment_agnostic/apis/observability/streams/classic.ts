@@ -39,7 +39,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const {
         body: { streams },
         status,
-      } = await apiClient.fetch('GET /api/streams');
+      } = await apiClient.fetch('GET /api/streams 2023-10-31');
 
       expect(status).to.eql(200);
 
@@ -56,7 +56,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Allows setting processing on classic streams', async () => {
-      const putResponse = await apiClient.fetch('PUT /api/streams/{name}', {
+      const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
         params: {
           path: {
             name: TEST_STREAM_NAME,
@@ -88,7 +88,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(putResponse.body).to.have.property('acknowledged', true);
 
-      const getResponse = await apiClient.fetch('GET /api/streams/{name}', {
+      const getResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
         params: { path: { name: TEST_STREAM_NAME } },
       });
 
@@ -126,33 +126,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(effectiveLifecycle).to.eql(isServerless ? { dsl: {} } : { ilm: { policy: 'logs' } });
 
-      expect(elasticsearchAssets).to.eql([
-        {
-          type: 'ingest_pipeline',
-          id: 'logs@default-pipeline',
-        },
-        {
-          type: 'component_template',
-          id: 'logs@mappings',
-        },
-        {
-          type: 'component_template',
-          id: 'logs@settings',
-        },
-        {
-          type: 'component_template',
-          id: 'logs@custom',
-        },
-        { type: 'component_template', id: 'ecs@mappings' },
-        {
-          type: 'index_template',
-          id: 'logs',
-        },
-        {
-          type: 'data_stream',
-          id: 'logs-test-default',
-        },
-      ]);
+      expect(elasticsearchAssets).to.eql({
+        ingestPipeline: 'logs@default-pipeline',
+        componentTemplates: ['logs@mappings', 'logs@settings', 'logs@custom', 'ecs@mappings'],
+        indexTemplate: 'logs',
+        dataStream: 'logs-test-default',
+      });
     });
 
     it('Executes processing on classic streams', async () => {
@@ -176,7 +155,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Allows removing processing on classic streams', async () => {
-      const response = await apiClient.fetch('PUT /api/streams/{name}', {
+      const response = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
         params: {
           path: { name: TEST_STREAM_NAME },
           body: {
@@ -214,7 +193,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Allows deleting classic streams', async () => {
-      const deleteStreamResponse = await apiClient.fetch('DELETE /api/streams/{name}', {
+      const deleteStreamResponse = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
         params: {
           path: {
             name: TEST_STREAM_NAME,
@@ -224,7 +203,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(deleteStreamResponse.status).to.eql(200);
 
-      const getStreamsResponse = await apiClient.fetch('GET /api/streams');
+      const getStreamsResponse = await apiClient.fetch('GET /api/streams 2023-10-31');
 
       expect(getStreamsResponse.status).to.eql(200);
 
@@ -270,7 +249,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('Allows adding processing to classic streams without pipeline', async () => {
-        const putResponse = await apiClient.fetch('PUT /api/streams/{name}', {
+        const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
           params: {
             path: {
               name: DATA_STREAM_NAME,

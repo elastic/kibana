@@ -8,9 +8,7 @@
 import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
 
 import type { agentPolicyStatuses } from '../../constants';
-import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
-
-import type { SOSecret } from '..';
+import type { BaseSSLSecrets, MonitoringType, PolicySecretReference, ValueOf } from '..';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
@@ -179,6 +177,11 @@ export interface FullAgentPolicyMonitoring {
     };
   };
 }
+export interface FullAgentPolicyDownload {
+  sourceURI: string;
+  ssl?: BaseSSLConfig;
+  secrets?: BaseSSLSecrets;
+}
 
 export interface FullAgentPolicy {
   id: string;
@@ -198,7 +201,7 @@ export interface FullAgentPolicy {
   revision?: number;
   agent?: {
     monitoring: FullAgentPolicyMonitoring;
-    download: { sourceURI: string };
+    download: FullAgentPolicyDownload;
     features: Record<string, { enabled: boolean }>;
     protection?: {
       enabled: boolean;
@@ -239,9 +242,7 @@ export interface FullAgentPolicyFleetConfig {
   proxy_url?: string;
   proxy_headers?: any;
   ssl?: BaseSSLConfig;
-  secrets?: {
-    ssl?: { key?: SOSecret };
-  };
+  secrets?: BaseSSLSecrets;
 }
 
 export interface FullAgentPolicyKibanaConfig {

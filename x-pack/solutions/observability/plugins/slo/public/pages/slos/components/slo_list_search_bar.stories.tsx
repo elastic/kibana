@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { SloListSearchBar as Component } from './slo_list_search_bar';
@@ -17,6 +17,8 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = () => <Component />;
+const Template: StoryFn<typeof Component> = () => <Component />;
 
-export const SloListSearchBar = Template.bind({});
+export const SloListSearchBar = {
+  render: Template,
+};

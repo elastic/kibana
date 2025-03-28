@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import {
-  CreateMicrosoftDefenderConnectorMockResponse,
-  microsoftDefenderEndpointConnectorMocks,
-} from './mocks';
+import type { CreateMicrosoftDefenderConnectorMockResponse } from './mocks';
+import { microsoftDefenderEndpointConnectorMocks } from './mocks';
 import { OAuthTokenManager } from './o_auth_token_manager';
-import { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';
+import type { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';
 
 describe('Microsoft Defender for Endpoint oAuth token manager', () => {
   let testMock: CreateMicrosoftDefenderConnectorMockResponse;

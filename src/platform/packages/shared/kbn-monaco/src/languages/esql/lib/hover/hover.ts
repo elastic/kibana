@@ -14,8 +14,6 @@ import {
   getFunctionDefinition,
   getFunctionSignatures,
   isSourceItem,
-  isSettingItem,
-  getCommandDefinition,
   type ESQLCallbacks,
   getPolicyHelper,
   collectVariables,
@@ -34,6 +32,8 @@ import {
   TIME_SYSTEM_PARAMS,
 } from '@kbn/esql-validation-autocomplete/src/autocomplete/factories';
 import { isESQLFunction, isESQLNamedParamLiteral } from '@kbn/esql-ast/src/types';
+import { ENRICH_MODES } from '@kbn/esql-validation-autocomplete/src/definitions/commands_helpers';
+import { modeDescription } from '@kbn/esql-validation-autocomplete/src/autocomplete/commands/enrich/util';
 import { monacoPositionToOffset } from '../shared/utils';
 import { monaco } from '../../../../monaco_imports';
 import { getVariablesHoverContent } from './helpers';
@@ -217,22 +217,16 @@ export async function getHoverItem(
           );
         }
       }
-      if (isSettingItem(astContext.node)) {
-        const commandDef = getCommandDefinition(astContext.command.name);
-        const settingDef = commandDef?.modes.find(({ values }) =>
-          values.some(({ name }) => name === astContext.node!.name)
+      if (astContext.node.type === 'mode') {
+        const mode = ENRICH_MODES.find(({ name }) => name === astContext.node!.name)!;
+        hoverContent.contents.push(
+          ...[
+            { value: modeDescription },
+            {
+              value: `**${mode.name}**: ${mode.description}`,
+            },
+          ]
         );
-        if (settingDef) {
-          const mode = settingDef.values.find(({ name }) => name === astContext.node!.name)!;
-          hoverContent.contents.push(
-            ...[
-              { value: settingDef.description },
-              {
-                value: `**${mode.name}**: ${mode.description}`,
-              },
-            ]
-          );
-        }
       }
     }
   }

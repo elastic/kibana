@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import { waitFor, renderHook } from '@testing-library/react';
 import { useCopyIDAction } from './use_copy_id_action';
 
 import { basicCase } from '../../../containers/mock';
+import { TestProviders } from '../../../common/mock';
+import React from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('../../../containers/api');
 
 describe('useCopyIDAction', () => {
-  let appMockRender: AppMockRenderer;
   const onActionSuccess = jest.fn();
   const originalClipboard = global.window.navigator.clipboard;
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
     Object.defineProperty(navigator, 'clipboard', {
       value: {
@@ -38,7 +37,7 @@ describe('useCopyIDAction', () => {
 
   it('renders a copy ID action with one case', async () => {
     const { result } = renderHook(() => useCopyIDAction({ onActionSuccess }), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     expect(result.current.getAction(basicCase)).toMatchInlineSnapshot(`
@@ -59,7 +58,7 @@ describe('useCopyIDAction', () => {
 
   it('copies the id of the selected case to the clipboard', async () => {
     const { result } = renderHook(() => useCopyIDAction({ onActionSuccess }), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     const action = result.current.getAction(basicCase);
@@ -68,13 +67,16 @@ describe('useCopyIDAction', () => {
 
     await waitFor(() => {
       expect(onActionSuccess).toHaveBeenCalled();
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicCase.id);
     });
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicCase.id);
   });
 
   it('shows the success toaster correctly when copying the case id', async () => {
+    const coreStart = coreMock.createStart();
+
     const { result } = renderHook(() => useCopyIDAction({ onActionSuccess }), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} coreStart={coreStart} />,
     });
 
     const action = result.current.getAction(basicCase);
@@ -83,10 +85,11 @@ describe('useCopyIDAction', () => {
 
     await waitFor(() => {
       expect(onActionSuccess).toHaveBeenCalled();
-      expect(appMockRender.coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'Copied case ID to clipboard',
-        className: 'eui-textBreakWord',
-      });
+    });
+
+    expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+      title: 'Copied case ID to clipboard',
+      className: 'eui-textBreakWord',
     });
   });
 });

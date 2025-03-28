@@ -58,6 +58,7 @@ export function LensEditConfigurationFlyout({
   onApply: onApplyCallback,
   onCancel: onCancelCallback,
   hideTimeFilterInfo,
+  isReadOnly,
   parentApi,
   panelId,
 }: EditConfigPanelProps) {
@@ -280,6 +281,7 @@ export function LensEditConfigurationFlyout({
           isScrollable
           isNewPanel={isNewPanel}
           isSaveable={isSaveable}
+          isReadOnly={isReadOnly}
         >
           <LayerConfiguration
             // TODO: remove this once we support switching to any chart in Discover
@@ -319,6 +321,7 @@ export function LensEditConfigurationFlyout({
         isScrollable={false}
         language={textBasedMode ? getLanguageDisplayName('esql') : ''}
         isNewPanel={isNewPanel}
+        isReadOnly={isReadOnly}
       >
         <EuiFlexGroup
           css={css`
@@ -381,7 +384,7 @@ export function LensEditConfigurationFlyout({
                 >
                   <h5>
                     {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {
-                      defaultMessage: 'Visualization configuration',
+                      defaultMessage: 'Visualization parameters',
                     })}
                   </h5>
                 </EuiTitle>

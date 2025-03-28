@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { ExecutorParams, ServiceNowPublicConfigurationType } from '../lib/servicenow/types';
-import {
-  ServiceNowConnectorType,
-  ServiceNowConnectorTypeExecutorOptions,
-  getServiceNowITSMConnectorType,
-} from '.';
+import type { ExecutorParams, ServiceNowPublicConfigurationType } from '../lib/servicenow/types';
+import type { ServiceNowConnectorType, ServiceNowConnectorTypeExecutorOptions } from '.';
+import { getServiceNowITSMConnectorType } from '.';
 import { api } from './api';
 
 jest.mock('./api', () => ({

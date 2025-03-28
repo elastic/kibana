@@ -86,6 +86,14 @@ export const epmRouteService = {
     return EPM_API_ROUTES.BULK_INSTALL_PATTERN;
   },
 
+  getBulkUpgradePath: () => {
+    return EPM_API_ROUTES.BULK_UPGRADE_PATTERN;
+  },
+
+  getOneBulkUpgradePath: (taskId: string) => {
+    return EPM_API_ROUTES.BULK_UPGRADE_INFO_PATTERN.replace('{taskId}', taskId);
+  },
+
   getRemovePath: (pkgName: string, pkgVersion?: string) => {
     if (pkgVersion) {
       return EPM_API_ROUTES.DELETE_PATTERN.replace('{pkgName}', pkgName)
@@ -158,6 +166,10 @@ export const packagePolicyRouteService = {
 
   getOrphanedIntegrationPoliciesPath: () => {
     return PACKAGE_POLICY_API_ROUTES.ORPHANED_INTEGRATION_POLICIES;
+  },
+
+  getBulkGetPath: (): string => {
+    return PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN;
   },
 };
 

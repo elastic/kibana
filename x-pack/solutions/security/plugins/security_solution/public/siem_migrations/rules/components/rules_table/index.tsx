@@ -320,7 +320,12 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
               <EmptyMigration />
             ) : (
               <>
-                <EuiFlexGroup gutterSize="m" justifyContent="flexEnd" wrap>
+                <EuiFlexGroup
+                  data-test-subj="siemMigrationsRulesTable"
+                  gutterSize="m"
+                  justifyContent="flexEnd"
+                  wrap
+                >
                   <EuiFlexItem>
                     <SearchField initialValue={searchTerm} onSearch={handleOnSearch} />
                   </EuiFlexItem>

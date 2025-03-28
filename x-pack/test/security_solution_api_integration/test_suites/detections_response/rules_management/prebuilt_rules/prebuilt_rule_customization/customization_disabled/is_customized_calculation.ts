@@ -61,30 +61,23 @@ export default ({ getService }: FtrProviderContext) => {
       );
 
       const { body } = await securitySolutionApi
-        .importRules({ query: {} })
+        .importRules({ query: { overwrite: true } })
         .attach('file', ruleBuffer, 'rules.ndjson')
         .expect('Content-Type', 'application/json; charset=utf-8')
         .expect(200);
 
       expect(body).toMatchObject({
         rules_count: 1,
-        success: false,
-        success_count: 0,
-        errors: [
-          {
-            error: {
-              message: expect.stringContaining('Importing prebuilt rules is not supported'),
-            },
-            rule_id: 'test-rule-id',
-          },
-        ],
+        success: true,
+        success_count: 1,
+        errors: [],
       });
 
-      // Check that the rule has not been customized
+      // Check that the imported rule is customized
       const { body: importedRule } = await securitySolutionApi.readRule({
         query: { rule_id: prebuiltRule.rule_id },
       });
-      expect(importedRule.rule_source.is_customized).toEqual(false);
+      expect(importedRule.rule_source.is_customized).toEqual(true);
     });
 
     it('should not allow rule customization on bulk edit', async () => {
