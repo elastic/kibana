@@ -102,7 +102,6 @@ export const useIngestionRate = ({
                       docs_count: {
                         date_histogram: {
                           field: TIMESTAMP_FIELD,
-                          // use the var intervalType from the previous snippet
                           [intervalType]: interval,
                           min_doc_count: 0,
                         },
@@ -213,7 +212,6 @@ export const useIngestionRatePerTier = ({
                       docs_count: {
                         date_histogram: {
                           field: TIMESTAMP_FIELD,
-                          // use the var intervalType from the previous snippet
                           [intervalType]: interval,
                           min_doc_count: 0,
                         },
