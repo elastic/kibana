@@ -16,7 +16,6 @@ import { FetchStatus } from '../../types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../state_management/discover_state_provider';
@@ -39,9 +38,6 @@ async function getHookProps(
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.appState.replaceUrlState = replaceUrlState;
   stateContainer.appState.update({ columns: [], ...appState });
-  const dataViewList = [dataViewMock as DataViewListItem];
-  jest.spyOn(dataViewsService, 'getIdsWithTitle').mockResolvedValue(dataViewList);
-  await stateContainer.internalState.dispatch(internalStateActions.loadDataViewList());
 
   const msgLoading = {
     fetchStatus: defaultFetchStatus,

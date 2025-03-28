@@ -67,7 +67,6 @@ async function getState(
     history: nextHistory,
   });
   jest.spyOn(nextState.dataState, 'fetch');
-  await nextState.internalState.dispatch(internalStateActions.loadDataViewList());
   nextState.internalState.dispatch(
     internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
   );
@@ -451,7 +450,6 @@ describe('Discover state', () => {
     test('fetchData', async () => {
       const { state } = await getState('/');
       const dataState = state.dataState;
-      await state.internalState.dispatch(internalStateActions.loadDataViewList());
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
@@ -473,14 +471,8 @@ describe('Discover state', () => {
       expect(dataState.data$.documents$.value.result).toEqual([]);
     });
 
-    test('loadDataViewList', async () => {
-      const { state } = await getState('');
-      expect(state.internalState.getState().savedDataViews.length).toBe(3);
-    });
-
     test('loadSavedSearch with no id given an empty URL', async () => {
       const { state, getCurrentUrl } = await getState('');
-      await state.internalState.dispatch(internalStateActions.loadDataViewList());
       await state.internalState.dispatch(
         internalStateActions.initializeSession({
           stateContainer: state,
