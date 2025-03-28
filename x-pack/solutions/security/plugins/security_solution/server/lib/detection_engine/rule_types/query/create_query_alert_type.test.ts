@@ -50,6 +50,9 @@ describe('Custom Query Alerts', () => {
 
   const { dependencies, executor, services } = mocks;
   const { actions, alerting, lists, logger, ruleDataClient } = dependencies;
+
+  const eventsTelemetry = createMockTelemetryEventsSender(true);
+
   const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
     actions,
     lists,
@@ -58,10 +61,13 @@ describe('Custom Query Alerts', () => {
     ruleDataClient,
     ruleExecutionLoggerFactory: ruleStatusLogger,
     version: '8.3',
+    experimentalFeatures: allowedExperimentalValues,
     publicBaseUrl,
     alerting,
+    eventsTelemetry,
+    licensing,
+    scheduleNotificationResponseActionsService: () => null,
   });
-  const eventsTelemetry = createMockTelemetryEventsSender(true);
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -70,11 +76,6 @@ describe('Custom Query Alerts', () => {
   it('does not send an alert when no events found', async () => {
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
-        eventsTelemetry,
-        licensing,
-        scheduleNotificationResponseActionsService: () => null,
-        experimentalFeatures: allowedExperimentalValues,
-        logger,
         id: QUERY_RULE_TYPE_ID,
         name: 'Custom Query Rule',
       })
@@ -118,11 +119,6 @@ describe('Custom Query Alerts', () => {
     (hasTimestampFields as jest.Mock).mockImplementationOnce(actualHasTimestampFields); // default behavior will produce a 'no indices found' result from this helper
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
-        eventsTelemetry,
-        licensing,
-        scheduleNotificationResponseActionsService: () => null,
-        experimentalFeatures: allowedExperimentalValues,
-        logger,
         id: QUERY_RULE_TYPE_ID,
         name: 'Custom Query Rule',
       })
@@ -170,11 +166,6 @@ describe('Custom Query Alerts', () => {
   it('sends an alert when events are found', async () => {
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
-        eventsTelemetry,
-        licensing,
-        scheduleNotificationResponseActionsService: () => null,
-        experimentalFeatures: allowedExperimentalValues,
-        logger,
         id: QUERY_RULE_TYPE_ID,
         name: 'Custom Query Rule',
       })
@@ -236,11 +227,6 @@ describe('Custom Query Alerts', () => {
     });
     const queryAlertType = securityRuleTypeWrapper(
       createQueryAlertType({
-        eventsTelemetry,
-        licensing,
-        scheduleNotificationResponseActionsService: () => null,
-        experimentalFeatures: allowedExperimentalValues,
-        logger,
         id: QUERY_RULE_TYPE_ID,
         name: 'Custom Query Rule',
       })

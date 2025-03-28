@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ValuesType } from 'utility-types';
+import type { ValuesType } from 'utility-types';
 import {
   ALERT_NAMESPACE,
   ALERT_RULE_NAMESPACE,
