@@ -110,7 +110,13 @@ export const registerEntityStoreDataViewRefreshTask = ({
       request,
     });
 
-    await entityStoreClient.applyDataViewIndices();
+    const { errors } = await entityStoreClient.applyDataViewIndices();
+
+    if (errors.length > 0) {
+      logger.error(
+        `Errors applying data view changes to the entity store. Errors: \n${errors.join('\n\n')}`
+      );
+    }
   };
 
   taskManager.registerTaskDefinitions({

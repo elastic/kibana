@@ -20,21 +20,16 @@ import {
   walk,
 } from '@kbn/esql-ast';
 import type { ESQLAstJoinCommand, ESQLIdentifier } from '@kbn/esql-ast/src/types';
-import { compareTypesWithLiterals } from '../shared/esql_types';
 import {
   areFieldAndVariableTypesCompatible,
   getColumnExists,
-  getColumnForASTNode,
   getCommandDefinition,
-  getQuotedColumnName,
-  hasWildcard,
   isColumnItem,
   isFunctionItem,
   isOptionItem,
   isParametrized,
   isSourceItem,
   isTimeIntervalItem,
-  isVariable,
   sourceExists,
 } from '../shared/helpers';
 import type { ESQLCallbacks } from '../shared/types';
@@ -266,7 +261,7 @@ function validateCommand(
               })
             );
           } else if (isSourceItem(arg)) {
-            messages.push(...validateSource(arg, command.name, references));
+            messages.push(...validateSource(arg, references));
           }
         }
       }
@@ -369,59 +364,20 @@ function validateUnsupportedTypeFields(fields: Map<string, ESQLRealField>, ast: 
   return messages;
 }
 
-export function validateSources(
-  command: ESQLCommand,
-  sources: ESQLSource[],
-  references: ReferenceMaps
-): ESQLMessage[] {
-  const messages: ESQLMessage[] = [];
-
-  for (const source of sources) {
-    messages.push(...validateSource(source, command.name, references));
-  }
-
-  return messages;
-}
-
-function validateSource(
-  source: ESQLSource,
-  commandName: string,
-  { sources, policies }: ReferenceMaps
-) {
+export function validateSource(source: ESQLSource, { sources }: ReferenceMaps) {
   const messages: ESQLMessage[] = [];
   if (source.incomplete) {
     return messages;
   }
 
-  const commandDef = getCommandDefinition(commandName);
-  const isWildcardAndNotSupported =
-    hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
-  if (isWildcardAndNotSupported) {
+  if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
     messages.push(
       getMessageFromId({
-        messageId: 'wildcardNotSupportedForCommand',
-        values: { command: commandName.toUpperCase(), value: source.name },
+        messageId: 'unknownIndex',
+        values: { name: source.name },
         locations: source.location,
       })
     );
-  } else {
-    if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownIndex',
-          values: { name: source.name },
-          locations: source.location,
-        })
-      );
-    } else if (source.sourceType === 'policy' && !policies.has(source.name)) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownPolicy',
-          values: { name: source.name },
-          locations: source.location,
-        })
-      );
-    }
   }
 
   return messages;
@@ -437,65 +393,9 @@ export function validateColumnForCommand(
     if (!references.variables.has(column.name) && !isParametrized(column)) {
       messages.push(errors.unknownColumn(column));
     }
-  } else {
-    const columnName = getQuotedColumnName(column);
-    if (getColumnExists(column, references)) {
-      const commandDef = getCommandDefinition(commandName);
-      const columnParamsWithInnerTypes = commandDef.signature.params.filter(
-        ({ type, innerTypes }) => type === 'column' && innerTypes
-      );
-      // this should be guaranteed by the columnCheck above
-      const columnRef = getColumnForASTNode(column, references)!;
-
-      if (columnParamsWithInnerTypes.length) {
-        const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(
-          ({ innerTypes }) =>
-            innerTypes &&
-            !innerTypes.includes('any') &&
-            !innerTypes.some((type) => compareTypesWithLiterals(type, columnRef.type))
-        );
-        if (hasSomeWrongInnerTypes) {
-          const supportedTypes: string[] = columnParamsWithInnerTypes
-            .map(({ innerTypes }) => innerTypes)
-            .flat()
-            .filter((type) => type !== undefined) as string[];
-
-          messages.push(
-            getMessageFromId({
-              messageId: 'unsupportedColumnTypeForCommand',
-              values: {
-                command: commandName.toUpperCase(),
-                type: supportedTypes.join(', '),
-                typeCount: supportedTypes.length,
-                givenType: columnRef.type,
-                column: columnName,
-              },
-              locations: column.location,
-            })
-          );
-        }
-      }
-      if (
-        hasWildcard(columnName) &&
-        !isVariable(columnRef) &&
-        !commandDef.signature.params.some(({ type, wildcards }) => type === 'column' && wildcards)
-      ) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'wildcardNotSupportedForCommand',
-            values: {
-              command: commandName.toUpperCase(),
-              value: columnName,
-            },
-            locations: column.location,
-          })
-        );
-      }
-    } else {
-      if (column.name) {
-        messages.push(errors.unknownColumn(column));
-      }
-    }
+  } else if (!getColumnExists(column, references)) {
+    messages.push(errors.unknownColumn(column));
   }
+
   return messages;
 }
