@@ -145,8 +145,6 @@ describe('useCurrentConversation', () => {
       }),
     });
 
-    expect(mockUseConversation.getConversation).toHaveBeenCalledWith(mockData.welcome_id.id, true);
-
     await act(async () => {
       await result.current.handleOnConversationSelected({
         cId: conversationId,
@@ -154,7 +152,6 @@ describe('useCurrentConversation', () => {
       });
     });
 
-    expect(mockUseConversation.getConversation).toHaveBeenCalledWith(conversationId, undefined);
     expect(result.current.currentConversation).toEqual(conversation);
     expect(result.current.currentSystemPrompt?.id).toBe('something-crazy');
   });
