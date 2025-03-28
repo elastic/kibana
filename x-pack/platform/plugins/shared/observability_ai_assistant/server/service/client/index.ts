@@ -6,6 +6,7 @@
  */
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { notFound, forbidden } from '@hapi/boom';
+import { v4 as uuidv4 } from 'uuid';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -52,6 +53,7 @@ import {
   type ConversationUpdateRequest,
   type KnowledgeBaseEntry,
   type Message,
+  type InferenceChunk,
   KnowledgeBaseType,
   KnowledgeBaseEntryRole,
 } from '../../../common/types';
@@ -98,7 +100,65 @@ export class ObservabilityAIAssistantClient {
       scopes: AssistantScope[];
     }
   ) {}
+  redactedMap: Record<string, string> = {};
+  async inferNER(chunks: InferenceChunk[]) {
+    const promises = chunks.map(async ({ chunkText, charStartOffset }) => {
+      const response = await this.dependencies.esClient.asCurrentUser.ml.inferTrainedModel({
+        model_id: 'elastic__distilbert-base-uncased-finetuned-conll03-english',
+        docs: [
+          {
+            text_field: chunkText,
+          },
+        ],
+      });
+      const entities = response?.inference_results?.[0]?.entities ?? [];
 
+      const adjustedEntities = entities.map((entity) => ({
+        ...entity,
+        start_pos: entity.start_pos + charStartOffset,
+        end_pos: entity.end_pos + charStartOffset,
+      }));
+
+      return adjustedEntities;
+    });
+
+    const settled = await Promise.all(promises);
+    return settled.flat();
+  }
+
+  async sanitizeMessages(messages: Message[]): Promise<{ sanitizedMessages: Message[] }> {
+    const redactedMap: Record<string, string> = {};
+    for (const message of messages) {
+      if (message.message.sanitized) {
+        // If the message is already sanitized, add its entities to the redactedMap
+        message.message.nerEntities?.forEach((entity) => {
+          redactedMap[entity.id] = entity.entity;
+        });
+        continue;
+      }
+      if (message.message.role === 'user' && message.message.content) {
+        // chunk before sending
+        const messageContent = message.message.content;
+        const chunks = chunkTextByChar(messageContent);
+        const entities = await this.inferNER(chunks);
+        message.message.sanitized = true;
+        message.message.nerEntities = entities?.map((ent) => {
+          const redactedId = uuidv4();
+          redactedMap[redactedId] = ent.entity;
+          return {
+            id: redactedId,
+            entity: ent.entity,
+            class_name: ent.class_name,
+            class_probability: ent.class_probability,
+            start_pos: ent.start_pos,
+            end_pos: ent.end_pos,
+          };
+        });
+      }
+    }
+    this.redactedMap = redactedMap;
+    return { sanitizedMessages: messages };
+  }
   private getConversationWithMetaFields = async (
     conversationId: string
   ): Promise<SearchHit<Conversation> | undefined> => {
@@ -495,17 +555,23 @@ export class ObservabilityAIAssistantClient {
         },
       },
     };
-
-    this.dependencies.logger.debug(
-      () => `Calling inference client for name: "${name}" with options: ${JSON.stringify(options)}`
-    );
-
     if (stream) {
       return defer(() =>
-        this.dependencies.inferenceClient.chatComplete({
-          ...options,
-          stream: true,
-        })
+        from(this.sanitizeMessages(messages)).pipe(
+          switchMap(({ sanitizedMessages }) => {
+            this.dependencies.logger.debug(
+              () =>
+                `Calling inference client for name: "${name}" with options: ${JSON.stringify(
+                  options
+                )}`
+            );
+            return this.dependencies.inferenceClient.chatComplete({
+              ...options,
+              stream: true,
+              messages: convertMessagesForInference(sanitizedMessages, this.dependencies.logger),
+            });
+          })
+        )
       ).pipe(
         convertInferenceEventsToStreamingEvents(),
         apmInstrumentation(name),
@@ -787,4 +853,13 @@ export class ObservabilityAIAssistantClient {
       this.dependencies.user
     );
   };
+}
+
+function chunkTextByChar(text: string, maxChars = 1800): InferenceChunk[] {
+  const chunks = [];
+  for (let i = 0; i < text.length; i += maxChars) {
+    const chunk = text.slice(i, i + maxChars);
+    chunks.push({ chunkText: chunk, charStartOffset: i });
+  }
+  return chunks;
 }

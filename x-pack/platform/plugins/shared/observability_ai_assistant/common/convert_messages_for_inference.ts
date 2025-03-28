@@ -13,6 +13,7 @@ import {
 import { generateFakeToolCallId } from '@kbn/inference-plugin/common';
 import type { Logger } from '@kbn/logging';
 import { Message, MessageRole } from '.';
+import { NerEntity } from './types';
 
 function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'error'>) {
   try {
@@ -29,11 +30,25 @@ function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'err
   }
 }
 
+function redactEntities(original: string, entities: NerEntity[]): string {
+  const sortedEntities = entities.slice().sort((a, b) => a.start_pos - b.start_pos);
+  let redacted = '';
+  let currentIndex = 0;
+  for (const ent of sortedEntities) {
+    redacted += original.substring(currentIndex, ent.start_pos);
+    redacted += `${ent.id}`;
+    currentIndex = ent.end_pos;
+  }
+  redacted += original.substring(currentIndex);
+  console.log('redacted', redacted);
+  return redacted;
+}
+
 export function convertMessagesForInference(
   messages: Message[],
   logger: Pick<Logger, 'error'>
 ): InferenceMessage[] {
-  const inferenceMessages: InferenceMessage[] = [];
+  const inferenceMessages: InferenceMessage[] = []; 
 
   messages.forEach((message) => {
     if (message.message.role === MessageRole.Assistant) {
@@ -82,9 +97,17 @@ export function convertMessagesForInference(
     }
 
     if (isUserMessage) {
+      let contentForInference = message.message.content ?? '';
+      // If nerEntities exist, remove them
+      if (message.message.nerEntities && message.message.nerEntities.length > 0) {
+        contentForInference = redactEntities(
+          message.message.content ?? '',
+          message.message.nerEntities
+        );
+      }
       inferenceMessages.push({
         role: InferenceMessageRole.User,
-        content: message.message.content ?? '',
+        content: contentForInference,
       });
       return;
     }

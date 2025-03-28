@@ -15,6 +15,15 @@ import {
   type StarterPrompt,
 } from '../../common/types';
 
+export const entityRt = t.type({
+  entity: t.string,
+  class_name: t.string,
+  class_probability: t.number,
+  start_pos: t.number,
+  end_pos: t.number,
+  id: t.string,
+});
+
 export const messageRt: t.Type<Message> = t.type({
   '@timestamp': t.string,
   message: t.intersection([
@@ -45,6 +54,8 @@ export const messageRt: t.Type<Message> = t.type({
           arguments: t.string,
         }),
       ]),
+      sanitized: t.boolean,
+      nerEntities: t.array(entityRt),
     }),
   ]),
 });

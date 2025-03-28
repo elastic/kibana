@@ -29,11 +29,20 @@ export interface PendingMessage {
   aborted?: boolean;
   error?: any;
 }
-
+export interface NerEntity {
+  entity: string;
+  class_name: string;
+  class_probability: number;
+  start_pos: number;
+  end_pos: number;
+  id: string;
+}
 export interface Message {
   '@timestamp': string;
   message: {
     content?: string;
+    nerEntities?: NerEntity[];
+    sanitized?: boolean;
     name?: string;
     role: MessageRole;
     function_call?: {
@@ -158,4 +167,9 @@ export interface ObservabilityAIAssistantScreenContext {
 export enum ConversationAccess {
   SHARED = 'shared',
   PRIVATE = 'private',
+}
+
+export interface InferenceChunk {
+  chunkText: string;
+  charStartOffset: number;
 }

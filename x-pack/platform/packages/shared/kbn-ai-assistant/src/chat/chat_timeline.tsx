@@ -43,6 +43,7 @@ export interface ChatTimelineItem
   error?: any;
   message: Message;
   functionCall?: Message['message']['function_call'];
+  displayContent?: React.ReactNode;
 }
 
 export interface ChatTimelineProps {
@@ -67,6 +68,74 @@ export interface ChatTimelineProps {
     message: Message;
     payload: ChatActionClickPayload;
   }) => void;
+}
+
+const highlightPIIClassName = css`
+  background-color: #ffeb3b;
+  padding: 2px 4px;
+  border-radius: 3px;
+`;
+
+// helper using NER positions to transform user messages into react node to add text highlighting
+function transformUserContent(
+  content: string,
+  nerEntities: Array<{ start_pos: number; end_pos: number; entity: string }>
+): React.ReactNode {
+  // Sort the entities by start position
+  const sortedEntities = [...nerEntities].sort((a, b) => a.start_pos - b.start_pos);
+  const parts: Array<string | React.ReactNode> = [];
+  let lastIndex = 0;
+  sortedEntities.forEach((entity, index) => {
+    // Add the text before the entity
+    if (entity.start_pos > lastIndex) {
+      parts.push(content.substring(lastIndex, entity.start_pos));
+    }
+    // Wrap the sensitive text in a span with highlight styles
+    parts.push(
+      <span key={`user-highlight-${index}`} className={highlightPIIClassName}>
+        {content.substring(entity.start_pos, entity.end_pos)}
+      </span>
+    );
+    lastIndex = entity.end_pos;
+  });
+  // Add any remaining text after the last entity
+  if (lastIndex < content.length) {
+    parts.push(content.substring(lastIndex));
+  }
+  return parts;
+}
+
+// processes a string and replaces each occurrence of a hash (key)
+// with a <span> wrapping the corresponding original text from the redactedEntitiesMap.
+function transformAssistantContent(
+  content: string,
+  redactedEntitiesMap: Record<string, string>
+): React.ReactNode {
+  let parts: Array<string | React.ReactNode> = [content];
+  Object.keys(redactedEntitiesMap).forEach((hash) => {
+    const newParts: Array<string | React.ReactNode> = [];
+    parts.forEach((part) => {
+      if (typeof part === 'string') {
+        // Split the string on the current hash
+        const segments = part.split(hash);
+        segments.forEach((segment, index) => {
+          newParts.push(segment);
+          // Insert the highlighted replacement if not at the end
+          if (index < segments.length - 1) {
+            newParts.push(
+              <span key={hash + '-' + index} className={highlightPIIClassName}>
+                {redactedEntitiesMap[hash]}
+              </span>
+            );
+          }
+        });
+      } else {
+        newParts.push(part);
+      }
+    });
+    parts = newParts;
+  });
+  return parts;
 }
 
 export function ChatTimeline({
@@ -98,21 +167,50 @@ export function ChatTimeline({
       isArchived,
     });
 
+    const redactedEntitiesMap: Record<string, string> = {};
     const consolidatedChatItems: Array<ChatTimelineItem | ChatTimelineItem[]> = [];
     let currentGroup: ChatTimelineItem[] | null = null;
 
     for (const item of timelineItems) {
       if (item.display.hide || !item) continue;
 
+      let displayContent: React.ReactNode;
+
+      // build redactedEntitiesMap with user messages using NER positions.
+      if (item.message.message.role === 'user' && item.message.message.content) {
+        if (item.message.message.sanitized && Array.isArray(item.message.message.nerEntities)) {
+          item.message.message.nerEntities.forEach((entity) => {
+            redactedEntitiesMap[entity.id] = entity.entity;
+          });
+          // transform user messages to react nodes to highlight the sensitive portions in the user message.
+          displayContent = transformUserContent(
+            item.message.message.content,
+            item.message.message.nerEntities
+          );
+        } else {
+          displayContent = item.message.message.content;
+        }
+      }
+      // Process assistant messages: transform the content using the cumulative redactedEntitiesMap.
+      else if (item.message.message.role === 'assistant' && item.message.message.content) {
+        displayContent = transformAssistantContent(
+          item.message.message.content,
+          redactedEntitiesMap
+        );
+      }
+
+      // Create a new item that includes the computed displayContent.
+      const newItem = { ...item, displayContent };
+
       if (item.display.collapsed) {
         if (currentGroup) {
-          currentGroup.push(item);
+          currentGroup.push(newItem);
         } else {
-          currentGroup = [item];
+          currentGroup = [newItem];
           consolidatedChatItems.push(currentGroup);
         }
       } else {
-        consolidatedChatItems.push(item);
+        consolidatedChatItems.push(newItem);
         currentGroup = null;
       }
     }
@@ -153,6 +251,7 @@ export function ChatTimeline({
           <ChatItem
             // use index, not id to prevent unmounting of component when message is persisted
             key={index}
+            displayContent={item.displayContent}
             {...omit(item, 'message')}
             onActionClick={(payload) => {
               onActionClick({ message: item.message, payload });
