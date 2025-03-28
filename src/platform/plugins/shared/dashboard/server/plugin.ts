@@ -67,7 +67,7 @@ export class DashboardPlugin
       })
     );
 
-    core.getStartServices().then(([_, { savedObjectsTagging }]) => {
+    void core.getStartServices().then(([_, { savedObjectsTagging }]) => {
       const { contentClient } = plugins.contentManagement.register({
         id: CONTENT_ID,
         storage: new DashboardStorage({
