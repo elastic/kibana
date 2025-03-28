@@ -29,6 +29,8 @@ export const startAction = (
 
   const panelRect = panelRef.getBoundingClientRect();
 
+  gridLayoutStateManager.activePanel$.next({ id: panelId, position: panelRect });
+
   gridLayoutStateManager.interactionEvent$.next({
     type,
     id: panelId,
