@@ -7,8 +7,8 @@
 
 import type { RouteSecurity } from '@kbn/core-http-server';
 
+import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { API_VERSIONS } from '../../../common/constants';
-
 import type { FleetAuthz } from '../../../common';
 
 import {
@@ -55,6 +55,10 @@ import {
   GetDataStreamsResponseSchema,
   GetBulkAssetsResponseSchema,
   ReauthorizeTransformResponseSchema,
+  BulkUpgradePackagesRequestSchema,
+  BulkUpgradePackagesResponseSchema,
+  GetOneBulkUpgradePackagesRequestSchema,
+  GetOneBulkUpgradePackagesResponseSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -84,6 +88,7 @@ import {
   deletePackageKibanaAssetsHandler,
   installPackageKibanaAssetsHandler,
 } from './kibana_assets_handler';
+import { postBulkUpgradePackagesHandler, getOneBulkUpgradePackagesHandler } from './bulk_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
@@ -119,6 +124,8 @@ export const READ_PACKAGE_INFO_SECURITY: RouteSecurity = {
 };
 
 export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
+  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
+
   router.versioned
     .get({
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
@@ -309,9 +316,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     );
 
   router.versioned
+    // @ts-ignore TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
     .get({
       path: EPM_API_ROUTES.INFO_PATTERN,
-      // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(fleetAuthz, getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_PATTERN))
           .granted,
@@ -445,6 +452,62 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       },
       deletePackageKibanaAssetsHandler
     );
+
+  if (experimentalFeatures.installedIntegrationsTabularUI) {
+    router.versioned
+      .post({
+        path: EPM_API_ROUTES.BULK_UPGRADE_PATTERN,
+        security: INSTALL_PACKAGES_SECURITY,
+        summary: `Bulk upgrade packages`,
+        options: {
+          tags: ['oas-tag:Elastic Package Manager (EPM)'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: BulkUpgradePackagesRequestSchema,
+            response: {
+              200: {
+                body: () => BulkUpgradePackagesResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        postBulkUpgradePackagesHandler
+      );
+
+    router.versioned
+      .get({
+        path: EPM_API_ROUTES.BULK_UPGRADE_INFO_PATTERN,
+        security: INSTALL_PACKAGES_SECURITY,
+        summary: `Get Bulk upgrade packages details`,
+        options: {
+          tags: ['oas-tag:Elastic Package Manager (EPM)'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: GetOneBulkUpgradePackagesRequestSchema,
+            response: {
+              200: {
+                body: () => GetOneBulkUpgradePackagesResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        getOneBulkUpgradePackagesHandler
+      );
+  }
 
   router.versioned
     .post({
@@ -652,9 +715,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
   // Update transforms with es-secondary-authorization headers,
   // append authorized_by to transform's _meta, and start transforms
   router.versioned
+    // @ts-ignore TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
     .post({
       path: EPM_API_ROUTES.REAUTHORIZE_TRANSFORMS,
-      // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
       fleetAuthz: {
         ...INSTALL_PACKAGES_AUTHZ,
         packagePrivileges: {
