@@ -63,6 +63,8 @@ export function getSensorOffsets(e: UserInteractionEvent, { top, left, right, bo
   };
 }
 
+const KEYBOARD_DRAG_BOTTOM_LIMIT = 8;
+
 export const getNextKeyboardPositionForPanel = (
   ev: UserKeyboardEvent,
   gridLayoutStateManager: GridLayoutStateManager,
@@ -114,7 +116,7 @@ export const getNextKeyboardPositionForPanel = (
       // if we're at the end of the scroll of the page, the dragged handle can go down even more so we can reorder with the last row
       const bottomMaxPosition = bottomOfPageReached
         ? panelPosition.bottom + stepY - (panelPosition.bottom - panelPosition.top) * 0.5
-        : panelPosition.bottom + stepY;
+        : panelPosition.bottom + stepY + KEYBOARD_DRAG_BOTTOM_LIMIT;
 
       const isCloseToBottom = bottomMaxPosition > window.innerHeight;
 

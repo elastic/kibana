@@ -9,7 +9,7 @@
 
 import { getGridLayoutStateManagerMock } from '../../test_utils/mocks';
 import { getRowKeysInOrder } from '../../utils/resolve_grid_row';
-import { moveAction } from './row_state_manager_actions';
+import { moveAction } from './state_manager_actions';
 
 describe('row state manager actions', () => {
   const gridLayoutStateManager = getGridLayoutStateManagerMock();
@@ -73,6 +73,7 @@ describe('row state manager actions', () => {
           top: -140,
           left: 80,
         },
+        sensorType: 'mouse',
       });
     });
   });

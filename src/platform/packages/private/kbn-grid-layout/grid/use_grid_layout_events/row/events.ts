@@ -10,7 +10,7 @@
 import { useCallback, useRef } from 'react';
 
 import { useGridLayoutContext } from '../../use_grid_layout_context';
-import { cancelAction, commitAction, moveAction, startAction } from './row_state_manager_actions';
+import { cancelAction, commitAction, moveAction, startAction } from './state_manager_actions';
 import {
   getSensorPosition,
   isKeyboardEvent,
