@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiSpacer, EuiLink, EuiSwitch } from '@elastic/eui';
+import { EuiSpacer, EuiLink, EuiSwitch, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -77,6 +77,18 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
       )}
       <EuiSpacer size="m" />
       <EuiSwitch label="Enable SSL" {...inputs.logstashEnableSSLInput.props} />
+      {inputs.logstashEnableSSLInput.value && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut title="Proceed with caution!" color="warning" iconType="warning">
+            <p>
+              Using TLS ensures that your Elastic Agents send encrypted data to trusted Logstash
+              servers, and that your Logstash servers receive data from trusted Elastic Agent
+              clients.
+            </p>
+          </EuiCallOut>
+        </>
+      )}
       <EuiSpacer size="m" />
       <LogstashInstructions isSSLEnabled={inputs.logstashEnableSSLInput.value} />
       <EuiSpacer size="m" />
