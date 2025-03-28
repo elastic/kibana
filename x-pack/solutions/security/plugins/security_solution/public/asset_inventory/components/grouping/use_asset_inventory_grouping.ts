@@ -36,9 +36,6 @@ import { groupPanelRenderer, groupStatsRenderer } from './utils/asset_inventory_
 import { type AssetsGroupingAggregation, useFetchGroupedData } from './use_fetch_grouped_data';
 import { assetsUnit, groupingTitle, assetGroupsUnit, GROUPING_LABELS } from './translations';
 
-// TODO Remove?
-export const ASSETS_GROUPING_RUNTIME_MAPPING_FIELDS: Record<string, string[]> = {};
-
 const MAX_GROUPING_LEVELS = 3;
 
 // TODO Move to other file?
@@ -108,28 +105,6 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
 };
 
 /**
- * Get runtime mappings for the given group field
- * Some fields require additional runtime mappings to aggregate additional information
- * Fallback to keyword type to support custom fields grouping
- */
-const getRuntimeMappingsByGroupField = (
-  field: string
-): Record<string, { type: 'keyword' }> | undefined => {
-  if (ASSETS_GROUPING_RUNTIME_MAPPING_FIELDS?.[field]) {
-    return ASSETS_GROUPING_RUNTIME_MAPPING_FIELDS[field].reduce(
-      (acc, runtimeField) => ({
-        ...acc,
-        [runtimeField]: {
-          type: 'keyword',
-        },
-      }),
-      {}
-    );
-  }
-  return {};
-};
-
-/**
  * Type Guard for checking if the given source is a AssetsRootGroupingAggregation
  */
 export const isAssetsRootGroupingAggregation = (
@@ -191,7 +166,6 @@ export const useAssetInventoryGrouping = ({
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }],
     statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
-    runtimeMappings: getRuntimeMappingsByGroupField(currentSelectedGroup),
     rootAggregations: [
       {
         ...(!isNoneGroup([currentSelectedGroup]) && {
