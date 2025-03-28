@@ -17,7 +17,7 @@ export class PainlessLab {
 
   constructor(private readonly page: ScoutPage) {
     this.outputValueElement = this.page.testSubj.locator('painlessTabs');
-    this.requestFlyoutHeader = this.page.locator('painlessLabRequestFlyoutHeader');
+    this.requestFlyoutHeader = this.page.testSubj.locator('painlessLabRequestFlyoutHeader');
   }
 
   async goto() {
@@ -48,15 +48,17 @@ export class PainlessLab {
   }
 
   async clickShowApiRequest() {
-    this.page.testSubj.locate('btnViewRequest').click();
+    this.page.testSubj.locator('btnViewRequest').click();
   }
 
   async getFlyoutRequestBody() {
-    return this.page.testSubj.locate('painlessLabFlyoutRequest').innerText();
+    return this.page.testSubj.locator('painlessLabFlyoutRequest').innerText();
   }
 
   async getFlyoutResponseBody() {
     this.page.locator('#response').click();
-    return this.page.testSubj.locate('painlessLabFlyoutResponse').innerText();
+    const flyoutResponse = this.page.testSubj.locator('painlessLabFlyoutResponse');
+    flyoutResponse.isVisible();
+    return flyoutResponse.innerText();
   }
 }
