@@ -153,7 +153,7 @@ export class UnenrollInactiveAgentsTask {
         continue;
       }
       agentCounter += res.agents.length;
-      if (agentCounter >= this.unenrollBatchSize) {
+      if (agentCounter > this.unenrollBatchSize) {
         this.endRun('Reached the maximum amount of agents to unenroll, exiting.');
         return;
       }
