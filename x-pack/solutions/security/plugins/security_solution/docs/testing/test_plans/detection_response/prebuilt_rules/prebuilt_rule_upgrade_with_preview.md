@@ -64,7 +64,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
     - [User gets notified after a new rule versions is released](#user-gets-notified-after-a-new-rule-versions-is-released)
   - [Licensing](#licensing)
     - [**Scenario: User can NOT modify field values in upgrade preview when license is insufficient**](#scenario-user-can-not-modify-field-values-in-upgrade-preview-when-license-is-insufficient)
-    - [**Scenario: User is notified about losing their modifications in upgrade preview when license is insufficient**](#scenario-user-is-notified-about-losing-their-modifications-in-upgrade-preview-when-license-is-insufficient)
+    - [**Scenario: User is warned about losing their customizations in upgrade preview when license is insufficient**](#scenario-user-is-warned-about-losing-their-customizations-in-upgrade-preview-when-license-is-insufficient)
     - [**Scenario: Prebuilt rule is upgraded to target version when upgraded via upgrade preview on insufficient license**](#scenario-prebuilt-rule-is-upgraded-to-target-version-when-upgraded-via-upgrade-preview-on-insufficient-license)
 
 ## Useful information
@@ -79,6 +79,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
 - **CTA to upgrade the prebuilt rule**: the button to upgrade the prebuilt rule currently shown in the Rule Upgrade flyout.
+- **customizable rule fields**: fields of prebuilt rules that are modifiable by user and are taken into account when calculating `is_customized`. Full list can be found in [Common information about prebuilt rules](./prebuilt_rules_common_info.md#customizable-rule-fields).
 
 ## Requirements
 
@@ -741,7 +742,7 @@ And saved custom field values got discarded
 
 #### **Scenario: User can NOT modify field values in upgrade preview when license is insufficient**
 
-**Automation**: 1 e2e test.
+**Automation**: 1 e2e test with a mock rule.
 
 ```Gherkin
 Given a Kibana installation running under an insufficient license
@@ -749,36 +750,37 @@ And an installed prebuilt rule
 And this rule is outdated (a new version is available for this rule)
 When user opens an upgrade preview for this rule
 Then user should see a read-only view of rule fields
-And user should NOT see any edit buttons or forms
+And there should NOT be a possibility to edit any field values
 ```
 
-#### **Scenario: User is notified about losing their modifications in upgrade preview when license is insufficient**
+#### **Scenario: User is warned about losing their customizations in upgrade preview when license is insufficient**
 
-**Automation**: 1 e2e test.
+**Automation**: 1 e2e test with a mock rule.
 
 ```Gherkin
 Given a Kibana installation running under an insufficient license
 And an installed prebuilt rule
-And this rule is outdated (a new version is available for this rule)
+And a base version exists for this rule
 And this rule is different from its base version
-When user opens a Rule Upgrade flyout for this rule
-Then user should see a warning message that their modifications will be lost
+And this rule is outdated (a new version is available for this rule)
+When user opens an upgrade preview for this rule
+Then user should see a warning that their customizations will be lost on upgrade
 ```
 
 #### **Scenario: Prebuilt rule is upgraded to target version when upgraded via upgrade preview on insufficient license**
 
-**Automation**: 2 e2e tests.
+**Automation**: 1 e2e test with a mock rule.
 
 ```Gherkin
 Given a Kibana installation running under an insufficient license
 And an installed prebuilt rule
+And a base version exists for this rule
 And this rule is outdated (a new version is available for this rule)
-And this rule has a base version
 And this rule is <customization_state>
-When user opens a Rule Upgrade flyout for this rule and clicks on CTA
+When user opens an upgrade preview for this rule and clicks on CTA
 Then success message should be displayed after upgrade
 And the upgraded prebuilt rule should be removed from the table
-And the upgraded prebuilt rule fields should be equal to the target version
+And all customizable rule fields should be equal to the target version
 
 <customization_state> = customized | not customized
 ```

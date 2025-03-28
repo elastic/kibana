@@ -114,6 +114,9 @@ Terminology related to UI and UX:
 
 - **CTA**: "call to action", usually a button, a link, or a callout message with a button, etc, that invites the user to do some action.
 
+Terminology related to the rule customization and upgrade workflow:
+- **insufficient license**: a license or a product tier that doesn't allow rule customization. In Serverless environments customization is only allowed on Security Essentials product tier. In non-Serverless environments customization is only allowed on Trial and Enterprise licenses.
+
 ## Common assumptions
 
 **Assumptions about test environments and scenarios** outlined in all of the test plans related to prebuilt rules.

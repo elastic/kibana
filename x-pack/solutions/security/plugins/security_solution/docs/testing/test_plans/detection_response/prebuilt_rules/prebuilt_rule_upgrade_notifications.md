@@ -65,7 +65,6 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - a notification callout shown on the Rule Details page that encourages the user to upgrade the rule to its latest version;
   - a notification callout shown on the Rule Editing page that encourages the user to upgrade the rule to its latest version before editing it.
 - **rule customization**: a change to a customizable field of a prebuilt rule. Full list of customizable rule fields can be found in [Common information about prebuilt rules](./prebuilt_rules_common_info.md#customizable-rule-fields).
-- **insufficient license**: a license or a product tier that doesn't allow rule customization. In Serverless environments customization is only allowed on Security Essentials product tier. In non-Serverless environments customization is only allowed on Trial and Enterprise licenses.
 
 ## Requirements
 
@@ -340,7 +339,7 @@ And user should NOT be able to dismiss it
 
 #### **Scenario: User is NOT notified on the Rule Editing page when the license is insufficient**
 
-**Automation**: 1 e2e test with mock rules.
+**Automation**: 1 e2e test with a mock rule
 
 ```Gherkin
 Given a prebuilt rule is installed in Kibana
