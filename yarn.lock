@@ -5906,10 +5906,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/investigation-shared@link:x-pack/solutions/observability/packages/kbn-investigation-shared":
-  version "0.0.0"
-  uid ""
-
 "@kbn/io-ts-utils@link:src/platform/packages/shared/kbn-io-ts-utils":
   version "0.0.0"
   uid ""

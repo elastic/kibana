@@ -1114,8 +1114,6 @@
       "@kbn/inventory-e2e/*": ["x-pack/solutions/observability/plugins/inventory/e2e/*"],
       "@kbn/inventory-plugin": ["x-pack/solutions/observability/plugins/inventory"],
       "@kbn/inventory-plugin/*": ["x-pack/solutions/observability/plugins/inventory/*"],
-      "@kbn/investigation-shared": ["x-pack/solutions/observability/packages/kbn-investigation-shared"],
-      "@kbn/investigation-shared/*": ["x-pack/solutions/observability/packages/kbn-investigation-shared/*"],
       "@kbn/io-ts-utils": ["src/platform/packages/shared/kbn-io-ts-utils"],
       "@kbn/io-ts-utils/*": ["src/platform/packages/shared/kbn-io-ts-utils/*"],
       "@kbn/ipynb": ["x-pack/solutions/search/packages/kbn-ipynb"],
