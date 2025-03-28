@@ -83,7 +83,7 @@ const missingRiskEnginePrivileges: RiskEngineMissingPrivilegesResponse = {
   isLoading: false,
   hasAllRequiredPrivileges: false,
   missingPrivileges: {
-    clusterPrivileges: [],
+    clusterPrivileges: { enable: [], run: [] },
     indexPrivileges: [],
   },
 };
