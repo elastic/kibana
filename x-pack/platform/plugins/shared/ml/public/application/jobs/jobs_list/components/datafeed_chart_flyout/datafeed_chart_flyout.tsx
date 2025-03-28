@@ -451,6 +451,9 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                                 visible: 'never',
                               },
                             },
+                            chartMargins: {
+                              top: 10,
+                            },
                           }}
                           baseTheme={baseTheme}
                           locale={i18n.getLocale()}
