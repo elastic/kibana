@@ -16,7 +16,7 @@ To create this connector, you must have a valid PagerDuty integration key. For c
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
 
-:::{image} ../../images/pagerduty-connector.png
+:::{image} ../images/pagerduty-connector.png
 :alt: PagerDuty connector
 :class: screenshot
 :::
@@ -51,7 +51,7 @@ When you create a rule that uses a PagerDuty connector, you can use any of these
 
 When you test the acknowlege action, you must provide the de-duplication key for a PagerDuty alert:
 
-:::{image} ../../images/pagerduty-acknowledge-test.png
+:::{image} ../images/pagerduty-acknowledge-test.png
 :alt: PagerDuty params test
 :class: screenshot
 :::
@@ -61,7 +61,7 @@ When you test the acknowlege action, you must provide the de-duplication key for
 
 Likewise when you test the resolve action, you must provide the de-duplication key:
 
-:::{image} ../../images/pagerduty-resolve-test.png
+:::{image} ../images/pagerduty-resolve-test.png
 :alt: PagerDuty params test
 :class: screenshot
 :::
@@ -71,7 +71,7 @@ Likewise when you test the resolve action, you must provide the de-duplication k
 
 When you test the trigger action, you must provide a summary for the PagerDuty alert:
 
-:::{image} ../../images/pagerduty-trigger-test.png
+:::{image} ../images/pagerduty-trigger-test.png
 :alt: PagerDuty params test
 :class: screenshot
 :::
@@ -144,7 +144,7 @@ To set up PagerDuty:
 
     You will be redirected to the **Integrations** tab for your service. An Integration Key is generated on this screen.
 
-    :::{image} ../../images/pagerduty-integration.png
+    :::{image} ../images/pagerduty-integration.png
     :alt: PagerDuty Integrations tab
     :class: screenshot
     :::
