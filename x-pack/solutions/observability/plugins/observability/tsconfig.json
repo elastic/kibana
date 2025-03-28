@@ -75,7 +75,6 @@
     "@kbn/core-chrome-browser",
     "@kbn/navigation-plugin",
     "@kbn/observability-alert-details",
-    "@kbn/investigation-shared",
     "@kbn/alerting-rule-utils",
     "@kbn/ui-theme",
     "@kbn/core-application-common",

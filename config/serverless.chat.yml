@@ -14,8 +14,6 @@ xpack.apm.enabled: false
 xpack.entities_data_access.enabled: false
 xpack.infra.enabled: false
 xpack.inventory.enabled: false
-xpack.investigate.enabled: false
-xpack.investigateApp.enabled: false
 xpack.observability.enabled: false
 xpack.observabilityAIAssistantApp.enabled: false
 xpack.observabilityLogsExplorer.enabled: false
