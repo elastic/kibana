@@ -390,6 +390,9 @@ Banners are disabled by default. You need to manually configure them in order to
 `xpack.banners.textColor`
 :   The color for the banner text. Defaults to `#8A6A0A`.
 
+`xpack.banners.linkColor`
+:   The color for the banner link text. Defaults to `#0B64DD`.
+
 `xpack.banners.backgroundColor`
 :   The color of the banner background. Defaults to `#FFF9E8`.
 
@@ -508,7 +511,7 @@ If search latency in {{es}} is sufficiently high, such as if you are using cross
 ## Logging and audit settings [ec_logging_and_audit_settings]
 
 ::::{note}
-To change logging settings or to enable auditing you must first [enable deployment logging](docs-content://deploy-manage/monitor/stack-monitoring/elastic-cloud-stack-monitoring.md).
+To change logging settings or to enable auditing you must first [enable deployment logging](docs-content://deploy-manage/monitor/stack-monitoring/ece-ech-stack-monitoring.md).
 ::::
 
 

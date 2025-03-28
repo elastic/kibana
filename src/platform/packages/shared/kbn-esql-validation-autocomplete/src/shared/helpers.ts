@@ -41,6 +41,7 @@ import {
   ArrayType,
   SupportedDataType,
   FunctionDefinitionTypes,
+  getLocationFromCommandOrOptionName,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
@@ -164,9 +165,7 @@ export function isSupportedFunction(
   }
   const fn = buildFunctionLookup().get(name);
   const isSupported = Boolean(
-    option == null
-      ? fn?.supportedCommands.includes(parentCommand)
-      : fn?.supportedOptions?.includes(option)
+    fn?.locationsAvailable.includes(getLocationFromCommandOrOptionName(option ?? parentCommand))
   );
   return {
     supported: isSupported,

@@ -12,8 +12,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Tab } from './tab';
 import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../../constants';
-import { TabStatus } from '../../types';
 import { servicesMock } from '../../../__mocks__/services';
+import { getPreviewDataMock } from '../../../__mocks__/get_preview_data';
 
 const tabItem = {
   id: 'test-id',
@@ -29,13 +29,6 @@ const tabsSizeConfig = {
   regularTabMinWidth: MIN_TAB_WIDTH,
 };
 
-const previewQuery = {
-  query: {
-    esql: 'SELECT * FROM table',
-  },
-  status: TabStatus.SUCCESS,
-};
-
 describe('Tab', () => {
   it('renders tab', async () => {
     const onLabelEdited = jest.fn();
@@ -49,10 +42,10 @@ describe('Tab', () => {
         item={tabItem}
         isSelected={false}
         services={servicesMock}
+        getPreviewData={getPreviewDataMock}
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
-        tabPreviewData={previewQuery}
       />
     );
 
@@ -95,10 +88,10 @@ describe('Tab', () => {
         isSelected={false}
         services={servicesMock}
         getTabMenuItems={getTabMenuItems}
+        getPreviewData={getPreviewDataMock}
         onLabelEdited={jest.fn()}
         onSelect={jest.fn()}
         onClose={jest.fn()}
-        tabPreviewData={previewQuery}
       />
     );
 
@@ -125,10 +118,10 @@ describe('Tab', () => {
         item={tabItem}
         isSelected={false}
         services={servicesMock}
+        getPreviewData={getPreviewDataMock}
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
-        tabPreviewData={previewQuery}
       />
     );
 
@@ -160,10 +153,10 @@ describe('Tab', () => {
         item={tabItem}
         isSelected={false}
         services={servicesMock}
+        getPreviewData={getPreviewDataMock}
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
-        tabPreviewData={previewQuery}
       />
     );
 
