@@ -15,8 +15,8 @@ import { updateIndex } from '../lib/update_index';
 
 export function registerUpdateIndexRoute({
   router,
-  log,
   lib: { handleEsError },
+  log,
 }: RouteDependencies) {
   const BASE_PATH = `${API_BASE_PATH}/update_index`;
   router.post(
@@ -50,7 +50,12 @@ export function registerUpdateIndexRoute({
       const { index } = request.params;
       const { operations } = request.body;
       try {
-        await updateIndex({ esClient: client.asCurrentUser, index, operations, log });
+        await updateIndex({
+          esClient: client.asCurrentUser,
+          index,
+          operations,
+          log,
+        });
         return response.ok();
       } catch (err) {
         if (err instanceof errors.ResponseError) {
