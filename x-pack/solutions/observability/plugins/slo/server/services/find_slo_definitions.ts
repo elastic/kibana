@@ -25,7 +25,7 @@ export class FindSLODefinitions {
     const requestTags: string[] = params.tags?.split(',') ?? [];
 
     const result = await this.repository.search(params.search ?? '', toPagination(params), {
-      includeOutdatedOnly: params.includeOutdatedOnly === true,
+      version: params.version,
       tags: requestTags,
     });
     return findSloDefinitionsResponseSchema.encode(result);

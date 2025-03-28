@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FindSLODefinitionsResponse } from '@kbn/slo-schema';
+import { FindSLODefinitionsResponse, SLODefinitionVersions } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
 import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';
@@ -20,7 +20,7 @@ export interface UseFetchSloDefinitionsResponse {
 
 interface SLODefinitionParams {
   name?: string;
-  includeOutdatedOnly?: boolean;
+  version?: SLODefinitionVersions;
   tags?: string[];
   page?: number;
   perPage?: number;
@@ -28,7 +28,7 @@ interface SLODefinitionParams {
 
 export function useFetchSloDefinitions({
   name = '',
-  includeOutdatedOnly = false,
+  version,
   tags = [],
   page = 1,
   perPage = 100,
@@ -38,14 +38,14 @@ export function useFetchSloDefinitions({
   const validTags = tags.filter((tag) => !!tag).join();
 
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({
-    queryKey: sloKeys.definitions({ search, page, perPage, includeOutdatedOnly, validTags }),
+    queryKey: sloKeys.definitions({ search, page, perPage, version, validTags }),
     queryFn: async ({ signal }) => {
       try {
         return await sloClient.fetch('GET /api/observability/slos/_definitions 2023-10-31', {
           params: {
             query: {
               ...(search !== undefined && { search }),
-              ...(includeOutdatedOnly !== undefined && { includeOutdatedOnly }),
+              ...(version !== undefined && { version }),
               ...(validTags?.length && { tags: validTags }),
               ...(page !== undefined && { page: String(page) }),
               ...(perPage !== undefined && { perPage: String(perPage) }),

@@ -7,7 +7,13 @@
 
 import { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
-import { ALL_VALUE, Paginated, Pagination, sloDefinitionSchema } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  Paginated,
+  Pagination,
+  sloDefinitionSchema,
+  SLODefinitionVersions,
+} from '@kbn/slo-schema';
 import { isLeft } from 'fp-ts/lib/Either';
 import { merge } from 'lodash';
 import { SLO_MODEL_VERSION } from '../../common/constants';
@@ -25,7 +31,7 @@ export interface SLORepository {
     search: string,
     pagination: Pagination,
     options?: {
-      includeOutdatedOnly: boolean;
+      version?: SLODefinitionVersions;
       tags: string[];
     }
   ): Promise<Paginated<SLODefinition>>;
@@ -116,17 +122,19 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     search: string,
     pagination: Pagination,
     options: {
-      includeOutdatedOnly: boolean;
+      version?: SLODefinitionVersions;
       tags: string[];
-    } = { includeOutdatedOnly: false, tags: [] }
+    } = { tags: [] }
   ): Promise<Paginated<SLODefinition>> {
-    const { includeOutdatedOnly, tags } = options;
+    const { version, tags } = options;
     const filter = [];
     if (tags.length > 0) {
       filter.push(`slo.attributes.tags: (${tags.join(' OR ')})`);
     }
 
-    if (!!includeOutdatedOnly) {
+    if (version === 'current') {
+      filter.push(`slo.attributes.version : ${SLO_MODEL_VERSION}`);
+    } else if (version === 'outdated') {
       filter.push(`slo.attributes.version < ${SLO_MODEL_VERSION}`);
     }
 

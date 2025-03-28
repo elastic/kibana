@@ -714,11 +714,15 @@
             "$ref": "#/components/parameters/space_id"
           },
           {
-            "name": "includeOutdatedOnly",
+            "name": "version",
             "in": "query",
             "description": "Indicates if the API returns only outdated SLO or all SLO definitions",
             "schema": {
-              "type": "boolean"
+              "type": "string",
+              "enum": [
+                "current",
+                "outdated"
+              ]
             },
             "example": true
           },

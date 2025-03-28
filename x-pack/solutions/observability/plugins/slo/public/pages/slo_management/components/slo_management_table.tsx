@@ -36,16 +36,11 @@ import { SloResetConfirmationModal } from '../../../components/slo/reset_confirm
 import { SloEnableConfirmationModal } from '../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
 import { SloDisableConfirmationModal } from '../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
 import { SLO_MODEL_VERSION } from '../../../../common/constants';
-import { useUrlSearchState } from './hooks/use_url_search_state';
-
-interface SearchFilters {
-  search: string;
-  tags: string[];
-}
+import { SearchState, useUrlSearchState } from './hooks/use_url_search_state';
 
 export function SloManagementTable() {
   const { state, onStateChange } = useUrlSearchState();
-  const { search, includeOutdatedOnly, page, perPage, tags } = state;
+  const { search, version, page, perPage, tags } = state;
   const { services } = useKibana();
 
   const {
@@ -54,7 +49,7 @@ export function SloManagementTable() {
   } = services;
 
   const { isLoading, isError, data, refetch } = useFetchSloDefinitions({
-    includeOutdatedOnly: !!includeOutdatedOnly,
+    version,
     page: page + 1,
     perPage,
     name: search,
@@ -113,12 +108,8 @@ export function SloManagementTable() {
     setSloToDisable(undefined);
   };
 
-  const updateFilter = (filters: SearchFilters) => {
-    onStateChange({
-      ...state,
-      search: filters.search,
-      tags: filters.tags,
-    });
+  const updateFilter = (newState: SearchState) => {
+    onStateChange(newState);
   };
 
   const navigateToClone = useCloneSlo();
@@ -304,7 +295,12 @@ export function SloManagementTable() {
   return (
     <>
       <EuiPanel hasBorder={true}>
-        <SloManagementSearchBar state={state} onRefresh={refetch} updateFilter={updateFilter} />
+        <SloManagementSearchBar
+          initialVersion={state.version}
+          state={state}
+          onRefresh={refetch}
+          updateFilter={updateFilter}
+        />
         <EuiSpacer size="m" />
         <EuiBasicTable<SLODefinitionResponse>
           tableCaption={TABLE_CAPTION}

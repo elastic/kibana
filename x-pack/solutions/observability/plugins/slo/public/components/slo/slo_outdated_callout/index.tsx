@@ -22,11 +22,11 @@ export function SloOutdatedCallout() {
   } = useKibana().services;
 
   const handleClick = () => {
-    onStateChange({ includeOutdatedOnly: true });
+    onStateChange({ version: 'outdated' });
     navigateToUrl(basePath.prepend(paths.slosManagement));
   };
 
-  const { isLoading, data } = useFetchSloDefinitions({ includeOutdatedOnly: true });
+  const { isLoading, data } = useFetchSloDefinitions({});
   if (!isLoading && data && data.total > 0) {
     return (
       <>
