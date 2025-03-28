@@ -343,7 +343,12 @@ export class AlertsClient<
   }
 
   public isTrackedAlert(id: string) {
-    return !!this.trackedAlerts.getById(id);
+    const alert = this.trackedAlerts.getById(id);
+    const uuid = alert?.[ALERT_UUID];
+    if (uuid) {
+      return !!this.trackedAlerts.active[uuid];
+    }
+    return false;
   }
 
   public hasReachedAlertLimit(): boolean {

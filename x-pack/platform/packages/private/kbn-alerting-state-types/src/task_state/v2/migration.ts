@@ -6,23 +6,14 @@
  */
 
 import { type TypeOf } from '@kbn/config-schema';
-import { isJSONObject, isString, isStringArray } from '../lib';
+import { isStringArray } from '../lib';
 import { versionSchema } from './schema';
-
-import {
-  migrateAlertInstances as migrateAlertInstancesV1,
-  migrateThrottledActions as migrateThrottledActionsV1,
-} from '../v1/migration';
 
 type VersionSchema = TypeOf<typeof versionSchema>;
 
 export const upMigration = (state: Record<string, unknown>): VersionSchema => {
   return {
-    alertTypeState: isJSONObject(state.alertTypeState) ? state.alertTypeState : undefined,
-    alertInstances: migrateAlertInstancesV1(state.alertInstances),
-    alertRecoveredInstances: migrateAlertInstancesV1(state.alertRecoveredInstances),
-    previousStartedAt: isString(state.previousStartedAt) ? state.previousStartedAt : undefined,
-    summaryActions: migrateThrottledActionsV1(state.summaryActions),
+    ...state,
     trackedExecutions: isStringArray(state.trackedExecutions) ? state.trackedExecutions : undefined,
   };
 };
