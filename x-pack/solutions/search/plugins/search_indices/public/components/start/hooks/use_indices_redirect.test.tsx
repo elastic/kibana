@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useIndicesRedirect } from './use_indices_redirect';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { UserStartPrivilegesResponse, IndicesStatusResponse } from '../../../../common';
