@@ -97,12 +97,12 @@ const RulesSettingsFlyoutWithProviders: React.FunctionComponent<RulesSettingsFly
   </IntlProvider>
 );
 
-const waitForFlyoutLoad = async (options?: {
+const waitForModalLoad = async (options?: {
   flappingSection?: boolean;
   queryDelaySection?: boolean;
 }) => {
   await waitFor(() => {
-    expect(screen.queryByTestId('rulesSettingsFlyout')).not.toBe(null);
+    expect(screen.queryByTestId('centerJustifiedSpinner')).toBe(null);
   });
 
   const { flappingSection = true, queryDelaySection = true } = options || {};
@@ -117,7 +117,7 @@ const waitForFlyoutLoad = async (options?: {
   });
 };
 
-describe('rules_settings_flyout', () => {
+describe('rules_settings_modal', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
 
@@ -162,7 +162,7 @@ describe('rules_settings_flyout', () => {
   test('renders flapping settings correctly', async () => {
     const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     expect(fetchFlappingSettingsMock).toHaveBeenCalledTimes(1);
-    await waitForFlyoutLoad();
+    await waitForModalLoad();
     expect(
       result.getByTestId('rulesSettingsFlappingEnableSwitch').getAttribute('aria-checked')
     ).toBe('true');
@@ -176,8 +176,8 @@ describe('rules_settings_flyout', () => {
   });
 
   test('can save flapping settings', async () => {
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
-    await waitForFlyoutLoad();
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
+    await waitForModalLoad();
 
     const lookBackWindowInput = result.getByTestId('lookBackWindowRangeInput');
     const statusChangeThresholdInput = result.getByTestId('statusChangeThresholdRangeInput');
@@ -192,9 +192,9 @@ describe('rules_settings_flyout', () => {
     await userEvent.click(result.getByTestId('rulesSettingsFlyoutSaveButton'));
 
     await waitFor(() => {
-      expect(flyoutProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
+      expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
     });
-    expect(flyoutProps.onClose).toHaveBeenCalledTimes(1);
+    expect(modalProps.onClose).toHaveBeenCalledTimes(1);
     expect(updateFlappingSettingsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         flappingSettings: {
@@ -205,15 +205,15 @@ describe('rules_settings_flyout', () => {
       })
     );
     expect(useKibanaMock().services.notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
-    expect(flyoutProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
-    expect(flyoutProps.onSave).toHaveBeenCalledTimes(1);
+    expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
+    expect(modalProps.onSave).toHaveBeenCalledTimes(1);
   });
 
   test('reset flapping settings to initial state on cancel without triggering another server reload', async () => {
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
     expect(fetchFlappingSettingsMock).toHaveBeenCalledTimes(1);
     expect(getQueryDelaySettingsMock).toHaveBeenCalledTimes(1);
-    await waitForFlyoutLoad();
+    await waitForModalLoad();
 
     const lookBackWindowInput = result.getByTestId('lookBackWindowRangeInput');
     const statusChangeThresholdInput = result.getByTestId('statusChangeThresholdRangeInput');
@@ -227,9 +227,9 @@ describe('rules_settings_flyout', () => {
     // Try cancelling
     await userEvent.click(result.getByTestId('rulesSettingsFlyoutCancelButton'));
 
-    expect(flyoutProps.onClose).toHaveBeenCalledTimes(1);
+    expect(modalProps.onClose).toHaveBeenCalledTimes(1);
     expect(updateFlappingSettingsMock).not.toHaveBeenCalled();
-    expect(flyoutProps.onSave).not.toHaveBeenCalled();
+    expect(modalProps.onSave).not.toHaveBeenCalled();
 
     expect(screen.queryByTestId('centerJustifiedSpinner')).toBe(null);
     expect(lookBackWindowInput.getAttribute('value')).toBe('10');
@@ -240,8 +240,8 @@ describe('rules_settings_flyout', () => {
   });
 
   test('should prevent statusChangeThreshold from being greater than lookBackWindow', async () => {
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
-    await waitForFlyoutLoad();
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
+    await waitForModalLoad();
 
     const lookBackWindowInput = result.getByTestId('lookBackWindowRangeInput');
     const statusChangeThresholdInput = result.getByTestId('statusChangeThresholdRangeInput');
@@ -263,8 +263,8 @@ describe('rules_settings_flyout', () => {
   test('handles errors when saving settings', async () => {
     updateFlappingSettingsMock.mockRejectedValue('failed!');
 
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
-    await waitForFlyoutLoad();
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
+    await waitForModalLoad();
 
     const lookBackWindowInput = result.getByTestId('lookBackWindowRangeInput');
     const statusChangeThresholdInput = result.getByTestId('statusChangeThresholdRangeInput');
@@ -278,17 +278,17 @@ describe('rules_settings_flyout', () => {
     // Try saving
     await userEvent.click(result.getByTestId('rulesSettingsFlyoutSaveButton'));
     await waitFor(() => {
-      expect(flyoutProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
+      expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
     });
-    expect(flyoutProps.onClose).toHaveBeenCalledTimes(1);
+    expect(modalProps.onClose).toHaveBeenCalledTimes(1);
     expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
-    expect(flyoutProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
-    expect(flyoutProps.onSave).toHaveBeenCalledTimes(1);
+    expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
+    expect(modalProps.onSave).toHaveBeenCalledTimes(1);
   });
 
   test('displays flapping detection off prompt when flapping is disabled', async () => {
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
-    await waitForFlyoutLoad();
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
+    await waitForModalLoad();
 
     expect(result.queryByTestId('rulesSettingsFlappingOffPrompt')).toBe(null);
     await userEvent.click(result.getByTestId('rulesSettingsFlappingEnableSwitch'));
@@ -310,8 +310,8 @@ describe('rules_settings_flyout', () => {
         readFlappingSettingsUI: true,
       },
     };
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
-    await waitForFlyoutLoad({ queryDelaySection: false });
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
+    await waitForModalLoad({ queryDelaySection: false });
 
     expect(result.getByTestId('rulesSettingsFlappingEnableSwitch')).toBeDisabled();
     expect(result.getByTestId('lookBackWindowRangeInput')).toBeDisabled();
@@ -334,17 +334,20 @@ describe('rules_settings_flyout', () => {
         readFlappingSettingsUI: false,
       },
     };
+    await waitForModalLoad({ flappingSection: false, queryDelaySection: false });
 
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
-    await waitForFlyoutLoad({ flappingSection: false, queryDelaySection: false });
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
+    await waitFor(() => {
+      expect(result.queryByTestId('centerJustifiedSpinner')).toBe(null);
+    });
 
     expect(result.queryByTestId('rulesSettingsFlappingSection')).toBe(null);
   });
 
   test('renders query delay settings correctly', async () => {
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
     expect(getQueryDelaySettingsMock).toHaveBeenCalledTimes(1);
-    await waitForFlyoutLoad();
+    await waitForModalLoad();
     expect(result.getByTestId('queryDelayRangeInput').getAttribute('value')).toBe('10');
 
     expect(result.getByTestId('rulesSettingsFlyoutCancelButton')).toBeInTheDocument();
@@ -354,8 +357,8 @@ describe('rules_settings_flyout', () => {
   });
 
   test('can save query delay settings', async () => {
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
-    await waitForFlyoutLoad();
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
+    await waitForModalLoad();
 
     const queryDelayRangeInput = result.getByTestId('queryDelayRangeInput');
     fireEvent.change(queryDelayRangeInput, { target: { value: 20 } });
@@ -365,9 +368,9 @@ describe('rules_settings_flyout', () => {
     await userEvent.click(result.getByTestId('rulesSettingsFlyoutSaveButton'));
 
     await waitFor(() => {
-      expect(flyoutProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
+      expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
     });
-    expect(flyoutProps.onClose).toHaveBeenCalledTimes(1);
+    expect(modalProps.onClose).toHaveBeenCalledTimes(1);
     expect(updateQueryDelaySettingsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         queryDelaySettings: {
@@ -376,15 +379,15 @@ describe('rules_settings_flyout', () => {
       })
     );
     expect(useKibanaMock().services.notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
-    expect(flyoutProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
-    expect(flyoutProps.onSave).toHaveBeenCalledTimes(1);
+    expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
+    expect(modalProps.onSave).toHaveBeenCalledTimes(1);
   });
 
   test('handles errors when saving query delay settings', async () => {
     updateQueryDelaySettingsMock.mockRejectedValue('failed!');
 
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
-    await waitForFlyoutLoad();
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
+    await waitForModalLoad();
 
     const queryDelayRangeInput = result.getByTestId('queryDelayRangeInput');
     fireEvent.change(queryDelayRangeInput, { target: { value: 20 } });
@@ -393,12 +396,12 @@ describe('rules_settings_flyout', () => {
     // Try saving
     await userEvent.click(result.getByTestId('rulesSettingsFlyoutSaveButton'));
     await waitFor(() => {
-      expect(flyoutProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
+      expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
     });
-    expect(flyoutProps.onClose).toHaveBeenCalledTimes(1);
+    expect(modalProps.onClose).toHaveBeenCalledTimes(1);
     expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
-    expect(flyoutProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
-    expect(flyoutProps.onSave).toHaveBeenCalledTimes(1);
+    expect(modalProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
+    expect(modalProps.onSave).toHaveBeenCalledTimes(1);
   });
 
   test('query delay form elements are disabled when provided with insufficient write permissions', async () => {
@@ -416,8 +419,8 @@ describe('rules_settings_flyout', () => {
         readQueryDelaySettingsUI: true,
       },
     };
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
-    await waitForFlyoutLoad({ flappingSection: false });
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
+    await waitForModalLoad({ flappingSection: false });
 
     expect(result.getByTestId('queryDelayRangeInput')).toBeDisabled();
     expect(result.getByTestId('rulesSettingsFlyoutSaveButton')).toBeDisabled();
@@ -439,16 +442,16 @@ describe('rules_settings_flyout', () => {
       },
     };
 
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
-    await waitForFlyoutLoad({ flappingSection: false, queryDelaySection: false });
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
+    await waitForModalLoad({ flappingSection: false, queryDelaySection: false });
 
     expect(result.queryByTestId('rulesSettingsQueryDelaySection')).toBe(null);
   });
 
   test('hides query delay settings when not serverless', async () => {
     useKibanaMock().services.isServerless = false;
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
-    await waitForFlyoutLoad({ queryDelaySection: false });
+    const result = render(<rulesSettingsFlyoutWithProviders {...modalProps} />);
+    await waitForModalLoad({ queryDelaySection: false });
     expect(result.queryByTestId('rulesSettingsQueryDelaySection')).not.toBeInTheDocument();
   });
 });

@@ -28,26 +28,20 @@ import {
 } from './rules_settings_flapping_form_section';
 
 const flappingDescription = i18n.translate(
-  'xpack.triggersActionsUI.rulesSettings.modal.flappingDetectionDescription',
+  'xpack.triggersActionsUI.rulesSettings.flappingDetectionDescription',
   {
     defaultMessage:
       'Detect alerts that switch quickly between active and recovered states and reduce unwanted noise for these flapping alerts.',
   }
 );
 
-const flappingOnLabel = i18n.translate(
-  'xpack.triggersActionsUI.rulesSettings.modal.flappingOnLabel',
-  {
-    defaultMessage: 'On (recommended)',
-  }
-);
+const flappingOnLabel = i18n.translate('xpack.triggersActionsUI.rulesSettings.flappingOnLabel', {
+  defaultMessage: 'On (recommended)',
+});
 
-const flappingOffLabel = i18n.translate(
-  'xpack.triggersActionsUI.rulesSettings.modal.flappingOffLabel',
-  {
-    defaultMessage: 'Off',
-  }
-);
+const flappingOffLabel = i18n.translate('xpack.triggersActionsUI.rulesSettings.flappingOffLabel', {
+  defaultMessage: 'Off',
+});
 
 export const RulesSettingsFlappingErrorPrompt = memo(() => {
   return (
@@ -58,7 +52,7 @@ export const RulesSettingsFlappingErrorPrompt = memo(() => {
       title={
         <h4>
           <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.modal.flappingErrorPromptTitle"
+            id="xpack.triggersActionsUI.rulesSettings.flappingErrorPromptTitle"
             defaultMessage="Unable to load your flapping settings"
           />
         </h4>
@@ -66,7 +60,7 @@ export const RulesSettingsFlappingErrorPrompt = memo(() => {
       body={
         <p>
           <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.modal.flappingErrorPromptBody"
+            id="xpack.triggersActionsUI.rulesSettings.flappingErrorPromptBody"
             defaultMessage="There was an error loading your flapping settings. Contact your administrator for help"
           />
         </p>
