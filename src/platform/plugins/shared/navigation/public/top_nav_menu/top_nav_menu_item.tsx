@@ -53,7 +53,13 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
 
   function handleClick(event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) {
     if (isDisabled()) return;
-    if (props.href && isModifiedEvent(event)) return;
+    if (props.href) {
+      if (isModifiedEvent(event)) {
+        return;
+      }
+
+      event.preventDefault();
+    }
 
     props.run(event.currentTarget);
     if (props.isMobileMenu) {
