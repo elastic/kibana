@@ -126,7 +126,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       filter.push(`slo.attributes.tags: (${tags.join(' OR ')})`);
     }
 
-    if (includeOutdatedOnly) {
+    if (!!includeOutdatedOnly) {
       filter.push(`slo.attributes.version < ${SLO_MODEL_VERSION}`);
     }
 
