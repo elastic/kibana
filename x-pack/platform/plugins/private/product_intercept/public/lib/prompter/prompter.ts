@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import * as Rx from 'rxjs';
+import React from 'react';
+import { css, Global } from '@emotion/react';
 import type { CoreStart, CoreSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
@@ -36,6 +37,7 @@ export class ProductInterceptPrompter {
   private userProfile?: Rx.ObservedValueOf<
     ReturnType<ProductInterceptPrompterStartDeps['userProfile']['getUserProfile$']>
   >;
+  private staticAssetsHelper?: CoreStart['http']['staticAssets'];
 
   setup({ analytics }: ProductInterceptPrompterSetupDeps) {
     return this.telemetry.setup({ analytics });
@@ -45,6 +47,7 @@ export class ProductInterceptPrompter {
     const eventReporter = this.telemetry.start({ analytics });
 
     this.userProfileService = userProfile;
+    this.staticAssetsHelper = http.staticAssets;
 
     http
       .get<{
@@ -111,14 +114,31 @@ export class ProductInterceptPrompter {
             values: { runId: String(runId) },
           }),
           content: () =>
-            React.createElement(
-              EuiText,
-              {},
-              i18n.translate('productIntercept.prompter.step.start.content', {
-                defaultMessage:
-                  'We are always looking for ways to improve Kibana. Please take a moment to share your feedback with us.',
-              })
-            ),
+            React.createElement(React.Fragment, {}, [
+              React.createElement(
+                Global,
+                {
+                  key: 'productInterceptPrompterGlobalStyles',
+                  styles: css`
+                    :root {
+                      --intercept-background: url(${this.staticAssetsHelper?.getPluginAssetHref(
+                          'magnifying_glass_search.png'
+                        )})
+                        no-repeat right;
+                    }
+                  `,
+                },
+                null
+              ),
+              React.createElement(
+                EuiText,
+                { key: 'productInterceptPrompterStartContent' },
+                i18n.translate('productIntercept.prompter.step.start.content', {
+                  defaultMessage:
+                    'We are always looking for ways to improve Kibana. Please take a moment to share your feedback with us.',
+                })
+              ),
+            ]),
         },
         {
           id: 'satisfaction',

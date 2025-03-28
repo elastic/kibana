@@ -146,6 +146,8 @@ export function InterceptDisplayManager({ ackIntercept, intercept$ }: InterceptD
         <EuiSplitPanel.Inner
           css={css`
             min-height: 112px;
+            position: relative;
+            background: var(--intercept-background);
           `}
           data-test-subj={`interceptStep-${currentInterceptStep.id}`}
         >
