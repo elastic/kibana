@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -43,7 +44,7 @@ export const ElasticsearchQueryViewer = ({
     name: ChatFormFields.elasticsearchQuery,
   });
   const {
-    field: { value: userElasticsearchQuery },
+    field: { value: userElasticsearchQuery, onChange: onChangeUserQuery },
   } = useController<ChatForm, ChatFormFields.userElasticsearchQuery>({
     name: ChatFormFields.userElasticsearchQuery,
   });
@@ -56,6 +57,9 @@ export const ElasticsearchQueryViewer = ({
     () => formatElasticsearchQueryString(elasticsearchQuery),
     [elasticsearchQuery]
   );
+  const resetElasticsearchQuery = useCallback(() => {
+    onChangeUserQuery(generatedEsQuery);
+  }, [onChangeUserQuery, generatedEsQuery]);
   const editorMounted = useCallback((editor: monacoEditor.editor.IStandaloneCodeEditor) => {
     monacoEditor.languages.json.jsonDefaults.setDiagnosticsOptions({
       validate: true,
@@ -66,8 +70,8 @@ export const ElasticsearchQueryViewer = ({
   return (
     <EuiSplitPanel.Outer grow hasBorder css={FullHeight}>
       <EuiSplitPanel.Inner grow={false} css={QueryViewTitlePanel(euiTheme)}>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+          <EuiFlexItem grow>
             <EuiFlexGroup gutterSize="s">
               <EuiText>
                 <h5>
@@ -94,6 +98,22 @@ export const ElasticsearchQueryViewer = ({
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
+          {userElasticsearchQueryValidations?.isUserCustomized ? (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                iconSide="left"
+                iconType="refresh"
+                data-test-subj="ResetElasticsearchQueryButton"
+                onClick={resetElasticsearchQuery}
+              >
+                <FormattedMessage
+                  id="xpack.searchPlayground.viewQuery.resetQuery.action"
+                  defaultMessage="Reset to default"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
