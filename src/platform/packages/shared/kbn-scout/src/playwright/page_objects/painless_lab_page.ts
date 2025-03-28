@@ -13,9 +13,11 @@ const DEFAULT_LOADING_TIMEOUT = 10_000;
 
 export class PainlessLab {
   public outputValueElement: Locator;
+  public requestFlyoutHeader: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.outputValueElement = this.page.testSubj.locator('painlessTabs');
+    this.requestFlyoutHeader = this.page.locator('painlessLabRequestFlyoutHeader');
   }
 
   async goto() {
@@ -43,5 +45,18 @@ export class PainlessLab {
       },
       [nthIndex, value]
     );
+  }
+
+  async clickShowApiRequest() {
+    this.page.testSubj.locate('btnViewRequest').click();
+  }
+
+  async getFlyoutRequestBody() {
+    return this.page.testSubj.locate('painlessLabFlyoutRequest').innerText();
+  }
+
+  async getFlyoutResponseBody() {
+    this.page.locator('#response').click();
+    return this.page.testSubj.locate('painlessLabFlyoutResponse').innerText();
   }
 }
