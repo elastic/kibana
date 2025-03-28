@@ -136,7 +136,6 @@ export {
   isFullValidatorContainer,
   isKibanaResponse,
   ReservedPrivilegesSet,
-  unwindNestedSecurityPrivileges,
 } from './src/router';
 
 export type { ICspConfig } from './src/csp';

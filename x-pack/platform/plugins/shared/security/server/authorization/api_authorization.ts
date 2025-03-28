@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReservedPrivilegesSet, unwindNestedSecurityPrivileges } from '@kbn/core/server';
+import { ReservedPrivilegesSet } from '@kbn/core/server';
 import type {
   AllRequiredCondition,
   AnyRequiredCondition,
@@ -18,6 +18,7 @@ import type {
   PrivilegeSet,
   RouteAuthz,
 } from '@kbn/core/server';
+import { unwindNestedSecurityPrivileges } from '@kbn/core-security-server';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type {
   AuthorizationServiceSetup,

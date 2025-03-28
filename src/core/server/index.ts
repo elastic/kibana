@@ -618,5 +618,3 @@ export type {
   AllRequiredCondition,
   AnyRequiredCondition,
 } from '@kbn/core-http-server';
-
-export { unwindNestedSecurityPrivileges } from '@kbn/core-http-server';
