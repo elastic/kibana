@@ -31,8 +31,11 @@ const getIntervalType = (
     return undefined;
   }
 
-  const calendarIntervalUnits = new Set(['1m', '1h', '1d', '1w', '1M', '1q', '1y']);
-  const intervalType = calendarIntervalUnits.has(interval) ? 'calendar_interval' : 'fixed_interval';
+  const calendarIntervalUnits = new Set(['w', 'M', 'q', 'y']);
+
+  const intervalType = calendarIntervalUnits.has(interval.replace(/^\d+/, ''))
+    ? 'calendar_interval'
+    : 'fixed_interval';
 
   return { interval, intervalType };
 };
