@@ -74,6 +74,7 @@ import {
   FunctionParameter,
   FunctionDefinitionTypes,
   GetPolicyMetadataFn,
+  getLocationFromCommandOrOptionName,
 } from '../definitions/types';
 import { comparisonFunctions } from '../definitions/all_operators';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
@@ -268,8 +269,7 @@ async function getSuggestionsWithinCommandExpression(
   ) {
     return await getSuggestionsToRightOfOperatorExpression({
       queryText: innerText,
-      commandName: astContext.command.name,
-      optionName: astContext.option?.name,
+      location: getLocationFromCommandOrOptionName(astContext.command.name),
       rootOperator: astContext.node,
       getExpressionType: (expression) =>
         getExpressionType(expression, references.fields, references.variables),
@@ -491,8 +491,7 @@ async function getFunctionArgsSuggestions(
     if (typesToSuggestNext.every((d) => !d.fieldsOnly)) {
       suggestions.push(
         ...getFunctionSuggestions({
-          command: command.name,
-          option: option?.name,
+          location: getLocationFromCommandOrOptionName(option?.name ?? command.name),
           returnTypes: canBeBooleanCondition
             ? ['any']
             : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
@@ -596,8 +595,7 @@ async function getListArgsSuggestions(
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
             [argType as string],
-            command.name,
-            undefined,
+            getLocationFromCommandOrOptionName(command.name),
             getFieldsByType,
             {
               functions: true,

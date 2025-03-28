@@ -10,7 +10,6 @@ import sinon from 'sinon';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 
-import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
@@ -27,19 +26,14 @@ import {
   parseInterval,
   getGapBetweenRuns,
   getNumCatchupIntervals,
-  errorAggregator,
-  getListsClient,
   getRuleRangeTuples,
   getExceptions,
   hasTimestampFields,
-  wrapBuildingBlocks,
-  generateSignalId,
   createErrorsFromShard,
   createSearchAfterReturnTypeFromResponse,
   createSearchAfterReturnType,
   mergeReturns,
   lastValidDate,
-  buildChunkedOrFilter,
   getValidDateFromDoc,
   calculateTotal,
   getTotalHitsValue,
@@ -51,12 +45,8 @@ import {
   calculateFromValue,
   stringifyAfterKey,
 } from './utils';
-import type { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from '../types';
+import type { SearchAfterAndBulkCreateReturnType } from '../types';
 import {
-  sampleBulkResponse,
-  sampleEmptyBulkResponse,
-  sampleBulkError,
-  sampleBulkErrorItem,
   sampleSignalHit,
   sampleDocSearchResultsWithSortId,
   sampleEmptyDocSearchResults,
@@ -213,237 +203,6 @@ describe('utils', () => {
         originalTo: nowDate.clone(),
       });
       expect(gap.asMilliseconds()).toEqual(0);
-    });
-  });
-
-  describe('errorAggregator', () => {
-    test('it should aggregate with an empty object when given an empty bulk response', () => {
-      const empty = sampleEmptyBulkResponse();
-      const aggregated = errorAggregator(empty, []);
-      const expected: BulkResponseErrorAggregation = {};
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it should aggregate with an empty create object', () => {
-      const empty = sampleBulkResponse();
-      empty.items = [{}];
-      const aggregated = errorAggregator(empty, []);
-      const expected: BulkResponseErrorAggregation = {};
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it should aggregate with an empty object when given a valid bulk response with no errors', () => {
-      const validResponse = sampleBulkResponse();
-      const aggregated = errorAggregator(validResponse, []);
-      const expected: BulkResponseErrorAggregation = {};
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it should aggregate with a single error when given a single error item', () => {
-      const singleError = sampleBulkError();
-      const aggregated = errorAggregator(singleError, []);
-      const expected: BulkResponseErrorAggregation = {
-        'Invalid call': {
-          count: 1,
-          statusCode: 400,
-        },
-      };
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it should aggregate two errors with a correct count when given the same two error items', () => {
-      const twoAggregatedErrors = sampleBulkError();
-      const item1 = sampleBulkErrorItem();
-      const item2 = sampleBulkErrorItem();
-      twoAggregatedErrors.items = [item1, item2];
-      const aggregated = errorAggregator(twoAggregatedErrors, []);
-      const expected: BulkResponseErrorAggregation = {
-        'Invalid call': {
-          count: 2,
-          statusCode: 400,
-        },
-      };
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it should aggregate three errors with a correct count when given the same two error items', () => {
-      const twoAggregatedErrors = sampleBulkError();
-      const item1 = sampleBulkErrorItem();
-      const item2 = sampleBulkErrorItem();
-      const item3 = sampleBulkErrorItem();
-      twoAggregatedErrors.items = [item1, item2, item3];
-      const aggregated = errorAggregator(twoAggregatedErrors, []);
-      const expected: BulkResponseErrorAggregation = {
-        'Invalid call': {
-          count: 3,
-          statusCode: 400,
-        },
-      };
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it should aggregate two distinct errors with the correct count of 1 for each error type', () => {
-      const twoAggregatedErrors = sampleBulkError();
-      const item1 = sampleBulkErrorItem({ status: 400, reason: 'Parse Error' });
-      const item2 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
-      twoAggregatedErrors.items = [item1, item2];
-      const aggregated = errorAggregator(twoAggregatedErrors, []);
-      const expected: BulkResponseErrorAggregation = {
-        'Parse Error': {
-          count: 1,
-          statusCode: 400,
-        },
-        'Bad Network': {
-          count: 1,
-          statusCode: 500,
-        },
-      };
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it should aggregate two of the same errors with the correct count of 2 for each error type', () => {
-      const twoAggregatedErrors = sampleBulkError();
-      const item1 = sampleBulkErrorItem({ status: 400, reason: 'Parse Error' });
-      const item2 = sampleBulkErrorItem({ status: 400, reason: 'Parse Error' });
-      const item3 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
-      const item4 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
-      twoAggregatedErrors.items = [item1, item2, item3, item4];
-      const aggregated = errorAggregator(twoAggregatedErrors, []);
-      const expected: BulkResponseErrorAggregation = {
-        'Parse Error': {
-          count: 2,
-          statusCode: 400,
-        },
-        'Bad Network': {
-          count: 2,
-          statusCode: 500,
-        },
-      };
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it should aggregate three of the same errors with the correct count of 2 for each error type', () => {
-      const twoAggregatedErrors = sampleBulkError();
-      const item1 = sampleBulkErrorItem({ status: 400, reason: 'Parse Error' });
-      const item2 = sampleBulkErrorItem({ status: 400, reason: 'Parse Error' });
-      const item3 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
-      const item4 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
-      const item5 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      const item6 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      twoAggregatedErrors.items = [item1, item2, item3, item4, item5, item6];
-      const aggregated = errorAggregator(twoAggregatedErrors, []);
-      const expected: BulkResponseErrorAggregation = {
-        'Parse Error': {
-          count: 2,
-          statusCode: 400,
-        },
-        'Bad Network': {
-          count: 2,
-          statusCode: 500,
-        },
-        'Bad Gateway': {
-          count: 2,
-          statusCode: 502,
-        },
-      };
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it should aggregate a mix of errors with the correct aggregate count of each', () => {
-      const twoAggregatedErrors = sampleBulkError();
-      const item1 = sampleBulkErrorItem({ status: 400, reason: 'Parse Error' });
-      const item2 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
-      const item3 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
-      const item4 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      const item5 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      const item6 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      twoAggregatedErrors.items = [item1, item2, item3, item4, item5, item6];
-      const aggregated = errorAggregator(twoAggregatedErrors, []);
-      const expected: BulkResponseErrorAggregation = {
-        'Parse Error': {
-          count: 1,
-          statusCode: 400,
-        },
-        'Bad Network': {
-          count: 2,
-          statusCode: 500,
-        },
-        'Bad Gateway': {
-          count: 3,
-          statusCode: 502,
-        },
-      };
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it will ignore error single codes such as 409', () => {
-      const twoAggregatedErrors = sampleBulkError();
-      const item1 = sampleBulkErrorItem({ status: 409, reason: 'Conflict Error' });
-      const item2 = sampleBulkErrorItem({ status: 409, reason: 'Conflict Error' });
-      const item3 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
-      const item4 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      const item5 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      const item6 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      twoAggregatedErrors.items = [item1, item2, item3, item4, item5, item6];
-      const aggregated = errorAggregator(twoAggregatedErrors, [409]);
-      const expected: BulkResponseErrorAggregation = {
-        'Bad Network': {
-          count: 1,
-          statusCode: 500,
-        },
-        'Bad Gateway': {
-          count: 3,
-          statusCode: 502,
-        },
-      };
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it will ignore two error codes such as 409 and 502', () => {
-      const twoAggregatedErrors = sampleBulkError();
-      const item1 = sampleBulkErrorItem({ status: 409, reason: 'Conflict Error' });
-      const item2 = sampleBulkErrorItem({ status: 409, reason: 'Conflict Error' });
-      const item3 = sampleBulkErrorItem({ status: 500, reason: 'Bad Network' });
-      const item4 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      const item5 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      const item6 = sampleBulkErrorItem({ status: 502, reason: 'Bad Gateway' });
-      twoAggregatedErrors.items = [item1, item2, item3, item4, item5, item6];
-      const aggregated = errorAggregator(twoAggregatedErrors, [409, 502]);
-      const expected: BulkResponseErrorAggregation = {
-        'Bad Network': {
-          count: 1,
-          statusCode: 500,
-        },
-      };
-      expect(aggregated).toEqual(expected);
-    });
-
-    test('it will return an empty object given valid inputs and status codes to ignore', () => {
-      const bulkResponse = sampleBulkResponse();
-      const aggregated = errorAggregator(bulkResponse, [409, 502]);
-      const expected: BulkResponseErrorAggregation = {};
-      expect(aggregated).toEqual(expected);
-    });
-  });
-
-  describe('#getListsClient', () => {
-    let alertServices: RuleExecutorServicesMock;
-
-    beforeEach(() => {
-      alertServices = alertsMock.createRuleExecutorServices();
-    });
-
-    test('it successfully returns list and exceptions list client', async () => {
-      const { listClient, exceptionsClient } = getListsClient({
-        services: alertServices,
-        savedObjectClient: alertServices.savedObjectsClient,
-        updatedByUser: 'some_user',
-        spaceId: '',
-        lists: listMock.createSetup(),
-      });
-
-      expect(listClient).toBeDefined();
-      expect(exceptionsClient).toBeDefined();
     });
   });
 
@@ -850,56 +609,6 @@ describe('utils', () => {
         message:
           'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.',
       });
-    });
-  });
-
-  describe('wrapBuildingBlocks', () => {
-    it('should generate a unique id for each building block', () => {
-      const wrappedBlocks = wrapBuildingBlocks(
-        [sampleSignalHit(), sampleSignalHit()],
-        'test-index'
-      );
-      const blockIds: string[] = [];
-      wrappedBlocks.forEach((block) => {
-        expect(blockIds.includes(block._id)).toEqual(false);
-        blockIds.push(block._id);
-      });
-    });
-
-    it('should generate different ids for identical documents in different sequences', () => {
-      const wrappedBlockSequence1 = wrapBuildingBlocks([sampleSignalHit()], 'test-index');
-      const wrappedBlockSequence2 = wrapBuildingBlocks(
-        [sampleSignalHit(), sampleSignalHit()],
-        'test-index'
-      );
-      const blockId = wrappedBlockSequence1[0]._id;
-      wrappedBlockSequence2.forEach((block) => {
-        expect(block._id).not.toEqual(blockId);
-      });
-    });
-
-    it('should generate the same ids when given the same sequence twice', () => {
-      const wrappedBlockSequence1 = wrapBuildingBlocks(
-        [sampleSignalHit(), sampleSignalHit()],
-        'test-index'
-      );
-      const wrappedBlockSequence2 = wrapBuildingBlocks(
-        [sampleSignalHit(), sampleSignalHit()],
-        'test-index'
-      );
-      wrappedBlockSequence1.forEach((block, idx) => {
-        expect(block._id).toEqual(wrappedBlockSequence2[idx]._id);
-      });
-    });
-  });
-
-  describe('generateSignalId', () => {
-    it('generates a unique signal id for same signal with different rule id', () => {
-      const signalId1 = generateSignalId(sampleSignalHit().signal);
-      const modifiedSignal = sampleSignalHit();
-      modifiedSignal.signal.rule.id = 'some other rule id';
-      const signalIdModified = generateSignalId(modifiedSignal.signal);
-      expect(signalId1).not.toEqual(signalIdModified);
     });
   });
 
@@ -1590,28 +1299,6 @@ describe('utils', () => {
       addToSearchAfterReturn({ current, next });
 
       expect(current.errors).toEqual(['error 1', 'error 2']);
-    });
-  });
-
-  describe('buildChunkedOrFilter', () => {
-    test('should return undefined if no values are provided', () => {
-      const filter = buildChunkedOrFilter('field.name', []);
-      expect(filter).toEqual(undefined);
-    });
-
-    test('should return a filter with a single value', () => {
-      const filter = buildChunkedOrFilter('field.name', ['id-1']);
-      expect(filter).toEqual('field.name: ("id-1")');
-    });
-
-    test('should return a filter with a multiple values', () => {
-      const filter = buildChunkedOrFilter('field.name', ['id-1', 'id-2']);
-      expect(filter).toEqual('field.name: ("id-1" OR "id-2")');
-    });
-
-    test('should return a filter with a multiple values chunked', () => {
-      const filter = buildChunkedOrFilter('field.name', ['id-1', 'id-2', 'id-3'], 2);
-      expect(filter).toEqual('field.name: ("id-1" OR "id-2") OR field.name: ("id-3")');
     });
   });
 

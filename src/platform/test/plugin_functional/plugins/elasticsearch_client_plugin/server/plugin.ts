@@ -15,7 +15,16 @@ export class ElasticsearchClientPlugin implements Plugin {
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
     router.get(
-      { path: '/api/elasticsearch_client_plugin/context/ping', validate: false },
+      {
+        path: '/api/elasticsearch_client_plugin/context/ping',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
       async (context, req, res) => {
         const esClient = (await context.core).elasticsearch.client;
         const body = await esClient.asInternalUser.ping();
@@ -23,7 +32,16 @@ export class ElasticsearchClientPlugin implements Plugin {
       }
     );
     router.get(
-      { path: '/api/elasticsearch_client_plugin/contract/ping', validate: false },
+      {
+        path: '/api/elasticsearch_client_plugin/contract/ping',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
       async (context, req, res) => {
         const [coreStart] = await core.getStartServices();
         const body = await coreStart.elasticsearch.client.asInternalUser.ping();
@@ -31,7 +49,16 @@ export class ElasticsearchClientPlugin implements Plugin {
       }
     );
     router.get(
-      { path: '/api/elasticsearch_client_plugin/custom_client/ping', validate: false },
+      {
+        path: '/api/elasticsearch_client_plugin/custom_client/ping',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
       async (context, req, res) => {
         const body = await this.client!.asInternalUser.ping();
         return res.ok({ body: JSON.stringify(body) });
