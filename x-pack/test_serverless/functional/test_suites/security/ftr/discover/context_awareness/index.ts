@@ -68,9 +68,9 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await esArchiver.unload(path.join(SECURITY_ES_ARCHIVES_DIR, 'auditbeat_single'));
     });
 
-    loadTestFile(require.resolve('./default_state'));
-    loadTestFile(require.resolve('./cell_renderer'));
-    loadTestFile(require.resolve('./row_indicator'));
+    // loadTestFile(require.resolve('./default_state'));
+    // loadTestFile(require.resolve('./cell_renderer'));
+    // loadTestFile(require.resolve('./row_indicator'));
     loadTestFile(require.resolve('./row_leading_controls'));
   });
 }

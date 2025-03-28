@@ -55,7 +55,6 @@ export function ExploreInSecurity({ Control, rowProps, services }: ExploreInSecu
   const label = useMemo(() => exploreRowActionLabel(isAlert), [isAlert]);
   return (
     <Control
-      data-test-subj="explore-in-security"
       iconType="logoSecurity"
       label={label}
       tooltipContent={label}

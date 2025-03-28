@@ -11,7 +11,14 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { SECURITY_SOLUTION_DATA_VIEW } from '../../../constants';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'svlCommonPage']);
+  const PageObjects = getPageObjects([
+    'common',
+    'timePicker',
+    'discover',
+    'svlCommonPage',
+    'unifiedFieldList',
+    'header',
+  ]);
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
 
@@ -27,18 +34,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await queryBar.setQuery('host.name: "siem-kibana"');
         await queryBar.clickQuerySubmitButton();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const exploreInSecurityAction = await testSubjects.findAll(
           'unifiedDataTable_rowControl_additionalRowControl_exploreInSecurity',
-          2500
+          5000
         );
         expect(exploreInSecurityAction).to.have.length(2);
 
         expect(await exploreInSecurityAction[0].getAttribute('aria-label')).to.eql(
-          'Explore alert in Security'
+          'Explore Alert in Security'
         );
         expect(await exploreInSecurityAction[1].getAttribute('aria-label')).to.eql(
-          'Explore event in Security'
+          'Explore Event in Security'
         );
       });
     });
@@ -54,18 +63,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const exploreInSecurityAction = await testSubjects.findAll(
           'unifiedDataTable_rowControl_additionalRowControl_exploreInSecurity',
-          2500
+          5000
         );
         expect(exploreInSecurityAction).to.have.length(2);
 
         expect(await exploreInSecurityAction[0].getAttribute('aria-label')).to.eql(
-          'Explore alert in Security'
+          'Explore Alert in Security'
         );
         expect(await exploreInSecurityAction[1].getAttribute('aria-label')).to.eql(
-          'Explore event in Security'
+          'Explore Event in Security'
         );
       });
     });

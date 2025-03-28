@@ -42,9 +42,13 @@ const mockRowProps = {
   },
 } as unknown as RowControlRowProps;
 
-const MockControl: RowControlComponent = ({ label, ...props }) => {
-  // @ts-expect-error
-  return <EuiButton {...props}>{label}</EuiButton>;
+const MockControl: RowControlComponent = ({ label, tooltipContent: _, ...props }) => {
+  return (
+    // @ts-expect-error
+    <EuiButton data-test-subj="explore-in-security" {...props}>
+      {label}
+    </EuiButton>
+  );
 };
 
 describe('Explore In Security Control', () => {
@@ -87,7 +91,6 @@ describe('Explore In Security Control', () => {
     );
 
     expect(screen.getByText('Explore Event in Security')).toBeVisible();
-    screen.debug(undefined, 1000000);
     expect(screen.getByTestId('explore-in-security')).toHaveAttribute('href', expectedEventURL);
   });
 });
