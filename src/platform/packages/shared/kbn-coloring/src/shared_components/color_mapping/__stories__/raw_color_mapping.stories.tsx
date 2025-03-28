@@ -24,7 +24,6 @@ import { CategoricalColorMapping, ColorMappingProps } from '../categorical_color
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '../config/default_color_mapping';
 import { ColorMapping } from '../config';
 import { getColorFactory } from '../color/color_handling';
-import { assignmentMatchFn } from '../color/rule_matching';
 import { getValidColor } from '../color/color_math';
 
 export default {
@@ -53,7 +52,9 @@ const Template: StoryFn<FC<ColorMappingProps>> = (args) => {
         {args.data.type === 'categories' &&
           args.data.categories.map((category: SerializedValue, i) => {
             const value: RawValue = deserializeField(category);
-            const match = updatedModel.assignments.some(assignmentMatchFn(value));
+            const match = updatedModel.assignments.some(({ rules }) =>
+              rules.some((r) => (r.type === 'raw' ? String(r.value) === String(category) : false))
+            );
             const color = colorFactory(value);
             const isDark = isColorDark(...getValidColor(color).rgb());
 
