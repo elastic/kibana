@@ -60,7 +60,7 @@ export const getCypressBaseConfig = (
 
         // Default log level for instance of `ToolingLog` created via `crateToolingLog()`. Set this
         // to `debug` or `verbose` when wanting to debug tooling used by tests (ex. data indexer functions).
-        TOOLING_LOG_LEVEL: 'verbose',
+        TOOLING_LOG_LEVEL: 'info',
 
         // Variable works in conjunction with the Cypress parallel runner. When set to true, fleet server
         // will be setup right after the Kibana stack, so that by the time cypress tests `.run()`/`.open()`,
@@ -77,7 +77,7 @@ export const getCypressBaseConfig = (
         // baseUrl: To override, set Env. variable `CYPRESS_BASE_URL`
         baseUrl: 'http://localhost:5601',
         supportFile: 'public/management/cypress/support/e2e.ts',
-        specPattern: 'public/management/cypress/e2e/**/metering.cy.ts',
+        specPattern: 'public/management/cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
         experimentalRunAllSpecs: true,
         experimentalMemoryManagement: true,
         experimentalInteractiveRunEvents: true,
