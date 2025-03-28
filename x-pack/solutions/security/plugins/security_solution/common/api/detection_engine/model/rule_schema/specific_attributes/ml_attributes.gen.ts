@@ -17,10 +17,10 @@
 import { z } from '@kbn/zod';
 
 /**
- * Anomaly score threshold above which the rule creates an alert.
+ * Anomaly score threshold above which the rule creates an alert. Valid values are from 0 to 100.
  */
 export type AnomalyThreshold = z.infer<typeof AnomalyThreshold>;
-export const AnomalyThreshold = z.number().int().min(0).max(100);
+export const AnomalyThreshold = z.number().int().min(0);
 
 /**
  * Machine learning job ID(s) the rule monitors for anomaly scores.
