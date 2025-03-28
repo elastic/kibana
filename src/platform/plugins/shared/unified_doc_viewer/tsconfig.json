@@ -40,7 +40,8 @@
     "@kbn/apm-types",
     "@kbn/event-stacktrace",
     "@kbn/elastic-agent-utils",
-    "@kbn/data-view-utils"
+    "@kbn/data-view-utils",
+    "@kbn/core-workspace-components"
   ],
   "exclude": ["target/**/*"]
 }

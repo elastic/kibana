@@ -11,3 +11,9 @@ export { Workspace, type WorkspaceProps } from './workspace';
 export { KibanaWorkspace, type KibanaWorkspaceProps } from './kibana';
 export type { WorkspaceToolProps, WorkspaceToolboxButtonProps } from './toolbox';
 export { RecentlyAccessedTool, type RecentlyAccessedToolProps, FeedbackTool } from './tools';
+export {
+  type WorkspaceFlyoutResizableProps,
+  WorkspaceFlyoutResizable,
+  type WorkspaceFlyoutProps,
+  WorkspaceFlyout,
+} from './flyouts/flyouts';
