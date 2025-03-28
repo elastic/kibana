@@ -16,6 +16,9 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import { IngestPipelinesPluginStart } from '@kbn/ingest-pipelines-plugin/public';
+import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 import { StreamsTelemetryService } from '../public/telemetry/service';
 
@@ -41,6 +44,9 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
         savedObjectsTagging: {} as unknown as SavedObjectTaggingPluginStart,
         fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
         licensing: {} as unknown as LicensingPluginStart,
+        indexManagement: {} as unknown as IndexManagementPluginStart,
+        ingestPipelines: {} as unknown as IngestPipelinesPluginStart,
+        discoverShared: {} as unknown as DiscoverSharedPublicStart,
       },
     },
     services: {

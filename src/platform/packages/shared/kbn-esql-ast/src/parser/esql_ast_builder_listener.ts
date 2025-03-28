@@ -51,7 +51,6 @@ import {
   visitByOption,
   collectAllColumnIdentifiers,
   visitRenameClauses,
-  collectBooleanExpression,
   visitOrderExpressions,
   getPolicyName,
   getMatchField,
@@ -63,6 +62,8 @@ import { createDissectCommand } from './factories/dissect';
 import { createGrokCommand } from './factories/grok';
 import { createStatsCommand } from './factories/stats';
 import { createChangePointCommand } from './factories/change_point';
+import { createWhereCommand } from './factories/where';
+import { createRowCommand } from './factories/row';
 
 export class ESQLAstBuilderListener implements ESQLParserListener {
   private ast: ESQLAst = [];
@@ -102,9 +103,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitWhereCommand(ctx: WhereCommandContext) {
-    const command = createCommand('where', ctx);
+    const command = createWhereCommand(ctx);
+
     this.ast.push(command);
-    command.args.push(...collectBooleanExpression(ctx.booleanExpression()));
   }
 
   /**
@@ -112,9 +113,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitRowCommand(ctx: RowCommandContext) {
-    const command = createCommand('row', ctx);
+    const command = createRowCommand(ctx);
+
     this.ast.push(command);
-    command.args.push(...collectAllFields(ctx.fields()));
   }
 
   /**
@@ -125,7 +126,7 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
     const commandAst = createCommand('from', ctx);
     this.ast.push(commandAst);
     commandAst.args.push(...collectAllSourceIdentifiers(ctx));
-    const metadataContext = ctx.metadata();
+    const metadataContext = ctx.indexPatternAndMetadataFields().metadata();
     if (metadataContext && metadataContext.METADATA()) {
       const option = createOption(
         metadataContext.METADATA().getText().toLowerCase(),
@@ -146,19 +147,12 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
       type: 'command',
       args: [],
       sources: ctx
+        .indexPatternAndMetadataFields()
         .getTypedRuleContexts(IndexPatternContext)
         .map((sourceCtx) => createSource(sourceCtx)),
     };
     this.ast.push(node);
-    const aggregates = collectAllAggFields(ctx.aggFields());
-    const grouping = collectAllFields(ctx.fields());
-    if (aggregates && aggregates.length) {
-      node.aggregates = aggregates;
-    }
-    if (grouping && grouping.length) {
-      node.grouping = grouping;
-    }
-    node.args.push(...node.sources, ...aggregates, ...grouping);
+    node.args.push(...node.sources);
   }
 
   /**
