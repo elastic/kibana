@@ -72,7 +72,7 @@ export function dashboardAttributesOut(
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
-    ...(tags && { tags }),
+    ...(tags && tags.length && { tags }),
     ...(timeFrom && { timeFrom }),
     timeRestore: timeRestore ?? false,
     ...(timeTo && { timeTo }),
