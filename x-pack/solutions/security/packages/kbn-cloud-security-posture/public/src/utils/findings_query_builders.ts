@@ -188,11 +188,11 @@ export const getVulnerabilitiesQuery = ({ query, sort }: UseCspOptions, isPrevie
   size: isPreview ? 0 : 500,
   aggs: getFindingsCountAggQueryVulnerabilities(),
   ignore_unavailable: true,
-  query: buildVulnerabilityFindingsQueryWithFilters(query),
+  query: buildFindingsQueryWithFilters(query),
   sort,
 });
 
-const buildVulnerabilityFindingsQueryWithFilters = (query: UseCspOptions['query']) => {
+export const buildFindingsQueryWithFilters = (query: UseCspOptions['query']) => {
   return {
     ...query,
     bool: {
@@ -205,6 +205,25 @@ const buildVulnerabilityFindingsQueryWithFilters = (query: UseCspOptions['query'
               gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
               lte: 'now',
             },
+          },
+        },
+      ],
+    },
+  };
+};
+
+export const createGetMisconfigurationFindingsQuery = (resourceId?: string, ruleId?: string) => {
+  return {
+    bool: {
+      filter: [
+        {
+          term: {
+            'rule.id': ruleId,
+          },
+        },
+        {
+          term: {
+            'resource.id': resourceId,
           },
         },
       ],

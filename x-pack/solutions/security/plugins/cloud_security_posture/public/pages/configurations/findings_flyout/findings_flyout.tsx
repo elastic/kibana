@@ -34,7 +34,11 @@ import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core/public';
 import { generatePath } from 'react-router-dom';
 import { css } from '@emotion/react';
-import { CspEvaluationBadge, benchmarksNavigation } from '@kbn/cloud-security-posture';
+import {
+  CspEvaluationBadge,
+  benchmarksNavigation,
+  createGetMisconfigurationFindingsQuery,
+} from '@kbn/cloud-security-posture';
 import type { CspFinding, BenchmarkId } from '@kbn/cloud-security-posture-common';
 import { BenchmarkName, CSP_MISCONFIGURATIONS_DATASET } from '@kbn/cloud-security-posture-common';
 import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/csp_vulnerability_finding';
@@ -61,25 +65,6 @@ import { CspInlineDescriptionList } from '../../../components/csp_inline_descrip
 const FINDINGS_MISCONFIGS_FLYOUT_DESCRIPTION_LIST = 'misconfigs-findings-flyout-description-list';
 
 const FINDINGS_FLYOUT = 'findings_flyout';
-
-const createGetMisconfigurationFindingsQuery = (resourceId?: string, ruleId?: string) => {
-  return {
-    bool: {
-      filter: [
-        {
-          term: {
-            'rule.id': ruleId,
-          },
-        },
-        {
-          term: {
-            'resource.id': resourceId,
-          },
-        },
-      ],
-    },
-  };
-};
 
 const tabs = [
   {

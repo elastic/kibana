@@ -6,10 +6,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
-import {
-  CDR_3RD_PARTY_RETENTION_POLICY,
-  CDR_MISCONFIGURATIONS_INDEX_PATTERN,
-} from '@kbn/cloud-security-posture-common';
+import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { showErrorToast } from '../..';
@@ -19,8 +16,9 @@ import type {
   LatestFindingsResponse,
   UseCspOptions,
 } from '../types';
+import { buildFindingsQueryWithFilters } from '../utils/findings_query_builders';
 
-const MISCONFIGURATIONS_SOURCE_FIELDS = [
+const GET_MISCONFIGURATIONS_SOURCE_FIELDS = [
   'result.*',
   'rule.*',
   'resource.*',
@@ -29,36 +27,13 @@ const MISCONFIGURATIONS_SOURCE_FIELDS = [
   'data_stream.*',
 ];
 
-export const buildGetMisconfigurationsFindingsQuery = (
-  { query, sort }: UseCspOptions,
-  isPreview = false
-) => {
+export const buildGetMisconfigurationsFindingsQuery = ({ query }: UseCspOptions) => {
   return {
     index: CDR_MISCONFIGURATIONS_INDEX_PATTERN,
     size: 1,
     ignore_unavailable: true,
-    query: buildGetMisconfigurationsFindingsQueryWithFilters(query),
-    _source: MISCONFIGURATIONS_SOURCE_FIELDS,
-  };
-};
-
-const buildGetMisconfigurationsFindingsQueryWithFilters = (query: UseCspOptions['query']) => {
-  return {
-    ...query,
-    bool: {
-      ...query?.bool,
-      filter: [
-        ...(query?.bool?.filter ?? []),
-        {
-          range: {
-            '@timestamp': {
-              gte: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
-              lte: 'now',
-            },
-          },
-        },
-      ],
-    },
+    query: buildFindingsQueryWithFilters(query),
+    _source: GET_MISCONFIGURATIONS_SOURCE_FIELDS,
   };
 };
 
