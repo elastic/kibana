@@ -12,19 +12,19 @@ import * as EsTree from 'estree';
 import * as TypescriptEsTree from '@typescript-eslint/typescript-estree';
 
 import { getPropValues } from '../helpers/get_prop_values';
+import { getFunctionName } from '../helpers/get_function_name';
 import { getIntentFromNode } from '../helpers/get_intent_from_node';
 import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
-import { getFunctionName } from '../helpers/get_function_name';
 import { getI18nImportFixer } from '../helpers/get_i18n_import_fixer';
+import { getWrappingElement } from '../helpers/get_wrapping_element';
 import {
   isTruthy,
   lowerCaseFirstChar,
   sanitizeEuiElementName,
   upperCaseFirstChar,
 } from '../helpers/utils';
-import { getWrappingElement } from '../helpers/get_wrapping_element';
 
-export const EUI_ELEMENTS = [
+export const EUI_ELEMENTS_TO_CHECK = [
   'EuiBetaBadge',
   'EuiButtonEmpty',
   'EuiButtonIcon',
@@ -34,9 +34,9 @@ export const EUI_ELEMENTS = [
   'EuiSuperSelect',
 ];
 
-export const EUI_WRAPPING_ELEMENTS = ['EuiFormRow'];
+const EUI_WRAPPING_ELEMENTS = ['EuiFormRow'];
 
-const PROP_NAMES = ['aria-label', 'aria-labelledby', 'label'];
+const A11Y_PROP_NAMES = ['aria-label', 'aria-labelledby', 'label'];
 
 export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: EsLint.Rule.RuleModule = {
   meta: {
@@ -53,15 +53,18 @@ export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: EsLint.Rule.Ru
         const { name } = node.name;
 
         // The element is not an element we're interested in
-        if (!EUI_ELEMENTS.includes(String(name))) return;
+        if (!EUI_ELEMENTS_TO_CHECK.includes(String(name))) return;
 
         const wrappingElement = getWrappingElement(node);
 
-        // The element is wrapped in an EuiFormRow
-        if (wrappingElement?.elementName === 'EuiFormRow') {
+        // The element is wrapped in an element which needs to get the a11y props instead
+        if (
+          wrappingElement?.elementName &&
+          EUI_WRAPPING_ELEMENTS.includes(wrappingElement.elementName)
+        ) {
           const props = getPropValues({
             jsxOpeningElement: wrappingElement.node,
-            propNames: PROP_NAMES,
+            propNames: A11Y_PROP_NAMES,
             sourceCode,
           });
 
@@ -85,7 +88,7 @@ export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: EsLint.Rule.Ru
         // The element is not wrapped in an EuiFormRow
         const props = getPropValues({
           jsxOpeningElement: node,
-          propNames: PROP_NAMES,
+          propNames: A11Y_PROP_NAMES,
           sourceCode,
         });
 
@@ -130,19 +133,18 @@ const checkNodeForPropNamesAndCreateReporter = ({
     sourceCode,
   });
 
-  // 2. The intention of the element (i.e. "Select date", "Submit", "Cancel")
+  // The intention of the element (i.e. "Select date", "Submit", "Cancel")
   const intent =
     name.name === 'EuiButtonIcon' && props.iconType
       ? String(props.iconType) // For EuiButtonIcon, use the iconType as the intent (i.e. 'pen', 'trash')
       : getIntentFromNode(node);
 
-  // 3. The element name (i.e. "Button", "Beta Badge", "Select")
+  // The element name (i.e. "Button", "Beta Badge", "Select")
   const { elementName } = sanitizeEuiElementName(name.name);
 
-  // Proposed default message
-  const defaultMessage = upperCaseFirstChar(intent).trim(); // 'Actions Button'
+  // 'Actions Button'
+  const defaultMessage = upperCaseFirstChar(intent).trim(); //
 
-  // 4. Set up the translation ID
   const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
 
   const functionDeclaration = sourceCode.getScope(node as unknown as EsTree.Node).block;
@@ -157,12 +159,13 @@ const checkNodeForPropNamesAndCreateReporter = ({
     'ariaLabel',
   ];
 
+  // 'xpack.observability.overview.logs.loadMore.ariaLabel'
   const translationId = translation
     .filter(Boolean)
     .map((el) => lowerCaseFirstChar(el).replaceAll(' ', ''))
-    .join('.'); // 'xpack.observability.overview.logs.loadMore.ariaLabel'
+    .join('.');
 
-  // 5. Check if i18n has already been imported into the file
+  // Get an additional fixer to add the i18n import line
   const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine, replaceMode } =
     getI18nImportFixer({
       sourceCode,
@@ -176,7 +179,7 @@ const checkNodeForPropNamesAndCreateReporter = ({
       return [
         fixer.insertTextAfterRange(
           range,
-          ` aria-label={i18n.translate('${translationId}', { defaultMessage: '${defaultMessage}' })}`
+          ` aria-label={i18n.translate('${translationId}', { defaultMessage: '${defaultMessage}' })} `
         ),
         !hasI18nImportLine && rangeToAddI18nImportLine
           ? replaceMode === 'replace'
