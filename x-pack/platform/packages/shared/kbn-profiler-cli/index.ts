@@ -8,25 +8,18 @@ import { run } from '@kbn/dev-cli-runner';
 import { compact, once, uniq } from 'lodash';
 import { getKibanaProcessId } from './src/get_kibana_process_id';
 import { runCommand } from './src/run_command';
-import { getPipedInput } from './src/get_piped_input';
 import { runUntilSigInt } from './src/run_until_sigint';
 import { getProfiler } from './src/get_profiler';
+import { untilStdinCompletes } from './src/until_stdin_completes';
 
 export function cli() {
   run(
     async ({ flags, log, addCleanupTask }) => {
-      const piped = await getPipedInput();
-      const command = piped || flags._.join(' ');
-
       const pid = flags.pid
         ? Number(flags.pid)
         : await getKibanaProcessId({
             ports: uniq(compact([Number(flags.port), 5603, 5601])),
           });
-
-      process.kill(pid, 'SIGUSR1');
-
-      const stop = once(await getProfiler({ log }));
 
       const controller = new AbortController();
       if (flags.timeout) {
@@ -34,6 +27,10 @@ export function cli() {
           controller.abort();
         }, Number(flags.timeout));
       }
+
+      process.kill(pid, 'SIGUSR1');
+
+      const stop = once(await getProfiler({ log }));
 
       addCleanupTask(() => {
         // exit-hook, which is used by addCleanupTask,
@@ -46,9 +43,6 @@ export function cli() {
 
         // @ts-expect-error
         process.exit = () => {};
-        process.nextTick(() => {
-          process.exit = exit;
-        });
 
         stop()
           .then(() => {
@@ -60,9 +54,12 @@ export function cli() {
           });
       });
 
-      if (command) {
+      if (!process.stdin.isTTY) {
+        await untilStdinCompletes();
+      } else if (flags._.length) {
         const connections = Number(flags.c || flags.connections || 1);
         const amount = Number(flags.a || flags.amount || 1);
+        const command = flags._.join(' ');
 
         log.info(`Executing "${command}" ${amount} times, ${connections} at a time`);
 
@@ -72,8 +69,6 @@ export function cli() {
           amount,
           signal: controller.signal,
         });
-
-        await stop();
       } else {
         if (flags.timeout) {
           log.info(`Awaiting timeout of ${flags.timeout}ms`);
@@ -86,6 +81,8 @@ export function cli() {
           signal: controller.signal,
         });
       }
+
+      await stop();
     },
     {
       flags: {

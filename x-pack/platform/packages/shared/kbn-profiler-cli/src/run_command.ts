@@ -45,22 +45,20 @@ export async function runCommand({
       reject(new AbortError());
     });
   });
+
+  function executeCommand() {
+    return execa.command(`bash "${command}"`, { shell: true, stdio: 'inherit' });
+  }
+
   if (amount === 1) {
-    return await Promise.race([
-      abortPromise,
-      execa.command(command, { shell: true }).catch((error) => {
-        throw new AggregateError([error], `Command failed with error ${error.stderr}`);
-      }),
-    ]);
+    return await Promise.race([abortPromise, executeCommand()]);
   }
 
   const limiter = pLimit(connections);
 
   await Promise.allSettled(
     range(0, amount).map(async () => {
-      await limiter(() =>
-        Promise.race([abortPromise, execa.command(command, { shell: true, stdio: 'ignore' })])
-      );
+      await limiter(() => Promise.race([abortPromise, executeCommand()]));
     })
   ).then((results) => {
     const errors = results.flatMap((result) =>

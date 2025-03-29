@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-export async function getPipedInput() {
+export async function untilStdinCompletes() {
   if (process.stdin.isTTY) {
     return undefined;
   }
 
-  const input = await new Promise<string>((resolve) => {
+  await new Promise<string>((resolve) => {
     let buffer = '';
     process.stdin.on('data', (chunk) => {
       buffer += chunk.toString('utf-8');
@@ -19,6 +19,4 @@ export async function getPipedInput() {
       resolve(buffer);
     });
   });
-
-  return input;
 }
