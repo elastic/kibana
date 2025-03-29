@@ -135,7 +135,7 @@ For more information, refer to https://github.com/elastic/kibana/issues/209996[#
 
 *Impact* +
 
-The validation error prevents Kibana from completing the bootstrap process, which may affect Kibana availability. Additionally, it blocks users from saving views in the Infrastructure Inventory pag
+The validation error prevents Kibana from completing the bootstrap process, which may affect Kibana availability. Additionally, it blocks users from saving views in the Infrastructure Inventory page.
 ====
 
 [float]
