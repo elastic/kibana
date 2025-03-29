@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
 import { uniqBy } from 'lodash';
-import { selectInspectStatusRule } from '../state/alert_rules/selectors';
-import { ClientPluginsStart } from '../../../plugin';
+import { selectInspectStatusRule } from '../../state/alert_rules/selectors';
+import { ClientPluginsStart } from '../../../../plugin';
 
 export const RuleMonitorsTable = () => {
   const {
@@ -39,7 +39,7 @@ export const RuleMonitorsTable = () => {
       render: (name: string, monitor: { id: string }) => (
         <EuiLink
           data-test-subj="ColumnsLink"
-          href={http.basePath.prepend(`/app/synthetics/monitors/${monitor.id}`)}
+          href={http.basePath.prepend(`/app/synthetics/monitor/${monitor.id}`)}
         >
           {name}
         </EuiLink>

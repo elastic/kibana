@@ -20,7 +20,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
-import { RuleMonitorsTable } from '../rule_monitors_table';
+import { RuleMonitorsTable } from './rule_monitors_table';
 import { apiService } from '../../../../utils/api_service';
 import { inspectStatusRuleAction } from '../../state/alert_rules';
 import { selectInspectStatusRule } from '../../state/alert_rules/selectors';

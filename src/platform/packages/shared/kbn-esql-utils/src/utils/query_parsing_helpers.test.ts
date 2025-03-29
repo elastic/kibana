@@ -20,6 +20,7 @@ import {
   getQueryColumnsFromESQLQuery,
   mapVariableToColumn,
   getValuesFromQueryField,
+  fixESQLQueryWithVariables,
 } from './query_parsing_helpers';
 import { monaco } from '@kbn/monaco';
 
@@ -579,6 +580,106 @@ describe('esql query helpers', () => {
         column: 36,
       } as monaco.Position);
       expect(values).toEqual('my_field');
+    });
+  });
+
+  describe('fixESQLQueryWithVariables', () => {
+    it('should return the query as is if no variables are given', () => {
+      const esql = 'FROM my_index | STATS COUNT(?field)';
+      const variables: ESQLControlVariable[] = [];
+      expect(fixESQLQueryWithVariables(esql, variables)).toEqual(esql);
+    });
+
+    it('should return the query as is if no fields or functions variables are given', () => {
+      const esql = 'FROM my_index | WHERE field == ?value';
+      const variables: ESQLControlVariable[] = [
+        {
+          key: 'interval',
+          value: '5 minutes',
+          type: ESQLVariableType.TIME_LITERAL,
+        },
+        {
+          key: 'agent_name',
+          value: 'go',
+          type: ESQLVariableType.VALUES,
+        },
+      ];
+      expect(fixESQLQueryWithVariables(esql, variables)).toEqual(esql);
+    });
+
+    it('should return the query as is if fields or functions variables are given but they are already used with ??', () => {
+      const esql = 'FROM my_index | STATS COUNT(??field)';
+      const variables: ESQLControlVariable[] = [
+        {
+          key: 'interval',
+          value: '5 minutes',
+          type: ESQLVariableType.TIME_LITERAL,
+        },
+        {
+          key: 'agent_name',
+          value: 'go',
+          type: ESQLVariableType.VALUES,
+        },
+        {
+          key: 'field',
+          value: 'bytes',
+          type: ESQLVariableType.FIELDS,
+        },
+      ];
+      expect(fixESQLQueryWithVariables(esql, variables)).toEqual(esql);
+    });
+
+    it('should fix the query if fields or functions variables are given and they are already used with ?', () => {
+      const esql = 'FROM my_index | STATS COUNT(?field)';
+      const expected = 'FROM my_index | STATS COUNT(??field)';
+      const variables: ESQLControlVariable[] = [
+        {
+          key: 'interval',
+          value: '5 minutes',
+          type: ESQLVariableType.TIME_LITERAL,
+        },
+        {
+          key: 'agent_name',
+          value: 'go',
+          type: ESQLVariableType.VALUES,
+        },
+        {
+          key: 'field',
+          value: 'bytes',
+          type: ESQLVariableType.FIELDS,
+        },
+      ];
+      expect(fixESQLQueryWithVariables(esql, variables)).toEqual(expected);
+    });
+
+    it('should fix a query with multiple variables', () => {
+      const esql =
+        'FROM my_index | STATS COUNT(?field) by ?breakdownField | WHERE agent.name == ?agent_name';
+      const expected =
+        'FROM my_index | STATS COUNT(??field) by ??breakdownField | WHERE agent.name == ?agent_name';
+      const variables: ESQLControlVariable[] = [
+        {
+          key: 'interval',
+          value: '5 minutes',
+          type: ESQLVariableType.TIME_LITERAL,
+        },
+        {
+          key: 'agent_name',
+          value: 'go',
+          type: ESQLVariableType.VALUES,
+        },
+        {
+          key: 'field',
+          value: 'bytes',
+          type: ESQLVariableType.FIELDS,
+        },
+        {
+          key: 'breakdownField',
+          value: 'clientip',
+          type: ESQLVariableType.FIELDS,
+        },
+      ];
+      expect(fixESQLQueryWithVariables(esql, variables)).toEqual(expected);
     });
   });
 });
