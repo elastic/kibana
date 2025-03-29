@@ -112,17 +112,14 @@ export const useBatchedPublishingSubjects = <
   ...subjects: [...SubjectsType]
 ): UnwrapPublishingSubjectTuple<SubjectsType> => {
   /**
-   * Set up latest published values state, initialized with the current values of the subjects.
-   */
-  const [latestPublishedValues, setLatestPublishedValues] = useState<
-    UnwrapPublishingSubjectTuple<SubjectsType>
-  >(() => unwrapPublishingSubjectArray(subjects));
-
-  /**
    * Subscribe to all subjects and update the latest values when any of them change.
+   * 
+   * Setting up subscription in useRef to avoid timing issues of useEffect.
+   * useEffect introduces a race condition where subscriptions may emit after values are set with useState
+   * but before subscription is setup in useEffect.
    */
-  useEffect(() => {
-    const subscription = combineLatest(subjects)
+  const subscriptionRef = useRef(
+    combineLatest(subjects)
       .pipe(
         // When a new observer subscribes to a BehaviorSubject, it immediately receives the current value. Skip this emit.
         skip(1),
@@ -130,11 +127,22 @@ export const useBatchedPublishingSubjects = <
       )
       .subscribe((values) => {
         setLatestPublishedValues(values as UnwrapPublishingSubjectTuple<SubjectsType>);
-      });
-    return () => subscription.unsubscribe();
-    // 'subjects' gets a new reference on each call because of spread
-    // Use 'useBatchedOptionalPublishingSubjects' when 'subjects' are expected to change.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      })
+  );
+
+  /**
+   * Set up latest published values state, initialized with the current values of the subjects.
+   */
+  const [latestPublishedValues, setLatestPublishedValues] = useState<
+    UnwrapPublishingSubjectTuple<SubjectsType>
+  >(() => unwrapPublishingSubjectArray(subjects));
+
+  /**
+   * Clean up subscription on unmount.
+   */
+  useEffect(() => {
+    const subscription = subscriptionRef.current;
+    return () => subscription?.unsubscribe();
   }, []);
 
   return latestPublishedValues;
