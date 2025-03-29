@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   EuiButton,
@@ -38,6 +38,16 @@ export const RulesWithGapsOverviewPanel = () => {
     statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
   });
   const [isPopoverOpen, setPopover] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      // reset filter options when unmounting
+      setFilterOptions({
+        gapSearchRange: defaultRangeValue,
+        showRulesWithGaps: false,
+      });
+    };
+  }, [setFilterOptions]);
 
   const rangeValueToLabel = {
     [GapRangeValue.LAST_24_H]: i18n.RULE_GAPS_OVERVIEW_PANEL_LAST_24_HOURS_LABEL,
