@@ -162,8 +162,6 @@ const AssistantComponent: React.FC<Props> = ({
       isFetchedPrompts &&
       Object.keys(conversations).length > 0,
   });
-  console.log('currentConversation---', currentConversation);
-  console.log('conversationTitle----', conversationTitle);
   const isInitialLoad = useMemo(() => {
     if (!isAssistantEnabled) {
       return false;

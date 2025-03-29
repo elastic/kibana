@@ -118,7 +118,6 @@ export const useAssistantOverlay = (
     () => suggestedUserPrompt ?? undefined,
     [suggestedUserPrompt]
   );
-  console.log('suggestedUserPrompt---', suggestedUserPrompt);
   const _tooltip = useMemo(() => tooltip, [tooltip]);
   const _replacements = useMemo(() => replacements, [replacements]);
 
@@ -191,8 +190,6 @@ export const useAssistantOverlay = (
       tooltip: _tooltip,
       replacements: _replacements ?? undefined,
     };
-    console.log('_suggestedUserPrompt---', _suggestedUserPrompt);
-    console.log('newContext---', newContext);
     registerPromptContext(newContext);
 
     return () => unRegisterPromptContext(promptContextId);

@@ -36,7 +36,7 @@ export const AssistantOverlay = React.memo(() => {
   const [conversationTitle, setConversationTitle] = useState<string | undefined>(undefined);
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
   const { assistantTelemetry, setShowAssistantOverlay } = useAssistantContext();
-  const { setLastConversationId, getLastConversationId } = useAssistantLastConversation({
+  const { getLastConversationId } = useAssistantLastConversation({
     spaceId,
   });
 
@@ -52,7 +52,6 @@ export const AssistantOverlay = React.memo(() => {
       }: ShowAssistantOverlayProps) => {
         const conversationId = getLastConversationId(cTitle);
         if (so) assistantTelemetry?.reportAssistantInvoked({ conversationId, invokedBy: 'click' });
-        console.log('setPromptContextId----', pid);
         setIsModalVisible(so);
         setPromptContextId(pid);
         setConversationTitle(conversationId);
