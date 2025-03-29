@@ -8,9 +8,11 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, UseEuiTheme } from '@elastic/eui';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { Observable } from 'rxjs';
+import { css } from '@emotion/react';
+import { useMemoizedStyles } from '@kbn/core/public';
 import { TimeSliderStrings } from './time_slider_strings';
 
 interface Props {
@@ -23,6 +25,8 @@ interface Props {
 }
 
 export function PlayButton(props: Props) {
+  const styles = useMemoizedStyles(playToggleStyles);
+
   if (
     props.waitForControlOutputConsumersToLoad$ === undefined ||
     (props.disablePlayButton && props.viewMode === 'view')
@@ -32,24 +36,29 @@ export function PlayButton(props: Props) {
 
   const Button = (
     <EuiButtonIcon
-      className="timeSlider-playToggle"
       onClick={props.isPaused ? props.onPlay : props.onPause}
       disabled={props.disablePlayButton}
       iconType={props.isPaused ? 'playFilled' : 'pause'}
       size="s"
       display="fill"
       aria-label={TimeSliderStrings.control.getPlayButtonAriaLabel(props.isPaused)}
+      css={styles.icon}
     />
   );
   return props.disablePlayButton ? (
-    <EuiToolTip
-      display="block"
-      anchorClassName="timeSlider-playToggle"
-      content={TimeSliderStrings.control.getPlayButtonDisabledTooltip()}
-    >
+    <EuiToolTip display="block" content={TimeSliderStrings.control.getPlayButtonDisabledTooltip()}>
       {Button}
     </EuiToolTip>
   ) : (
     Button
   );
 }
+
+const playToggleStyles = {
+  icon: ({ euiTheme }: UseEuiTheme) => css`
+    height: 100%;
+    &:enabled {
+      background-color: ${euiTheme.colors.primary} !important;
+    }
+  `,
+};

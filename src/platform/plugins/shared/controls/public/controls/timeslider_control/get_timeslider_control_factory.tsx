@@ -28,7 +28,6 @@ import {
   initializeDefaultControlManager,
 } from '../default_control_manager';
 import { ControlFactory } from '../types';
-import './components/index.scss';
 import { TimeSliderPopoverButton } from './components/time_slider_popover_button';
 import { TimeSliderPopoverContent } from './components/time_slider_popover_content';
 import { TimeSliderPrepend } from './components/time_slider_prepend';
