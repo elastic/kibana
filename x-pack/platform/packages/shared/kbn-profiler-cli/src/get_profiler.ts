@@ -20,7 +20,7 @@ export async function getProfiler({ log }: { log: ToolingLog }): Promise<() => P
   await client.Profiler.enable();
   await client.Profiler.start();
 
-  log.info(`Started profiling session`);
+  log.debug(`Started profiling session`);
 
   return async () => {
     log.debug(`Stopping profiling session`);
@@ -43,5 +43,7 @@ export async function getProfiler({ log }: { log: ToolingLog }): Promise<() => P
     log.info(`Wrote profile to ${profileFilePath}`);
 
     await execa.command(`npx speedscope ${profileFilePath}`);
+
+    log.info(`Opened Speedscope`);
   };
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { run } from '@kbn/dev-cli-runner';
-import { compact, uniq } from 'lodash';
+import { compact, once, uniq } from 'lodash';
 import { getKibanaProcessId } from './src/get_kibana_process_id';
 import { runCommand } from './src/run_command';
 import { getPipedInput } from './src/get_piped_input';
@@ -15,7 +15,9 @@ import { getProfiler } from './src/get_profiler';
 export function cli() {
   run(
     async ({ flags, log, addCleanupTask }) => {
-      const command = (await getPipedInput()) || flags._.join(' ');
+      const piped = await getPipedInput();
+      const command = piped || flags._.join(' ');
+
       const pid = flags.pid
         ? Number(flags.pid)
         : await getKibanaProcessId({
@@ -24,7 +26,7 @@ export function cli() {
 
       process.kill(pid, 'SIGUSR1');
 
-      const stop = await getProfiler({ log });
+      const stop = once(await getProfiler({ log }));
 
       const controller = new AbortController();
       if (flags.timeout) {

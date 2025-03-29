@@ -12,9 +12,8 @@ export async function getPipedInput() {
 
   const input = await new Promise<string>((resolve) => {
     let buffer = '';
-    process.stdin.setEncoding('utf8');
     process.stdin.on('data', (chunk) => {
-      buffer += chunk;
+      buffer += chunk.toString('utf-8');
     });
     process.stdin.on('end', () => {
       resolve(buffer);

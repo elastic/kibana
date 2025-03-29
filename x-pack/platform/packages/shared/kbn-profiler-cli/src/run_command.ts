@@ -37,7 +37,7 @@ export async function runCommand({
   signal: AbortSignal;
 }) {
   const abortPromise = new Promise((resolve, reject) => {
-    if (!signal.aborted) {
+    if (signal.aborted) {
       reject(new AbortError());
       return;
     }
@@ -48,8 +48,8 @@ export async function runCommand({
   if (amount === 1) {
     return await Promise.race([
       abortPromise,
-      execa.command(command).catch((error) => {
-        throw new AggregateError([error], `Command "${command}" failed`);
+      execa.command(command, { shell: true }).catch((error) => {
+        throw new AggregateError([error], `Command failed with error ${error.stderr}`);
       }),
     ]);
   }
@@ -59,7 +59,7 @@ export async function runCommand({
   await Promise.allSettled(
     range(0, amount).map(async () => {
       await limiter(() =>
-        Promise.race([abortPromise, execa.command(command, { stdio: 'ignore' })])
+        Promise.race([abortPromise, execa.command(command, { shell: true, stdio: 'ignore' })])
       );
     })
   ).then((results) => {
