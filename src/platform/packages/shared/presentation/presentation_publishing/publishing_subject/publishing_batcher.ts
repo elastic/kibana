@@ -112,6 +112,13 @@ export const useBatchedPublishingSubjects = <
   ...subjects: [...SubjectsType]
 ): UnwrapPublishingSubjectTuple<SubjectsType> => {
   /**
+   * Set up latest published values state, initialized with the current values of the subjects.
+   */
+  const [latestPublishedValues, setLatestPublishedValues] = useState<
+    UnwrapPublishingSubjectTuple<SubjectsType>
+  >(() => unwrapPublishingSubjectArray(subjects));
+  
+  /**
    * Subscribe to all subjects and update the latest values when any of them change.
    * 
    * Setting up subscription in useRef to avoid timing issues of useEffect.
@@ -129,13 +136,6 @@ export const useBatchedPublishingSubjects = <
         setLatestPublishedValues(values as UnwrapPublishingSubjectTuple<SubjectsType>);
       })
   );
-
-  /**
-   * Set up latest published values state, initialized with the current values of the subjects.
-   */
-  const [latestPublishedValues, setLatestPublishedValues] = useState<
-    UnwrapPublishingSubjectTuple<SubjectsType>
-  >(() => unwrapPublishingSubjectArray(subjects));
 
   /**
    * Clean up subscription on unmount.
