@@ -254,7 +254,7 @@ describe('math(resp, panel, series)', () => {
       )(await mathAgg(resp, panel, series)((results) => results))([]);
     } catch (e) {
       expect(e.message).toMatchInlineSnapshot(
-        `"Failed to parse expression. Expected \\"=\\", [*/], [+\\\\-], [<>], end of input, or whitespace but \\"(\\" found."`
+        `"Failed to parse expression. Expected \\"*\\", \\"+\\", \\"-\\", \\"/\\", \\"<\\", \\"=\\", \\">\\", end of input, or whitespace but \\"(\\" found."`
       );
     }
   });
