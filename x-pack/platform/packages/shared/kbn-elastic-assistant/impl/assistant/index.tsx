@@ -155,14 +155,15 @@ const AssistantComponent: React.FC<Props> = ({
     conversations,
     defaultConnector,
     refetchCurrentUserConversations,
-    conversationId: lastConversationIdFromLocalStorage,
+    conversationId: conversationTitle ?? lastConversationIdFromLocalStorage,
     mayUpdateConversations:
       isFetchedConnectors &&
       isFetchedCurrentUserConversations &&
       isFetchedPrompts &&
       Object.keys(conversations).length > 0,
   });
-
+  console.log('currentConversation---', currentConversation);
+  console.log('conversationTitle----', conversationTitle);
   const isInitialLoad = useMemo(() => {
     if (!isAssistantEnabled) {
       return false;

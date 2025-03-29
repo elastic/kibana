@@ -118,6 +118,7 @@ export const useAssistantOverlay = (
     () => suggestedUserPrompt ?? undefined,
     [suggestedUserPrompt]
   );
+  console.log('suggestedUserPrompt---', suggestedUserPrompt);
   const _tooltip = useMemo(() => tooltip, [tooltip]);
   const _replacements = useMemo(() => replacements, [replacements]);
 
@@ -181,7 +182,6 @@ export const useAssistantOverlay = (
 
   useEffect(() => {
     unRegisterPromptContext(promptContextId); // a noop if the current prompt context id is not registered
-
     const newContext: PromptContext = {
       category: _category,
       description: _description,
@@ -191,7 +191,8 @@ export const useAssistantOverlay = (
       tooltip: _tooltip,
       replacements: _replacements ?? undefined,
     };
-
+    console.log('_suggestedUserPrompt---', _suggestedUserPrompt);
+    console.log('newContext---', newContext);
     registerPromptContext(newContext);
 
     return () => unRegisterPromptContext(promptContextId);
