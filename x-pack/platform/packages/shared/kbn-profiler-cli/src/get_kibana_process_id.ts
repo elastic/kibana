@@ -6,11 +6,24 @@
  */
 import execa from 'execa';
 
-export async function getKibanaProcessId({ port }: { port: number }) {
-  const { stdout: output } = await execa.command(`lsof -ti :${port}`);
-  const pid = parseInt(output.trim().split('\n')[0], 10);
-  if (!pid) {
-    throw new Error(`Kibana process id not found for port ${port}`);
+async function getProcessIdAtPort(port: number) {
+  return await execa
+    .command(`lsof -ti :${port}`)
+    .then(({ stdout }) => {
+      return parseInt(stdout.trim().split('\n')[0], 10);
+    })
+    .catch((error) => {
+      return undefined;
+    });
+}
+
+export async function getKibanaProcessId({ ports }: { ports: number[] }): Promise<number> {
+  for (const port of ports) {
+    const pid = await getProcessIdAtPort(port);
+    if (pid) {
+      return pid;
+    }
   }
-  return pid;
+
+  throw new Error(`Kibana process id not found at ports ${ports.join(', ')}`);
 }

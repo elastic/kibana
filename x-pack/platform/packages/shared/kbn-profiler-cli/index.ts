@@ -5,75 +5,100 @@
  * 2.0.
  */
 import { run } from '@kbn/dev-cli-runner';
-import Path from 'path';
-import { promises as Fs } from 'fs';
-import Os from 'os';
-import execa from 'execa';
-import pLimit from 'p-limit';
-import { range } from 'lodash';
+import { compact, uniq } from 'lodash';
 import { getKibanaProcessId } from './src/get_kibana_process_id';
-import { getInspectorSession } from './src/get_inspector_session';
+import { runCommand } from './src/run_command';
+import { getPipedInput } from './src/get_piped_input';
+import { runUntilSigInt } from './src/run_until_sigint';
+import { getProfiler } from './src/get_profiler';
 
-run(
-  async ({ flags, log, addCleanupTask }) => {
-    const command = flags._.join(' ');
-    const pid = flags.pid
-      ? Number(flags.pid)
-      : await getKibanaProcessId({
-          port: Number(flags.port || 5603),
+export function cli() {
+  run(
+    async ({ flags, log, addCleanupTask }) => {
+      const command = (await getPipedInput()) || flags._.join(' ');
+      const pid = flags.pid
+        ? Number(flags.pid)
+        : await getKibanaProcessId({
+            ports: uniq(compact([Number(flags.port), 5603, 5601])),
+          });
+
+      process.kill(pid, 'SIGUSR1');
+
+      const stop = await getProfiler({ log });
+
+      const controller = new AbortController();
+      if (flags.timeout) {
+        setTimeout(() => {
+          controller.abort();
+        }, Number(flags.timeout));
+      }
+
+      addCleanupTask(() => {
+        // exit-hook, which is used by addCleanupTask,
+        // only allows for synchronous exits, and 3.x
+        // are on ESM which we currently can't use. so
+        // we do a really gross thing where we make
+        // process.exit a noop for a bit until the
+        // profile has been collected and opened
+        const exit = process.exit.bind(process);
+
+        // @ts-expect-error
+        process.exit = () => {};
+        process.nextTick(() => {
+          process.exit = exit;
         });
 
-    process.kill(pid, 'SIGUSR1');
-
-    const stop = await getInspectorSession();
-
-    addCleanupTask(() => {
-      return stop();
-    });
-
-    const connections = Number(flags.c || flags.connections || 1);
-    const amount = Number(flags.a || flags.amount || 1);
-
-    log.info(`Executing "${command}" ${amount} times, ${connections} at a time`);
-
-    if (amount === 1) {
-      await execa.command(command).catch((error) => {
-        log.error(new AggregateError([error], `Command "${command}" failed`));
+        stop()
+          .then(() => {
+            exit(0);
+          })
+          .catch((error) => {
+            log.error(error);
+            exit(1);
+          });
       });
-    } else {
-      const limiter = pLimit(connections);
 
-      await Promise.allSettled(
-        range(0, amount).map(async () => {
-          await limiter(() => execa.command(command, { stdio: 'ignore' }));
-        })
-      ).then((results) => {
-        const errors = results.flatMap((result) =>
-          result.status === 'rejected' ? [result.reason] : []
-        );
-        if (errors.length) {
-          log.error(new AggregateError(errors, `Some executions failed`));
+      if (command) {
+        const connections = Number(flags.c || flags.connections || 1);
+        const amount = Number(flags.a || flags.amount || 1);
+
+        log.info(`Executing "${command}" ${amount} times, ${connections} at a time`);
+
+        await runCommand({
+          command,
+          connections,
+          amount,
+          signal: controller.signal,
+        });
+
+        await stop();
+      } else {
+        if (flags.timeout) {
+          log.info(`Awaiting timeout of ${flags.timeout}ms`);
+        } else {
+          log.info(`Awaiting SIGINT (Cmd+C)...`);
         }
-      });
-    }
 
-    const profile = await stop();
-
-    // Write the profile data to a file.
-    const tmpDir = await Fs.mkdtemp(Path.join(Os.tmpdir(), 'kbn-profiles'));
-
-    const profileFilePath = Path.join(tmpDir, 'profile.cpuprofile');
-
-    await Fs.writeFile(profileFilePath, JSON.stringify(profile), 'utf-8');
-
-    log.info(`Wrote profile to ${profileFilePath}`);
-
-    await execa.command(`npx speedscope ${profileFilePath}`);
-  },
-  {
-    flags: {
-      string: ['port', 'pid', 'timeout', 'c', 'connections', 'a', 'amount'],
-      allowUnexpected: true,
+        await runUntilSigInt({
+          log,
+          signal: controller.signal,
+        });
+      }
     },
-  }
-);
+    {
+      flags: {
+        string: ['port', 'pid', 't', 'timeout', 'c', 'connections', 'a', 'amount'],
+        help: `
+          Usage: node scripts/profiler.js <args> <command>
+
+          --port              Port on which Kibana is running. Falls back to 5603 & 5601.
+          --pid               Process ID to hook into it. Takes precedence over \`port\`.
+          --timeout           Run commands until timeout (in milliseconds)
+          --c, --connections  Number of commands that can be run in parallel.
+          --a, --amount       Amount of times the command should be run
+        `,
+        allowUnexpected: true,
+      },
+    }
+  );
+}

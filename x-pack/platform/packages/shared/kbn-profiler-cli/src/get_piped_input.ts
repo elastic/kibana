@@ -1,0 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export async function getPipedInput() {
+  if (process.stdin.isTTY) {
+    return undefined;
+  }
+
+  const input = await new Promise<string>((resolve) => {
+    let buffer = '';
+    process.stdin.setEncoding('utf8');
+    process.stdin.on('data', (chunk) => {
+      buffer += chunk;
+    });
+    process.stdin.on('end', () => {
+      resolve(buffer);
+    });
+  });
+
+  return input;
+}
