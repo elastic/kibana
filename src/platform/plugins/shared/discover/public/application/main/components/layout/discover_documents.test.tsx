@@ -85,7 +85,7 @@ async function mountComponent(
       <DiscoverCustomizationProvider value={customisationService}>
         <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
           <DiscoverMainProvider value={stateContainer}>
-          <EuiProvider highContrastMode={false}>
+            <EuiProvider highContrastMode={false}>
               <DiscoverDocuments {...props} />
             </EuiProvider>
           </DiscoverMainProvider>

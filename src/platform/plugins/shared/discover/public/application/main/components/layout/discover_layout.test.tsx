@@ -138,7 +138,7 @@ async function mountComponent(
       <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
         <DiscoverMainProvider value={stateContainer}>
           <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
-          <EuiProvider highContrastMode={false}>
+            <EuiProvider highContrastMode={false}>
               <DiscoverLayout {...props} />
             </EuiProvider>
           </RuntimeStateProvider>
