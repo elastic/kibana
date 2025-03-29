@@ -51,7 +51,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({ packages: [{ name: 'idonotexists', version: '1.0.0' }] })
           .expect(400);
 
-        expect(res.body.message).equal('Cannot uninstall non installed packages: idonotexists');
+        expect(res.body.message).equal('Cannot uninstall non-installed packages: idonotexists');
       });
     });
 
