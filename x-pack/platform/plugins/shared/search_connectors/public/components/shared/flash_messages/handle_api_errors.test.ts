@@ -8,13 +8,13 @@
 jest.mock('./set_message_helpers', () => ({
   flashErrorToast: jest.fn(),
 }));
-import '../../__mocks__/kea_logic/kibana_logic.mock';
 
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
 import { FlashMessagesLogic } from './flash_messages_logic';
 import { flashAPIErrors, getErrorsFromHttpResponse, toastAPIErrors } from './handle_api_errors';
 import { flashErrorToast } from './set_message_helpers';
+import { scopedHistoryMock } from '@kbn/core/public/mocks';
 
 describe('flashAPIErrors', () => {
   const mockHttpError = {
@@ -30,7 +30,8 @@ describe('flashAPIErrors', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    FlashMessagesLogic({ notifications: {} as unknown as NotificationsStart });
+    const history = scopedHistoryMock.create();
+    FlashMessagesLogic({ notifications: {} as unknown as NotificationsStart, history });
     FlashMessagesLogic.mount();
     jest.spyOn(FlashMessagesLogic.actions, 'setFlashMessages');
     jest.spyOn(FlashMessagesLogic.actions, 'setQueuedMessages');

@@ -11,11 +11,10 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../../__mocks__/kea_logic';
-
 import { omit } from 'lodash';
 
 import { InlineEditableTableLogic } from './inline_editable_table_logic';
+import { LogicMounter } from '../../../../__mocks__';
 
 interface Foo {
   id: number;

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../__mocks__/kea_logic';
-
 import { resetContext } from 'kea';
 
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
-const { history } = mockKibanaValues;
+const history = scopedHistoryMock.create();
 
 import { FlashMessagesLogic } from './flash_messages_logic';
 import { IFlashMessage } from './types';
+import { scopedHistoryMock } from '@kbn/core/public/mocks';
+import { LogicMounter } from '../../../__mocks__';
 
 describe('FlashMessagesLogic', () => {
   const { mount: mountFlashMessagesLogic, unmount: unmountFlashMessagesLogic } = new LogicMounter(

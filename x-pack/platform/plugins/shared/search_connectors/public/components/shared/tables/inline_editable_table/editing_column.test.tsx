@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
-
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
@@ -14,6 +12,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiFormRow } from '@elastic/eui';
 
 import { EditingColumn } from './editing_column';
+import { setMockActions, setMockValues } from '../../../../__mocks__';
 
 describe('EditingColumn', () => {
   const column = {

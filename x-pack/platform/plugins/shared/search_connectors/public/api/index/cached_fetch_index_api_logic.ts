@@ -55,6 +55,7 @@ export const CachedFetchIndexApiLogic = kea<
     CachedFetchIndexApiLogicProps
   >
 >({
+  key: (props) => props.http,
   actions: {
     clearPollTimeout: true,
     createPollTimeout: (duration) => ({ duration }),

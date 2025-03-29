@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { mockHistory } from '../../__mocks__/react_router';
-
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import { createHref } from '.';
+import { mockHistory } from '../../../__mocks__/react_router';
 
 describe('createHref', () => {
   const dependencies = {

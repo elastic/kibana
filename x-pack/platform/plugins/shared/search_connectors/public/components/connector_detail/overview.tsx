@@ -9,7 +9,17 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiCallOut, EuiCode, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -29,48 +39,54 @@ import { EuiButtonTo } from '../shared/react_router_helpers';
 import { ConvertConnectorLogic } from '../search_index/connector/native_connector_configuration/convert_connector_logic';
 import { ConvertConnectorModal } from '../shared/convert_connector_modal/convert_connector_modal';
 import { docLinks } from '../shared/doc_links';
+import { useAppContext } from '../../app_context';
 
 export const ConnectorDetailOverview: React.FC = () => {
   const {
     services: { http },
   } = useKibana();
+  const isCloud = useAppContext();
   const { indexData } = useValues(IndexViewLogic({ http }));
-  const { connector, error, connectorAgentlessPolicy } = useValues(ConnectorViewLogic({ http }));
+  const { connector, error, isWaitingOnAgentlessDeployment, connectorAgentlessPolicy } = useValues(
+    ConnectorViewLogic({ http })
+  );
 
   const { showModal } = useActions(ConvertConnectorLogic({ http }));
   const { isModalVisible } = useValues(ConvertConnectorLogic({ http }));
 
   return (
     <>
-      {
-        // TODO remove this callout when example status is removed
-        connector && connector.service_type && (
-          <>
-            <EuiCallOut
-              iconType="iInCircle"
-              color="warning"
-              title={i18n.translate(
-                'xpack.searchConnectorscontent.connectors.overview.connectorUnsupportedCallOut.title',
+      {isWaitingOnAgentlessDeployment && (
+        <>
+          <EuiCallOut
+            iconType="warning"
+            color="warning"
+            title={
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  {i18n.translate(
+                    'xpack.searchConnectors.content.connectors.overview.agentlessDeploymentNotReadyCallOut.title',
+                    {
+                      defaultMessage: 'Provisioning infrastructure',
+                    }
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
+            <EuiSpacer size="s" />
+            <EuiText size="s">
+              {i18n.translate(
+                'xpack.searchConnectors.content.connectors.overview.agentlessDeploymentNotReadyCallOut.description',
                 {
-                  defaultMessage: 'Example connector',
+                  defaultMessage: 'Setting up the agentless infrastructure to run the connector.',
                 }
               )}
-            >
-              <EuiSpacer size="s" />
-              <EuiText size="s">
-                <FormattedMessage
-                  id="xpack.searchConnectors.content.connectors.overview.connectorUnsupportedCallOut.description"
-                  defaultMessage="This is an example connector that serves as a building block for customizations. The design and code is being provided as-is with no warranties. This is not subject to the SLA of supported features."
-                />
-              </EuiText>
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        )
-      }
-      {connector?.is_native && (
-        <>
-          {isModalVisible && <ConvertConnectorModal />}
+            </EuiText>
+          </EuiCallOut>
           <EuiSpacer />
         </>
       )}
@@ -80,7 +96,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             iconType="warning"
             color="danger"
             title={i18n.translate(
-              'xpack.searchConnectorscontent.connectors.overview.connectorErrorCallOut.title',
+              'xpack.searchConnectors.content.connectors.overview.connectorErrorCallOut.title',
               {
                 defaultMessage: 'Your connector has reported an error',
               }
@@ -98,7 +114,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             iconType="iInCircle"
             color="warning"
             title={i18n.translate(
-              'xpack.searchConnectorscontent.connectors.overview.connectorNoIndexCallOut.title',
+              'xpack.searchConnectors.content.connectors.overview.connectorNoIndexCallOut.title',
               {
                 defaultMessage: 'Connector has no attached index',
               }
@@ -107,7 +123,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             <EuiSpacer size="s" />
             <EuiText size="s">
               {i18n.translate(
-                'xpack.searchConnectorscontent.connectors.overview.connectorNoIndexCallOut.description',
+                'xpack.searchConnectors.content.connectors.overview.connectorNoIndexCallOut.description',
                 {
                   defaultMessage:
                     "You won't be able to start syncing content until your connector is attached to an index.",
@@ -124,7 +140,7 @@ export const ConnectorDetailOverview: React.FC = () => {
               })}#attachIndexBox`}
             >
               {i18n.translate(
-                'xpack.searchConnectorscontent.connectors.overview.connectorNoIndexCallOut.buttonLabel',
+                'xpack.searchConnectors.content.connectors.overview.connectorNoIndexCallOut.buttonLabel',
                 {
                   defaultMessage: 'Attach index',
                 }
@@ -139,7 +155,7 @@ export const ConnectorDetailOverview: React.FC = () => {
           <EuiCallOut
             iconType="iInCircle"
             title={i18n.translate(
-              'xpack.searchConnectorscontent.connectors.overview.connectorIndexDoesntExistCallOut.title',
+              'xpack.searchConnectors.content.connectors.overview.connectorIndexDoesntExistCallOut.title',
               {
                 defaultMessage: "Attached index doesn't exist",
               }
@@ -159,23 +175,73 @@ export const ConnectorDetailOverview: React.FC = () => {
           <EuiSpacer />
         </>
       )}
-      {connector &&
-        !connector.is_native &&
-        connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
-          <ConnectorStats
-            connector={connector}
-            indexData={indexData || undefined}
-            agentlessOverview={connectorAgentlessPolicy}
-          />
-        )}
-      {connector &&
-        !connector.is_native &&
-        connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
-          <>
-            <EuiSpacer />
-            <SyncJobs connector={connector} />
-          </>
-        )}
+      {connector?.is_native && !isCloud && (
+        <>
+          {isModalVisible && <ConvertConnectorModal />}
+          <EuiCallOut
+            iconType="warning"
+            color="warning"
+            title={i18n.translate(
+              'xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.title',
+              {
+                defaultMessage:
+                  'Elastic managed connectors (formerly native connectors) are no longer supported outside Elastic Cloud',
+              }
+            )}
+          >
+            <EuiSpacer size="s" />
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.content"
+                  defaultMessage="Convert it to a {link}, to be self-hosted on your own infrastructure. Elastic managed connectors are available only in your Elastic Cloud deployment."
+                  values={{
+                    link: (
+                      <EuiLink
+                        data-test-subj="entSearchContent-connectorDetailOverview-nativeCloudCallout-connectorClientLink"
+                        data-telemetry-id="entSearchContent-connectorDetailOverview-nativeCloudCallout-connectorClientLink"
+                        href={docLinks.buildConnector}
+                        target="_blank"
+                      >
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.connectorClient',
+                          { defaultMessage: 'self-managed connector' }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiButton
+              data-test-subj="entSearchContent-connectorDetailOverview-nativeCloudCallout-convertToSelfManagedClientButton"
+              color="warning"
+              fill
+              onClick={() => showModal()}
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.connectors.overview.convertConnector.buttonLabel',
+                { defaultMessage: 'Convert connector' }
+              )}
+            </EuiButton>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
+      {connector && connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
+        <ConnectorStats
+          connector={connector}
+          indexData={indexData || undefined}
+          agentlessOverview={connectorAgentlessPolicy}
+        />
+      )}
+      {connector && connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
+        <>
+          <EuiSpacer />
+          <SyncJobs connector={connector} />
+        </>
+      )}
     </>
   );
 };

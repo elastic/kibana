@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockHttpValues } from '../../../__mocks__/kea_logic';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
@@ -17,7 +17,7 @@ jest.mock('@kbn/search-connectors', () => ({
 }));
 
 describe('generateConnectorApiKeyApiLogic', () => {
-  const { http } = mockHttpValues;
+  const http = httpServiceMock.createSetupContract();
   beforeEach(() => {
     jest.clearAllMocks();
   });

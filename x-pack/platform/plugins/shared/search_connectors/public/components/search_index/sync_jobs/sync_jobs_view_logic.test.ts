@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
-
 import moment from 'moment';
 
 import { ConnectorSyncJob, SyncJobType, SyncStatus, TriggerMethod } from '@kbn/search-connectors';
 import { nextTick } from '@kbn/test-jest-helpers';
-
-import { HttpError, Status } from '../../../../../../common/types/api';
 
 import { FetchSyncJobsApiLogic } from '../../../api/connector/fetch_sync_jobs_api_logic';
 
 import { IndexViewLogic } from '../index_view_logic';
 
 import { SyncJobView, SyncJobsViewLogic } from './sync_jobs_view_logic';
+import { HttpError, Status } from '../../../../common/types/api';
+import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__';
 
 // We can't test fetchTimeOutId because this will get set whenever the logic is created
 // And the timeoutId is non-deterministic. We use expect.object.containing throughout this test file

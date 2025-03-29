@@ -140,7 +140,7 @@ export const ConnectorScheduling: React.FC = () => {
         shouldShowIncrementalSync={shouldShowIncrementalSync}
         updateConnectorStatus={status === Status.LOADING}
         updateScheduling={(scheduling: SchedulingConfiguraton) =>
-          makeRequest({ connectorId: connector.id, scheduling })
+          makeRequest({ connectorId: connector.id, scheduling, http })
         }
       />
     </>

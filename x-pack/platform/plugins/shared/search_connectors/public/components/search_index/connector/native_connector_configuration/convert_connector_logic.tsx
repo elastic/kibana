@@ -59,13 +59,13 @@ export const ConvertConnectorLogic = kea<
     values: [ConvertConnectorApiLogic, ['status'], ConnectorViewLogic, ['connectorId']],
     keys: [ConnectorViewLogic, ['http']],
   },
-  listeners: ({ actions, values }) => ({
+  listeners: ({ actions, values, props }) => ({
     apiSuccess: () => {
       actions.hideModal();
     },
     convertConnector: () => {
       if (values.connectorId) {
-        actions.makeRequest({ connectorId: values.connectorId });
+        actions.makeRequest({ connectorId: values.connectorId, http: props.http });
       }
     },
   }),

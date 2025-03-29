@@ -130,6 +130,7 @@ export const IndexViewLogic = kea<
     startAccessControlSync: true,
     startIncrementalSync: true,
     startSync: true,
+    setConnector: true,
   },
   connect: {
     actions: [
@@ -165,7 +166,7 @@ export const IndexViewLogic = kea<
       CachedFetchIndexApiLogic,
       ['fetchIndexApiData', 'status as fetchIndexApiStatus', 'indexData', 'isInitialLoading'],
     ],
-    keys: [CachedFetchIndexApiLogic, 'http'],
+    keys: [CachedFetchIndexApiLogic, ['http'], ConnectorConfigurationApiLogic, ['http']],
   },
   events: ({ actions }) => ({
     beforeUnmount: () => {

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import '../../../__mocks__/kea_logic';
-
 import React from 'react';
 
 import { shallow } from 'enzyme';

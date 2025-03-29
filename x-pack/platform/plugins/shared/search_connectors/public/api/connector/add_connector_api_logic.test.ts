@@ -11,7 +11,7 @@ import { addConnector } from './add_connector_api_logic';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
 describe('addConnectorApiLogic', () => {
-  const http = kibanaServicem;
+  const http = httpServiceMock.createSetupContract();
   beforeEach(() => {
     jest.clearAllMocks();
   });

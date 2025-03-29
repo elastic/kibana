@@ -9,6 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Connector } from '@kbn/search-connectors';
 
+import { HttpSetup } from '@kbn/core/public';
 import {
   ConnectorNameAndDescriptionApiLogic,
   PutConnectorNameAndDescriptionArgs,
@@ -43,9 +44,18 @@ interface ConnectorNameAndDescriptionValues {
   nameAndDescription: NameAndDescription;
 }
 
+export interface ConnectorNameAndDescriptionLogicProps {
+  http?: HttpSetup;
+}
+
 export const ConnectorNameAndDescriptionLogic = kea<
-  MakeLogicType<ConnectorNameAndDescriptionValues, ConnectorNameAndDescriptionActions>
+  MakeLogicType<
+    ConnectorNameAndDescriptionValues,
+    ConnectorNameAndDescriptionActions,
+    ConnectorNameAndDescriptionLogicProps
+  >
 >({
+  key: (props) => props.http,
   actions: {
     saveNameAndDescription: true,
     setIsEditing: (isEditing: boolean) => ({
@@ -68,7 +78,7 @@ export const ConnectorNameAndDescriptionLogic = kea<
     afterMount: () =>
       actions.setNameAndDescription(isConnectorIndex(values.index) ? values.index.connector : {}),
   }),
-  listeners: ({ actions, values }) => ({
+  listeners: ({ actions, values, props }) => ({
     fetchIndexApiSuccess: (index) => {
       if (!values.isEditing && isConnectorIndex(index)) {
         actions.setNameAndDescription(index.connector);
@@ -79,6 +89,7 @@ export const ConnectorNameAndDescriptionLogic = kea<
         actions.makeRequest({
           connectorId: values.index.connector.id,
           ...values.localNameAndDescription,
+          http: props.http,
         });
       }
     },

@@ -13,10 +13,10 @@ import { BetaCallOut } from './beta_callout';
 
 export const BetaConnectorCallout: React.FC = () => (
   <BetaCallOut
-    title={i18n.translate('xpack.searchConnectorsbetaConnectorCalloutTitle', {
+    title={i18n.translate('xpack.searchConnectors.betaConnectorCalloutTitle', {
       defaultMessage: 'Beta connector',
     })}
-    description={i18n.translate('xpack.searchConnectorsbetaConnectorCalloutDescription', {
+    description={i18n.translate('xpack.searchConnectors.betaConnectorCalloutDescription', {
       defaultMessage:
         'This connector is in beta. Beta features are subject to change and are not covered by the support SLA of general release (GA) features. Elastic plans to promote this feature to GA in a future release.',
     })}

@@ -6,14 +6,13 @@
  */
 
 // write tests that checks cancelSync API logic calls correct endpoint
-import { mockHttpValues } from '../../../__mocks__/kea_logic';
-
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { cancelSync } from './cancel_sync_api_logic';
 
 describe('CancelSyncApiLogic', () => {
-  const { http } = mockHttpValues;
+  const http = httpServiceMock.createSetupContract();
   beforeEach(() => {
     jest.clearAllMocks();
   });

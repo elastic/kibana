@@ -24,11 +24,11 @@
       "licensing",
       "taskManager",
       "fleet",
-      "kibanaReact"
+      "kibanaReact",
+      "indexManagement",
     ],
     "optionalPlugins": [
       "cloud",
-      "indexManagement",
     ]
   }
 }

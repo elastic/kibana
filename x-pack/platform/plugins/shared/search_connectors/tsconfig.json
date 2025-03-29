@@ -18,6 +18,7 @@
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/core-http-browser",
+    "@kbn/index-management-plugin",
     "@kbn/search-connectors",
     "@kbn/task-manager-plugin",
     "@kbn/fleet-plugin",

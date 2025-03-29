@@ -7,29 +7,25 @@
 import React from 'react';
 
 import { EuiLink } from '@elastic/eui';
-import { useAppContext } from '../../../app_context';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export const ConnectorViewIndexLink: React.FC<{
   indexName: string;
   target?: boolean;
 }> = ({ indexName, target }) => {
   const {
-    plugins: { share },
-  } = useAppContext();
+    services: { http },
+  } = useKibana();
 
-  const searchIndexDetailsUrl = share?.url.locators
-    .get('SEARCH_INDEX_DETAILS_LOCATOR_ID')
-    ?.useUrl({ indexName });
-
-  return searchIndexDetailsUrl ? (
+  return (
     <EuiLink
       target={target ? '_blank' : undefined}
       external={target ?? false}
-      href={searchIndexDetailsUrl}
+      href={`${http?.basePath.prepend(
+        `/app/management/data/index_management/indices/index_details?indexName=${indexName}`
+      )}`}
     >
       {indexName}
     </EuiLink>
-  ) : (
-    <>{indexName}</>
   );
 };

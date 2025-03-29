@@ -60,12 +60,9 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
 
   const getSyncButtonText = () => {
     if (isWaitingForSync) {
-      return i18n.translate(
-        'xpack.searchConnectorscontent.index.syncButton.waitingForSync.label',
-        {
-          defaultMessage: 'Waiting for sync',
-        }
-      );
+      return i18n.translate('xpack.searchConnectorscontent.index.syncButton.waitingForSync.label', {
+        defaultMessage: 'Waiting for sync',
+      });
     }
     if (isSyncing && connector?.status !== ConnectorStatus.ERROR) {
       return i18n.translate('xpack.searchConnectorscontent.index.syncButton.syncing.label', {

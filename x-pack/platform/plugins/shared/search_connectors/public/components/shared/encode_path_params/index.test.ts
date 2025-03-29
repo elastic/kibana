@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { mockUseParams } from '../../__mocks__/react_router';
-
+import { mockUseParams } from '../../../__mocks__/react_router';
 import { encodePathParams, generateEncodedPath, useDecodedParams } from '.';
 
 describe('encodePathParams', () => {

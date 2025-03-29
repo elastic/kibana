@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { connectorIndex, apiIndex } from '../__mocks__/view_index.mock';
-
 import moment from 'moment';
 
 import {
@@ -26,6 +24,7 @@ import {
   isConnectorViewIndex,
   isApiViewIndex,
 } from './indices';
+import { apiIndex, connectorIndex } from '../__mocks__/view_index.mock';
 
 describe('Indices util functions', () => {
   describe('getIngestionMethod', () => {

@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import {
-  LogicMounter,
-  mockFlashMessageHelpers,
-  mockHttpValues,
-} from '../../../__mocks__/kea_logic';
 import { apiIndex, connectorIndex } from '../../__mocks__/view_index.mock';
 
 import { SyncStatus, IngestionMethod, IngestionStatus } from '@kbn/search-connectors';
 import { nextTick } from '@kbn/test-jest-helpers';
-
-import { Status } from '../../../../../common/types/api';
 
 import { StartSyncApiLogic } from '../../api/connector/start_sync_api_logic';
 import { CachedFetchIndexApiLogic } from '../../api/index/cached_fetch_index_api_logic';
@@ -24,10 +17,9 @@ import { indexToViewIndex } from '../../utils/indices';
 
 import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
-
-jest.mock('../../../shared/kibana/kibana_logic', () => ({
-  KibanaLogic: { values: { productAccess: { hasDocumentLevelSecurityEnabled: true } } },
-}));
+import { Status } from '../../../common/types/api';
+import { LogicMounter, mockFlashMessageHelpers } from '../../__mocks__';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
 // We can't test fetchTimeOutId because this will get set whenever the logic is created
 // And the timeoutId is non-deterministic. We use expect.object.containing throughout this test file
@@ -82,7 +74,7 @@ describe('IndexViewLogic', () => {
   const { mount: indexNameMount } = new LogicMounter(IndexNameLogic);
   const { mount } = new LogicMounter(IndexViewLogic);
   const { flashSuccessToast } = mockFlashMessageHelpers;
-  const { http } = mockHttpValues;
+  const http = httpServiceMock.createSetupContract();
 
   beforeEach(() => {
     jest.clearAllMocks();

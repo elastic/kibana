@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { mockHttpValues } from '../../../__mocks__/kea_logic';
-
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { deleteIndex } from './delete_index_api_logic';
 
 describe('deleteIndexApiLogic', () => {
-  const { http } = mockHttpValues;
+  const http = httpServiceMock.createSetupContract();
   beforeEach(() => {
     jest.clearAllMocks();
   });

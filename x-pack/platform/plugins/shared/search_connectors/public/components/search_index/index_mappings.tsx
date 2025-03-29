@@ -88,13 +88,13 @@ export const SearchIndexIndexMappings: React.FC = () => {
                 <EuiCallOut
                   size="m"
                   title={i18n.translate(
-                    'xpack.searchConnectorscontent.searchIndex.mappings.noIndex.title',
+                    'xpack.searchConnectors.content.searchIndex.mappings.noIndex.title',
                     { defaultMessage: 'Access Control Index not found' }
                   )}
                   iconType="iInCircle"
                 >
                   <p>
-                    {i18n.translate('xpack.searchConnectorscontent.searchIndex.mappings.noIndex', {
+                    {i18n.translate('xpack.searchConnectors.content.searchIndex.mappings.noIndex', {
                       defaultMessage:
                         "An Access Control Index won't be created until you enable document-level security and run your first access control sync.",
                     })}
@@ -117,7 +117,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
                       color="danger"
                       iconType="warn"
                       title={i18n.translate(
-                        'xpack.searchConnectorscontent.searchIndex.mappings.noMappingsComponent',
+                        'xpack.searchConnectors.content.searchIndex.mappings.noMappingsComponent',
                         { defaultMessage: 'Mappings component not found' }
                       )}
                     />
@@ -136,7 +136,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
               <EuiFlexItem>
                 <EuiTitle size="xs">
                   <h3>
-                    {i18n.translate('xpack.searchConnectorscontent.searchIndex.mappings.title', {
+                    {i18n.translate('xpack.searchConnectors.content.searchIndex.mappings.title', {
                       defaultMessage: 'About index mappings',
                     })}
                   </h3>
@@ -164,7 +164,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
               target="_blank"
               external
             >
-              {i18n.translate('xpack.searchConnectorscontent.searchIndex.mappings.docLink', {
+              {i18n.translate('xpack.searchConnectors.content.searchIndex.mappings.docLink', {
                 defaultMessage: 'Learn how to customize index mappings and settings',
               })}
             </EuiLink>
@@ -178,7 +178,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
               <EuiFlexItem>
                 <EuiTitle size="xs">
                   <h3>
-                    {i18n.translate('xpack.searchConnectorscontent.searchIndex.transform.title', {
+                    {i18n.translate('xpack.searchConnectors.content.searchIndex.transform.title', {
                       defaultMessage: 'Transform your searchable content',
                     })}
                   </h3>
@@ -202,7 +202,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
               target="_blank"
               external
             >
-              {i18n.translate('xpack.searchConnectorscontent.searchIndex.transform.docLink', {
+              {i18n.translate('xpack.searchConnectors.content.searchIndex.transform.docLink', {
                 defaultMessage: 'Learn more',
               })}
             </EuiLink>

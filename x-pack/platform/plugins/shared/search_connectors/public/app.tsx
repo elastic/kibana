@@ -100,7 +100,7 @@ const AppWithExecutionContext = ({
   const isAgentlessEnabled =
     (isCloud || isServerless) && plugins.fleet?.config.agentless?.enabled === true;
 
-  const indexMappingComponent = plugins.indexManagementPlugin?.getIndexMappingComponent({
+  const indexMappingComponent = plugins.indexManagement?.getIndexMappingComponent({
     history: params.history,
   });
 

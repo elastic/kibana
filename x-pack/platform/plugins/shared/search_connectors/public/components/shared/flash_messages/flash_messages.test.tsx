@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../__mocks__/kea_logic';
-
 import React from 'react';
 
 import { shallow } from 'enzyme';
@@ -14,6 +12,7 @@ import { shallow } from 'enzyme';
 import { EuiCallOut } from '@elastic/eui';
 
 import { FlashMessages } from './flash_messages';
+import { setMockValues } from '../../../__mocks__';
 
 describe('FlashMessages', () => {
   it('renders an array of callouts', () => {

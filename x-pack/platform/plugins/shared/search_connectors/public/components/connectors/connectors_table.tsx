@@ -63,10 +63,6 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
   const {
     plugins: { share },
   } = useAppContext();
-  const searchIndicesLocator = useMemo(
-    () => share?.url.locators.get('SEARCH_INDEX_DETAILS_LOCATOR_ID'),
-    [share]
-  );
 
   const columns: Array<EuiBasicTableColumn<ConnectorViewItem>> = [
     ...(!isCrawler
@@ -98,7 +94,7 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
       ),
       render: (connector: ConnectorViewItem) =>
         connector.index_name ? (
-          connector.indexExists && searchIndicesLocator ? (
+          connector.indexExists ? (
             <ConnectorViewIndexLink indexName={connector.index_name} />
           ) : (
             connector.index_name

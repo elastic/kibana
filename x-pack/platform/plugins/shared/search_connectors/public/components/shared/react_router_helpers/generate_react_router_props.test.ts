@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { mockKibanaValues } from '../../__mocks__/kea_logic';
-import { mockHistory } from '../../__mocks__/react_router';
-
+import { mockHistory } from '../../../__mocks__/react_router';
 import { generateReactRouterProps } from '.';
+import { scopedHistoryMock } from '@kbn/core/public/mocks';
 
 describe('generateReactRouterProps', () => {
+  const history = scopedHistoryMock.create();
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('generates React-Router-friendly href and onClick props', () => {
-    expect(generateReactRouterProps({ to: '/hello/world' })).toEqual({
+    expect(generateReactRouterProps({ to: '/hello/world', history })).toEqual({
       href: '/app/search_connectors/hello/world',
       onClick: expect.any(Function),
     });
@@ -24,7 +24,9 @@ describe('generateReactRouterProps', () => {
   });
 
   it('renders with the correct non-basenamed href when shouldNotCreateHref is passed', () => {
-    expect(generateReactRouterProps({ to: '/hello/world', shouldNotCreateHref: true })).toEqual({
+    expect(
+      generateReactRouterProps({ to: '/hello/world', shouldNotCreateHref: true, history })
+    ).toEqual({
       href: '/hello/world',
       onClick: expect.any(Function),
     });
@@ -32,17 +34,18 @@ describe('generateReactRouterProps', () => {
 
   describe('onClick', () => {
     it('prevents default navigation and uses React Router history for internal links', () => {
+      const navigateToUrl = jest.fn();
       const mockEvent = {
         button: 0,
         target: { getAttribute: () => '_self' },
         preventDefault: jest.fn(),
       } as any;
 
-      const { onClick } = generateReactRouterProps({ to: '/test' });
+      const { onClick } = generateReactRouterProps({ to: '/test', history, navigateToUrl });
       onClick(mockEvent);
 
       expect(mockEvent.preventDefault).toHaveBeenCalled();
-      expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/test', {
+      expect(navigateToUrl).toHaveBeenCalledWith('/test', {
         shouldNotCreateHref: false,
         shouldNotPrepend: false,
       });
@@ -54,38 +57,44 @@ describe('generateReactRouterProps', () => {
         target: { getAttribute: () => '_self' },
         preventDefault: jest.fn(),
       } as any;
-
+      const navigateToUrl = jest.fn();
       const { onClick } = generateReactRouterProps({
         to: '/app/search_connectors/test',
         shouldNotCreateHref: true,
+        history,
       });
       onClick(mockEvent);
 
       expect(mockEvent.preventDefault).toHaveBeenCalled();
-      expect(mockKibanaValues.navigateToUrl).toHaveBeenCalledWith('/app/search_connectors/test', {
+      expect(navigateToUrl).toHaveBeenCalledWith('/app/search_connectors/test', {
         shouldNotCreateHref: true,
         shouldNotPrepend: false,
       });
     });
 
     it('does not prevent default browser behavior on new tab/window clicks', () => {
+      const navigateToUrl = jest.fn();
       const mockEvent = {
         preventDefault: jest.fn(),
         shiftKey: true,
         target: { getAttribute: () => '_blank' },
       } as any;
 
-      const { onClick } = generateReactRouterProps({ to: '/test' });
+      const { onClick } = generateReactRouterProps({ to: '/test', history });
       onClick(mockEvent);
 
-      expect(mockKibanaValues.navigateToUrl).not.toHaveBeenCalled();
+      expect(navigateToUrl).not.toHaveBeenCalled();
     });
 
     it('calls inherited onClick actions in addition to default navigation', () => {
       const mockEvent = { preventDefault: jest.fn() } as any;
       const customOnClick = jest.fn(); // Can be anything from telemetry to a state reset
 
-      const { onClick } = generateReactRouterProps({ to: '/test', onClick: customOnClick });
+      const { onClick } = generateReactRouterProps({
+        to: '/test',
+        onClick: customOnClick,
+        history,
+      });
       onClick(mockEvent);
 
       expect(customOnClick).toHaveBeenCalled();

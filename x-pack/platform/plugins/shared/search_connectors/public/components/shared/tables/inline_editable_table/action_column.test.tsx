@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
-
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
 import { ActionColumn } from './action_column';
+import { setMockActions, setMockValues } from '../../../../__mocks__';
 
 const requiredParams = {
   displayedItems: [],

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { mockHttpValues } from '../../../__mocks__/kea_logic';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { fetchSyncJobs } from './fetch_sync_jobs_api_logic';
 
 describe('FetchSyncJobs', () => {
-  const { http } = mockHttpValues;
+  const http = httpServiceMock.createSetupContract();
   beforeEach(() => {
     jest.clearAllMocks();
   });

@@ -153,6 +153,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                           connectorName: rawName,
                           connectorType: selectedConnector.serviceType,
                           isManagedConnector: selectedConnector.isNative,
+                          http,
                         });
                       }
                     }}

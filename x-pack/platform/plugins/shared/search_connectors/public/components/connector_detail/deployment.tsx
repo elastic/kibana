@@ -68,9 +68,9 @@ export const ConnectorDeployment: React.FC = () => {
 
   useEffect(() => {
     if (connectorId && connector && connector.api_key_id) {
-      getApiKeyById(connector.api_key_id);
+      getApiKeyById({ id: connector.api_key_id, http });
     }
-  }, [connector, connectorId, getApiKeyById]);
+  }, [connector, connectorId, getApiKeyById, http]);
 
   const selectDeploymentMethod = useCallback(
     (deploymentMethod: 'docker' | 'source') => {
@@ -166,6 +166,7 @@ export const ConnectorDeployment: React.FC = () => {
                               generateConnectorApiKey({
                                 indexName: connector.index_name,
                                 isNative: connector.is_native,
+                                http,
                               });
                             }
                           }}

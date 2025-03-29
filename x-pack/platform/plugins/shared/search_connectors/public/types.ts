@@ -36,7 +36,7 @@ export interface SearchConnectorsPluginStartDependencies {
   fleet?: FleetStart;
   cloud?: CloudSetup & CloudStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
-  indexManagementPlugin?: IndexManagementPluginStart;
+  indexManagement?: IndexManagementPluginStart;
 }
 
 export interface AppDependencies {

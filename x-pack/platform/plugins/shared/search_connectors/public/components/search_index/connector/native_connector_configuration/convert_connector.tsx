@@ -22,14 +22,18 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ConvertConnectorModal } from '../../../shared/convert_connector_modal/convert_connector_modal';
 
 import { ConvertConnectorLogic } from './convert_connector_logic';
 import { docLinks } from '../../../shared/doc_links';
 
 export const ConvertConnector: React.FC = () => {
-  const { showModal } = useActions(ConvertConnectorLogic);
-  const { isModalVisible } = useValues(ConvertConnectorLogic);
+  const {
+    services: { http },
+  } = useKibana();
+  const { showModal } = useActions(ConvertConnectorLogic({ http }));
+  const { isModalVisible } = useValues(ConvertConnectorLogic({ http }));
 
   return (
     <>

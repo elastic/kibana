@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockHttpValues } from '../../../__mocks__/kea_logic';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
@@ -13,7 +13,7 @@ import { startAccessControlSync } from './start_access_control_sync_api_logic';
 
 describe('startAccessControlSyncApiLogic', () => {
   describe('startAccessControlSync', () => {
-    const { http } = mockHttpValues;
+    const http = httpServiceMock.createSetupContract();
     beforeEach(() => {
       jest.clearAllMocks();
     });

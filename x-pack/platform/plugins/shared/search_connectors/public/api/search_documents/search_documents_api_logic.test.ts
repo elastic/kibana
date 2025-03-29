@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { mockHttpValues } from '../../../__mocks__/kea_logic';
-
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { searchDocuments } from './search_documents_api_logic';
 
 describe('SearchDocumentsApiLogic', () => {
-  const { http } = mockHttpValues;
+  const http = httpServiceMock.createSetupContract();
   const results = {
     _meta: {
       page: {

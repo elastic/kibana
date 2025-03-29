@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import '../../__mocks__/kea_logic/kibana_logic.mock';
-
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
 import { FlashMessagesLogic, mountFlashMessagesLogic } from './flash_messages_logic';
@@ -19,6 +17,8 @@ import {
   flashSuccessToast,
   flashErrorToast,
 } from './set_message_helpers';
+import { ScopedHistory } from '@kbn/core/public';
+import { scopedHistoryMock } from '@kbn/core/public/mocks';
 
 describe('Flash Message Helpers', () => {
   const mockNotifications = {
@@ -26,9 +26,13 @@ describe('Flash Message Helpers', () => {
       add: jest.fn(),
     },
   };
+  const history: ScopedHistory<unknown> = scopedHistoryMock.create();
   const message = 'I am a message';
   beforeAll(() => {
-    mountFlashMessagesLogic({ notifications: mockNotifications as unknown as NotificationsStart });
+    mountFlashMessagesLogic({
+      notifications: mockNotifications as unknown as NotificationsStart,
+      history,
+    });
   });
 
   beforeEach(() => {

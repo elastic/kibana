@@ -22,7 +22,7 @@ export const BetaCallOut: React.FC<BetaCallOutProps> = ({ title, description }) 
       iconType="beaker"
       title={
         title ||
-        i18n.translate('xpack.searchConnectorsbetaCalloutTitle', {
+        i18n.translate('xpack.searchConnectors.betaCalloutTitle', {
           defaultMessage: 'Beta feature',
         })
       }
