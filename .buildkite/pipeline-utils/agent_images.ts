@@ -20,7 +20,7 @@ const DEFAULT_AGENT_IMAGE_CONFIG: AgentImageConfig = {
 
 const FIPS_AGENT_IMAGE_CONFIG: AgentImageConfig = {
   provider: 'gcp',
-  image: 'family/kibana-fips-ubuntu-2004-1743209453',
+  image: 'kibana-fips-ubuntu-2004-1743209453',
   imageProject: 'elastic-images-qa',
 };
 
