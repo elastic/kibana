@@ -15,6 +15,7 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
+  RouteSecurity,
 } from '@kbn/core/server';
 import {
   VersionedRouteValidation,
@@ -54,7 +55,9 @@ export interface UMServerRoute<T> {
  * provided by Kibana core.
  */
 export type UMRouteDefinition<T> = UMServerRoute<T> &
-  RouteConfig<ObjectType, ObjectType, ObjectType, RouteMethod>;
+  Omit<RouteConfig<ObjectType, ObjectType, ObjectType, RouteMethod>, 'security'> & {
+    security?: RouteSecurity;
+  };
 
 /**
  * This type represents an Uptime route definition that corresponds to the contract
@@ -83,7 +86,7 @@ export type SyntheticsRouteWrapper = (
   uptimeRoute: SyntheticsRoute<Record<string, unknown>>,
   server: SyntheticsServerSetup,
   syntheticsMonitorClient: SyntheticsMonitorClient
-) => UMKibanaRoute;
+) => UMKibanaRoute & { security: RouteSecurity };
 
 export interface RouteContext<
   Params = Record<string, any>,
