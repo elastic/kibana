@@ -7,57 +7,58 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isFunction } from 'lodash';
 import useLatest from 'react-use/lib/useLatest';
+import useUnmount from 'react-use/lib/useUnmount';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
 import type { CustomizationCallback } from './types';
-import type {
-  DiscoverCustomizationId,
-  DiscoverCustomizationService,
-} from './customization_service';
+import type { DiscoverCustomizationId } from './customization_service';
 import { createCustomizationService } from './customization_service';
 
 const customizationContext = createContext(createCustomizationService());
 
 export const DiscoverCustomizationProvider = customizationContext.Provider;
 
-export const useDiscoverCustomizationService = ({
-  customizationCallbacks: originalCustomizationCallbacks,
-  stateContainer,
-}: {
-  customizationCallbacks: CustomizationCallback[];
-  stateContainer?: DiscoverStateContainer;
-}) => {
-  const customizationCallbacks = useLatest(originalCustomizationCallbacks);
-  const [customizationService, setCustomizationService] = useState<DiscoverCustomizationService>();
+export const useDiscoverCustomizationService = () => {
+  const unmountRef = useRef(async () => {});
+  const getCustomizationServiceInternal = useLatest(
+    async ({
+      customizationCallbacks,
+      stateContainer,
+    }: {
+      customizationCallbacks: CustomizationCallback[];
+      stateContainer: DiscoverStateContainer;
+    }) => {
+      await unmountRef.current();
 
-  useEffect(() => {
-    setCustomizationService(undefined);
+      const customizations = createCustomizationService();
+      const callbacks = customizationCallbacks.map((callback) =>
+        Promise.resolve(callback({ customizations, stateContainer }))
+      );
+      const initialize = () => Promise.all(callbacks).then((result) => result.filter(isFunction));
 
-    if (!stateContainer) {
-      return;
-    }
-
-    const customizations = createCustomizationService();
-    const callbacks = customizationCallbacks.current.map((callback) =>
-      Promise.resolve(callback({ customizations, stateContainer }))
-    );
-    const initialize = () => Promise.all(callbacks).then((result) => result.filter(isFunction));
-
-    initialize().then(() => {
-      setCustomizationService(customizations);
-    });
-
-    return () => {
-      initialize().then((cleanups) => {
+      unmountRef.current = async () => {
+        const cleanups = await initialize();
         cleanups.forEach((cleanup) => cleanup());
-      });
-    };
-  }, [customizationCallbacks, stateContainer]);
+      };
 
-  return customizationService;
+      await initialize();
+
+      return customizations;
+    }
+  );
+  const [getCustomizationService] = useState(() => {
+    return (...params: Parameters<typeof getCustomizationServiceInternal.current>) =>
+      getCustomizationServiceInternal.current(...params);
+  });
+
+  useUnmount(() => {
+    unmountRef.current();
+  });
+
+  return getCustomizationService;
 };
 
 export const useDiscoverCustomization$ = <TCustomizationId extends DiscoverCustomizationId>(

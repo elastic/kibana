@@ -32,6 +32,7 @@ export interface DiscoverContainerInternalProps {
   customizationCallbacks: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
   isLoading?: boolean;
+  isLogsExplorer?: boolean;
 }
 
 const discoverContainerWrapperCss = css`
@@ -45,7 +46,7 @@ const discoverContainerWrapperCss = css`
   }
 `;
 
-const customizationContext: DiscoverCustomizationContext = {
+const defaultCustomizationContext: Omit<DiscoverCustomizationContext, 'isLogsExplorer'> = {
   displayMode: 'embedded',
   inlineTopNav: {
     enabled: false,
@@ -60,8 +61,16 @@ export const DiscoverContainerInternal = ({
   getDiscoverServices,
   stateStorageContainer,
   isLoading = false,
+  isLogsExplorer = false,
 }: DiscoverContainerInternalProps) => {
   const { value: discoverServices } = useAsync(getDiscoverServices, [getDiscoverServices]);
+  const customizationContext = useMemo<DiscoverCustomizationContext>(
+    () => ({
+      ...defaultCustomizationContext,
+      isLogsExplorer,
+    }),
+    [isLogsExplorer]
+  );
   const services = useMemo(() => {
     if (!discoverServices) {
       return undefined;

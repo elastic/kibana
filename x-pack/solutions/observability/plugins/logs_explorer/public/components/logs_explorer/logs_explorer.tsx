@@ -41,6 +41,7 @@ export const createLogsExplorer = ({ core, plugins }: CreateLogsExplorerArgs) =>
         overrideServices={overrideServices}
         scopedHistory={scopedHistory}
         stateStorageContainer={urlStateStorage}
+        isLogsExplorer
       />
     );
   };

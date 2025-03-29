@@ -27,6 +27,10 @@ export interface DiscoverCustomizationContext {
    */
   displayMode: DiscoverDisplayMode;
   /**
+   * 8.x only flag to indicate if the current view is Logs Explorer
+   */
+  isLogsExplorer: boolean;
+  /**
    * Inline top nav configuration
    */
   inlineTopNav: {

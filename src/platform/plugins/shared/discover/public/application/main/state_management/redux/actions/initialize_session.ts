@@ -36,13 +36,14 @@ export interface InitializeSessionParams {
   discoverSessionId: string | undefined;
   dataViewSpec: DataViewSpec | undefined;
   defaultUrlState: DiscoverAppState | undefined;
+  isLogsExplorer?: boolean;
 }
 
 export const initializeSession: InternalStateThunkActionCreator<
   [InitializeSessionParams],
   Promise<{ showNoDataPage: boolean }>
 > =
-  ({ stateContainer, discoverSessionId, dataViewSpec, defaultUrlState }) =>
+  ({ stateContainer, discoverSessionId, dataViewSpec, defaultUrlState, isLogsExplorer }) =>
   async (
     dispatch,
     getState,
@@ -57,7 +58,9 @@ export const initializeSession: InternalStateThunkActionCreator<
     const discoverSessionLoadTracker =
       services.ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
     const urlState = cleanupUrlState(
-      defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
+      isLogsExplorer
+        ? { ...stateContainer.appState.get() }
+        : defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
       services.uiSettings
     );
     const persistedDiscoverSession = discoverSessionId
@@ -67,23 +70,26 @@ export const initializeSession: InternalStateThunkActionCreator<
       urlState?.query ?? persistedDiscoverSession?.searchSource.getField('query');
     const isEsqlMode = isOfAggregateQueryType(initialQuery);
     const discoverSessionDataView = persistedDiscoverSession?.searchSource.getField('index');
-    const discoverSessionHasAdHocDataView = Boolean(
-      discoverSessionDataView && !discoverSessionDataView.isPersisted()
-    );
-    const { initializationState, defaultProfileAdHocDataViewIds } = getState();
-    const profileDataViews = runtimeStateManager.adHocDataViews$
-      .getValue()
-      .filter(({ id }) => id && defaultProfileAdHocDataViewIds.includes(id));
-    const profileDataViewsExist = profileDataViews.length > 0;
-    const locationStateHasDataViewSpec = Boolean(dataViewSpec);
-    const canAccessWithoutPersistedDataView =
-      isEsqlMode ||
-      discoverSessionHasAdHocDataView ||
-      profileDataViewsExist ||
-      locationStateHasDataViewSpec;
 
-    if (!initializationState.hasUserDataView && !canAccessWithoutPersistedDataView) {
-      return { showNoDataPage: true };
+    if (!isLogsExplorer) {
+      const discoverSessionHasAdHocDataView = Boolean(
+        discoverSessionDataView && !discoverSessionDataView.isPersisted()
+      );
+      const { initializationState, defaultProfileAdHocDataViewIds } = getState();
+      const profileDataViews = runtimeStateManager.adHocDataViews$
+        .getValue()
+        .filter(({ id }) => id && defaultProfileAdHocDataViewIds.includes(id));
+      const profileDataViewsExist = profileDataViews.length > 0;
+      const locationStateHasDataViewSpec = Boolean(dataViewSpec);
+      const canAccessWithoutPersistedDataView =
+        isEsqlMode ||
+        discoverSessionHasAdHocDataView ||
+        profileDataViewsExist ||
+        locationStateHasDataViewSpec;
+
+      if (!initializationState.hasUserDataView && !canAccessWithoutPersistedDataView) {
+        return { showNoDataPage: true };
+      }
     }
 
     /**
@@ -117,9 +123,12 @@ export const initializeSession: InternalStateThunkActionCreator<
     } else {
       // Load the requested data view if one exists, or a fallback otherwise
       const result = await loadAndResolveDataView({
-        dataViewId: isDataViewSource(urlState?.dataSource)
-          ? urlState?.dataSource.dataViewId
-          : discoverSessionDataView?.id,
+        dataViewId:
+          isLogsExplorer && runtimeStateManager.currentDataView$.getValue()?.id
+            ? runtimeStateManager.currentDataView$.getValue()?.id
+            : isDataViewSource(urlState?.dataSource)
+            ? urlState?.dataSource.dataViewId
+            : discoverSessionDataView?.id,
         dataViewSpec,
         savedSearch: persistedDiscoverSession,
         isEsqlMode,

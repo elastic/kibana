@@ -32,6 +32,7 @@ import {
 import type {
   CustomizationCallback,
   DiscoverCustomizationContext,
+  DiscoverCustomizationService,
 } from '../../../../customizations';
 import type { InternalStateStore, RuntimeStateManager } from '../../state_management/redux';
 import {
@@ -59,10 +60,12 @@ type SessionInitializationState =
   | {
       showNoDataPage: true;
       stateContainer: undefined;
+      customizationService: undefined;
     }
   | {
       showNoDataPage: false;
       stateContainer: DiscoverStateContainer;
+      customizationService: DiscoverCustomizationService;
     };
 
 type InitializeSession = (options?: {
@@ -81,6 +84,7 @@ export const DiscoverSessionView = ({
   const services = useDiscoverServices();
   const { core, history, getScopedHistory } = services;
   const { id: discoverSessionId } = useParams<{ id?: string }>();
+  const getCustomizationService = useDiscoverCustomizationService();
   const [initializeSessionState, initializeSession] = useAsyncFunction<InitializeSession>(
     async ({ dataViewSpec, defaultUrlState } = {}) => {
       const stateContainer = getDiscoverStateContainer({
@@ -90,16 +94,23 @@ export const DiscoverSessionView = ({
         internalState,
         runtimeStateManager,
       });
+      const customizationService = await getCustomizationService({
+        stateContainer,
+        customizationCallbacks,
+      });
       const { showNoDataPage } = await dispatch(
         internalStateActions.initializeSession({
           stateContainer,
           discoverSessionId,
           dataViewSpec,
           defaultUrlState,
+          isLogsExplorer: customizationContext.isLogsExplorer,
         })
       );
 
-      return showNoDataPage ? { showNoDataPage } : { showNoDataPage, stateContainer };
+      return showNoDataPage
+        ? { showNoDataPage }
+        : { showNoDataPage, stateContainer, customizationService };
     }
   );
   const initializeSessionWithDefaultLocationState = useLatest(() => {
@@ -110,10 +121,6 @@ export const DiscoverSessionView = ({
       dataViewSpec: historyLocationState?.dataViewSpec,
       defaultUrlState: historyLocationState?.defaultState,
     });
-  });
-  const customizationService = useDiscoverCustomizationService({
-    customizationCallbacks,
-    stateContainer: initializeSessionState.value?.stateContainer,
   });
   const initializationState = useInternalStateSelector((state) => state.initializationState);
   const currentDataView = useRuntimeState(runtimeStateManager.currentDataView$);
@@ -179,12 +186,12 @@ export const DiscoverSessionView = ({
     );
   }
 
-  if (!customizationService || !currentDataView) {
+  if (!currentDataView) {
     return <BrandedLoadingIndicator />;
   }
 
   return (
-    <DiscoverCustomizationProvider value={customizationService}>
+    <DiscoverCustomizationProvider value={initializeSessionState.value.customizationService}>
       <DiscoverMainProvider value={initializeSessionState.value.stateContainer}>
         <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
           <DiscoverTopNavInline
