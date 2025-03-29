@@ -9,7 +9,7 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { RuleCustomizationStatus } from '../../../../../../common/api/detection_engine';
-import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../../common/translations';
 
 interface RuleCustomizationFilterPopoverProps {
   customizationStatus: RuleCustomizationStatus | undefined;
