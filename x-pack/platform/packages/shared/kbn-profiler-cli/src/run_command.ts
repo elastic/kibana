@@ -31,7 +31,7 @@ export async function runCommand({
   connections,
   signal,
 }: {
-  command: string;
+  command: string[];
   amount: number;
   connections: number;
   signal: AbortSignal;
@@ -47,7 +47,8 @@ export async function runCommand({
   });
 
   function executeCommand() {
-    return execa.command(`bash "${command}"`, { shell: true, stdio: 'inherit' });
+    const [file, ...args] = command;
+    return execa(file, args, { stdio: 'ignore' });
   }
 
   if (amount === 1) {

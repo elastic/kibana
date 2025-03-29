@@ -59,7 +59,7 @@ export function cli() {
       } else if (flags._.length) {
         const connections = Number(flags.c || flags.connections || 1);
         const amount = Number(flags.a || flags.amount || 1);
-        const command = flags._.join(' ');
+        const command = flags._;
 
         log.info(`Executing "${command}" ${amount} times, ${connections} at a time`);
 
@@ -96,7 +96,7 @@ export function cli() {
           --c, --connections  Number of commands that can be run in parallel.
           --a, --amount       Amount of times the command should be run
         `,
-        allowUnexpected: true,
+        allowUnexpected: false,
       },
     }
   );
