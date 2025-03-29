@@ -37,6 +37,7 @@ import {
   getParamAtPosition,
   extractSingularType,
   isArrayType,
+  isParametrized,
 } from '../shared/helpers';
 import { getMessageFromId, errors } from './errors';
 import { getMaxMinNumberOfParams, collapseWrongArgumentTypeMessages } from './helpers';
@@ -487,7 +488,7 @@ function validateFunctionColumnArg(
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
-  if (!(isColumnItem(actualArg) || isIdentifier(actualArg))) {
+  if (!(isColumnItem(actualArg) || isIdentifier(actualArg)) || isParametrized(actualArg)) {
     return messages;
   }
 
