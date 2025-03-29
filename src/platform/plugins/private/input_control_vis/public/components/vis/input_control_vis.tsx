@@ -158,12 +158,15 @@ export class InputControlVis extends Component<InputControlVisProps> {
     }
 
     return (
-      <div className="eui-scrollBar" css={css({
-        minHeight: 0,
-        flex: '1 1 0',
-        display: 'flex',
-        overflow: 'auto'
-      })}>
+      <div
+        className="eui-scrollBar"
+        css={css({
+          minHeight: 0,
+          flex: '1 1 0',
+          display: 'flex',
+          overflow: 'auto',
+        })}
+      >
         <div css={icvContainerStyles}>
           <EuiFlexGroup wrap>{this.renderControls()}</EuiFlexGroup>
           {stagingButtons}
@@ -172,8 +175,8 @@ export class InputControlVis extends Component<InputControlVisProps> {
     );
   }
 }
-const icvContainerStyles = ({euiTheme}: UseEuiTheme) => css`
+const icvContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
   width: 100%;
   margin: 0 ${euiTheme.size.xs};
   padding: ${euiTheme.size.s};
-`
+`;
