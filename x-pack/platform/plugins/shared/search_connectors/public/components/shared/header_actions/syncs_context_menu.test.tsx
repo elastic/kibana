@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import '../../../../__mocks__/shallow_useeffect.mock';
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
-
 import React from 'react';
 
 import {
@@ -20,9 +17,9 @@ import {
 import { IngestionStatus, IngestionMethod, ConnectorStatus } from '@kbn/search-connectors';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { Status } from '../../../../../../common/types/api';
-
 import { SyncsContextMenu } from './syncs_context_menu';
+import { Status } from '../../../../common/types/api';
+import { setMockActions, setMockValues } from '../../../__mocks__';
 
 describe('SyncsContextMenu', () => {
   const startSync = jest.fn();

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { MockRouter, mockDependencies } from '../../__mocks__';
-
 import { RequestHandlerContext } from '@kbn/core/server';
 
 import { fetchSearchResults } from '@kbn/search-index-documents/lib';
 
 import { registerSearchRoute } from './search';
+import { mockDependencies, MockRouter } from '../__mocks__';
 
 jest.mock('@kbn/search-index-documents/lib', () => ({
   fetchSearchResults: jest.fn(),

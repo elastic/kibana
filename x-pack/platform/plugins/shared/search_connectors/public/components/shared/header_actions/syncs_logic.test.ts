@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../../../__mocks__/kea_logic';
-
 import {
   Connector,
   ConnectorStatus,
@@ -17,6 +15,7 @@ import {
 } from '@kbn/search-connectors';
 
 import { SyncsLogic } from './syncs_logic';
+import { LogicMounter } from '../../../__mocks__';
 
 const mockConnector: Connector = {
   id: '123',

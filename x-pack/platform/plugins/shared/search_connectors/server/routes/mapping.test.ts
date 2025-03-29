@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { MockRouter, mockDependencies } from '../../__mocks__';
-
 import { RequestHandlerContext } from '@kbn/core/server';
 
-jest.mock('../../lib/fetch_mapping', () => ({
+jest.mock('../lib/fetch_mapping', () => ({
   fetchMapping: jest.fn(),
 }));
-import { fetchMapping } from '../../lib/fetch_mapping';
+import { fetchMapping } from '../lib/fetch_mapping';
 
 import { registerMappingRoute } from './mapping';
+import { mockDependencies, MockRouter } from '../__mocks__';
 
 describe('Elasticsearch Index Mapping', () => {
   let mockRouter: MockRouter;

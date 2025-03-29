@@ -72,12 +72,16 @@ describe('addConnector lib function', () => {
     (generateApiKey as jest.Mock).mockImplementation(() => undefined);
 
     await expect(
-      addConnector(mockClient as unknown as IScopedClusterClient, {
-        indexName: 'index_name',
-        isNative: false,
-        language: 'fr',
-        name: 'index_name',
-      })
+      addConnector(
+        mockClient as unknown as IScopedClusterClient,
+        {
+          indexName: 'index_name',
+          isNative: false,
+          language: 'fr',
+          name: 'index_name',
+        },
+        true
+      )
     ).resolves.toEqual(expect.objectContaining({ id: 'fakeId', index_name: 'index_name' }));
     expect(createConnector).toHaveBeenCalledWith(mockClient.asCurrentUser, {
       indexName: 'index_name',
@@ -116,12 +120,16 @@ describe('addConnector lib function', () => {
     }));
 
     await expect(
-      addConnector(mockClient as unknown as IScopedClusterClient, {
-        indexName: 'index_name',
-        isNative: true,
-        language: 'ja',
-        name: 'index_name',
-      })
+      addConnector(
+        mockClient as unknown as IScopedClusterClient,
+        {
+          indexName: 'index_name',
+          isNative: true,
+          language: 'ja',
+          name: 'index_name',
+        },
+        true
+      )
     ).resolves.toEqual(expect.objectContaining({ id: 'fakeId', index_name: 'index_name' }));
     expect(createConnector).toHaveBeenCalledWith(mockClient.asCurrentUser, {
       indexName: 'index_name',
@@ -156,12 +164,16 @@ describe('addConnector lib function', () => {
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
 
     await expect(
-      addConnector(mockClient as unknown as IScopedClusterClient, {
-        indexName: 'index_name',
-        isNative: true,
-        language: 'en',
-        name: '',
-      })
+      addConnector(
+        mockClient as unknown as IScopedClusterClient,
+        {
+          indexName: 'index_name',
+          isNative: true,
+          language: 'en',
+          name: '',
+        },
+        true
+      )
     ).rejects.toEqual(new Error(ErrorCode.INDEX_ALREADY_EXISTS));
     expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
   });
@@ -173,12 +185,16 @@ describe('addConnector lib function', () => {
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
 
     await expect(
-      addConnector(mockClient as unknown as IScopedClusterClient, {
-        indexName: 'index_name',
-        isNative: false,
-        language: 'en',
-        name: '',
-      })
+      addConnector(
+        mockClient as unknown as IScopedClusterClient,
+        {
+          indexName: 'index_name',
+          isNative: false,
+          language: 'en',
+          name: '',
+        },
+        true
+      )
     ).rejects.toEqual(new Error(ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS));
     expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
   });
@@ -190,12 +206,16 @@ describe('addConnector lib function', () => {
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
 
     await expect(
-      addConnector(mockClient as unknown as IScopedClusterClient, {
-        indexName: 'index_name',
-        isNative: true,
-        language: 'en',
-        name: '',
-      })
+      addConnector(
+        mockClient as unknown as IScopedClusterClient,
+        {
+          indexName: 'index_name',
+          isNative: true,
+          language: 'en',
+          name: '',
+        },
+        true
+      )
     ).rejects.toEqual(new Error(ErrorCode.INDEX_ALREADY_EXISTS));
     expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
     expect(createConnector).not.toHaveBeenCalled();
@@ -216,13 +236,17 @@ describe('addConnector lib function', () => {
     }));
 
     await expect(
-      addConnector(mockClient as unknown as IScopedClusterClient, {
-        deleteExistingConnector: true,
-        indexName: 'index_name',
-        isNative: true,
-        language: null,
-        name: '',
-      })
+      addConnector(
+        mockClient as unknown as IScopedClusterClient,
+        {
+          deleteExistingConnector: true,
+          indexName: 'index_name',
+          isNative: true,
+          language: null,
+          name: '',
+        },
+        true
+      )
     ).resolves.toEqual(expect.objectContaining({ id: 'fakeId', index_name: 'index_name' }));
     expect(deleteConnectorById).toHaveBeenCalledWith(mockClient.asCurrentUser, 'connectorId');
     expect(createConnector).toHaveBeenCalledWith(mockClient.asCurrentUser, {

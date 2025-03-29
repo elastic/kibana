@@ -80,6 +80,12 @@ export function registerConnectorRoutes({
           service_type: schema.maybe(schema.string()),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -130,6 +136,12 @@ export function registerConnectorRoutes({
           connectorId: schema.string(),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -145,6 +157,12 @@ export function registerConnectorRoutes({
         params: schema.object({
           syncJobId: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
@@ -184,6 +202,12 @@ export function registerConnectorRoutes({
           connectorId: schema.string(),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -209,6 +233,12 @@ export function registerConnectorRoutes({
           connectorId: schema.string(),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -229,6 +259,12 @@ export function registerConnectorRoutes({
           connectorId: schema.string(),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -245,6 +281,12 @@ export function registerConnectorRoutes({
           connectorId: schema.string(),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -260,6 +302,12 @@ export function registerConnectorRoutes({
         params: schema.object({
           connectorId: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
@@ -300,6 +348,12 @@ export function registerConnectorRoutes({
           type: schema.maybe(schema.string()),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -328,6 +382,12 @@ export function registerConnectorRoutes({
           connectorId: schema.string(),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -348,6 +408,12 @@ export function registerConnectorRoutes({
           run_ml_inference: schema.boolean(),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -360,6 +426,12 @@ export function registerConnectorRoutes({
     {
       path: '/internal/search_connectors/connectors/default_pipeline',
       validate: {},
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
     },
     elasticsearchErrorHandler(log, async (context, _, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -376,6 +448,12 @@ export function registerConnectorRoutes({
         params: schema.object({
           connectorId: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
@@ -397,6 +475,12 @@ export function registerConnectorRoutes({
         params: schema.object({
           connectorId: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
@@ -421,6 +505,12 @@ export function registerConnectorRoutes({
         params: schema.object({
           connectorId: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
@@ -460,6 +550,12 @@ export function registerConnectorRoutes({
         params: schema.object({
           connectorId: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
@@ -502,6 +598,12 @@ export function registerConnectorRoutes({
           connectorId: schema.string(),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -520,6 +622,12 @@ export function registerConnectorRoutes({
         params: schema.object({
           connectorId: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
@@ -541,6 +649,12 @@ export function registerConnectorRoutes({
           searchQuery: schema.string({ defaultValue: '' }),
           size: schema.number({ defaultValue: 10, min: 0 }),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
@@ -617,6 +731,12 @@ export function registerConnectorRoutes({
           connectorId: schema.string(),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -640,6 +760,12 @@ export function registerConnectorRoutes({
         query: schema.object({
           shouldDeleteIndex: schema.maybe(schema.boolean()),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
@@ -715,6 +841,12 @@ export function registerConnectorRoutes({
           indexName: schema.string(),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -759,6 +891,12 @@ export function registerConnectorRoutes({
           size: schema.number({ defaultValue: 40, min: 0 }),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { from, size, search_query: searchQuery } = request.query;
@@ -794,6 +932,12 @@ export function registerConnectorRoutes({
         params: schema.object({
           connectorId: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
@@ -862,6 +1006,12 @@ export function registerConnectorRoutes({
           isManagedConnector: schema.maybe(schema.boolean()),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
@@ -904,6 +1054,12 @@ export function registerConnectorRoutes({
         params: schema.object({
           connectorId: schema.string(),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
