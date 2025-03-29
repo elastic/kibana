@@ -57,6 +57,7 @@ import { AuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
 import { StaticAssets, type InternalStaticAssets } from './static_assets';
+import { collectAsyncContextMetrics } from './monitoring/collect_async_context_metrics';
 
 /**
  * Adds ELU timings for the executed function to the current's context transaction
@@ -76,6 +77,8 @@ function startEluMeasurement<T>(
   const startUtilization = performance.eventLoopUtilization();
   const start = performance.now();
 
+  const collect = collectAsyncContextMetrics();
+
   return function stopEluMeasurement() {
     const { active, utilization } = performance.eventLoopUtilization(startUtilization);
 
@@ -90,6 +93,10 @@ function startEluMeasurement<T>(
     const duration = performance.now() - start;
 
     const { elu: eluThreshold, ela: elaThreshold } = eluMonitorOptions.logging.threshold;
+
+    const collection = collect();
+
+    log.info(collection.print());
 
     if (
       eluMonitorOptions.logging.enabled &&
