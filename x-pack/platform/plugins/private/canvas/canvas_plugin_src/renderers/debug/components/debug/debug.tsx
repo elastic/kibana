@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { EuiCode } from '@elastic/eui';
-import './debug.scss';
+import { EuiCode, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 const LimitRows = (key: string, value: any) => {
   if (key === 'rows') {
@@ -16,10 +16,28 @@ const LimitRows = (key: string, value: any) => {
   return value;
 };
 
-export const Debug = ({ payload }: { payload: unknown }) => (
-  <EuiCode className="canvasDebug">
-    <pre className="canvasDebug__content" data-test-subj="canvasDebug__content">
-      {JSON.stringify(payload, LimitRows, 2)}
-    </pre>
-  </EuiCode>
-);
+export const Debug = ({ payload }: { payload: unknown }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiCode
+      css={css({
+        padding: 0,
+        width: '100%',
+        height: '100%',
+      })}
+    >
+      <pre
+        data-test-subj="canvasDebug__content"
+        css={css({
+          width: '100%',
+          height: '100%',
+          overflow: 'auto',
+          padding: euiTheme.size.base,
+        })}
+      >
+        {JSON.stringify(payload, LimitRows, 2)}
+      </pre>
+    </EuiCode>
+  );
+};
