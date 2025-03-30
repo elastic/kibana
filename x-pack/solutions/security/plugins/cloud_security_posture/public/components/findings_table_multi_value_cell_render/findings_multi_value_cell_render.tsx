@@ -6,28 +6,22 @@
  */
 
 import React from 'react';
-import { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common';
 import { get } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { VulnerabilityGroupingMultiValueOptions } from '../../common/types';
 import { PopoverTableItems } from './popover_table_items';
 
-interface FindingsMultiValueCellRenderProps {
-  finding: CspVulnerabilityFinding;
+interface FindingsMultiValueCellRenderProps<T> {
+  finding: T;
   multiValueField: VulnerabilityGroupingMultiValueOptions;
-  renderItem: (
-    item: string,
-    i: number,
-    field: string,
-    finding: CspVulnerabilityFinding
-  ) => React.ReactNode;
+  renderItem: (item: string, i: number, field: string, finding: T) => React.ReactNode;
 }
 
-const FindingsMultiValueCellRenderComponent = ({
+const FindingsMultiValueCellRenderComponent = <T extends Record<string, any>>({
   finding,
   multiValueField,
   renderItem,
-}: FindingsMultiValueCellRenderProps) => {
+}: FindingsMultiValueCellRenderProps<T>) => {
   const value = get(multiValueField, finding);
   if (!Array.isArray(value)) {
     return <>{value || '-'}</>;
@@ -42,6 +36,7 @@ const FindingsMultiValueCellRenderComponent = ({
             items={value}
             renderItem={(item, index) => renderItem(item, index, multiValueField, finding)}
             field={multiValueField}
+            finding={finding}
           />
         </EuiFlexItem>
       )}

@@ -194,7 +194,7 @@ export const LatestVulnerabilitiesTable = ({
       'vulnerability.id': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
         <CspVulnerabilityFindingRenderer row={tableRows[rowIndex]}>
           {({ finding }) => (
-            <FindingsMultiValueCellRender
+            <FindingsMultiValueCellRender<CspVulnerabilityFinding>
               finding={finding}
               multiValueField="vulnerability.id"
               renderItem={renderItem}
@@ -205,7 +205,7 @@ export const LatestVulnerabilitiesTable = ({
       'package.name': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
         <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
           {({ finding }) => (
-            <FindingsMultiValueCellRender
+            <FindingsMultiValueCellRender<CspVulnerabilityFinding>
               finding={finding}
               multiValueField="package.name"
               renderItem={renderItem}
@@ -216,7 +216,7 @@ export const LatestVulnerabilitiesTable = ({
       'package.version': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
         <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
           {({ finding }) => (
-            <FindingsMultiValueCellRender
+            <FindingsMultiValueCellRender<CspVulnerabilityFinding>
               finding={finding}
               multiValueField="package.version"
               renderItem={renderItem}
@@ -227,7 +227,7 @@ export const LatestVulnerabilitiesTable = ({
       'package.fixed_version': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
         <CspVulnerabilityFindingRenderer row={rows[rowIndex]}>
           {({ finding }) => (
-            <FindingsMultiValueCellRender
+            <FindingsMultiValueCellRender<CspVulnerabilityFinding>
               finding={finding}
               multiValueField="package.fixed_version"
               renderItem={renderItem}
