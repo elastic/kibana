@@ -6,3 +6,4 @@
  */
 
 export * from './integration-vendors';
+export * from './test_subjects';

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { FindingsMultiValueCellRender } from './findings_multi_value_cell_render';
+export const MULTI_VALUE_CELL_FIRST_ITEM_VALUE = 'multi_value_cell_first_item_value';
+export const MULTI_VALUE_CELL_MORE_BUTTON = 'multi_value_cell_more_button';

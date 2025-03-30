@@ -117,7 +117,9 @@ export const ActionableBadge = ({ item, index, actions = [] }: ActionableBadgePr
         <EuiToolTip
           content={
             isTextCopied
-              ? i18n.translate('xpack.csp.itemCopied', { defaultMessage: 'Item copied' })
+              ? i18n.translate('securitySolutionPackages.csp.actionableBadge.itemCopied', {
+                  defaultMessage: 'Item copied',
+                })
               : null
           }
         >
