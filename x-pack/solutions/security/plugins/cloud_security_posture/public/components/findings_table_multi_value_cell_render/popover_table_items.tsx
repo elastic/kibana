@@ -10,17 +10,19 @@ import { EuiPopover, EuiBadgeGroup, EuiBadge, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getShowMoreAriaLabel } from '../../pages/vulnerabilities/translations';
 
-interface PopoverItemsProps<T> {
-  items: T[];
-  renderItem: (item: T, index: number, field: string) => React.ReactNode;
+interface PopoverItemsProps<T, K> {
+  items: K[];
+  renderItem: (item: K, index: number, field: string, finding: T) => React.ReactNode;
   field: string;
+  finding: T;
 }
 
-const PopoverTableItemsComponent = <T extends unknown>({
+const PopoverTableItemsComponent = <T extends Record<string, any>, K = string>({
   items,
   renderItem,
   field,
-}: PopoverItemsProps<T>) => {
+  finding,
+}: PopoverItemsProps<T, K>) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
   const onButtonClick = () => {
@@ -57,7 +59,7 @@ const PopoverTableItemsComponent = <T extends unknown>({
           padding-right: ${euiTheme.size.s};
         `}
       >
-        {items.map((item, index) => renderItem(item, index, field))}
+        {items.map((item, index) => renderItem(item, index, field, finding))}
       </EuiBadgeGroup>
     </EuiPopover>
   );

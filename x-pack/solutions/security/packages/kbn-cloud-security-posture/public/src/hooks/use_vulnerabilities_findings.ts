@@ -30,7 +30,7 @@ export enum VULNERABILITY {
   TITLE = 'vulnerability.title',
   ID = 'vulnerability.id',
   SEVERITY = 'vulnerability.severity',
-  PACKAGE_NAME = 'vulnerability.package.name',
+  PACKAGE_NAME = 'package.name',
 }
 
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
