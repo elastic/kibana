@@ -10,24 +10,24 @@ import execa from 'execa';
 import { ToolingLog } from '@kbn/tooling-log';
 import { pickBy } from 'lodash';
 
-class VaultUnavailableError extends AggregateError {
-  constructor(originalError: Error) {
-    super([originalError], `Vault is not available. See https://docs.elastic.dev/vault.`);
+class VaultUnavailableError extends Error {
+  constructor(cause: Error) {
+    super(`Vault is not available. See https://docs.elastic.dev/vault.`, { cause });
   }
 }
 
-class VaultTimedOutError extends AggregateError {
-  constructor(originalError: Error) {
+class VaultTimedOutError extends Error {
+  constructor(cause: Error) {
     super(
-      [originalError],
-      `Vault timed out. Make sure you are connected to the VPN. See https://docs.elastic.dev/vault.`
+      `Vault timed out. Make sure you are connected to the VPN. See https://docs.elastic.dev/vault.`,
+      { cause }
     );
   }
 }
 
-class VaultAccessError extends AggregateError {
-  constructor(originalError: Error) {
-    super([originalError], `Could not read from Vault`);
+class VaultAccessError extends Error {
+  constructor(cause: Error) {
+    super(`Could not read from Vault`, { cause });
   }
 }
 
@@ -44,7 +44,7 @@ async function getBedrockCreditsFromVault() {
     }
   });
 
-  const secretPath = process.env.VAULT_SECRET_PATH || 'secret/eis/bedrock';
+  const secretPath = process.env.VAULT_SECRET_PATH || 'kibana-eis-bedrock-config';
   const vaultAddress = process.env.VAULT_ADDR || 'https://secrets.elastic.co:8200';
 
   const output = await execa

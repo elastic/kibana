@@ -67,73 +67,61 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
   preSaveHook: async ({ config, secrets, logger, services, isUpdate }) => {
     const esClient = services.scopedClusterClient.asInternalUser;
     try {
-      const taskSettings = config.taskTypeConfig
+      const taskSettings = config?.taskTypeConfig
         ? {
-            ...unflattenObject(config.taskTypeConfig),
+            ...unflattenObject(config?.taskTypeConfig),
           }
         : {};
       const serviceSettings = {
-        ...unflattenObject(config.providerConfig ?? {}),
-        ...unflattenObject(secrets.providerSecrets ?? {}),
+        ...unflattenObject(config?.providerConfig ?? {}),
+        ...unflattenObject(secrets?.providerSecrets ?? {}),
       };
 
-      const inferenceEndpoint = await esClient?.inference
-        .get({
-          inference_id: config.inferenceId,
-          task_type: config.taskType as InferenceTaskType,
-        })
-        .then(({ endpoints }) => endpoints[0])
-        .catch((error) => {
-          return undefined;
+      let inferenceExists = false;
+      try {
+        await esClient?.inference.get({
+          inference_id: config?.inferenceId,
+          task_type: config?.taskType as InferenceTaskType,
         });
-
-      const isInternalInferenceEndpoint = inferenceEndpoint?.inference_id.startsWith('.');
-
-      if (isInternalInferenceEndpoint) {
-        logger.debug(
-          `Cannot update existing internal inference endpoint ${inferenceEndpoint?.inference_id}`
-        );
-        return;
+        inferenceExists = true;
+      } catch (e) {
+        /* throws error if inference endpoint by id does not exist */
       }
-
-      const nextInferenceConfig = {
-        service: config.provider,
-        service_settings: serviceSettings,
-        task_settings: taskSettings,
-      };
-
-      function logDebugMessage(updated: boolean) {
-        logger.debug(
-          `Inference endpoint for task type "${config.taskType}" and inference id ${
-            config.inferenceId
-          } was successfuly ${updated ? 'updated' : 'created'}`
+      if (!isUpdate && inferenceExists) {
+        throw new Error(
+          `Inference with id ${config?.inferenceId} and task type ${config?.taskType} already exists.`
         );
       }
 
-      if (inferenceEndpoint) {
-        await esClient.transport.request({
-          method: 'PUT',
-          path: `_inference/${inferenceEndpoint.inference_id}/_update`,
-          body: nextInferenceConfig,
-        });
-
-        logDebugMessage(true);
-
-        return;
+      if (isUpdate && inferenceExists && config && config.provider) {
+        // TODO: replace, when update API for inference endpoint exists
+        await deleteInferenceEndpoint(
+          config.inferenceId,
+          config.taskType as InferenceTaskType,
+          logger,
+          esClient
+        );
       }
 
-      await esClient.inference.put({
-        inference_id: config.inferenceId ?? '',
-        task_type: config.taskType as InferenceTaskType,
-        inference_config: nextInferenceConfig,
+      await esClient?.inference.put({
+        inference_id: config?.inferenceId ?? '',
+        task_type: config?.taskType as InferenceTaskType,
+        inference_config: {
+          service: config!.provider,
+          service_settings: serviceSettings,
+          task_settings: taskSettings,
+        },
       });
-
-      logDebugMessage(false);
+      logger.debug(
+        `Inference endpoint for task type "${config?.taskType}" and inference id ${
+          config?.inferenceId
+        } was successfuly ${isUpdate ? 'updated' : 'created'}`
+      );
     } catch (e) {
       logger.warn(
         `Failed to ${isUpdate ? 'update' : 'create'} inference endpoint for task type "${
-          config.taskType
-        }" and inference id ${config.inferenceId}. Error: ${e.message}`
+          config?.taskType
+        }" and inference id ${config?.inferenceId}. Error: ${e.message}`
       );
       throw e;
     }

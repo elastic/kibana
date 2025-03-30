@@ -7,9 +7,9 @@
 
 import execa, { ExecaError } from 'execa';
 
-class DockerUnavailableError extends AggregateError {
-  constructor(originalError: ExecaError) {
-    super([originalError], `Docker is not available`);
+class DockerUnavailableError extends Error {
+  constructor(cause: ExecaError) {
+    super(`Docker is not available`, { cause });
   }
 }
 

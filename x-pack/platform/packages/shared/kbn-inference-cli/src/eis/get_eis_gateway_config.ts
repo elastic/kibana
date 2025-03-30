@@ -25,6 +25,9 @@ export interface EisGatewayConfig {
     };
   };
   aws: AwsBedrockConfig;
+  model: {
+    id: string;
+  };
 }
 
 const EIS_CHAT_MODEL_NAME = `rainbow-sprinkles`;
@@ -84,6 +87,9 @@ export async function getEisGatewayConfig({
     ports: [8443, 8051],
     aws,
     image: `docker.elastic.co/cloud-ci/k8s-arch/eis-gateway:git-${version}`,
+    model: {
+      id: EIS_CHAT_MODEL_NAME,
+    },
     mount: {
       acl: aclFilePath,
       tls,

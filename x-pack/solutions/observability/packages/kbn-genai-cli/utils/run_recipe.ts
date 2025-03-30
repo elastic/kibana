@@ -32,7 +32,7 @@ export function runRecipe(callback: RunRecipeCallback) {
         log,
         signal,
         kibanaClient,
-        setupEis: Boolean(flags['setup-eis']),
+        connectorId: flags.connectorId as string | undefined,
       });
 
       return await callback({
@@ -44,9 +44,9 @@ export function runRecipe(callback: RunRecipeCallback) {
     },
     {
       flags: {
-        boolean: ['setup-eis'],
+        boolean: ['connectorId'],
         help: `
-          --setup-eis  Sets up EIS if no connector is found
+          --connectorId  Use a specific connector id
         `,
       },
     }

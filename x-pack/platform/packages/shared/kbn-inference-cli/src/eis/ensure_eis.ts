@@ -20,6 +20,20 @@ import { getBedrockConfig } from './get_bedrock_config';
 const DOCKER_COMPOSE_FILE_PATH = Path.join(DATA_DIR, 'docker-compose.yaml');
 const NGINX_CONF_FILE_PATH = Path.join(DATA_DIR, 'nginx.conf');
 
+function getPreconfiguredConnectorConfig({ modelId }: { modelId: string }) {
+  return `xpack.actions.preconfigured:
+  elastic-llm:
+    name: Elastic LLM
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: 'elastic'
+      taskType: 'chat_completion'
+      inferenceId: '.rainbow-sprinkles-elastic'
+      providerConfig:
+        model_id: '${modelId}'`;
+}
+
 async function down(cleanup: boolean = true) {
   await execa
     .command(`docker compose -f ${DOCKER_COMPOSE_FILE_PATH} down`, { cleanup })
@@ -92,12 +106,30 @@ export async function ensureEis({ log, signal }: { log: ToolingLog; signal: Abor
           eisGatewayConfig.ports[0]
         }" to connect`
       );
+
+      log.write(
+        `${chalk.green(
+          `📋`
+        )} Paste the following config in kibana.(dev.).yml if you don't already have a connector:`
+      );
+
+      const lines = getPreconfiguredConnectorConfig({ modelId: eisGatewayConfig.model.id }).split(
+        '\n'
+      );
+
+      log.write('');
+
+      lines.forEach((line) => {
+        if (line) {
+          log.write(line);
+        }
+      });
     })
     .catch((error) => {
       log.error(error);
     });
 
-  await execa.command(`docker compose -f ${DOCKER_COMPOSE_FILE_PATH} up`, {
+  await execa.command(`docker compose -f ${DOCKER_COMPOSE_FILE_PATH} up --menu=false`, {
     stdio: 'inherit',
     cleanup: true,
   });

@@ -115,7 +115,19 @@ export class KibanaClient {
     }
 
     if (response.status >= 400) {
-      throw new FetchResponseError(response);
+      const content = response.headers.get('content-type')?.includes('application/json')
+        ? await response
+            .json()
+            .then((jsonResponse) => {
+              if ('message' in jsonResponse) {
+                return jsonResponse.message;
+              }
+              return JSON.stringify(jsonResponse);
+            })
+            .catch(() => {})
+        : await response.text().catch(() => {});
+
+      throw new FetchResponseError(response, content ?? response.statusText);
     }
 
     return response.json() as Promise<T>;
