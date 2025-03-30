@@ -12,8 +12,6 @@ export type { CloudSecurityPosturePageId } from './common/navigation/types';
 export { getSecuritySolutionLink } from './common/navigation/security_solution_links';
 
 export type { CspClientPluginSetup, CspClientPluginStart } from './types';
-export { FindingsMultiValueCellRender } from './components/findings_table_multi_value_cell_render';
-export { findReferenceLink } from './common/utils/find_reference_link.util';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new CspPlugin(initializerContext);

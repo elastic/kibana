@@ -26,6 +26,8 @@ import {
   SeverityStatusBadge,
   getNormalizedSeverity,
   ActionableBadge,
+  MultiValueCellPopover,
+  findReferenceLink,
 } from '@kbn/cloud-security-posture';
 import {
   ENTITY_FLYOUT_EXPAND_VULNERABILITY_VIEW_VISITS,
@@ -37,10 +39,7 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
 import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_get_severity_status_color';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
-import {
-  FindingsMultiValueCellRender,
-  findReferenceLink,
-} from '@kbn/cloud-security-posture-plugin/public';
+import { get } from 'lodash/fp';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
@@ -170,10 +169,10 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
   );
 
   const renderItem = useCallback(
-    (item: string, i: number, field: string, finding: VulnerabilitiesFindingDetailFields) => {
-      const references = Array.isArray(finding.vulnerability.reference)
-        ? finding.vulnerability.reference
-        : [finding.vulnerability.reference];
+    (item: string, i: number, field: string, object: VulnerabilitiesFindingDetailFields) => {
+      const references = Array.isArray(object.vulnerability.reference)
+        ? object.vulnerability.reference
+        : [object.vulnerability.reference];
 
       const url = findReferenceLink(references, item);
 
@@ -198,6 +197,23 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
     },
     []
   );
+
+  const renderMultiValueCell = (field: string, finding: VulnerabilitiesFindingDetailFields) => {
+    const cellValue = get(field, finding);
+    if (!Array.isArray(cellValue)) {
+      return <EuiText size="s">{cellValue || EMPTY_VALUE}</EuiText>;
+    }
+
+    return (
+      <MultiValueCellPopover<VulnerabilitiesFindingDetailFields>
+        items={cellValue}
+        field={field}
+        object={finding}
+        renderItem={renderItem}
+        firstItemRenderer={(item) => <EuiText size="s">{item}</EuiText>}
+      />
+    );
+  };
 
   const columns: Array<EuiBasicTableColumn<VulnerabilitiesFindingDetailFields>> = [
     {
@@ -255,13 +271,8 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
     },
     {
       field: VULNERABILITY.ID,
-      render: (id: string, finding: VulnerabilitiesFindingDetailFields) => (
-        <FindingsMultiValueCellRender<VulnerabilitiesFindingDetailFields>
-          finding={finding}
-          multiValueField="vulnerability.id"
-          renderItem={renderItem}
-        />
-      ),
+      render: (id: string, finding: VulnerabilitiesFindingDetailFields) =>
+        renderMultiValueCell(VULNERABILITY.ID, finding),
       name: i18n.translate(
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.vulnerabilityIdColumnName',
         { defaultMessage: 'CVE ID' }
@@ -287,13 +298,8 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
     },
     {
       field: VULNERABILITY.PACKAGE_NAME,
-      render: (packageName: string, finding: VulnerabilitiesFindingDetailFields) => (
-        <FindingsMultiValueCellRender<VulnerabilitiesFindingDetailFields>
-          finding={finding}
-          multiValueField="package.name"
-          renderItem={renderItem}
-        />
-      ),
+      render: (packageName: string, finding: VulnerabilitiesFindingDetailFields) =>
+        renderMultiValueCell(VULNERABILITY.PACKAGE_NAME, finding),
       name: i18n.translate(
         'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
         { defaultMessage: 'Package' }
