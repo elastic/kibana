@@ -42,7 +42,7 @@ export const ProjectListItem = ({ project, onStatusChange }: Props) => {
   return (
     <EuiFlexItem
       className={classnames('projectListItem', {
-        'projectListItem--isOverridden': true,
+        'projectListItem--isOverridden': isOverride,
         'projectListItem--isOverriddenEnabled': isOverride && isEnabled,
       })}
       css={css({
