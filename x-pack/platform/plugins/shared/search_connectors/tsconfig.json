@@ -56,5 +56,6 @@
     "@kbn/spaces-plugin",
     "@kbn/features-plugin",
     "@kbn/core-http-server",
+    "@kbn/core-http-router-server-mocks",
   ]
 }
