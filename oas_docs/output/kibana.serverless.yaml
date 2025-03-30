@@ -45102,6 +45102,11 @@ paths:
           name: includeOutdatedOnly
           schema:
             type: boolean
+        - description: Specify which SLO tags to query by (comma-separated list)
+          in: query
+          name: tags
+          schema:
+            type: string
         - description: Filters the SLOs by name
           example: my service availability
           in: query

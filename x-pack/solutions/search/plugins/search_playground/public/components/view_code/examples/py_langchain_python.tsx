@@ -9,6 +9,7 @@ import { EuiCodeBlock } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { ChatForm } from '../../../types';
 import { Prompt } from '../../../../common/prompt';
+import { elasticsearchQueryObject } from '../../../utils/user_query';
 import { getESQuery } from './utils';
 
 export const getSourceFields = (sourceFields: ChatForm['source_fields']) => {
@@ -38,7 +39,13 @@ export const LangchainPythonExmaple = ({
   const { esQuery, hasContentFieldsArray, indices, prompt, sourceFields } = useMemo(() => {
     const fields = getSourceFields(formValues.source_fields);
     return {
-      esQuery: getESQuery(formValues.elasticsearch_query),
+      esQuery: getESQuery(
+        elasticsearchQueryObject(
+          formValues.elasticsearch_query,
+          formValues.user_elasticsearch_query,
+          formValues.user_elasticsearch_query_validations
+        )
+      ),
       indices: formValues.indices.join(','),
       prompt: Prompt(formValues.prompt, {
         context: true,
