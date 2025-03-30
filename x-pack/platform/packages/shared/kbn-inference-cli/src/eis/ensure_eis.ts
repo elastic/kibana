@@ -99,6 +99,8 @@ export async function ensureEis({ log, signal }: { log: ToolingLog; signal: Abor
     numOfAttempts: 20,
   })
     .then(() => {
+      log.write('');
+
       log.write(
         `${chalk.green(
           `✔`
@@ -106,6 +108,8 @@ export async function ensureEis({ log, signal }: { log: ToolingLog; signal: Abor
           eisGatewayConfig.ports[0]
         }" to connect`
       );
+
+      log.write('');
 
       log.write(
         `${chalk.green(
@@ -129,7 +133,7 @@ export async function ensureEis({ log, signal }: { log: ToolingLog; signal: Abor
       log.error(error);
     });
 
-  await execa.command(`docker compose -f ${DOCKER_COMPOSE_FILE_PATH} up --menu=false`, {
+  await execa.command(`docker compose -f ${DOCKER_COMPOSE_FILE_PATH} up`, {
     stdio: 'inherit',
     cleanup: true,
   });
