@@ -14,13 +14,13 @@ import {
 } from '@tanstack/react-query';
 import { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { LastConversation } from '../../assistant_context';
 import { FetchConversationsResponse } from '../api';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { getDefaultNewSystemPrompt, getDefaultSystemPrompt } from '../use_conversation/helpers';
 import { useConversation } from '../use_conversation';
 import { sleep } from '../helpers';
 import { Conversation } from '../../..';
+import type { LastConversation } from '../use_space_aware_context';
 
 export interface Props {
   allSystemPrompts: PromptResponse[];
@@ -34,7 +34,7 @@ export interface Props {
   refetchCurrentUserConversations: <TPageData>(
     options?: RefetchOptions & RefetchQueryFilters<TPageData>
   ) => Promise<QueryObserverResult<InfiniteData<FetchConversationsResponse>, unknown>>;
-  setLastConversation: Dispatch<SetStateAction<LastConversation | undefined>>;
+  setLastConversation: (lastConversation: LastConversation) => void;
 }
 
 interface UseCurrentConversation {
@@ -125,14 +125,18 @@ export const useCurrentConversation = ({
    * @param isStreamRefetch - Are we refetching because stream completed? If so retry several times to ensure the message has updated on the server
    */
   const refetchCurrentConversation = useCallback(
-    async ({ cId, isStreamRefetch = false }: { cId?: string; isStreamRefetch?: boolean } = {}) => {
+    async ({
+      cId,
+      isStreamRefetch = false,
+      silent,
+    }: { cId?: string; isStreamRefetch?: boolean; silent?: boolean } = {}) => {
       if (cId === '') {
         return;
       }
       const cConversationId = cId ?? currentConversation?.id;
 
       if (cConversationId) {
-        let updatedConversation = await getConversation(cConversationId);
+        let updatedConversation = await getConversation(cConversationId, silent);
         let retries = 0;
         const maxRetries = 5;
 
@@ -203,7 +207,17 @@ export const useCurrentConversation = ({
   );
 
   const handleOnConversationSelected = useCallback(
-    async ({ cId, cTitle, apiConfig }: { apiConfig?: ApiConfig; cId: string; cTitle?: string }) => {
+    async ({
+      cId,
+      cTitle,
+      apiConfig,
+      silent,
+    }: {
+      apiConfig?: ApiConfig;
+      cId: string;
+      cTitle?: string;
+      silent?: boolean;
+    }) => {
       if (cId === '') {
         if (
           currentAppId === 'securitySolutionUI' &&
@@ -228,7 +242,7 @@ export const useCurrentConversation = ({
       }
       // refetch will set the currentConversation
       try {
-        await refetchCurrentConversation({ cId });
+        await refetchCurrentConversation({ cId, silent });
         setLastConversation({
           id: cId,
         });
@@ -249,7 +263,11 @@ export const useCurrentConversation = ({
 
   useEffect(() => {
     if (!mayUpdateConversations || !!currentConversation) return;
-    handleOnConversationSelected({ cId: lastConversation.id, cTitle: lastConversation.title });
+    handleOnConversationSelected({
+      cId: lastConversation.id,
+      cTitle: lastConversation.title,
+      silent: true,
+    });
   }, [lastConversation, handleOnConversationSelected, currentConversation, mayUpdateConversations]);
 
   const handleOnConversationDeleted = useCallback(
