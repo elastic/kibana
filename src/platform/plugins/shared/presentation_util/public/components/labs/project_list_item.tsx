@@ -96,7 +96,6 @@ export const ProjectListItem = ({ project, onStatusChange }: Props) => {
                   {name}
                   {isOverride ? (
                     <span
-                      className="projectListItem__titlePendingChangesIndicator"
                       css={css({
                         marginLeft: euiTheme.size.s,
                         position: 'relative',
@@ -115,10 +114,7 @@ export const ProjectListItem = ({ project, onStatusChange }: Props) => {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <div
-                className="projectListItem__solutions"
-                css={css({ textTransform: 'capitalize' })}
-              >
+              <div css={css({ textTransform: 'capitalize' })}>
                 {solutions.map((solution) => (
                   <EuiBadge key={solution}>{solution}</EuiBadge>
                 ))}
