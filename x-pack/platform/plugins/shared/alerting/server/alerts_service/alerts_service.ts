@@ -412,6 +412,16 @@ export class AlertsService implements IAlertsService {
       secondaryAlias,
     });
 
+    const { index_templates: indexTemplates } = await esClient.indices.getIndexTemplate({
+      name: indexTemplateAndPattern.template,
+    });
+    const updatedLimitFromTheTemplate =
+      indexTemplates[0].index_template.template?.settings?.index?.mapping?.total_fields?.limit;
+
+    const newLimit = updatedLimitFromTheTemplate
+      ? parseInt(updatedLimitFromTheTemplate as string, 10)
+      : TOTAL_FIELDS_LIMIT;
+
     let initFns: Array<() => Promise<void>> = [];
 
     // List of component templates to reference
@@ -433,6 +443,7 @@ export class AlertsService implements IAlertsService {
         fieldMap: mappings.fieldMap,
         dynamic: mappings.dynamic,
         context,
+        dynamicTemplates: mappings.dynamicTemplates,
       });
       initFns.push(
         async () =>
@@ -440,7 +451,7 @@ export class AlertsService implements IAlertsService {
             logger: this.options.logger,
             esClient,
             template: componentTemplate,
-            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+            totalFieldsLimit: newLimit,
           })
       );
       componentTemplateRefs.push(componentTemplate.name);
@@ -466,7 +477,7 @@ export class AlertsService implements IAlertsService {
             indexPatterns: indexTemplateAndPattern,
             kibanaVersion: this.options.kibanaVersion,
             namespace,
-            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+            totalFieldsLimit: newLimit,
             dataStreamAdapter: this.dataStreamAdapter,
           }),
         }),
@@ -474,7 +485,7 @@ export class AlertsService implements IAlertsService {
         await createConcreteWriteIndex({
           logger: this.options.logger,
           esClient,
-          totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+          totalFieldsLimit: newLimit,
           indexPatterns: indexTemplateAndPattern,
           dataStreamAdapter: this.dataStreamAdapter,
         }),

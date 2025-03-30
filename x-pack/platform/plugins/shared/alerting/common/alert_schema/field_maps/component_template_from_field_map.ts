@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { type FieldMap } from '@kbn/alerts-as-data-utils';
+import type {
+  ClusterPutComponentTemplateRequest,
+  MappingDynamicTemplate,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { mappingFromFieldMap } from './mapping_from_field_map';
 
 export interface GetComponentTemplateFromFieldMapOpts {
@@ -14,12 +17,14 @@ export interface GetComponentTemplateFromFieldMapOpts {
   fieldMap: FieldMap;
   includeSettings?: boolean;
   dynamic?: 'strict' | false;
+  dynamicTemplates?: Array<Record<string, MappingDynamicTemplate>>;
 }
 export const getComponentTemplateFromFieldMap = ({
   name,
   fieldMap,
   dynamic,
   includeSettings,
+  dynamicTemplates,
 }: GetComponentTemplateFromFieldMapOpts): ClusterPutComponentTemplateRequest => {
   return {
     name,
@@ -37,7 +42,10 @@ export const getComponentTemplateFromFieldMap = ({
           : {}),
       },
 
-      mappings: mappingFromFieldMap(fieldMap, dynamic ?? 'strict'),
+      mappings: {
+        ...mappingFromFieldMap(fieldMap, dynamic ?? 'strict'),
+        dynamic_templates: dynamicTemplates,
+      },
     },
   };
 };
