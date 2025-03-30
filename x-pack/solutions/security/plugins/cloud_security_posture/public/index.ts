@@ -13,8 +13,7 @@ export { getSecuritySolutionLink } from './common/navigation/security_solution_l
 
 export type { CspClientPluginSetup, CspClientPluginStart } from './types';
 export { FindingsMultiValueCellRender } from './components/findings_table_multi_value_cell_render';
-export { ActionableBadge } from './common/component/actionable_badge';
-export { findReferenceLink } from './pages/vulnerabilities/utils/find_reference_link.util';
+export { findReferenceLink } from './common/utils/find_reference_link.util';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new CspPlugin(initializerContext);
