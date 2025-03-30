@@ -12,7 +12,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiCopy,
@@ -23,52 +23,52 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useAssetCriticalityData } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
+import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { assetCriticalityOptions } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { ResponsiveDataCards } from './components/responsive_data_cards';
 
 export const HeaderDataCards = ({
-  criticality,
+  // criticality,
   id,
   subType,
   type,
 }: {
-  criticality?: CriticalityLevelWithUnassigned;
+  // criticality?: CriticalityLevelWithUnassigned;
   id: string;
   subType: string;
   type: string;
 }) => {
-  const assetCriticalityData = useAssetCriticalityData({
-    entity: {
-      name: id,
-      type,
-    },
-    // enabled: !!privileges.data?.has_read_permissions,
-    enabled: true,
-    onChange: (data) => {
-      console.log('data', data);
-    },
+  const { getAssetCriticality, assignAssetCriticality } = useGenericEntityCriticality({
+    idField: 'entity.id',
+    idValue: id,
   });
 
-  console.log('qyest resut', assetCriticalityData.query.data);
+  const criticality = getAssetCriticality.data?.criticality_level;
 
-  const [selectValue, setSelectValue] = useState<CriticalityLevelWithUnassigned>(
-    assetCriticalityData.query.data?.criticality_level || 'unassigned'
+  // const [selectValue, setSelectValue] = useState<CriticalityLevelWithUnassigned>(
+  //   getAssetCriticality.data?.criticality_level || 'unassigned'
+  // );
+
+  // useEffect(() => {
+  //   if (!getAssetCriticality.data?.criticality_level) {
+  //     setSelectValue('unassigned');
+  //   } else {
+  //     setSelectValue(getAssetCriticality.data.criticality_level);
+  //   }
+  // }, [getAssetCriticality.data?.criticality_level]);
+
+  const assignCriticality = useCallback(
+    (value: CriticalityLevelWithUnassigned) => {
+      const t = assignAssetCriticality.mutate({
+        criticalityLevel: value,
+        idField: 'entity.id',
+        idValue: id,
+      });
+      console.log(t);
+    },
+    [assignAssetCriticality, id]
   );
-
-  useEffect(() => {
-    setSelectValue(assetCriticalityData.query.data?.criticality_level);
-  }, [assetCriticalityData.query.data?.criticality_level]);
-
-  const change = async (value) => {
-    const t = await assetCriticalityData.mutation.mutate({
-      criticalityLevel: value,
-      idField: 'entity.id',
-      idValue: id,
-    });
-    console.log(t);
-  };
 
   const cards = useMemo(
     () => [
@@ -94,10 +94,10 @@ export const HeaderDataCards = ({
               compressed
               hasDividers
               options={assetCriticalityOptions}
-              valueOfSelected={selectValue}
+              valueOfSelected={criticality}
               onChange={(newValue) => {
-                setSelectValue(newValue);
-                change(newValue);
+                // setSelectValue(newValue);
+                assignCriticality(newValue);
               }}
             />
           </div>
@@ -135,7 +135,7 @@ export const HeaderDataCards = ({
         description: <EuiTextTruncate text={subType || ''} />,
       },
     ],
-    [selectValue, id, subType, type]
+    [criticality, id, type, subType, assignCriticality]
   );
 
   return <ResponsiveDataCards cards={cards} collapseWidth={750} />;

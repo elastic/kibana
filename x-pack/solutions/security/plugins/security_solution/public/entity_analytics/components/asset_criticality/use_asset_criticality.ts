@@ -98,10 +98,9 @@ export const useAssetCriticalityData = ({
       });
     },
     onSuccess: (data) => {
-      console.log({ data });
       const queryData = 'deleted' in data ? null : data;
       QC.setQueryData(QUERY_KEY, queryData);
-      onChange?.(data);
+      onChange?.();
     },
   });
 

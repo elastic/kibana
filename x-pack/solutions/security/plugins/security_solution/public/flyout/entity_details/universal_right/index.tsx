@@ -14,6 +14,7 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
 import { useGetGenericEntity } from './hooks/use_get_generic_entity';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { UniversalEntityFlyoutHeader } from './header';
@@ -48,7 +49,13 @@ export interface UniversalEntityPanelExpandableFlyoutProps extends FlyoutPanelPr
 }
 
 export const UniversalEntityPanel = ({ entityDocId }: UniversalEntityPanelProps) => {
-  const getGenericEntity = useGetGenericEntity(entityDocId);
+  const { getGenericEntity } = useGetGenericEntity(entityDocId);
+  const { getAssetCriticality } = useGenericEntityCriticality({
+    idField: 'entity.id',
+    // @ts-ignore since this query is only enabled when the data exists, we can safely assume that idValue won't be undefined
+    idValue: getGenericEntity.data?._source?.entity.id,
+    enabled: !!getGenericEntity.data?._source?.entity.id,
+  });
 
   useEffect(() => {
     if (getGenericEntity.data?._id) {
@@ -56,7 +63,9 @@ export const UniversalEntityPanel = ({ entityDocId }: UniversalEntityPanelProps)
     }
   }, [getGenericEntity.data?._id]);
 
-  if (getGenericEntity.isLoading) {
+  console.log(getGenericEntity.data?._source?.entity.id);
+
+  if (getGenericEntity.isLoading || getAssetCriticality.isLoading) {
     return (
       <>
         <EuiLoadingSpinner size="m" style={{ position: 'absolute', inset: '50%' }} />

@@ -7,8 +7,6 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EntityType } from '../../../../common/entity_analytics/types';
-import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
 import { FieldsTable } from './components/fields_table';
 import { ExpandableSection } from '../../document_details/right/components/expandable_section';
@@ -31,10 +29,6 @@ export const UniversalEntityFlyoutContent = ({ source }: UniversalEntityFlyoutCo
         expanded
         localStorageKey={'universal_flyout:overview:fields_section'}
       >
-        <AssetCriticalityAccordion
-          entity={{ name: 'test', type: EntityType.host }}
-          onChange={() => {}}
-        />
         <FieldsTable
           document={source || {}}
           tableStorageKey={'universal_flyout:overview:fields_table_pins'}
