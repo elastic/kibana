@@ -6,4 +6,4 @@
  */
 
 export { MockRouter } from './router.mock';
-export { mockConfig, mockLogger, mockDependencies } from './routerDependencies.mock';
+export { mockLogger, mockDependencies } from './routerDependencies.mock';
