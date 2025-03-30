@@ -45,6 +45,7 @@ export type {
   AlertsHealth,
   AlertingFrameworkHealth,
   ResolvedSanitizedRule,
+  Artifact,
 } from '@kbn/alerting-types';
 
 export {

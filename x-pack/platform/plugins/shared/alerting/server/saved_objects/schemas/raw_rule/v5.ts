@@ -8,10 +8,14 @@
 import { schema } from '@kbn/config-schema';
 import { rawRuleSchema as rawRuleSchemaV4 } from './v4';
 
-export const dashboardSchema = schema.arrayOf(schema.object({ id: schema.string() }));
+export const rawRuleDashboardSchema = schema.arrayOf(
+  schema.object({
+    refId: schema.string(),
+  })
+);
 
 export const artifactSchema = schema.object({
-  dashboards: schema.maybe(dashboardSchema),
+  dashboards: schema.maybe(rawRuleDashboardSchema),
   investigation_guide: schema.maybe(schema.string()),
 });
 

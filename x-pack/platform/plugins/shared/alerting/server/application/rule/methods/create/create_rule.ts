@@ -196,10 +196,10 @@ export async function createRule<Params extends RuleParams = never>(
     references,
     params: updatedParams,
     actions: actionsWithRefs,
+    artifacts: artifactsWithRefs,
   } = await withSpan({ name: 'extractReferences', type: 'rules' }, () =>
-    extractReferences(context, ruleType, allActions, validatedRuleTypeParams)
+    extractReferences(context, ruleType, allActions, validatedRuleTypeParams, initialData.artifacts)
   );
-  // TODO update extractReferences
 
   const createTime = Date.now();
   const lastRunTimestamp = new Date();
@@ -210,7 +210,8 @@ export async function createRule<Params extends RuleParams = never>(
   const { systemActions, actions: actionToNotUse, ...restData } = data;
   // Convert domain rule object to ES rule attributes
   const ruleAttributes = transformRuleDomainToRuleAttributes({
-    actionsWithRefs, // TODO add dashboards with refs
+    actionsWithRefs,
+    artifactsWithRefs,
     rule: {
       ...restData,
       // TODO (http-versioning) create a rule domain version of this function
@@ -270,6 +271,7 @@ export async function createRule<Params extends RuleParams = never>(
   }
 
   // Convert domain rule to rule (Remove certain properties)
+  // As I understand I need to remove artifacts, need to confirm
   const rule = transformRuleDomainToRule<Params>(ruleDomain, { isPublic: true });
 
   // TODO (http-versioning): Remove this cast, this enables us to move forward

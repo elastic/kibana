@@ -156,4 +156,6 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
     : {}),
   ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
   ...(rule.flapping !== undefined ? { flapping: transformFlapping(rule.flapping) } : {}),
+  // do I need to add artifacts here?
+  artifacts: rule.artifacts,
 });

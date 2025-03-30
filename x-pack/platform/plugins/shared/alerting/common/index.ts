@@ -45,6 +45,7 @@ export type {
   RuleSystemActionKey,
   SanitizedRuleConfig,
   RuleMonitoringLastRunMetrics,
+  Artifact,
 } from './rule';
 export {
   RuleExecutionStatusValues,

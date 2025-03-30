@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { isEmpty } from 'lodash';
+import { omit } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { ruleExecutionStatusValues } from '../constants';
@@ -169,6 +170,31 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
       omitGeneratedValues,
     });
 
+  // TODO: create a transformRawArtifactsToDomainArtifacts file and export injectReferencesIntoArtifacts
+
+  const injectReferencesIntoArtifacts = (
+    artifacts: RawRule['artifacts'],
+    references: SavedObjectReference[]
+  ) => {
+    if (!artifacts) {
+      return { artifacts: { dashboards: [] } };
+    }
+    return {
+      ...artifacts,
+      dashboards: artifacts.dashboards?.map((dashboard) => {  
+        const reference = references.find((ref) => ref.name === dashboard.refId);
+        if (!reference) {
+          throw new Error(`Artifact reference "${dashboard.refId}" not found in rule id: ${id}`);
+        }
+        return {
+          ...omit(dashboard, 'refId'),
+          id: reference.id,
+        };
+      })
+    };
+  }
+
+  const artifactsWithInjectedRefs = esRule.artifacts ? injectReferencesIntoArtifacts(esRule.artifacts, references || []) : null; // TODO: don't return null
   const params = injectReferencesIntoParams<Params, RuleParams>(
     id,
     ruleType,
@@ -234,7 +260,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     ...(esRule.alertDelay ? { alertDelay: esRule.alertDelay } : {}),
     ...(esRule.legacyId !== undefined ? { legacyId: esRule.legacyId } : {}),
     ...(esRule.flapping !== undefined ? { flapping: esRule.flapping } : {}),
-    artifacts: esRule.artifacts,
+    artifacts: artifactsWithInjectedRefs,
   };
 
   // Bad casts, but will fix once we fix all rule types

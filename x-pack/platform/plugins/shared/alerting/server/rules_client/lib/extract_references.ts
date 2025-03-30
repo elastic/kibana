@@ -6,11 +6,11 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { RuleTypeParams } from '../../types';
+import type { RuleTypeParams, Artifact } from '../../types';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import type { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../types';
 import { extractedSavedObjectParamReferenceNamePrefix } from '../common/constants';
-import type { RulesClientContext } from '../types';
+import type { RulesClientContext, DenormalizedArtifacts } from '../types';
 import { denormalizeActions } from './denormalize_actions';
 
 export async function extractReferences<
@@ -20,9 +20,11 @@ export async function extractReferences<
   context: RulesClientContext,
   ruleType: UntypedNormalizedRuleType,
   ruleActions: NormalizedAlertActionWithGeneratedValues[],
-  ruleParams: Params
+  ruleParams: Params,
+  ruleArtifacts?: Artifact
 ): Promise<{
   actions: DenormalizedAction[];
+  artifacts: DenormalizedArtifacts;
   params: ExtractedParams;
   references: SavedObjectReference[];
 }> {
@@ -31,6 +33,42 @@ export async function extractReferences<
     actionsClient,
     ruleActions
   );
+
+  // TODO move this to demormalize_artifacts file
+  const denormalizeArtifacts = (ruleArtifacts: Artifact): { artifacts: DenormalizedArtifacts; references: SavedObjectReference[] } => {
+    const references: SavedObjectReference[] = [];
+    const artifacts: DenormalizedArtifacts = {
+      artifacts: { 
+        dashboards: []
+      },
+    };
+
+    if (ruleArtifacts.dashboards) {
+      ruleArtifacts.dashboards.forEach((dashboard, i) => {
+        const refName = `dashboard_${i}`;
+        const dashboardRef = {
+          id: dashboard.id,
+          name: refName, // what kind of name do I give here?
+          type: 'dashboard',
+        };
+        references.push(dashboardRef);
+        if (!artifacts.artifacts.dashboards) {
+          artifacts.artifacts.dashboards = [];
+        }
+        artifacts.artifacts.dashboards.push({
+          refId: refName,
+        });
+      });
+    }
+    
+    return {
+      artifacts,
+      references
+    };
+  };
+  const { artifacts, references: artifactReferences } = ruleArtifacts
+    ? denormalizeArtifacts(ruleArtifacts)
+    : { artifacts: { artifacts: { dashboards: [] } }, references: [] };
 
   // Extracts any references using configured reference extractor if available
   const extractedRefsAndParams = ruleType?.useSavedObjectReferences?.extractReferences
@@ -45,10 +83,11 @@ export async function extractReferences<
     name: `${extractedSavedObjectParamReferenceNamePrefix}${reference.name}`,
   }));
 
-  const references = [...actionReferences, ...paramReferences];
+  const references = [...actionReferences, ...paramReferences, ...artifactReferences];
 
   return {
     actions,
+    artifacts,
     params,
     references,
   };

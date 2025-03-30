@@ -85,7 +85,7 @@ export interface Rule<Params extends RuleParams = never> {
   alertDelay?: RuleSchemaType['alertDelay'];
   legacyId?: RuleSchemaType['legacyId'];
   flapping?: RuleSchemaType['flapping'];
-  artifacts?: RuleSchemaType['artifacts'];
+  artifacts?: RuleSchemaType['artifacts']; // do I need to remove it from here?
 }
 
 export interface RuleDomain<Params extends RuleParams = never> {
