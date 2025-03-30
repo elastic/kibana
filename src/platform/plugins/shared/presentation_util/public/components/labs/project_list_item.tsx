@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,6 +19,7 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiIconTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import classnames from 'classnames';
 
@@ -27,8 +29,6 @@ import { EnvironmentSwitch } from './environment_switch';
 import { LabsStrings } from '../../i18n';
 const { ListItem: strings } = LabsStrings.Components;
 
-import './project_list_item.scss';
-
 export interface Props {
   project: Project;
   onStatusChange: (id: ProjectID, env: EnvironmentName, enabled: boolean) => void;
@@ -37,13 +37,54 @@ export interface Props {
 export const ProjectListItem = ({ project, onStatusChange }: Props) => {
   const { id, status, isActive, name, description, solutions } = project;
   const { isEnabled, isOverride } = status;
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiFlexItem
-      className={classnames({
-        projectListItem: true,
-        'projectListItem--isOverridden': isOverride,
+      className={classnames('projectListItem', {
+        'projectListItem--isOverridden': true,
         'projectListItem--isOverriddenEnabled': isOverride && isEnabled,
+      })}
+      css={css({
+        position: 'relative',
+        background: euiTheme.colors.emptyShade,
+        padding: euiTheme.size.l,
+        minWidth: '500px',
+        '+ .projectListItem:after': {
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          left: 0,
+          height: '1px',
+          background: euiTheme.colors.lightShade,
+          content: '""',
+        },
+
+        '&.projectListItem--isOverridden:before': {
+          position: 'absolute',
+          top: euiTheme.size.l,
+          left: '4px',
+          bottom: euiTheme.size.l,
+          width: '4px',
+          background: euiTheme.colors.success,
+          content: '""',
+        },
+        '.euiSwitch__label': {
+          width: '100%',
+        },
+        '.euiFlyout &': {
+          padding: `${euiTheme.size.l} ${euiTheme.size.xs}`,
+
+          '&:first-child': {
+            paddingTop: 0,
+          },
+          '&.projectListItem--isOverridden:before': {
+            left: `-${euiTheme.size.s}`,
+          },
+          '&.projectListItem--isOverridden:first-child:before': {
+            top: 0,
+          },
+        },
       })}
     >
       <EuiFlexGroup gutterSize="m" responsive={false}>
@@ -54,7 +95,14 @@ export const ProjectListItem = ({ project, onStatusChange }: Props) => {
                 <h2>
                   {name}
                   {isOverride ? (
-                    <span className="projectListItem__titlePendingChangesIndicator">
+                    <span
+                      className="projectListItem__titlePendingChangesIndicator"
+                      css={css({
+                        marginLeft: euiTheme.size.s,
+                        position: 'relative',
+                        top: '-1px',
+                      })}
+                    >
                       <EuiIconTip
                         content={strings.getOverriddenIconTipLabel()}
                         position="top"
@@ -67,7 +115,10 @@ export const ProjectListItem = ({ project, onStatusChange }: Props) => {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <div className="projectListItem__solutions">
+              <div
+                className="projectListItem__solutions"
+                css={css({ textTransform: 'capitalize' })}
+              >
                 {solutions.map((solution) => (
                   <EuiBadge key={solution}>{solution}</EuiBadge>
                 ))}
