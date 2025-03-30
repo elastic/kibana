@@ -13,9 +13,11 @@ import { Filter } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import {
+  ActionableBadge,
   CVSScoreBadge,
   SeverityStatusBadge,
   getNormalizedSeverity,
+  MultiValueCellAction,
 } from '@kbn/cloud-security-posture';
 import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
 import { HttpSetup } from '@kbn/core/public';
@@ -33,8 +35,7 @@ import { useKibana } from '../../common/hooks/use_kibana';
 import { useDataViewContext } from '../../common/contexts/data_view_context';
 import { usePersistedQuery } from '../../common/hooks/use_cloud_posture_data_table';
 import { useUrlQuery } from '../../common/hooks/use_url_query';
-import { ActionableBadge, MultiValueCellAction } from '../../common/component/actionable_badge';
-import { findReferenceLink } from './utils/find_reference_link.util';
+import { findReferenceLink } from '../../common/utils/find_reference_link.util';
 
 type URLQuery = FindingsBaseURLQuery & Record<string, any>;
 

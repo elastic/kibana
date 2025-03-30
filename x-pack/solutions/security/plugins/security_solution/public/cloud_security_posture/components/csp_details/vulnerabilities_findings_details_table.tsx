@@ -19,11 +19,13 @@ import {
   useVulnerabilitiesFindings,
   VULNERABILITY,
 } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
+import type { MultiValueCellAction } from '@kbn/cloud-security-posture';
 import {
   getVulnerabilityStats,
   CVSScoreBadge,
   SeverityStatusBadge,
   getNormalizedSeverity,
+  ActionableBadge,
 } from '@kbn/cloud-security-posture';
 import {
   ENTITY_FLYOUT_EXPAND_VULNERABILITY_VIEW_VISITS,
@@ -35,9 +37,7 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useGetNavigationUrlParams } from '@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params';
 import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_get_severity_status_color';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
-import type { MultiValueCellAction } from '@kbn/cloud-security-posture-plugin/public/common/component/actionable_badge';
 import {
-  ActionableBadge,
   FindingsMultiValueCellRender,
   findReferenceLink,
 } from '@kbn/cloud-security-posture-plugin/public';
