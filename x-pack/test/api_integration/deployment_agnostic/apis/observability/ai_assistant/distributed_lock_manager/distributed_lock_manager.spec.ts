@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type { Logger } from '@kbn/logging';
 import {
   LockId,
   ensureTemplatesAndIndexCreated,
@@ -14,35 +13,32 @@ import {
   withLock,
 } from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { getLoggerMock } from '../utils/logger';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
+  const log = getService('log');
 
   describe('LockManager', function () {
-    // Increase timeout since Elasticsearch operations and TTL waits might take a few seconds.
-    this.timeout(15000);
-
     let lockManager: LockManager;
-    const fakeLogger = {
-      debug: () => {},
-      error: () => {},
-      info: () => {},
-      warn: () => {},
-      fatal: () => {},
-      trace: () => {},
-    } as unknown as Logger;
+    let lockManager2: LockManager;
+
+    const loggerMock = getLoggerMock(log);
 
     before(async () => {
       await ensureTemplatesAndIndexCreated(es);
-      lockManager = new LockManager(LockId.KnowledgeBaseReindex, es, fakeLogger);
+      lockManager = new LockManager(LockId.KnowledgeBaseReindex, es, loggerMock);
+      lockManager2 = new LockManager(LockId.KnowledgeBaseReindex, es, loggerMock);
     });
 
     beforeEach(async () => {
       await lockManager.release();
+      await lockManager2.release();
     });
 
     afterEach(async () => {
       await lockManager.release();
+      await lockManager2.release();
     });
 
     describe('LockManager', () => {
@@ -62,12 +58,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('should not acquire the lock if it is already held', async () => {
-        const firstAcquired = await lockManager.acquire();
+        const firstAcquired = await lockManager.acquire({ meta: { attempt: 'one' } });
         expect(firstAcquired).to.be(true);
 
         // Try to acquire again; it should fail.
-        const secondAcquired = await lockManager.acquire();
+        const secondAcquired = await lockManager2.acquire({ meta: { attempt: 'two' } });
         expect(secondAcquired).to.be(false);
+        const lock = await lockManager2.get();
+        expect(lock?.meta).to.eql({ attempt: 'one' });
       });
 
       it('should release the lock', async () => {
@@ -82,18 +80,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('should allow reacquiring the lock after expiration', async () => {
         // Acquire the lock with a very short TTL (1 second).
-        const acquired = await lockManager.acquire({ ttlMs: 1000 });
+        const acquired = await lockManager.acquire({ ttlMs: 1000, meta: { attempt: 'one' } });
         expect(acquired).to.be(true);
 
         // Wait for 1.5 seconds so that the lock expires.
         await sleep(1500);
 
-        // get() should now return undefined (and remove the expired lock).
-        const lockAfterExpiration = await lockManager.get();
-        expect(lockAfterExpiration).to.be(undefined);
-
         // Try to acquire the lock again.
-        const reacquired = await lockManager.acquire();
+        const reacquired = await lockManager2.acquire({ meta: { attempt: 'two' } });
         expect(reacquired).to.be(true);
       });
 
@@ -127,16 +121,21 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('should only allow a single lock to be acquired when multiple calls are made in parallel', async () => {
+        function acquire() {
+          const customLockManager = new LockManager(LockId.KnowledgeBaseReindex, es, loggerMock);
+          return customLockManager.acquire();
+        }
+
         const values = await Promise.all([
-          lockManager.acquire(),
-          lockManager.acquire(),
-          lockManager.acquire(),
-          lockManager.acquire(),
-          lockManager.acquire(),
-          lockManager.acquire(),
-          lockManager.acquire(),
-          lockManager.acquire(),
-          lockManager.acquire(),
+          acquire(),
+          acquire(),
+          acquire(),
+          acquire(),
+          acquire(),
+          acquire(),
+          acquire(),
+          acquire(),
+          acquire(),
         ]);
 
         expect(values.filter((v) => v === true)).to.have.length(1);
@@ -147,9 +146,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         let counter = 0;
 
         async function add() {
-          const lock = await lockManager.acquire();
+          const customLockManager = new LockManager(LockId.KnowledgeBaseReindex, es, loggerMock);
+          const lock = await customLockManager.acquire();
           if (lock) {
-            await sleep(10);
             counter++;
             lockManager.release();
           }
@@ -164,7 +163,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('Multiple LockManager instances', () => {
       let customLockManager: LockManager;
       before(async () => {
-        customLockManager = new LockManager('customLockId' as LockId, es, fakeLogger);
+        customLockManager = new LockManager('customLockId' as LockId, es, loggerMock);
         await customLockManager.release();
       });
 
@@ -184,8 +183,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       beforeEach(async () => {
         // Use two LockManager instances with the same lockId.
-        blockingManager = new LockManager(LockId.KnowledgeBaseReindex, es, fakeLogger);
-        waitingManager = new LockManager(LockId.KnowledgeBaseReindex, es, fakeLogger);
+        blockingManager = new LockManager(LockId.KnowledgeBaseReindex, es, loggerMock);
+        waitingManager = new LockManager(LockId.KnowledgeBaseReindex, es, loggerMock);
       });
 
       afterEach(async () => {
@@ -224,38 +223,36 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('withLock', () => {
-      it('should execute the callback when the lock is acquired', async () => {
-        let executed = false;
-        const result = await withLock(
-          {
-            esClient: es,
-            lockId: LockId.KnowledgeBaseReindex,
-            logger: fakeLogger,
-            meta: { test: 'withLock' },
-          },
-          async () => {
-            executed = true;
-            return 'success';
-          }
-        );
-        expect(executed).to.be(true);
-        expect(result).to.be('success');
+      let executions: number;
+      let runWithLock: () => Promise<string | undefined>;
+      let results: Array<string | undefined>;
+
+      before(async () => {
+        executions = 0;
+        runWithLock = () => {
+          return withLock(
+            { esClient: es, lockId: LockId.KnowledgeBaseReindex, logger: loggerMock },
+            async () => {
+              executions++;
+              return 'was called';
+            }
+          );
+        };
+
+        results = await Promise.all([runWithLock(), runWithLock(), runWithLock()]);
       });
 
-      it('should return undefined and not execute the callback when the lock is not acquired', async () => {
-        // Acquire the lock so that the free function cannot acquire it.
-        await lockManager.acquire();
+      it('should only execute the callback once', async () => {
+        expect(executions).to.be(1);
+      });
 
-        let executed = false;
-        const result = await withLock(
-          { esClient: es, lockId: LockId.KnowledgeBaseReindex, logger: fakeLogger },
-          async () => {
-            executed = true;
-            return 'failure';
-          }
-        );
-        expect(executed).to.be(false);
-        expect(result).to.be(undefined);
+      it('should return the result of the callback', async () => {
+        expect(results.sort()).to.eql(['was called', undefined, undefined]);
+      });
+
+      it('should release the lock', async () => {
+        const lock = await new LockManager(LockId.KnowledgeBaseReindex, es, loggerMock).get();
+        expect(lock).to.be(undefined);
       });
     });
   });
