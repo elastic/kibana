@@ -7,6 +7,7 @@
 
 import { Client, errors } from '@elastic/elasticsearch';
 import { Logger } from '@kbn/logging';
+import pRetry from 'p-retry';
 
 const INDEX_NAME = '.kibana-distributed-lock-manager';
 
@@ -20,6 +21,11 @@ export interface LockDocument {
   meta: Record<string, any>;
 }
 
+interface AcquireOptions {
+  meta?: Record<string, any>;
+  ttlMs?: number;
+}
+
 export class LockManager {
   constructor(private lockId: LockId, private esClient: Client, private logger: Logger) {}
 
@@ -27,9 +33,7 @@ export class LockManager {
    * Attempts to acquire a lock by creating a document with the given lockId.
    * If the lock exists and is expired, it will be released and acquisition retried.
    */
-  public async acquire(
-    options: { meta?: Record<string, any>; ttlMs?: number } = {}
-  ): Promise<boolean> {
+  public async acquire(options: AcquireOptions = {}): Promise<boolean> {
     const ttl = options.ttlMs ?? 3600 * 1000; // Default TTL: 1 hour.
     const now = new Date();
 
@@ -100,13 +104,52 @@ export class LockManager {
 
     return res._source;
   }
+
+  public async waitForLock(options: AcquireOptions & pRetry.Options = {}): Promise<boolean> {
+    const { meta, ttlMs, ...pRetryOptions } = options;
+
+    return pRetry(async () => {
+      const acquired = await this.acquire({ meta, ttlMs });
+      if (!acquired) {
+        this.logger.debug(`Lock "${this.lockId}" not available yet.`);
+        throw new Error(`Lock "${this.lockId}" not available yet`);
+      }
+      return acquired;
+    }, pRetryOptions ?? { forever: true, maxTimeout: 10_000 });
+  }
 }
 
-export async function ensureTemplatesAndIndexCreated(client: Client): Promise<void> {
+export async function withLock<T>(
+  {
+    lockId,
+    esClient,
+    logger,
+    meta,
+    ttlMs,
+  }: {
+    lockId: LockId;
+    esClient: Client;
+    logger: Logger;
+  } & AcquireOptions,
+  callback: () => Promise<T>
+): Promise<T | undefined> {
+  const lockManager = new LockManager(lockId, esClient, logger);
+  const acquired = await lockManager.acquire({ meta, ttlMs });
+  if (acquired) {
+    try {
+      return await callback();
+    } finally {
+      await lockManager.release();
+    }
+  }
+  return undefined;
+}
+
+export async function ensureTemplatesAndIndexCreated(esClient: Client): Promise<void> {
   const COMPONENT_TEMPLATE_NAME = `${INDEX_NAME}-component`;
   const INDEX_TEMPLATE_NAME = `${INDEX_NAME}-index-template`;
 
-  await client.cluster.putComponentTemplate({
+  await esClient.cluster.putComponentTemplate({
     name: COMPONENT_TEMPLATE_NAME,
     template: {
       mappings: {
@@ -120,7 +163,7 @@ export async function ensureTemplatesAndIndexCreated(client: Client): Promise<vo
     },
   });
 
-  await client.indices.putIndexTemplate({
+  await esClient.indices.putIndexTemplate({
     name: INDEX_TEMPLATE_NAME,
     index_patterns: [INDEX_NAME],
     composed_of: [COMPONENT_TEMPLATE_NAME],
@@ -134,5 +177,5 @@ export async function ensureTemplatesAndIndexCreated(client: Client): Promise<vo
     },
   });
 
-  await client.indices.create({ index: INDEX_NAME }, { ignore: [400] });
+  await esClient.indices.create({ index: INDEX_NAME }, { ignore: [400] });
 }
