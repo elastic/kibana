@@ -28,7 +28,7 @@ You can copy a curl request from the browser, and place it after the command:
 
 You can also use stdin for this, for example:
 
-`pbpaste | node scripts/profile.js --connections=10 --amount=50`
+`pbpaste | node scripts/profile.js`
 
 When using stdin, take into consideration that there is some lag between starting the script and connecting the profiler, so the profiler might miss the first second or so of the running process.
 
@@ -36,9 +36,4 @@ You can also use any other command, like `autocannon`, `sleep` or `xargs`.
 
 ### SigInt
 
-By default, the profiler will run until the process exits:
-`node scripts/profile.js`. This is useful when you have a long running
-running separately and you want to collect the profile over a longer time
-period. Be aware that this might cause memory issues because the profile will
-get huge. When you press Cmd+C, the profiler will gracefully exit and first
-write the profile to disk and open Speedscope.
+By default, the profiler will run until the process exits:`node scripts/profile.js`. This is useful when you have a long running process running separately and you want to collect the profile over a longer time period. Be aware that this might cause memory issues because the profile will get huge. When you press Cmd+C, the profiler will gracefully exit and first write the profile to disk and open Speedscope.
