@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { css } from '@emotion/react';
 import classNames from 'classnames';
 import { sortBy, uniq } from 'lodash';
 import { comboBoxFieldOptionMatcher, getFieldIconType } from '@kbn/field-utils';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
@@ -20,12 +21,11 @@ import {
   EuiSelectableOption,
   EuiSelectableProps,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 import { FieldTypeFilter } from './field_type_filter';
-
-import './field_picker.scss';
 
 export interface FieldPickerProps {
   dataView?: DataView;
@@ -44,6 +44,7 @@ export const FieldPicker = ({
   ...other
 }: FieldPickerProps) => {
   const initialSelection = useRef(selectedFieldName);
+  const { euiTheme } = useEuiTheme();
 
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
@@ -117,8 +118,17 @@ export const FieldPicker = ({
     <EuiSelectable
       {...other}
       {...selectableProps}
-      className={classNames('fieldPickerSelectable', {
+      className={classNames({
         fieldPickerSelectableLoading: selectableProps?.isLoading,
+      })}
+      css={css({
+        height: '360px',
+        '.presFieldPicker__fieldButton[aria-checked=true]': {
+          backgroundColor: euiTheme.colors.backgroundBasePrimary,
+        },
+        '.euiSelectableMessage': {
+          height: '100%',
+        },
       })}
       emptyMessage={i18n.translate('presentationUtil.fieldPicker.noFieldsLabel', {
         defaultMessage: 'No matching fields',
