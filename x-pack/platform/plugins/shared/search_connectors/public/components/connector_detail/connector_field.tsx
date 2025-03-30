@@ -12,7 +12,7 @@ import { useActions, useValues } from 'kea';
 import { EuiFlexItem, EuiInlineEditText, EuiInlineEditTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { Connector } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ConnectorNameAndDescriptionLogic } from './connector_name_and_description_logic';

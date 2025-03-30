@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
-import { toAlphanumeric } from '@kbn/search-connectors/utils/to_alphanumeric';
+import { toAlphanumeric } from '@kbn/search-connectors';
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { indexOrAliasExists } from './exists_index';

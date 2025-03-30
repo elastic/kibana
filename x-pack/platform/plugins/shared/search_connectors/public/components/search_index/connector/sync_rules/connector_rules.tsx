@@ -24,7 +24,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { FilteringRulesTable } from '@kbn/search-connectors/components/sync_jobs/filtering_rules_table';
+import { FilteringRulesTable } from '@kbn/search-connectors';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isAdvancedSyncRuleSnippetEmpty } from '../../../../utils/sync_rules_helpers';
 import { ConnectorViewLogic } from '../../../connector_detail/connector_view_logic';

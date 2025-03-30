@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorSyncJob, Paginate } from '@kbn/search-connectors';
+import type { ConnectorSyncJob, Paginate } from '@kbn/search-connectors';
 import { HttpSetup } from '@kbn/core/public';
 import { createApiLogic } from '../api_logic/create_api_logic';
 

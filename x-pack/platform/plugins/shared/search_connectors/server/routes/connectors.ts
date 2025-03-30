@@ -29,13 +29,10 @@ import {
   ConnectorStatus,
   FilteringRule,
   SyncJobType,
-} from '@kbn/search-connectors';
-
-import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
-import {
+  cancelSyncs,
   isResourceNotFoundException,
   isStatusTransitionException,
-} from '@kbn/search-connectors/utils/identify_exceptions';
+} from '@kbn/search-connectors';
 
 import { addConnector } from '../lib/connectors/add_connector';
 import { generateConfig } from '../lib/connectors/generate_config';

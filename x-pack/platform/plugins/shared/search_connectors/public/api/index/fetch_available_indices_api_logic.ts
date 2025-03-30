@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Meta } from '@kbn/search-connectors';
+import type { Meta } from '@kbn/search-connectors';
 import { HttpSetup } from '@kbn/core/public';
 import { INPUT_THROTTLE_DELAY_MS } from '../../../common/constants';
 import { Actions, createApiLogic } from '../api_logic/create_api_logic';

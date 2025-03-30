@@ -149,10 +149,9 @@ export const SyncRulesTable: React.FC = () => {
         />
       ),
       field: 'rule',
-      name: i18n.translate(
-        'xpack.searchConnectorsindex.connector.syncRules.basicTable.ruleTitle',
-        { defaultMessage: 'Rule' }
-      ),
+      name: i18n.translate('xpack.searchConnectorsindex.connector.syncRules.basicTable.ruleTitle', {
+        defaultMessage: 'Rule',
+      }),
       render: (rule: any) => <EuiText size="s">{filteringRuleToText(rule.rule)}</EuiText>,
     },
     {

@@ -8,7 +8,7 @@
 import { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
-import { IngestPipelineParams } from '@kbn/search-connectors';
+import type { IngestPipelineParams } from '@kbn/search-connectors';
 import { createApiLogic } from '../api_logic/create_api_logic';
 
 export interface PostPipelineArgs {

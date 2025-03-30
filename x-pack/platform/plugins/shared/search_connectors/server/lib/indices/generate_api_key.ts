@@ -13,8 +13,8 @@ import {
   CONNECTORS_INDEX,
   createConnectorSecret,
   updateConnectorSecret,
+  toAlphanumeric,
 } from '@kbn/search-connectors';
-import { toAlphanumeric } from '@kbn/search-connectors/utils/to_alphanumeric';
 
 export const generateApiKey = async (
   client: IScopedClusterClient,

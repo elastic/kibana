@@ -129,7 +129,7 @@ export function ingestionMethodToText(ingestionMethod: IngestionMethod) {
       );
     case IngestionMethod.CRAWLER:
       return i18n.translate(
-        'xpack.searchConnectorscontent.searchIndices.ingestionMethod.crawler',
+        'xpack.searchConnectors.content.searchIndices.ingestionMethod.crawler',
         {
           defaultMessage: 'Crawler',
         }

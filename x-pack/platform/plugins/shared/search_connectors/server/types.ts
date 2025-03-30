@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
+import type { ConnectorServerSideDefinition } from '@kbn/search-connectors';
 import type { FleetStartContract, FleetSetupContract } from '@kbn/fleet-plugin/server';
 import {
   TaskManagerSetupContract,

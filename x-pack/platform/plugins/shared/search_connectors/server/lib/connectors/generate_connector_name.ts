@@ -11,7 +11,7 @@ import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 
 import { MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connectors';
 
-import { toAlphanumeric } from '@kbn/search-connectors/utils/to_alphanumeric';
+import { toAlphanumeric } from '@kbn/search-connectors';
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { indexOrAliasExists } from '../indices/exists_index';

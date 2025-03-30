@@ -8,7 +8,7 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import { fetchConnectors } from '@kbn/search-connectors';
 
-import { isNotNullish } from '@kbn/search-connectors/utils/is_not_nullish';
+import { isNotNullish } from '@kbn/search-connectors';
 import { getUnattachedIndexData } from './utils/get_index_data';
 
 export const fetchUnattachedIndices = async (

@@ -17,7 +17,7 @@ import { CoreStart } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { ConnectorDefinition } from '@kbn/search-connectors/types';
+import type { ConnectorDefinition } from '@kbn/search-connectors';
 import { CONNECTORS_PATH, ROOT_PATH } from './components/routes';
 import { ConnectorsRouter } from './components/connectors/connectors_router';
 import { SearchConnectorsPluginStart, SearchConnectorsPluginStartDependencies } from './types';

@@ -51,7 +51,7 @@ export type ConnectorCreationSteps = 'start' | 'deployment' | 'configure' | 'fin
 export type SelfManagePreference = 'native' | 'selfManaged';
 import { SearchConnectorsPageTemplateWrapper } from '../../shared/page_template';
 
-export const CreateConnector: React.FC = () => {
+const CreateConnector: React.FC = () => {
   const {
     services: { overlays, http, application },
   } = useKibana();
@@ -295,3 +295,5 @@ export const CreateConnector: React.FC = () => {
     </SearchConnectorsPageTemplateWrapper>
   );
 };
+// eslint-disable-next-line import/no-default-export
+export { CreateConnector as default };

@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/search/packages/kbn-search-index-documents'],
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-search-index-documents'],
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Connector } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
 import { HttpSetup } from '@kbn/core/public';
 import { Actions, createApiLogic } from '../api_logic/create_api_logic';
 

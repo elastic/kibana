@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { isEqual } from 'lodash';
 
-import { ElasticsearchIndexWithIngestion } from '@kbn/search-connectors';
+import type { ElasticsearchIndexWithIngestion } from '@kbn/search-connectors';
 import { HttpSetup } from '@kbn/core/public';
 import { IndexNameLogic } from '../../components/search_index/index_name_logic';
 

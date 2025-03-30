@@ -28,7 +28,7 @@ import { DefaultSettingsFlyout } from '../settings/default_settings_flyout';
 import { ConnectorStats } from './connector_stats';
 import { ConnectorsLogic } from './connectors_logic';
 import { ConnectorsTable } from './connectors_table';
-import { CreateConnector } from './create_connector';
+// import { CreateConnector } from './create_connector';
 import { DeleteConnectorModal } from './delete_connector_modal';
 import { ElasticManagedWebCrawlerEmptyPrompt } from './elastic_managed_web_crawler_empty_prompt';
 import { SelfManagedWebCrawlerEmptyPrompt } from './self_managed_web_crawler_empty_prompt';
@@ -59,7 +59,7 @@ export interface ConnectorsProps {
   isCrawler: boolean;
   isCrawlerSelfManaged?: boolean;
 }
-export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged }) => {
+const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged }) => {
   const {
     services: { application, http },
   } = useKibana();
@@ -88,9 +88,7 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams.from, searchParams.size, searchQuery, isCrawler]);
 
-  return !isLoading && isEmpty && !isCrawler ? (
-    <CreateConnector />
-  ) : (
+  return !isLoading && isEmpty && !isCrawler ? null : (
     <SearchConnectorsPageTemplateWrapper
       isLoading={isLoading}
       pageHeader={{
@@ -250,3 +248,5 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
     </SearchConnectorsPageTemplateWrapper>
   );
 };
+// eslint-disable-next-line import/no-default-export
+export { Connectors as default };

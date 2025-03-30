@@ -36,7 +36,7 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
               </EuiFlexItem>
               <EuiFlexItem>
                 {i18n.translate(
-                  'xpack.searchConnectorsindex.connector.syncRules.validatingTitle',
+                  'xpack.searchConnectors.index.connector.syncRules.validatingTitle',
                   {
                     defaultMessage: 'Draft sync rules are validating',
                   }

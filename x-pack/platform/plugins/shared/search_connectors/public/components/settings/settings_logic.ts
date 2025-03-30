@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { isDeepEqual } from 'react-use/lib/util';
 
-import { IngestPipelineParams } from '@kbn/search-connectors';
+import type { IngestPipelineParams } from '@kbn/search-connectors';
 
 import { HttpSetup } from '@kbn/core/public';
 import {

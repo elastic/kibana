@@ -13,7 +13,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { isNotNullish } from '@kbn/search-connectors/utils/is_not_nullish';
+import { isNotNullish } from '@kbn/search-connectors';
 import { fetchIndexCounts } from './fetch_index_counts';
 import { fetchIndexPrivileges } from './fetch_index_privileges';
 import { fetchIndexStats } from './fetch_index_stats';

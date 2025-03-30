@@ -7,7 +7,7 @@
 
 import { SEARCH_ELASTICSEARCH } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
-import { IngestPipelineParams } from '@kbn/search-connectors';
+import type { IngestPipelineParams } from '@kbn/search-connectors';
 import dedent from 'dedent';
 
 export const PLUGIN_ID = 'search_connectors';

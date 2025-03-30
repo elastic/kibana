@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import {
   CriteriaWithPagination,
@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Meta } from '@kbn/search-connectors';
+import type { Meta } from '@kbn/search-connectors';
 import { CONNECTOR_DETAIL_PATH, SEARCH_INDEX_PATH } from '../routes';
 import {
   connectorStatusToColor,

@@ -384,13 +384,10 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
                 isLoading={isSaveLoading || isExistLoading}
                 disabled={indexExists[sanitizedName]}
               >
-                {i18n.translate(
-                  'xpack.searchConnectorsattachIndexBox.createSameIndexButtonLabel',
-                  {
-                    defaultMessage: 'Create and attach an index named {indexName}',
-                    values: { indexName: sanitizedName },
-                  }
-                )}
+                {i18n.translate('xpack.searchConnectorsattachIndexBox.createSameIndexButtonLabel', {
+                  defaultMessage: 'Create and attach an index named {indexName}',
+                  values: { indexName: sanitizedName },
+                })}
               </EuiButton>
               {indexExists[sanitizedName] && (
                 <EuiText size="xs">

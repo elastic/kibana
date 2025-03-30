@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { Connector, Meta } from '@kbn/search-connectors/types';
+import type { Connector, Meta } from '@kbn/search-connectors';
 
 import { HttpSetup } from '@kbn/core/public';
 import {

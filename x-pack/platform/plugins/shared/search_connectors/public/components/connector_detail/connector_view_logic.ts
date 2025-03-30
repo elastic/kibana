@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import {
+import type {
   Connector,
   ElasticsearchViewIndex,
   IngestionMethod,

@@ -6,7 +6,7 @@
  */
 
 import { ConsolePluginStart } from '@kbn/console-plugin/public';
-import { ConnectorDefinition, ConnectorServerSideDefinition } from '@kbn/search-connectors';
+import type { ConnectorDefinition, ConnectorServerSideDefinition } from '@kbn/search-connectors';
 import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { FleetStart } from '@kbn/fleet-plugin/public';
