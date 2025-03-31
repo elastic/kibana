@@ -817,9 +817,8 @@ describe('artifacts lists', () => {
       });
     });
 
-    describe('macos/windows', () => {
+    describe.each(['macos', 'windows'] as const)('%s', (os) => {
       test('it should translate wildcard process.executable entry without modifications', async () => {
-        const os = Math.floor(Math.random() * 2) === 0 ? 'windows' : 'macos';
         const value = os === 'windows' ? 'C:\\My Doc*\\doc.md' : '/usr/bi*/doc.md';
 
         const testEntries: EntriesArray = [
@@ -860,7 +859,6 @@ describe('artifacts lists', () => {
       });
 
       test('it should translate wildcard file.path.text entry without modifications', async () => {
-        const os = Math.floor(Math.random() * 2) === 0 ? 'windows' : 'macos';
         const value = os === 'windows' ? 'C:\\My Doc*\\doc.md' : '/usr/bi*/doc.md';
 
         const testEntries: EntriesArray = [
