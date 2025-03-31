@@ -124,6 +124,41 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    it('creates slos with different tags', async () => {
+      const tags = ['test1', 'test2'];
+      const slo1 = {
+        ...DEFAULT_SLO,
+        tags: [tags[0]],
+        name: 'Test SLO for api integration 1',
+      };
+
+      const slo2 = {
+        ...DEFAULT_SLO,
+        tags: [tags[1]],
+        name: 'Test SLO for api integration 2',
+      };
+
+      await Promise.allSettled([
+        sloApi.create(slo1, adminRoleAuthc),
+        sloApi.create(slo2, adminRoleAuthc),
+      ]);
+
+      const definitions = await sloApi.findDefinitions(adminRoleAuthc, {
+        tags: tags.join(','),
+      });
+
+      expect(definitions.total).eql(2);
+
+      const definitionsWithoutTag2 = await sloApi.findDefinitions(adminRoleAuthc, {
+        tags: tags[0],
+      });
+
+      expect(definitionsWithoutTag2.total).eql(1);
+      expect(definitionsWithoutTag2.results.find((def) => def.tags.includes('tag2'))).eql(
+        undefined
+      );
+    });
+
     it('creates two SLOs with matching ids across different spaces', async () => {
       const spaceApiResponse = await spaceApi.create({
         name: 'space1',
