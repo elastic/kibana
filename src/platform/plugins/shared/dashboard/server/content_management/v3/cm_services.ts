@@ -361,6 +361,11 @@ export const searchResultsAttributesSchema = schema.object({
     defaultValue: false,
     meta: { description: 'Whether to restore time upon viewing this dashboard' },
   }),
+  tags: schema.maybe(
+    schema.arrayOf(
+      schema.string({ meta: { description: 'An array of tags applied to this dashboard' } })
+    )
+  ),
 });
 
 export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
@@ -579,13 +584,6 @@ export const serviceDefinition: ServicesDefinition = {
     in: {
       options: {
         schema: dashboardSearchOptionsSchema,
-      },
-    },
-  },
-  mSearch: {
-    out: {
-      result: {
-        schema: dashboardItemSchema,
       },
     },
   },
