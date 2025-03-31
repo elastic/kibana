@@ -20,6 +20,7 @@ import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
 import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/project_navigation';
 
+import { SubItemTitle } from './subitem_title';
 import { useNavigation as useServices } from '../../services';
 import { isAbsoluteLink, isActiveFromUrl, isAccordionNode } from '../../utils';
 import type { BasePathService, NavigateToUrlFn } from '../../types';
@@ -420,7 +421,8 @@ function nodeToEuiCollapsibleNavProps(
       isSelected,
       onClick,
       icon: navNode.icon,
-      title: navNode.title,
+      // @ts-expect-error title accepts JSX elements and they render correctly but the type definition expects a string
+      title: !subItems && navNode.withBadge ? <SubItemTitle item={navNode} /> : navNode.title,
       ['data-test-subj']: dataTestSubj,
       iconProps: { size: deps.treeDepth === 0 ? 'm' : 's' },
 
