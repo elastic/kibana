@@ -866,6 +866,8 @@
       "@kbn/eslint-plugin-disable/*": ["packages/kbn-eslint-plugin-disable/*"],
       "@kbn/eslint-plugin-eslint": ["packages/kbn-eslint-plugin-eslint"],
       "@kbn/eslint-plugin-eslint/*": ["packages/kbn-eslint-plugin-eslint/*"],
+      "@kbn/eslint-plugin-eui-a11y": ["packages/kbn-eslint-plugin-eui-a11y"],
+      "@kbn/eslint-plugin-eui-a11y/*": ["packages/kbn-eslint-plugin-eui-a11y/*"],
       "@kbn/eslint-plugin-i18n": ["packages/kbn-eslint-plugin-i18n"],
       "@kbn/eslint-plugin-i18n/*": ["packages/kbn-eslint-plugin-i18n/*"],
       "@kbn/eslint-plugin-imports": ["packages/kbn-eslint-plugin-imports"],

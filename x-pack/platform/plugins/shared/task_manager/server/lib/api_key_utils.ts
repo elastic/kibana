@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AuthenticatedUser, SecurityServiceStart } from '@kbn/core/server';
-import { KibanaRequest } from '@kbn/core/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { AuthenticatedUser, SecurityServiceStart } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { truncate } from 'lodash';
-import { TaskInstance, TaskUserScope } from '../task';
+import type { TaskInstance, TaskUserScope } from '../task';
 
 export interface APIKeyResult {
   id: string;

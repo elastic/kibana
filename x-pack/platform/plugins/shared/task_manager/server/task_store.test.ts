@@ -6,33 +6,31 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import type { estypes } from '@elastic/elasticsearch';
 import _ from 'lodash';
 import { first } from 'rxjs';
 
-import {
-  TaskInstance,
-  TaskStatus,
-  TaskLifecycleResult,
-  SerializedConcreteTaskInstance,
-} from './task';
+import type { TaskInstance, SerializedConcreteTaskInstance } from './task';
+import { TaskStatus, TaskLifecycleResult } from './task';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
   coreMock,
-  ElasticsearchClientMock,
   elasticsearchServiceMock,
   httpServerMock,
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { TaskStore, SearchOpts, AggregationOpts, taskInstanceToAttributes } from './task_store';
+import type { SearchOpts, AggregationOpts } from './task_store';
+import { TaskStore, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { SavedObjectAttributes, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { SavedObjectAttributes } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr, asOk } from './lib/result_type';
-import { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { MsearchError } from './lib/msearch_error';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';

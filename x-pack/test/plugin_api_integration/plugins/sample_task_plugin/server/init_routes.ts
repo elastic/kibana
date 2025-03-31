@@ -66,6 +66,12 @@ export function initRoutes(
   router.post(
     {
       path: `/api/sample_tasks/schedule`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: taskSchema,
       },
@@ -116,6 +122,12 @@ export function initRoutes(
   router.post(
     {
       path: `/api/sample_tasks/run_soon`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           task: schema.object({
@@ -144,6 +156,12 @@ export function initRoutes(
   router.post(
     {
       path: `/api/sample_tasks/run_mark_removed_tasks_as_unrecognized`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({}),
       },
@@ -172,6 +190,12 @@ export function initRoutes(
   router.post(
     {
       path: `/api/sample_tasks/bulk_enable`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           taskIds: schema.arrayOf(schema.string()),
@@ -197,6 +221,12 @@ export function initRoutes(
   router.post(
     {
       path: `/api/sample_tasks/bulk_disable`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           taskIds: schema.arrayOf(schema.string()),
@@ -221,6 +251,12 @@ export function initRoutes(
   router.post(
     {
       path: `/api/sample_tasks/bulk_update_schedules`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           taskIds: schema.arrayOf(schema.string()),
@@ -246,6 +282,12 @@ export function initRoutes(
   router.post(
     {
       path: `/api/sample_tasks/ensure_scheduled`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           task: schema.object({
@@ -282,6 +324,12 @@ export function initRoutes(
   router.post(
     {
       path: `/api/sample_tasks/event`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           event: schema.string(),
@@ -307,6 +355,12 @@ export function initRoutes(
   router.get(
     {
       path: `/api/sample_tasks`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async function (
@@ -331,6 +385,12 @@ export function initRoutes(
   router.get(
     {
       path: `/api/sample_tasks/task/{taskId}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           taskId: schema.string(),
@@ -355,6 +415,12 @@ export function initRoutes(
   router.get(
     {
       path: `/api/ensure_tasks_index_refreshed`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async function (
@@ -370,6 +436,12 @@ export function initRoutes(
   router.delete(
     {
       path: `/api/sample_tasks`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async function (
@@ -398,6 +470,12 @@ export function initRoutes(
   router.get(
     {
       path: '/api/registered_tasks',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async (
@@ -419,6 +497,12 @@ export function initRoutes(
   router.post(
     {
       path: `/api/update_kibana_node`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           id: schema.string(),

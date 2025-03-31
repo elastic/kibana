@@ -13,9 +13,9 @@ import {
 } from './api_key_utils';
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
-import { AuthenticatedUser } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/core/server';
 
 const mockTask = {
   id: 'task',

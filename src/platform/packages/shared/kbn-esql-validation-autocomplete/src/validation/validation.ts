@@ -393,7 +393,7 @@ export function validateColumnForCommand(
     if (!references.variables.has(column.name) && !isParametrized(column)) {
       messages.push(errors.unknownColumn(column));
     }
-  } else if (!getColumnExists(column, references)) {
+  } else if (!getColumnExists(column, references) && !isParametrized(column)) {
     messages.push(errors.unknownColumn(column));
   }
 
