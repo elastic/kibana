@@ -27,7 +27,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type FunctionDefinition, FunctionDefinitionTypes } from '../types';
+import { type FunctionDefinition, FunctionDefinitionTypes, Location } from '../types';
 
 import { isNumericType } from '../../shared/esql_types';
 
@@ -369,8 +369,14 @@ const addDefinition: FunctionDefinition = {
       returnType: 'date',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: undefined,
   examples: [],
 };
@@ -537,8 +543,14 @@ const divDefinition: FunctionDefinition = {
       returnType: 'unsigned_long',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: (fnDef) => {
     const [left, right] = fnDef.args;
     const messages = [];
@@ -1052,8 +1064,14 @@ const equalsDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: undefined,
   examples: [],
 };
@@ -1426,8 +1444,14 @@ const greaterThanDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: undefined,
   examples: [],
 };
@@ -1803,8 +1827,14 @@ const greaterThanOrEqualDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: undefined,
   examples: [],
 };
@@ -2045,8 +2075,7 @@ const inDefinition: FunctionDefinition = {
       minParams: 2,
     },
   ],
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  supportedOptions: undefined,
+  locationsAvailable: [Location.EVAL, Location.WHERE, Location.SORT, Location.ROW],
   validate: undefined,
   examples: ['ROW a = 1, b = 4, c = 3\n| WHERE c-a IN (3, b / 2, a)'],
 };
@@ -2419,8 +2448,14 @@ const lessThanDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: undefined,
   examples: [],
 };
@@ -2740,8 +2775,14 @@ const lessThanOrEqualDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: undefined,
   examples: [],
 };
@@ -2822,8 +2863,7 @@ const likeDefinition: FunctionDefinition = {
       minParams: 2,
     },
   ],
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  supportedOptions: undefined,
+  locationsAvailable: [Location.EVAL, Location.WHERE, Location.SORT, Location.ROW],
   validate: undefined,
   examples: ['FROM employees\n| WHERE first_name LIKE """?b*"""\n| KEEP first_name, last_name'],
 };
@@ -3333,8 +3373,7 @@ const matchOperatorDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['where'],
-  supportedOptions: [],
+  locationsAvailable: [Location.WHERE],
   validate: undefined,
   examples: [
     'FROM books\n| WHERE MATCH(author, "Faulkner")\n| KEEP book_no, author\n| SORT book_no\n| LIMIT 5',
@@ -3503,8 +3542,14 @@ const modDefinition: FunctionDefinition = {
       returnType: 'unsigned_long',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: (fnDef) => {
     const [left, right] = fnDef.args;
     const messages = [];
@@ -3696,8 +3741,14 @@ const mulDefinition: FunctionDefinition = {
       returnType: 'unsigned_long',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: undefined,
   examples: [],
 };
@@ -3763,8 +3814,7 @@ const negDefinition: FunctionDefinition = {
       returnType: 'time_duration',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics'],
-  supportedOptions: undefined,
+  locationsAvailable: [Location.STATS],
   validate: undefined,
   examples: [],
 };
@@ -4007,8 +4057,7 @@ const notInDefinition: FunctionDefinition = {
       minParams: 2,
     },
   ],
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  supportedOptions: undefined,
+  locationsAvailable: [Location.EVAL, Location.WHERE, Location.SORT, Location.ROW],
   validate: undefined,
   examples: [],
 };
@@ -4057,8 +4106,7 @@ const notLikeDefinition: FunctionDefinition = {
       minParams: 2,
     },
   ],
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  supportedOptions: undefined,
+  locationsAvailable: [Location.EVAL, Location.WHERE, Location.SORT, Location.ROW],
   validate: undefined,
   examples: [],
 };
@@ -4107,8 +4155,7 @@ const notRlikeDefinition: FunctionDefinition = {
       minParams: 2,
     },
   ],
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  supportedOptions: undefined,
+  locationsAvailable: [Location.EVAL, Location.WHERE, Location.SORT, Location.ROW],
   validate: undefined,
   examples: [],
 };
@@ -4597,8 +4644,14 @@ const notEqualsDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: undefined,
   examples: [],
 };
@@ -4679,8 +4732,7 @@ const rlikeDefinition: FunctionDefinition = {
       minParams: 2,
     },
   ],
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  supportedOptions: undefined,
+  locationsAvailable: [Location.EVAL, Location.WHERE, Location.SORT, Location.ROW],
   validate: undefined,
   examples: [
     'FROM employees\n| WHERE first_name RLIKE """.leja.*"""\n| KEEP first_name, last_name',
@@ -4995,8 +5047,14 @@ const subDefinition: FunctionDefinition = {
       returnType: 'date',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: undefined,
   examples: [],
 };
