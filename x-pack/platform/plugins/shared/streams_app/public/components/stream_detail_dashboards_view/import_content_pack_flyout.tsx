@@ -6,24 +6,18 @@
  */
 
 import React, { useState } from 'react';
-import { capitalize, omitBy, uniq } from 'lodash';
+import { capitalize, compact, uniqBy } from 'lodash';
 import {
+  ContentPack,
   ContentPackObject,
   ContentPackSavedObject,
   IngestStreamGetResponse,
-  findIndexPatterns,
-  isIndexPlaceholder,
-  replaceIndexPatterns,
 } from '@kbn/streams-schema';
 import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
-  EuiCallOut,
-  EuiFieldText,
   EuiFilePicker,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -32,11 +26,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
-  DashboardAttributes,
-  SavedDashboardPanel,
-} from '@kbn/dashboard-plugin/common/content_management/v2';
-import { getDashboardBackupService } from '@kbn/dashboard-plugin/public';
+import type { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
 import { useKibana } from '../../hooks/use_kibana';
 
 export function ImportContentPackFlyout({
@@ -50,18 +40,14 @@ export function ImportContentPackFlyout({
 }) {
   const {
     core: { http },
-    dependencies: { start },
   } = useKibana();
 
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [contentPack, setContentPack] = useState<ContentPack | undefined>();
   const [contentPackObjects, setContentPackObjects] = useState<ContentPackObject[]>([]);
   const [selectedContentPackObjects, setSelectedContentPackObjects] = useState<ContentPackObject[]>(
     []
-  );
-  const [indexPatterns, setIndexPatterns] = useState<string[]>([]);
-  const [indexPatternReplacements, setIndexPatternReplacements] = useState<Record<string, string>>(
-    {}
   );
 
   return (
@@ -90,21 +76,13 @@ export function ImportContentPackFlyout({
               setFile(contentFile);
 
               contentFile.text().then((text: string) => {
-                const { content } = JSON.parse(text);
-                const objects: ContentPackObject[] = content
+                const contentPack = JSON.parse(text);
+                const objects: ContentPackObject[] = contentPack.content
                   .split('\n')
-                  .map((line: string) => JSON.parse(line))
-                  .filter(
-                    (object: ContentPackObject) =>
-                      object.type === 'saved_object' && object.content.type === 'dashboard'
-                  );
+                  .map((line: string) => JSON.parse(line));
 
-                const indexPatterns = uniq(
-                  objects.flatMap((object) => findIndexPatterns(object.content))
-                ).filter((index) => !isIndexPlaceholder(index));
-
+                setContentPack(contentPack);
                 setContentPackObjects(objects);
-                setIndexPatterns(indexPatterns);
               });
             } else {
               setFile(null);
@@ -117,41 +95,8 @@ export function ImportContentPackFlyout({
           <>
             <EuiSpacer />
 
-            {indexPatterns.length ? (
-              <EuiCallOut>
-                <details>
-                  <summary>Advanced settings</summary>
-                  <EuiSpacer />
-                  <p>
-                    We detected index patterns in the content pack. You can update them here or
-                    later in the imported objects.
-                  </p>
-                  {indexPatterns.map((index) => (
-                    <EuiFlexGroup alignItems="center">
-                      <EuiFlexItem grow={false}>{index}</EuiFlexItem>
-
-                      <EuiFlexItem grow={false}>
-                        <EuiFieldText
-                          compressed
-                          placeholder={index}
-                          onChange={(e) => {
-                            setIndexPatternReplacements({
-                              ...indexPatternReplacements,
-                              [index]: e.target.value,
-                            });
-                          }}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  ))}
-                </details>
-              </EuiCallOut>
-            ) : null}
-
-            <EuiSpacer />
-
             <EuiBasicTable
-              items={contentPackObjects}
+              items={contentPackObjects.filter((object) => object.content.type === 'dashboard')}
               itemId={(record: ContentPackObject) => record.content.id}
               columns={[
                 {
@@ -174,51 +119,6 @@ export function ImportContentPackFlyout({
                         {capitalize(type)}
                       </EuiBadge>
                     );
-                  },
-                },
-                {
-                  render: (record: ContentPackObject) => {
-                    const type = record.type === 'saved_object' ? record.content.type : record.type;
-                    if (type === 'dashboard') {
-                      return (
-                        <EuiButton
-                          size="s"
-                          onClick={() => {
-                            const service = getDashboardBackupService();
-                            const updatedContent = replaceIndexPatterns(
-                              record.content,
-                              omitBy(indexPatternReplacements, (value) => !value)
-                            );
-                            const panels = JSON.parse(updatedContent.attributes.panelsJSON).reduce(
-                              (
-                                acc: Record<
-                                  string,
-                                  SavedDashboardPanel & {
-                                    explicitInput: SavedDashboardPanel['embeddableConfig'];
-                                  }
-                                >,
-                                panel: SavedDashboardPanel,
-                                index: number
-                              ) => {
-                                acc[index] = { ...panel, explicitInput: panel.embeddableConfig };
-                                return acc;
-                              },
-                              {}
-                            );
-
-                            service.setState(
-                              'unsavedDashboard',
-                              { ...record.content, panels },
-                              panels
-                            );
-
-                            start.share.url.locators.get('DASHBOARD_APP_LOCATOR')?.navigate({});
-                          }}
-                        >
-                          Preview
-                        </EuiButton>
-                      );
-                    }
                   },
                 },
               ]}
@@ -244,29 +144,25 @@ export function ImportContentPackFlyout({
 
             setIsLoading(true);
 
-            const selectedObjects: ContentPackObject[] = selectedContentPackObjects.map(
-              (object) => {
-                if (object.type !== 'saved_object' || object.content.type !== 'dashboard') {
-                  return object;
-                }
-
-                return {
-                  type: 'saved_object',
-                  content: replaceIndexPatterns(
-                    object.content,
-                    omitBy(indexPatternReplacements, (value) => !value)
-                  ),
-                };
-              }
-            );
-
             const body = new FormData();
             body.append(
               'content',
               new File(
                 [
                   JSON.stringify({
-                    content: selectedObjects.map((object) => JSON.stringify(object)).join('\n'),
+                    ...contentPack,
+                    content: selectedContentPackObjects
+                      .flatMap((object) => {
+                        const references = compact(
+                          uniqBy(object.content.references, (ref) => ref.id).map((ref) =>
+                            JSON.stringify(
+                              contentPackObjects.find((object) => object.content.id === ref.id)
+                            )
+                          )
+                        );
+                        return [...references, JSON.stringify(object)];
+                      })
+                      .join('\n'),
                   }),
                 ],
                 'content.json',
@@ -290,7 +186,9 @@ export function ImportContentPackFlyout({
               });
           }}
         >
-          Import objects
+          {i18n.translate('xpack.streams.importContentPackFlyout.importObjects', {
+            defaultMessage: 'Import objects',
+          })}
         </EuiButton>
       </EuiFlyoutFooter>
     </EuiFlyout>

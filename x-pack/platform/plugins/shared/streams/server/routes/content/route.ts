@@ -16,7 +16,7 @@ import {
 } from '@kbn/utils';
 import {
   ContentPack,
-  ContentPackObject,
+  ContentPackSavedObject,
   INDEX_PLACEHOLDER,
   contentPackSchema,
   findIndexPatterns,
@@ -71,8 +71,12 @@ const exportContentRoute = createServerRoute({
         (savedObject) =>
           (savedObject as SavedObjectsExportResultDetails).exportedCount === undefined
       ),
-      createMapStream((savedObject: SavedObject<DashboardAttributes>) => {
-        const patterns = findIndexPatterns(savedObject);
+      createMapStream((savedObject: ContentPackSavedObject['content']) => {
+        const contentPackObject: ContentPackSavedObject = {
+          type: 'saved_object',
+          content: savedObject,
+        };
+        const patterns = findIndexPatterns(contentPackObject);
         const replacements = patterns
           .filter((pattern) => pattern.startsWith(params.path.name))
           .reduce((acc, pattern) => {
@@ -80,19 +84,20 @@ const exportContentRoute = createServerRoute({
             return acc;
           }, {} as Record<string, string>);
 
-        return JSON.stringify({
-          type: 'saved_object',
-          content:
-            patterns.length > 0 ? replaceIndexPatterns(savedObject, replacements) : savedObject,
-        });
+        return JSON.stringify(
+          patterns.length > 0
+            ? replaceIndexPatterns(contentPackObject, replacements)
+            : contentPackObject
+        );
       }),
       createConcatStream([]),
     ]);
 
+    const contentPack: ContentPack = { name: params.path.name, content: savedObjects.join('\n') };
     return response.ok({
-      body: { content: savedObjects.join('\n') },
+      body: contentPack,
       headers: {
-        'Content-Disposition': `attachment; filename="content.json"`,
+        'Content-Disposition': `attachment; filename="${contentPack.name}.json"`,
         'Content-Type': 'application/json',
       },
     });
@@ -148,8 +153,8 @@ const importContentRoute = createServerRoute({
       .split('\n')
       .map((object) => JSON.parse(object))
       .filter((object) => object.type === 'saved_object')
-      .map((object: ContentPackObject) => {
-        const patterns = findIndexPatterns(object.content);
+      .map((object: ContentPackSavedObject) => {
+        const patterns = findIndexPatterns(object);
         const replacements = patterns
           .filter((pattern) => pattern.startsWith(INDEX_PLACEHOLDER))
           .reduce((acc, pattern) => {
@@ -157,9 +162,7 @@ const importContentRoute = createServerRoute({
             return acc;
           }, {} as Record<string, string>);
 
-        return patterns.length > 0
-          ? replaceIndexPatterns(object.content, replacements)
-          : object.content;
+        return patterns.length > 0 ? replaceIndexPatterns(object, replacements) : object.content;
       });
 
     const importer = (await context.core).savedObjects.getImporter(soClient);
