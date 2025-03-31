@@ -34,10 +34,7 @@ import { readPrivilegesRoute } from '../lib/detection_engine/routes/privileges/r
 import type { SetupPlugins, StartPlugins } from '../plugin';
 import type { ConfigType } from '../config';
 import type { ITelemetryEventsSender } from '../lib/telemetry/sender';
-import type {
-  CreateRuleOptions,
-  CreateSecurityRuleTypeWrapperProps,
-} from '../lib/detection_engine/rule_types/types';
+import type { CreateSecurityRuleTypeWrapperProps } from '../lib/detection_engine/rule_types/types';
 import type { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
 import { readAlertsIndexExistsRoute } from '../lib/detection_engine/routes/index/read_alerts_index_exists_route';
@@ -75,7 +72,6 @@ export const initRoutes = (
   ruleDataService: RuleDataPluginService,
   logger: Logger,
   ruleDataClient: IRuleDataClient | null,
-  ruleOptions: CreateRuleOptions,
   getStartServices: StartServicesAccessor<StartPlugins>,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
@@ -96,7 +92,6 @@ export const initRoutes = (
     config,
     ml,
     security,
-    ruleOptions,
     securityRuleTypeOptions,
     previewRuleDataClient,
     getStartServices,
