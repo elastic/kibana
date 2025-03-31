@@ -129,7 +129,7 @@ async function mountComponent(
     <KibanaContextProvider services={services}>
       <DiscoverMainProvider value={stateContainer}>
         <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
-          <EuiProvider>
+          <EuiProvider highContrastMode={false}>
             <DiscoverLayout {...props} />
           </EuiProvider>
         </RuntimeStateProvider>

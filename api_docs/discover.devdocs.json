@@ -2293,34 +2293,14 @@
           {
             "parentPluginId": "discover",
             "id": "def-public.DiscoverStateContainer.runtimeStateManager",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "runtimeStateManager",
             "description": [
               "\nState manager for runtime state that can't be stored in Redux"
             ],
             "signature": [
-              "{ currentDataView$: ",
-              "BehaviorSubject",
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | undefined>; adHocDataViews$: ",
-              "BehaviorSubject",
-              "<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              "[]>; }"
+              "ReactiveRuntimeState<DiscoverRuntimeState, never> & { tabs: { byId: Record<string, ReactiveTabRuntimeState>; }; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": false,
@@ -2406,7 +2386,7 @@
               "\nComplex functions to update multiple containers from UI"
             ],
             "signature": [
-              "{ fetchData: (initial?: boolean | undefined) => void; initializeAndSync: () => () => void; createAndAppendAdHocDataView: (dataViewSpec: ",
+              "{ fetchData: (initial?: boolean | undefined) => void; initializeAndSync: () => void; stopSyncing: () => void; createAndAppendAdHocDataView: (dataViewSpec: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
