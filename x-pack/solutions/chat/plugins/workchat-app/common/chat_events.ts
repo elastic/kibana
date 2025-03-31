@@ -94,6 +94,56 @@ export const conversationUpdatedEvent = ({
   };
 };
 
+/**
+ * Creates a chunk event to represent partial content from an LLM response.
+ */
+export const chunkEvent = ({
+  content_chunk,
+  message_id,
+}: {
+  content_chunk: string;
+  message_id: string;
+}): ChunkEvent => {
+  return {
+    type: 'message_chunk',
+    content_chunk,
+    message_id,
+  };
+};
+
+/**
+ * Creates a message event to represent a complete message from either a user or assistant.
+ */
+export const messageEvent = ({
+  message,
+}: {
+  message: UserMessage | AssistantMessage;
+}): MessageEvent => {
+  return {
+    type: 'message',
+    message,
+  };
+};
+
+/**
+ * Creates a tool result event to represent the result of a tool execution.
+ */
+export const toolResultEvent = ({
+  callId,
+  result,
+}: {
+  callId: string;
+  result: string;
+}): ToolResultEvent => {
+  return {
+    type: 'tool_result',
+    toolResult: {
+      callId,
+      result,
+    },
+  };
+};
+
 export const isMessageEvent = (event: ChatEvent): event is MessageEvent => {
   return event.type === 'message';
 };
@@ -104,4 +154,12 @@ export const isChunkEvent = (event: ChatEvent): event is ChunkEvent => {
 
 export const isToolResultEvent = (event: ChatEvent): event is ToolResultEvent => {
   return event.type === 'tool_result';
+};
+
+export const isConversationCreatedEvent = (event: ChatEvent): event is ConversationCreatedEvent => {
+  return event.type === 'conversation_created';
+};
+
+export const isConversationUpdatedEvent = (event: ChatEvent): event is ConversationUpdatedEvent => {
+  return event.type === 'conversation_updated';
 };
