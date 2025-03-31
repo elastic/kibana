@@ -50,7 +50,7 @@ export function TransactionDurationSummary({ duration }: TransactionDurationSumm
       </EuiText>
       <EuiSpacer size="m" />
 
-      <div>
+      <>
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
             <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -79,7 +79,7 @@ export function TransactionDurationSummary({ duration }: TransactionDurationSumm
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
-      </div>
+      </>
     </>
   );
 }

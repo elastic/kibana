@@ -50,7 +50,7 @@ export function SpanDurationSummary({ duration }: SpanDurationSummaryProps) {
       </EuiText>
       <EuiSpacer size="m" />
 
-      <div>
+      <>
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
             <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -79,7 +79,7 @@ export function SpanDurationSummary({ duration }: SpanDurationSummaryProps) {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
-      </div>
+      </>
     </>
   );
 }
