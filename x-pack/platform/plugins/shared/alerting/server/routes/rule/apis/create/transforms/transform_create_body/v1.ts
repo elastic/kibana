@@ -87,7 +87,7 @@ export const transformCreateBody = <Params extends RuleParams = never>({
   actions: CreateRuleRequestBodyV1<Params>['actions'];
   systemActions: CreateRuleRequestBodyV1<Params>['actions'];
 }): CreateRuleData<Params> => {
-  const afterTransform = {
+  return {
     name: createBody.name,
     alertTypeId: createBody.rule_type_id,
     enabled: createBody.enabled,
@@ -96,7 +96,6 @@ export const transformCreateBody = <Params extends RuleParams = never>({
     ...(createBody.throttle ? { throttle: createBody.throttle } : {}),
     params: createBody.params,
     schedule: createBody.schedule,
-    artifacts: createBody.artifacts,
     actions: transformCreateBodyActions(actions),
     systemActions: transformCreateBodySystemActions(systemActions),
     ...(createBody.notify_when ? { notifyWhen: createBody.notify_when } : {}),
@@ -106,6 +105,4 @@ export const transformCreateBody = <Params extends RuleParams = never>({
       : {}),
     ...(createBody.artifacts ? { artifacts: createBody.artifacts } : {}),
   };
-  console.log('after transform', afterTransform);
-  return afterTransform;
 };

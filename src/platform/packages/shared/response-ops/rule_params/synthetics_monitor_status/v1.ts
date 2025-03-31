@@ -63,7 +63,6 @@ export const syntheticsMonitorStatusRuleParamsSchema = schema.object(
     tags: schema.maybe(schema.arrayOf(schema.string())),
     monitorTypes: schema.maybe(schema.arrayOf(schema.string())),
     projects: schema.maybe(schema.arrayOf(schema.string())),
-    investigation_guide: schema.maybe(schema.string()),
     kqlQuery: schema.maybe(schema.string()),
   },
   {
