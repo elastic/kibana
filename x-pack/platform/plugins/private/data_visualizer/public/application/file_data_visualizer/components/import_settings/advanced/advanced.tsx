@@ -21,7 +21,7 @@ import {
 
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { CombinedField } from '../../../../common/components/combined_fields';
-import { CombinedFieldsForm } from '../../../../common/components/combined_fields';
+// import { CombinedFieldsForm } from '../../../../common/components/combined_fields';
 
 import { CreateDataViewToolTip } from '../create_data_view_tooltip';
 import { IndexSettings, IngestPipeline, Mappings } from './inputs';
@@ -142,7 +142,7 @@ export const AdvancedSettings: FC<Props> = ({
 
       <SemanticTextInfo results={results} />
 
-      <CombinedFieldsForm
+      {/* <CombinedFieldsForm
         mappingsString={mappingsString}
         pipelineString={pipelineString}
         onMappingsStringChange={onMappingsStringChange}
@@ -151,7 +151,7 @@ export const AdvancedSettings: FC<Props> = ({
         onCombinedFieldsChange={onCombinedFieldsChange}
         results={results}
         isDisabled={initialized === true}
-      />
+      /> */}
 
       <EuiSpacer size="s" />
 

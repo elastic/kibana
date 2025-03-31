@@ -49,7 +49,7 @@ enum TAB {
 interface Props {
   uploadStatus: UploadStatus;
   fileStatus: FileAnalysis;
-  pipeline: IngestPipelineType;
+  pipeline?: IngestPipelineType;
   deleteFile: () => void;
   index: number;
   setPipeline?: (pipeline: string) => void;
@@ -251,7 +251,7 @@ export const FileStatus: FC<Props> = ({
                     />
                   ) : null}
 
-                  {selectedTab === TAB.PIPELINE ? (
+                  {selectedTab === TAB.PIPELINE && pipeline !== undefined ? (
                     <IngestPipeline
                       pipeline={pipeline}
                       showTitle={false}
