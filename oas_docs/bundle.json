@@ -10877,6 +10877,21 @@
                           "agentless": {
                             "additionalProperties": false,
                             "properties": {
+                              "cloud_connectors": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "enabled": {
+                                    "type": "boolean"
+                                  },
+                                  "target_csp": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "enabled"
+                                ],
+                                "type": "object"
+                              },
                               "resources": {
                                 "additionalProperties": false,
                                 "properties": {
@@ -10891,18 +10906,6 @@
                                       }
                                     },
                                     "type": "object"
-                                  }
-                                },
-                                "type": "object"
-                              },
-                              "cloud_connectors": {
-                                "additionalProperties": false,
-                                "properties": {
-                                  "target_csp": {
-                                    "type": "string"
-                                  },
-                                  "enabled": {
-                                    "type": "boolean"
                                   }
                                 },
                                 "type": "object"
@@ -11894,6 +11897,21 @@
                   "agentless": {
                     "additionalProperties": false,
                     "properties": {
+                      "cloud_connectors": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "enabled": {
+                            "type": "boolean"
+                          },
+                          "target_csp": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "enabled"
+                        ],
+                        "type": "object"
+                      },
                       "resources": {
                         "additionalProperties": false,
                         "properties": {
@@ -12196,6 +12214,21 @@
                         "agentless": {
                           "additionalProperties": false,
                           "properties": {
+                            "cloud_connectors": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "target_csp": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "enabled"
+                              ],
+                              "type": "object"
+                            },
                             "resources": {
                               "additionalProperties": false,
                               "properties": {
@@ -13227,6 +13260,21 @@
                           "agentless": {
                             "additionalProperties": false,
                             "properties": {
+                              "cloud_connectors": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "enabled": {
+                                    "type": "boolean"
+                                  },
+                                  "target_csp": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "enabled"
+                                ],
+                                "type": "object"
+                              },
                               "resources": {
                                 "additionalProperties": false,
                                 "properties": {
@@ -14504,6 +14552,21 @@
                         "agentless": {
                           "additionalProperties": false,
                           "properties": {
+                            "cloud_connectors": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "target_csp": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "enabled"
+                              ],
+                              "type": "object"
+                            },
                             "resources": {
                               "additionalProperties": false,
                               "properties": {
@@ -15507,6 +15570,21 @@
                   "agentless": {
                     "additionalProperties": false,
                     "properties": {
+                      "cloud_connectors": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "enabled": {
+                            "type": "boolean"
+                          },
+                          "target_csp": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "enabled"
+                        ],
+                        "type": "object"
+                      },
                       "resources": {
                         "additionalProperties": false,
                         "properties": {
@@ -15812,6 +15890,21 @@
                         "agentless": {
                           "additionalProperties": false,
                           "properties": {
+                            "cloud_connectors": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "target_csp": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "enabled"
+                              ],
+                              "type": "object"
+                            },
                             "resources": {
                               "additionalProperties": false,
                               "properties": {
@@ -16843,6 +16936,21 @@
                         "agentless": {
                           "additionalProperties": false,
                           "properties": {
+                            "cloud_connectors": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "target_csp": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "enabled"
+                              ],
+                              "type": "object"
+                            },
                             "resources": {
                               "additionalProperties": false,
                               "properties": {
