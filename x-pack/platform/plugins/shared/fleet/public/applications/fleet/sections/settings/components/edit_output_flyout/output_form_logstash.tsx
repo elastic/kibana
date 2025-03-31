@@ -76,15 +76,31 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
         </>
       )}
       <EuiSpacer size="m" />
-      <EuiSwitch label="Enable SSL" {...inputs.logstashEnableSSLInput.props} />
+      <EuiSwitch
+        label={i18n.translate('xpack.fleet.settings.editOutputFlyout.logstashSSLSwitchLabel', {
+          defaultMessage: 'Enable SSL',
+        })}
+        {...inputs.logstashEnableSSLInput.props}
+      />
       {!inputs.logstashEnableSSLInput.value && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut title="Proceed with caution!" color="warning" iconType="warning">
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.logstashSSLSwitchCalloutTitle',
+              { defaultMessage: 'Proceed with caution!' }
+            )}
+            color="warning"
+            iconType="warning"
+          >
             <p>
-              Using SSL/TLS ensures that your Elastic Agents send encrypted data to trusted Logstash
-              servers, and that your Logstash servers receive data from trusted Elastic Agent
-              clients.
+              {i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.logstashSSLSwitchCalloutMessage',
+                {
+                  defaultMessage:
+                    'Using SSL/TLS ensures that your Elastic Agents send encrypted data to trusted Logstash servers, and that your Logstash servers receive data from trusted Elastic Agent clients.',
+                }
+              )}
             </p>
           </EuiCallOut>
         </>
