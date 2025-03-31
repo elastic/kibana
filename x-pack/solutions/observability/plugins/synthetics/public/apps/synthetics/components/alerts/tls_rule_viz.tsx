@@ -6,15 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
-import { inspectStatusRuleAction } from '../../state/alert_rules';
-import { StatusRuleParamsProps } from './status_rule_ui';
+import { inspectTLSRuleAction } from '../../state/alert_rules';
+import { TLSRuleParamsProps } from './tls_rule_ui';
 import { RuleViz } from './rule_viz';
 
-export const StatusRuleViz = ({
-  ruleParams,
-}: {
-  ruleParams: StatusRuleParamsProps['ruleParams'];
-}) => {
-  const dispatchedAction = useMemo(() => inspectStatusRuleAction.get(ruleParams), [ruleParams]);
+export const TLSRuleViz = ({ ruleParams }: { ruleParams: TLSRuleParamsProps['ruleParams'] }) => {
+  const dispatchedAction = useMemo(() => inspectTLSRuleAction.get(ruleParams), [ruleParams]);
   return <RuleViz dispatchedAction={dispatchedAction} />;
 };
