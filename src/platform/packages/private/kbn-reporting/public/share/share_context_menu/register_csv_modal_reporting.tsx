@@ -18,7 +18,7 @@ import { LocatorParams } from '@kbn/reporting-common/types';
 import {
   getSearchCsvJobParams,
   CsvSearchModeParams,
-} from '@kbn/reporting-common/get_search_csv_job_params';
+} from '@kbn/reporting-csv-share-panel/get_search_csv_job_params';
 import type { ExportModalShareOpts } from '.';
 import { checkLicense } from '../..';
 

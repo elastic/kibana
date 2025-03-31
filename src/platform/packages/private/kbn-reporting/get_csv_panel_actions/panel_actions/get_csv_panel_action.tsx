@@ -48,11 +48,8 @@ import type { ClientConfigType } from '@kbn/reporting-public/types';
 import { checkLicense } from '@kbn/reporting-public/license_check';
 import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
 import { LocatorParams } from '@kbn/reporting-common/types';
-import {
-  getSearchCsvJobParams,
-  CsvSearchModeParams,
-} from '@kbn/reporting-common/get_search_csv_job_params';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { getSearchCsvJobParams, CsvSearchModeParams } from '../get_search_csv_job_params';
 import { getI18nStrings } from './strings';
 
 export interface PanelActionDependencies {

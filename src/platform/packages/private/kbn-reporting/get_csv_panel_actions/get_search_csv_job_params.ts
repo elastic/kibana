@@ -15,7 +15,7 @@ import {
 } from '@kbn/reporting-export-types-csv-common';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { ReportingAPIClient } from '@kbn/reporting-public';
-import type { BaseParams, LocatorParams } from './types';
+import { LocatorParams, BaseParams } from '@kbn/reporting-common/types';
 
 export type CsvSearchModeParams =
   | {
