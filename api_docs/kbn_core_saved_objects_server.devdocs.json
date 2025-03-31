@@ -4947,6 +4947,18 @@
                 "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/server/sample_data/logs.ts"
               },
@@ -4957,18 +4969,6 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/server/sample_data/flights.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
                 "plugin": "osquery",
@@ -9053,28 +9053,28 @@
                 "path": "x-pack/platform/plugins/private/canvas/server/saved_objects/workpad_template.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/server/saved_objects/graph_workspace.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
               },
               {
                 "plugin": "lens",
@@ -9856,12 +9856,12 @@
                 "path": "x-pack/platform/plugins/private/canvas/server/saved_objects/custom_element.ts"
               },
               {
-                "plugin": "graph",
-                "path": "x-pack/platform/plugins/private/graph/server/saved_objects/graph_workspace.ts"
-              },
-              {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/saved_objects/tag.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/platform/plugins/private/graph/server/saved_objects/graph_workspace.ts"
               },
               {
                 "plugin": "lens",
