@@ -13,6 +13,8 @@ navigation_title: "Known issues"
 
 In Upgrade Assistant, follower indices may be identified to be reindexed. However, this is not a valid migration path and will result in an error. Instead, the recommendation is to mark as read-only and unfollow the leader index. Cross-cluster replication on that index will not be possible.
 
+Find additional information in the [upgrade documentation](docs-content://deploy-manage/upgrade/prepare-to-upgrade.md#upgrade-ccr-data-streams).
+
 ::::
 
 ::::{dropdown} Unexpected deprecation warnings for APM indices during upgrade
