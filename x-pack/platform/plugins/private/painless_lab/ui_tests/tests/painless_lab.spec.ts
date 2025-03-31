@@ -45,14 +45,15 @@ test.describe('Painless Lab', { tag: tags.ESS_ONLY }, () => {
   });
 
   test('validate painless lab editor and request', async ({ pageObjects }) => {
-    pageObjects.painlessLab.setCodeEditorValue(TEST_SCRIPT);
+    await pageObjects.painlessLab.setCodeEditorValue(TEST_SCRIPT);
     await expect(pageObjects.painlessLab.outputValueElement).toContainText(TEST_SCRIPT_RESULT);
 
-    pageObjects.painlessLab.clickShowApiRequest();
+    await pageObjects.painlessLab.clickShowApiRequest();
     await expect(pageObjects.painlessLab.requestFlyoutHeader).toBeVisible();
 
     expect(await pageObjects.painlessLab.getFlyoutRequestBody()).toBe(TEST_SCRIPT_REQUEST);
 
+    await pageObjects.painlessLab.clickFlyoutResponseButton();
     expect(await pageObjects.painlessLab.getFlyoutResponseBody()).toBe(
       UPDATED_TEST_SCRIPT_RESPONSE
     );

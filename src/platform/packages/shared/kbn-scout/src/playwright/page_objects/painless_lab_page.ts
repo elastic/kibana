@@ -9,7 +9,6 @@
 
 import { ScoutPage } from '..';
 
-const DEFAULT_LOADING_TIMEOUT = 10_000;
 
 export class PainlessLab {
   public outputValueElement: Locator;
@@ -21,12 +20,12 @@ export class PainlessLab {
   }
 
   async goto() {
-    this.page.gotoApp('dev_tools', { hash: 'painless_lab' });
+    return this.page.gotoApp('dev_tools', { hash: 'painless_lab' });
   }
 
   async waitForRenderComplete() {
     // wait for page to be rendered
-    await this.page.testSubj.locator('painless_lab').waitFor({ timeout: DEFAULT_LOADING_TIMEOUT });
+    await this.page.testSubj.locator('painless_lab').waitFor({ state: 'visible' });
   }
 
   async setCodeEditorValue(value: string, nthIndex?: number) {
@@ -55,10 +54,13 @@ export class PainlessLab {
     return this.page.testSubj.locator('painlessLabFlyoutRequest').innerText();
   }
 
-  async getFlyoutResponseBody() {
+  async clickFlyoutResponseButton() {
     this.page.locator('#response').click();
+  }
+
+  async getFlyoutResponseBody() {
     const flyoutResponse = this.page.testSubj.locator('painlessLabFlyoutResponse');
-    flyoutResponse.isVisible();
+    await flyoutResponse..waitFor({ state: 'visible' })
     return flyoutResponse.innerText();
   }
 }
