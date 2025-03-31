@@ -46,6 +46,8 @@ export async function getRule<Params extends RuleParams = never>(
     id,
   });
 
+  console.log('saved object result', result);
+
   try {
     await context.authorization.ensureAuthorized({
       ruleTypeId: result.attributes.alertTypeId,

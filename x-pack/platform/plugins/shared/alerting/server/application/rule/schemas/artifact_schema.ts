@@ -19,5 +19,5 @@ export const investigationGuideSchema = schema.object({
 
 export const artifactSchema = schema.object({
   dashboards: schema.maybe(dashboardSchema),
-  investigationGuide: schema.maybe(investigationGuideSchema),
+  investigation_guide: schema.maybe(investigationGuideSchema),
 });
