@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { isEmpty } from 'lodash';
-import { omit } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { ruleExecutionStatusValues } from '../constants';
@@ -13,7 +12,7 @@ import { getRuleSnoozeEndTime } from '../../../lib';
 import type { RuleDomain, Monitoring, RuleParams } from '../types';
 import type { PartialRule, RawRule, RawRuleExecutionStatus, SanitizedRule } from '../../../types';
 import type { UntypedNormalizedRuleType } from '../../../rule_type_registry';
-import { injectReferencesIntoParams } from '../../../rules_client/common';
+import { injectReferencesIntoParams, injectReferencesIntoArtifacts } from '../../../rules_client/common';
 import { getActiveScheduledSnoozes } from '../../../lib/is_rule_snoozed';
 import {
   transformRawActionsToDomainActions,
@@ -170,31 +169,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
       omitGeneratedValues,
     });
 
-  // TODO: create a transformRawArtifactsToDomainArtifacts file and export injectReferencesIntoArtifacts
-
-  const injectReferencesIntoArtifacts = (
-    artifacts: RawRule['artifacts'],
-    references: SavedObjectReference[]
-  ) => {
-    if (!artifacts) {
-      return { artifacts: { dashboards: [] } };
-    }
-    return {
-      ...artifacts,
-      dashboards: artifacts.dashboards?.map((dashboard) => {  
-        const reference = references.find((ref) => ref.name === dashboard.refId);
-        if (!reference) {
-          throw new Error(`Artifact reference "${dashboard.refId}" not found in rule id: ${id}`);
-        }
-        return {
-          ...omit(dashboard, 'refId'),
-          id: reference.id,
-        };
-      })
-    };
-  }
-
-  const artifactsWithInjectedRefs = esRule.artifacts ? injectReferencesIntoArtifacts(esRule.artifacts, references || []) : null; // TODO: don't return null
+  const artifactsWithInjectedRefs = injectReferencesIntoArtifacts(id, esRule.artifacts, references || []);
   const params = injectReferencesIntoParams<Params, RuleParams>(
     id,
     ruleType,

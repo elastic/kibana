@@ -38,9 +38,7 @@ export async function extractReferences<
   const denormalizeArtifacts = (ruleArtifacts: Artifact): { artifacts: DenormalizedArtifacts; references: SavedObjectReference[] } => {
     const references: SavedObjectReference[] = [];
     const artifacts: DenormalizedArtifacts = {
-      artifacts: { 
-        dashboards: []
-      },
+      dashboards: []
     };
 
     if (ruleArtifacts.dashboards) {
@@ -52,10 +50,10 @@ export async function extractReferences<
           type: 'dashboard',
         };
         references.push(dashboardRef);
-        if (!artifacts.artifacts.dashboards) {
-          artifacts.artifacts.dashboards = [];
+        if (!artifacts.dashboards) {
+          artifacts.dashboards = [];
         }
-        artifacts.artifacts.dashboards.push({
+        artifacts.dashboards.push({
           refId: refName,
         });
       });
@@ -68,7 +66,7 @@ export async function extractReferences<
   };
   const { artifacts, references: artifactReferences } = ruleArtifacts
     ? denormalizeArtifacts(ruleArtifacts)
-    : { artifacts: { artifacts: { dashboards: [] } }, references: [] };
+    : { artifacts: { dashboards: [] }, references: [] };
 
   // Extracts any references using configured reference extractor if available
   const extractedRefsAndParams = ruleType?.useSavedObjectReferences?.extractReferences

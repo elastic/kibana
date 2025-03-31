@@ -191,7 +191,5 @@ interface DashboardItem {
 }
 
 export interface DenormalizedArtifacts {
-  artifacts: {
-    dashboards?: DashboardItem[];
-  };
+  dashboards?: DashboardItem[];
 }
