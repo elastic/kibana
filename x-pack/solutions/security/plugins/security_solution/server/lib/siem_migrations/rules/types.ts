@@ -22,22 +22,14 @@ import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_cl
 
 export type Stored<T extends object> = T & { id: string };
 
-export type WithCommonAttrs<T extends object> = T & {
+export interface SiemMigration {
+  id: string;
   /** The moment the migration was created */
   created_at: string;
   /** The profile id of the user who created the migration */
   created_by: string;
-  /** The moment the migration was last updated */
-  updated_at: string;
-  /** The profile id of the user who last updated the migration */
-  updated_by: string;
-};
-
-export type MigrationMetadata = WithCommonAttrs<{
-  id: string;
-}>;
-
-export type StoredMigrationMetadata = Stored<MigrationMetadata>;
+}
+export type StoredSiemMigration = Stored<SiemMigration>;
 
 export type StoredRuleMigration = Stored<RuleMigration>;
 export type StoredRuleMigrationResource = Stored<RuleMigrationResource>;

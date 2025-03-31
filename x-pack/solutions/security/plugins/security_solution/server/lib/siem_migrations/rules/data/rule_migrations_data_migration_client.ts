@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import type { StoredMigrationMetadata } from '../types';
+import type { StoredSiemMigration } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 
 export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseClient {
@@ -24,11 +24,15 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
         document: {
           created_by: profileUid,
           created_at: createdAt,
-          updated_at: createdAt,
-          updated_by: profileUid,
         },
+        op_type: 'create',
       })
       .catch((error) => {
+        if (error.statusCode === 409) {
+          const msg = `Migration ${migrationId} already exists.`;
+          this.logger.error(msg);
+          throw new Error(msg);
+        }
         this.logger.error(`Error creating migration ${migrationId}: ${error}`);
         throw error;
       });
@@ -36,11 +40,11 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
     return migrationId;
   }
 
-  async get({ id }: { id: string }): Promise<StoredMigrationMetadata> {
+  async get({ id }: { id: string }): Promise<StoredSiemMigration> {
     this.logger.debug(`Getting migration ${id}.`);
     const index = await this.getIndexName();
     const response = await this.esClient
-      .get<StoredMigrationMetadata>({
+      .get<StoredSiemMigration>({
         index,
         id,
         _source: true,
@@ -52,7 +56,7 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
 
     if (!response._source) {
       throw new Error(
-        `Migration document ${id} has no source. This is an unknown error. Please create migration again. If the error persists, contact support.`
+        `Migration document ${id} has no source. This is an unknown error. Please create a new migration.`
       );
     }
 

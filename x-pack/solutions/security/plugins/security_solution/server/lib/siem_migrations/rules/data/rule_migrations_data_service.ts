@@ -47,6 +47,10 @@ export class RuleMigrationsDataService {
 
   constructor(private logger: Logger, private kibanaVersion: string) {
     this.adapters = {
+      migrations: this.createIndexPatternAdapter({
+        adapterId: 'migrations',
+        fieldMap: migrationsFieldMaps,
+      }),
       rules: this.createIndexPatternAdapter({
         adapterId: 'rules',
         fieldMap: ruleMigrationsFieldMap,
@@ -62,10 +66,6 @@ export class RuleMigrationsDataService {
       prebuiltrules: this.createIndexAdapter({
         adapterId: 'prebuiltrules',
         fieldMap: prebuiltRulesFieldMap,
-      }),
-      migrations: this.createIndexPatternAdapter({
-        adapterId: 'migrations',
-        fieldMap: migrationsFieldMaps,
       }),
     };
   }

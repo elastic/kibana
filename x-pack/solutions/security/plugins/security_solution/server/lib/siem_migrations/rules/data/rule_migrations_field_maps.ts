@@ -10,11 +10,7 @@ import type {
   RuleMigration,
   RuleMigrationResource,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import type {
-  MigrationMetadata,
-  RuleMigrationIntegration,
-  RuleMigrationPrebuiltRule,
-} from '../types';
+import type { SiemMigration, RuleMigrationIntegration, RuleMigrationPrebuiltRule } from '../types';
 
 export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigration, 'id'>>> = {
   '@timestamp': { type: 'date', required: false },
@@ -81,7 +77,7 @@ export const prebuiltRulesFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigrationPre
   mitre_attack_ids: { type: 'keyword', array: true, required: false },
 };
 
-export const migrationsFieldMaps: FieldMap<SchemaFieldMapKeys<MigrationMetadata>> = {
+export const migrationsFieldMaps: FieldMap<SchemaFieldMapKeys<SiemMigration>> = {
   id: { type: 'keyword', required: true },
   created_at: { type: 'date', required: true },
   created_by: { type: 'keyword', required: true },
