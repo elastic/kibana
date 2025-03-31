@@ -1289,7 +1289,7 @@
     "usng.js": "^0.4.5",
     "utility-types": "^3.10.0",
     "uuid": "10.0.0",
-    "vega": "^5.24.0",
+    "vega": "^5.33.0",
     "vega-interpreter": "^1.0.4",
     "vega-lite": "^5.5.0",
     "vega-schema-url-parser": "^2.2.0",
