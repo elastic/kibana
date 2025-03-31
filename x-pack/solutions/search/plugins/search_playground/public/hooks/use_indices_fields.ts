@@ -14,23 +14,16 @@ const initialData = {};
 export const useIndicesFields = (indices: string[] = []) => {
   const { services } = useKibana();
 
-  const { data, isLoading, isFetching } = useQuery<IndicesQuerySourceFields>({
+  const { data, isLoading, isFetching, isFetched } = useQuery<IndicesQuerySourceFields>({
     enabled: indices.length > 0,
     queryKey: ['fields', indices.toString()],
     initialData,
-    queryFn: async () => {
-      const response = await services.http.post<IndicesQuerySourceFields>(
-        APIRoutes.POST_QUERY_SOURCE_FIELDS,
-        {
-          body: JSON.stringify({
-            indices,
-          }),
-        }
-      );
-
-      return response;
-    },
+    queryFn: () =>
+      services.http.post<IndicesQuerySourceFields>(APIRoutes.POST_QUERY_SOURCE_FIELDS, {
+        body: JSON.stringify({
+          indices,
+        }),
+      }),
   });
-
-  return { fields: data, isLoading: isLoading || isFetching };
+  return { fields: data, isFetched, isLoading: isLoading || isFetching };
 };
