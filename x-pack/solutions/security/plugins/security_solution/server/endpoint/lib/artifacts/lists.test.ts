@@ -18,14 +18,7 @@ import {
 } from './lists';
 import type { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
 import { ArtifactConstants } from './common';
-import {
-  ENDPOINT_ARTIFACT_LISTS,
-  ENDPOINT_BLOCKLISTS_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-  ENDPOINT_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { FILTER_PROCESS_DESCENDANTS_TAG } from '../../../../common/endpoint/service/artifacts/constants';
 import type { ExperimentalFeatures } from '../../../../common';
 import { allowedExperimentalValues } from '../../../../common';
@@ -783,7 +776,7 @@ describe('artifacts lists', () => {
           const resp = await getFilteredEndpointExceptionListRaw({
             elClient: mockExceptionClient,
             filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
-            listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+            listId: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
           });
           const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
           expect(translated).toEqual({
@@ -821,7 +814,7 @@ describe('artifacts lists', () => {
           const resp = await getFilteredEndpointExceptionListRaw({
             elClient: mockExceptionClient,
             filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
-            listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+            listId: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
           });
           const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
           expect(translated).toEqual({
@@ -894,14 +887,14 @@ describe('artifacts lists', () => {
       const resp = await getAllItemsFromEndpointExceptionList({
         elClient: mockExceptionClient,
         os: 'macos',
-        listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
       });
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
 
       expect(translated).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
       expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
-        listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
         namespaceType: 'agnostic',
         filter: 'exception-list-agnostic.attributes.os_types:"macos"',
         perPage: 1000,
@@ -919,14 +912,14 @@ describe('artifacts lists', () => {
       const resp = await getAllItemsFromEndpointExceptionList({
         elClient: mockExceptionClient,
         os: 'macos',
-        listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
       });
 
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
       expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
-        listId: ENDPOINT_EVENT_FILTERS_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
         namespaceType: 'agnostic',
         filter: 'exception-list-agnostic.attributes.os_types:"macos"',
         perPage: 1000,
@@ -944,14 +937,14 @@ describe('artifacts lists', () => {
       const resp = await getAllItemsFromEndpointExceptionList({
         elClient: mockExceptionClient,
         os: 'macos',
-        listId: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
       });
 
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
       expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
-        listId: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
         namespaceType: 'agnostic',
         filter: 'exception-list-agnostic.attributes.os_types:"macos"',
         perPage: 1000,
@@ -969,14 +962,14 @@ describe('artifacts lists', () => {
       const resp = await getAllItemsFromEndpointExceptionList({
         elClient: mockExceptionClient,
         os: 'macos',
-        listId: ENDPOINT_BLOCKLISTS_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
       });
 
       const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
       expect(translated).toEqual(TEST_EXCEPTION_LIST_ITEM);
 
       expect(mockExceptionClient.findExceptionListItem).toHaveBeenCalledWith({
-        listId: ENDPOINT_BLOCKLISTS_LIST_ID,
+        listId: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
         namespaceType: 'agnostic',
         filter: 'exception-list-agnostic.attributes.os_types:"macos"',
         perPage: 1000,
