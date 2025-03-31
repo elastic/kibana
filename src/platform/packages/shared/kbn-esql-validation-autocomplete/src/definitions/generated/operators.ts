@@ -27,7 +27,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type FunctionDefinition, FunctionDefinitionTypes } from '../types';
+import { type FunctionDefinition, FunctionDefinitionTypes, Location } from '../types';
 
 import { isNumericType } from '../../shared/esql_types';
 
@@ -369,8 +369,14 @@ const addDefinition: FunctionDefinition = {
       returnType: 'date',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: undefined,
   examples: [],
 };
@@ -537,8 +543,14 @@ const divDefinition: FunctionDefinition = {
       returnType: 'unsigned_long',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: (fnDef) => {
     const [left, right] = fnDef.args;
     const messages = [];
@@ -1052,8 +1064,14 @@ const equalsDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: undefined,
   examples: [],
 };
@@ -1426,8 +1444,14 @@ const greaterThanDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: undefined,
   examples: [],
 };
@@ -1803,8 +1827,14 @@ const greaterThanOrEqualDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: undefined,
   examples: [],
 };
@@ -2045,8 +2075,7 @@ const inDefinition: FunctionDefinition = {
       minParams: 2,
     },
   ],
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  supportedOptions: undefined,
+  locationsAvailable: [Location.EVAL, Location.WHERE, Location.SORT, Location.ROW],
   validate: undefined,
   examples: ['ROW a = 1, b = 4, c = 3\n| WHERE c-a IN (3, b / 2, a)'],
 };
@@ -2419,8 +2448,14 @@ const lessThanDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: undefined,
   examples: [],
 };
@@ -2740,8 +2775,14 @@ const lessThanOrEqualDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: undefined,
   examples: [],
 };
@@ -2822,8 +2863,7 @@ const likeDefinition: FunctionDefinition = {
       minParams: 2,
     },
   ],
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  supportedOptions: undefined,
+  locationsAvailable: [Location.EVAL, Location.WHERE, Location.SORT, Location.ROW],
   validate: undefined,
   examples: ['FROM employees\n| WHERE first_name LIKE """?b*"""\n| KEEP first_name, last_name'],
 };
@@ -3333,8 +3373,7 @@ const matchOperatorDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['where'],
-  supportedOptions: [],
+  locationsAvailable: [Location.WHERE],
   validate: undefined,
   examples: [
     'FROM books \n| WHERE MATCH(author, "Faulkner")\n| KEEP book_no, author \n| SORT book_no \n| LIMIT 5',
@@ -3503,8 +3542,14 @@ const modDefinition: FunctionDefinition = {
       returnType: 'unsigned_long',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: (fnDef) => {
     const [left, right] = fnDef.args;
     const messages = [];
@@ -3696,8 +3741,14 @@ const mulDefinition: FunctionDefinition = {
       returnType: 'unsigned_long',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: undefined,
   examples: [],
 };
@@ -3763,8 +3814,348 @@ const negDefinition: FunctionDefinition = {
       returnType: 'time_duration',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics'],
-  supportedOptions: undefined,
+  locationsAvailable: [Location.STATS],
+  validate: undefined,
+  examples: [],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const notInDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.OPERATOR,
+  name: 'not_in',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.not_in', {
+    defaultMessage:
+      'The `NOT IN` operator allows testing whether a field or expression does *not* equal any element in a list of literals, fields or expressions.',
+  }),
+  ignoreAsSuggestion: true,
+
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'boolean',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'boolean[]',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'cartesian_point',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'cartesian_point[]',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'cartesian_shape',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'cartesian_shape[]',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'double[]',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'geo_point[]',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'geo_shape',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'geo_shape[]',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'integer[]',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'ip',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'ip[]',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'keyword[]',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'text[]',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'long[]',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'keyword[]',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'text[]',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'version',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'version[]',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+  ],
+  locationsAvailable: [Location.EVAL, Location.WHERE, Location.SORT, Location.ROW],
+  validate: undefined,
+  examples: [],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const notLikeDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.OPERATOR,
+  name: 'not_like',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.not_like', {
+    defaultMessage:
+      'Use `LIKE` to filter data based on string patterns using wildcards. `LIKE`\nusually acts on a field placed on the left-hand side of the operator, but it can\nalso act on a constant (literal) expression. The right-hand side of the operator\nrepresents the pattern.\n\nThe following wildcard characters are supported:\n\n* `*` matches zero or more characters.\n* `?` matches one character.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'str',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'pattern',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'str',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'pattern',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+  ],
+  locationsAvailable: [Location.EVAL, Location.WHERE, Location.SORT, Location.ROW],
+  validate: undefined,
+  examples: [],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const notRlikeDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.OPERATOR,
+  name: 'not_rlike',
+  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.not_rlike', {
+    defaultMessage:
+      'Use `RLIKE` to filter data based on string patterns using using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
+  }),
+  preview: false,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'str',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'pattern',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+    {
+      params: [
+        {
+          name: 'str',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'pattern',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+      minParams: 2,
+    },
+  ],
+  locationsAvailable: [Location.EVAL, Location.WHERE, Location.SORT, Location.ROW],
   validate: undefined,
   examples: [],
 };
@@ -4253,352 +4644,14 @@ const notEqualsDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
-  validate: undefined,
-  examples: [],
-};
-
-// Do not edit this manually... generated by scripts/generate_function_definitions.ts
-const notInDefinition: FunctionDefinition = {
-  type: FunctionDefinitionTypes.OPERATOR,
-  name: 'not_in',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.not_in', {
-    defaultMessage:
-      'The `NOT IN` operator allows testing whether a field or expression does *not* equal any element in a list of literals, fields or expressions.',
-  }),
-  ignoreAsSuggestion: true,
-
-  preview: false,
-  alias: undefined,
-  signatures: [
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'boolean',
-          optional: false,
-        },
-        {
-          name: 'right',
-          type: 'boolean[]',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'cartesian_point',
-          optional: false,
-        },
-        {
-          name: 'right',
-          type: 'cartesian_point[]',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'cartesian_shape',
-          optional: false,
-        },
-        {
-          name: 'right',
-          type: 'cartesian_shape[]',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'double',
-          optional: false,
-        },
-        {
-          name: 'right',
-          type: 'double[]',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'geo_point',
-          optional: false,
-        },
-        {
-          name: 'right',
-          type: 'geo_point[]',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'geo_shape',
-          optional: false,
-        },
-        {
-          name: 'right',
-          type: 'geo_shape[]',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'right',
-          type: 'integer[]',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'ip',
-          optional: false,
-        },
-        {
-          name: 'right',
-          type: 'ip[]',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'right',
-          type: 'keyword[]',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'right',
-          type: 'text[]',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'right',
-          type: 'long[]',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'right',
-          type: 'keyword[]',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'right',
-          type: 'text[]',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'left',
-          type: 'version',
-          optional: false,
-        },
-        {
-          name: 'right',
-          type: 'version[]',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
   ],
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  supportedOptions: undefined,
-  validate: undefined,
-  examples: [],
-};
-
-// Do not edit this manually... generated by scripts/generate_function_definitions.ts
-const notLikeDefinition: FunctionDefinition = {
-  type: FunctionDefinitionTypes.OPERATOR,
-  name: 'not_like',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.not_like', {
-    defaultMessage:
-      'Use `NOT LIKE` to filter data based on string patterns using wildcards. `NOT LIKE`\nusually acts on a field placed on the left-hand side of the operator, but it can\nalso act on a constant (literal) expression. The right-hand side of the operator\nrepresents the pattern.\n\nThe following wildcard characters are supported:\n\n* `*` matches zero or more characters.\n* `?` matches one character.',
-  }),
-  preview: false,
-  alias: undefined,
-  signatures: [
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'pattern',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'pattern',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-  ],
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  supportedOptions: undefined,
-  validate: undefined,
-  examples: [],
-};
-
-// Do not edit this manually... generated by scripts/generate_function_definitions.ts
-const notRlikeDefinition: FunctionDefinition = {
-  type: FunctionDefinitionTypes.OPERATOR,
-  name: 'not_rlike',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.not_rlike', {
-    defaultMessage:
-      'Use `NOT RLIKE` to filter data based on string patterns using using\nregular expressions. `NOT RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
-  }),
-  preview: false,
-  alias: undefined,
-  signatures: [
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'keyword',
-          optional: false,
-        },
-        {
-          name: 'pattern',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-    {
-      params: [
-        {
-          name: 'str',
-          type: 'text',
-          optional: false,
-        },
-        {
-          name: 'pattern',
-          type: 'keyword',
-          optional: false,
-        },
-      ],
-      returnType: 'boolean',
-      minParams: 2,
-    },
-  ],
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  supportedOptions: undefined,
   validate: undefined,
   examples: [],
 };
@@ -4679,8 +4732,7 @@ const rlikeDefinition: FunctionDefinition = {
       minParams: 2,
     },
   ],
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  supportedOptions: undefined,
+  locationsAvailable: [Location.EVAL, Location.WHERE, Location.SORT, Location.ROW],
   validate: undefined,
   examples: [
     'FROM employees\n| WHERE first_name RLIKE """.leja.*"""\n| KEEP first_name, last_name',
@@ -4995,8 +5047,14 @@ const subDefinition: FunctionDefinition = {
       returnType: 'date',
     },
   ],
-  supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
-  supportedOptions: ['by'],
+  locationsAvailable: [
+    Location.STATS,
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_BY,
+  ],
   validate: undefined,
   examples: [],
 };

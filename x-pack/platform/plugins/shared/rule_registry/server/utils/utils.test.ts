@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { errorAggregator } from './utils';
-import { BulkResponseErrorAggregation } from './utils';
+import type { BulkResponseErrorAggregation } from './utils';
 
 const sampleBulkErrorItem = (
   {

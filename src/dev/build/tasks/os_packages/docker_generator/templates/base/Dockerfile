@@ -12,7 +12,7 @@
 FROM {{{baseImageName}}} AS builder
 
 {{#ubi}}
-RUN microdnf install -y findutils tar gzip{{#fips}} perl make gcc{{/fips}}
+RUN microdnf install -y findutils tar gzip
 {{/ubi}}
 {{#ubuntu}}
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl
@@ -38,29 +38,6 @@ RUN tar \
   --strip-components=1 \
   -zxf /tmp/kibana.tar.gz
 
-{{#fips}}
-# OpenSSL requires specific versions that are FIPS certified.
-#
-# See:
-# https://github.com/openssl/openssl/blob/openssl-3.0/README-FIPS.md
-# https://www.openssl.org/docs/man3.0/man7/fips_module.html
-RUN set -e ; \
- OPENSSL_VERSION='3.0.8'; \
- OPENSSL_PATH=/usr/share/kibana/openssl ; \
- mkdir "${OPENSSL_PATH}"; \
- curl --retry 8 -S -L -O "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" ; \
- curl --retry 8 -S -L -O "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz.sha256" ; \
- echo "$(cat openssl-${OPENSSL_VERSION}.tar.gz.sha256) openssl-${OPENSSL_VERSION}.tar.gz" | sha256sum -c ; \
- tar -zxf "openssl-${OPENSSL_VERSION}.tar.gz" ; \
- rm -rf openssl-${OPENSSL_VERSION}.tar* ; \
- cd "/usr/share/kibana/openssl-${OPENSSL_VERSION}" ; \
- ./Configure --prefix="${OPENSSL_PATH}" --openssldir="${OPENSSL_PATH}/ssl" --libdir="${OPENSSL_PATH}/lib" enable-fips; \
- make -j $(nproc) > /dev/null ; \
- make install > /dev/null ; \
- rm -rf  "/usr/share/kibana/openssl-${OPENSSL_VERSION}" ; \
- chown -R 1000:0 "${OPENSSL_PATH}";
-
-{{/fips}}
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
 # OpenShift does this, for example.
@@ -149,16 +126,7 @@ COPY --from=builder --chown=0:0 /usr/share/fonts/local/NotoSansCJK-Regular.ttc /
 RUN fc-cache -v
 {{/serverless}}
 WORKDIR /usr/share/kibana
-{{#fips}}
 
-# Enable FIPS for Kibana only. In the future we can override OS wide with ENV OPENSSL_CONF
-RUN /bin/echo -e '\n--enable-fips' >> config/node.options
-RUN echo '--openssl-config=/usr/share/kibana/config/nodejs.cnf' >> config/node.options
-COPY --chown=1000:0 openssl/nodejs.cnf "/usr/share/kibana/config/nodejs.cnf"
-ENV OPENSSL_MODULES=/usr/share/kibana/openssl/lib/ossl-modules
-ENV XPACK_SECURITY_FIPSMODE_ENABLED=true
-
-{{/fips}}
 RUN ln -s /usr/share/kibana /opt/kibana
 
 {{! Please notify @elastic/kibana-security if you want to remove or change this environment variable. }}
@@ -174,6 +142,15 @@ ENV PROFILER_SIGNAL=SIGUSR1
 {{^opensslLegacyProvider}}
 RUN sed 's/\(--openssl-legacy-provider\)/#\1/' -i config/node.options
 {{/opensslLegacyProvider}}
+{{#fips}}
+
+RUN /bin/echo -e '\n--enable-fips' >> config/node.options
+COPY --chown=1000:0 openssl/nodejs.cnf "/usr/share/kibana/config/nodejs.cnf"
+ENV OPENSSL_CONF=/usr/share/kibana/config/nodejs.cnf
+ENV OPENSSL_MODULES=/usr/lib64/ossl-modules
+RUN /bin/echo -e '\nxpack.security.fipsMode.enabled: true' >> config/kibana.yml
+
+{{/fips}}
 
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.
