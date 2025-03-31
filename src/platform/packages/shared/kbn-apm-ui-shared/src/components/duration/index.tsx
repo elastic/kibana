@@ -28,7 +28,7 @@ export function Duration({ duration, parent }: DurationProps) {
   return (
     <EuiText size="xs">
       {asDuration(duration)} &nbsp;
-      {parent?.loading && <EuiLoadingSpinner />}
+      {parent?.loading && <EuiLoadingSpinner data-test-subj="DurationLoadingSpinner" />}
       {!parent?.loading && parent?.duration && (
         <PercentOfParent
           duration={duration}
