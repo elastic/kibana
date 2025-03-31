@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -124,11 +124,9 @@ describe('publishing subject', () => {
           subject1,
         );
 
-        useMemo(() => {
-          // synchronously emit new values for observables
-          // this will cause test to fail if subscriptions are not setup synchronously
-          incrementAll();
-        }, []);
+        // synchronously emit new values for observables
+        // this will cause test to fail if subscriptions are not setup synchronously
+        incrementAll();
 
         return (
           <>
@@ -139,6 +137,8 @@ describe('publishing subject', () => {
       render(<Component />);
       await waitFor(() => {
         expect(
+          // If there is a race condition, then 'value1: 0' will be rendered
+          // because value1 will have the original value '0' instead of latest value
           screen.getByText('value1: 1')
         ).toBeInTheDocument();
       });
