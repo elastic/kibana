@@ -15,10 +15,7 @@ import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { ShareContext, ShareMenuItemV2 } from '@kbn/share-plugin/public';
 import { LocatorParams } from '@kbn/reporting-common/types';
-import {
-  getSearchCsvJobParams,
-  CsvSearchModeParams,
-} from '@kbn/reporting-csv-share-panel/get_search_csv_job_params';
+import { getSearchCsvJobParams, CsvSearchModeParams } from '../shared/get_search_csv_job_params';
 import type { ExportModalShareOpts } from '.';
 import { checkLicense } from '../..';
 

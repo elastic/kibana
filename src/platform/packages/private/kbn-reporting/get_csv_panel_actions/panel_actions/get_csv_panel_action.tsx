@@ -46,10 +46,13 @@ import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-acti
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ClientConfigType } from '@kbn/reporting-public/types';
 import { checkLicense } from '@kbn/reporting-public/license_check';
+import {
+  getSearchCsvJobParams,
+  CsvSearchModeParams,
+} from '@kbn/reporting-public/share/shared/get_search_csv_job_params';
 import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
 import { LocatorParams } from '@kbn/reporting-common/types';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getSearchCsvJobParams, CsvSearchModeParams } from '../get_search_csv_job_params';
 import { getI18nStrings } from './strings';
 
 export interface PanelActionDependencies {
