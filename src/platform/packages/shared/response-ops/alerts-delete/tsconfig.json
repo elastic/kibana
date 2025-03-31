@@ -4,9 +4,7 @@
     "outDir": "target/types",
     "types": ["jest", "node", "@emotion/react/types/css-prop", "@kbn/ambient-ui-types"]
   },
-  "include": ["**/*.ts", "**/*.tsx", ".storybook/**/*.ts", ".storybook/**/*.tsx"],
+  "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
-  "kbn_references": [
-    "@kbn/i18n",
-  ]
+  "kbn_references": ["@kbn/i18n"]
 }
