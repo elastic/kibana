@@ -10,7 +10,6 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 import { retrieveCases } from './tools';
 
-
 // Define enum field structure upfront
 interface Field {
   field: string;
@@ -49,8 +48,8 @@ export async function createMcpServer({
   ];
 
   // Extract field mappings for sorting parameters
-  const sortableFields = await getSortableFields(elasticsearchClient, logger, index)
-  logger.info('Sortable Fields ' + JSON.stringify(sortableFields))
+  const sortableFields = await getSortableFields(elasticsearchClient, logger, index);
+  logger.info('Sortable Fields ' + JSON.stringify(sortableFields));
   const enumFieldValues = await getFieldValues(elasticsearchClient, logger, index, enumFields);
 
   // Extract specific values for tool parameters
@@ -78,8 +77,16 @@ export async function createMcpServer({
           'Salesforce internal IDs of the support cases (use only when specifically requested)'
         ),
       size: z.number().int().positive().default(10).describe('Maximum number of cases to return'),
-      sortField: z.string().optional().describe(`Field to sort results by. Can only be one of these ${sortableFields}`),
-      sortOrder: z.string().optional().describe(`Sorting order. Can only be 'desc' meaning sort in descending order or 'asc' meaning sort in ascending order`),
+      sortField: z
+        .string()
+        .optional()
+        .describe(`Field to sort results by. Can only be one of these ${sortableFields}`),
+      sortOrder: z
+        .string()
+        .optional()
+        .describe(
+          `Sorting order. Can only be 'desc' meaning sort in descending order or 'asc' meaning sort in ascending order`
+        ),
       ownerEmail: z
         .array(z.string())
         .optional()
@@ -207,26 +214,25 @@ async function getFieldValues(
 async function getSortableFields(
   client: ElasticsearchClient,
   logger: Logger,
-  indexName: string,
+  indexName: string
 ): Promise<Record<string, any>> {
-  const sortableFieldTypes = ["keyword", "date", "boolean", "integer", "long", "double", "float"];
-  const sortableFields = []
+  const sortableFieldTypes = ['keyword', 'date', 'boolean', 'integer', 'long', 'double', 'float'];
+  const sortableFields = [];
   try {
     const response = await client.indices.getMapping({
-      index: indexName
+      index: indexName,
     });
 
     if (response) {
-      const properties = response[indexName].mappings.properties as Record<string, any>
+      const properties = response[indexName].mappings.properties as Record<string, any>;
 
       for (const [fieldName, fieldConfig] of Object.entries(properties)) {
-
         if (sortableFieldTypes.includes(fieldConfig.type)) {
-          const sortableField = {field: fieldName, type: fieldConfig.type}
-          sortableFields.push(sortableField)
+          const sortableField = { field: fieldName, type: fieldConfig.type };
+          sortableFields.push(sortableField);
         }
       }
-      return sortableFields
+      return sortableFields;
     } else {
       throw new Error('Could not find mappings in response');
     }

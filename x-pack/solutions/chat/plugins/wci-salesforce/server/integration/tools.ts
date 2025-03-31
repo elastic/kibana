@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { SearchRequest, SearchResponse, SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  SearchRequest,
+  SearchResponse,
+  SortOrder,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SupportCase } from './types';
 
@@ -41,7 +45,9 @@ export async function retrieveCases(
   params: CaseRetrievalParams = {}
 ): Promise<Array<{ type: 'text'; text: string }>> {
   const size = params.size || 10;
-  const sort = params.sortField ? [{ [params.sortField as string]: { order: params.sortOrder as SortOrder } }] : [];
+  const sort = params.sortField
+    ? [{ [params.sortField as string]: { order: params.sortOrder as SortOrder } }]
+    : [];
 
   try {
     const query = buildQuery(params);
