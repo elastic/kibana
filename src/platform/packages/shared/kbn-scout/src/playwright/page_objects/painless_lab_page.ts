@@ -9,7 +9,6 @@
 
 import { ScoutPage } from '..';
 
-
 export class PainlessLab {
   public outputValueElement: Locator;
   public requestFlyoutHeader: Locator;
