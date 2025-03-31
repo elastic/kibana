@@ -158,7 +158,7 @@ describe('current status route', () => {
         })
       );
       const routeContext: any = {
-        request: {},
+        request: { query: {} },
         syntheticsEsClient,
       };
 
@@ -316,7 +316,7 @@ describe('current status route', () => {
       );
 
       const routeContext: any = {
-        request: {},
+        request: { query: {} },
         syntheticsEsClient,
       };
 
@@ -420,7 +420,7 @@ describe('current status route', () => {
         })
       );
       const routeContext: any = {
-        request: {},
+        request: { query: {} },
         syntheticsEsClient,
       };
 
