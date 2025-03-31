@@ -20,6 +20,7 @@ import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { StreamsPluginStart } from '@kbn/streams-plugin/public';
 
 export interface IndexManagementStartServices {
   analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
@@ -47,6 +48,7 @@ export interface StartDependencies {
   licensing?: LicensingPluginStart;
   ml?: MlPluginStart;
   uiActions: UiActionsStart;
+  streams?: StreamsPluginStart;
 }
 
 export interface ClientConfigType {
