@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 
 import { css } from '@emotion/react';
 
@@ -18,6 +18,7 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiSteps,
@@ -44,12 +45,12 @@ import connectorsBackgroundImage from './assets/connector_logos_comp.png';
 import { ConfigurationStep } from './configuration_step';
 import { DeploymentStep } from './deployment_step';
 import { FinishUpStep } from './finish_up_step';
-import { StartStep } from './start_step';
 import { errorToText } from '../utils/error_to_text';
 
 export type ConnectorCreationSteps = 'start' | 'deployment' | 'configure' | 'finish';
 export type SelfManagePreference = 'native' | 'selfManaged';
 import { SearchConnectorsPageTemplateWrapper } from '../../shared/page_template';
+const StartStep = lazy(() => import('./start_step'));
 
 const CreateConnector: React.FC = () => {
   const {
@@ -139,17 +140,19 @@ const CreateConnector: React.FC = () => {
       />
     ),
     start: (
-      <StartStep
-        title={i18n.translate('xpack.searchConnectorscreateConnector.startStep.startLabel', {
-          defaultMessage: 'Start',
-        })}
-        selfManagePreference={selfManagePreference}
-        setCurrentStep={setCurrentStep}
-        onSelfManagePreferenceChange={(preference) => {
-          setSelfManagePreference(preference);
-        }}
-        error={errorToText(error)}
-      />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <StartStep
+          title={i18n.translate('xpack.searchConnectorscreateConnector.startStep.startLabel', {
+            defaultMessage: 'Start',
+          })}
+          selfManagePreference={selfManagePreference}
+          setCurrentStep={setCurrentStep}
+          onSelfManagePreferenceChange={(preference: SelfManagePreference) => {
+            setSelfManagePreference(preference);
+          }}
+          error={errorToText(error)}
+        />
+      </Suspense>
     ),
   };
 

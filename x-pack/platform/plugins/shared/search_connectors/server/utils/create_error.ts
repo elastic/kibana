@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaResponseFactory } from '@kbn/core-http-server';
+import type { KibanaResponseFactory } from '@kbn/core-http-server';
 
 import { ErrorCode } from '../../common/types/error_codes';
 

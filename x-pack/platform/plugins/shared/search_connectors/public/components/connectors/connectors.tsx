@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiLoadingSpinner,
   EuiSearchBar,
   EuiSpacer,
   EuiText,
@@ -28,7 +29,6 @@ import { DefaultSettingsFlyout } from '../settings/default_settings_flyout';
 import { ConnectorStats } from './connector_stats';
 import { ConnectorsLogic } from './connectors_logic';
 import { ConnectorsTable } from './connectors_table';
-// import { CreateConnector } from './create_connector';
 import { DeleteConnectorModal } from './delete_connector_modal';
 import { ElasticManagedWebCrawlerEmptyPrompt } from './elastic_managed_web_crawler_empty_prompt';
 import { SelfManagedWebCrawlerEmptyPrompt } from './self_managed_web_crawler_empty_prompt';
@@ -38,6 +38,7 @@ import { LEARN_MORE_LINK } from './translations';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 import { useBreadcrumbs } from '../../utils/use_breadcrumbs';
 import { SearchConnectorsPageTemplateWrapper } from '../shared/page_template';
+const CreateConnector = lazy(() => import('./create_connector/create_connector'));
 
 export const connectorsBreadcrumbs = [
   {
@@ -88,7 +89,11 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams.from, searchParams.size, searchQuery, isCrawler]);
 
-  return !isLoading && isEmpty && !isCrawler ? null : (
+  return !isLoading && isEmpty && !isCrawler ? (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <CreateConnector />
+    </Suspense>
+  ) : (
     <SearchConnectorsPageTemplateWrapper
       isLoading={isLoading}
       pageHeader={{

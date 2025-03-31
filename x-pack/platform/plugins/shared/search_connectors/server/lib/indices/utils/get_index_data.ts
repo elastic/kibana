@@ -12,10 +12,6 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { IScopedClusterClient } from '@kbn/core/server';
-
-import { TotalIndexData } from '../fetch_indices';
-
-import { mapIndexStats } from './map_index_stats';
 import { AlwaysShowPattern } from '../../../types/indices';
 
 export const getSearchIndexData = async (
@@ -77,15 +73,6 @@ export const getSearchIndexData = async (
     indexAndAliasNames,
     indicesNames,
   };
-};
-
-export const getIndexDataMapper = (totalIndexData: TotalIndexData) => {
-  return (indexName: string) =>
-    mapIndexStats(
-      totalIndexData.allIndexMatches[indexName],
-      totalIndexData.indicesStats[indexName],
-      indexName
-    );
 };
 
 function isHidden(index: IndicesIndexState): boolean {

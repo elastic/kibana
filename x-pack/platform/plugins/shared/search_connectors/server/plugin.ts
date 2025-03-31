@@ -12,7 +12,7 @@ import type {
   CoreStart,
   LoggerFactory,
 } from '@kbn/core/server';
-import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
+import type { ConnectorServerSideDefinition } from '@kbn/search-connectors';
 import { getConnectorTypes } from '../common/lib/connector_types';
 import type {
   SearchConnectorsPluginSetup,

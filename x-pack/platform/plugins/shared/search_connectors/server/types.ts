@@ -7,18 +7,21 @@
 
 import type { ConnectorServerSideDefinition } from '@kbn/search-connectors';
 import type { FleetStartContract, FleetSetupContract } from '@kbn/fleet-plugin/server';
-import {
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
-import { IRouter, StartServicesAccessor, Logger } from '@kbn/core/server';
-import { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type {
+  SavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
+} from '@kbn/core-saved-objects-server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
+import type { IRouter, StartServicesAccessor, Logger } from '@kbn/core/server';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 export interface SearchConnectorsPluginSetup {
   getConnectorTypes: () => ConnectorServerSideDefinition[];

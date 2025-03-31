@@ -8,11 +8,11 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/search/plugins/search_connectors'],
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/search_connectors'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/search/plugins/search_connectors',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/search_connectors',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/solutions/search/plugins/search_connectors/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/search_connectors/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

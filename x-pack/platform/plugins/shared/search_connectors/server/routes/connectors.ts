@@ -1170,7 +1170,7 @@ export function registerConnectorRoutes({
       const { client } = (await context.core).elasticsearch;
 
       try {
-        const index = await fetchIndex(client.asCurrentUser, indexName, log);
+        const index = await fetchIndex(client.asCurrentUser, indexName);
         return response.ok({
           body: index,
           headers: { 'content-type': 'application/json' },

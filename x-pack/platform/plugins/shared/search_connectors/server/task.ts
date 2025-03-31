@@ -13,7 +13,7 @@ import type {
   TaskInstance,
 } from '@kbn/task-manager-plugin/server';
 
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   SearchConnectorsPluginStartDependencies,
   SearchConnectorsPluginSetupDependencies,

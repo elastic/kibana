@@ -49,7 +49,7 @@ interface StartStepProps {
   title: string;
 }
 
-export const StartStep: React.FC<StartStepProps> = ({
+const StartStep: React.FC<StartStepProps> = ({
   title,
   selfManagePreference,
   onSelfManagePreferenceChange,
@@ -430,3 +430,5 @@ export const StartStep: React.FC<StartStepProps> = ({
     </EuiForm>
   );
 };
+// eslint-disable-next-line import/no-default-export
+export { StartStep as default };

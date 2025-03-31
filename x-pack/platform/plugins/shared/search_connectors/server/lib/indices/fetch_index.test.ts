@@ -105,7 +105,7 @@ describe('fetchIndex lib function', () => {
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
 
     await expect(
-      fetchIndex(mockClient as unknown as ElasticsearchClient, 'index_name', logger)
+      fetchIndex(mockClient as unknown as ElasticsearchClient, 'index_name')
     ).resolves.toEqual(result);
   });
 
@@ -129,7 +129,7 @@ describe('fetchIndex lib function', () => {
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
 
     await expect(
-      fetchIndex(mockClient as unknown as ElasticsearchClient, 'index_name', logger)
+      fetchIndex(mockClient as unknown as ElasticsearchClient, 'index_name')
     ).resolves.toEqual({
       ...result,
       connector: { doc: 'doc', service_type: 'some-service-type' },
@@ -145,7 +145,7 @@ describe('fetchIndex lib function', () => {
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
 
     await expect(
-      fetchIndex(mockClient as unknown as ElasticsearchClient, 'index_name', logger)
+      fetchIndex(mockClient as unknown as ElasticsearchClient, 'index_name')
     ).rejects.toEqual(new Error('404'));
   });
   it('should throw a 404 error if the indexStats cannot be fonud', async () => {
@@ -162,7 +162,7 @@ describe('fetchIndex lib function', () => {
     );
 
     await expect(
-      fetchIndex(mockClient as unknown as ElasticsearchClient, 'index_name', logger)
+      fetchIndex(mockClient as unknown as ElasticsearchClient, 'index_name')
     ).rejects.toEqual(new Error('404'));
   });
   it('should throw a 404 error if the index stats indices cannot be fonud', async () => {
@@ -177,7 +177,7 @@ describe('fetchIndex lib function', () => {
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve({}));
 
     await expect(
-      fetchIndex(mockClient as unknown as ElasticsearchClient, 'index_name', logger)
+      fetchIndex(mockClient as unknown as ElasticsearchClient, 'index_name')
     ).rejects.toEqual(new Error('404'));
   });
 });
