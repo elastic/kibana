@@ -65,7 +65,7 @@ export const areValuesIntervalsValid = (values: string[]) => {
   });
 };
 
-export const getVariablePrefix = (variableType: ESQLVariableType) => {
+export const getVariableSuggestion = (variableType: ESQLVariableType) => {
   switch (variableType) {
     case ESQLVariableType.FIELDS:
       return 'field';

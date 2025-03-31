@@ -13,7 +13,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { monaco } from '@kbn/monaco';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { IdentifierControlForm } from './identifier_control_form';
+import { ESQLControlsFlyout } from '.';
 import { ESQLControlState, EsqlControlType } from '../types';
 
 jest.mock('@kbn/esql-utils', () => ({
@@ -32,12 +32,12 @@ describe('IdentifierControlForm', () => {
     it('should default correctly if no initial state is given', async () => {
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
-          <IdentifierControlForm
+          <ESQLControlsFlyout
             variableType={ESQLVariableType.FIELDS}
             queryString="FROM foo | STATS BY"
-            onCreateControl={jest.fn()}
+            onSaveControl={jest.fn()}
             closeFlyout={jest.fn()}
-            onEditControl={jest.fn()}
+            onCancelControl={jest.fn()}
             search={searchMock}
             cursorPosition={{ column: 19, lineNumber: 1 } as monaco.Position}
             esqlVariables={[]}
@@ -82,12 +82,12 @@ describe('IdentifierControlForm', () => {
       const onCreateControlSpy = jest.fn();
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
-          <IdentifierControlForm
+          <ESQLControlsFlyout
             variableType={ESQLVariableType.FIELDS}
             queryString="FROM foo | STATS BY"
-            onCreateControl={onCreateControlSpy}
+            onSaveControl={onCreateControlSpy}
             closeFlyout={jest.fn()}
-            onEditControl={jest.fn()}
+            onCancelControl={jest.fn()}
             search={searchMock}
             cursorPosition={{ column: 19, lineNumber: 1 } as monaco.Position}
             esqlVariables={[]}
@@ -110,13 +110,12 @@ describe('IdentifierControlForm', () => {
       const onCancelControlSpy = jest.fn();
       const { findByTestId } = render(
         <IntlProvider locale="en">
-          <IdentifierControlForm
+          <ESQLControlsFlyout
             variableType={ESQLVariableType.FIELDS}
             queryString="FROM foo | STATS BY"
-            onCreateControl={jest.fn()}
+            onSaveControl={jest.fn()}
             onCancelControl={onCancelControlSpy}
             closeFlyout={jest.fn()}
-            onEditControl={jest.fn()}
             search={searchMock}
             cursorPosition={{ column: 19, lineNumber: 1 } as monaco.Position}
             esqlVariables={[]}
@@ -142,12 +141,12 @@ describe('IdentifierControlForm', () => {
       } as ESQLControlState;
       const { findByTestId } = render(
         <IntlProvider locale="en">
-          <IdentifierControlForm
+          <ESQLControlsFlyout
             variableType={ESQLVariableType.FIELDS}
             queryString="FROM foo | STATS BY"
-            onCreateControl={jest.fn()}
+            onSaveControl={jest.fn()}
             closeFlyout={jest.fn()}
-            onEditControl={jest.fn()}
+            onCancelControl={jest.fn()}
             search={searchMock}
             cursorPosition={{ column: 19, lineNumber: 1 } as monaco.Position}
             initialState={initialState}
@@ -194,12 +193,12 @@ describe('IdentifierControlForm', () => {
       const onEditControlSpy = jest.fn();
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
-          <IdentifierControlForm
+          <ESQLControlsFlyout
             variableType={ESQLVariableType.FIELDS}
             queryString="FROM foo | STATS BY"
-            onCreateControl={jest.fn()}
+            onSaveControl={onEditControlSpy}
             closeFlyout={jest.fn()}
-            onEditControl={onEditControlSpy}
+            onCancelControl={jest.fn()}
             search={searchMock}
             cursorPosition={{ column: 19, lineNumber: 1 } as monaco.Position}
             initialState={initialState}
@@ -224,12 +223,12 @@ describe('IdentifierControlForm', () => {
     it('should default correctly if no initial state is given', async () => {
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
-          <IdentifierControlForm
+          <ESQLControlsFlyout
             variableType={ESQLVariableType.FUNCTIONS}
             queryString="FROM foo | STATS "
-            onCreateControl={jest.fn()}
+            onSaveControl={jest.fn()}
             closeFlyout={jest.fn()}
-            onEditControl={jest.fn()}
+            onCancelControl={jest.fn()}
             search={searchMock}
             cursorPosition={{ column: 17, lineNumber: 1 } as monaco.Position}
             esqlVariables={[]}
