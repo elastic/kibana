@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
   EuiPopover,
@@ -66,8 +67,19 @@ export function SpanLinksTable({ items }: Props) {
         }
         return (
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="stopSlash" size="m" color="subdued" />
+            <EuiFlexItem grow={false} css={{ lineHeight: 1 }}>
+              <EuiIconTip
+                type="stopSlash"
+                size="m"
+                color="subdued"
+                content={i18n.translate(
+                  'xpack.apm.apm.spanLinks.table.serviceName.unknown.tooltip',
+                  {
+                    defaultMessage:
+                      'This span has not yet been completed, please check again in a while.',
+                  }
+                )}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               {i18n.translate('xpack.apm.spanLinks.table.serviceName.unknown', {
