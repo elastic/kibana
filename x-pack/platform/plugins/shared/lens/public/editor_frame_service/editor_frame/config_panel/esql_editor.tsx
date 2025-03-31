@@ -16,6 +16,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { BehaviorSubject } from 'rxjs';
 import { useCurrentAttributes } from '../../../app_plugin/shared/edit_on_the_fly/use_current_attributes';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
 import type { Simplify } from '../../../types';
@@ -29,7 +30,6 @@ import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
 import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
 import type { LayerPanelProps } from './types';
 import { ESQLDataGridAccordion } from '../../../app_plugin/shared/edit_on_the_fly/esql_data_grid_accordion';
-import { BehaviorSubject } from 'rxjs';
 
 export type ESQLEditorProps = Simplify<
   {
@@ -107,7 +107,9 @@ export function ESQLEditor({
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
 
   const esqlVariables = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi) ? parentApi?.esqlVariables$ : new BehaviorSubject(undefined)
+    isApiESQLVariablesCompatible(parentApi)
+      ? parentApi?.esqlVariables$
+      : new BehaviorSubject(undefined)
   );
 
   const dispatch = useLensDispatch();

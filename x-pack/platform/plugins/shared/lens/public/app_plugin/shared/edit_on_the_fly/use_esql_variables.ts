@@ -8,11 +8,11 @@
 import { useMemo, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
 import {
   isApiESQLVariablesCompatible,
   TypedLensSerializedState,
 } from '../../../react_embeddable/types';
-import { BehaviorSubject } from 'rxjs';
 
 export const useESQLVariables = ({
   parentApi,
@@ -29,7 +29,9 @@ export const useESQLVariables = ({
     isApiESQLVariablesCompatible(parentApi) ? parentApi?.children$ : new BehaviorSubject(undefined)
   );
   const controlGroupApi = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi) ? parentApi?.controlGroupApi$ : new BehaviorSubject(undefined)
+    isApiESQLVariablesCompatible(parentApi)
+      ? parentApi?.controlGroupApi$
+      : new BehaviorSubject(undefined)
   );
 
   const panel = useMemo(() => {
