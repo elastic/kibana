@@ -1,6 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "../../../../../tsconfig.base.json",
   "include": [".storybook/**/*.ts", ".storybook/**/*.tsx"],
-  "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/i18n"]
+  "exclude": ["target/**/*"]
 }
