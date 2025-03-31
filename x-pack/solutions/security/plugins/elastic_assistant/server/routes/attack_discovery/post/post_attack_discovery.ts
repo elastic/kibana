@@ -19,7 +19,7 @@ import { updateAttackDiscoveryStatusToRunning } from '../helpers/helpers';
 import { buildResponse } from '../../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { requestIsValid } from './helpers/request_is_valid';
-import { generateAttackDiscoveries } from '../helpers/generate_discovery';
+import { generateAttackDiscoveries } from '../helpers/generate_discoveries';
 
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 
