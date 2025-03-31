@@ -19,6 +19,7 @@ import { createServiceMetricsAggregator } from '../../aggregators/otel/create_se
 import { createServiceSummaryMetricsAggregator } from '../../aggregators/otel/create_service_summary_metrics_aggregator';
 import { createSpanMetricsAggregator } from '../../aggregators/otel/create_span_metrics_aggregator';
 import { fork } from '../../../utils/stream_utils';
+import { getDynamicTemplateTransform } from './get_dynamic_template_transform';
 
 export type OtelSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
@@ -66,6 +67,7 @@ function otelPipeline(includeSerialization: boolean = true) {
       ...serializationTransform,
       fork(new PassThrough({ objectMode: true }), ...aggregators),
       getRoutingTransform(),
+      getDynamicTemplateTransform(),
       getDedotTransform(),
       (err: unknown) => {
         if (err) {

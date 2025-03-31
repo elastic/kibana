@@ -39,7 +39,12 @@ export {
   setIdGeneratorStrategy,
 } from './src/lib/utils/generate_id';
 export { appendHash, hashKeysOf } from './src/lib/utils/hash';
-export type { ESDocumentWithOperation, SynthtraceESAction, SynthtraceGenerator } from './src/types';
+export type {
+  ESDocumentWithOperation,
+  SynthtraceESAction,
+  SynthtraceGenerator,
+  SynthtraceDynamicTemplate,
+} from './src/types';
 export { log, type LogDocument, LONG_FIELD_NAME } from './src/lib/logs';
 export { syntheticsMonitor, type SyntheticsMonitorDocument } from './src/lib/synthetics';
 export { type EntityFields, entities } from './src/lib/entities';

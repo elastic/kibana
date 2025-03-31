@@ -31,7 +31,7 @@ const scenario: Scenario<ApmOtelFields> = async (runOptions) => {
 
       const otelNativeInstance = apmOtel
         .service({
-          name: 'asendotlp-otel-native-synth',
+          name: 'sendotlp-otel-native-synth',
           sdkName: 'otlp',
           sdkLanguage: 'nodejs',
         })
