@@ -52,8 +52,14 @@ describe('autocomplete.suggest', () => {
           'changePointType, ',
         ]);
 
-        await assertSuggestions(`from a | change_point value on field as changePointType, /`, [
+        await assertSuggestions(`from a | change_point value on field as changePointType,/`, [
           'pValue',
+        ]);
+      });
+
+      it('suggests pipe after complete command, without requiring pressing a space', async () => {
+        await assertSuggestions(`from a | change_point value on field as changePointType,pValue/`, [
+          'changePointType,pValue | ',
         ]);
       });
 

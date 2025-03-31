@@ -9,6 +9,7 @@
 
 import { ESQLCommand } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
+import { handleFragment } from '../../helper';
 import { ESQL_NUMBER_TYPES } from '../../../shared/esql_types';
 import { findFinalWord, isSingleItem } from '../../../shared/helpers';
 import { CommandSuggestParams } from '../../../definitions/types';
@@ -31,7 +32,7 @@ export const getPosition = (
   command: ESQLCommand<'change_point'>
 ): Position | undefined => {
   if (command.args.length < 2) {
-    if (innerText.match(/(:|CHANGE_POINT\s+)\S*$/i)) {
+    if (innerText.match(/CHANGE_POINT\s+\S*$/i)) {
       return Position.VALUE;
     }
 
@@ -41,10 +42,12 @@ export const getPosition = (
   }
 
   const lastArg = command.args[command.args.length - 1];
+
+  if (innerText.match(/on\s+\S*$/i)) {
+    return Position.ON_COLUMN;
+  }
+
   if (isSingleItem(lastArg) && lastArg.name === 'on') {
-    if (innerText.match(/on\s+\S*$/i)) {
-      return Position.ON_COLUMN;
-    }
     if (innerText.match(/on\s+\S+\s+$/i)) {
       return Position.AFTER_ON_CLAUSE;
     }
@@ -55,11 +58,13 @@ export const getPosition = (
   }
 
   if (isSingleItem(lastArg) && lastArg.name === 'as') {
-    if (innerText.match(/as\s+\S+,\s*$/i)) {
+    if (innerText.match(/as\s+\S+,\s*\S*$/i)) {
       return Position.AS_P_VALUE_COLUMN;
     }
 
-    return Position.AFTER_AS_CLAUSE;
+    if (innerText.match(/as\s+\S+,\s*\S+\s+$/i)) {
+      return Position.AFTER_AS_CLAUSE;
+    }
   }
 };
 
@@ -94,6 +99,7 @@ export async function suggest({
 
   switch (pos) {
     case Position.VALUE:
+      // TODO can also be a fragment
       const numericFields = await getColumnsByType(ESQL_NUMBER_TYPES, [], {
         advanceCursor: true,
         openSuggestions: true,
@@ -128,8 +134,27 @@ export async function suggest({
       return suggestions;
     }
     case Position.AS_P_VALUE_COLUMN: {
-      const suggestions: SuggestionRawDefinition[] = buildVariablesDefinitions(['pValue']);
-      return suggestions;
+      return handleFragment(
+        innerText,
+        (fragment) => {
+          const isFragmentComplete = fragment.trim().split(',').filter(Boolean).length > 1;
+          return isFragmentComplete;
+        },
+        // incomplete suggestion
+        (fragment, rangeToReplace) => {
+          return buildVariablesDefinitions(['pValue']);
+        },
+        // complete suggestion
+        (fragment, rangeToReplace) => {
+          return [{ ...pipeCompleteItem, text: ' | ' }].map((suggestion) => ({
+            ...suggestion,
+            filterText: fragment,
+            text: fragment + suggestion.text,
+            rangeToReplace,
+            command: TRIGGER_SUGGESTION_COMMAND,
+          }));
+        }
+      );
     }
     case Position.AFTER_AS_CLAUSE: {
       return [pipeCompleteItem];
