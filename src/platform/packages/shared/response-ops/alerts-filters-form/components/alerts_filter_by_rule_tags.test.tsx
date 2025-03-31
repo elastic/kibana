@@ -78,16 +78,24 @@ describe('AlertsFilterByRuleTags', () => {
     expect(comboboxInput).toHaveAttribute('disabled');
   });
 
-  it('should have the correct metadata', () => {
-    expect(filterMetadata.id).toEqual('ruleTags');
-    expect(filterMetadata.component).toEqual(AlertsFilterByRuleTags);
-    expect(filterMetadata.isEmpty(undefined)).toEqual(true);
-    expect(filterMetadata.isEmpty([])).toEqual(true);
-    expect(filterMetadata.isEmpty(['test-tag'])).toEqual(false);
-    expect(filterMetadata.toEsQuery(['test-tag'])).toEqual({
-      terms: {
-        [ALERT_RULE_TAGS]: ['test-tag'],
-      },
+  describe('filterMetadata', () => {
+    it('should have the correct type id and component', () => {
+      expect(filterMetadata.id).toEqual('ruleTags');
+      expect(filterMetadata.component).toEqual(AlertsFilterByRuleTags);
+    });
+
+    it('should detect empty values', () => {
+      expect(filterMetadata.isEmpty(undefined)).toEqual(true);
+      expect(filterMetadata.isEmpty([])).toEqual(true);
+      expect(filterMetadata.isEmpty(['test-tag'])).toEqual(false);
+    });
+
+    it('should convert the filter value to an es query', () => {
+      expect(filterMetadata.toEsQuery(['test-tag'])).toEqual({
+        terms: {
+          [ALERT_RULE_TAGS]: ['test-tag'],
+        },
+      });
     });
   });
 });

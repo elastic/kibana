@@ -95,16 +95,24 @@ describe('AlertsFilterByRuleTypes', () => {
     expect(comboboxInput).toHaveAttribute('disabled');
   });
 
-  it('should have the correct metadata', () => {
-    expect(filterMetadata.id).toEqual('ruleTypes');
-    expect(filterMetadata.component).toEqual(AlertsFilterByRuleTypes);
-    expect(filterMetadata.isEmpty(undefined)).toEqual(true);
-    expect(filterMetadata.isEmpty([])).toEqual(true);
-    expect(filterMetadata.isEmpty(['test-type'])).toEqual(false);
-    expect(filterMetadata.toEsQuery(['test-type'])).toEqual({
-      terms: {
-        [ALERT_RULE_TYPE_ID]: ['test-type'],
-      },
+  describe('filterMetadata', () => {
+    it('should have the correct type id and component', () => {
+      expect(filterMetadata.id).toEqual('ruleTypes');
+      expect(filterMetadata.component).toEqual(AlertsFilterByRuleTypes);
+    });
+
+    it('should detect empty values', () => {
+      expect(filterMetadata.isEmpty(undefined)).toEqual(true);
+      expect(filterMetadata.isEmpty([])).toEqual(true);
+      expect(filterMetadata.isEmpty(['test-type'])).toEqual(false);
+    });
+
+    it('should convert the filter value to an es query', () => {
+      expect(filterMetadata.toEsQuery(['test-type'])).toEqual({
+        terms: {
+          [ALERT_RULE_TYPE_ID]: ['test-type'],
+        },
+      });
     });
   });
 });
