@@ -17,24 +17,30 @@ import {
   type ThunkDispatch,
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
-import type { RuntimeStateManager } from './runtime_state';
+import { type RuntimeStateManager } from './runtime_state';
 import {
   LoadingStatus,
   type DiscoverInternalState,
   type InternalStateDataRequestParams,
+  type TabState,
 } from './types';
+import { setTabs } from './actions';
+import { selectAllTabs, selectCurrentTab } from './selectors';
 
-const initialState: DiscoverInternalState = {
-  initializationState: { hasESData: false, hasUserDataView: false },
+const DEFAULT_TAB_LABEL = i18n.translate('discover.defaultTabLabel', {
+  defaultMessage: 'Untitled session',
+});
+const DEFAULT_TAB_REGEX = new RegExp(`^${DEFAULT_TAB_LABEL}( \\d+)?$`);
+
+export const defaultTabState: Omit<TabState, keyof TabItem> = {
   dataViewId: undefined,
   isDataViewLoading: false,
-  defaultProfileAdHocDataViewIds: [],
-  expandedDoc: undefined,
   dataRequestParams: {},
   overriddenVisContextAfterInvalidation: undefined,
-  isESQLToDataViewTransitionModalVisible: false,
   resetDefaultProfileState: {
     resetId: '',
     columns: false,
@@ -55,6 +61,31 @@ const initialState: DiscoverInternalState = {
   },
 };
 
+const initialState: DiscoverInternalState = {
+  initializationState: { hasESData: false, hasUserDataView: false },
+  defaultProfileAdHocDataViewIds: [],
+  expandedDoc: undefined,
+  isESQLToDataViewTransitionModalVisible: false,
+  tabs: { byId: {}, allIds: [], currentId: '' },
+};
+
+export const createTabItem = (allTabs: TabState[]): TabItem => {
+  const id = uuidv4();
+  const untitledTabCount = allTabs.filter((tab) => DEFAULT_TAB_REGEX.test(tab.label.trim())).length;
+  const label =
+    untitledTabCount > 0 ? `${DEFAULT_TAB_LABEL} ${untitledTabCount}` : DEFAULT_TAB_LABEL;
+
+  return { id, label };
+};
+
+const withCurrentTab = (state: DiscoverInternalState, fn: (tab: TabState) => void) => {
+  const currentTab = selectCurrentTab(state);
+
+  if (currentTab) {
+    fn(currentTab);
+  }
+};
+
 export const internalStateSlice = createSlice({
   name: 'internalState',
   initialState,
@@ -66,17 +97,31 @@ export const internalStateSlice = createSlice({
       state.initializationState = action.payload;
     },
 
-    setDataViewId: (state, action: PayloadAction<string | undefined>) => {
-      if (action.payload !== state.dataViewId) {
-        state.expandedDoc = undefined;
-      }
-
-      state.dataViewId = action.payload;
+    setTabs: (state, action: PayloadAction<{ allTabs: TabState[]; selectedTabId: string }>) => {
+      state.tabs.byId = action.payload.allTabs.reduce<Record<string, TabState>>(
+        (acc, tab) => ({
+          ...acc,
+          [tab.id]: tab,
+        }),
+        {}
+      );
+      state.tabs.allIds = action.payload.allTabs.map((tab) => tab.id);
+      state.tabs.currentId = action.payload.selectedTabId;
     },
 
-    setIsDataViewLoading: (state, action: PayloadAction<boolean>) => {
-      state.isDataViewLoading = action.payload;
-    },
+    setDataViewId: (state, action: PayloadAction<string | undefined>) =>
+      withCurrentTab(state, (tab) => {
+        if (action.payload !== tab.dataViewId) {
+          state.expandedDoc = undefined;
+        }
+
+        tab.dataViewId = action.payload;
+      }),
+
+    setIsDataViewLoading: (state, action: PayloadAction<boolean>) =>
+      withCurrentTab(state, (tab) => {
+        tab.isDataViewLoading = action.payload;
+      }),
 
     setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {
       state.defaultProfileAdHocDataViewIds = action.payload;
@@ -86,16 +131,18 @@ export const internalStateSlice = createSlice({
       state.expandedDoc = action.payload;
     },
 
-    setDataRequestParams: (state, action: PayloadAction<InternalStateDataRequestParams>) => {
-      state.dataRequestParams = action.payload;
-    },
+    setDataRequestParams: (state, action: PayloadAction<InternalStateDataRequestParams>) =>
+      withCurrentTab(state, (tab) => {
+        tab.dataRequestParams = action.payload;
+      }),
 
     setOverriddenVisContextAfterInvalidation: (
       state,
-      action: PayloadAction<DiscoverInternalState['overriddenVisContextAfterInvalidation']>
-    ) => {
-      state.overriddenVisContextAfterInvalidation = action.payload;
-    },
+      action: PayloadAction<TabState['overriddenVisContextAfterInvalidation']>
+    ) =>
+      withCurrentTab(state, (tab) => {
+        tab.overriddenVisContextAfterInvalidation = action.payload;
+      }),
 
     setIsESQLToDataViewTransitionModalVisible: (state, action: PayloadAction<boolean>) => {
       state.isESQLToDataViewTransitionModalVisible = action.payload;
@@ -103,23 +150,24 @@ export const internalStateSlice = createSlice({
 
     setResetDefaultProfileState: {
       prepare: (
-        resetDefaultProfileState: Omit<DiscoverInternalState['resetDefaultProfileState'], 'resetId'>
+        resetDefaultProfileState: Omit<TabState['resetDefaultProfileState'], 'resetId'>
       ) => ({
         payload: {
           ...resetDefaultProfileState,
           resetId: uuidv4(),
         },
       }),
-      reducer: (
-        state,
-        action: PayloadAction<DiscoverInternalState['resetDefaultProfileState']>
-      ) => {
-        state.resetDefaultProfileState = action.payload;
-      },
+      reducer: (state, action: PayloadAction<TabState['resetDefaultProfileState']>) =>
+        withCurrentTab(state, (tab) => {
+          tab.resetDefaultProfileState = action.payload;
+        }),
     },
 
     resetOnSavedSearchChange: (state) => {
-      state.overriddenVisContextAfterInvalidation = undefined;
+      withCurrentTab(state, (tab) => {
+        tab.overriddenVisContextAfterInvalidation = undefined;
+      });
+
       state.expandedDoc = undefined;
     },
   },
@@ -132,12 +180,22 @@ export interface InternalStateThunkDependencies {
   urlStateStorage: IKbnUrlStateStorage;
 }
 
-export const createInternalStateStore = (options: InternalStateThunkDependencies) =>
-  configureStore({
+export const createInternalStateStore = (options: InternalStateThunkDependencies) => {
+  const store = configureStore({
     reducer: internalStateSlice.reducer,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({ thunk: { extraArgument: options } }),
   });
+
+  // TEMPORARY: Create initial default tab
+  const defaultTab: TabState = {
+    ...defaultTabState,
+    ...createTabItem(selectAllTabs(store.getState())),
+  };
+  store.dispatch(setTabs({ allTabs: [defaultTab], selectedTabId: defaultTab.id }));
+
+  return store;
+};
 
 export type InternalStateStore = ReturnType<typeof createInternalStateStore>;
 

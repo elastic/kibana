@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Document } from '@langchain/core/documents';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 export type IndicesQuerySourceFields = Record<string, QuerySourceFields>;
 
@@ -95,5 +96,6 @@ export interface Pagination {
 }
 
 export interface QueryTestResponse {
+  documents?: Document[];
   searchResponse: SearchResponse;
 }
