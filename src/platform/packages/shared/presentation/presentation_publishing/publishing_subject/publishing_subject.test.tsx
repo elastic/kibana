@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -116,6 +116,32 @@ describe('publishing subject', () => {
         ).toBeInTheDocument();
       });
       expect(renderCount).toBe(2);
+    });
+
+    test('useBatchedPublishingSubjects should synchronously subscribe to observables to avoid race conditions', async () => {
+      function Component() {
+        const [value1] = useBatchedPublishingSubjects(
+          subject1,
+        );
+
+        useMemo(() => {
+          // synchronously emit new values for observables
+          // this will cause test to fail if subscriptions are not setup synchronously
+          incrementAll();
+        }, []);
+
+        return (
+          <>
+            <span>{`value1: ${value1}`}</span>
+          </>
+        );
+      }
+      render(<Component />);
+      await waitFor(() => {
+        expect(
+          screen.getByText('value1: 1')
+        ).toBeInTheDocument();
+      });
     });
 
     test('should batch state updates when using useBatchedOptionalPublishingSubjects', async () => {
