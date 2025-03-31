@@ -1384,6 +1384,7 @@ describe('rules_list with show only capability', () => {
 
 describe('MaintenanceWindowsMock', () => {
   beforeEach(() => {
+    fetchActiveMaintenanceWindowsMock.mockClear();
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
 
     loadRulesWithKueryFilter.mockResolvedValue({
