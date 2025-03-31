@@ -28,7 +28,7 @@ import { useIndexMappings } from '../../hooks/use_index_mappings';
 
 export const SearchMode: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const { control, handleSubmit } = useFormContext();
+  const { control, handleSubmit } = useFormContext<ChatForm>();
   const {
     field: { value: searchBarValue },
     formState: { isSubmitting },
