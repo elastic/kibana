@@ -140,19 +140,18 @@ export const AlertDeleteModal = ({ onCloseModal, isVisible }: AlertDeleteProps) 
   };
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    const formState = {
-      isActiveAlertsDeleteEnabled: validations.isActiveThresholdValid,
-      isInactiveAlertsDeleteEnabled: validations.isInactiveThresholdValid,
-      activeAlertsDeleteThreshold: getThresholdInDays(
-        activeState.threshold,
-        activeState.thresholdUnit
-      ),
-      inactiveAlertsDeleteThreshold: getThresholdInDays(
-        inactiveState.threshold,
-        inactiveState.thresholdUnit
-      ),
-    };
-    console.log(formState);
+    // const formState = {
+    //   isActiveAlertsDeleteEnabled: validations.isActiveThresholdValid,
+    //   isInactiveAlertsDeleteEnabled: validations.isInactiveThresholdValid,
+    //   activeAlertsDeleteThreshold: getThresholdInDays(
+    //     activeState.threshold,
+    //     activeState.thresholdUnit
+    //   ),
+    //   inactiveAlertsDeleteThreshold: getThresholdInDays(
+    //     inactiveState.threshold,
+    //     inactiveState.thresholdUnit
+    //   ),
+    // };
   };
 
   const onClose = () => {
