@@ -913,13 +913,18 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    options?: { user?: AuthenticatedUser; removeProtection?: boolean; asyncDeploy?: boolean }
+    options?: {
+      user?: AuthenticatedUser;
+      removeProtection?: boolean;
+      asyncDeploy?: boolean;
+      skipValidation?: boolean;
+    }
   ): Promise<void> {
     return withSpan('bump_agent_policy_revision', async () => {
       await this._update(soClient, esClient, id, {}, options?.user, {
         bumpRevision: true,
         removeProtection: options?.removeProtection ?? false,
-        skipValidation: false,
+        skipValidation: options?.skipValidation ?? false,
         returnUpdatedPolicy: false,
         asyncDeploy: options?.asyncDeploy,
       });
