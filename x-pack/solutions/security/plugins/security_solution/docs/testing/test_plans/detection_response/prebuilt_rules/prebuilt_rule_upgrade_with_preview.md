@@ -745,7 +745,7 @@ And saved custom field values got discarded
 **Automation**: 1 e2e test with a mock rule.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 And an installed prebuilt rule
 And this rule is outdated (a new version is available for this rule)
 When user opens an upgrade preview for this rule
@@ -758,7 +758,7 @@ And there should NOT be a possibility to edit any field values
 **Automation**: 1 e2e test with a mock rule.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 And an installed prebuilt rule
 And a base version exists for this rule
 And this rule is different from its base version
@@ -772,7 +772,7 @@ Then user should see a warning that their customizations will be lost on upgrade
 **Automation**: 1 e2e test with a mock rule.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 And an installed prebuilt rule
 And a base version exists for this rule
 And this rule is outdated (a new version is available for this rule)

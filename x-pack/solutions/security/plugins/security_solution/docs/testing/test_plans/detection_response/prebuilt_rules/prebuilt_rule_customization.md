@@ -377,7 +377,7 @@ And the all shown table rows should NOT have the Modified badge present
 **Automation**: 2 Cypress tests: one for Serverless, one for non-Serverless.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 When user navigates to the rule edit page of a prebuilt rule
 Then About, Definition and Schedule views should be disabled
 When user tries to access the disabled views
@@ -390,7 +390,7 @@ And required license name should be included in the message
 **Automation**: 2 Cypress tests: one for Serverless, one for non-Serverless.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 When a user selects one or more prebuilt rules in the rule management table
 And user's selection doesn't contain any custom rules
 And user attempts to apply a <customizing_bulk_action> bulk action to selected rules
@@ -404,7 +404,7 @@ And no button to proceed with applying the action should be displayed
 **Automation**: 2 Cypress tests: one for Serverless, one for non-Serverless.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 When a user selects one or more prebuilt rules in the rule management table
 And user also selects one or more custom rules
 And user attempts to apply a <customizing_bulk_action> bulk action to selected rules
@@ -418,7 +418,7 @@ And a button to proceed with applying the action only to custom rules should not
 **Automation**: Multiple API integration tests - one for each bulk action type.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 When a user sends a request to bulk edit API
 And request's "dry run" parameter is set to false
 And the bulk edit action is <customizing_bulk_action>

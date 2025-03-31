@@ -127,8 +127,8 @@ Unless explicitly indicated otherwise:
 - EPR is available for fetching the package with prebuilt rules.
 - Only the latest **stable** package with prebuilt rules is checked for installation/upgrade. Pre-release packages are ignored.
 - User is on the following licenses/tiers:
-  - on the `Basic` license in a self-hosted or ECH environment;
-  - on the `Essentials` tier in a Serverless Security environment.
+  - on the `Enterprise` license in a self-hosted or ECH environment;
+  - on the `Complete` tier in a Serverless Security environment.
 - User has the required [privileges for managing detection rules](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html).
 
 ## Common technical requirements

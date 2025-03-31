@@ -816,7 +816,7 @@ But user should not be able to upgrade them
 **Automation**: 1 e2e test with a mock rule.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 And an installed prebuilt rule
 And a base version exists for this rule
 And this rule is outdated (a new version is available for this rule)
@@ -835,7 +835,7 @@ And all customizable rule fields should be equal to the target version
 **Automation**: 1 e2e test with a mock rule.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 And multiple outdated prebuilt rules (new versions are available for them)
 When user is on the Rule Updates table
 And selects multiple rules
@@ -849,7 +849,7 @@ And all customizable fields of each upgraded rule should be equal to their respe
 **Automation**: 1 e2e test with a mock rule.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 And multiple outdated prebuilt rules (a new version is available for them)
 When user is on the Rule Updates table
 And upgrades all rules at once using "Upgrade all" button
@@ -862,7 +862,7 @@ And all customizable fields of each upgraded rule should be equal to their respe
 **Automation**: 1 e2e test with a mock rule.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 And there's at least one prebuilt rule available for upgrade
 When user is on the Rule Updates table
 Then user should NOT see UI elements to filter rules by customization state (Modified/Unmodified)
@@ -873,7 +873,7 @@ Then user should NOT see UI elements to filter rules by customization state (Mod
 **Automation**: 1 e2e test with 2 mock rules.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 And an installed prebuilt rule
 And this rule is outdated (a new version is available for this rule)
 And this rule has a <conflict_type> conflict
@@ -889,7 +889,7 @@ Examples:
 **Automation**: 1 e2e test with 2 mock rules.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 And an installed prebuilt rule
 And this rule is outdated (a new version is available for this rule)
 And this rule has a <conflict_type> conflict
@@ -906,7 +906,7 @@ Examples:
 **Automation**: 1 integration test.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 And at least one installed and outdated prebuilt rule
 When user makes an API request to upgrade all outdated rules
 And this request contains a pick_version parameter with value = TARGET
@@ -919,7 +919,7 @@ And all customizable fields of each upgraded rule should be equal to their respe
 **Automation**: an API integration test for each pick_version parameter value.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 And at least one installed and outdated prebuilt rule
 When user makes an API request to upgrade all outdated rules
 And this request contains a pick_version parameter with value other than TARGET
@@ -935,7 +935,7 @@ Examples:
 **Automation**: 1 API integration test.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 And at least one installed and outdated prebuilt rule
 When user makes an API request to upgrade specific outdated rules
 And all rules in request body contain a pick_version parameter with value = TARGET
@@ -948,7 +948,7 @@ And all customizable fields of each upgraded rule should be equal to their respe
 **Automation**: an API integration test for each pick_version parameter value.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 And at least one installed and outdated prebuilt rule
 When user makes an API request to upgrade specific outdated rules
 And at least one rule in request body contains a pick_version parameter with value other than TARGET
@@ -964,7 +964,7 @@ Examples:
 **Automation**: 1 API integration test.
 
 ```Gherkin
-Given a Kibana installation running under an insufficient license
+Given a Kibana instance running under an insufficient license
 And at least one installed and outdated prebuilt rule
 When user makes an API request to upgrade specific outdated rules
 And at least one rule in request body specifies a field value
