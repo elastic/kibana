@@ -12,6 +12,7 @@ import {
   isApiESQLVariablesCompatible,
   TypedLensSerializedState,
 } from '../../../react_embeddable/types';
+import { BehaviorSubject } from 'rxjs';
 
 export const useESQLVariables = ({
   parentApi,
@@ -25,10 +26,10 @@ export const useESQLVariables = ({
   closeFlyout?: () => void;
 }) => {
   const dashboardPanels = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi) ? parentApi?.children$ : undefined
+    isApiESQLVariablesCompatible(parentApi) ? parentApi?.children$ : new BehaviorSubject<{ [key: string]: unknown }>({})
   );
   const controlGroupApi = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi) ? parentApi?.controlGroupApi$ : undefined
+    isApiESQLVariablesCompatible(parentApi) ? parentApi?.controlGroupApi$ : new BehaviorSubject(undefined)
   );
 
   const panel = useMemo(() => {

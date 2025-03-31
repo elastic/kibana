@@ -29,6 +29,7 @@ import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
 import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
 import type { LayerPanelProps } from './types';
 import { ESQLDataGridAccordion } from '../../../app_plugin/shared/edit_on_the_fly/esql_data_grid_accordion';
+import { BehaviorSubject } from 'rxjs';
 
 export type ESQLEditorProps = Simplify<
   {
@@ -106,7 +107,7 @@ export function ESQLEditor({
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
 
   const esqlVariables = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi) ? parentApi?.esqlVariables$ : undefined
+    isApiESQLVariablesCompatible(parentApi) ? parentApi?.esqlVariables$ : new BehaviorSubject(undefined)
   );
 
   const dispatch = useLensDispatch();
