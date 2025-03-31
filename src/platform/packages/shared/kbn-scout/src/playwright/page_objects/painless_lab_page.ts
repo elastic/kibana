@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import '@kbn/monaco';
+import { Locator } from 'playwright/test';
 import { ScoutPage } from '..';
 
 export class PainlessLab {
