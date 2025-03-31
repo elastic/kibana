@@ -20,5 +20,8 @@
     "@kbn/screenshotting-plugin",
     "@kbn/i18n",
     "@kbn/task-manager-plugin",
+    "@kbn/reporting-export-types-csv-common",
+    "@kbn/data-plugin",
+    "@kbn/reporting-public",
   ]
 }
