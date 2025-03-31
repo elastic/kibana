@@ -109,7 +109,7 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
         combineQueries({
           config: esQueryConfig,
           dataProviders,
-          indexPattern: dataView,
+          dataViewSpec: dataView,
           browserFields,
           filters: filters ? filters : [],
           kqlQuery: kqlQueryObj,
