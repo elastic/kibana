@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getFieldNamesByType, setup } from './helpers';
+import { attachTriggerCommand, getFieldNamesByType, setup } from './helpers';
 import { ESQL_NUMBER_TYPES } from '../../shared/esql_types';
 
 describe('autocomplete.suggest', () => {
@@ -27,8 +27,14 @@ describe('autocomplete.suggest', () => {
     });
 
     it('suggests ON after value column', async () => {
-      await assertSuggestions(`from a | change_point value /`, ['ON ', 'AS ', '| ']);
-      await assertSuggestions(`from a | change_point value O/`, ['ON ', 'AS ', '| ']);
+      await assertSuggestions(
+        `from a | change_point value /`,
+        ['ON ', 'AS ', '| '].map(attachTriggerCommand)
+      );
+      await assertSuggestions(
+        `from a | change_point value O/`,
+        ['ON ', 'AS ', '| '].map(attachTriggerCommand)
+      );
     });
 
     it('suggests fields after ON', async () => {
@@ -44,7 +50,18 @@ describe('autocomplete.suggest', () => {
 
     describe('AS', () => {
       it('suggests AS after ON <field>', async () => {
-        await assertSuggestions(`from a | change_point value on field /`, ['AS ', '| ']);
+        await assertSuggestions(
+          `from a | change_point value on field /`,
+          ['AS ', '| '].map(attachTriggerCommand)
+        );
+      });
+
+      it('suggests default field name for AS clauses with an empty ON', async () => {
+        await assertSuggestions(`from a | change_point value as / `, ['changePointType, ']);
+
+        await assertSuggestions(`from a | change_point value on field as changePointType,/`, [
+          'pValue',
+        ]);
       });
 
       it('suggests default field name for AS clauses', async () => {

@@ -36,7 +36,7 @@ export const getPosition = (
       return Position.VALUE;
     }
 
-    if (innerText.match(/\s+\S*$/)) {
+    if (innerText.match(/CHANGE_POINT\s+\S+\s*\S*$/i)) {
       return Position.AFTER_VALUE;
     }
   }
@@ -99,7 +99,6 @@ export async function suggest({
 
   switch (pos) {
     case Position.VALUE:
-      // TODO can also be a fragment
       const numericFields = await getColumnsByType(ESQL_NUMBER_TYPES, [], {
         advanceCursor: true,
         openSuggestions: true,
