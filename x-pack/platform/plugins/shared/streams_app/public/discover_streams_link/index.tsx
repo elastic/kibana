@@ -10,7 +10,9 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import { DiscoverStreamsLinkProps } from './discover_streams_link';
 
-export const DiscoverStreamsLink = dynamic(() => import('./discover_streams_link'));
+export const DiscoverStreamsLink = dynamic(() =>
+  import('./discover_streams_link').then((m) => ({ default: m.DiscoverStreamsLink }))
+);
 
 export function createDiscoverStreamsLink(services: Omit<DiscoverStreamsLinkProps, 'doc'>) {
   return (props: StreamsFeatureRenderDeps) => <DiscoverStreamsLink {...services} {...props} />;

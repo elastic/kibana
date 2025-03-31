@@ -7,10 +7,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { getMigrations } from './migrations';
-import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { TaskInstanceWithDeprecatedFields } from '../task';
+import type { TaskInstanceWithDeprecatedFields } from '../task';
 
 const migrationContext = migrationMocks.createContext();
 
