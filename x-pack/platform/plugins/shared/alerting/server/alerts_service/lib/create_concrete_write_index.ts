@@ -97,8 +97,24 @@ const updateUnderlyingMapping = async ({
 
     return;
   } catch (err) {
-    logger.error(`Failed to PUT mapping for ${alias}: ${err.message}`);
-    throw err;
+    const newLimit = await increaseFiledsLimit({
+      err,
+      esClient,
+      concreteIndexInfo,
+      logger,
+    });
+
+    if (newLimit) {
+      await updateUnderlyingMapping({
+        logger,
+        esClient,
+        concreteIndexInfo,
+        totalFieldsLimit: newLimit,
+      });
+    } else {
+      logger.error(`Failed to PUT mapping for ${alias}: ${err.message}`);
+      throw err;
+    }
   }
 };
 /**
@@ -206,3 +222,66 @@ export async function setConcreteWriteIndex(opts: SetConcreteWriteIndexOpts) {
     );
   }
 }
+
+const increaseFiledsLimit = async ({
+  err,
+  esClient,
+  concreteIndexInfo,
+  logger,
+}: {
+  err: Error;
+  esClient: ElasticsearchClient;
+  concreteIndexInfo: ConcreteIndexInfo;
+  logger: Logger;
+}): Promise<number | undefined> => {
+  const match = err.message
+    ? err.message.match(/Limit of total fields \[(\d+)\] has been exceeded/)
+    : null;
+  if (match !== null) {
+    const { alias } = concreteIndexInfo;
+    const exceededLimit = parseInt(match[1], 10);
+    const newLimit = exceededLimit + 5;
+
+    const { index_templates: indexTemplates } = await retryTransientEsErrors(
+      () =>
+        esClient.indices.getIndexTemplate({
+          name: `${alias}-index-template`,
+        }),
+      { logger }
+    );
+
+    const template = indexTemplates[0];
+
+    updateTotalFieldLimitSetting({
+      logger,
+      esClient,
+      totalFieldsLimit: newLimit,
+      concreteIndexInfo,
+    });
+
+    await retryTransientEsErrors(
+      () =>
+        esClient.indices.putIndexTemplate({
+          name: template.name,
+          body: {
+            ...template.index_template,
+            // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
+            template: {
+              ...template.index_template.template,
+              settings: {
+                ...template.index_template.template?.settings,
+                'index.mapping.total_fields.limit': newLimit,
+              },
+            },
+          },
+        }),
+      { logger }
+    );
+
+    logger.info(
+      `total_fields.limit of ${alias} has been increased form ${exceededLimit} to ${newLimit}`
+    );
+
+    return newLimit;
+  }
+};
