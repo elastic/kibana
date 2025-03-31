@@ -37,6 +37,7 @@ export const config: PluginConfigDescriptor = {
     },
     agentless: {
       enabled: true,
+      isDefault: true,
     },
     enableExperimental: true,
     developer: {
@@ -151,6 +152,7 @@ export const config: PluginConfigDescriptor = {
       agentless: schema.maybe(
         schema.object({
           enabled: schema.boolean({ defaultValue: false }),
+          isDefault: schema.maybe(schema.boolean({ defaultValue: false })),
           api: schema.maybe(
             schema.object({
               url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
