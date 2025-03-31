@@ -35,7 +35,7 @@ import {
   getUngroupedReasonMessage,
 } from './message_utils';
 import { queryMonitorStatusAlert } from './queries/query_monitor_status_alert';
-import { parseArrayFilters } from '../../routes/common';
+import { parseArrayFilters, parseLocationFilter } from '../../routes/common';
 import { SyntheticsServerSetup } from '../../types';
 import { SyntheticsEsClient } from '../../lib';
 import {
@@ -115,14 +115,23 @@ export class StatusRuleExecutor {
       return processMonitors([]);
     }
 
+    const locationIds = await parseLocationFilter(
+      {
+        savedObjectsClient: this.soClient,
+        server: this.server,
+        syntheticsMonitorClient: this.syntheticsMonitorClient,
+      },
+      this.params.locations
+    );
+
     const { filtersStr } = parseArrayFilters({
       configIds,
       filter: baseFilter,
-      tags: this.params?.tags,
-      locations: this.params?.locations,
-      monitorTypes: this.params?.monitorTypes,
-      monitorQueryIds: this.params?.monitorIds,
-      projects: this.params?.projects,
+      tags: this.params.tags,
+      locations: locationIds,
+      monitorTypes: this.params.monitorTypes,
+      monitorQueryIds: this.params.monitorIds,
+      projects: this.params.projects,
     });
 
     this.monitors = await getAllMonitors({
@@ -130,7 +139,11 @@ export class StatusRuleExecutor {
       filter: filtersStr,
     });
 
-    this.debug(`Found ${this.monitors.length} monitors for params ${JSON.stringify(this.params)}`);
+    this.debug(
+      `Found ${this.monitors.length} monitors for params ${JSON.stringify(
+        this.params
+      )} | parsed location filter is ${JSON.stringify(locationIds)} `
+    );
     return processMonitors(this.monitors);
   }
 
@@ -436,19 +449,11 @@ export class StatusRuleExecutor {
     const data = await this.getDownChecks({});
     return {
       ...data,
-      monitors: [
-        ...this.monitors.map((monitor) => ({
-          id: monitor.id,
-          name: monitor.attributes.name,
-          type: monitor.attributes.type,
-        })),
-        // add some 1000 dummy monitors to test the pagination
-        ...new Array(1000).fill(null).map((_, index) => ({
-          id: `dummy-${index}`,
-          name: `dummy-${index}`,
-          type: 'http',
-        })),
-      ],
+      monitors: this.monitors.map((monitor) => ({
+        id: monitor.id,
+        name: monitor.attributes.name,
+        type: monitor.attributes.type,
+      })),
     };
   };
 }
