@@ -48,8 +48,8 @@ const Container = euiStyled.div<IContainerStyleProps>`
   margin-right: ${(props) => props.timelineMargins.right}px;
   margin-left: ${(props) =>
     props.hasToggle
-      ? props.timelineMargins.left - 30 // fix margin if there is a toggle
-      : props.timelineMargins.left}px ;
+      ? props.timelineMargins.left - 21 // fix margin if there is a toggle (toggle width is 20px)
+      : props.timelineMargins.left}px;
   background-color: ${({ isSelected, theme }) =>
     isSelected ? theme.eui.euiColorLightestShade : 'initial'};
   cursor: pointer;

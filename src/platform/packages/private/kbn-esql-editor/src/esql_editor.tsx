@@ -36,6 +36,7 @@ import {
 } from '@kbn/monaco';
 import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
@@ -131,9 +132,14 @@ export const ESQLEditor = memo(function ESQLEditor({
   } = kibana.services;
   const darkMode = core.theme?.getTheme().darkMode;
 
+  const fixedQuery = useMemo(
+    () => fixESQLQueryWithVariables(query.esql, esqlVariables),
+    [esqlVariables, query.esql]
+  );
+
   const variablesService = kibana.services?.esql?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
-  const [code, setCode] = useState<string>(query.esql ?? '');
+  const [code, setCode] = useState<string>(fixedQuery ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
   const [editorHeight, setEditorHeight] = useState(
@@ -220,11 +226,11 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   useEffect(() => {
     if (editor1.current) {
-      if (code !== query.esql) {
-        setCode(query.esql);
+      if (code !== fixedQuery) {
+        setCode(fixedQuery);
       }
     }
-  }, [code, query.esql]);
+  }, [code, fixedQuery]);
 
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
@@ -293,7 +299,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   monaco.editor.registerCommand('esql.control.time_literal.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      query.esql,
+      fixedQuery,
       ESQLVariableType.TIME_LITERAL,
       position,
       uiActions,
@@ -306,7 +312,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   monaco.editor.registerCommand('esql.control.fields.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      query.esql,
+      fixedQuery,
       ESQLVariableType.FIELDS,
       position,
       uiActions,
@@ -319,7 +325,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   monaco.editor.registerCommand('esql.control.values.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      query.esql,
+      fixedQuery,
       ESQLVariableType.VALUES,
       position,
       uiActions,
@@ -332,7 +338,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   monaco.editor.registerCommand('esql.control.functions.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      query.esql,
+      fixedQuery,
       ESQLVariableType.FUNCTIONS,
       position,
       uiActions,
@@ -448,7 +454,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   const esqlCallbacks: ESQLCallbacks = useMemo(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
-        clearCacheWhenOld(dataSourcesCache, query.esql);
+        clearCacheWhenOld(dataSourcesCache, fixedQuery);
         const sources = await memoizedSources(dataViews, core).result;
         return sources;
       },
@@ -513,7 +519,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     fieldsMetadata,
     kibana.services?.esql?.getJoinIndicesAutocomplete,
     dataSourcesCache,
-    query.esql,
+    fixedQuery,
     memoizedSources,
     dataViews,
     core,
