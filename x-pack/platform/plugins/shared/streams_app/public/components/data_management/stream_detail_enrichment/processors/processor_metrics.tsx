@@ -36,23 +36,23 @@ export const ProcessorMetricBadges = ({
   parsed_rate,
 }: ProcessorMetricBadgesProps) => {
   const detectedFieldsCount = detected_fields.length;
-  const failureRate = failed_rate > 0 ? formatter.format(failed_rate) : null;
+  const parsedRate = parsed_rate > 0 ? formatter.format(parsed_rate) : null;
   const skippedRate = skipped_rate > 0 ? formatter.format(skipped_rate) : null;
-  const successRate = parsed_rate > 0 ? formatter.format(parsed_rate) : null;
+  const failedRate = failed_rate > 0 ? formatter.format(failed_rate) : null;
 
   return (
     <EuiBadgeGroup gutterSize="xs">
-      {failureRate && (
+      {parsedRate && (
         <EuiBadge
           color="hollow"
-          iconType="warning"
-          title={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.failureRate', {
+          iconType="check"
+          title={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.parsedRate', {
             defaultMessage:
-              '{failureRate} of the sampled documents were not parsed due to an error',
-            values: { failureRate },
+              '{parsedRate} of the sampled documents were successfully parsed by this processor',
+            values: { parsedRate },
           })}
         >
-          {failureRate}
+          {parsedRate}
         </EuiBadge>
       )}
       {skippedRate && (
@@ -68,17 +68,16 @@ export const ProcessorMetricBadges = ({
           {skippedRate}
         </EuiBadge>
       )}
-      {successRate && (
+      {failedRate && (
         <EuiBadge
           color="hollow"
-          iconType="check"
-          title={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.successRate', {
-            defaultMessage:
-              '{successRate} of the sampled documents were successfully parsed by this processor',
-            values: { successRate },
+          iconType="warning"
+          title={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.failedRate', {
+            defaultMessage: '{failedRate} of the sampled documents were not parsed due to an error',
+            values: { failedRate },
           })}
         >
-          {successRate}
+          {failedRate}
         </EuiBadge>
       )}
       {detectedFieldsCount > 0 && (
