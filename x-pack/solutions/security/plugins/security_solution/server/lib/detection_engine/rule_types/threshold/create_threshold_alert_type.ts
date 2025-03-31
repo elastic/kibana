@@ -13,13 +13,13 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { ThresholdRuleParams } from '../../rule_schema';
 import { thresholdExecutor } from './threshold';
 import type { ThresholdAlertState } from './types';
-import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
 
-export const createThresholdAlertType = (
-  createOptions: CreateRuleOptions
-): SecurityAlertType<ThresholdRuleParams, ThresholdAlertState> => {
-  const { licensing, scheduleNotificationResponseActionsService } = createOptions;
+export const createThresholdAlertType = (): SecurityAlertType<
+  ThresholdRuleParams,
+  ThresholdAlertState
+> => {
   return {
     id: THRESHOLD_RULE_TYPE_ID,
     name: 'Threshold Rule',
@@ -66,8 +66,9 @@ export const createThresholdAlertType = (
         services,
         startedAt,
         state,
-        licensing,
-        scheduleNotificationResponseActionsService,
+        licensing: sharedParams.licensing,
+        scheduleNotificationResponseActionsService:
+          sharedParams.scheduleNotificationResponseActionsService,
       });
       return result;
     },
