@@ -66,6 +66,13 @@ export const policySelectorMocks = Object.freeze({
         );
       },
 
+      isPolicyDisabled(policyId: string): boolean {
+        return (
+          renderResult.getByTestId(testIds.policy(policyId)).getAttribute('aria-disabled') ===
+          'true'
+        );
+      },
+
       waitForDataToLoad: async (): Promise<void> => {
         await waitFor(() => {
           expect(renderResult.queryByTestId(testIds.isFetchingProgress)).toBeNull();

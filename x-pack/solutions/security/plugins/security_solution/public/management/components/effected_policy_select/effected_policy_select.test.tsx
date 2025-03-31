@@ -77,7 +77,7 @@ describe('when using EffectedPolicySelect component', () => {
       };
       renderResult = mockedContext.render(<EffectedPolicySelect {...componentProps} />);
       policySelectorTestUtils = policySelectorMocks.getTestHelpers(
-        componentProps['data-test-subj']!,
+        `${componentProps['data-test-subj']!}-policiesSelector`,
         renderResult
       );
 
@@ -179,6 +179,41 @@ describe('when using EffectedPolicySelect component', () => {
     expect(handleOnChange).toHaveBeenCalledWith(
       expect.objectContaining({ tags: [buildPerPolicyTag(policyId)] })
     );
+  });
+
+  describe('and when license downgrades below Platinum', () => {
+    let policyIdList: string[];
+
+    beforeEach(() => {
+      (useLicenseMock() as jest.Mocked<LicenseService>).isPlatinumPlus.mockReturnValue(false);
+      componentProps.item.tags = [buildPerPolicyTag(policyId)];
+
+      policyIdList = apiMocks.responseProvider.packagePolicies().items.map((policy) => policy.id);
+    });
+
+    it('should maintain policy assignments but disable the ability to select/unselect policies', async () => {
+      await render();
+      await policySelectorTestUtils.waitForDataToLoad();
+
+      expect(policySelectorTestUtils.isPolicySelected(policyId)).toBe(true);
+
+      policyIdList.forEach((id) => {
+        expect(policySelectorTestUtils.isPolicyDisabled(id)).toBe(true);
+      });
+    });
+
+    it("should allow the user to select 'Global' in the edit option", async () => {
+      const { getByTestId } = await render();
+      await policySelectorTestUtils.waitForDataToLoad();
+
+      act(() => {
+        fireEvent.click(getByTestId('test-global'));
+      });
+
+      expect(componentProps.onChange).toHaveBeenCalledWith(
+        expect.objectContaining({ tags: [GLOBAL_ARTIFACT_TAG] })
+      );
+    });
   });
 
   describe('and space awareness is enabled', () => {
