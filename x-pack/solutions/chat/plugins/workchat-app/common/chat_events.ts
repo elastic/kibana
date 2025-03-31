@@ -67,3 +67,41 @@ export type ChatEvent =
   | ConversationCreatedEvent
   | ConversationUpdatedEvent
   | ToolResultEvent;
+
+export const conversationCreatedEvent = ({
+  id,
+  title,
+}: {
+  id: string;
+  title: string;
+}): ConversationCreatedEvent => {
+  return {
+    type: 'conversation_created',
+    conversation: { id, title },
+  };
+};
+
+export const conversationUpdatedEvent = ({
+  id,
+  title,
+}: {
+  id: string;
+  title: string;
+}): ConversationUpdatedEvent => {
+  return {
+    type: 'conversation_updated',
+    conversation: { id, title },
+  };
+};
+
+export const isMessageEvent = (event: ChatEvent): event is MessageEvent => {
+  return event.type === 'message';
+};
+
+export const isChunkEvent = (event: ChatEvent): event is ChunkEvent => {
+  return event.type === 'message_chunk';
+};
+
+export const isToolResultEvent = (event: ChatEvent): event is ToolResultEvent => {
+  return event.type === 'tool_result';
+};
