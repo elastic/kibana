@@ -34,7 +34,8 @@ export async function createAndInstallIngestPipelines(
     return [{ type: 'ingest_pipeline', id: latestId }];
   } catch (e) {
     logger.error(
-      `Cannot create entity latest ingest pipelines for [${definition.id}] entity definition`
+      `Cannot create entity latest ingest pipelines for [${definition.id}] entity definition`,
+      { error: e }
     );
     throw e;
   }
