@@ -183,3 +183,6 @@ xpack.securitySolution.enableExperimental:
 
 # Increase task manager capacity because security projects have more resources (Memory and CPU)
 xpack.task_manager.capacity: 20
+
+## Search Connectors in stack management
+xpack.searchConnectors.enabled: true

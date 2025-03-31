@@ -69,12 +69,13 @@ const CONNECTOR_VALUES = {
 };
 
 describe('IndexViewLogic', () => {
+  const http = httpServiceMock.createSetupContract();
+
   const { mount: apiLogicMount } = new LogicMounter(StartSyncApiLogic);
   const { mount: fetchIndexMount } = new LogicMounter(CachedFetchIndexApiLogic);
   const { mount: indexNameMount } = new LogicMounter(IndexNameLogic);
-  const { mount } = new LogicMounter(IndexViewLogic);
+  const { mount } = new LogicMounter(IndexViewLogic({ http }));
   const { flashSuccessToast } = mockFlashMessageHelpers;
-  const http = httpServiceMock.createSetupContract();
 
   beforeEach(() => {
     jest.clearAllMocks();

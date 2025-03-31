@@ -19,8 +19,9 @@ jest.mock('./get_updated_columns', () => ({
 import { getUpdatedColumns } from './get_updated_columns';
 
 import { InlineEditableTable, InlineEditableTableContents } from './inline_editable_table';
-import { InlineEditableTableLogic } from './inline_editable_table_logic';
+import { InlineEditableTableLogic, InlineEditableTableProps } from './inline_editable_table_logic';
 import { setMockActions, setMockValues } from '../../../../__mocks__';
+import { ItemWithAnID } from '../../types';
 
 const items = [{ id: 1 }, { id: 2 }];
 const requiredParams = {
@@ -66,7 +67,14 @@ describe('InlineEditableTable', () => {
     const bindLogic = wrapper.find(BindLogic);
     expect(bindLogic.props()).toEqual(
       expect.objectContaining({
-        logic: InlineEditableTableLogic,
+        logic: InlineEditableTableLogic({
+          columns: [],
+          defaultItem: {
+            id: 'test',
+            created_at: 'sdfsdf',
+          },
+          instanceId: 'test',
+        } as unknown as InlineEditableTableProps<ItemWithAnID>),
         props: {
           columns: requiredParams.columns,
           instanceId,
