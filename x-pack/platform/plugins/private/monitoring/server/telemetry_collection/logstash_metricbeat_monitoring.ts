@@ -33,7 +33,7 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
     stats: INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATS,
   };
 
-  private monitoringType: string = "metricbeat";
+  private monitoringType: string = 'metricbeat';
 
   /*
    * Call the function for fetching and summarizing Logstash metrics for Metricbeat monitoring
