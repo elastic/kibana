@@ -17,7 +17,7 @@ import {
   SerializedTitles,
   initializeTitleManager,
   SerializedPanelState,
-  useBatchedOptionalPublishingSubjects,
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 
@@ -218,7 +218,7 @@ export const getLinksEmbeddableFactory = () => {
       );
 
       const Component = () => {
-        const [links, layout] = useBatchedOptionalPublishingSubjects(links$, layout$);
+        const [links, layout] = useBatchedPublishingSubjects(links$, layout$);
 
         const linkItems: { [id: string]: { id: string; content: JSX.Element } } = useMemo(() => {
           if (!links) return {};
