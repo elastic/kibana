@@ -14,17 +14,11 @@ import type { JsonObject } from '@kbn/utility-types';
 import type { SummarizedWorkloadStat, WorkloadStat } from './workload_statistics';
 import { createWorkloadAggregator, summarizeWorkloadStat } from './workload_statistics';
 import type { TaskRunStat, SummarizedTaskRunStat } from './task_run_statistics';
-import {
-  EphemeralTaskStat,
-  createEphemeralTaskAggregator,
-  SummarizedEphemeralTaskStat,
-  summarizeEphemeralStat,
-} from './ephemeral_task_statistics';
+import type { EphemeralTaskStat, SummarizedEphemeralTaskStat } from './ephemeral_task_statistics';
+import { createEphemeralTaskAggregator, summarizeEphemeralStat } from './ephemeral_task_statistics';
 import { createTaskRunAggregator, summarizeTaskRunStat } from './task_run_statistics';
-import {
-  BackgroundTaskUtilizationStat,
-  createBackgroundTaskUtilizationAggregator,
-} from './background_task_utilization_statistics';
+import type { BackgroundTaskUtilizationStat } from './background_task_utilization_statistics';
+import { createBackgroundTaskUtilizationAggregator } from './background_task_utilization_statistics';
 
 import type { ConfigStat } from './configuration_statistics';
 import { createConfigurationAggregator } from './configuration_statistics';

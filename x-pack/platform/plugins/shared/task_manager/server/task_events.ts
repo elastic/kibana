@@ -15,7 +15,7 @@ import type { PollingError } from './polling';
 import type { DecoratedError, TaskRunResult } from './task_running';
 import type { EventLoopDelayConfig } from './config';
 import type { TaskManagerMetrics } from './metrics/task_metrics_collector';
-import { EphemeralTaskInstanceRequest } from './ephemeral_task_lifecycle';
+import type { EphemeralTaskInstanceRequest } from './ephemeral_task_lifecycle';
 
 export enum TaskPersistence {
   Recurring = 'recurring',

@@ -14,15 +14,8 @@ import { Subject } from 'rxjs';
 import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import { either, isErr, mapErr } from './lib/result_type';
-import {
-  ErroredTask,
-  ErrResultOf,
-  isTaskClaimEvent,
-  isTaskRunEvent,
-  isTaskRunRequestEvent,
-  OkResultOf,
-  RanTask,
-} from './task_events';
+import type { ErroredTask, ErrResultOf, OkResultOf, RanTask } from './task_events';
+import { isTaskClaimEvent, isTaskRunEvent, isTaskRunRequestEvent } from './task_events';
 import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
 import type {
@@ -35,8 +28,8 @@ import type {
 import { TaskStatus } from './task';
 import type { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
-import { TaskLifecycleEvent } from './polling_lifecycle';
-import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
+import type { TaskLifecycleEvent } from './polling_lifecycle';
+import type { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTaskRejectedDueToCapacityError } from './task_running';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
 import type { ErrorOutput } from './lib/bulk_operation_buffer';

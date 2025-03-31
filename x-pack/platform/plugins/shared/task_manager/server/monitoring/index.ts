@@ -14,7 +14,7 @@ import type { TaskStore } from '../task_store';
 import type { TaskPollingLifecycle } from '../polling_lifecycle';
 import type { AdHocTaskCounter } from '../lib/adhoc_task_counter';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
-import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
+import type { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
 
 export type { MonitoringStats, RawMonitoringStats } from './monitoring_stats_stream';
 export {
