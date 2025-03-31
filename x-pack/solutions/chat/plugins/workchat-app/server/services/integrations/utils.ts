@@ -18,7 +18,7 @@ export async function getLCTools({
   session: IntegrationsSession;
   logger: Logger;
 }): Promise<StructuredTool[]> {
-  const tools = await session.getAllTools();
+  const tools = await session.listTools();
   return tools.map((tool) =>
     convertToLCTool(tool, async (input) => {
       try {

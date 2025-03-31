@@ -12,10 +12,11 @@ import type {
   SavedObjectsServiceStart,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import type { McpProvider } from '@kbn/wci-server';
+import type { Integration } from '../../../common/integrations';
 import { integrationTypeName } from '../../saved_objects/integrations';
 import { IntegrationsSessionImpl, type IntegrationsSession } from './integrations_session';
 import type { IntegrationRegistry } from './integration_registry';
-import { IntegrationWithMeta } from './types';
 import { IntegrationClientImpl, IntegrationClient } from './integration_client';
 
 interface IntegrationsServiceOptions {
@@ -71,18 +72,39 @@ export class IntegrationsServiceImpl implements IntegrationsService {
     // Fetch integrations from the saved objects
     const availableIntegrations = await client.list();
 
-    const integrations = await Promise.all(
-      availableIntegrations.map<Promise<IntegrationWithMeta>>(async (source) => {
-        const definition = this.registry.get(source.type);
-        const integration = await definition.createIntegration({
+    const providers = await Promise.all(
+      availableIntegrations.map<Promise<McpProvider>>(async (source) => {
+        return integrationToProvider({
+          integration: source,
           request,
-          configuration: source.configuration,
-          description: source.description,
+          registry: this.registry,
         });
-        return Object.assign(integration, { id: source.id });
       })
     );
 
-    return new IntegrationsSessionImpl({ integrations, logger: this.logger.get('session') });
+    return new IntegrationsSessionImpl({ providers, logger: this.logger.get('session') });
   }
 }
+
+const integrationToProvider = async ({
+  integration,
+  registry,
+  request,
+}: {
+  integration: Integration;
+  registry: IntegrationRegistry;
+  request: KibanaRequest;
+}): Promise<McpProvider> => {
+  const definition = registry.get(integration.type);
+  const instance = await definition.createIntegration({
+    request,
+    integrationId: integration.id,
+    configuration: integration.configuration,
+    description: integration.description,
+  });
+  return {
+    id: integration.id,
+    connect: instance.connect,
+    meta: {},
+  };
+};

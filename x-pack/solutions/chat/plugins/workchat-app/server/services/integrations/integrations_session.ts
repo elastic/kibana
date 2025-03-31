@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { JsonSchemaObject } from '@n8n/json-schema-to-zod';
-import type { Logger } from '@kbn/core/server';
 import { parseToolName, buildToolName } from '@kbn/wci-common';
+import type { McpProvider, McpClient } from '@kbn/wci-server';
+import type { Logger } from '@kbn/core/server';
 import { IntegrationToolInputSchema, IntegrationTool } from './types';
-import type { IntegrationWithMeta } from './types';
 
 /**
  * Interface used to manage the integrations session.
@@ -19,15 +18,13 @@ import type { IntegrationWithMeta } from './types';
  */
 export interface IntegrationsSession {
   /**
-   * Get all available tools from all connected integrations
+   * List all available tools from all connected integrations.
    */
-  getAllTools(): Promise<IntegrationTool[]>;
-
+  listTools(): Promise<IntegrationTool[]>;
   /**
    * Execute a tool from a specific integration
    */
   executeTool(serverToolName: string, params: IntegrationToolInputSchema): Promise<unknown>;
-
   /**
    * Disconnect from all integrations
    */
@@ -35,14 +32,14 @@ export interface IntegrationsSession {
 }
 
 export class IntegrationsSessionImpl implements IntegrationsSession {
-  private readonly integrations: IntegrationWithMeta[];
+  private readonly providers: McpProvider[];
   private readonly logger: Logger;
 
-  private sessionState: Record<string, IntegrationState> = {};
+  private sessionClients: Record<string, McpClient> = {};
   private connected = false;
 
-  constructor({ integrations, logger }: { integrations: IntegrationWithMeta[]; logger: Logger }) {
-    this.integrations = integrations;
+  constructor({ providers, logger }: { providers: McpProvider[]; logger: Logger }) {
+    this.providers = providers;
     this.logger = logger;
   }
 
@@ -51,30 +48,26 @@ export class IntegrationsSessionImpl implements IntegrationsSession {
       return;
     }
 
-    this.sessionState = await this.integrations.reduce(async (accPromise, integration) => {
+    this.sessionClients = await this.providers.reduce(async (accPromise, provider) => {
       const acc = await accPromise;
       try {
-        const integClient = integration.client;
-        acc[integration.id] = {
-          client: await integClient.connect(),
-          disconnect: integClient.disconnect,
-        };
+        acc[provider.id] = await provider.connect();
       } catch (e) {
-        this.logger.warn(`Error connecting integration: ${integration.id}`);
+        this.logger.warn(`Error connecting integration: ${provider.id}`);
       }
       return acc;
-    }, Promise.resolve<Record<string, IntegrationState>>({}));
+    }, Promise.resolve<Record<string, McpClient>>({}));
 
     this.connected = true;
   }
 
-  async getAllTools(): Promise<IntegrationTool[]> {
+  async listTools(): Promise<IntegrationTool[]> {
     await this.ensureConnected();
 
     const toolCalls = await Promise.all(
-      Object.keys(this.sessionState).map(async (clientId) => {
+      Object.keys(this.sessionClients).map(async (clientId) => {
         try {
-          const client = this.sessionState[clientId].client;
+          const client = this.sessionClients[clientId];
           const toolsResponse = await client.listTools();
           if (toolsResponse && toolsResponse.tools && Array.isArray(toolsResponse.tools)) {
             return toolsResponse.tools.map((tool) => ({
@@ -98,11 +91,11 @@ export class IntegrationsSessionImpl implements IntegrationsSession {
     await this.ensureConnected();
 
     const { integrationId, toolName } = parseToolName(serverToolName);
-    const integration = this.sessionState[integrationId];
-    if (!integration) {
+    const client = this.sessionClients[integrationId];
+    if (!client) {
       throw new Error(`Client not found: ${integrationId}`);
     }
-    return integration.client.callTool({
+    return client.callTool({
       name: toolName,
       arguments: params,
     });
@@ -113,13 +106,8 @@ export class IntegrationsSessionImpl implements IntegrationsSession {
       return;
     }
 
-    await Promise.all(Object.values(this.sessionState).map((session) => session.disconnect()));
-    this.sessionState = {};
+    await Promise.all(Object.values(this.sessionClients).map((session) => session.disconnect()));
+    this.sessionClients = {};
     this.connected = false;
   }
-}
-
-interface IntegrationState {
-  client: Client;
-  disconnect: () => Promise<void>;
 }

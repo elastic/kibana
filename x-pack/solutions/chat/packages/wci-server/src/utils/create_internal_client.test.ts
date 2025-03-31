@@ -8,7 +8,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { getClientForInternalServer } from './create_internal_client';
+import { getConnectToInternalServer } from './create_internal_client';
 
 jest.mock('@modelcontextprotocol/sdk/inMemory.js');
 jest.mock('@modelcontextprotocol/sdk/client/index.js');
@@ -50,7 +50,7 @@ describe('getClientForInternalServer', () => {
     const server = createStubServer();
     const { clientTransport, serverTransport, mockClient } = setupMocks();
 
-    const integrationClient = await getClientForInternalServer({
+    const integrationClient = await getConnectToInternalServer({
       server,
       clientName: 'test-client',
     });
@@ -69,7 +69,7 @@ describe('getClientForInternalServer', () => {
     const server = createStubServer();
     const { mockClient } = setupMocks();
 
-    const integrationClient = await getClientForInternalServer({
+    const integrationClient = await getConnectToInternalServer({
       server,
     });
 
@@ -84,7 +84,7 @@ describe('getClientForInternalServer', () => {
     const server = createStubServer();
     setupMocks();
 
-    const integrationClient = await getClientForInternalServer({
+    const integrationClient = await getConnectToInternalServer({
       server,
     });
 
@@ -94,7 +94,7 @@ describe('getClientForInternalServer', () => {
 
   it('should handle disconnection of an unconnected client gracefully', async () => {
     const server = createStubServer();
-    const integrationClient = await getClientForInternalServer({
+    const integrationClient = await getConnectToInternalServer({
       server,
     });
 

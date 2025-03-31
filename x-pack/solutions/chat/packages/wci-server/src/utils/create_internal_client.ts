@@ -8,48 +8,43 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import type { IntegrationClient } from '../integration';
+import type { McpClient } from '../mcp';
 
 /**
- * Returns a {@link IntegrationClient} that will run the provided server in memory
+ * Returns a {@link McpProviderFn} that will run the provided server in memory
  * and connect to it.
  */
-export const getClientForInternalServer = async ({
+export const getConnectToInternalServer = ({
   server,
   clientName = 'unknown',
 }: {
   server: McpServer;
   clientName?: string;
-}): Promise<IntegrationClient> => {
-  let _disconnect: () => Promise<void> | undefined;
+}): (() => Promise<McpClient>) => {
   let connected = false;
 
-  return {
-    connect: async () => {
-      if (connected) {
-        throw new Error('Client already connected');
-      }
-      connected = true;
+  return async function connect() {
+    if (connected) {
+      throw new Error('Client already connected');
+    }
+    connected = true;
 
-      const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
-      const client = new Client({
-        name: clientName,
-        version: '1.0.0',
-      });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const client = new Client({
+      name: clientName,
+      version: '1.0.0',
+    });
 
-      await server.connect(clientTransport);
-      await client.connect(serverTransport);
+    await server.connect(clientTransport);
+    await client.connect(serverTransport);
 
-      _disconnect = async () => {
-        await client.close();
-        await server.close();
-      };
+    const disconnect = async () => {
+      await client.close();
+      await server.close();
+    };
 
-      return client;
-    },
-    disconnect: async () => {
-      await _disconnect?.();
-      connected = false;
-    },
+    return Object.assign(client, {
+      disconnect,
+    });
   };
 };

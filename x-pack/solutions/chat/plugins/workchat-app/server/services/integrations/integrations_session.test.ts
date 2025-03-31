@@ -9,7 +9,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from '@kbn/zod';
 import { loggerMock } from '@kbn/logging-mocks';
 import { buildToolName } from '@kbn/wci-common';
-import { getClientForInternalServer } from '@kbn/wci-server';
+import { getConnectToInternalServer } from '@kbn/wci-server';
 import { IntegrationWithMeta, IntegrationToolInputSchema } from './types';
 import { IntegrationsSessionImpl } from './integrations_session';
 
@@ -49,13 +49,13 @@ describe('IntegrationsGateway', () => {
       const integration1: IntegrationWithMeta = {
         id: 'Test Server 1',
         type: 'test1' as any,
-        client: await getClientForInternalServer({ server: serverA() }),
+        client: await getConnectToInternalServer({ server: serverA() }),
       };
 
       const integration2: IntegrationWithMeta = {
         id: 'Test Server 2',
         type: 'test2' as any,
-        client: await getClientForInternalServer({ server: serverB() }),
+        client: await getConnectToInternalServer({ server: serverB() }),
       };
 
       return [integration1, integration2];
@@ -67,7 +67,7 @@ describe('IntegrationsGateway', () => {
         integrations: await getIntegrations(),
       });
 
-      const allTools = await integrationSession.getAllTools();
+      const allTools = await integrationSession.listTools();
       expect(allTools.length).toBe(2);
       expect(allTools.map((tool) => tool.name)).toEqual([
         buildToolName({ integrationId: 'Test Server 1', toolName: 'add' }),

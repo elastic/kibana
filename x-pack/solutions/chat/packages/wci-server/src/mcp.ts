@@ -25,10 +25,12 @@ export type McpClient = Pick<McpBaseClient, 'listTools' | 'callTool'> & {
   disconnect: () => Promise<void>;
 };
 
+export type McpClientFactoryFn = () => MaybePromise<McpClient>;
+
 export interface McpProvider {
   id: string;
-  connect: () => Promise<McpClient>;
-  meta: Record<string, unknown>;
+  connect: McpClientFactoryFn;
+  meta?: Record<string, unknown>;
 }
 
 /**

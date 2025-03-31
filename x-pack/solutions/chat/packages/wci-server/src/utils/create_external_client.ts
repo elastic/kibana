@@ -7,52 +7,47 @@
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
-import type { IntegrationClient } from '../integration';
+import type { McpClient } from '../mcp';
 
-export const getClientForExternalServer = async ({
+export const getConnectToExternalServer = ({
   serverUrl,
   clientName = 'unknown',
 }: {
   serverUrl: string;
   clientName?: string;
-}): Promise<IntegrationClient> => {
-  let _disconnect: () => Promise<void> | undefined;
+}): (() => Promise<McpClient>) => {
   let connected = false;
 
-  return {
-    connect: async () => {
-      if (connected) {
-        throw new Error('Client already connected');
-      }
-      connected = true;
+  return async function connect() {
+    if (connected) {
+      throw new Error('Client already connected');
+    }
+    connected = true;
 
-      const transport = new SSEClientTransport(new URL(serverUrl));
+    const transport = new SSEClientTransport(new URL(serverUrl));
 
-      const client = new Client(
-        {
-          name: clientName,
-          version: '1.0.0',
+    const client = new Client(
+      {
+        name: clientName,
+        version: '1.0.0',
+      },
+      {
+        capabilities: {
+          prompts: {},
+          resources: {},
+          tools: {},
         },
-        {
-          capabilities: {
-            prompts: {},
-            resources: {},
-            tools: {},
-          },
-        }
-      );
+      }
+    );
 
-      await client.connect(transport);
+    await client.connect(transport);
 
-      _disconnect = async () => {
-        await client.close();
-      };
+    const disconnect = async () => {
+      await client.close();
+    };
 
-      return client;
-    },
-    disconnect: async () => {
-      await _disconnect?.();
-      connected = false;
-    },
+    return Object.assign(client, {
+      disconnect,
+    });
   };
 };

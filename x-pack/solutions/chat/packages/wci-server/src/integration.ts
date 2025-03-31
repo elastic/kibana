@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Client as McpClient } from '@modelcontextprotocol/sdk/client/index';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { IntegrationType, IntegrationConfiguration } from '@kbn/wci-common';
+import type { McpProvider } from './mcp';
 /**
  * Represents the definition of a type of integration for WorkChat.
  *
@@ -33,31 +33,14 @@ export interface WorkchatIntegrationDefinition<
 export interface IntegrationContext<T extends IntegrationConfiguration> {
   request: KibanaRequest;
   description: string;
+  integrationId: string;
   configuration: T;
 }
 
 /**
- * Represents an instance of an integration type.
+ * Represents an instance of an integration type, bound to a specific context
  */
 export interface WorkChatIntegration {
-  /**
-   * Type of integration
-   */
-  type: IntegrationType;
-  /**
-   * Client attached to this integration
-   */
-  client: IntegrationClient;
-}
-
-// TODO: Omit<McpClient, 'close'>
-
-/**
- * Wrapper around MCP client.
- *
- * Note that `disconnect` should be called on this instance rather than on the attached McpClient.
- */
-export interface IntegrationClient {
-  connect: () => Promise<McpClient>;
-  disconnect: () => Promise<void>;
+  /** connect to the MCP client */
+  connect: McpProvider['connect'];
 }

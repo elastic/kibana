@@ -7,7 +7,7 @@
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
-import { getClientForExternalServer } from './create_external_client';
+import { getConnectToExternalServer } from './create_external_client';
 
 jest.mock('@modelcontextprotocol/sdk/client/index.js');
 jest.mock('@modelcontextprotocol/sdk/client/sse.js');
@@ -38,7 +38,7 @@ describe('getClientForExternalServer', () => {
   it('should create a client and connect successfully', async () => {
     const { mockTransport, mockClient } = setupMocks();
 
-    const integrationClient = await getClientForExternalServer({
+    const integrationClient = await getConnectToExternalServer({
       serverUrl: mockUrl,
       clientName: 'test-client',
     });
@@ -65,7 +65,7 @@ describe('getClientForExternalServer', () => {
   it('should use correct URL when creating transport', async () => {
     setupMocks();
 
-    const integrationClient = await getClientForExternalServer({
+    const integrationClient = await getConnectToExternalServer({
       serverUrl: mockUrl,
     });
 
@@ -77,7 +77,7 @@ describe('getClientForExternalServer', () => {
   it('should disconnect properly', async () => {
     const { mockClient } = setupMocks();
 
-    const integrationClient = await getClientForExternalServer({
+    const integrationClient = await getConnectToExternalServer({
       serverUrl: mockUrl,
     });
 
@@ -90,7 +90,7 @@ describe('getClientForExternalServer', () => {
   it('should throw error when connecting an already connected client', async () => {
     setupMocks();
 
-    const integrationClient = await getClientForExternalServer({
+    const integrationClient = await getConnectToExternalServer({
       serverUrl: mockUrl,
     });
 
@@ -99,7 +99,7 @@ describe('getClientForExternalServer', () => {
   });
 
   it('should handle disconnection of an unconnected client gracefully', async () => {
-    const integrationClient = await getClientForExternalServer({
+    const integrationClient = await getConnectToExternalServer({
       serverUrl: mockUrl,
     });
 

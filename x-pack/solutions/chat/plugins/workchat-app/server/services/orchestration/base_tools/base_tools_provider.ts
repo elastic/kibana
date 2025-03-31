@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import {
-  getClientForInternalServer,
-  createMcpServer,
-  type IntegrationClient,
-} from '@kbn/wci-server';
+import { getConnectToInternalServer, createMcpServer, type McpProvider } from '@kbn/wci-server';
 import { getCalculatorTool } from './calculator';
 
-export const getBaseToolClient = async (): Promise<IntegrationClient> => {
+export const getBaseToolProvider = async (): Promise<McpProvider> => {
   const tools = [getCalculatorTool()];
 
   const server = createMcpServer({
@@ -21,5 +17,11 @@ export const getBaseToolClient = async (): Promise<IntegrationClient> => {
     tools,
   });
 
-  return await getClientForInternalServer({ server, clientName: 'baseToolsClient' });
+  return {
+    id: 'base_tools',
+    connect: getConnectToInternalServer({ server, clientName: 'baseToolsClient' }),
+    meta: {
+      builtin: true,
+    },
+  };
 };
