@@ -21,6 +21,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
+  const retry = getService('retry');
+
+  const checkAlert = async (text: string) => {
+    const alert = await browser.getAlert();
+    try {
+      expect(await alert?.getText()).to.be(text);
+    } finally {
+      await retry.waitFor('alert to be dismissed', async () => {
+        await alert?.dismiss();
+        return !(await browser.getAlert());
+      });
+    }
+  };
 
   describe('extension getAdditionalCellActions', () => {
     before(async () => {
@@ -40,20 +53,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await dataGrid.clickCellExpandButton(0, { columnName: '@timestamp' });
         await dataGrid.clickCellExpandPopoverAction('example-data-source-action');
-        let alert = await browser.getAlert();
-        try {
-          expect(await alert?.getText()).to.be('Example data source action executed');
-        } finally {
-          await alert?.dismiss();
-        }
+        await checkAlert('Example data source action executed');
         await dataGrid.clickCellExpandButton(0, { columnName: '@timestamp' });
         await dataGrid.clickCellExpandPopoverAction('another-example-data-source-action');
-        alert = await browser.getAlert();
-        try {
-          expect(await alert?.getText()).to.be('Another example data source action executed');
-        } finally {
-          await alert?.dismiss();
-        }
+        await checkAlert('Another example data source action executed');
       });
 
       it('should not render incompatible cell action for message column', async () => {
@@ -95,8 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/213422
-    describe.skip('data view mode', () => {
+    describe('data view mode', () => {
       it('should render additional cell actions for logs data source', async () => {
         await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
@@ -106,20 +108,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await dataGrid.clickCellExpandButton(0, { columnName: '@timestamp' });
         await dataGrid.clickCellExpandPopoverAction('example-data-source-action');
-        let alert = await browser.getAlert();
-        try {
-          expect(await alert?.getText()).to.be('Example data source action executed');
-        } finally {
-          await alert?.dismiss();
-        }
+        await checkAlert('Example data source action executed');
         await dataGrid.clickCellExpandButton(0, { columnName: '@timestamp' });
         await dataGrid.clickCellExpandPopoverAction('another-example-data-source-action');
-        alert = await browser.getAlert();
-        try {
-          expect(await alert?.getText()).to.be('Another example data source action executed');
-        } finally {
-          await alert?.dismiss();
-        }
+        await checkAlert('Another example data source action executed');
         // check Surrounding docs page
         await dataGrid.clickRowToggle();
         const [, surroundingActionEl] = await dataGrid.getRowActions();
@@ -131,20 +123,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.context.waitUntilContextLoadingHasFinished();
         await dataGrid.clickCellExpandButton(0, { columnName: '@timestamp' });
         await dataGrid.clickCellExpandPopoverAction('example-data-source-action');
-        alert = await browser.getAlert();
-        try {
-          expect(await alert?.getText()).to.be('Example data source action executed');
-        } finally {
-          await alert?.dismiss();
-        }
+        await checkAlert('Example data source action executed');
         await dataGrid.clickCellExpandButton(0, { columnName: '@timestamp' });
         await dataGrid.clickCellExpandPopoverAction('another-example-data-source-action');
-        alert = await browser.getAlert();
-        try {
-          expect(await alert?.getText()).to.be('Another example data source action executed');
-        } finally {
-          await alert?.dismiss();
-        }
+        await checkAlert('Another example data source action executed');
       });
 
       it('should not render incompatible cell action for message column', async () => {
