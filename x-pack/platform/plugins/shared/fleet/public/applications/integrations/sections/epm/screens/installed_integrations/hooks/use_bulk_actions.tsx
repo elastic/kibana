@@ -10,29 +10,32 @@ import { i18n } from '@kbn/i18n';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
 
 import {
+  sendBulkUninstallPackagesForRq,
   sendBulkUpgradePackagesForRq,
+  sendGetOneBulkUninstallPackagesForRq,
   sendGetOneBulkUpgradePackagesForRq,
   useStartServices,
 } from '../../../../../../../hooks';
 
 import type { InstalledPackageUIPackageListItem } from '../types';
 
+interface PollAction {
+  taskId: string;
+  type: 'bulk_upgrade' | 'bulk_uninstall';
+  integrations: InstalledPackageUIPackageListItem[];
+}
+
 export const bulkActionsContext = React.createContext<{
   upgradingIntegrations: InstalledPackageUIPackageListItem[];
+  uninstallingIntegrations: InstalledPackageUIPackageListItem[];
   bulkActions: {
-    setBulkUpgradeActions: React.Dispatch<
-      React.SetStateAction<
-        Array<{
-          taskId: string;
-          upgradingIntegrations: InstalledPackageUIPackageListItem[];
-        }>
-      >
-    >;
+    setPollingBulkActions: React.Dispatch<React.SetStateAction<PollAction[]>>;
   };
 }>({
   upgradingIntegrations: [],
+  uninstallingIntegrations: [],
   bulkActions: {
-    setBulkUpgradeActions: () => {},
+    setPollingBulkActions: () => {},
   },
 });
 
@@ -44,47 +47,79 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
   } = useStartServices();
 
   const queryClient = useQueryClient();
-  const [bulkUpgradeActions, setBulkUpgradeActions] = useState<
-    Array<{
-      taskId: string;
-      upgradingIntegrations: InstalledPackageUIPackageListItem[];
-    }>
-  >([]);
+  const [pollingBulkActions, setPollingBulkActions] = useState<PollAction[]>([]);
 
   const upgradingIntegrations = useMemo(() => {
-    return bulkUpgradeActions.flatMap((action) => action.upgradingIntegrations);
-  }, [bulkUpgradeActions]);
+    return pollingBulkActions
+      .filter((action) => action.type === 'bulk_upgrade')
+      .flatMap((action) => action.integrations);
+  }, [pollingBulkActions]);
 
-  // Poll for upgrade task results
+  const uninstallingIntegrations = useMemo(() => {
+    return pollingBulkActions
+      .filter((action) => action.type === 'bulk_uninstall')
+      .flatMap((action) => action.integrations);
+  }, [pollingBulkActions]);
+
+  // Poll for task results
   useQueries({
-    queries: bulkUpgradeActions.map((action) => ({
-      queryKey: ['bulk-upgrade-packages', action.taskId],
+    queries: pollingBulkActions.map((action) => ({
+      queryKey: ['bulk-action-packages', action.taskId],
       queryFn: async () => {
-        const res = await sendGetOneBulkUpgradePackagesForRq(action.taskId);
+        const res =
+          action.type === 'bulk_upgrade'
+            ? await sendGetOneBulkUpgradePackagesForRq(action.taskId)
+            : await sendGetOneBulkUninstallPackagesForRq(action.taskId);
 
         if (res.status !== 'pending') {
           await queryClient.invalidateQueries(['get-packages']);
-          setBulkUpgradeActions((actions) => actions.filter((a) => a.taskId !== action.taskId));
+          setPollingBulkActions((actions) => actions.filter((a) => a.taskId !== action.taskId));
 
           if (res.status === 'success') {
             // TODO update copy and view integrations https://github.com/elastic/kibana/issues/209892
             toasts.addSuccess({
-              title: i18n.translate(
-                'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUpgradeSuccessTitle',
-                {
-                  defaultMessage: 'Upgrade succeeded',
-                }
-              ),
+              title:
+                action.type === 'bulk_upgrade'
+                  ? i18n.translate(
+                      'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUpgradeSuccessTitle',
+                      {
+                        defaultMessage: 'Upgrade succeeded',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUninstallSuccessTitle',
+                      {
+                        defaultMessage: 'Uninstall succeeded',
+                      }
+                    ),
             });
           } else if (res.status === 'failed') {
             // TODO update copy and view integrations https://github.com/elastic/kibana/issues/209892
-            toasts.addDanger({
-              title: i18n.translate(
-                'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUpgradeFailedTitle',
-                {
-                  defaultMessage: 'Upgrade failed',
-                }
-              ),
+            const errorMessage = res.error?.message
+              ? res.error?.message
+              : res.results
+              ? res.results
+                  .filter((result) => result.error)
+                  .map((result) => `${result.name}: ${result.error?.message}`)
+                  .join('\n')
+              : 'Unexpected error';
+            const error = new Error(errorMessage);
+
+            toasts.addError(error, {
+              title:
+                action.type === 'bulk_upgrade'
+                  ? i18n.translate(
+                      'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUpgradeFailedTitle',
+                      {
+                        defaultMessage: 'Upgrade failed',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUninstallFailedTitle',
+                      {
+                        defaultMessage: 'Uninstall failed',
+                      }
+                    ),
             });
           }
         }
@@ -95,15 +130,16 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
 
   const bulkActions = useMemo(
     () => ({
-      setBulkUpgradeActions,
+      setPollingBulkActions,
     }),
-    [setBulkUpgradeActions]
+    [setPollingBulkActions]
   );
 
   return (
     <bulkActionsContext.Provider
       value={{
         upgradingIntegrations,
+        uninstallingIntegrations,
         bulkActions,
       }}
     >
@@ -115,7 +151,8 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
 export function useBulkActions() {
   const {
     upgradingIntegrations,
-    bulkActions: { setBulkUpgradeActions },
+    uninstallingIntegrations,
+    bulkActions: { setPollingBulkActions },
   } = useContext(bulkActionsContext);
   const {
     notifications: { toasts },
@@ -129,11 +166,12 @@ export function useBulkActions() {
           upgrade_package_policies: updatePolicies,
         });
 
-        setBulkUpgradeActions((actions) => [
+        setPollingBulkActions((actions) => [
           ...actions,
           {
             taskId: res.taskId,
-            upgradingIntegrations: items,
+            type: 'bulk_upgrade',
+            integrations: items,
           },
         ]);
       } catch (error) {
@@ -147,13 +185,49 @@ export function useBulkActions() {
         });
       }
     },
-    [setBulkUpgradeActions, toasts]
+    [setPollingBulkActions, toasts]
+  );
+
+  const bulkUninstallIntegrations = useCallback(
+    async (items: InstalledPackageUIPackageListItem[], updatePolicies?: boolean) => {
+      try {
+        const res = await sendBulkUninstallPackagesForRq({
+          packages: items.map((item) => ({
+            name: item.name,
+            version: item.installationInfo!.version,
+          })),
+        });
+
+        setPollingBulkActions((actions) => [
+          ...actions,
+          {
+            taskId: res.taskId,
+            type: 'bulk_uninstall',
+            integrations: items,
+          },
+        ]);
+      } catch (error) {
+        toasts.addError(error, {
+          title: i18n.translate(
+            'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUninstallErrorTitle',
+            {
+              defaultMessage: 'Error uninstalling integrations',
+            }
+          ),
+        });
+      }
+    },
+    [toasts, setPollingBulkActions]
+  );
+
+  const actions = useMemo(
+    () => ({ bulkUpgradeIntegrations, bulkUninstallIntegrations }),
+    [bulkUpgradeIntegrations, bulkUninstallIntegrations]
   );
 
   return {
-    actions: {
-      bulkUpgradeIntegrations,
-    },
+    actions,
     upgradingIntegrations,
+    uninstallingIntegrations,
   };
 }
