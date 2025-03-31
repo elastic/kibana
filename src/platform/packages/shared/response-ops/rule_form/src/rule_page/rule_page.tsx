@@ -50,6 +50,10 @@ export const RulePage = (props: RulePageProps) => {
   };
 
   const onSaveInternal = useCallback(() => {
+    console.log('example saved:', {
+      ...formData,
+      ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
+    });
     onSave({
       ...formData,
       ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),

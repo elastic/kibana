@@ -189,7 +189,15 @@ export const createBodySchema = schema.object({
   notify_when: schema.maybe(schema.nullable(notifyWhenSchemaV1)),
   alert_delay: schema.maybe(alertDelaySchemaV1),
   flapping: schema.maybe(schema.nullable(flappingSchemaV1)),
-  artifacts: schema.maybe(artifactSchemaV1),
+  artifacts: schema.maybe(
+    schema.object({
+      investigation_guide: schema.maybe(
+        schema.object({
+          blob: schema.string(),
+        })
+      ),
+    })
+  ),
 });
 
 export { createRuleParamsExamplesV1 };
