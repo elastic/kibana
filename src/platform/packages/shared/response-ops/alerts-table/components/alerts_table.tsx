@@ -43,7 +43,7 @@ import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/al
 import deepEqual from 'fast-deep-equal';
 import { Alert } from '@kbn/alerting-types';
 import { useGetMutedAlertsQuery } from '@kbn/response-ops-alerts-apis/hooks/use_get_muted_alerts_query';
-import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/constants';
+import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/query_keys';
 import { ErrorFallback } from './error_fallback';
 import { defaultAlertsTableColumns } from '../configuration';
 import { Storage } from '../utils/storage';
@@ -357,7 +357,7 @@ const AlertsTableContent = typedForwardRef(
         refetchAlerts();
       }
       queryClient.invalidateQueries(queryKeys.casesBulkGet(caseIds));
-      queryClient.invalidateQueries(alertsQueryKeys.mutedAlerts(ruleIds));
+      queryClient.invalidateQueries(alertsQueryKeys.getMutedAlerts(ruleIds));
       queryClient.invalidateQueries(queryKeys.maintenanceWindowsBulkGet(maintenanceWindowIds));
     }, [caseIds, maintenanceWindowIds, queryClient, queryParams.pageIndex, refetchAlerts, ruleIds]);
 
