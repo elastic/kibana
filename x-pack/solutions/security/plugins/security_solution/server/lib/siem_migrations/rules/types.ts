@@ -33,12 +33,8 @@ export type WithCommonAttrs<T extends object> = T & {
   updated_by: string;
 };
 
-export interface CreateMigrationMetadataInput {
-  migrationId: string;
-}
-
 export type MigrationMetadata = WithCommonAttrs<{
-  migration_id: string;
+  id: string;
 }>;
 
 export type StoredMigrationMetadata = Stored<MigrationMetadata>;

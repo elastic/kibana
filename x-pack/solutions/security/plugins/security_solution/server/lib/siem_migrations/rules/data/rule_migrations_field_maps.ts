@@ -82,7 +82,7 @@ export const prebuiltRulesFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigrationPre
 };
 
 export const migrationsFieldMaps: FieldMap<SchemaFieldMapKeys<MigrationMetadata>> = {
-  migration_id: { type: 'keyword', required: true },
+  id: { type: 'keyword', required: true },
   created_at: { type: 'date', required: true },
   created_by: { type: 'keyword', required: true },
   updated_at: { type: 'date', required: false },

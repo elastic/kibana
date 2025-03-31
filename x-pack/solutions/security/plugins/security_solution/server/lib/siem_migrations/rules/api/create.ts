@@ -7,7 +7,6 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { v4 as uuidV4 } from 'uuid';
 import { SIEM_RULE_MIGRATION_CREATE_PATH } from '../../../../../common/siem_migrations/constants';
 import {
   CreateRuleMigrationRequestBody,
@@ -44,8 +43,8 @@ export const registerSiemRuleMigrationsCreateRoute = (
       withLicense(
         async (context, req, res): Promise<IKibanaResponse<CreateRuleMigrationResponse>> => {
           const originalRules = req.body;
-          const migrationId = req.params.migration_id ?? uuidV4();
           const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+          const providedMigrationId = req.params?.migration_id;
           try {
             const [firstOriginalRule] = originalRules;
             if (!firstOriginalRule) {
@@ -54,11 +53,17 @@ export const registerSiemRuleMigrationsCreateRoute = (
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
-            await siemMigrationAuditLogger.logCreateMigration({ migrationId });
+            let migrationId: string;
 
-            await ruleMigrationsClient.data.migrations.create({
-              migrationId,
-            });
+            if (!providedMigrationId) {
+              /** if new migration */
+              migrationId = await ruleMigrationsClient.data.migrations.create();
+              await siemMigrationAuditLogger.logCreateMigration({ migrationId });
+            } else {
+              /** if updating existing migration */
+              migrationId = providedMigrationId;
+              await siemMigrationAuditLogger.logUpdateMigration({ migrationId });
+            }
 
             const ruleMigrations = originalRules.map<CreateRuleMigrationInput>((originalRule) => ({
               migration_id: migrationId,
@@ -80,7 +85,10 @@ export const registerSiemRuleMigrationsCreateRoute = (
             return res.ok({ body: { migration_id: migrationId } });
           } catch (error) {
             logger.error(error);
-            await siemMigrationAuditLogger.logCreateMigration({ migrationId, error });
+            await siemMigrationAuditLogger.logCreateMigration({
+              migrationId: providedMigrationId,
+              error,
+            });
             return res.badRequest({ body: error.message });
           }
         }
