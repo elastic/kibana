@@ -9,7 +9,7 @@ import { expect, test, tags } from '@kbn/scout';
 
 const space = '  ';
 const TEST_SCRIPT_RESULT = '45';
-const UPDATED_TEST_SCRIPT_RESPONSE = '"45"'
+const UPDATED_TEST_SCRIPT_RESPONSE = '"45"';
 const TEST_SCRIPT = `
 int total = 0;
 
@@ -35,7 +35,7 @@ const TEST_SCRIPT_REQUEST = `POST _scripts/painless/_execute
       "boolean_parameter": true
     }
   }
-}`
+}`;
 
 test.describe('Painless Lab', { tag: tags.ESS_ONLY }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -51,8 +51,10 @@ test.describe('Painless Lab', { tag: tags.ESS_ONLY }, () => {
     pageObjects.painlessLab.clickShowApiRequest();
     await expect(pageObjects.painlessLab.requestFlyoutHeader).toBeVisible();
 
-    await expect(await pageObjects.painlessLab.getFlyoutRequestBody()).toBe(TEST_SCRIPT_REQUEST);
+    expect(await pageObjects.painlessLab.getFlyoutRequestBody()).toBe(TEST_SCRIPT_REQUEST);
 
-    await expect(await pageObjects.painlessLab.getFlyoutResponseBody()).toBe(UPDATED_TEST_SCRIPT_RESPONSE);
+    expect(await pageObjects.painlessLab.getFlyoutResponseBody()).toBe(
+      UPDATED_TEST_SCRIPT_RESPONSE
+    );
   });
 });
