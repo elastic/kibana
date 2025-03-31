@@ -878,12 +878,18 @@ export function defineRoutes(
   router.post(
     {
       path: '/api/alerts_fixture/preview_alert_deletion',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
-          isActiveAlertsDeletionEnabled: schema.boolean(),
-          isInactiveAlertsDeletionEnabled: schema.boolean(),
-          activeAlertsDeletionThreshold: schema.number(),
-          inactiveAlertsDeletionThreshold: schema.number(),
+          isActiveAlertDeleteEnabled: schema.boolean(),
+          isInactiveAlertDeleteEnabled: schema.boolean(),
+          activeAlertDeleteThreshold: schema.number(),
+          inactiveAlertDeleteThreshold: schema.number(),
           categoryIds: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
@@ -911,6 +917,12 @@ export function defineRoutes(
   router.get(
     {
       path: '/api/alerts_fixture/last_run_alert_deletion',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async (
@@ -934,12 +946,18 @@ export function defineRoutes(
   router.post(
     {
       path: '/api/alerts_fixture/schedule_alert_deletion',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
-          isActiveAlertsDeletionEnabled: schema.boolean(),
-          isInactiveAlertsDeletionEnabled: schema.boolean(),
-          activeAlertsDeletionThreshold: schema.number(),
-          inactiveAlertsDeletionThreshold: schema.number(),
+          isActiveAlertDeleteEnabled: schema.boolean(),
+          isInactiveAlertDeleteEnabled: schema.boolean(),
+          activeAlertDeleteThreshold: schema.number(),
+          inactiveAlertDeleteThreshold: schema.number(),
           categoryIds: schema.maybe(schema.arrayOf(schema.string())),
           spaceIds: schema.maybe(schema.arrayOf(schema.string())),
         }),
@@ -961,10 +979,10 @@ export function defineRoutes(
         const result = await alerting.scheduleAlertDeletion(
           req,
           {
-            isActiveAlertsDeletionEnabled: req.body.isActiveAlertsDeletionEnabled,
-            isInactiveAlertsDeletionEnabled: req.body.isInactiveAlertsDeletionEnabled,
-            activeAlertsDeletionThreshold: req.body.activeAlertsDeletionThreshold,
-            inactiveAlertsDeletionThreshold: req.body.inactiveAlertsDeletionThreshold,
+            isActiveAlertDeleteEnabled: req.body.isActiveAlertDeleteEnabled,
+            isInactiveAlertDeleteEnabled: req.body.isInactiveAlertDeleteEnabled,
+            activeAlertDeleteThreshold: req.body.activeAlertDeleteThreshold,
+            inactiveAlertDeleteThreshold: req.body.inactiveAlertDeleteThreshold,
             categoryIds: req.body.categoryIds,
           },
           spaceIds

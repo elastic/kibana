@@ -119,10 +119,10 @@ export default function alertDeletionTaskStateTests({ getService }: FtrProviderC
         .set('kbn-xsrf', 'foo')
         .auth(Superuser.username, Superuser.password)
         .send({
-          isActiveAlertsDeletionEnabled: true,
-          isInactiveAlertsDeletionEnabled: false,
-          activeAlertsDeletionThreshold: 1,
-          inactiveAlertsDeletionThreshold: 90,
+          isActiveAlertDeleteEnabled: true,
+          isInactiveAlertDeleteEnabled: false,
+          activeAlertDeleteThreshold: 1,
+          inactiveAlertDeleteThreshold: 90,
         })
         .expect(200);
 

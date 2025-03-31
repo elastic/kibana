@@ -78,8 +78,8 @@ export const DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS: RulesSettingsQueryDelayPro
 };
 
 export const DEFAULT_ALERT_DELETION_SETTINGS: RulesSettingsAlertDeletionProperties = {
-  isActiveAlertsDeletionEnabled: false,
-  isInactiveAlertsDeletionEnabled: false,
-  activeAlertsDeletionThreshold: 90,
-  inactiveAlertsDeletionThreshold: 90,
+  isActiveAlertDeleteEnabled: false,
+  isInactiveAlertDeleteEnabled: false,
+  activeAlertDeleteThreshold: 90,
+  inactiveAlertDeleteThreshold: 90,
 };

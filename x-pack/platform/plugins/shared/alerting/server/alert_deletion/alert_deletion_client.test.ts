@@ -216,10 +216,10 @@ const alertDeletionTaskInstance = {
   state: {},
   params: {
     settings: {
-      isActiveAlertsDeletionEnabled: false,
-      isInactiveAlertsDeletionEnabled: true,
-      activeAlertsDeletionThreshold: 1,
-      inactiveAlertsDeletionThreshold: 30,
+      isActiveAlertDeleteEnabled: false,
+      isInactiveAlertDeleteEnabled: true,
+      activeAlertDeleteThreshold: 1,
+      inactiveAlertDeleteThreshold: 30,
     },
     spaceIds: ['default', 'space-1', 'another-space'],
   },
@@ -388,10 +388,10 @@ describe('AlertDeletionClient', () => {
       await alertDeletionClient.scheduleTask(
         fakeRequest,
         {
-          isActiveAlertsDeletionEnabled: false,
-          isInactiveAlertsDeletionEnabled: true,
-          activeAlertsDeletionThreshold: 1,
-          inactiveAlertsDeletionThreshold: 30,
+          isActiveAlertDeleteEnabled: false,
+          isInactiveAlertDeleteEnabled: true,
+          activeAlertDeleteThreshold: 1,
+          inactiveAlertDeleteThreshold: 30,
         },
         ['space-1', 'default']
       );
@@ -400,10 +400,10 @@ describe('AlertDeletionClient', () => {
         taskType: 'alert-deletion',
         params: {
           settings: {
-            isActiveAlertsDeletionEnabled: false,
-            isInactiveAlertsDeletionEnabled: true,
-            activeAlertsDeletionThreshold: 1,
-            inactiveAlertsDeletionThreshold: 30,
+            isActiveAlertDeleteEnabled: false,
+            isInactiveAlertDeleteEnabled: true,
+            activeAlertDeleteThreshold: 1,
+            inactiveAlertDeleteThreshold: 30,
           },
           spaceIds: ['space-1', 'default'],
         },
@@ -429,10 +429,10 @@ describe('AlertDeletionClient', () => {
         alertDeletionClient.scheduleTask(
           fakeRequest,
           {
-            isActiveAlertsDeletionEnabled: false,
-            isInactiveAlertsDeletionEnabled: true,
-            activeAlertsDeletionThreshold: 1,
-            inactiveAlertsDeletionThreshold: 30,
+            isActiveAlertDeleteEnabled: false,
+            isInactiveAlertDeleteEnabled: true,
+            activeAlertDeleteThreshold: 1,
+            inactiveAlertDeleteThreshold: 30,
           },
           ['space-1']
         )
@@ -464,10 +464,10 @@ describe('AlertDeletionClient', () => {
       });
       const result = await alertDeletionClient.previewTask(
         {
-          isActiveAlertsDeletionEnabled: false,
-          isInactiveAlertsDeletionEnabled: true,
-          activeAlertsDeletionThreshold: 1,
-          inactiveAlertsDeletionThreshold: 30,
+          isActiveAlertDeleteEnabled: false,
+          isInactiveAlertDeleteEnabled: true,
+          activeAlertDeleteThreshold: 1,
+          inactiveAlertDeleteThreshold: 30,
         },
         'space-1'
       );
@@ -490,10 +490,10 @@ describe('AlertDeletionClient', () => {
       });
       const result = await alertDeletionClient.previewTask(
         {
-          isActiveAlertsDeletionEnabled: true,
-          isInactiveAlertsDeletionEnabled: false,
-          activeAlertsDeletionThreshold: 45,
-          inactiveAlertsDeletionThreshold: 1,
+          isActiveAlertDeleteEnabled: true,
+          isInactiveAlertDeleteEnabled: false,
+          activeAlertDeleteThreshold: 45,
+          inactiveAlertDeleteThreshold: 1,
         },
         'space-1'
       );
@@ -520,10 +520,10 @@ describe('AlertDeletionClient', () => {
       });
       const result = await alertDeletionClient.previewTask(
         {
-          isActiveAlertsDeletionEnabled: true,
-          isInactiveAlertsDeletionEnabled: true,
-          activeAlertsDeletionThreshold: 45,
-          inactiveAlertsDeletionThreshold: 30,
+          isActiveAlertDeleteEnabled: true,
+          isInactiveAlertDeleteEnabled: true,
+          activeAlertDeleteThreshold: 45,
+          inactiveAlertDeleteThreshold: 30,
         },
         'space-1'
       );
@@ -548,10 +548,10 @@ describe('AlertDeletionClient', () => {
       });
       const result = await alertDeletionClient.previewTask(
         {
-          isActiveAlertsDeletionEnabled: false,
-          isInactiveAlertsDeletionEnabled: true,
-          activeAlertsDeletionThreshold: 1,
-          inactiveAlertsDeletionThreshold: 30,
+          isActiveAlertDeleteEnabled: false,
+          isInactiveAlertDeleteEnabled: true,
+          activeAlertDeleteThreshold: 1,
+          inactiveAlertDeleteThreshold: 30,
           categoryIds: ['observability'],
         },
         'space-1'
@@ -572,10 +572,10 @@ describe('AlertDeletionClient', () => {
       await expect(
         alertDeletionClient.previewTask(
           {
-            isActiveAlertsDeletionEnabled: false,
-            isInactiveAlertsDeletionEnabled: true,
-            activeAlertsDeletionThreshold: 1,
-            inactiveAlertsDeletionThreshold: 30,
+            isActiveAlertDeleteEnabled: false,
+            isInactiveAlertDeleteEnabled: true,
+            activeAlertDeleteThreshold: 1,
+            inactiveAlertDeleteThreshold: 30,
             categoryIds: ['invalid-category', 'management'],
           },
           'space-1'
@@ -590,10 +590,10 @@ describe('AlertDeletionClient', () => {
       await expect(
         alertDeletionClient.previewTask(
           {
-            isActiveAlertsDeletionEnabled: false,
-            isInactiveAlertsDeletionEnabled: true,
-            activeAlertsDeletionThreshold: 1,
-            inactiveAlertsDeletionThreshold: 30,
+            isActiveAlertDeleteEnabled: false,
+            isInactiveAlertDeleteEnabled: true,
+            activeAlertDeleteThreshold: 1,
+            inactiveAlertDeleteThreshold: 30,
           },
           'space-1'
         )
@@ -898,10 +898,10 @@ describe('AlertDeletionClient', () => {
           ...alertDeletionTaskInstance,
           params: {
             settings: {
-              isActiveAlertsDeletionEnabled: false,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 1,
-              inactiveAlertsDeletionThreshold: 30,
+              isActiveAlertDeleteEnabled: false,
+              isInactiveAlertDeleteEnabled: true,
+              activeAlertDeleteThreshold: 1,
+              inactiveAlertDeleteThreshold: 30,
             },
             spaceIds: ['default'],
           },
@@ -1079,10 +1079,10 @@ describe('AlertDeletionClient', () => {
           ...alertDeletionTaskInstance,
           params: {
             settings: {
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 30,
+              isActiveAlertDeleteEnabled: true,
+              isInactiveAlertDeleteEnabled: true,
+              activeAlertDeleteThreshold: 90,
+              inactiveAlertDeleteThreshold: 30,
               categoryIds: ['observability'],
             },
             spaceIds: ['default'],
@@ -1197,10 +1197,10 @@ describe('AlertDeletionClient', () => {
             ...alertDeletionTaskInstance,
             params: {
               settings: {
-                isActiveAlertsDeletionEnabled: false,
-                isInactiveAlertsDeletionEnabled: true,
-                activeAlertsDeletionThreshold: 1,
-                inactiveAlertsDeletionThreshold: 30,
+                isActiveAlertDeleteEnabled: false,
+                isInactiveAlertDeleteEnabled: true,
+                activeAlertDeleteThreshold: 1,
+                inactiveAlertDeleteThreshold: 30,
                 categoryIds: ['invalid-category'],
               },
               spaceIds: ['default'],
@@ -1272,10 +1272,10 @@ describe('AlertDeletionClient', () => {
             ...alertDeletionTaskInstance,
             params: {
               settings: {
-                isActiveAlertsDeletionEnabled: false,
-                isInactiveAlertsDeletionEnabled: true,
-                activeAlertsDeletionThreshold: 1,
-                inactiveAlertsDeletionThreshold: 30,
+                isActiveAlertDeleteEnabled: false,
+                isInactiveAlertDeleteEnabled: true,
+                activeAlertDeleteThreshold: 1,
+                inactiveAlertDeleteThreshold: 30,
               },
             },
           },
@@ -1297,7 +1297,7 @@ describe('AlertDeletionClient', () => {
             duration: expect.any(String),
           },
           error: {
-            message: `Invalid task parameters: {\"settings\":{\"isActiveAlertsDeletionEnabled\":false,\"isInactiveAlertsDeletionEnabled\":true,\"activeAlertsDeletionThreshold\":1,\"inactiveAlertsDeletionThreshold\":30}}`,
+            message: `Invalid task parameters: {\"settings\":{\"isActiveAlertDeleteEnabled\":false,\"isInactiveAlertDeleteEnabled\":true,\"activeAlertDeleteThreshold\":1,\"inactiveAlertDeleteThreshold\":30}}`,
           },
           kibana: {
             alert: { deletion: { num_deleted: 0 } },
@@ -1340,10 +1340,10 @@ describe('AlertDeletionClient', () => {
             ...alertDeletionTaskInstance,
             params: {
               settings: {
-                isActiveAlertsDeletionEnabled: true,
-                isInactiveAlertsDeletionEnabled: true,
-                activeAlertsDeletionThreshold: 45,
-                inactiveAlertsDeletionThreshold: 100,
+                isActiveAlertDeleteEnabled: true,
+                isInactiveAlertDeleteEnabled: true,
+                activeAlertDeleteThreshold: 45,
+                inactiveAlertDeleteThreshold: 100,
               },
               spaceIds: ['default'],
             },
@@ -1353,7 +1353,7 @@ describe('AlertDeletionClient', () => {
 
         // active alerts search failures should not prevent inactive alerts from being deleted
 
-        // 1 setting with isActiveAlertsDeletionEnabled = true
+        // 1 setting with isActiveAlertDeleteEnabled = true
         expect(esClient.search).toHaveBeenCalledTimes(2);
         expect(esClient.search).toHaveBeenNthCalledWith(
           1,
@@ -1454,10 +1454,10 @@ describe('AlertDeletionClient', () => {
             ...alertDeletionTaskInstance,
             params: {
               settings: {
-                isActiveAlertsDeletionEnabled: true,
-                isInactiveAlertsDeletionEnabled: false,
-                activeAlertsDeletionThreshold: 45,
-                inactiveAlertsDeletionThreshold: 100,
+                isActiveAlertDeleteEnabled: true,
+                isInactiveAlertDeleteEnabled: false,
+                activeAlertDeleteThreshold: 45,
+                inactiveAlertDeleteThreshold: 100,
               },
               spaceIds: ['default'],
             },

@@ -153,40 +153,40 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: false,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
+              isActiveAlertDeleteEnabled: true,
+              isInactiveAlertDeleteEnabled: false,
+              activeAlertDeleteThreshold: 90,
+              inactiveAlertDeleteThreshold: 90,
             });
 
           const previewDeleteAllCategoryInactiveAlerts = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertsDeletionEnabled: false,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
+              isActiveAlertDeleteEnabled: false,
+              isInactiveAlertDeleteEnabled: true,
+              activeAlertDeleteThreshold: 90,
+              inactiveAlertDeleteThreshold: 90,
             });
 
           const previewDeleteAllCategoryActiveAndInactiveAlerts = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
+              isActiveAlertDeleteEnabled: true,
+              isInactiveAlertDeleteEnabled: true,
+              activeAlertDeleteThreshold: 90,
+              inactiveAlertDeleteThreshold: 90,
             });
 
           const previewDeleteObservabilityActiveAlerts = await supertest
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: false,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
+              isActiveAlertDeleteEnabled: true,
+              isInactiveAlertDeleteEnabled: false,
+              activeAlertDeleteThreshold: 90,
+              inactiveAlertDeleteThreshold: 90,
               categoryIds: ['observability'],
             });
 
@@ -194,10 +194,10 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertsDeletionEnabled: false,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
+              isActiveAlertDeleteEnabled: false,
+              isInactiveAlertDeleteEnabled: true,
+              activeAlertDeleteThreshold: 90,
+              inactiveAlertDeleteThreshold: 90,
               categoryIds: ['observability'],
             });
 
@@ -205,10 +205,10 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
+              isActiveAlertDeleteEnabled: true,
+              isInactiveAlertDeleteEnabled: true,
+              activeAlertDeleteThreshold: 90,
+              inactiveAlertDeleteThreshold: 90,
               categoryIds: ['observability'],
             });
 
@@ -216,10 +216,10 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: false,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
+              isActiveAlertDeleteEnabled: true,
+              isInactiveAlertDeleteEnabled: false,
+              activeAlertDeleteThreshold: 90,
+              inactiveAlertDeleteThreshold: 90,
               categoryIds: ['securitySolution'],
             });
 
@@ -227,10 +227,10 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertsDeletionEnabled: false,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
+              isActiveAlertDeleteEnabled: false,
+              isInactiveAlertDeleteEnabled: true,
+              activeAlertDeleteThreshold: 90,
+              inactiveAlertDeleteThreshold: 90,
               categoryIds: ['securitySolution'],
             });
 
@@ -238,10 +238,10 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
+              isActiveAlertDeleteEnabled: true,
+              isInactiveAlertDeleteEnabled: true,
+              activeAlertDeleteThreshold: 90,
+              inactiveAlertDeleteThreshold: 90,
               categoryIds: ['securitySolution'],
             });
 
@@ -249,10 +249,10 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: false,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
+              isActiveAlertDeleteEnabled: true,
+              isInactiveAlertDeleteEnabled: false,
+              activeAlertDeleteThreshold: 90,
+              inactiveAlertDeleteThreshold: 90,
               categoryIds: ['management'],
             });
 
@@ -260,10 +260,10 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertsDeletionEnabled: false,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
+              isActiveAlertDeleteEnabled: false,
+              isInactiveAlertDeleteEnabled: true,
+              activeAlertDeleteThreshold: 90,
+              inactiveAlertDeleteThreshold: 90,
               categoryIds: ['management'],
             });
 
@@ -271,10 +271,10 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
+              isActiveAlertDeleteEnabled: true,
+              isInactiveAlertDeleteEnabled: true,
+              activeAlertDeleteThreshold: 90,
+              inactiveAlertDeleteThreshold: 90,
               categoryIds: ['management'],
             });
 
@@ -282,10 +282,10 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: false,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
+              isActiveAlertDeleteEnabled: true,
+              isInactiveAlertDeleteEnabled: false,
+              activeAlertDeleteThreshold: 90,
+              inactiveAlertDeleteThreshold: 90,
               categoryIds: ['observability', 'management'],
             });
 
@@ -293,10 +293,10 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertsDeletionEnabled: false,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
+              isActiveAlertDeleteEnabled: false,
+              isInactiveAlertDeleteEnabled: true,
+              activeAlertDeleteThreshold: 90,
+              inactiveAlertDeleteThreshold: 90,
               categoryIds: ['observability', 'securitySolution'],
             });
 
@@ -304,10 +304,10 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
             .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
             .set('kbn-xsrf', 'foo')
             .send({
-              isActiveAlertsDeletionEnabled: true,
-              isInactiveAlertsDeletionEnabled: true,
-              activeAlertsDeletionThreshold: 90,
-              inactiveAlertsDeletionThreshold: 90,
+              isActiveAlertDeleteEnabled: true,
+              isInactiveAlertDeleteEnabled: true,
+              activeAlertDeleteThreshold: 90,
+              inactiveAlertDeleteThreshold: 90,
               categoryIds: ['securitySolution', 'management'],
             });
 

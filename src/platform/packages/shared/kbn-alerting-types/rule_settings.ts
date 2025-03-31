@@ -36,10 +36,10 @@ export type RulesSettingsQueryDelay = RulesSettingsQueryDelayProperties &
   RulesSettingsModificationMetadata;
 
 export interface RulesSettingsAlertDeletionProperties {
-  isActiveAlertsDeletionEnabled: boolean;
-  isInactiveAlertsDeletionEnabled: boolean;
-  activeAlertsDeletionThreshold: number;
-  inactiveAlertsDeletionThreshold: number;
+  isActiveAlertDeleteEnabled: boolean;
+  isInactiveAlertDeleteEnabled: boolean;
+  activeAlertDeleteThreshold: number;
+  inactiveAlertDeleteThreshold: number;
   categoryIds?: string[] | null;
 }
 

@@ -182,10 +182,10 @@ export class AlertDeletionClient {
     const esClient = await this.elasticsearchClientPromise;
 
     const {
-      isActiveAlertsDeletionEnabled,
-      isInactiveAlertsDeletionEnabled,
-      activeAlertsDeletionThreshold,
-      inactiveAlertsDeletionThreshold,
+      isActiveAlertDeleteEnabled,
+      isInactiveAlertDeleteEnabled,
+      activeAlertDeleteThreshold,
+      inactiveAlertDeleteThreshold,
       categoryIds,
     } = settings;
 
@@ -203,8 +203,8 @@ export class AlertDeletionClient {
 
     let numAlertsToBeDeleted = 0;
 
-    if (isActiveAlertsDeletionEnabled) {
-      const activeAlertsQuery = getActiveAlertsQuery(activeAlertsDeletionThreshold, spaceId);
+    if (isActiveAlertDeleteEnabled) {
+      const activeAlertsQuery = getActiveAlertsQuery(activeAlertDeleteThreshold, spaceId);
 
       try {
         const countResponse = await esClient.count({ index: indices, query: activeAlertsQuery });
@@ -217,8 +217,8 @@ export class AlertDeletionClient {
       }
     }
 
-    if (isInactiveAlertsDeletionEnabled) {
-      const inactiveAlertsQuery = getInactiveAlertsQuery(inactiveAlertsDeletionThreshold, spaceId);
+    if (isInactiveAlertDeleteEnabled) {
+      const inactiveAlertsQuery = getInactiveAlertsQuery(inactiveAlertDeleteThreshold, spaceId);
 
       try {
         const countResponse = await esClient.count({ index: indices, query: inactiveAlertsQuery });
@@ -281,10 +281,10 @@ export class AlertDeletionClient {
     const taskManager = await this.taskManagerStartPromise;
 
     const {
-      isActiveAlertsDeletionEnabled,
-      isInactiveAlertsDeletionEnabled,
-      activeAlertsDeletionThreshold,
-      inactiveAlertsDeletionThreshold,
+      isActiveAlertDeleteEnabled,
+      isInactiveAlertDeleteEnabled,
+      activeAlertDeleteThreshold,
+      inactiveAlertDeleteThreshold,
       categoryIds,
     } = settings;
 
@@ -311,8 +311,8 @@ export class AlertDeletionClient {
       return { numAlertsDeleted, errors: [`No indices found`] };
     }
 
-    if (isActiveAlertsDeletionEnabled) {
-      const activeAlertsQuery = getActiveAlertsQuery(activeAlertsDeletionThreshold, spaceId);
+    if (isActiveAlertDeleteEnabled) {
+      const activeAlertsQuery = getActiveAlertsQuery(activeAlertDeleteThreshold, spaceId);
 
       try {
         const {
@@ -345,8 +345,8 @@ export class AlertDeletionClient {
       }
     }
 
-    if (isInactiveAlertsDeletionEnabled) {
-      const inactiveAlertsQuery = getInactiveAlertsQuery(inactiveAlertsDeletionThreshold, spaceId);
+    if (isInactiveAlertDeleteEnabled) {
+      const inactiveAlertsQuery = getInactiveAlertsQuery(inactiveAlertDeleteThreshold, spaceId);
 
       try {
         const { numAlertsDeleted: numInactiveAlertsDeleted, errors: inactiveAlertDeletionErrors } =
