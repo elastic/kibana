@@ -142,6 +142,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
 
   const { onMouseEnter, onMouseLeave } = useHoverOpener({
     onOpen: (e: React.MouseEvent) => {
+      if (selectedNode?.id === item.id) return;
       lastOpenByHoverTS.current = Date.now();
       openPanel(item, e.target as Element);
     },
