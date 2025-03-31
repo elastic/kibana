@@ -32,15 +32,15 @@ export const registerUpdateScriptedFieldRoute = (
     .post({
       path: '/api/index_patterns/index_pattern/{id}/scripted_field/{name}',
       access: 'public',
+      security: {
+        authz: {
+          requiredPrivileges: ['indexPatterns:manage'],
+        },
+      },
     })
     .addVersion(
       {
         version: INITIAL_REST_VERSION,
-        security: {
-          authz: {
-            requiredPrivileges: ['indexPatterns:manage'],
-          },
-        },
         validate: {
           request: {
             params: schema.object(

@@ -20,7 +20,9 @@
       "navigation",
       "fieldsMetadata",
       "datasetQuality",
-      "licensing"
+      "licensing",
+      "indexManagement",
+      "ingestPipelines",
     ],
     "requiredBundles": [
       "kibanaReact"
