@@ -78,11 +78,21 @@ export const App: React.FC<AppProps> = ({ showDocs = false }) => {
         ) : (
           <>
             <Route exact path={SEARCH_PLAYGROUND_CHAT_PATH} component={Chat} />
-            <Route exact path={PLAYGROUND_CHAT_QUERY_PATH} component={QueryMode} />
+            <Route
+              exact
+              path={PLAYGROUND_CHAT_QUERY_PATH}
+              render={() =>
+                isSearchModeEnabled ? <SearchQueryMode pageMode={pageMode} /> : <QueryMode />
+              }
+            />
             {isSearchModeEnabled && (
               <>
                 <Route exact path={SEARCH_PLAYGROUND_SEARCH_PATH} component={SearchMode} />
-                <Route exact path={PLAYGROUND_SEARCH_QUERY_PATH} component={SearchQueryMode} />
+                <Route
+                  exact
+                  path={PLAYGROUND_SEARCH_QUERY_PATH}
+                  render={() => <SearchQueryMode pageMode={pageMode} />}
+                />
               </>
             )}
           </>
