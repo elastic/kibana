@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
@@ -17,6 +17,12 @@ export function initPlugin(router: IRouter, path: string) {
   router.post(
     {
       path: `${path}/oauth_token.do`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: false,
       },
