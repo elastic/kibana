@@ -47,7 +47,6 @@ export const useCurrentTabSelector: TypedUseSelectorHook<TabState> = (selector) 
 
 export const useDataViewsForPicker = () => {
   const originalAdHocDataViews = useAdHocDataViews();
-  const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
   const defaultProfileAdHocDataViewIds = useInternalStateSelector(
     (state) => state.defaultProfileAdHocDataViewIds
   );
@@ -58,6 +57,6 @@ export const useDataViewsForPicker = () => {
     );
     const adHocDataViews = differenceBy(originalAdHocDataViews, managedDataViews, 'id');
 
-    return { savedDataViews, managedDataViews, adHocDataViews };
-  }, [defaultProfileAdHocDataViewIds, originalAdHocDataViews, savedDataViews]);
+    return { managedDataViews, adHocDataViews };
+  }, [defaultProfileAdHocDataViewIds, originalAdHocDataViews]);
 };

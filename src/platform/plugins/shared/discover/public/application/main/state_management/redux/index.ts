@@ -10,7 +10,6 @@
 import { omit } from 'lodash';
 import { internalStateSlice } from './internal_state';
 import {
-  loadDataViewList,
   appendAdHocDataViews,
   initializeSession,
   replaceAdHocDataViewWithId,
@@ -32,7 +31,6 @@ export const internalStateActions = {
     'setDataViewId',
     'setDefaultProfileAdHocDataViewIds'
   ),
-  loadDataViewList,
   setTabs,
   updateTabs,
   setDataView,

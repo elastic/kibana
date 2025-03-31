@@ -28,7 +28,7 @@ import {
   type InternalStateDataRequestParams,
   type TabState,
 } from './types';
-import { loadDataViewList, setTabs } from './actions';
+import { setTabs } from './actions';
 import { selectAllTabs, selectCurrentTab } from './selectors';
 
 const DEFAULT_TAB_LABEL = i18n.translate('discover.defaultTabLabel', {
@@ -64,7 +64,6 @@ export const defaultTabState: Omit<TabState, keyof TabItem> = {
 const initialState: DiscoverInternalState = {
   initializationState: { hasESData: false, hasUserDataView: false },
   defaultProfileAdHocDataViewIds: [],
-  savedDataViews: [],
   expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
   tabs: { byId: {}, allIds: [], currentId: '' },
@@ -171,11 +170,6 @@ export const internalStateSlice = createSlice({
 
       state.expandedDoc = undefined;
     },
-  },
-  extraReducers: (builder) => {
-    builder.addCase(loadDataViewList.fulfilled, (state, action) => {
-      state.savedDataViews = action.payload;
-    });
   },
 });
 

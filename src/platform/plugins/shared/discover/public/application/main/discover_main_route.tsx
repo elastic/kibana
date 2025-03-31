@@ -83,7 +83,6 @@ export const DiscoverMainRoute = ({
         dataViews.hasData.hasESData().catch(() => false),
         dataViews.hasData.hasUserDataView().catch(() => false),
         dataViews.defaultDataViewExists().catch(() => false),
-        internalState.dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
         initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
       ]);
       const initializationState: DiscoverInternalState['initializationState'] = {

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { TimeRange } from '@kbn/es-query';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
@@ -63,7 +62,6 @@ export interface TabState extends TabItem {
 
 export interface DiscoverInternalState {
   initializationState: { hasESData: boolean; hasUserDataView: boolean };
-  savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
   isESQLToDataViewTransitionModalVisible: boolean;

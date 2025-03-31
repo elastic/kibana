@@ -182,7 +182,6 @@ export const DiscoverSessionView = forwardRef<DiscoverSessionViewRef, DiscoverSe
         <NoDataPage
           {...initializationState}
           onDataViewCreated={async (dataViewUnknown) => {
-            await dispatch(internalStateActions.loadDataViewList());
             dispatch(
               internalStateActions.setInitializationState({
                 hasESData: true,

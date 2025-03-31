@@ -394,8 +394,6 @@ export function getDiscoverStateContainer({
   const onDataViewCreated = async (nextDataView: DataView) => {
     if (!nextDataView.isPersisted()) {
       internalState.dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
-    } else {
-      await internalState.dispatch(internalStateActions.loadDataViewList());
     }
     if (nextDataView.id) {
       await onChangeDataView(nextDataView);
@@ -411,7 +409,6 @@ export function getDiscoverStateContainer({
     } else {
       await updateAdHocDataViewId();
     }
-    void internalState.dispatch(internalStateActions.loadDataViewList());
     addLog('[getDiscoverStateContainer] onDataViewEdited triggers data fetching');
     fetchData();
   };
