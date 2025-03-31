@@ -9,7 +9,7 @@
 
 import { getGroupingQuery, parseGroupingQuery } from '.';
 import { getEmptyValue } from './helpers';
-import { GroupingAggregation } from '../../..';
+import type { GroupingAggregation } from '../../..';
 import { groupingBucket, mocktestProps1, mockTestProps2 } from '../../mocks';
 
 describe('group selector', () => {
