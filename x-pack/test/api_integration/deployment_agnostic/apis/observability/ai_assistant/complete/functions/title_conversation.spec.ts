@@ -53,7 +53,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       before(async () => {
         await clearConversations(es);
-        void llmProxy.interceptTitle(TITLE);
+        const simulatorPromise = llmProxy.interceptTitle(TITLE);
         void llmProxy.interceptConversation('The sky is blue because of Rayleigh scattering.');
 
         const res = await chatComplete({
@@ -66,7 +66,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        titleRequestBody = llmProxy.interceptedRequests[0].requestBody;
+        const simulator = await simulatorPromise;
+        titleRequestBody = simulator.requestBody;
       });
 
       after(async () => {
