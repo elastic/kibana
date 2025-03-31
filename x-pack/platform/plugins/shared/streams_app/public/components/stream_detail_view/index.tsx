@@ -7,13 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
+import { StreamDetailContextProvider, useStreamDetail } from '../../hooks/use_stream_detail';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { StreamDetailManagement } from '../data_management/stream_detail_management';
 import { EntityDetailViewWithoutParams, EntityViewTab } from '../entity_detail_view';
-import { StreamDetailOverview } from '../stream_detail_overview';
-import { StreamDetailContextProvider, useStreamDetail } from '../../hooks/use_stream_detail';
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
-import { StreamDetailSignificantEventsView } from '../stream_detail_significant_events_view';
+import { StreamDetailOverview } from '../stream_detail_overview';
 
 export function StreamDetailView() {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
@@ -53,14 +52,6 @@ export function StreamDetailViewContent({ name, tab }: { name: string; tab: stri
       content: <StreamDetailDashboardsView definition={definition} />,
       label: i18n.translate('xpack.streams.streamDetailView.dashboardsTab', {
         defaultMessage: 'Dashboards',
-      }),
-      background: true,
-    },
-    {
-      name: 'significant_events',
-      content: <StreamDetailSignificantEventsView definition={definition} />,
-      label: i18n.translate('xpack.streams.streamDetailView.significantEventsTab', {
-        defaultMessage: 'Significant events',
       }),
       background: true,
     },
