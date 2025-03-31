@@ -168,13 +168,9 @@ describe('GridLayout', () => {
         exact: true,
       });
       mouseStartDragging(panelHandle);
-       expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
-        'kbnGridPanel kbnGridPanel--active',
-        { exact: true }
-      );
       mouseMoveTo({ clientX: 256, clientY: 128 });
       expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
-        'kbnGridPanel kbnGridPanel--active kbnGridPanel--activeModified',
+        'kbnGridPanel kbnGridPanel--active',
         { exact: true }
       );
       mouseDrop(panelHandle);

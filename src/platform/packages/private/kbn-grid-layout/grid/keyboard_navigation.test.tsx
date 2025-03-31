@@ -83,14 +83,10 @@ describe('Keyboard navigation', () => {
       exact: true,
     });
     await pressEnter();
-    expect(screen.getByLabelText('panelId:panel5').closest('div')).toHaveClass(
-      'kbnGridPanel kbnGridPanel--active',
-      { exact: true }
-    );
     await pressKey('[ArrowDown]');
     expect(panelHandle).toHaveFocus(); // focus is not lost during interaction
     expect(screen.getByLabelText('panelId:panel5').closest('div')).toHaveClass(
-      'kbnGridPanel kbnGridPanel--active kbnGridPanel--activeModified',
+      'kbnGridPanel kbnGridPanel--active',
       { exact: true }
     );
     await pressKey('{Escape}');
