@@ -80,24 +80,20 @@ while read -r config_path; do
   for mode in $RUN_MODE_LIST; do
     echo "--- Running tests: $config_path ($mode)"
 
-    for i in {1..5}; do
-      echo "--- Attempt $i for $config_path ($mode)"
+    # prevent non-zero exit code from breaking the loop
+    set +e;
+    node scripts/scout run-tests "$mode" --config "$config_path" --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+    EXIT_CODE=$?
+    set -e;
 
-      # prevent non-zero exit code from breaking the loop
-      set +e;
-      node scripts/scout run-tests "$mode" --config "$config_path" --kibana-install-dir "$KIBANA_BUILD_LOCATION" > "result_${config_path//\//_}_$i.log" 2>&1
-      EXIT_CODE=$?
-      set -e;
-
-      if [[ $EXIT_CODE -eq 2 ]]; then
-        configWithoutTests+=("$config_path ($mode) [Attempt $i]")
-      elif [[ $EXIT_CODE -ne 0 ]]; then
-        failedConfigs+=("$config_path ($mode) [Attempt $i] ❌")
-        FINAL_EXIT_CODE=10  # Ensure we exit with failure if any test fails with (exit code 10 to match FTR)
-      else
-        results+=("$config_path ($mode) [Attempt $i] ✅")
-      fi
-    done
+    if [[ $EXIT_CODE -eq 2 ]]; then
+      configWithoutTests+=("$config_path ($mode)")
+    elif [[ $EXIT_CODE -ne 0 ]]; then
+      failedConfigs+=("$config_path ($mode) ❌")
+      FINAL_EXIT_CODE=10  # Ensure we exit with failure if any test fails with (exit code 10 to match FTR)
+    else
+      results+=("$config_path ($mode) ✅")
+    fi
   done
 done <<< "$configs"
 
