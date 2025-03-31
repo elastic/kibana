@@ -33,7 +33,6 @@ import {
   createSearchAfterReturnTypeFromResponse,
   createSearchAfterReturnType,
   mergeReturns,
-  lastValidDate,
   getValidDateFromDoc,
   calculateTotal,
   getTotalHitsValue,
@@ -51,7 +50,6 @@ import {
   sampleDocSearchResultsWithSortId,
   sampleEmptyDocSearchResults,
   sampleDocSearchResultsNoSortIdNoHits,
-  sampleDocSearchResultsNoSortId,
   sampleDocNoSortId,
   sampleAlertDocNoSortIdWithTimestamp,
   sampleAlertDocAADNoSortIdWithTimestamp,
@@ -838,84 +836,6 @@ describe('utils', () => {
         primaryTimestamp: 'event.ingested',
       });
       expect(success).toEqual(true);
-    });
-  });
-
-  describe('lastValidDate', () => {
-    test('It returns undefined if the search result contains a null timestamp', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
-      if (searchResult.hits.hits[0].fields != null) {
-        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
-      }
-      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
-      expect(date).toEqual(undefined);
-    });
-
-    test('It returns undefined if the search result contains a undefined timestamp', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
-      if (searchResult.hits.hits[0].fields != null) {
-        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
-      }
-      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
-      expect(date).toEqual(undefined);
-    });
-
-    test('It returns undefined if the search result contains an invalid string value', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
-      if (searchResult.hits.hits[0].fields != null) {
-        (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid value'];
-      }
-      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
-      expect(date).toEqual(undefined);
-    });
-
-    test('It returns normal date time if set', () => {
-      const searchResult = sampleDocSearchResultsNoSortId();
-      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
-      expect(date?.toISOString()).toEqual('2020-04-20T21:27:45.000Z');
-    });
-
-    test('It returns date time from field if set there', () => {
-      const timestamp = '2020-10-07T19:27:19.136Z';
-      const searchResult = sampleDocSearchResultsNoSortId();
-      if (searchResult.hits.hits[0] == null) {
-        throw new TypeError('Test requires one element');
-      }
-      searchResult.hits.hits[0] = {
-        ...searchResult.hits.hits[0],
-        fields: {
-          '@timestamp': [timestamp],
-        },
-      };
-      const date = lastValidDate({ searchResult, primaryTimestamp: TIMESTAMP });
-      expect(date?.toISOString()).toEqual(timestamp);
-    });
-
-    test('It returns timestampOverride date time if set', () => {
-      const override = '2020-10-07T19:20:28.049Z';
-      const searchResult = sampleDocSearchResultsNoSortId();
-      searchResult.hits.hits[0]._source.different_timestamp = new Date(override).toISOString();
-      const date = lastValidDate({ searchResult, primaryTimestamp: 'different_timestamp' });
-      expect(date?.toISOString()).toEqual(override);
-    });
-
-    test('It returns timestampOverride date time from fields if set on it', () => {
-      const override = '2020-10-07T19:36:31.110Z';
-      const searchResult = sampleDocSearchResultsNoSortId();
-      if (searchResult.hits.hits[0] == null) {
-        throw new TypeError('Test requires one element');
-      }
-      searchResult.hits.hits[0] = {
-        ...searchResult.hits.hits[0],
-        fields: {
-          different_timestamp: [override],
-        },
-      };
-      const date = lastValidDate({ searchResult, primaryTimestamp: 'different_timestamp' });
-      expect(date?.toISOString()).toEqual(override);
     });
   });
 

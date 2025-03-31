@@ -492,31 +492,6 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
 };
 
 /**
- * Given a SignalSearchResponse this will return a valid last date if it can find one, otherwise it
- * will return undefined. This tries the "fields" first to get a formatted date time if it can, but if
- * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
- * is not correctly ISO8601 or epoch milliseconds formatted.
- * @param searchResult The result to try and parse out the timestamp.
- * @param primaryTimestamp The primary timestamp to use.
- */
-export const lastValidDate = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
->({
-  searchResult,
-  primaryTimestamp,
-}: {
-  searchResult: SignalSearchResponse<TAggregations>;
-  primaryTimestamp: TimestampOverride;
-}): Date | undefined => {
-  if (searchResult.hits.hits.length === 0) {
-    return undefined;
-  } else {
-    const lastRecord = searchResult.hits.hits[searchResult.hits.hits.length - 1];
-    return getValidDateFromDoc({ doc: lastRecord, primaryTimestamp });
-  }
-};
-
-/**
  * Given a search hit this will return a valid last date if it can find one, otherwise it
  * will return undefined. This tries the "fields" first to get a formatted date time if it can, but if
  * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
