@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { AnomalyValueDisplay } from './anomaly_value_display';
 import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 jest.mock('../../formatters/format_value', () => ({
   formatValue: jest.fn((value, mlFunction, fieldFormat) => {
@@ -127,7 +128,8 @@ describe('AnomalyValueDisplay', () => {
   it('Handles custom field format for non-time functions', () => {
     const customFormat = {
       convert: jest.fn().mockReturnValue('42.50%'),
-    };
+    } as unknown as FieldFormat;
+
     const { getByTestId } = render(
       <AnomalyValueDisplay {...baseProps} fieldFormat={customFormat} />
     );
