@@ -95,7 +95,10 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
   // colorMode provided by the `theme`.
   const colorMode = colorModeProp || themeColorMode;
 
-  const getUserProfile$ = userProfile?.getUserProfile$ ?? Rx.of;
+  const getUserProfile$ = useMemo(
+    () => userProfile?.getUserProfile$ ?? Rx.of,
+    [userProfile?.getUserProfile$]
+  );
   const userProfileData = useObservable(getUserProfile$(), null);
 
   // If the high contrast mode value is undefined, EUI will use the OS level setting.
