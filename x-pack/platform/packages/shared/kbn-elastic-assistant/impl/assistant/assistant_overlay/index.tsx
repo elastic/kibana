@@ -12,12 +12,13 @@ import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
 import { createGlobalStyle } from 'styled-components';
-import {
-  LastConversation,
-  ShowAssistantOverlayProps,
-  useAssistantContext,
-} from '../../assistant_context';
+import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
 import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
+import {
+  useAssistantLastConversation,
+  useAssistantSpaceId,
+  type LastConversation,
+} from '../use_space_aware_context';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -33,14 +34,15 @@ export const UnifiedTimelineGlobalStyles = createGlobalStyle`
 `;
 
 export const AssistantOverlay = React.memo(() => {
+  const spaceId = useAssistantSpaceId();
   const [isModalVisible, setIsModalVisible] = useState(false);
   // id if the conversation exists in the data stream, title if it's a new conversation
   const [lastConversation, setSelectedConversation] = useState<LastConversation | undefined>(
     undefined
   );
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
-  const { assistantTelemetry, setShowAssistantOverlay, getLastConversation } =
-    useAssistantContext();
+  const { assistantTelemetry, setShowAssistantOverlay } = useAssistantContext();
+  const { getLastConversation } = useAssistantLastConversation({ spaceId });
 
   const [chatHistoryVisible, setChatHistoryVisible] = useState(false);
 

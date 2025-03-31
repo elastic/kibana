@@ -9,11 +9,12 @@
 
 module.exports = {
   bail: true, // only report 1 issue
-  // TODO replace the line below with
-  // preset: '@kbn/test/jest_integration_node
+  // TODO remove the line below once we've addressed all the open handles
+  // We stop the server very soon, and plugins installing (and retrying indices) might keep Kibana running until a timeout occurs.
   // to do so, we must fix all integration tests first
   // see https://github.com/elastic/kibana/pull/130255/
-  preset: '@kbn/test/jest_integration',
+  forceExit: true,
+  preset: '@kbn/test/jest_integration_node',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/core/server/integration_tests/ci_checks'],
   // must override to match all test given there is no `integration_tests` subfolder
