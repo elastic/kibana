@@ -5789,6 +5789,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inference-cli@link:x-pack/platform/packages/shared/kbn-inference-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/inference-common@link:x-pack/platform/packages/shared/ai-infra/inference-common":
   version "0.0.0"
   uid ""
@@ -5889,6 +5893,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/kbn-genai-cli@link:x-pack/solutions/observability/packages/kbn-genai-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/kbn-health-gateway-status-plugin@link:src/platform/test/health_gateway/plugins/status":
   version "0.0.0"
   uid ""
@@ -5910,6 +5918,10 @@
   uid ""
 
 "@kbn/key-value-metadata-table@link:x-pack/platform/packages/shared/kbn-key-value-metadata-table":
+  version "0.0.0"
+  uid ""
+
+"@kbn/kibana-api-cli@link:x-pack/platform/packages/shared/kbn-kibana-api-cli":
   version "0.0.0"
   uid ""
 
