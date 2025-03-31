@@ -1325,7 +1325,7 @@ describe('xy_suggestions', () => {
           xAccessor: 'date',
           accessors: ['bytes'],
           splitAccessor: undefined,
-        }
+        },
       ],
     };
 
@@ -1334,10 +1334,10 @@ describe('xy_suggestions', () => {
         isMultiRow: true,
         columns: [numCol('bytes'), dateCol('date')],
         layerId: 'first',
-        changeType: 'unchanged'
+        changeType: 'unchanged',
       },
       keptLayerIds: ['first'],
-      state: currentState
+      state: currentState,
     });
 
     expect(rest).toHaveLength(visualizationSubtypes.length - 1);
@@ -1349,7 +1349,7 @@ describe('xy_suggestions', () => {
         layers: [
           expect.objectContaining({
             ...currentState.layers[0],
-            seriesType: 'area_stacked'
+            seriesType: 'area_stacked',
           }),
         ],
       })
@@ -1369,7 +1369,7 @@ describe('xy_suggestions', () => {
           xAccessor: 'date',
           accessors: ['bytes'],
           splitAccessor: undefined,
-        }
+        },
       ],
     };
 
@@ -1378,14 +1378,14 @@ describe('xy_suggestions', () => {
         isMultiRow: true,
         columns: [numCol('bytes'), dateCol('date')],
         layerId: 'first',
-        changeType: 'unchanged'
+        changeType: 'unchanged',
       },
       keptLayerIds: ['first'],
-      state: currentState
+      state: currentState,
     });
 
     expect(rest).toHaveLength(visualizationSubtypes.length - 1);
-    
+
     expect(suggestion.title).toEqual('Area chart');
     expect(suggestion.state).toEqual(
       expect.objectContaining({
@@ -1394,7 +1394,7 @@ describe('xy_suggestions', () => {
         layers: [
           expect.objectContaining({
             ...currentState.layers[0],
-            seriesType: 'area'
+            seriesType: 'area',
           }),
         ],
       })
