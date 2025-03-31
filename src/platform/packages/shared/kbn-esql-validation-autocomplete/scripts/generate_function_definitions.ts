@@ -913,7 +913,8 @@ ${
 }
 
 (async function main() {
-  const pathToElasticsearch = process.argv[2];
+  // const pathToElasticsearch = process.argv[2];
+  const pathToElasticsearch = '/Users/stratoulakalafateli/Documents/elasticsearch';
   if (!pathToElasticsearch) {
     throw new Error('Path to Elasticsearch is required');
   }
