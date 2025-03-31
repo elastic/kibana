@@ -32,7 +32,6 @@ export const ConfigurationsRouter = React.memo(() => {
       />
       <Route
         path={`${CONFIGURATIONS_PATH}`}
-        exact
         render={() => <Redirect to={`${CONFIGURATIONS_PATH}/${ConfigurationTabs.integrations}`} />}
       />
     </Routes>

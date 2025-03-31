@@ -19,4 +19,16 @@ export const configurationsLink: NodeDefinition<AppDeepLinkId, string, string> =
   id: SecurityPageName.configurations,
   link: 'securitySolutionUI:configurations',
   title: CONFIGURATIONS,
+  renderAs: 'panelOpener',
+  children: [
+    {
+      link: `securitySolutionUI:configurations-knowledge_sources`,
+    },
+    {
+      link: `securitySolutionUI:configurations-basic_rules`,
+    },
+    {
+      link: `securitySolutionUI:configurations-integrations`,
+    },
+  ],
 };

@@ -8,23 +8,19 @@ import React from 'react';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { Configurations } from './page/configurations';
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
-import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
+import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { CONFIGURATIONS_PATH } from '../../common/constants';
 
 const ConfigurationsPage = React.memo(function ConfigurationsPage() {
-  return (
-    <PluginTemplateWrapper>
-      <SecurityRoutePageWrapper pageName={SecurityPageName.configurations} redirectOnMissing>
-        <Configurations />
-      </SecurityRoutePageWrapper>
-    </PluginTemplateWrapper>
-  );
+  return <Configurations />;
 });
 
 export const routes: SecuritySubPluginRoutes = [
   {
     path: `${CONFIGURATIONS_PATH}/:tab?`,
-    component: ConfigurationsPage,
+    component: withSecurityRoutePageWrapper(ConfigurationsPage, SecurityPageName.configurations, {
+      redirectIfUnauthorized: true,
+      redirectOnMissing: true,
+    }),
   },
 ];

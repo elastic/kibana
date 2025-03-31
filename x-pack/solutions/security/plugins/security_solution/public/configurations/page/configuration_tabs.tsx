@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
-import { useHistory, useParams } from 'react-router-dom';
+import React, { useCallback, useMemo } from 'react';
+import { EuiTab, EuiTabs } from '@elastic/eui';
+import { useParams } from 'react-router-dom';
+import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { CONFIGURATIONS_PATH } from '../../../common/constants';
+import { useNavigation } from '../../common/lib/kibana';
+
 import * as i18n from '../translations';
 export enum ConfigurationTabs {
   integrations = 'integrations',
@@ -17,7 +20,7 @@ export enum ConfigurationTabs {
 }
 
 export const ConfigurationsTabs = React.memo(() => {
-  const history = useHistory();
+  const { navigateTo } = useNavigation();
   const params: { tab: ConfigurationTabs } = useParams();
 
   const tabs = useMemo(
@@ -47,36 +50,29 @@ export const ConfigurationsTabs = React.memo(() => {
 
   const tabsArray = useMemo(() => Object.values(tabs), [tabs]);
 
-  const initialPage = params.tab || ConfigurationTabs.integrations;
-  const [selectedTabId, setSelectedTabId] = useState(initialPage);
-
   const onSelectedTabChanged = useCallback(
     (id: ConfigurationTabs) => {
-      setSelectedTabId(id);
-      const { href } = tabs[id];
-      history.push(href);
+      navigateTo({
+        deepLinkId: SecurityPageName.configurations,
+        path: id,
+      });
     },
-    [history, tabs]
+    [navigateTo]
   );
 
   return (
-    <EuiFlexGroup justifyContent={'spaceBetween'}>
-      <EuiFlexItem grow={false}>
-        <EuiTabs size="l" expand>
-          {tabsArray.map((tab, i) => (
-            <EuiTab
-              key={`${tab}-${i}`}
-              onClick={() => onSelectedTabChanged(tab.id)}
-              isSelected={tab.id === selectedTabId}
-              disabled={tab.disabled}
-            >
-              {tab.name}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} />
-    </EuiFlexGroup>
+    <EuiTabs size="m" bottomBorder>
+      {tabsArray.map((tab, i) => (
+        <EuiTab
+          key={`${tab}-${i}`}
+          onClick={() => onSelectedTabChanged(tab.id)}
+          isSelected={tab.id === params.tab}
+          disabled={tab.disabled}
+        >
+          {tab.name}
+        </EuiTab>
+      ))}
+    </EuiTabs>
   );
 });
 

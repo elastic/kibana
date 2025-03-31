@@ -16,7 +16,7 @@ export const BASIC_RULES = i18n.translate(
 export const KNOWLEDGE_SOURCES = i18n.translate(
   'xpack.securitySolution.configurations.tabs.knowledge_sources',
   {
-    defaultMessage: 'Knowledge Sources',
+    defaultMessage: 'Knowledge sources',
   }
 );
 export const INTEGRATIONS = i18n.translate(

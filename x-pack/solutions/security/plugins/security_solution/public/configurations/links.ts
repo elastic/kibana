@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ConfigurationTabs } from './page/configuration_tabs';
 import type { LinkItem } from '..';
 import { CONFIGURATIONS_PATH, SECURITY_FEATURE_ID, SecurityPageName } from '../../common/constants';
 import { CONFIGURATIONS } from '../app/translations';
@@ -22,4 +23,33 @@ export const configurationsLinks: LinkItem = {
   id: SecurityPageName.configurations,
   path: CONFIGURATIONS_PATH,
   title: CONFIGURATIONS,
+  links: [
+    {
+      id: SecurityPageName.configurationsIntegrations,
+      title: i18n.translate('xpack.securitySolution.appLinks.integrations', {
+        defaultMessage: 'Integrations',
+      }),
+      path: `${CONFIGURATIONS_PATH}/${ConfigurationTabs.integrations}`,
+      skipUrlState: true,
+      hideTimeline: true,
+    },
+    {
+      id: SecurityPageName.configurationsBasicRules,
+      title: i18n.translate('xpack.securitySolution.appLinks.basicRules', {
+        defaultMessage: 'Rules',
+      }),
+      path: `${CONFIGURATIONS_PATH}/${ConfigurationTabs.basicRules}`,
+      skipUrlState: true,
+      hideTimeline: true,
+    },
+    {
+      id: SecurityPageName.configurationsKnowledgeSources,
+      title: i18n.translate('xpack.securitySolution.appLinks.knowledgeSources', {
+        defaultMessage: 'Knowledge sources',
+      }),
+      path: `${CONFIGURATIONS_PATH}/${ConfigurationTabs.knowledgeSources}`,
+      skipUrlState: true,
+      hideTimeline: true,
+    },
+  ],
 };
