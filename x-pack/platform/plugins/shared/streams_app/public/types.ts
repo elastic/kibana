@@ -21,6 +21,8 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import { IngestPipelinesPluginStart } from '@kbn/ingest-pipelines-plugin/public';
 import {
   DiscoverSharedPublicSetup,
   DiscoverSharedPublicStart,
@@ -52,6 +54,8 @@ export interface StreamsAppStartDependencies {
   discoverShared: DiscoverSharedPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   licensing: LicensingPluginStart;
+  indexManagement: IndexManagementPluginStart;
+  ingestPipelines: IngestPipelinesPluginStart;
   navigation: NavigationPublicStart;
   observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;

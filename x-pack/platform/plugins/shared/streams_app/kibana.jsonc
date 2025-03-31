@@ -16,6 +16,8 @@
       "discoverShared",
       "fieldsMetadata",
       "licensing",
+      "indexManagement",
+      "ingestPipelines",
       "navigation",
       "observabilityAIAssistant",
       "savedObjectsTagging",
