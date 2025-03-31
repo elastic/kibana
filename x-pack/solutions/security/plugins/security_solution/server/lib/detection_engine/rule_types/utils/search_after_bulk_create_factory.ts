@@ -91,18 +91,6 @@ export const searchAfterAndBulkCreateFactory = async ({
     // sortId tells us where to start our next consecutive search_after query
     let sortIds: estypes.SortResults | undefined;
 
-    if (tuple == null || tuple.to == null || tuple.from == null) {
-      ruleExecutionLogger.error(
-        `missing run options fields: ${!tuple.to ? '"tuple.to"' : ''}, ${
-          !tuple.from ? '"tuple.from"' : ''
-        }`
-      );
-      return createSearchAfterReturnType({
-        success: false,
-        errors: ['malformed date tuple'],
-      });
-    }
-
     const maxSignals = maxSignalsOverride ?? tuple.maxSignals;
 
     while (toReturn.createdSignalsCount <= maxSignals) {
