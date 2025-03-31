@@ -12,6 +12,7 @@ import type { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } fro
 import { extractedSavedObjectParamReferenceNamePrefix } from '../common/constants';
 import type { RulesClientContext, DenormalizedArtifacts } from '../types';
 import { denormalizeActions } from './denormalize_actions';
+import { denormalizeArtifacts } from './denormalize_artifacts';
 
 export async function extractReferences<
   Params extends RuleTypeParams,
@@ -34,39 +35,7 @@ export async function extractReferences<
     ruleActions
   );
 
-  // TODO move this to demormalize_artifacts file
-  const denormalizeArtifacts = (ruleArtifacts: Artifact): { artifacts: DenormalizedArtifacts; references: SavedObjectReference[] } => {
-    const references: SavedObjectReference[] = [];
-    const artifacts: DenormalizedArtifacts = {
-      dashboards: []
-    };
-
-    if (ruleArtifacts.dashboards) {
-      ruleArtifacts.dashboards.forEach((dashboard, i) => {
-        const refName = `dashboard_${i}`;
-        const dashboardRef = {
-          id: dashboard.id,
-          name: refName, // what kind of name do I give here?
-          type: 'dashboard',
-        };
-        references.push(dashboardRef);
-        if (!artifacts.dashboards) {
-          artifacts.dashboards = [];
-        }
-        artifacts.dashboards.push({
-          refId: refName,
-        });
-      });
-    }
-    
-    return {
-      artifacts,
-      references
-    };
-  };
-  const { artifacts, references: artifactReferences } = ruleArtifacts
-    ? denormalizeArtifacts(ruleArtifacts)
-    : { artifacts: { dashboards: [] }, references: [] };
+  const { artifacts, references: artifactReferences } = denormalizeArtifacts(ruleArtifacts);
 
   // Extracts any references using configured reference extractor if available
   const extractedRefsAndParams = ruleType?.useSavedObjectReferences?.extractReferences
