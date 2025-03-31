@@ -62,8 +62,7 @@ export const policySelectorMocks = Object.freeze({
 
       isPolicySelected(policyId: string): boolean {
         return (
-          renderResult.getByTestId(testIds.policy(policyId)).getAttribute('aria-selected') ===
-          'true'
+          renderResult.getByTestId(testIds.policy(policyId)).getAttribute('aria-checked') === 'true'
         );
       },
 
