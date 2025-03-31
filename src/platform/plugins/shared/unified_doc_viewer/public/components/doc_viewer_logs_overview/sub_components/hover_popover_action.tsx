@@ -19,6 +19,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useTruncateText } from '@kbn/react-hooks';
 import { useUIFieldActions } from '../../../hooks/use_field_actions';
 
 interface HoverPopoverActionProps {
@@ -53,7 +54,6 @@ export const HoverActionPopover = ({
   truncate,
 }: HoverPopoverActionProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
   const leaveTimer = useRef<NodeJS.Timeout | null>(null);
   const uiFieldActions = useUIFieldActions({ field, value, formattedValue });
 
@@ -80,11 +80,13 @@ export const HoverActionPopover = ({
   const onMouseLeave = () => {
     leaveTimer.current = setTimeout(() => setIsPopoverOpen(false), 100);
   };
-
   const titleText = getTitleText();
-  const shouldTruncate = truncate && titleText.length > MAX_CHAR_LENGTH;
-  const displayTitle =
-    shouldTruncate && !isExpanded ? `${titleText.slice(0, MAX_CHAR_LENGTH)}...` : titleText;
+
+  const { displayText, isExpanded, toggleExpanded, shouldTruncate } = useTruncateText(
+    titleText,
+    MAX_CHAR_LENGTH
+  );
+  const displayTitle = truncate ? displayText : titleText;
 
   return (
     <span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
@@ -107,10 +109,8 @@ export const HoverActionPopover = ({
             }}
           >
             {displayTitle}
-            {shouldTruncate && (
-              <EuiLink onClick={() => setIsExpanded(!isExpanded)}>
-                {isExpanded ? readLess : readMore}
-              </EuiLink>
+            {shouldTruncate && truncate && (
+              <EuiLink onClick={toggleExpanded}>{isExpanded ? readLess : readMore}</EuiLink>
             )}
           </EuiPopoverTitle>
         )}
