@@ -278,10 +278,12 @@ describe('TaskStore', () => {
       };
 
       const request = httpServerMock.createKibanaRequest();
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce({
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('id', {
         apiKey: mockApiKey,
         userScope: mockUserScope,
       });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
 
       scopedSavedObjectsClient.create.mockImplementation(
@@ -320,6 +322,7 @@ describe('TaskStore', () => {
       );
 
       expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
+        [task],
         request,
         true,
         coreStart.security,
@@ -2228,11 +2231,18 @@ describe('TaskStore', () => {
       };
 
       const request = httpServerMock.createKibanaRequest();
-      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
-      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce({
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('task1', {
         apiKey: mockApiKey,
         userScope: mockUserScope,
       });
+      apiKeyAndUserScopeMap.set('task2', {
+        apiKey: mockApiKey,
+        userScope: mockUserScope,
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
 
       scopedSavedObjectsClient.bulkCreate.mockImplementationOnce(async () => ({
         saved_objects: [
@@ -2286,6 +2296,7 @@ describe('TaskStore', () => {
       const result = await store.bulkSchedule([task1, task2], { request });
 
       expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
+        [task1, task2],
         request,
         true,
         coreStart.security,

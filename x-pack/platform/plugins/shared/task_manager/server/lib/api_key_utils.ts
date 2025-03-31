@@ -9,12 +9,21 @@ import { AuthenticatedUser, SecurityServiceStart } from '@kbn/core/server';
 import { KibanaRequest } from '@kbn/core/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { truncate } from 'lodash';
-import { TaskUserScope } from '../task';
+import { TaskInstance, TaskUserScope } from '../task';
 
-export interface GrantAPIKeyResult {
+export interface APIKeyResult {
   id: string;
-  name: string;
   api_key: string;
+}
+
+export interface EncodedApiKeyResult {
+  apiKey: string;
+  apiKeyId: string;
+}
+
+export interface ApiKeyAndUserScope {
+  apiKey: string;
+  userScope: TaskUserScope;
 }
 
 const getCredentialsFromRequest = (request: KibanaRequest) => {
@@ -30,13 +39,12 @@ export const isRequestApiKeyType = (user: AuthenticatedUser | null) => {
   return user?.authentication_type === 'api_key';
 };
 
-export const getApiKeyFromRequest = (request: KibanaRequest, name: string) => {
+export const getApiKeyFromRequest = (request: KibanaRequest) => {
   const credentials = getCredentialsFromRequest(request);
   if (credentials) {
     const apiKey = Buffer.from(credentials, 'base64').toString().split(':');
 
     return {
-      name,
       id: apiKey[0],
       api_key: apiKey[1],
     };
@@ -45,6 +53,7 @@ export const getApiKeyFromRequest = (request: KibanaRequest, name: string) => {
 };
 
 export const createApiKey = async (
+  taskInstances: TaskInstance[],
   request: KibanaRequest,
   canEncryptSo: boolean,
   security: SecurityServiceStart
@@ -64,54 +73,90 @@ export const createApiKey = async (
     throw Error('Cannot authenticate current user.');
   }
 
-  let apiKeyCreateResult: GrantAPIKeyResult | null;
-  const name = truncate(`TaskManager: ${user.username}`, { length: 256 });
+  const apiKeyByTaskIdMap = new Map<string, EncodedApiKeyResult>();
 
+  // If the user passed in their own API key, simply return it
   if (isRequestApiKeyType(user)) {
-    apiKeyCreateResult = getApiKeyFromRequest(request, name);
-  } else {
-    apiKeyCreateResult = await security.authc.apiKeys.grantAsInternalUser(request, {
-      name,
+    const apiKeyCreateResult = getApiKeyFromRequest(request);
+
+    if (!apiKeyCreateResult) {
+      throw Error('Could not create API key.');
+    }
+
+    const { id, api_key: apiKey } = apiKeyCreateResult;
+
+    taskInstances.forEach((task) => {
+      apiKeyByTaskIdMap.set(task.id!, {
+        apiKey: Buffer.from(`${id}:${apiKey}`).toString('base64'),
+        apiKeyId: apiKeyCreateResult.id,
+      });
+    });
+
+    return apiKeyByTaskIdMap;
+  }
+  // If the user did not pass in their own API key, we need to create 1 key per task
+  // type (due to naming requirements).
+  const taskTypes = [...new Set(taskInstances.map((task) => task.taskType))];
+  const apiKeyByTaskTypeMap = new Map<string, EncodedApiKeyResult>();
+
+  for (const taskType of taskTypes) {
+    const apiKeyCreateResult = await security.authc.apiKeys.grantAsInternalUser(request, {
+      name: truncate(`TaskManager: ${taskType} - ${user.username}`, { length: 256 }),
       role_descriptors: {},
       metadata: { managed: true },
     });
+
+    if (!apiKeyCreateResult) {
+      throw Error('Could not create API key.');
+    }
+
+    const { id, api_key: apiKey } = apiKeyCreateResult;
+
+    apiKeyByTaskTypeMap.set(taskType, {
+      apiKey: Buffer.from(`${id}:${apiKey}`).toString('base64'),
+      apiKeyId: apiKeyCreateResult.id,
+    });
   }
 
-  if (!apiKeyCreateResult) {
-    throw Error('Could not create API key.');
-  }
+  // Assign each of the created API keys to the task ID
+  taskInstances.forEach((task) => {
+    const encodedApiKeyResult = apiKeyByTaskTypeMap.get(task.taskType);
+    if (encodedApiKeyResult) {
+      apiKeyByTaskIdMap.set(task.id!, encodedApiKeyResult);
+    }
+  });
 
-  const encodedApiKey = Buffer.from(
-    `${apiKeyCreateResult.id}:${apiKeyCreateResult.api_key}`
-  ).toString('base64');
-
-  return {
-    apiKey: encodedApiKey,
-    apiKeyId: apiKeyCreateResult.id,
-  };
+  return apiKeyByTaskIdMap;
 };
 
 export const getApiKeyAndUserScope = async (
+  taskInstances: TaskInstance[],
   request: KibanaRequest,
   canEncryptSo: boolean,
   security: SecurityServiceStart,
   spaces?: SpacesPluginStart
-): Promise<{
-  apiKey: string;
-  userScope: TaskUserScope;
-}> => {
-  const { apiKey, apiKeyId } = await createApiKey(request, canEncryptSo, security);
+): Promise<Map<string, ApiKeyAndUserScope>> => {
+  const apiKeyByTaskIdMap = await createApiKey(taskInstances, request, canEncryptSo, security);
   const space = await spaces?.spacesService.getActiveSpace(request);
   const user = security.authc.getCurrentUser(request);
 
-  return {
-    apiKey,
-    userScope: {
-      apiKeyId,
-      spaceId: space?.id || 'default',
-      // Set apiKeyCreatedByUser to true if the user passed in their own API key, since we do
-      // not want to invalidate a specific API key that was not created by the task manager
-      apiKeyCreatedByUser: isRequestApiKeyType(user),
-    },
-  };
+  const apiKeyAndUserScopeByTaskId = new Map<string, ApiKeyAndUserScope>();
+
+  taskInstances.forEach((task) => {
+    const encodedApiKeyResult = apiKeyByTaskIdMap.get(task.id!);
+    if (encodedApiKeyResult) {
+      apiKeyAndUserScopeByTaskId.set(task.id!, {
+        apiKey: encodedApiKeyResult.apiKey,
+        userScope: {
+          apiKeyId: encodedApiKeyResult.apiKeyId,
+          spaceId: space?.id || 'default',
+          // Set apiKeyCreatedByUser to true if the user passed in their own API key, since we do
+          // not want to invalidate a specific API key that was not created by the task manager
+          apiKeyCreatedByUser: isRequestApiKeyType(user),
+        },
+      });
+    }
+  });
+
+  return apiKeyAndUserScopeByTaskId;
 };

@@ -17,6 +17,13 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { AuthenticatedUser } from '@kbn/core/server';
 
+const mockTask = {
+  id: 'task',
+  params: { hello: 'world' },
+  state: { foo: 'bar' },
+  taskType: 'report',
+};
+
 describe('api_key_utils', () => {
   describe('isRequestApiKeyType', () => {
     test('should return true if the request is made by a API key', () => {
@@ -40,13 +47,13 @@ describe('api_key_utils', () => {
         },
       });
 
-      const result = getApiKeyFromRequest(request, 'testName');
-      expect(result).toEqual({ name: 'testName', id: 'apiKeyId', api_key: 'apiKey' });
+      const result = getApiKeyFromRequest(request);
+      expect(result).toEqual({ id: 'apiKeyId', api_key: 'apiKey' });
     });
 
     test('should return null if request is missing the authorization header', () => {
       const request = httpServerMock.createKibanaRequest();
-      const result = getApiKeyFromRequest(request, 'testName');
+      const result = getApiKeyFromRequest(request);
       expect(result).toBeNull();
     });
   });
@@ -69,14 +76,15 @@ describe('api_key_utils', () => {
         api_key: 'apiKey',
       });
 
-      const result = await createApiKey(request, true, coreStart.security);
-      const decodedApiKey = Buffer.from(result.apiKey, 'base64').toString();
+      const result = await createApiKey([mockTask], request, true, coreStart.security);
+      const apiKeyResult = result.get('task');
+      const decodedApiKey = Buffer.from(apiKeyResult!.apiKey, 'base64').toString();
       expect(decodedApiKey).toEqual('apiKeyId:apiKey');
 
       expect(coreStart.security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalled();
       expect(coreStart.security.authc.getCurrentUser).toHaveBeenCalledWith(request);
       expect(coreStart.security.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(request, {
-        name: 'TaskManager: testUser',
+        name: 'TaskManager: report - testUser',
         role_descriptors: {},
         metadata: { managed: true },
       });
@@ -99,8 +107,9 @@ describe('api_key_utils', () => {
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
 
-      const result = await createApiKey(request, true, coreStart.security);
-      const decodedApiKey = Buffer.from(result.apiKey, 'base64').toString();
+      const result = await createApiKey([mockTask], request, true, coreStart.security);
+      const apiKeyResult = result.get('task');
+      const decodedApiKey = Buffer.from(apiKeyResult!.apiKey, 'base64').toString();
       expect(decodedApiKey).toEqual('apiKeyId:apiKey');
 
       expect(coreStart.security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalled();
@@ -111,7 +120,9 @@ describe('api_key_utils', () => {
     test('should throw if canEncryptSo is false', async () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = coreMock.createStart();
-      await expect(createApiKey(request, false, coreStart.security)).rejects.toMatchObject({
+      await expect(
+        createApiKey([mockTask], request, false, coreStart.security)
+      ).rejects.toMatchObject({
         message:
           'Unable to create API keys because the Encrypted Saved Objects plugin has not been registered or is missing encryption key.',
       });
@@ -123,7 +134,9 @@ describe('api_key_utils', () => {
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(false);
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(null);
 
-      await expect(createApiKey(request, true, coreStart.security)).rejects.toMatchObject({
+      await expect(
+        createApiKey([mockTask], request, true, coreStart.security)
+      ).rejects.toMatchObject({
         message: 'API keys are not enabled, cannot create API key.',
       });
     });
@@ -133,7 +146,9 @@ describe('api_key_utils', () => {
       const coreStart = coreMock.createStart();
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
 
-      await expect(createApiKey(request, true, coreStart.security)).rejects.toMatchObject({
+      await expect(
+        createApiKey([mockTask], request, true, coreStart.security)
+      ).rejects.toMatchObject({
         message: 'Cannot authenticate current user.',
       });
     });
@@ -148,7 +163,9 @@ describe('api_key_utils', () => {
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValueOnce(mockUser);
       coreStart.security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValueOnce(null);
-      await expect(createApiKey(request, true, coreStart.security)).rejects.toMatchObject({
+      await expect(
+        createApiKey([mockTask], request, true, coreStart.security)
+      ).rejects.toMatchObject({
         message: 'Could not create API key.',
       });
     });
@@ -178,9 +195,15 @@ describe('api_key_utils', () => {
         api_key: 'apiKey',
       });
 
-      const result = await getApiKeyAndUserScope(request, true, coreStart.security, spacesStart);
+      const result = await getApiKeyAndUserScope(
+        [mockTask],
+        request,
+        true,
+        coreStart.security,
+        spacesStart
+      );
 
-      expect(result).toEqual({
+      expect(result.get('task')).toEqual({
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
         userScope: {
           apiKeyId: 'apiKeyId',
@@ -209,9 +232,15 @@ describe('api_key_utils', () => {
         api_key: 'apiKey',
       });
 
-      const result = await getApiKeyAndUserScope(request, true, coreStart.security, spacesStart);
+      const result = await getApiKeyAndUserScope(
+        [mockTask],
+        request,
+        true,
+        coreStart.security,
+        spacesStart
+      );
 
-      expect(result).toEqual({
+      expect(result.get('task')).toEqual({
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
         userScope: {
           apiKeyId: 'apiKeyId',
@@ -239,9 +268,15 @@ describe('api_key_utils', () => {
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
 
-      const result = await getApiKeyAndUserScope(request, true, coreStart.security, spacesStart);
+      const result = await getApiKeyAndUserScope(
+        [mockTask],
+        request,
+        true,
+        coreStart.security,
+        spacesStart
+      );
 
-      expect(result).toEqual({
+      expect(result.get('task')).toEqual({
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
         userScope: {
           apiKeyId: 'apiKeyId',

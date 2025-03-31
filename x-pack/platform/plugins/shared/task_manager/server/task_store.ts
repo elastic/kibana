@@ -206,7 +206,7 @@ export class TaskStore {
     return this.savedObjectsRepository;
   }
 
-  private async maybeGetApiKeyFromRequest(request?: KibanaRequest) {
+  private async maybeGetApiKeyFromRequest(taskInstances: TaskInstance[], request?: KibanaRequest) {
     if (!request) {
       return null;
     }
@@ -214,6 +214,7 @@ export class TaskStore {
     let userScopeAndApiKey;
     try {
       userScopeAndApiKey = await getApiKeyAndUserScope(
+        taskInstances,
         request,
         this.canEncryptSo(),
         this.security,
@@ -304,7 +305,9 @@ export class TaskStore {
   ): Promise<ConcreteTaskInstance> {
     this.definitions.ensureHas(taskInstance.taskType);
 
-    const { apiKey, userScope } = (await this.maybeGetApiKeyFromRequest(options?.request)) || {};
+    const apiKeyAndUserScopeMap =
+      (await this.maybeGetApiKeyFromRequest([taskInstance], options?.request)) || new Map();
+    const { apiKey, userScope } = apiKeyAndUserScopeMap.get(taskInstance.id) || {};
 
     const soClient = this.getSoClientForCreate(options || {});
 
@@ -343,11 +346,13 @@ export class TaskStore {
     taskInstances: TaskInstance[],
     options?: ApiKeyOptions
   ): Promise<ConcreteTaskInstance[]> {
-    const { apiKey, userScope } = (await this.maybeGetApiKeyFromRequest(options?.request)) || {};
+    const apiKeyAndUserScopeMap =
+      (await this.maybeGetApiKeyFromRequest(taskInstances, options?.request)) || new Map();
 
     const soClient = this.getSoClientForCreate(options || {});
 
     const objects = taskInstances.map((taskInstance) => {
+      const { apiKey, userScope } = apiKeyAndUserScopeMap.get(taskInstance.id) || {};
       const id = taskInstance.id || v4();
       this.definitions.ensureHas(taskInstance.taskType);
       const validatedTaskInstance =
