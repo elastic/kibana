@@ -81,7 +81,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
   const isIconVisible = isNotMobile && !isSideNavCollapsed && !!children && children.length > 0;
   const hasLandingPage = Boolean(href);
   const isExpanded = selectedNode?.path === path;
-  const isActive = hasLandingPage ? isActiveFromUrl(item.path, activeNodes) : isExpanded;
+  const isActive = isActiveFromUrl(item.path, activeNodes) || isExpanded;
 
   const itemClassNames = classNames(
     'sideNavItem',
